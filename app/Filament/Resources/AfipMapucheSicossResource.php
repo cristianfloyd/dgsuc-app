@@ -26,9 +26,11 @@ class AfipMapucheSicossResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('periodo_fiscal')
-                    ->required(),
+                    ->required()
+                    ->disabled(),
                 Forms\Components\TextInput::make('cuil')
-                    ->required(),
+                    ->required()
+                    ->disabled(),
             ]);
     }
 
