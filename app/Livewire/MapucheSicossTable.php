@@ -58,6 +58,20 @@ class MapucheSicossTable extends Component
         ]);
     }
 
+
+    /**
+     * Recupera de forma segura el valor del $attribute especificado del $model.
+     *
+     * Si el valor del attribute es un objeto, intentará convertirlo en una cadena.
+     * usando el método `__toString()`. Si eso falla, devolverá el nombre de la clase.
+     * del objeto.
+     *
+     * Si ocurre una excepción al recuperar el valor del attribute, devolverá un
+     * mensaje de error con el mensaje de excepción.
+     * @param mixed $model The model instance to retrieve the attribute from.
+     * @param string $attribute The name of the attribute to retrieve.
+     * @return mixed The value of the specified attribute, or an error message if an exception occurs.
+     */
     private function getAttributeSafely($model, $attribute)
     {
         try {

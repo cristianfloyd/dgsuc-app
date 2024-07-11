@@ -31,7 +31,7 @@ class Uploadtxt extends Component
         $extension = $file->getClientOriginalExtension();
         $time = time();
         $file_path = $this->file_path;
-        $filename = $originalName . '_' . $time . '.' . $extension;
+        $filename = "{$originalName}_$time.$extension";
 
 
         $this->archivoModel = new UploadedFile();
@@ -51,7 +51,7 @@ class Uploadtxt extends Component
         $this->validate([
             'archivotxt' => 'required|max:20480', // 15MB en kilobytes
         ]);
-        $this->file_path = $this->archivotxt->store('afiptxt', 'public');
+        $this->file_path = $this->archivotxt->store('/public/afiptxt', 'public');
         $this->uploadfilemodel();
         session()->flash('message', 'Archivo subido exitosamente.');
         // Resetear la propiedad para limpiar el formulario

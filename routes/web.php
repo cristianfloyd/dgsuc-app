@@ -42,6 +42,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::post('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
     Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
+    Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
     Route::get('/importar-crudo'  , AfipImportCrudo::class )->name('upload');
     Route::get('buscar-columna', BuscarColumna::class)->name('buscar-columna');
     Route::get('buscar-comentario', BuscarComentario::class)->name('buscar-comentario');

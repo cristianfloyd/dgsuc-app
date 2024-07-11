@@ -125,8 +125,27 @@ class AfipMapucheSicoss extends Model
         return 'unique_id';
     }
 
+    /**
+     * Obtains the unique string representation of the model.
+     *
+     * This method returns a unique string representation of the model, which is used to uniquely identify the model instance.
+     *
+     * @return string The unique string representation of the model.
+     */
+    public function getKeyString(): string
+    {
+        return (string) $this->getKey();
+    }
 
-    public function getUniqueIdAttribute()
+
+
+    /**
+ * Obtiene la representación de cadena única del modelo.
+ *
+ * Este método devuelve una representación de cadena única del modelo, que se utiliza para identificar de manera inequívoca a la instancia del modelo.
+ *
+ * @return string La representación de cadena única del modelo.
+ */    public function getUniqueIdAttribute()
     {
         return "{$this->periodo_fiscal}|{$this->cuil}";
     }

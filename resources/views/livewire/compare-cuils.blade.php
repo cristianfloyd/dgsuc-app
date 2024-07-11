@@ -5,10 +5,15 @@
                 class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuils Mapuche que no
                     estan en Afip</h5>
-                <p class="font-normal text-gray-700 dark:text-gray-400">
-                    Cantidad de cuils que no estan en Afip: {{ count($cuilsNotInAfip) }}
-                </p>
-            </a>
+                <button wire:click="loadCuilsNotInAfip" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Load
+                </button>
+
+                @if($cuilsNotInAfipLoaded)
+                    <p class="font-normal text-gray-700 dark:text-gray-400">
+                        Cantidad de cuils que no estan en Afip: 1111
+                    </p>
+                @endif            </a>
         </div>
 
         <div class="overflow-x-auto content-center">
@@ -17,24 +22,25 @@
                     <tr>
                         <th class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">CUIL
                         </th>
-                        <th class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">DNI
-                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($cuilsNotInAfip as $key => $cuil)
+                    @foreach ($cuilsPaginados as $cuil)
                         <tr class="border-b">
-                            <td class="py-2 px-4">{{ $cuil }}</td>
-                            <td class="py-2 px-4">
-                                <button wire:click="searchEmployee('{{ $arrayDnis[$key] }}')"
-                                    class="text-blue-600 hover:underline">
-                                    {{ $arrayDnis[$key] }}
+                            <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
+                                <button>
+                                    {{ $cuil }}
                                 </button>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            @if(false)
+            <div class="mt-4">
+                {{ $cuilsPaginados->links() }}
+            </div>
+            @endif
         </div>
     </div>
 
