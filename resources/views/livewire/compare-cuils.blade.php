@@ -13,9 +13,10 @@
                     <p class="font-normal text-gray-700 dark:text-gray-400">
                         Cantidad de cuils que no estan en Afip: 1111
                     </p>
-                @endif            </a>
+                @endif
+            </a>
         </div>
-
+        @if($cuilsNotInAfipLoaded)
         <div class="overflow-x-auto content-center">
             <table class="max-w-xs bg-gray">
                 <thead>
@@ -25,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($cuilsPaginados as $cuil)
+                    @foreach ($this->compareCuils as $cuil)
                         <tr class="border-b">
                             <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
                                 <button>
@@ -36,12 +37,13 @@
                     @endforeach
                 </tbody>
             </table>
-            @if(false)
+
             <div class="mt-4">
-                {{ $cuilsPaginados->links() }}
+                {{ $this->compareCuils->links() }}
             </div>
-            @endif
+
         </div>
+        @endif
     </div>
 
     @if ($showModal)

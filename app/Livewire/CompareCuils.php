@@ -22,12 +22,13 @@ class CompareCuils extends Component
     public $showModal = false;
     public $showCargoModal = false;
     public $cargos = [];
+    public $load = false;
     public $perPage = 10;
 
     public function loadCuilsNotInAfip()
     {
         $this->cuilsNotInAfipLoaded = true;
-        $this->cuilsNotInAfip = $this->compareCuils();
+        $this->compareCuils();
     }
 
     /**
@@ -39,6 +40,7 @@ class CompareCuils extends Component
      * Además, el método crea una matriz de DNI (Documento Nacional de Identidad) eliminando los dos primeros caracteres
      * y el último carácter de cada CUIL en la matriz $cuilsNotInAfip, y lo almacena en la propiedad $arrayDnis.
      */
+    #[Computed()]
     public function compareCuils() // Este metodo obtiene un array que ocupa 80mb de memoria.
     {
         $afipCuils = AfipRelacionesActivas::pluck('cuil')->toArray();
