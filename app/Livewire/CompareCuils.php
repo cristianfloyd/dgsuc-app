@@ -58,14 +58,7 @@ class CompareCuils extends Component
         );
     }
 
-
-
-
-    public function mount()
-    {
-        // $this->compareCuils();
-    }
-
+    
 
 
     public function searchEmployee($dni)
