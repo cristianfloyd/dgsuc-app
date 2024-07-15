@@ -37,8 +37,6 @@ class CompareCuils extends Component
      * Este método recupera todos los CUIL del modelo AfipRelacionesActivas, y luego encuentra todos los CUIL del modelo AfipMapucheSicoss
      * que no están presentes en el modelo AfipRelacionesActivas.
      * Los CUIL resultantes que no están en el modelo AfipRelacionesActivas se almacenan en la propiedad $cuilsNotInAfip.
-     * Además, el método crea una matriz de DNI (Documento Nacional de Identidad) eliminando los dos primeros caracteres
-     * y el último carácter de cada CUIL en la matriz $cuilsNotInAfip, y lo almacena en la propiedad $arrayDnis.
      */
     #[Computed()]
     public function compareCuils() // Este metodo obtiene un array que ocupa 80mb de memoria.
