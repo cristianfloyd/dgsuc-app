@@ -9,7 +9,7 @@
                     Load
                 </button>
                 @if ($cuilsNotInAfipLoaded)
-                    <button wire:click="showCuilDetails({{ $nroLiqui }}, '{{ $periodoFiscal }}')" class="px-4 py-2 bg-blue-500 text-white rounded">
+                    <button wire:click="showDetails({{ $nroLiqui }}, '{{ $periodoFiscal }}')" class="px-4 py-2 bg-blue-500 text-white rounded">
                         Mostrar detalles de CUILs
                     </button>
                 @endif
@@ -52,8 +52,8 @@
 
         @if($showDetails)
             @livewire('show-cuil-details', [
-                'periodoFiscal' => $this->periodoFiscal,
                 'nroLiqui' => $this->nroLiqui,
+                'periodoFiscal' => $this->periodoFiscal,
                 'cuilsNotInAfip' => $this->cuilsToSearch
                 ])
         @endif

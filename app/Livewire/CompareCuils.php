@@ -32,12 +32,13 @@ class CompareCuils extends Component
     public $periodoFiscal = '202312';
 
 
-    public function showCuilDetails($nroLiqui, $periodoFiscal)
+    public function showDetails($nroLiqui, $periodoFiscal)
     {
+        $this->cuilsNotInAfipLoaded = false;
         $this->showDetails = true;
         $this->nroLiqui = $nroLiqui;
         $this->periodoFiscal = $periodoFiscal;
-        $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
+        // $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
         // dump($nroLiqui, $periodoFiscal);
     }
 
@@ -66,7 +67,7 @@ class CompareCuils extends Component
 
         $this->cuilsNotInAfip = AfipMapucheSicoss::whereNotIn('cuil', $afipCuils)
             ->pluck('cuil');
-        
+
         $perPage = $this->perPage;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentPageItems = $this->cuilsNotInAfip

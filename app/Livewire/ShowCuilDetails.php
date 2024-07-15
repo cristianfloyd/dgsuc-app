@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -36,6 +37,7 @@ class ShowCuilDetails extends Component
         return $resultados;
     }
 
+    #[Computed()]
     public function paginateResultados()
     {
         $page = request()->get('page', 1);
@@ -54,8 +56,6 @@ class ShowCuilDetails extends Component
 
     public function render()
     {
-        $paginatedResultados = $this->resultados;
-
         return view('livewire.show-cuil-details', [
             'resultados' => $this->paginateResultados(),
         ]);
