@@ -8,15 +8,20 @@
                 <button wire:click="loadCuilsNotInAfip" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Load
                 </button>
+                @if ($cuilsNotInAfipLoaded)
+                    <button wire:click="showCuilDetails({{ $nroLiqui }}, '{{ $periodoFiscal }}')" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        Mostrar detalles de CUILs
+                    </button>
+                @endif
 
-                @if($cuilsNotInAfipLoaded)
+                @if ($cuilsNotInAfipLoaded)
                     <p class="font-normal text-gray-700 dark:text-gray-400">
-                        Cantidad de cuils que no estan en Afip: 1111
+                        Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}
                     </p>
                 @endif
             </a>
         </div>
-        @if($cuilsNotInAfipLoaded)
+        @if ($cuilsNotInAfipLoaded)
         <div class="overflow-x-auto content-center">
             <table class="max-w-xs bg-gray">
                 <thead>
@@ -44,7 +49,53 @@
 
         </div>
         @endif
+
+        @if($showDetails)
+            @livewire('show-cuil-details', [
+                'periodoFiscal' => $this->periodoFiscal,
+                'nroLiqui' => $this->nroLiqui,
+                'cuilsNotInAfip' => $this->cuilsToSearch
+                ])
+        @endif
     </div>
+
+    {{-- @if (!$showDetails)
+        @if (!$cuilsNotInAfipLoaded)
+            <button wire:click="loadCuilsNotInAfip" class="px-4 py-2 bg-blue-500 text-white rounded">
+                Cargar CUILs no encontrados en AFIP
+            </button>
+        @else
+            <h2 class="text-xl font-bold mb-4">CUILs no encontrados en AFIP</h2>
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">CUIL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($cuilsPaginados as $cuil)
+                        <tr>
+                            <td class="py-2 px-4 border-b">{{ $cuil }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{ $cuilsPaginados->links() }}
+
+            <button wire:click="showCuilDetails({{ $nroLiqui }}, '{{ $periodoFiscal }}')"
+                class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+                Mostrar detalles completos
+            </button>
+        @endif
+    @else
+        <button wire:click="hideCuilDetails" class="mb-4 px-4 py-2 bg-blue-500 text-white rounded">
+            Volver a la lista de CUILs
+        </button>
+
+        @livewire('show-cuil-details', ['cuilsNotInAfip' => $cuilsNotInAfip, 'nroLiqui' => $nroLiqui, 'periodoFiscal' => $periodoFiscal])
+    @endif --}}
+
 
     @if ($showModal)
         <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
@@ -57,7 +108,7 @@
                                 <strong>Nombre:</strong> {{ $employeeInfo['nombre'] }}
                                 {{ $employeeInfo['apellido'] }}<br>
                                 <button wire:click="showCargos('{{ $employeeInfo['nro_legaj'] }}')"
-                                class="text-blue-600 hover:underline">
+                                    class="text-blue-600 hover:underline">
                                     Legajo: {{ $employeeInfo['nro_legaj'] }}
                                 </button><br>
                                 {{-- <strong>Legajo:</strong> {{ $employeeInfo['nro_legaj'] }}<br> --}}

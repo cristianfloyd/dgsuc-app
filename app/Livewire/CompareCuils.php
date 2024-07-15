@@ -5,16 +5,19 @@ namespace App\Livewire;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
+use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
 use App\Models\AfipRelacionesActivas;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Livewire\Attributes\Computed;
-use Livewire\WithPagination;
+use Illuminate\Support\Facades\Request;
 
 class CompareCuils extends Component
 {
     use WithPagination;
     public $cuilsNotInAfip = [];
+    public $cuilsToSearch = [];
     public $cuilsNotInAfipLoaded = false;
     public $arrayDnis = [];
     public $selectedDni;
@@ -24,6 +27,24 @@ class CompareCuils extends Component
     public $cargos = [];
     public $load = false;
     public $perPage = 10;
+    public $showDetails = false;
+    public $nroLiqui = 1;
+    public $periodoFiscal = '202312';
+
+
+    public function showCuilDetails($nroLiqui, $periodoFiscal)
+    {
+        $this->showDetails = true;
+        $this->nroLiqui = $nroLiqui;
+        $this->periodoFiscal = $periodoFiscal;
+        $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
+        // dump($nroLiqui, $periodoFiscal);
+    }
+
+    public function hideCuilDetails()
+    {
+        $this->showDetails = false;
+    }
 
     public function loadCuilsNotInAfip()
     {
@@ -39,12 +60,13 @@ class CompareCuils extends Component
      * Los CUIL resultantes que no están en el modelo AfipRelacionesActivas se almacenan en la propiedad $cuilsNotInAfip.
      */
     #[Computed()]
-    public function compareCuils() // Este metodo obtiene un array que ocupa 80mb de memoria.
+    public function compareCuils() // ya fue optimizado v1.0
     {
         $afipCuils = AfipRelacionesActivas::pluck('cuil')->toArray();
 
         $this->cuilsNotInAfip = AfipMapucheSicoss::whereNotIn('cuil', $afipCuils)
             ->pluck('cuil');
+        
         $perPage = $this->perPage;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentPageItems = $this->cuilsNotInAfip
@@ -58,7 +80,7 @@ class CompareCuils extends Component
         );
     }
 
-    
+
 
 
     public function searchEmployee($dni)
