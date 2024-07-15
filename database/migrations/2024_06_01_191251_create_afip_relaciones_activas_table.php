@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     protected $connection = 'pgsql-mapuche';
-    protected $table = 'afip_relaciones_activas';
+    protected $table = 'suc.afip_relaciones_activas';
     //sin timestamps
     protected $timestamps = false;
 
@@ -16,7 +16,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('afip_relaciones_activas', function (Blueprint $table) {
+        Schema::create('suc.afip_relaciones_activas', function (Blueprint $table) {
             $table->id();
             $table->char('periodo_fiscal', 6);
             $table->char('codigo_movimiento', 2)->nullable();
@@ -48,6 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('afip_relaciones_activas');
+        Schema::dropIfExists('suc.afip_relaciones_activas');
     }
 };

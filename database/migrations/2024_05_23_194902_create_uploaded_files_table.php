@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     protected $connection = 'pgsql-mapuche';
+    protected $table = 'suc.afip_uploaded_files';
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         //Se crea la tabla uploaded_files con los campos: id, filename, ogirinal_name, file_path, timestamps
-        Schema::create('afip_uploaded_files', function (Blueprint $table) {
+        Schema::create('suc.afip_uploaded_files', function (Blueprint $table) {
             $table->id();
             $table->text('filename');
             $table->text('original_name');
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('afip_uploaded_files');
+        Schema::dropIfExists('suc.afip_uploaded_files');
     }
 };

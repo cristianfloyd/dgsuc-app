@@ -22,13 +22,14 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipMapucheMiSimplificacion;
 
+
+Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
+Route::get('/user/register', RegisterForm::class)->name('registerform');
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
     Route::get('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () { return view('dashboard'); })->name('dashboard');
     Route::get('/todos', TodoList::class )->name('todos');
     Route::post('/todos', [TodoList::class, 'create'])->name('todos.create');
-    Route::get('/user/register', RegisterForm::class)->name('registerform');
-    Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
     Route::get('/user/list',UserList::class)->name('userlist');
     Route::get('/contactus', ContactUs::class)->name('contact-us');
     Route::get('/modal', Modal::class)->name('modal');

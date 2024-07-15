@@ -32,7 +32,7 @@ class RegisterForm extends Component
 
     public function createUser(){
 
-        sleep(2); // Simulate a slow request (3 seconds
+        sleep(10); // Simulate a slow request (3 seconds
 
         $validated = $this->validate();
 
