@@ -17,7 +17,9 @@ class CompareCuils extends Component
 {
     use WithPagination;
     public $cuilsNotInAfip = [];
-    public $cuilsToSearch = [];
+    public $nroLiqui = 1;
+    public $periodoFiscal = '202312';
+    public $cuilstosearch = [];
     public $cuilsNotInAfipLoaded = false;
     public $arrayDnis = [];
     public $selectedDni;
@@ -28,18 +30,15 @@ class CompareCuils extends Component
     public $load = false;
     public $perPage = 10;
     public $showDetails = false;
-    public $nroLiqui = 1;
-    public $periodoFiscal = '202312';
 
 
-    public function showDetails($nroLiqui, $periodoFiscal)
+
+    public function showCuilsDetails()
     {
-        $this->cuilsNotInAfipLoaded = false;
-        $this->showDetails = true;
-        $this->nroLiqui = $nroLiqui;
-        $this->periodoFiscal = $periodoFiscal;
-        // $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
-        // dump($nroLiqui, $periodoFiscal);
+        $this->toggleCuils($this->cuilsNotInAfipLoaded);
+        $this->toggleShow($this->showDetails);
+        // dump('Hola Mundo!');
+        // $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
     }
 
     public function hideCuilDetails()
@@ -47,9 +46,17 @@ class CompareCuils extends Component
         $this->showDetails = false;
     }
 
+    public function toggleShow($value): void
+    {
+        $this->showDetails = (bool) $value === false;
+    }
+    public function toggleCuils($value): void
+    {
+        $this->cuilsNotInAfipLoaded = (bool) $value === false;
+    }
     public function loadCuilsNotInAfip()
     {
-        $this->cuilsNotInAfipLoaded = true;
+        $this->toggleCuils($this->cuilsNotInAfipLoaded);
         $this->compareCuils();
     }
 
@@ -67,18 +74,22 @@ class CompareCuils extends Component
 
         $this->cuilsNotInAfip = AfipMapucheSicoss::whereNotIn('cuil', $afipCuils)
             ->pluck('cuil');
+        $this->cuilstosearch = $this->cuilsNotInAfip;
+        $this->cuilstosearch = $this->cuilstosearch->toArray();
+        // dd($this->cuilstosearch);
+        // dd($this->cuilsNotInAfip);
 
         $perPage = $this->perPage;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentPageItems = $this->cuilsNotInAfip
             ->slice(($currentPage - 1) * $perPage, $perPage)->all();
-
-        return new LengthAwarePaginator(
+        $data =  new LengthAwarePaginator(  //retorna los cuils paginados en una coleccion
             $currentPageItems,
             // count($this->cuilsNotInAfip),
             $this->cuilsNotInAfip->count(),
             $perPage
         );
+        return $data;
     }
 
 
@@ -138,8 +149,6 @@ class CompareCuils extends Component
 
     public function render()
     {
-        return view('livewire.compare-cuils',[
-            'cuilsPaginados' => $this->cuilsNotInAfip,
-        ]);
+        return view('livewire.compare-cuils');
     }
 }

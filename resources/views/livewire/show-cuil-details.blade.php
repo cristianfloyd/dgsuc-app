@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($resultados as $resultado)
+                @foreach($this->resultados as $resultado)
                     <tr>
                         <td class="py-2 px-4 border-b">{{ $resultado->cuil }}</td>
                         <td class="py-2 px-4 border-b">{{ $resultado->nro_legaj }}</td>

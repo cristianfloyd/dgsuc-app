@@ -22,6 +22,7 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Livewire\ShowCuilDetails;
+use App\Livewire\TestCuils;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
@@ -51,5 +52,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
     Route::get('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
     Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
+    Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
     // Route::get('/encoding', [ExampleController::class, 'showEncoding']);
 });
