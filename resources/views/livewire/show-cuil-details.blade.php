@@ -5,25 +5,34 @@
             <thead>
                 <tr>
                     <th class="py-2 px-4 border-b">CUIL</th>
-                    <th class="py-2 px-4 border-b">Nro. Legajo</th>
+                    {{-- <th class="py-2 px-4 border-b">Nro. Legajo</th>
                     <th class="py-2 px-4 border-b">Nro. Cargo</th>
-                    <th class="py-2 px-4 border-b">Periodo Fiscal</th>
+                    <th class="py-2 px-4 border-b">Periodo Fiscal</th> --}}
                     <!-- Agrega más columnas según sea necesario -->
                 </tr>
             </thead>
             <tbody>
-                @foreach($this->resultados as $resultado)
+                @foreach($this->resultados as $key => $resultado)
                     <tr>
-                        <td class="py-2 px-4 border-b">{{ $resultado->cuil }}</td>
-                        <td class="py-2 px-4 border-b">{{ $resultado->nro_legaj }}</td>
-                        <td class="py-2 px-4 border-b">{{ $resultado->nro_cargo }}</td>
-                        <td class="py-2 px-4 border-b">{{ $resultado->periodo_fiscal }}</td>
+                        <td class="py-2 px-4 border-b">{{ $resultado[$key]['cuil'] }}</td>
+                        <td class="py-2 px-4 border-b">{{ $resultado[$key]['nro_legaj'     ] }}</td>
+                        <td class="py-2 px-4 border-b">{{ $resultado[$key]['nro_cargo'     ] }}</td>
+                        <td class="py-2 px-4 border-b">{{ $resultado[$key]['periodo_fiscal'] }}</td>
                         <!-- Agrega más celdas según sea necesario -->
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-
-    {{-- {{ $resultados->links() }} --}}
+    <div>
+        <p>paginas</p>
+        {{ $this->resultados }}
+    </div>
+    <div>
+        @if(!empty($failedCuils))
+            <h2>
+                {{dd($failedCuils)}}
+            </h2>
+        @endif
+    </div>
 </div>

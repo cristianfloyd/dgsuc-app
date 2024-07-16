@@ -13,10 +13,13 @@ class ShowCuilDetails extends Component
 {
     use WithPagination;
 
-    public $cuilsNotInAfip = null;
+    public $cuilsNotInAfip;
+    public $failedCuils = [];
     public $nroLiqui;
     public $periodoFiscal;
-    public $perPage = 10;
+    private const MAX_CUILS_PER_QUERY = 8;
+    private const RESULTS_PER_PAGE = 4;
+    private $resultadosCache = null;
 
     public function mount($nroLiqui, $periodoFiscal, $cuilsNotInAfip)
     {
@@ -27,53 +30,54 @@ class ShowCuilDetails extends Component
 
     public function getResultadosProperty()
     {
-        return $this->processCuilsNotInAfip();
-    }
-
-    public function processCuilsNotInAfip()
-    {
-        $resultados = collect();
-
-        $cuilsNotInAfipLimited = $this->limitCuilsTo10($this->cuilsNotInAfip);
-
-        foreach ($cuilsNotInAfipLimited as $cuil) {
-            $resultados = $resultados->concat(
-                DB::connection('pgsql-mapuche')
-                ->select('SELECT * FROM suc.get_mi_simplificacion(?, ?, ?) limit 10', [$this->nroLiqui, $this->periodoFiscal, $cuil])
-            );
+        if(!$this->resultadosCache){
+            $limitedCuils = $this->getLimitedCuils();
+            $this->resultadosCache = $this->getResultsForCuils($limitedCuils);
         }
 
-
-        return $resultados;
+        //paginar los resultados
+        $paginator = new LengthAwarePaginator(
+            collect($this->resultadosCache),
+            count($this->resultadosCache),
+            self::RESULTS_PER_PAGE,
+            null,
+            ['path'=>request()->url()]
+        );
+        // dd($this->resultadosCache,$paginator);
+        return $paginator;
     }
-
-    private function limitCuilsTo10($cuils)
+    public function getResultsForCuils(array $cuils)
     {
-        $cuilsLimited = array_slice($cuils, 0, 10);
+        try {
+            $results = [];
 
-        // Corroborar que solo queden 10 elementos en el array
-        if ($cuilsLimited > 10) {
-            // throw new Exception('Error: más de 10 elementos en el array');
-            // dump('$ciulsLimited');
+            foreach ($cuils as $cuil) {
+                $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?)';
+                $params = [$this->nroLiqui, $this->periodoFiscal, $cuil];
+                $result = DB::connection('pgsql-mapuche')->select($query, $params);
+
+                if(empty($result)){
+                    $failedCuils[] = $cuil;
+                } else {
+                    $results[] = $result;
+
+                }
+            }
+        // You can now use the $failedCuils array to store or log the CUILs that didn't return any results
+        // For example, you could add a property to your component to store the failed CUILs
+        $this->failedCuils = $failedCuils;
+
+        return $results;
+
+    } catch (Exception $e) {
+            // Handle exception
         }
-
-        return $cuilsLimited;
     }
-    // #[Computed()]
-    // public function resultados()
-    // {
-    //     $page = request()->get('page', 1);
-    //     $perPage = $this->perPage;
-    //     $items = $this->resultados;
+    public function getLimitedCuils()
+    {
+        return array_slice($this->cuilsNotInAfip,0, self::MAX_CUILS_PER_QUERY);
+    }
 
-    //     return new LengthAwarePaginator(
-    //         $items->forPage($page, $perPage),
-    //         $items->count(),
-    //         $perPage,
-    //         $page,
-    //         ['path' => request()->url(), 'query' => request()->query()]
-    //     );
-    // }
 
 
     public function render()
@@ -81,3 +85,4 @@ class ShowCuilDetails extends Component
         return view('livewire.show-cuil-details');
     }
 }
+
