@@ -2,12 +2,11 @@
 
 namespace App\Livewire;
 
-use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ShowCuilDetails extends Component
 {
@@ -17,72 +16,58 @@ class ShowCuilDetails extends Component
     public $failedCuils = [];
     public $nroLiqui;
     public $periodoFiscal;
-    private const MAX_CUILS_PER_QUERY = 8;
-    private const RESULTS_PER_PAGE = 4;
-    private $resultadosCache = null;
+    public $allResults;
+    private const RESULTS_PER_PAGE = 10;
+
+    protected $queryString = ['page' => ['except' => 1]];
 
     public function mount($nroLiqui, $periodoFiscal, $cuilsNotInAfip)
     {
         $this->cuilsNotInAfip = $cuilsNotInAfip;
         $this->nroLiqui = $nroLiqui;
         $this->periodoFiscal = $periodoFiscal;
+        $this->allResults = $this->getAllResults();
     }
 
-    public function getResultadosProperty()
+    private function getAllResults()
     {
-        if(!$this->resultadosCache){
-            $limitedCuils = $this->getLimitedCuils();
-            $this->resultadosCache = $this->getResultsForCuils($limitedCuils);
-        }
-
-        //paginar los resultados
-        $paginator = new LengthAwarePaginator(
-            collect($this->resultadosCache),
-            count($this->resultadosCache),
-            self::RESULTS_PER_PAGE,
-            null,
-            ['path'=>request()->url()]
-        );
-        // dd($this->resultadosCache,$paginator);
-        return $paginator;
-    }
-    public function getResultsForCuils(array $cuils)
-    {
-        try {
-            $results = [];
-
-            foreach ($cuils as $cuil) {
+        $results = new Collection();
+        foreach ($this->cuilsNotInAfip as $cuil) {
+            try {
                 $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?)';
                 $params = [$this->nroLiqui, $this->periodoFiscal, $cuil];
                 $result = DB::connection('pgsql-mapuche')->select($query, $params);
 
-                if(empty($result)){
-                    $failedCuils[] = $cuil;
+                if (empty($result)) {
+                    $this->failedCuils[] = $cuil;
                 } else {
-                    $results[] = $result;
-
+                    $results->push($result[0]);
                 }
+            } catch (\Exception $e) {
+                $this->failedCuils[] = $cuil;
+                // Log the error if needed
             }
-        // You can now use the $failedCuils array to store or log the CUILs that didn't return any results
-        // For example, you could add a property to your component to store the failed CUILs
-        $this->failedCuils = $failedCuils;
-
-        return $results;
-
-    } catch (Exception $e) {
-            // Handle exception
         }
+        return $results;
     }
-    public function getLimitedCuils()
+
+    public function getPaginatedResultsProperty()
     {
-        return array_slice($this->cuilsNotInAfip,0, self::MAX_CUILS_PER_QUERY);
+        $page = $this->page;
+        return new LengthAwarePaginator(
+            $this->allResults->forPage($page, self::RESULTS_PER_PAGE),
+            $this->allResults->count(),
+            self::RESULTS_PER_PAGE,
+            $page,
+            ['path' => '/show-cuil-details']
+        );
     }
-
-
 
     public function render()
     {
-        return view('livewire.show-cuil-details');
+        return view('livewire.show-cuil-details', [
+            'paginatedResults' => $this->paginatedResults,
+            'failedCuils' => $this->failedCuils,
+        ]);
     }
 }
-
