@@ -9,7 +9,7 @@ use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class ShowCuilDetails extends Component
+class ShowCuilDetailsOld extends Component
 {
     use WithPagination;
 
