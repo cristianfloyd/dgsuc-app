@@ -37,8 +37,8 @@ class CompareCuils extends Component
     {
         $this->toggleCuils($this->cuilsNotInAfipLoaded);
         $this->toggleShow($this->showDetails);
-        // dump('Hola Mundo!');
-        // $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
+        $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
+        $this->dispatch('compareCuils', $this->nroLiqui, $this->periodoFiscal, $this->cuilstosearch);
     }
 
     public function hideCuilDetails()
@@ -76,8 +76,6 @@ class CompareCuils extends Component
             ->pluck('cuil');
         $this->cuilstosearch = $this->cuilsNotInAfip;
         $this->cuilstosearch = $this->cuilstosearch->toArray();
-        // dd($this->cuilstosearch);
-        // dd($this->cuilsNotInAfip);
 
         $perPage = $this->perPage;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
