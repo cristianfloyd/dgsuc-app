@@ -59,17 +59,17 @@ class AfipMapucheMiSimplificacionResource extends Resource
                 Forms\Components\TextInput::make('modalidad_de_contrato'),
                     // ->maxLength(3)
                     // ->default(008),
-                Forms\Components\TextInput::make('fecha_inicio_de_rel_laboral')
+                Forms\Components\TextInput::make('inicio_rel_laboral')
                     ->required()
                     ->maxLength(10),
-                Forms\Components\TextInput::make('fecha_fin_rel_laboral')
+                Forms\Components\TextInput::make('fin_rel_laboral')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('codigo_obra_social')
+                Forms\Components\TextInput::make('obra_social')
                     ->maxLength(6)
                     ->default(000000),
                 Forms\Components\TextInput::make('codigo_situacion_baja')
                     ->maxLength(2),
-                Forms\Components\TextInput::make('fecha_telegrama_renuncia')
+                Forms\Components\TextInput::make('fecha_tel_renuncia')
                     ->tel()
                     ->maxLength(10),
                 Forms\Components\TextInput::make('retribucion_pactada')
@@ -78,7 +78,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->required()
                     ->maxLength(1)
                     ->default(1),
-                Forms\Components\TextInput::make('sucursal')
+                Forms\Components\TextInput::make('domicilio')
                     ->maxLength(5),
                 Forms\Components\TextInput::make('actividad')
                     ->maxLength(6),
@@ -86,16 +86,16 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->maxLength(4),
                 Forms\Components\TextInput::make('rectificacion')
                     ->maxLength(2),
-                Forms\Components\TextInput::make('ccc_trabajo')
+                Forms\Components\TextInput::make('ccct')
                     ->maxLength(10)
                     ->default(0000000000),
                 Forms\Components\TextInput::make('tipo_servicio')
                     ->maxLength(3),
-                Forms\Components\TextInput::make('categ_prof')
+                Forms\Components\TextInput::make('categoria')
                     ->maxLength(6),
                 Forms\Components\TextInput::make('fecha_susp_serv_temp')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('numero_formulario_agropecuario')
+                Forms\Components\TextInput::make('nro_form_agropecuario')
                     ->maxLength(10),
                 Forms\Components\TextInput::make('covid')
                     ->maxLength(1),
@@ -131,11 +131,11 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('modalidad_de_contrato')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('fecha_inicio_de_rel_laboral')
+                Tables\Columns\TextColumn::make('inicio_rel_laboral')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('fecha_fin_rel_laboral')
+                Tables\Columns\TextColumn::make('fin_rel_laboral')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codigo_obra_social')
+                Tables\Columns\TextColumn::make('obra_social')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('codigo_situacion_baja')
                     ->searchable(),
@@ -145,7 +145,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('modalidad_liquidacion')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('sucursal')
+                Tables\Columns\TextColumn::make('domicilio')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('actividad')
                     ->searchable(),
@@ -153,15 +153,15 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('rectificacion')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('ccc_trabajo')
+                Tables\Columns\TextColumn::make('ccct')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tipo_servicio')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('categ_prof')
+                Tables\Columns\TextColumn::make('categoria')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('fecha_susp_serv_temp')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('numero_formulario_agropecuario')
+                Tables\Columns\TextColumn::make('nro_form_agropecuario')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('covid')
                     ->searchable(),

@@ -92,8 +92,8 @@
                         <td>{{ $result->ccct }}</td>
                         <td>{{ $result->tipo_servicio }}</td>
                         <td>{{ $result->categoria }}</td>
-                        <td>{{ $result->fecha_suspencion_servicios }}</td>
-                        <td>{{ $result->numero_form_agrop }}</td>
+                        <td>{{ $result->fecha_susp_servicios_temp }}</td>
+                        <td>{{ $result->nro_form_agrop }}</td>
                         <td>{{ $result->covid }}</td>
                     </tr>
                 @endforeach

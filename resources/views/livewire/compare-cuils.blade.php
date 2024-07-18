@@ -1,6 +1,11 @@
 
 <div>
     <div class="container max-w-screen-md mx-auto p-4">
+        @if($crearTablaTemp)
+            <div class="inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="cargo-modal">
+                <livewire:tabla-temp-cuils /><!-- Agrega el componente Livewire aquí -->
+            </div>
+        @endif
         <div class="float-left m-4">
             <a href="#"
                 class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
@@ -12,7 +17,7 @@
                 </button>
                 @if ($cuilsNotInAfipLoaded)
                     <button wire:click="showCuilsDetails" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Mostrar detalles de CUILs
+                        Crear tabla temporal
                     </button>
                 @endif
 
@@ -146,4 +151,5 @@
             </div>
         </div>
     @endif
+
 </div>

@@ -9,9 +9,10 @@ use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompareCuils extends Component
 {
@@ -26,6 +27,7 @@ class CompareCuils extends Component
     public $employeeInfo;
     public $showModal = false;
     public $showCargoModal = false;
+    public $crearTablaTemp = false;
     public $cargos = [];
     public $load = false;
     public $perPage = 10;
@@ -33,12 +35,14 @@ class CompareCuils extends Component
 
 
 
-    public function showCuilsDetails()
+    public function showCuilsDetails(): void
     {
-        $this->toggleCuils($this->cuilsNotInAfipLoaded);
-        $this->toggleShow($this->showDetails);
+        $this->toggleValue($this->cuilsNotInAfipLoaded);
+        // $this->toggleShow($this->showDetails);
+        $this->toggleValue($this->crearTablaTemp);
         $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
-        $this->dispatch('compareCuils', $this->nroLiqui, $this->periodoFiscal, $this->cuilstosearch);
+        $this->dispatch('crear-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilstosearch);
+        Log::info('crear-tabla-temp dispatch event created');
     }
 
     public function hideCuilDetails()
@@ -49,6 +53,16 @@ class CompareCuils extends Component
     public function toggleShow($value): void
     {
         $this->showDetails = (bool) $value === false;
+    }
+    /**
+     * Toggles a boolean value.
+     *
+     * @param bool $value The value to toggle.
+     * @return void
+     */
+    public function toggleValue($value): void
+    {
+        $this->crearTablaTemp = (bool) $value === false;
     }
     public function toggleCuils($value): void
     {
