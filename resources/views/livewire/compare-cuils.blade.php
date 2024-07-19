@@ -4,6 +4,14 @@
         @if($crearTablaTemp)
             <div class="inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="cargo-modal">
                 <livewire:tabla-temp-cuils /><!-- Agrega el componente Livewire aquí -->
+                @if($tableTempCreated)
+                    <div>
+                        <p>La tabla temporal ya está creada.</p>
+                        <button wire:click="dropTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
+                            Eliminar Tabla Temporal
+                        </button>
+                    </div>
+                @endif
             </div>
         @endif
         <div class="float-left m-4">
@@ -20,7 +28,11 @@
                         Crear tabla temporal
                     </button>
                 @endif
-
+                @if($tableTempCreated)
+                    <button wire:click="$this->dropTableTemp()" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        Drop Table Temp
+                    </button>
+                @endif  
                 @if ($cuilsNotInAfipLoaded)
                     <p class="font-normal text-gray-700 dark:text-gray-400">
                         Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}

@@ -3,14 +3,15 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\TablaTempCuils as TableModel;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
+use App\Models\TablaTempCuils as TableModel;
 
 class TablaTempCuils extends Component
 {
     public $cuils = [];
     public $selectedCuil = null;
+    public $cuilsNotInAfipLoaded;
 
     protected $tablaTempCuil;
 
@@ -24,28 +25,37 @@ class TablaTempCuils extends Component
         //primero verificar que la tabla no exista y si no existe  crearla y retornar un mensaje de exito
         if (!$this->tablaTempCuil->tableExists()) {
             $this->tablaTempCuil->createTable();
-            session()->flash('success', 'Tabla creada exitosamente.');
+            // session()->flash('success', 'Tabla creada exitosamente.');
             log::info('Tabla creada exitosamente.');
-            $this->dispatch('table-created');
+            $this->dispatch('created');
             // return true;
         } else {
-            session()->flash('error', 'La tabla ya existe.');
+            // session()->flash('error', 'La tabla ya existe.');
             Log::info('La tabla ya existe.');
-            $this->dispatch('table-exists');
+            Log::info('dispatch: tableexists');
+            $this->dispatch('exists');
             // return false;
         }
     }
-
+    #[On('drop-table-temp')]
+    public function dropTableTemp()
+    {
+        TableModel::dropTable();
+        Log::info('dropTableTemp');
+        $this->dispatch('toggle-show-drop');
+    }
     public function boot()
     {
-        Log::info('Cargando el componente TablaTempCuils');
+        Log::info('boot TablaTempCuils');
     }
     public function mount()
     {
-        log::info('Montando el componente TablaTempCuils');
+        log::info('mount TablaTempCuils');
     }
+
     public function render()
     {
+        Log::info('render TablaTempCuils');
         return view('livewire.tabla-temp-cuils');
     }
 }

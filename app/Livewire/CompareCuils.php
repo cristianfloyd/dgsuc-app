@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
 use Livewire\Attributes\Computed;
@@ -28,21 +29,63 @@ class CompareCuils extends Component
     public $showModal = false;
     public $showCargoModal = false;
     public $crearTablaTemp = false;
+    public $tableTempCreated = false;
     public $cargos = [];
     public $load = false;
     public $perPage = 10;
     public $showDetails = false;
 
 
-
     public function showCuilsDetails(): void
     {
-        $this->toggleValue($this->cuilsNotInAfipLoaded);
-        // $this->toggleShow($this->showDetails);
-        $this->toggleValue($this->crearTablaTemp);
-        $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
+        $this->cuilsNotInAfipLoaded = ! $this->cuilsNotInAfipLoaded;
+        Log::info("cuilsNotInAfipLoaded parent = {$this->cuilsNotInAfipLoaded}");
+
+        $this->showDetails = $this->toggleValue($this->showDetails);
+        Log::info("showDetails parent = {$this->showDetails}");
+
+        // $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
+        // Log::info("crearTablaTemp parent = {$this->crearTablaTemp}");
+
+        // $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
+
         $this->dispatch('crear-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilstosearch);
         Log::info('crear-tabla-temp dispatch event created');
+
+    }
+
+
+
+    #[On('created')]
+    public function handleTableCreated()
+    {
+        // La tabla se creó exitosamente
+        $this->tableTempCreated = false;
+        // Aquí puedes añadir cualquier lógica adicional que necesites
+        Log::info('Tabla temporal creada exitosamente');
+    }
+
+    #[On('exists')]
+    public function handleTableExists()
+    {
+        // La tabla ya existe
+        $this->tableTempCreated = true;
+        // Aquí puedes añadir cualquier lógica adicional que necesites
+        Log::info('La tabla temporal ya existe');
+    }
+
+
+    #[On('toggle-show-drop')]
+    public function showDropTable()
+    {
+        Log::info('exist dispatch event listened');
+        $this->tableTempCreated = !$this->tableTempCreated;
+        $this->cuilsNotInAfipLoaded = true;
+    }
+    public function dropTableTemp()
+    {
+        $this->dispatch('drop-table-temp');
+        Log::info('drop-table-temp dispatch event created');
     }
 
     public function hideCuilDetails()
@@ -50,27 +93,22 @@ class CompareCuils extends Component
         $this->showDetails = false;
     }
 
-    public function toggleShow($value): void
-    {
-        $this->showDetails = (bool) $value === false;
-    }
+
     /**
      * Toggles a boolean value.
      *
      * @param bool $value The value to toggle.
      * @return void
      */
-    public function toggleValue($value): void
+    public function toggleValue($value) : bool
     {
-        $this->crearTablaTemp = (bool) $value === false;
+        return $value = (bool) $value === false;
     }
-    public function toggleCuils($value): void
-    {
-        $this->cuilsNotInAfipLoaded = (bool) $value === false;
-    }
+
     public function loadCuilsNotInAfip()
     {
-        $this->toggleCuils($this->cuilsNotInAfipLoaded);
+        $this->cuilsNotInAfipLoaded = $this->toggleValue($this->cuilsNotInAfipLoaded);
+        $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
         $this->compareCuils();
     }
 

@@ -29,4 +29,11 @@ class TablaTempCuils extends Model
             $table->string('cuil', 11)->unique();
         });
     }
+
+    public static function dropTable(): void
+    {
+        $connection = (new TablaTempCuils())->getConnectionName();
+        $table = (new TablaTempCuils())->getTable();
+        Schema::connection($connection)->dropIfExists($table);
+    }
 }
