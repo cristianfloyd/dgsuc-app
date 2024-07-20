@@ -152,7 +152,9 @@ class AfipSicossDesdeMapuche extends Model
 
         $minCaracteres = PHP_INT_MAX;
         $maxCaracteres = PHP_INT_MIN;
-
+        $i = 0;
+        $kmin = 0;
+        $kmax = 0;
         // Leer el archivo línea por línea
         while (($linea = fgets($archivo)) !== false) {
             $numCaracteres = mb_strlen($linea);
@@ -160,10 +162,13 @@ class AfipSicossDesdeMapuche extends Model
             // Actualizar el mínimo y máximo de caracteres
             if ($numCaracteres < $minCaracteres) {
                 $minCaracteres = $numCaracteres;
+                $kmin = $i;
             }
             if ($numCaracteres > $maxCaracteres) {
                 $maxCaracteres = $numCaracteres;
+                $kmax = $i;
             }
+            $i++;
         }
 
         // Cerrar el archivo
@@ -171,8 +176,8 @@ class AfipSicossDesdeMapuche extends Model
 
         // Devolver los valores mínimo y máximo
         return [
-            'min' => $minCaracteres,
-            'max' => $maxCaracteres
+            $kmin => $minCaracteres,
+            $kmax => $maxCaracteres
         ];
     }
 
@@ -299,8 +304,12 @@ class AfipSicossDesdeMapuche extends Model
         if (empty($filename) || empty($periodoFiscal)) {
             throw new \InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
         }
-        if (Storage::exists($filename)) {
-            $filename = Storage::path($filename);
+        $archivoRuta = $filename;
+        $archivoRuta = Storage::path("/public/$archivoRuta");
+
+        if (Storage::exists("/public/$filename"))
+        {
+            $filename = Storage::path("/public/$filename");
         } else {
             throw new \InvalidArgumentException('El archivo no existe.');
         }

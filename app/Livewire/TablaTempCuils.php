@@ -25,8 +25,8 @@ class TablaTempCuils extends Component
         //primero verificar que la tabla no exista y si no existe  crearla y retornar un mensaje de exito
         if (!$this->tablaTempCuil->tableExists()) {
             $this->tablaTempCuil->createTable();
-            // session()->flash('success', 'Tabla creada exitosamente.');
-            log::info('Tabla creada exitosamente.');
+            session()->flash('success', 'Tabla creada exitosamente.');
+            log::info('createTable() Tabla creada exitosamente.');
             $this->dispatch('created');
             // return true;
         } else {
@@ -41,16 +41,16 @@ class TablaTempCuils extends Component
     public function dropTableTemp()
     {
         TableModel::dropTable();
-        Log::info('dropTableTemp');
+        Log::info('dropTableTemp()');
         $this->dispatch('toggle-show-drop');
     }
     public function boot()
     {
-        Log::info('boot TablaTempCuils');
+        Log::info('TablaTempCuils boot');
     }
     public function mount()
     {
-        log::info('mount TablaTempCuils');
+        log::info('TablaTempCuils mout');
     }
 
     public function render()

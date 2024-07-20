@@ -3,11 +3,12 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\AfipImportacionCrudaModel;
-use App\Models\AfipSicossDesdeMapuche;
 use App\Models\UploadedFile;
-
+use App\Models\AfipSicossDesdeMapuche;
 use function PHPUnit\Framework\isEmpty;
+
+use Illuminate\Support\Facades\Storage;
+use App\Models\AfipImportacionCrudaModel;
 
 class ConvertirTabla extends Component
 {
@@ -41,7 +42,7 @@ class ConvertirTabla extends Component
         }
 
         $this->filasExtraidas = $this->extraerFilas();
-        // dd($this->periodoFiscal );
+
         $afipSicoss = new AfipSicossDesdeMapuche();
         $tabla = $afipSicoss->procesarTabla($this->filasExtraidas, $this->periodoFiscal);
         $resultado = $afipSicoss::insertarDatosMasivos($tabla);
@@ -54,10 +55,11 @@ class ConvertirTabla extends Component
 
     public function contarLineas()
     {
-        $this->filepath = 'c:\laragon\www\informes-app\storage\app\public\afiptxt\BAV5BLrQ8PeKcPeFFHhRnbaZtpzsUTiFJVdhvVfU.csv';
+        $archivoRuta = Storage::path("/public/{$this->filepath}");
         $AfipimportacionCruda = new AfipSicossDesdeMapuche();
-        $resultado = $AfipimportacionCruda->contarCaracteresPorLinea($this->filepath);
-        //dd($resultado);
+        $resultado = $AfipimportacionCruda->contarCaracteresPorLinea($archivoRuta);
+
+        dd($resultado);
     }
     public function procesarLinea($linea)
     {
@@ -91,11 +93,13 @@ class ConvertirTabla extends Component
     {
         // Buscar el archivo por ID
         $archivo = UploadedFile::find($this->selectedArchivo);
-        dump($archivo);
+        // dump($archivo);
         // Verificar si el archivo existe
         if ($archivo) {
             $this->archivoName = $archivo->original_name;
             $this->periodoFiscal = $archivo->periodo_fiscal;
+            $this->archivo = $archivo;
+            $this->filepath = $archivo->file_path;
             return true;
         } else {
             return false; // O puedes lanzar una excepción o manejar el error de otra forma

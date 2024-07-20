@@ -108,8 +108,6 @@ class MapucheSicoss extends Component
 
     public function mount()
     {
-        //$this->verifyAfipImportCrudoTable();
-        //$this->verifyAfipMapucheSicossTable();
         //llamar al modelo UploadedFile para obtener todos los archivos subidos
         $this->listadoArchivos = UploadedFile::all();
     }

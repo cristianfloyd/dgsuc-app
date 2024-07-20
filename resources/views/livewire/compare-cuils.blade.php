@@ -1,5 +1,10 @@
 
 <div>
+    @if ('success' === session('message'))
+        <div>
+            <p>{{ session('message') }}</p>
+        </div>
+    @endif
     <div class="container max-w-screen-md mx-auto p-4">
         @if($crearTablaTemp)
             <div class="inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="cargo-modal">
@@ -32,7 +37,7 @@
                     <button wire:click="$this->dropTableTemp()" class="px-4 py-2 bg-blue-500 text-white rounded">
                         Drop Table Temp
                     </button>
-                @endif  
+                @endif
                 @if ($cuilsNotInAfipLoaded)
                     <p class="font-normal text-gray-700 dark:text-gray-400">
                         Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}

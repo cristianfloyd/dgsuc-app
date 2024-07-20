@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
+use Exception;
 use Livewire\Component;
 use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
 use Livewire\Attributes\Rule;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\Validate;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+
 
 class Uploadtxt extends Component
 {
@@ -46,29 +49,45 @@ class Uploadtxt extends Component
         $this->archivoModel->save();
     }
 
+
     public function save()
     {
+
+        $messages = [
+            'archivotxt.required' => 'Por favor, seleccione un archivo para subir.',
+            'archivotxt.mimes' => 'Solo se permiten archivos de tipo .txt.',
+            'archivotxt.max' => 'El archivo no debe superar los 20MB.',
+        ];
+
+    try {
         $this->validate([
-            'archivotxt' => 'required|max:20480', // 15MB en kilobytes
-        ]);
-        $this->file_path = $this->archivotxt->store('/public/afiptxt', 'public');
+            'archivotxt' => 'required|file|mimes:txt|max:20480', // Asegurarse de que el archivo sea de tipo .txt
+        ], $messages);
+
+
+        $this->file_path = $this->archivotxt->store('/afiptxt', 'public');
         $this->uploadfilemodel();
         session()->flash('message', 'Archivo subido exitosamente.');
         // Resetear la propiedad para limpiar el formulario
         $this->reset('archivotxt');
-    }
 
-    public function index()
-    {
-        $this->importaciones = UploadedFile::all();
+    } catch (ValidationException $e) {
+        //Handle validation errors
+        $this->dispatch('validationError', $e->errors());
+
+    } catch (Exception $e) {
+        //Handle file upload or other unexpected errors
+        $this->dispatch('fileUploadError', $e->getMessage());
     }
+}
+
+
 
     public function mount()
     {
-        $this->index();
+        $this->importaciones = UploadedFile::all();
         //obtener los origenes de la base de datos OrigenesModel
-        $origenes = new OrigenesModel();
-        $this->origenes = $origenes->get();
+        $this->origenes = OrigenesModel::all();
     }
     public function render()
     {

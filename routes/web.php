@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipMapucheMiSimplificacion;
+use App\Livewire\FileEncoding;
 use App\Livewire\ShowCuilDetails;
 use App\Livewire\TestCuils;
 
@@ -53,5 +54,5 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
     Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
     Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
-    // Route::get('/encoding', [ExampleController::class, 'showEncoding']);
+    Route::get('/encoding', FileEncoding::class)->name('encoding');
 });
