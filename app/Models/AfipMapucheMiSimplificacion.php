@@ -23,27 +23,27 @@ class AfipMapucheMiSimplificacion extends Model
         'desc_estado_liquidacion',
         'nro_cargo',
         'periodo_fiscal',
-        'Tipo_de_registro',
+        'tipo_registro',
         'codigo_movimiento',
-        'CUIL',
-        'Marca_de_trabajador_agropecuario',
+        'cuil',
+        'trabajador_agropecuario',
         'Modalidad_de_contrato',
-        'Fecha_inicio_de_rel_laboral',
-        'Fecha_fin_rel_laboral',
+        'inicio_de_rel_laboral',
+        'fin_rel_laboral',
         'Código_obra_social',
         'codigo_situacion_baja',
-        'Fecha_telegrama_renuncia',
-        'Retribución_pactada',
-        'Modalidad_liquidación',
+        'fecha_tel_renuncia',
+        'retribución_pactada',
+        'modalidad_liquidación',
         'Sucursal',
         'Actividad',
         'Puesto',
         'Rectificacion',
-        'C_C_C_Trabajo',
+        'ccct',
         'Tipo_servicio',
-        'Categ_Prof',
+        'categoria',
         'Fecha_susp_serv_temp',
-        'Número_Formulario_Agropecuario',
+        'nro_form_agro',
         'covid'
     ];
 
@@ -58,27 +58,27 @@ class AfipMapucheMiSimplificacion extends Model
                 $table->string('desc_estado_liquidacion', 50);
                 $table->integer('nro_cargo');
                 $table->char('periodo_fiscal', 6);
-                $table->char('tipo_de_registro', 2)->default('01');
+                $table->char('tipo_registro', 2)->default('01');
                 $table->char('codigo_movimiento', 2)->default('AT');
                 $table->char('cuil', 11);
                 $table->char('marca_de_trabajador_agropecuario', 1)->default('N');
                 $table->char('modalidad_de_contrato', 3)->default('008')->nullable();
-                $table->char('fecha_inicio_de_rel_laboral', 10);
-                $table->char('fecha_fin_rel_laboral', 10)->nullable();
-                $table->char('codigo_obra_social', 6)->default('000000')->nullable();
+                $table->char('inicio_rel_laboral', 10);
+                $table->char('fin_rel_laboral', 10)->nullable();
+                $table->char('obra_social', 6)->default('000000')->nullable();
                 $table->char('codigo_situacion_baja', 2)->nullable();
-                $table->char('fecha_telegrama_renuncia', 10)->nullable();
+                $table->char('fecha_tel_renuncia', 10)->nullable();
                 $table->char('retribucion_pactada', 15)->nullable();
                 $table->char('modalidad_liquidacion', 1)->default('1');
                 $table->char('sucursal', 5)->nullable();
                 $table->char('actividad', 6)->nullable();
                 $table->char('puesto', 4)->nullable();
                 $table->char('rectificacion', 2)->nullable();
-                $table->char('ccc_trabajo', 10)->nullable()->default('0000000000');
+                $table->char('ccct', 10)->nullable()->default('0000000000');
                 $table->char('tipo_servicio', 3)->nullable();
-                $table->char('categ_prof', 6)->nullable();
+                $table->char('categoria', 6)->nullable();
                 $table->char('fecha_susp_serv_temp', 10)->nullable();
-                $table->char('numero_formulario_agropecuario', 10)->nullable();
+                $table->char('nro_form_agro', 10)->nullable();
                 $table->char('covid', 1)->nullable();
 
                 $table->primary(['periodo_fiscal', 'cuil']);

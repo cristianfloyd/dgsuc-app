@@ -23,82 +23,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nro_legaj')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('nro_liqui')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('sino_cerra')
-                    ->required()
-                    ->maxLength(1),
-                Forms\Components\TextInput::make('desc_estado_liquidacion')
-                    ->required()
-                    ->maxLength(50),
-                Forms\Components\TextInput::make('nro_cargo')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('periodo_fiscal')
-                    ->required()
-                    ->maxLength(6),
-                Forms\Components\TextInput::make('tipo_de_registro')
-                    ->required()
-                    ->maxLength(2)
-                    ->default(01),
-                Forms\Components\TextInput::make('codigo_movimiento')
-                    ->required()
-                    ->maxLength(2)
-                    ->default('AT'),
-                Forms\Components\TextInput::make('cuil')
-                    ->required()
-                    ->maxLength(11),
-                Forms\Components\TextInput::make('marca_de_trabajador_agropecuario')
-                    ->required()
-                    ->maxLength(1)
-                    ->default('N'),
-                Forms\Components\TextInput::make('modalidad_de_contrato'),
-                    // ->maxLength(3)
-                    // ->default(008),
-                Forms\Components\TextInput::make('inicio_rel_laboral')
-                    ->required()
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('fin_rel_laboral')
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('obra_social')
-                    ->maxLength(6)
-                    ->default(000000),
-                Forms\Components\TextInput::make('codigo_situacion_baja')
-                    ->maxLength(2),
-                Forms\Components\TextInput::make('fecha_tel_renuncia')
-                    ->tel()
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('retribucion_pactada')
-                    ->maxLength(15),
-                Forms\Components\TextInput::make('modalidad_liquidacion')
-                    ->required()
-                    ->maxLength(1)
-                    ->default(1),
-                Forms\Components\TextInput::make('domicilio')
-                    ->maxLength(5),
-                Forms\Components\TextInput::make('actividad')
-                    ->maxLength(6),
-                Forms\Components\TextInput::make('puesto')
-                    ->maxLength(4),
-                Forms\Components\TextInput::make('rectificacion')
-                    ->maxLength(2),
-                Forms\Components\TextInput::make('ccct')
-                    ->maxLength(10)
-                    ->default(0000000000),
-                Forms\Components\TextInput::make('tipo_servicio')
-                    ->maxLength(3),
-                Forms\Components\TextInput::make('categoria')
-                    ->maxLength(6),
-                Forms\Components\TextInput::make('fecha_susp_serv_temp')
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('nro_form_agropecuario')
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('covid')
-                    ->maxLength(1),
+                //
             ]);
     }
 
@@ -170,12 +95,12 @@ class AfipMapucheMiSimplificacionResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                    // Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -190,8 +115,8 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return [
             'index' => Pages\ListAfipMapucheMiSimplificacions::route('/'),
-            'create' => Pages\CreateAfipMapucheMiSimplificacion::route('/create'),
-            'edit' => Pages\EditAfipMapucheMiSimplificacion::route('/{record}/edit'),
+            // 'create' => Pages\CreateAfipMapucheMiSimplificacion::route('/create'),
+            // 'edit' => Pages\EditAfipMapucheMiSimplificacion::route('/{record}/edit'),
         ];
     }
 }

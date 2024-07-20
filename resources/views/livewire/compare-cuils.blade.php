@@ -80,7 +80,7 @@
         @endif
 
         @if ($showDetails)
-            <livewire:para-mi-simplificacion :nroLiqui="$nroLiqui" :periodoFiscal="$periodoFiscal" :cuils="$cuilstosearch" />
+            <livewire:para-mi-simplificacion  />
         @endif
     </div>
 
