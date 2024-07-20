@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use Livewire\Component;
@@ -19,7 +20,7 @@ class CompareCuils extends Component
 {
     use WithPagination;
     public $cuilsNotInAfip = [];
-    public $nroLiqui = 1;
+    public $nroLiqui = 3;
     public $periodoFiscal = '202312';
     public $cuilstosearch = [];
     public $cuilsNotInAfipLoaded = false;
@@ -34,6 +35,10 @@ class CompareCuils extends Component
     public $load = false;
     public $perPage = 10;
     public $showDetails = false;
+    public $successMessage = '';
+    public $showCuilsTable = false;
+    public $insertTablaTemp = false;
+    public $miSimButton = false;
 
 
     public function showCuilsDetails(): void
@@ -61,6 +66,8 @@ class CompareCuils extends Component
     {
         // La tabla se creó exitosamente
         $this->tableTempCreated = false;
+        $this->insertTablaTemp = true;
+        $this->successMessage = 'Tabla temporal creada exitosamente';
         // Aquí puedes añadir cualquier lógica adicional que necesites
         Log::info('Tabla temporal creada exitosamente');
     }
@@ -70,6 +77,7 @@ class CompareCuils extends Component
     {
         // La tabla ya existe
         $this->tableTempCreated = true;
+        $this->successMessage = 'La tabla temporal ya existe';
         // Aquí puedes añadir cualquier lógica adicional que necesites
         Log::info('La tabla temporal ya existe');
     }
@@ -79,20 +87,79 @@ class CompareCuils extends Component
     public function showDropTable()
     {
         Log::info('exist dispatch event listened');
-        $this->tableTempCreated = !$this->tableTempCreated;
         $this->cuilsNotInAfipLoaded = true;
     }
     public function dropTableTemp()
     {
         $this->dispatch('drop-table-temp');
+        $this->reset('tableTempCreated');
+        $this->reset('successMessage');
         Log::info('drop-table-temp dispatch event created');
     }
 
+
+    public function insertTableTemp()
+    {
+        $this->dispatch('insert-table-temp',
+                        $this->nroLiqui,
+                        $this->periodoFiscal,
+                        $this->cuilstosearch);
+        $this->reset('insertTablaTemp');
+        $this->reset('successMessage');
+        Log::info('insert-table-temp dispatch event created');
+    }
     public function hideCuilDetails()
     {
         $this->showDetails = false;
     }
 
+    #[On('inserted-table-temp')]
+    public function handleInsertedTableTemp()
+    {
+        $this->successMessage = 'Datos insertados en tabla temporal';
+        Log::info('Datos insertados en tabla temporal');
+        $this->reset('cuilsNotInAfipLoaded');
+        $this->miSimButton = True;
+    }
+
+    #[On('error-inserted-table-temp')]
+    public function handleErrorInsertedTableTemp()
+    {
+        $this->successMessage = 'Error al insertar la tabla temporal';
+    }
+
+    public function mapucheMiSimplificacion()
+    {
+        $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal);
+        $this->reset('cuilsNotInAfipLoaded');
+    }
+
+    #[On('success-mapuche-mi-simplificacion')]
+    public function handleSuccessMapucheMiSimplificacion()
+    {
+        $this->successMessage = 'Datos insertados en Mi Simplificacion';
+        $this->miSimButton = false;
+        sleep(2);
+        $count = AfipMapucheMiSimplificacion::count();
+        $this->successMessage = "Datos insertados en Mi Simplificacion: {$count}";
+    }
+
+    #[On('error-mapuche-mi-simplificacion')]
+    public function handleErrorMapucheMiSimplificacion()
+    {
+        $this->successMessage = 'Error al insertar Mi Simplificacion';
+        $this->restart();
+    }
+
+    public function restart()
+    {
+        $this->reset('cuilsNotInAfipLoaded');
+        $this->reset('showCuilsTable');
+        $this->reset('showDetails');
+        $this->reset('crearTablaTemp');
+        $this->reset('insertTablaTemp');
+        $this->reset('miSimButton');
+    }
 
     /**
      * Toggles a boolean value.
@@ -100,13 +167,14 @@ class CompareCuils extends Component
      * @param bool $value The value to toggle.
      * @return void
      */
-    public function toggleValue($value) : bool
+    public function toggleValue(bool|string $value) : bool
     {
         return $value = (bool) $value === false;
     }
 
     public function loadCuilsNotInAfip()
     {
+        $this->showCuilsTable = true;
         $this->cuilsNotInAfipLoaded = $this->toggleValue($this->cuilsNotInAfipLoaded);
         $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
         $this->compareCuils();

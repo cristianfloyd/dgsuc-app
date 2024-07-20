@@ -1,22 +1,14 @@
-
 <div>
-    @if ('success' === session('message'))
-        <div>
-            <p>{{ session('message') }}</p>
-        </div>
+    @if ($successMessage)
+        <x-alert-success>
+            {{ __( $successMessage ) }}
+        </x-alert-success>
     @endif
     <div class="container max-w-screen-md mx-auto p-4">
-        @if($crearTablaTemp)
+        @if ($crearTablaTemp)
             <div class="inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="cargo-modal">
                 <livewire:tabla-temp-cuils /><!-- Agrega el componente Livewire aquí -->
-                @if($tableTempCreated)
-                    <div>
-                        <p>La tabla temporal ya está creada.</p>
-                        <button wire:click="dropTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
-                            Eliminar Tabla Temporal
-                        </button>
-                    </div>
-                @endif
+
             </div>
         @endif
         <div class="float-left m-4">
@@ -33,9 +25,19 @@
                         Crear tabla temporal
                     </button>
                 @endif
-                @if($tableTempCreated)
-                    <button wire:click="$this->dropTableTemp()" class="px-4 py-2 bg-blue-500 text-white rounded">
+                @if ($miSimButton)
+                    <button wire:click="mapucheMiSimplificacion" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        Generar tabla MiSim
+                    </button>
+                @endif
+                @if ($tableTempCreated)
+                    <button wire:click="dropTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
                         Drop Table Temp
+                    </button>
+                @endif
+                @if ($insertTablaTemp)
+                    <button wire:click="insertTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
+                        Insertar en Table Temp
                     </button>
                 @endif
                 @if ($cuilsNotInAfipLoaded)
@@ -46,7 +48,7 @@
             </a>
         </div>
 
-        @if ($cuilsNotInAfipLoaded)
+        @if ($showCuilsTable)
             <div class="overflow-x-auto content-center">
                 <table class="max-w-xs bg-gray">
                     <thead>
@@ -78,11 +80,7 @@
         @endif
 
         @if ($showDetails)
-            <livewire:para-mi-simplificacion
-                :nroLiqui="$nroLiqui"
-                :periodoFiscal="$periodoFiscal"
-                :cuils="$cuilstosearch"
-                />
+            <livewire:para-mi-simplificacion :nroLiqui="$nroLiqui" :periodoFiscal="$periodoFiscal" :cuils="$cuilstosearch" />
         @endif
     </div>
 
@@ -168,5 +166,4 @@
             </div>
         </div>
     @endif
-
 </div>
