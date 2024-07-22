@@ -77,6 +77,11 @@ class AfipMapucheMiSimplificacion extends Model
         DB::connection('pgsql-mapuche')->statement('TRUNCATE TABLE suc.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
     }
 
+    // Metodo para retornar las columas de la tabla.
+    public function getTableHeaders()
+    {
+        return $this->fillable;
+    }
 
     static function getDatabaseTableName()
     {

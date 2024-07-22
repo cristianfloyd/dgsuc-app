@@ -13,39 +13,30 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
 
 class ParaMiSimplificacion extends Component
 {
-    public $prueba;
 
-
-    public function createTablePrueba()
-    {
-        Log::info('entro');
-        $instance = new AfipMapucheMiSimplificacion();
-        Log::info("{$instance} created");
-        $this->prueba = $instance->createTable();
+    public function mount(){
+        $this->dispatch('para-mi-simplificacion-mount');
     }
 
-    public function truncateTable()
+    #[Computed()]
+    public function headers(): array
     {
-        Log::info('truncando tabla');
-        AfipMapucheMiSimplificacion::truncate();
+        // Get the headers from the database or from the model AfipMapucheMiSimplificacion
         $instance = new AfipMapucheMiSimplificacion();
-        // verificar si la tabla existe
+        $headers = $instance->getTableHeaders();
+        return $headers;
     }
-
-    public function borrarTable()
-    {
-        Log::info('borrando tabla');
-        AfipMapucheMiSimplificacion::dropIfExists();
-        $instance = new AfipMapucheMiSimplificacion();
-        // verificar si la tabla existe
-    }
-
     public function render()
     {
-        return view('livewire.para-mi-simplificacion');
+        $dataTable = AfipMapucheMiSimplificacion::query()->paginate(10);
+
+        return view('livewire.para-mi-simplificacion',[
+            'dataTable' => $dataTable,
+        ]);
     }
 }

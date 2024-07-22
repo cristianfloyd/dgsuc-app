@@ -1,114 +1,128 @@
 <div>
-    @if ($successMessage)
-        <x-alert-success>
-            {{ __( $successMessage ) }}
-        </x-alert-success>
-    @endif
-    <div class="container max-w-screen-md mx-auto p-4">
+    <!-- Sección de alertas -->
+    <div class="fixed top-0 right-0 m-4">
+        @if ($successMessage)
+            <x-alert-success>
+                {{ __($successMessage) }}
+            </x-alert-success>
+        @endif
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto w-2/3">
         @if ($crearTablaTemp)
             <div class="inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="cargo-modal">
                 <livewire:tabla-temp-cuils /><!-- Agrega el componente Livewire aquí -->
-
             </div>
         @endif
-        <div class="float-left m-4">
-            <a href="#"
-                class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuils Mapuche que no
-                    estan en Afip</h5>
-                <button wire:click="loadCuilsNotInAfip"
-                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Load
-                </button>
-                @if ($cuilsNotInAfipLoaded)
-                    <button wire:click="showCuilsDetails" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Crear tabla temporal
-                    </button>
-                @endif
-                @if ($miSimButton)
-                    <button wire:click="mapucheMiSimplificacion" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Generar tabla AfipMapucheMiSimplificacion
-                    </button>
-                @endif
-                @if ($tableTempCreated)
-                    <button wire:click="dropTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Drop Table Temp
-                    </button>
-                @endif
-                @if ($insertTablaTemp)
-                    <button wire:click="insertTableTemp" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Insertar en Table Temp
-                    </button>
-                @endif
-                @if ($cuilsNotInAfipLoaded)
-                    <p class="font-normal text-gray-700 dark:text-gray-400">
-                        Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}
-                    </p>
-                @endif
-            </a>
-        </div>
 
-        @if ($showCuilsTable)
-            <div class="overflow-x-auto content-center">
-                <table class="max-w-xs bg-gray">
-                    <thead>
-                        <tr>
-                            <th
-                                class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
-                                CUIL Sin Datos
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($this->compareCuils as $cuil)
-                            <tr class="border-b">
-                                <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
-                                    <button>
-                                        {{ $cuil }}
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <div class="mt-4">
-                    {{ $this->compareCuils->links() }}
+        <div class="flex space-x-4" id="contenedor-secundario">
+            <!-- Sección de botones -->
+            <div class="w-2/3 grid grid-cols-1 gap-4" id="buttons-container">
+                <div>
+                    <div
+                        class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuils Mapuche que no
+                            estan en Afip</h5>
+                        <x-mary-button wire:click="loadCuilsNotInAfip" class="btn-outline">
+                            Load
+                        </x-mary-button>
+                        @if ($cuilsNotInAfipLoaded)
+                            <div class="mt-2 mb-2">
+                                <x-mary-button wire:click="showCuilsDetails" class="btn-outline">
+                                    Crear tabla temporal
+                                </x-mary-button>
+                                <p class="font-normal text-gray-700 dark:text-gray-400">
+                                    Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}
+                                </p>
+                            </div>
+                        @endif
+                        @if ($miSimButton)
+                            <x-mary-button wire:click="mapucheMiSimplificacion" class="btn-outline rounded">
+                                Generar tabla AfipMapucheMiSimplificacion
+                            </x-mary-button>
+                        @endif
+                        @if ($tableTempCreated)
+                            <x-mary-button wire:click="dropTableTemp" class="btn-outline rounded">
+                                Drop Table Temp
+                            </x-mary-button>
+                        @endif
+                        @if ($insertTablaTemp)
+                            <x-mary-button wire:click="insertTableTemp" class="btn-outline rounded">
+                                Insertar en Table Temp
+                            </x-mary-button>
+                        @endif
+                    </div>
                 </div>
-
             </div>
-        @elseif ($showCuilsNoEncontrados)
-        <div class="overflow-x-auto content-center">
-            <table class="max-w-xs bg-gray">
-                <thead>
-                    <tr>
-                        <th
-                            class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
-                            CUIL
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($cuilsNoInserted as $cuil)
-                        <tr class="border-b">
-                            <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
-                                <button>
-                                    {{ $cuil }}
-                                </button>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-
+            <!-- Contenedor de dos columnas -->
+            <div class="w-1/3" id="TablaCuils">
+                @if ($showCuilsTable)
+                    <div class="w-1/3">
+                        <table class="max-w-xs bg-gray">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
+                                        CUIL
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($this->compareCuils as $cuil)
+                                    <tr class="border-b">
+                                        <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
+                                            <button>
+                                                {{ $cuil }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Tabla principal de CUILs -->
+                @elseif ($showCuilsNoEncontrados)
+                    <div class="w-1/3">
+                        <table class="max-w-xs bg-gray">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
+                                        CUIL Sin Datos
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($cuilsNoInserted as $cuil)
+                                    <tr class="border-b">
+                                        <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
+                                            <button>
+                                                {{ $cuil }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
         </div>
-        @endif
-
-        @if ($showDetails)
-            {{-- <livewire:para-mi-simplificacion  /> --}}
+        @if ($showCuilsTable)
+        <div class="w-xl mx-auto mt-4">
+            {{ $this->compareCuils->links() }}
+        </div>
         @endif
     </div>
+
+
+    <div class="mt-8 w-full">
+    @if (!$showDetails)
+        <livewire:para-mi-simplificacion />
+    @endif
+    </div>
+
 
 
     @if ($showModal)
