@@ -20,9 +20,12 @@ class CompareCuils extends Component
 {
     use WithPagination;
     public $cuilsNotInAfip = [];
+    protected $cuilsCount = 0;
     public $nroLiqui = 3;
-    public $periodoFiscal = '202312';
+    public $periodoFiscal = 202312;
     public $cuilstosearch = [];
+    public $cuilsNoInserted = [];
+    public $showCuilsNoEncontrados = false;
     public $cuilsNotInAfipLoaded = false;
     public $arrayDnis = [];
     public $selectedDni;
@@ -142,6 +145,27 @@ class CompareCuils extends Component
         sleep(2);
         $count = AfipMapucheMiSimplificacion::count();
         $this->successMessage = "Datos insertados en Mi Simplificacion: {$count}";
+        $result = count($this->cuilstosearch) - $count;
+        if ($result > 0) {
+            // llamar un metodo que busque los cuils estan en la tabla temporal y no fueron insertados en Mi Simplificacion
+            $this->cuilsNoInserted = $this->cuilsNoEncontrados();
+            // Aquí puedes hacer algo con $cuilsNoEncontrados, como mostrarlos en la interfaz o registrarlos
+            $this->successMessage .= ". CUILs no insertados: " . count($this->cuilsNoInserted);
+            $this->reset('cuilsNotInAfipLoaded', 'showCuilsTable');
+            $this->showCuilsNoEncontrados = true;
+        }
+    }
+
+    public function cuilsNoEncontrados()
+    {
+        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')
+            ->table('suc.tabla_temp_cuils as ttc')
+            ->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')
+            ->whereNull('amms.cuil')
+            ->pluck('ttc.cuil')
+            ->toArray();
+
+        return $cuilsNoEncontrados;
     }
 
     #[On('error-mapuche-mi-simplificacion')]

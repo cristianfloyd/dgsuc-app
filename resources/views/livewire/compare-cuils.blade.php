@@ -27,7 +27,7 @@
                 @endif
                 @if ($miSimButton)
                     <button wire:click="mapucheMiSimplificacion" class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Generar tabla MiSim
+                        Generar tabla AfipMapucheMiSimplificacion
                     </button>
                 @endif
                 @if ($tableTempCreated)
@@ -55,7 +55,7 @@
                         <tr>
                             <th
                                 class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
-                                CUIL
+                                CUIL Sin Datos
                             </th>
                         </tr>
                     </thead>
@@ -77,10 +77,36 @@
                 </div>
 
             </div>
+        @elseif ($showCuilsNoEncontrados)
+        <div class="overflow-x-auto content-center">
+            <table class="max-w-xs bg-gray">
+                <thead>
+                    <tr>
+                        <th
+                            class="items-center py-2 px-4 bg-gray-800 text-gray-200 font-semibold text-sm uppercase">
+                            CUIL
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($cuilsNoInserted as $cuil)
+                        <tr class="border-b">
+                            <td class="py-2 px-4" wire:click="searchCuil('{{ $cuil }}')">
+                                <button>
+                                    {{ $cuil }}
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+
+        </div>
         @endif
 
         @if ($showDetails)
-            <livewire:para-mi-simplificacion  />
+            {{-- <livewire:para-mi-simplificacion  /> --}}
         @endif
     </div>
 

@@ -59,55 +59,74 @@ class TablaTempCuils extends Component
         }
     }
 
-    #[On('mapuche-mi-simplificacion')]
-    public function mapucheMiSimplificacion($nroLiqui, $periodoFiscal)
-    {
-        //Validad parametros de entrada
-        if(empty($nroLiqui) || empty($periodoFiscal)){
-            $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
-            return;
-        }
-
-        $instance = new AfipMapucheMiSimplificacion();
-        $table = 'suc.afip_mapuche_mi_simplificacion';
-        $fresh = false;
-
-        //Chequear si la tabla no existe
-        if(!Schema::hasTable($table)){
-            $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla no existe');
-            //Crear la tabla
-            sleep(1);
-            // de el modelo @app/Models/AfipMapucheMiSimplificacion.php invocar el metodo createTable()
-            if(!$instance->createTable() ){
-                $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla no se creo');
-                return;
-            }
-            $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla se creo exitosamente');
-            $fresh = true;
-        }
-
-        //Chequear si la tabla esta vacia
-        $tableHasData = $instance->get();
-        if($tableHasData && !$fresh){
-            $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla no esta vacia');
-            sleep(1);
-            $this->dispatch('success-mapuche-mi-simplificacion', 'La no tabla esta vacia. Intentando vaciar');
-            // Trucar y resetear identidades.
-            AfipMapucheMiSimplificacion::truncate();
-        }
 
 
-        Log::info('mapucheMiSimplificacion() ');
-        $result = TableModel::mapucheMiSimplificacion(
-            $nroLiqui,
-            $periodoFiscal
-            );
-        if($result){
-            $this->dispatch('success-mapuche-mi-simplificacion');
-        } else{
-            $this->dispatch('error-mapuche-mi-simplificacion');
-        }
+
+#[On('mapuche-mi-simplificacion')]
+public function mapucheMiSimplificacion($nroLiqui, $periodoFiscal)
+{
+    if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
+        return;
     }
+
+    $instance = new AfipMapucheMiSimplificacion();
+    $table = 'suc.afip_mapuche_mi_simplificacion';
+
+    if (!$this->verificarYCrearTabla($instance, $table)) {
+        return;
+    }
+
+    $this->verificarYVaciarTabla($instance);
+
+    $this->insertarDatos($nroLiqui, $periodoFiscal);
+}
+
+private function validarParametros($nroLiqui, $periodoFiscal)
+{
+    if (empty($nroLiqui) || empty($periodoFiscal)) {
+        $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
+        return false;
+    }
+    return true;
+}
+
+private function verificarYCrearTabla($instance, $table)
+{
+    $connection = $instance->getConnectionName();
+    $status = Schema::connection($connection)->hasTable($table);
+    if (!$status) {
+        if (!$instance->createTable()) {
+            $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla MapucheMiSim no se creo');
+            Log::info('La tabla MapucheMiSim no se creo');
+            return false;
+        }
+        $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla se creo exitosamente');
+        Log::info('La tabla se creo exitosamente');
+    }
+    return true;
+}
+
+private function verificarYVaciarTabla($instance)
+{
+    $tableHasData = $instance->get();
+    if ($tableHasData) {
+        $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla no esta vacia. Intentando vaciar');
+        Log::info('La tabla no esta vacia. Intentando vaciar');
+        AfipMapucheMiSimplificacion::truncate();
+    }
+}
+
+private function insertarDatos($nroLiqui, $periodoFiscal)
+{
+    Log::info('mapucheMiSimplificacion() ');
+    $result = TableModel::mapucheMiSimplificacion($nroLiqui, $periodoFiscal);
+    if ($result) {
+        $this->dispatch('success-mapuche-mi-simplificacion', 'insert into suc.afip_mapuche_mi_simplificacion exitoso');
+    } else {
+        $this->dispatch('error-mapuche-mi-simplificacion', 'insert into suc.afip_mapuche_mi_simplificacion fallo');
+    }
+}
+
 
 
     public function boot()
