@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use Livewire\Component;
@@ -14,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompareCuils extends Component
@@ -155,6 +156,8 @@ class CompareCuils extends Component
             $this->showCuilsNoEncontrados = true;
         }
     }
+
+    
 
     public function cuilsNoEncontrados()
     {

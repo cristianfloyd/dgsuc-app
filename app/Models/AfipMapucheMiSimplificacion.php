@@ -17,7 +17,7 @@ class AfipMapucheMiSimplificacion extends Model
     public $timestamps = false;
     protected $collection;
 
-    protected $fillable = ['nro_legaj', 'nro_liqui', 'sino_cerra', 'desc_estado_liquidacion', 'nro_cargo', 'periodo_fiscal', 'tipo_registro', 'codigo_movimiento', 'cuil', 'trabajador_agropecuario', 'Modalidad_de_contrato', 'inicio_de_rel_laboral', 'fin_rel_laboral', 'Código_obra_social', 'codigo_situacion_baja', 'fecha_tel_renuncia', 'retribución_pactada', 'modalidad_liquidación', 'Sucursal', 'Actividad', 'Puesto', 'Rectificacion', 'ccct', 'Tipo_servicio', 'categoria', 'Fecha_susp_serv_temp', 'nro_form_agro', 'covid'];
+    protected $fillable = ['nro_legaj', 'nro_liqui', 'sino_cerra', 'desc_estado_liquidacion', 'nro_cargo', 'periodo_fiscal', 'tipo_registro', 'codigo_movimiento', 'cuil', 'trabajador_agropecuario', 'modalidad_contrato', 'inicio_rel_laboral', 'fin_rel_laboral', 'obra_social', 'codigo_situacion_baja', 'fecha_tel_renuncia', 'retribucion_pactada', 'modalidad_liquidacion', 'domicilio', 'actividad', 'puesto', 'rectificacion', 'ccct', 'tipo_servicio', 'categoria', 'fecha_susp_serv_temp', 'nro_form_agro', 'covid'];
 
     // Metodo para crear la tabla en base al modelo.
     /**
@@ -89,6 +89,7 @@ class AfipMapucheMiSimplificacion extends Model
     }
     public function scopeSearch($query, $value)
     {
-        $query->where('cuil', 'like', "%{{ $value }}%");
+        return empty($value) ? $query :  $query->where('cuil', 'ilike', "%$value%")
+            ->orWhere('nro_legaj', 'ilike', "%$value%");
     }
 }

@@ -2,23 +2,38 @@
 
 namespace App\Livewire;
 
-use App\Models\AfipMapucheMiSimplificacion;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
+use Filament\Tables\Table;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
+use Livewire\WithPagination;
+use Livewire\Attributes\Rule;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\Computed;
-use Livewire\WithPagination;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Contracts\HasTable;
+use Illuminate\Support\Facades\Storage;
+use App\Models\AfipMapucheMiSimplificacion;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Filament\Tables\Concerns\InteractsWithTable;
 
 class ParaMiSimplificacion extends Component
 {
+    use WithPagination;
 
+    #[Url(history: true, as: 's')]
+    public $search = '';
+    #[Url(history: true)]
+    public $perPage = 5;
+    #[Rule('required|gt:5')]
+    public int $level2 = 5;
+
+    public function updateSearch()
+    {
+        $this->resetPage();
+    }
     public function mount(){
         $this->dispatch('para-mi-simplificacion-mount');
     }
@@ -31,12 +46,63 @@ class ParaMiSimplificacion extends Component
         $headers = $instance->getTableHeaders();
         return $headers;
     }
+
+    public function exportarTxt()
+    {
+        // Recopilar los datos de las columnas que deseas exportar
+        $data = AfipMapucheMiSimplificacion::all([
+            'tipo_registro',
+            'codigo_movimiento',
+            'cuil',
+            'trabajador_agropecuario',
+            'modalidad_contrato',
+            'inicio_rel_laboral',
+            'fin_rel_laboral',
+            'obra_social',
+            'codigo_situacion_baja',
+            'fecha_tel_renuncia',
+            'retribucion_pactada',
+            'modalidad_liquidacion',
+            'domicilio',
+            'actividad',
+            'puesto',
+            'rectificacion',
+            'ccct',
+            'tipo_servicio',
+            'categoria',
+            'fecha_susp_serv_temp',
+            'nro_form_agro',
+            'covid'
+        ])->toArray();
+
+        // Generar el contenido del archivo TXT
+        $txtContent = "";
+        foreach ($data as $row) {
+            $txtContent .= implode("", $row) . "\n";
+        }
+
+        // Crear un nombre de archivo único
+        $fileName = 'exportacion_' . now()->format('Ymd_His') . '.txt';
+
+        // Guardar el archivo temporalmente
+        Storage::disk('local')->put($fileName, $txtContent);
+
+        // Generar la URL de descarga
+        $filePath = storage_path("app/$fileName");
+
+        // Descargar el archivo
+        return response()->download($filePath)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
-        $dataTable = AfipMapucheMiSimplificacion::query()->paginate(10);
+        $instance = new AfipMapucheMiSimplificacion();
+        $dataTable = $instance->search($this->search)->take(10)->paginate(5);
 
         return view('livewire.para-mi-simplificacion',[
-            'dataTable' => $dataTable,
+            'dataTable' => AfipMapucheMiSimplificacion::search($this->search)
+                ->paginate($this->perPage)
+                ,
         ]);
     }
 }

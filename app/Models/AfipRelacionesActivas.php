@@ -122,7 +122,7 @@ class AfipRelacionesActivas extends Model
      */
     public function scopeSearch($query, $search)
     {
-        return empty($search) ? $query : $query->where('cuil', 'ilike', '%' . $search . '%');
+        return empty($search) ? $query : $query->where('cuil', 'ilike', "%$search%");
     }
 
 }
