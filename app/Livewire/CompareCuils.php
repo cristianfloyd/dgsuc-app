@@ -20,6 +20,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class CompareCuils extends Component
 {
     use WithPagination;
+
+
     public $cuilsNotInAfip = [];
     protected $cuilsCount = 0;
     public $nroLiqui = 3;
@@ -43,6 +45,7 @@ class CompareCuils extends Component
     public $showCuilsTable = false;
     public $insertTablaTemp = false;
     public $miSimButton = false;
+    public $ShowMiSimplificacion = false;
 
 
     public function showCuilsDetails(): void
@@ -157,9 +160,14 @@ class CompareCuils extends Component
         }
     }
 
-    
 
-    public function cuilsNoEncontrados()
+
+    /**
+    * Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
+    *
+    * @return array The array of CUILs that are present in the temporary table but not in the afip_mapuche_mi_simplificacion table.
+     */
+    public function cuilsNoEncontrados(): array
     {
         $cuilsNoEncontrados = DB::connection('pgsql-mapuche')
             ->table('suc.tabla_temp_cuils as ttc')
@@ -198,6 +206,8 @@ class CompareCuils extends Component
     {
         return $value = (bool) $value === false;
     }
+
+
 
     public function loadCuilsNotInAfip()
     {
@@ -291,6 +301,19 @@ class CompareCuils extends Component
         $this->showCargoModal = false;
         $this->cargos = [];
     }
+
+    public function mount()
+    {
+
+        $this->loadCuilsNotInserted();
+    }
+
+    private function loadCuilsNotInserted()
+    {
+        $this->cuilsNoInserted = $this->cuilsNoEncontrados();
+    }
+
+
 
     public function render()
     {

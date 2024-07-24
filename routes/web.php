@@ -22,6 +22,7 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
+use App\Livewire\AfipMiSimplificacion;
 use App\Livewire\FileEncoding;
 use App\Livewire\ParaMiSimplificacion;
 use App\Livewire\ShowCuilDetails;
@@ -39,7 +40,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/modal', Modal::class)->name('modal');
     Route::get('/userstable', UsersTable::class)->name('datatable');
     Route::get('/', function () { return view('index'); })->name('index');
-    Route::get('/afip',AfipRelacionesActivas::class)->name('afip');
+    Route::get('/afip', AfipMiSimplificacion::class)->name('afip');  // Raiz para la app de mapuche-afip mi simplificacion
+    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas');
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar');
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');
     Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('mapuchemisim');
@@ -48,14 +50,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
     Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
+    Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
+    Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
     Route::get('/importar-crudo'  , AfipImportCrudo::class )->name('upload');
     Route::get('buscar-columna', BuscarColumna::class)->name('buscar-columna');
     Route::get('buscar-comentario', BuscarComentario::class)->name('buscar-comentario');
     Route::get('dh21', Dh21::class)->name('dh21');
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
     Route::get('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
-    Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
-    Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
     Route::get('/encoding', FileEncoding::class)->name('encoding');
     Route::get('/prueba', ParaMiSimplificacion::class)->name('misimplificacion');
 

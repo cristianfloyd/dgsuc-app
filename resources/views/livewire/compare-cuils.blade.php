@@ -118,7 +118,7 @@
 
 
     <div class="mt-8 w-full">
-    @if (!$showDetails)
+    @if ($ShowMiSimplificacion)
         <livewire:para-mi-simplificacion />
     @endif
     </div>

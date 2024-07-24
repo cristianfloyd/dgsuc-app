@@ -26,9 +26,8 @@ class ParaMiSimplificacion extends Component
     #[Url(history: true, as: 's')]
     public $search = '';
     #[Url(history: true)]
-    public $perPage = 5;
+    public int $perPage = 5;
     #[Rule('required|gt:5')]
-    public int $level2 = 5;
 
     public function updateSearch()
     {
