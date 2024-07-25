@@ -69,6 +69,8 @@ class AfipRelacionesActivas extends Component
         $this->validateSelectedFile();
         $lineasProcesadas = $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnWidths);
         $this->almacenarLineas($lineasProcesadas);
+        // despachar un evento para actualizar la tabla
+        $this->dispatch('datos-importados');
     }
 
 

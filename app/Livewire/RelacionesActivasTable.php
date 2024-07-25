@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use App\Models\AfipRelacionesActivas;
+use Livewire\Attributes\On;
 
 class RelacionesActivasTable extends Component
 {
@@ -21,6 +22,12 @@ class RelacionesActivasTable extends Component
     public $sortDir = 'DESC';
     #[Url(history: true)]
 
+
+    #[On('datos-importados')]
+    public function updateTable()
+    {
+        $this->resetPage();
+    }
     public function setSortBy($field)
     {
         if ($this->sortField === $field) {
