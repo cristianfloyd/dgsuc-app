@@ -35,7 +35,4 @@ class UploadedFile extends Model
         return $query->where('filename', 'like', '%' . $search . '%')
             ->orWhere('original_name', 'like', '%' . $search . '%');
     }
-
-
-
 }

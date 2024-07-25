@@ -2,9 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Models\AfipRelacionesActivas as ModelsAfipRelacionesActivas;
 use Livewire\Component;
 use App\Models\UploadedFile;
+use Illuminate\Support\Facades\Log;
+use App\Models\AfipRelacionesActivas as ModelsAfipRelacionesActivas;
 
 class AfipRelacionesActivas extends Component
 {
@@ -69,7 +70,7 @@ class AfipRelacionesActivas extends Component
     {
         if (!$this->archivoSeleccionado) {
             // mostrar un mensaje que no se selecciono archivo
-            dd('No se selecciono archivo');
+            Log::warning('No se selecciono archivo');
         }
         $this->periodo_fiscal = $this->archivoSeleccionado->periodo_fiscal;
 
@@ -128,7 +129,7 @@ class AfipRelacionesActivas extends Component
         $resultado = $afipsicoss::insertarDatosMasivos( $datosMapeados);
         if ($resultado) {
             // mostrar un mensaje flas de exito
-            
+
         }else {
             dd("Algo malo paso :( ");
         }

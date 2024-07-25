@@ -43,24 +43,32 @@
 
                         <x-slot name="content">
                             <!-- Dropdown Links -->
-                            <x-dropdown-link href="{{ route('convertir') }}" :active="request()->routeIs('convertir')">
-                                {{__('Convertir')}}
+                            <x-dropdown-link href="{{ route('afip') }}" :active="request()->routeIs('afip')" >
+                                {{__('Afip')}}
                             </x-dropdown-link>
                             <x-dropdown-link href="{{ route('importar') }}" :active="request()->routeIs('importar')">
                                 {{__('Upload File')}}
                             </x-dropdown-link>
-                            <x-dropdown-link href="{{ route('upload') }}" :active="request()->routeIs('upload')">
-                                {{__('Import')}}
-                            </x-dropdown-link>
-                            <x-dropdown-link href="{{ route('afip') }}" :active="request()->routeIs('afip')" >
-                                {{__('Afip')}}
-                            </x-dropdown-link>
-                            <x-dropdown-link href="{{ route('mapuchemisim') }}" :active="request()->routeIs('mapuchemisim')">
-                                {{__('Mapuche mi Sim')}}
+                            <x-dropdown-link href="{{ route('afiprelacionesactivas') }}" :active="request()->routeIs('afiprelacionesactivas')">
+                                {{ __('Importar Relaciones Activas') }}
                             </x-dropdown-link>
                             <x-dropdown-link href="{{ route('mapuche-sicoss') }}" :active="request()->routeIs('mapuche-sicoss')">
                                 {{__('Mapuche Sicoss')}}
                             </x-dropdown-link>
+
+
+                            <x-dropdown-link href="{{ route('convertir') }}" :active="request()->routeIs('convertir')">
+                                {{__('Convertir')}}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link href="{{ route('upload') }}" :active="request()->routeIs('upload')">
+                                {{__('Import')}}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link href="{{ route('mapuchemisim') }}" :active="request()->routeIs('mapuchemisim')">
+                                {{__('Mapuche mi Sim')}}
+                            </x-dropdown-link>
+
                             <x-dropdown-link href="{{ route('mapuche-sicoss-table') }}" :active="request()->routeIs('mapuche-sicoss-table')">
                                 {{__('Mapuche Sicoss Table')}}
                             </x-dropdown-link>

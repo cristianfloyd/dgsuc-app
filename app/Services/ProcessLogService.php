@@ -49,15 +49,21 @@ class ProcessLogService
      */
     public function updateStep(ProcessLog $processLog, string $step, string $status)
     {
-        $step = $processLog->steps;
+        $steps = $processLog->steps;
+        if (isset($steps[$step]))
+        {
         $steps[$step] = $status;
+
         $processLog->update(['steps' => $steps]);
 
-        Log::info("Paso actualizado: {$step} - {$status}", ['process_id' => $processLog->id]);
+        Log::info("Paso actualizado: $step - $status", ['process_id' => $processLog->id]);
 
-        if($status === 'completed' && $this->allStepsCompleted($step)){
+        if($status === 'completed' && $this->allStepsCompleted($steps)){
             $this->completeProcess($processLog);
         }
+    } else {
+            Log::warning("Paso no encontrado: $step", ['process_id' => $processLog->id]);
+    }
     }
 
     /*
@@ -105,25 +111,13 @@ class ProcessLogService
         Log::error("Proceso fallido: {$processLog->process_name} - {$errorMessage}", ['process_id' => $processLog->id]);
     }
 
+    /**
+     * Devuelve el último registro de ProcessLog.
+     *
+     * @return \App\Models\ProcessLog|null El último registro de ProcessLog, o nulo si no existe ninguno.
+     */
     public function getLatestProcess(): ?ProcessLog
     {
         return ProcessLog::latest()->first();
-    }
-
-
-    /**
-     * Register services.
-     */
-    public function register(): void
-    {
-        //
-    }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        //
     }
 }

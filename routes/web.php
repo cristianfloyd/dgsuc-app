@@ -41,8 +41,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/userstable', UsersTable::class)->name('datatable');
     Route::get('/', function () { return view('index'); })->name('index');
     Route::get('/afip', AfipMiSimplificacion::class)->name('afip');  // Raiz para la app de mapuche-afip mi simplificacion
-    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas');
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar');
+    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas');
+
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');
     Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('mapuchemisim');
     Route::get('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
