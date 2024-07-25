@@ -16,8 +16,6 @@
             </div>
         </div>
     </details>
-
-
     {{-- llamar al componente livewire RelacionesActivasTable --}}
     <livewire:relaciones-activas-table />
 </div>
