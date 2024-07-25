@@ -23,26 +23,7 @@ class WorkflowService
         $this->processLogService = $processLogService;
     }
 
-    /**
-     * Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
-     * Las keys son los nombres de los pasos y los valores son las descripciones de los pasos(stpes).
-     *
-     * @return array Una matriz asociativa de pasos del flujo de trabajo.
-     */
-    public function getSteps()
-    {
-        return [
-            'subir_archivo_afip' => 'Subir archivo de relaciones laborales activas',
-            'subir_archivo_mapuche' => 'Subir archivo de Mapuche SICOSS',
-            'import_archivo_afip' => 'Importar relaciones laborales activas',
-            'import_archivo_mapuche' => 'Importar Mapuche SICOSS',
-            'obtener_cuils_not_in_afip' => 'Comparar y extraer CUILs',
-            'poblar_tabla_temp_cuils' => 'Poblar tabla Mapuche MI Simplificación',
-            'ejecutar_funcion_almacenada' => 'Obtener diferencias de CUILs',
-            'obtener_cuils_no_insertados' => 'Cuils no insertados',
-            'exportar_txt_para_afip' => 'Exportar resultados a AFIP',
-        ];
-    }
+
 
     /**
      * Inicia un nuevo proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
@@ -81,6 +62,27 @@ class WorkflowService
     }
 
     /**
+     * Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
+     * Las keys son los nombres de los pasos y los valores son las descripciones de los pasos(stpes).
+     *
+     * @return array Una matriz asociativa de pasos del flujo de trabajo.
+     */
+    public function getSteps()
+    {
+        return [
+            'subir_archivo_afip' => 'Subir archivo de relaciones laborales activas',
+            'subir_archivo_mapuche' => 'Subir archivo de Mapuche SICOSS',
+            'import_archivo_afip' => 'Importar relaciones laborales activas',
+            'import_archivo_mapuche' => 'Importar Mapuche SICOSS',
+            'obtener_cuils_not_in_afip' => 'Comparar y extraer CUILs',
+            'poblar_tabla_temp_cuils' => 'Poblar tabla Mapuche MI Simplificación',
+            'ejecutar_funcion_almacenada' => 'Obtener diferencias de CUILs',
+            'obtener_cuils_no_insertados' => 'Cuils no insertados',
+            'exportar_txt_para_afip' => 'Exportar resultados a AFIP',
+        ];
+    }
+
+    /**
      * Obtenga el paso actual en el proceso de flujo de trabajo.
      *
      * @param ProcessLog $processLog The process log instance.
@@ -97,6 +99,34 @@ class WorkflowService
         return 'completed';
     }
 
+    /* Update the status of a step in the process log.
+    */
+    public function updateStep(ProcessLog $processLog, string $step, string $status)
+    {
+        // Actualiza el estado del step en el workflow
+        $steps = $processLog->steps;
+        if(isset($steps[$step])){
+            $steps[$step] = $status;
+
+            // Actualizar el ProcessLog
+            $this->processLogService->updateStep($processLog, $steps, $status);
+
+            // Logica adicional del workflow si es necesario
+            if($status === 'completed'){
+                // obtener el siguiente paso
+                $nextStep = $this->getNextStep($step);
+                // si hay un siguiente paso, actualiza el estado del siguiente paso a "in_progress"
+                if ($nextStep) {
+                    $this->processLogService->updateStep($processLog, $nextStep, 'in_progress');
+                }
+            }
+
+            Log::info("Paso actualizado en WorkflowService: $step - $status", ['process_id' => $processLog->id]);
+        } else {
+            Log::warning("Paso no encontrado en WorkflowService: $step", ['process_id' => $processLog->id]);
+        }
+    }
+
     /**
      * Completa un paso en el proceso de flujo de trabajo y actualiza el siguiente paso si está disponible.
      *
@@ -107,12 +137,12 @@ class WorkflowService
      */
     public function completeStep(ProcessLog $processLog, string $step)
     {
-        $this->processLogService->updateStep($processLog, $step, 'completed');
+        $this->updateStep($processLog, $step, 'completed');
         Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
 
         $nextStep = $this->getNextStep($step);
         if ($nextStep) {
-            $this->processLogService->updateStep($processLog, $nextStep, 'in_progress');
+            $this->updateStep($processLog, $nextStep, 'in_progress');
 
         }
     }

@@ -2,19 +2,30 @@
 
 namespace App\Livewire;
 
-use App\FileProcessor;
+use App\Services\FileProcessorService;
 use Livewire\Component;
 use App\Models\UploadedFile;
+use App\Services\WorkflowService;
 use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas as ModelsAfipRelacionesActivas;
+use App\services\DatabaseService;
+use App\Services\ValidationService;
 
+/**
+ * Componente Livewire que maneja la importación de archivos AFIP y el almacenamiento de las relaciones activas.
+ *
+ * Este componente se encarga de:
+ * - Mostrar la lista de archivos cargados y permitir la selección de uno de ellos.
+ * - Procesar el archivo seleccionado, validar su contenido y almacenar las líneas procesadas en la base de datos.
+ * - Manejar el flujo de trabajo de la importación, marcando los pasos correspondientes.
+ * - Mostrar mensajes de éxito o error durante el proceso de importación.
+ */
 class AfipRelacionesActivas extends Component
 {
-    public $showCard = true;
     public $relacionesActivas;
     public $archivosCargados;
     public $archivoSeleccionado; //este es el archivo que se va a abrir en la vista
-    public $archivoSeleccionadoId; //este es el id del archivo que se va a abrir en la vista
+    public int $archivoSeleccionadoId; //este es el id del archivo que se va a abrir en la vista
     protected array $columnWidths = [
         6,  //periodo fiscal
         2,  //codigo movimiento
@@ -39,24 +50,32 @@ class AfipRelacionesActivas extends Component
         7,  //Código de Convenio Colectivo de Trabajo
         4,  //Sin valores, en blanco
     ];
-    public $lineasProcesadas; //este es el array que va a devolver la funcion procesarLinea
-    public $periodo_fiscal; //este es el periodo fiscal que se va a cargar en la tabla relaciones_activas
-    private $fileProcessor;
+    public array $lineasProcesadas; //este es el array que va a devolver la funcion procesarLinea
+    public string $periodo_fiscal; //este es el periodo fiscal que se va a cargar en la tabla relaciones_activas
 
-    public function boot(FileProcessor $fileProcessor)
+    private $fileProcessor;
+    private $databaseService;
+    private $workflowService;
+    private $validationService;
+
+
+    public function boot(
+        FileProcessorService $fileProcessor,
+        DatabaseService $databaseService,
+        WorkflowService $workflowService,
+        ValidationService $validationService
+        )
     {
         $this->fileProcessor = $fileProcessor;
+        $this->databaseService = $databaseService;
+        $this->workflowService = $workflowService;
+        $this->validationService = $validationService;
     }
 
     public function mount()
     {
         $this->archivosCargados = UploadedFile::all();
     }
-    public function render()
-    {
-        return view('livewire.afip-relaciones-activas');
-    }
-
 
     public function updatedarchivoSeleccionadoId($value)
     {
@@ -64,25 +83,49 @@ class AfipRelacionesActivas extends Component
     }
 
 
+    /**
+     * Importa un archivo AFIP y almacena las líneas procesadas en la base de datos.
+     *
+     * Este método se encarga de validar el archivo seleccionado, procesar su contenido y almacenar los datos en la base de datos.
+     * También actualiza el estado del flujo de trabajo y envía mensajes de éxito o error según corresponda.
+     *
+     * @return void
+     */
     public function importar()
     {
-        $this->validateSelectedFile();
-        $lineasProcesadas = $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnWidths);
-        $this->almacenarLineas($lineasProcesadas);
-        // despachar un evento para actualizar la tabla
-        $this->dispatch('datos-importados');
+        $processLog = $this->workflowService->getLatestWorkflow() ?? $this->workflowService->startWorkflow();
+        $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'in_progress');
+
+        try {
+            $this->validationService->validateSelectedFile($this->archivoSeleccionado);
+            $lineasProcesadas = $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnWidths);
+            $this->almacenarLineas($lineasProcesadas);
+
+            $this->workflowService->completeStep($processLog, 'import_archivo_afip');
+            $this->dispatch('datos-importados');
+            $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
+
+            $nextStep = $this->workflowService->getNextStep('import_archivo_afip');
+            sleep(3);
+            if ($nextStep) {
+                return redirect()->to($this->workflowService->getStepUrl($nextStep));
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en la importación: ' . $e->getMessage());
+            $this->dispatch('show-error-message', ['message' => 'No se importó correctamente: ' . $e->getMessage()]);
+            $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'failed');
+        }
     }
 
 
     private function almacenarLineas($lineasProcesadas)
     {
-        $afipRelacionesActivas = new ModelsAfipRelacionesActivas();
         $datosMapeados = collect($lineasProcesadas)
-            ->map(function ($linea) use ($afipRelacionesActivas) {
-                return $afipRelacionesActivas::mapearDatosAlModelo($linea);
+            ->map(function ($linea) {
+                return $this->databaseService->mapearDatosAlModelo($linea);
             })->all();
 
-        $resultado = $afipRelacionesActivas::insertarDatosMasivos($datosMapeados);
+        $resultado = $this->databaseService->insertarDatosMasivos($datosMapeados);
         $this->handleResultado($resultado);
     }
 
@@ -98,89 +141,10 @@ class AfipRelacionesActivas extends Component
             $this->dispatch('show-error-message', ['message' => 'No se importo correctamente']);
         }
     }
-    private function validateSelectedFile(): void
+
+
+    public function render()
     {
-        if (!$this->archivoSeleccionado) {
-            throw new \InvalidArgumentException('No se ha seleccionado ningún archivo para importar.');
-        }
-
-        if (!$this->archivoSeleccionado instanceof UploadedFile) {
-            throw new \InvalidArgumentException('El archivo seleccionado no es válido.');
-        }
-
-        $filePath = storage_path('app/public/' . $this->archivoSeleccionado->file_path);
-        if (!file_exists($filePath)) {
-            throw new \RuntimeException('El archivo seleccionado no existe en el sistema.');
-        }
-
-        if (!is_readable($filePath)) {
-            throw new \RuntimeException('No se puede leer el archivo seleccionado.');
-        }
-
-        // Validación adicional específica para el tipo de archivo esperado
-        // Por ejemplo, verificar la extensión del archivo o su contenido
-        $allowedExtensions = ['txt', 'csv'];
-        $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
-        if (!in_array($fileExtension, $allowedExtensions)) {
-            throw new \InvalidArgumentException('El tipo de archivo seleccionado no es válido. Se esperaba un archivo .txt o .csv.');
-        }
-
-        // Si todas las validaciones pasan, el método no lanzará excepciones
+        return view('livewire.afip-relaciones-activas');
     }
-
-
-
-    //Aqui vamos a procesar el abrir el archivo seleccionado en la vista que va a estar en $archivoSeleccionado
-    // public function importar()
-    // {
-    //     if (!$this->archivoSeleccionado) {
-    //         // mostrar un mensaje que no se selecciono archivo
-    //         Log::warning('No se selecciono archivo');
-    //     }
-    //     $this->periodo_fiscal = $this->archivoSeleccionado->periodo_fiscal;
-
-    //     //aqui vamos a procesar el archivo seleccionado
-    //     //primero vamos a abrir el archivo
-    //     $file_path = storage_path() . '/app/public/' . $this->archivoSeleccionado->file_path;
-    //     // dd($file_path);
-    //     $file = fopen($file_path, "r"); //abrimos el archivo en modo lectura
-    //     // dd($file);
-    //     if ($file) {
-    //         $i = 0; //este es el contador de lineas
-    //         while (($line = fgets($file)) !== false) {
-    //             // calcular el ancho de la linea
-    //             $anchoLinea = strlen($line) - 1 + 6; //actualmente tiene 119 caracteres
-    //             // dd($anchoLinea);
-
-    //             // calcular el ancho de columnWidths
-    //             $sumaAnchoColumnas = array_sum($this->columnWidths) + 1; // ser resta la ultima posicion porque no corresponde a una columna valida
-    //             // dd($sumaAnchoColumnas);
-
-    //             // Validar que el ancho de la línea coincida con la suma de los anchos de columna
-    //             if ($anchoLinea !== $sumaAnchoColumnas) {
-    //                 throw new \InvalidArgumentException('El ancho de la línea no coincide con la suma de los anchos de columna.');
-    //             }
-
-    //             // llamar a una funcion procesarlinea(array $columnWidths) y que retorne un array separando la linea
-    //             //en columnas del ancho dado por el array columnWidths
-    //             $lineaProcesada = $this->procesarLineaEspacios($line, $this->columnWidths); //esta funcion va a devolver un array con los campos de la linea
-    //             // dd($lineaProcesada);
-    //             $this->lineasProcesadas[$i] = $lineaProcesada;
-
-    //             $i++; //aumentamos el contador de lineas
-
-    //         }
-    //         // dd($this->lineasProcesadas);
-    //     } else {
-    //         // Manejar error al abrir el archivo
-    //         dd('Error al abrir el archivo.');
-    //     }
-    //     fclose($file);
-    //     // llamar a una funcion para almacenar en la tabla
-    //     // relaciones_activas
-    //     $this->almacenar();
-    // }
-
-
-
 }

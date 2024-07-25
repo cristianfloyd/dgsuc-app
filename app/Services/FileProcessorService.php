@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Services;
 
 use App\Models\UploadedFile;
 
@@ -11,7 +11,7 @@ use App\Models\UploadedFile;
  * @param array $columnWidths Una matriz de anchos de columna para usar al procesar cada línea.
  * @return array Un array de líneas procesadas.
  */
-class FileProcessor
+class FileProcessorService
 {
     /**
      * Create a new class instance.
