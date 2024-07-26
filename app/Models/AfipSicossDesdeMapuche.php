@@ -337,29 +337,9 @@ class AfipSicossDesdeMapuche extends Model
             throw new \InvalidArgumentException('El archivo no es legible.');
         }
 
-        // $datosMapeados = [];
-        // foreach ($tablaProcesada as $lineaProcesada) {
-        //     $datosMapeados[] = $model->mapearDatosAlModelo($lineaProcesada);
-        // }
-        // dd($tablaProcesada);
         return self::insertarDatosMasivos($tablaProcesada);
     }
 
-    // public static function importarDesdeArchivo($filepath, $periodoFiscal)
-    // {
-    //     $model = new self();
-    //     $model->periodoFiscal = $periodoFiscal;
-
-    //     $lineasExtraidas = file($filepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    //     $tablaProcesada = $model->procesarTabla($lineasExtraidas, $periodoFiscal);
-
-    //     $datosMapeados = [];
-    //     foreach ($tablaProcesada as $lineaProcesada) {
-    //         $datosMapeados[] = $model->mapearDatosAlModelo($lineaProcesada);
-    //     }
-
-    //     return self::insertarDatosMasivos($datosMapeados);
-    // }
 
     /**
      * Procesa los datos de la tabla afip_importacion_cruda y los inserta en la tabla afip_sicoss_desde_mapuche.

@@ -1,118 +1,74 @@
 <?php
 namespace App\Livewire;
 
+use App\ImportService;
 use Livewire\Component;
 use App\Models\UploadedFile;
 use App\Models\AfipMapucheSicoss;
+use App\TableVerificationService;
 use App\Models\AfipSicossDesdeMapuche;
-use App\Models\AfipImportacionCrudaModel;
 use Illuminate\Support\Facades\Storage;
+use App\Models\AfipImportacionCrudaModel;
 
 class MapucheSicoss extends Component
 {
-    public $tablasVacias = false;
-    public $selectedArchivo;
-    public $listadoArchivos;
-    public $selectedArchivoID;
-    public $filename;
 
-    protected $filepath;
-    protected $absolutePath;
-    protected $periodoFiscal;
-    protected $afipMapucheSicoss;
+    const TABLE_AFIP_IMPORT_CRUDO = 'AfipImportCrudo';
+    const TABLE_AFIP_MAPUCHE_SICOSS = 'AfipMapucheSicoss';
+
+    public ?UploadedFile $selectedArchivo;
+    public $listadoArchivos;
+    public ?int $selectedArchivoID;
+    public ?string $filename;
+
+    protected ?string $filepath;
+    protected ?string $absolutePath;
+    protected ?string $periodoFiscal;
+
     protected $afipMapucheSicossTable;
     protected $afipImportacionCrudaTable;
+    protected $importService;
+    protected $tableVerificationService;
 
 
-    public function importarArchivo($archivoId = null)
+    public function boot(ImportService $importService, TableVerificationService $tableVerificationService)
+    {
+        $this->importService = $importService;
+        $this->tableVerificationService = $tableVerificationService;
+    }
+
+
+    public function mount()
+    {
+        $this->listadoArchivos = UploadedFile::all();
+    }
+
+    public function importarArchivo($archivoId = null): void
     {
         if ($archivoId === null) {
             $archivoId = $this->selectedArchivoID;
         }
 
         $archivo = UploadedFile::findOrFail($archivoId);
-        // dd($archivo);
+
         if($archivo){
-            session()->flash('success','Archivo Encontrado');
+            $this->dispatch('success', message: 'Archivo Encontrado');
         }
-        $resultado = AfipSicossDesdeMapuche::importarDesdeArchivo($archivo->file_path, $archivo->periodo_fiscal);
+
+        $resultado = $this->importService->importFile($archivo);
 
         if ($resultado) {
-            session()->flash('success', 'Importación completada con éxito.');
+            $this->dispatch('success', 'Importación completada con éxito.');
         } else {
-            session()->flash('error', 'Hubo un problema durante la importación.');
+            $this->dispatch('error', 'Hubo un problema durante la importación.');
         }
     }
 
     public function seleccionarArchivo()
     {
-
+        //
     }
-
-    public function impotarTabla()
-    {
-        $this->verificarTablas();
-        if($this->tablasVacias){
-            $this->afipMapucheSicoss->importarTabla();
-        }
-    }
-
-
-    /**
-     * Verifica las tablas necesarias para el funcionamiento del componente.
-     */
-    public function verificarTablas(){
-        $this->verifyAfipImportCrudoTable();
-        $this->verifyAfipMapucheSicossTable();
-        if($this->afipImportacionCrudaTable && !$this->afipMapucheSicossTable){
-            $this->afipMapucheSicoss = new AfipSicossDesdeMapuche();
-            $this->tablasVacias = false;
-        }
-    }
-
-    /**
-     * Verifica si la tabla de importación cruda de AFIP está vacía.
-     */
-    public function verifyAfipImportCrudoTable(){
-        $this->afipImportacionCrudaTable = $this->verifyTableIsEmpty(AfipImportacionCrudaModel::class, 'AfipImportCrudo');
-    }
-
-    /**
-     * Verifica si la tabla de Mapuche Sicoss de AFIP está vacía.
-     */
-    public function verifyAfipMapucheSicossTable(){
-        $this->afipMapucheSicossTable = $this->verifyTableIsEmpty(AfipMapucheSicoss::class, 'AfipMapucheSicoss');
-    }
-
-
-
-    public function verifyTableIsEmpty($model, $tableName): bool
-    {
-        $modelInstance = new $model;
-
-        $tableIsEmpty = $modelInstance->all()->isEmpty();
-
-        if ($tableIsEmpty) {
-            // Tabla vacia emite un mensaje de error
-            session()->flash('tableIsEmpty', "La tabla $tableName está vacía.");
-            return false;
-        } else {
-            // la tabla no esta vacia
-            session()->flash('tableIsNotEmpty', "La tabla $tableName no está vacía.");
-            return true;
-        }
-    }
-
-
-
-
-    public function mount()
-    {
-        //llamar al modelo UploadedFile para obtener todos los archivos subidos
-        $this->listadoArchivos = UploadedFile::all();
-    }
-
-    public function updatedSelectedArchivoID($archivoId)
+    public function updatedSelectedArchivoID($archivoId): void
     {
         $this->selectedArchivo = UploadedFile::findOrFail($archivoId);
         $this->filepath = $this->selectedArchivo->file_path;
@@ -120,6 +76,37 @@ class MapucheSicoss extends Component
         $this->periodoFiscal = $this->selectedArchivo->periodo_fiscal;
         $this->filename = $this->selectedArchivo->original_name;
     }
+
+
+    /**
+     * Verifica las tablas necesarias para el funcionamiento del componente.
+     */
+    public function verificarTablas(): void
+    {
+        $this->verifyAfipImportCrudoTable();
+        $this->verifyAfipMapucheSicossTable();
+    }
+
+    public function verifyAfipImportCrudoTable(): void
+    {
+        $this->afipImportacionCrudaTable = $this->tableVerificationService->verifyTableIsEmpty(new AfipImportacionCrudaModel, self::TABLE_AFIP_IMPORT_CRUDO);
+        $this->emitTableVerificationResult(self::TABLE_AFIP_IMPORT_CRUDO, $this->afipImportacionCrudaTable);
+    }
+
+    public function verifyAfipMapucheSicossTable(): void
+    {
+        $this->afipMapucheSicossTable = $this->tableVerificationService->verifyTableIsEmpty(new AfipMapucheSicoss, self::TABLE_AFIP_MAPUCHE_SICOSS);
+        $this->emitTableVerificationResult(self::TABLE_AFIP_MAPUCHE_SICOSS, $this->afipMapucheSicossTable);
+    }
+    private function emitTableVerificationResult(string $tableName, bool $isNotEmpty): void
+    {
+        if($isNotEmpty){
+            $this->dispatch('success', "La tabla $tableName no está vacía.");
+        } else {
+            $this->dispatch('error', "La tabla $tableName no está vacía.");
+        }
+    }
+
 
     public function render()
     {
