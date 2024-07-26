@@ -9,6 +9,7 @@ use App\TableVerificationService;
 use App\Models\AfipSicossDesdeMapuche;
 use Illuminate\Support\Facades\Storage;
 use App\Models\AfipImportacionCrudaModel;
+use App\Services\WorkflowService;
 
 class MapucheSicoss extends Component
 {
@@ -29,12 +30,16 @@ class MapucheSicoss extends Component
     protected $afipImportacionCrudaTable;
     protected $importService;
     protected $tableVerificationService;
+    protected $workflowService;
 
 
-    public function boot(ImportService $importService, TableVerificationService $tableVerificationService)
-    {
+    public function boot(ImportService $importService,
+            TableVerificationService $tableVerificationService,
+        WorkflowService $workflowService
+    ){
         $this->importService = $importService;
         $this->tableVerificationService = $tableVerificationService;
+        $this->workflowService = $workflowService;
     }
 
 
@@ -53,12 +58,27 @@ class MapucheSicoss extends Component
 
         if($archivo){
             $this->dispatch('success', message: 'Archivo Encontrado');
+            //obtener el ultimo workflow
+            $latestWorkflow = $this->workflowService->getLatestWorkflow();
         }
 
         $resultado = $this->importService->importFile($archivo);
 
         if ($resultado) {
-            $this->dispatch('success', 'Importación completada con éxito.');
+            //completar el workflow
+            $this->workflowService->completeStep($latestWorkflow, 'import_archivo_mapuche');
+
+            //obtener el siguiente paso
+            $nextStep = $this->workflowService->getNextStep($latestWorkflow);
+
+            if ($nextStep) {
+                //ir al siguiente paso
+                $nextStepUrl = $this->workflowService->getStepUrl($nextStep);
+                $this->dispatch('success', 'Importación completada con éxito.');
+                redirect()->to($nextStepUrl);
+            } else {
+                $this->dispatch('success', 'Importación completada con éxito. Proceso finalizado.');
+            }
         } else {
             $this->dispatch('error', 'Hubo un problema durante la importación.');
         }

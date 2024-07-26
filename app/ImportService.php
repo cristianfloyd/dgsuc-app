@@ -15,6 +15,12 @@ class ImportService
         //
     }
 
+    /**
+     * Importa un archivo de AFIP SICOSS desde Mapuche.
+     *
+     * @param UploadedFile $file El archivo a importar.
+     * @return bool Verdadero si la importación fue exitosa, falso en caso contrario.
+     */
     public function importFile(UploadedFile $file): bool
     {
         return AfipSicossDesdeMapuche::importarDesdeArchivo($file->file_path, $file->periodo_fiscal);

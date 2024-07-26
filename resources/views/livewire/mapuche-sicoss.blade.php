@@ -29,4 +29,23 @@
             @endif
         </x-mary-form>
     </div>
+    @if ($latestWorkflow = $this->workflowService->getLatestWorkflow())
+        <div class="mt-4">
+            <h3>Progreso del Workflow</h3>
+            <ul>
+                @foreach ($this->workflowService->getSteps() as $step => $description)
+                    <li>
+                        {{ $description }}:
+                        @if ($this->workflowService->isStepCompleted($latestWorkflow, $step))
+                            <span class="text-green-500">Completado</span>
+                        @elseif ($step === 'import_archivo_mapuche')
+                            <span class="text-blue-500">En progreso</span>
+                        @else
+                            <span class="text-gray-500">Pendiente</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 </div>
