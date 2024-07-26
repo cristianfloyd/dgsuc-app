@@ -242,10 +242,10 @@ class AfipSicossDesdeMapuche extends Model
 
          // Calcular el ancho total de la línea
         $anchoLinea = $this->calcularAnchoLinea($line) - 2 + 6; // -1 se le resta la ultima posicion de la fila. Y +6 por la columna del periodo fiscal.
-        // dd($anchoLinea);
+        
         // Calcular la suma de los anchos de columna
         $sumaAnchoColumnas = array_sum($columnWidths); // -1 se resta la ultima posicion de la fila.
-        // dd($sumaAnchoColumnas);
+
         // Validar que el ancho de la línea coincida con la suma de los anchos de columna
         if ($anchoLinea !== $sumaAnchoColumnas) {
             throw new \InvalidArgumentException('linea: '.$this->contador  .' El ancho de línea '.$anchoLinea .' no coincide con la suma de los anchos de columna ' .$sumaAnchoColumnas);
@@ -299,13 +299,30 @@ class AfipSicossDesdeMapuche extends Model
 
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
 
-    public static function importarDesdeArchivo($filename, $periodoFiscal)
+    /**
+     * Importa datos desde un archivo y los procesa para insertarlos en la tabla afip_sicoss_desde_mapuche.
+     *
+     * Este método recibe el nombre del archivo y el periodo fiscal como parámetros, y realiza las siguientes tareas:
+     *
+     * 1. Verifica que los parámetros de entrada no estén vacíos.
+     * 2. Verifica que el archivo exista en el sistema de archivos.
+     * 3. Crea una nueva instancia del modelo AfipSicossDesdeMapuche.
+     * 4. Establece el periodo fiscal en la instancia del modelo.
+     * 5. Lee el contenido del archivo y lo procesa utilizando el método procesarTabla().
+     * 6. Inserta los datos procesados en la base de datos utilizando el método insertarDatosMasivos().
+     *
+     * @param string $filename Nombre del archivo a importar.
+     * @param string $periodoFiscal Periodo fiscal al que pertenecen los datos.
+     * @return bool Verdadero si la importación fue exitosa, falso en caso contrario.
+     * @throws \InvalidArgumentException Si los parámetros de entrada están vacíos o el archivo no existe.
+     * @throws Exception Si no se puede abrir el archivo.
+     */
+    public static function importarDesdeArchivo($filename, $periodoFiscal): bool
     {
         if (empty($filename) || empty($periodoFiscal)) {
             throw new \InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
         }
-        $archivoRuta = $filename;
-        $archivoRuta = Storage::path("/public/$archivoRuta");
+
 
         if (Storage::exists("/public/$filename"))
         {
@@ -318,14 +335,14 @@ class AfipSicossDesdeMapuche extends Model
         $model->periodoFiscal = $periodoFiscal;
         //probar si se puede leer el archivo almacenado en $filename
         if(is_readable($filename)){
-            // $lineasExtraidas = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $lineasExtraidas = [];
             $archivo = fopen($filename, "r");
-            $i = 0;
+
             if ($archivo) {
                 while (($linea = fgets($archivo)) !== false ) {
-                    $i++;
-                    $lineasExtraidas[] = $linea;
+                    // Convertir a UTF-8
+                    $lineaUTF8 = mb_convert_encoding($linea, 'UTF-8', mb_detect_encoding($linea, 'UTF-8, ISO-8859-1', true));
+                    $lineasExtraidas[] = $lineaUTF8;
                 }
                 fclose($archivo);
             } else {
@@ -414,8 +431,7 @@ class AfipSicossDesdeMapuche extends Model
                 // Elimina la clave 'id' si existe en los datos
                 unset($data['id']);
             }
-            // Registro de depuración antes de la inserción
-            Log::info('Insertando chunk: ' . json_encode($chunk));
+
             try {
                 DB::connection($conexion)->table((new self)->getTable())->insert($chunk);
             } catch (Exception $e) {
@@ -428,7 +444,6 @@ class AfipSicossDesdeMapuche extends Model
         // Confirmar la transaccion en la conexion especificada.
         DB::connection($conexion)->commit();
         return true;
-
     }
 
 

@@ -8,6 +8,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
+use App\Services\WorkflowService;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -46,7 +47,14 @@ class CompareCuils extends Component
     public $insertTablaTemp = false;
     public $miSimButton = false;
     public $ShowMiSimplificacion = false;
+    protected $workflowService;
 
+
+
+    public function boot(WorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+    }
 
     public function showCuilsDetails(): void
     {
@@ -56,16 +64,11 @@ class CompareCuils extends Component
         $this->showDetails = $this->toggleValue($this->showDetails);
         Log::info("showDetails parent = {$this->showDetails}");
 
-        // $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
-        // Log::info("crearTablaTemp parent = {$this->crearTablaTemp}");
-
-        // $this->cuilstosearch = $this->cuilsNotInAfip->toArray();
 
         $this->dispatch('crear-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilstosearch);
         Log::info('crear-tabla-temp dispatch event created');
 
     }
-
 
 
     #[On('created')]
@@ -211,10 +214,15 @@ class CompareCuils extends Component
 
     public function loadCuilsNotInAfip()
     {
+        //iniciar el workflow
+        $this->workflowService->startWorkflow();
+
         $this->showCuilsTable = true;
         $this->cuilsNotInAfipLoaded = $this->toggleValue($this->cuilsNotInAfipLoaded);
         $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
         $this->compareCuils();
+        // marcar como completado el workflow
+        $this->workflowService->completeWorkflow();
     }
 
     /**

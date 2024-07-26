@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\ImportService;
 use Illuminate\Support\ServiceProvider;
+use App\Services\TableManagementService;
 
 class ImportServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,8 @@ class ImportServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ImportService::class, function ($app) {
-            return new ImportService();
+            return new ImportService($app->make(TableManagementService::class));
+            ;
         });
     }
 

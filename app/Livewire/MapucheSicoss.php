@@ -50,6 +50,11 @@ class MapucheSicoss extends Component
 
     public function importarArchivo($archivoId = null): void
     {
+
+        /*
+        *   Falta veriicar la tabla y limpiearla si es necesario.
+        *
+        */
         if ($archivoId === null) {
             $archivoId = $this->selectedArchivoID;
         }
@@ -60,6 +65,7 @@ class MapucheSicoss extends Component
             $this->dispatch('success', message: 'Archivo Encontrado');
             //obtener el ultimo workflow
             $latestWorkflow = $this->workflowService->getLatestWorkflow();
+            $currentStep = $this->workflowService->getCurrentStep($latestWorkflow);
         }
 
         $resultado = $this->importService->importFile($archivo);
@@ -69,7 +75,7 @@ class MapucheSicoss extends Component
             $this->workflowService->completeStep($latestWorkflow, 'import_archivo_mapuche');
 
             //obtener el siguiente paso
-            $nextStep = $this->workflowService->getNextStep($latestWorkflow);
+            $nextStep = $this->workflowService->getNextStep($currentStep);
 
             if ($nextStep) {
                 //ir al siguiente paso
@@ -101,22 +107,9 @@ class MapucheSicoss extends Component
     /**
      * Verifica las tablas necesarias para el funcionamiento del componente.
      */
-    public function verificarTablas(): void
+    public function verifyTables(): void
     {
-        $this->verifyAfipImportCrudoTable();
-        $this->verifyAfipMapucheSicossTable();
-    }
 
-    public function verifyAfipImportCrudoTable(): void
-    {
-        $this->afipImportacionCrudaTable = $this->tableVerificationService->verifyTableIsEmpty(new AfipImportacionCrudaModel, self::TABLE_AFIP_IMPORT_CRUDO);
-        $this->emitTableVerificationResult(self::TABLE_AFIP_IMPORT_CRUDO, $this->afipImportacionCrudaTable);
-    }
-
-    public function verifyAfipMapucheSicossTable(): void
-    {
-        $this->afipMapucheSicossTable = $this->tableVerificationService->verifyTableIsEmpty(new AfipMapucheSicoss, self::TABLE_AFIP_MAPUCHE_SICOSS);
-        $this->emitTableVerificationResult(self::TABLE_AFIP_MAPUCHE_SICOSS, $this->afipMapucheSicossTable);
     }
     private function emitTableVerificationResult(string $tableName, bool $isNotEmpty): void
     {

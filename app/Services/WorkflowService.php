@@ -200,10 +200,10 @@ class WorkflowService
             'subir_archivo_mapuche' => '/afip/subir-archivo',
             'import_archivo_afip' => '/afip/relaciones-activas',
             'import_archivo_mapuche' => '/afip/mapuchesicoss',
-            'obtener_cuils_not_in_afip' => '/compare-cuils',
-            'poblar_tabla_temp_cuils' => '/compare-cuils',
-            'ejecutar_funcion_almacenada' => '/compare-cuils',
-            'obtener_cuils_no_insertados' => '/compare-cuils',
+            'obtener_cuils_not_in_afip' => '/afip/compare-cuils',
+            'poblar_tabla_temp_cuils' => '/afip/compare-cuils',
+            'ejecutar_funcion_almacenada' => '/afip/compare-cuils',
+            'obtener_cuils_no_insertados' => '/afip/compare-cuils',
             'exportar_txt_para_afip' => '/export-results'
         ];
 

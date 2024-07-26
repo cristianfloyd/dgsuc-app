@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Providers;
+namespace App\Services;
 
-use App\Services\FileProcessorService;
 use Illuminate\Support\ServiceProvider;
 
-class FileProcesorServiceProvider extends ServiceProvider
+class TableManagementServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
     public function register(): void
     {
-        $this->app->singleton(FileProcessorService::class, function ($app) {
-            return new FileProcessorService();
+        $this->app->bind(TableManagementService::class, function ($app) {
+            return new TableManagementService();
         });
     }
 

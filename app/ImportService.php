@@ -2,17 +2,21 @@
 
 namespace App;
 
-use App\Models\AfipSicossDesdeMapuche;
 use App\Models\UploadedFile;
+use Doctrine\DBAL\Schema\Table;
+use Illuminate\Support\Facades\Log;
+use App\Models\AfipSicossDesdeMapuche;
+use App\Services\TableManagementService;
 
 class ImportService
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    protected $tableManagementService;
+
+
+
+    public function __construct(TableManagementService $tableManagementService)
     {
-        //
+        $this->tableManagementService = $tableManagementService;
     }
 
     /**
@@ -23,6 +27,12 @@ class ImportService
      */
     public function importFile(UploadedFile $file): bool
     {
-        return AfipSicossDesdeMapuche::importarDesdeArchivo($file->file_path, $file->periodo_fiscal);
+        $tableName = 'suc.afip_mapuche_sicoss';
+        $connection = 'pgsql-mapuche';
+        $this->tableManagementService->verifyAndPrepareTable($tableName, $connection);
+
+        AfipSicossDesdeMapuche::importarDesdeArchivo($file->file_path, $file->periodo_fiscal);
+        Log::info("Archivo {$file->id} importado a la tabla $tableName.");
+        return true;
     }
 }
