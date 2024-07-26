@@ -55,7 +55,7 @@ class AfipRelacionesActivas extends Component
 
     private $fileProcessor;
     private $databaseService;
-    private $workflowService;
+    protected $workflowService;
     private $validationService;
 
 
@@ -97,9 +97,18 @@ class AfipRelacionesActivas extends Component
         $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'in_progress');
 
         try {
+            if (!$this->archivoSeleccionado) {
+                dd($this->archivoSeleccionado);
+                throw new \Exception('No se ha seleccionado ningún archivo.');
+            }
+
             $this->validationService->validateSelectedFile($this->archivoSeleccionado);
             $lineasProcesadas = $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnWidths);
+
+            // dd($lineasProcesadas);
+
             $this->almacenarLineas($lineasProcesadas);
+
 
             $this->workflowService->completeStep($processLog, 'import_archivo_afip');
             $this->dispatch('datos-importados');
@@ -124,8 +133,9 @@ class AfipRelacionesActivas extends Component
             ->map(function ($linea) {
                 return $this->databaseService->mapearDatosAlModelo($linea);
             })->all();
+        // dd($datosMapeados);
 
-        $resultado = $this->databaseService->insertarDatosMasivos($datosMapeados);
+        $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
         $this->handleResultado($resultado);
     }
 

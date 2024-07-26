@@ -108,20 +108,26 @@ class WorkflowService
         if(isset($steps[$step])){
             $steps[$step] = $status;
 
+            // dd($steps, $step, $status);
             // Actualizar el ProcessLog
-            $this->processLogService->updateStep($processLog, $steps, $status);
+            $this->processLogService->updateStep($processLog, $step, $status);
+
+            // dd($steps, $step, $status);
 
             // Logica adicional del workflow si es necesario
             if($status === 'completed'){
                 // obtener el siguiente paso
                 $nextStep = $this->getNextStep($step);
+
                 // si hay un siguiente paso, actualiza el estado del siguiente paso a "in_progress"
                 if ($nextStep) {
                     $this->processLogService->updateStep($processLog, $nextStep, 'in_progress');
                 }
+
             }
 
             Log::info("Paso actualizado en WorkflowService: $step - $status", ['process_id' => $processLog->id]);
+            // dd($steps, $step, $status);
         } else {
             Log::warning("Paso no encontrado en WorkflowService: $step", ['process_id' => $processLog->id]);
         }

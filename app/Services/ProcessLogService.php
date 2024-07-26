@@ -50,13 +50,19 @@ class ProcessLogService
     public function updateStep(ProcessLog $processLog, string $step, string $status)
     {
         $steps = $processLog->steps;
+
+        // dd($steps, $step, $status);
+
         if (isset($steps[$step]))
         {
         $steps[$step] = $status;
+        // dd($steps, $step, $status);
 
         $processLog->update(['steps' => $steps]);
 
         Log::info("Paso actualizado: $step - $status", ['process_id' => $processLog->id]);
+
+            // dd($steps, $step, $status);
 
         if($status === 'completed' && $this->allStepsCompleted($steps)){
             $this->completeProcess($processLog);
