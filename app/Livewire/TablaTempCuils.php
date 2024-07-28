@@ -7,6 +7,7 @@ use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
 
@@ -18,114 +19,206 @@ class TablaTempCuils extends Component
 
     protected $tablaTempCuil;
 
-    // metodo para crear una tabla temporal con el modelo TablaTempCuil
-    #[On('crear-tabla-temp')]
-    public function createTable():void
+
+    #[On('iniciar-poblado-tabla-temp')]
+    public function iniciarPobladoTablaTemp($nroLiqui, $periodoFiscal, $cuils)
     {
-        $this->tablaTempCuil = new TableModel();
-        Log::info('Intentando crear la tabla temporal tablaTempCuil');
-        // Lógica para crear la tabla temporal tablaTempCuil
-        //primero verificar que la tabla no exista y si no existe  crearla y retornar un mensaje de exito
-        if (!$this->tablaTempCuil->tableExists()) {
-            $this->tablaTempCuil->createTable();
-            log::info('createTable() Tabla creada exitosamente.');
-            $this->dispatch('created');
-            // return true;
-        } else {
-            // session()->flash('error', 'La tabla ya existe.');
-            Log::info('La tabla ya existe.');
-            Log::info('dispatch: tableexists');
-            $this->dispatch('exists');
-            // return false;
+        $processLog = $this->workflowService->getLatestWorkflow();
+
+        $this->verificarExistenciaTabla();
+        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'verificar_existencia_tabla');
+
+        $this->crearTablaSiNoExiste();
+        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'crear_tabla_si_no_existe');
+
+        $this->borrarDatosSiExisten();
+        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'borrar_datos_si_existen');
+
+        $this->insertarDatos($nroLiqui, $periodoFiscal, $cuils);
+        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'insertar_datos');
+
+        $this->dispatch('success-poblado-tabla-temp-cuils');
+    }
+
+
+
+
+
+
+    /** Procesa la simplificación de AFIP Mapuche.
+     *
+     * Este método se encarga de verificar la existencia de la tabla 'suc.afip_mapuche_mi_simplificacion', crearla si no existe, y luego vaciar y llenar la tabla con los datos proporcionados.
+     *
+     * @param int $nroLiqui Número de liquidación.
+     * @param string $periodoFiscal Período fiscal.
+     * @return void
+     */
+    #[On('mapuche-mi-simplificacion')]
+    public function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): void
+    {
+        if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
+            $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
+            return;
+        }
+
+        $instance = new AfipMapucheMiSimplificacion();
+        $table = 'suc.afip_mapuche_mi_simplificacion';
+
+        if (!$this->verificarYCrearTabla($instance, $table)) {
+            return;
+        }
+
+        $this->verificarYVaciarTabla($instance);
+
+        try {
+            $result = TableModel::mapucheMiSimplificacion($nroLiqui, $periodoFiscal);
+            if ($result) {
+                $this->dispatch('success-mapuche-mi-simplificacion', 'Función almacenada ejecutada exitosamente');
+            } else {
+                $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
+            $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
         }
     }
-    #[On('drop-table-temp')]
-    public function dropTableTemp()
+
+
+
+
+    /** Valida que los parámetros 'nroLiqui' y 'periodoFiscal' no estén vacíos.
+     *
+     *
+     * @param int $nroLiqui Número de liquidación.
+     * @param string $periodoFiscal Período fiscal.
+     * @return bool Verdadero si los parámetros son válidos, falso en caso contrario.
+     */
+    private function validarParametros($nroLiqui, $periodoFiscal)
     {
-        TableModel::dropTable();
-        Log::info('dropTableTemp()');
-        $this->dispatch('toggle-show-drop');
-    }
-
-    #[On('insert-table-temp')]
-    public function insertTableTemp($nro_liqui, $periodo_fiscal, $cuils)
-    {
-        Log::info('insertTableTemp()');
-        $this->cuils = $cuils;
-        if(TableModel::insertTable($cuils) ){
-            $this->dispatch('inserted-table-temp');
-        } else{
-            $this->dispatch('error-inserted-table-temp');
-        }
-    }
-
-
-
-
-#[On('mapuche-mi-simplificacion')]
-public function mapucheMiSimplificacion($nroLiqui, $periodoFiscal)
-{
-    if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
-        return;
-    }
-
-    $instance = new AfipMapucheMiSimplificacion();
-    $table = 'suc.afip_mapuche_mi_simplificacion';
-
-    if (!$this->verificarYCrearTabla($instance, $table)) {
-        return;
-    }
-
-    $this->verificarYVaciarTabla($instance);
-
-    $this->insertarDatos($nroLiqui, $periodoFiscal);
-}
-
-private function validarParametros($nroLiqui, $periodoFiscal)
-{
-    if (empty($nroLiqui) || empty($periodoFiscal)) {
-        $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
-        return false;
-    }
-    return true;
-}
-
-private function verificarYCrearTabla($instance, $table)
-{
-    $connection = $instance->getConnectionName();
-    $status = Schema::connection($connection)->hasTable($table);
-    if (!$status) {
-        if (!$instance->createTable()) {
-            $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla MapucheMiSim no se creo');
-            Log::info('La tabla MapucheMiSim no se creo');
+        if (empty($nroLiqui) || empty($periodoFiscal)) {
+            $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
             return false;
         }
-        $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla se creo exitosamente');
-        Log::info('La tabla se creo exitosamente');
+        return true;
     }
-    return true;
-}
 
-private function verificarYVaciarTabla($instance)
-{
-    $tableHasData = $instance->get();
-    if ($tableHasData) {
-        $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla no esta vacia. Intentando vaciar');
-        Log::info('La tabla no esta vacia. Intentando vaciar');
-        AfipMapucheMiSimplificacion::truncate();
+    /**  Verifica si la tabla 'suc.afip_mapuche_mi_simplificacion' existe y, si no existe, la crea.
+     *
+     * @param AfipMapucheMiSimplificacion $instance Instancia del modelo de la tabla 'suc.afip_mapuche_mi_simplificacion'.
+     * @param string $table Nombre de la tabla a verificar y crear.
+     * @return bool Verdadero si la tabla existe o se creó correctamente, falso en caso contrario.
+     */
+    private function verificarYCrearTabla($instance, $table): bool
+    {
+        $connection = $instance->getConnectionName();
+        $status = Schema::connection($connection)->hasTable($table);
+        if (!$status) {
+            if (!$instance->createTable()) {
+                $this->dispatch('error-mapuche-mi-simplificacion', 'La tabla MapucheMiSim no se creo');
+                Log::info('La tabla MapucheMiSim no se creo');
+                return false;
+            }
+            $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla se creo exitosamente');
+            Log::info('La tabla se creo exitosamente');
+        }
+        return true;
     }
-}
 
-private function insertarDatos($nroLiqui, $periodoFiscal)
-{
-    Log::info('mapucheMiSimplificacion() ');
-    $result = TableModel::mapucheMiSimplificacion($nroLiqui, $periodoFiscal);
-    if ($result) {
-        $this->dispatch('success-mapuche-mi-simplificacion', 'insert into suc.afip_mapuche_mi_simplificacion exitoso');
-    } else {
-        $this->dispatch('error-mapuche-mi-simplificacion', 'insert into suc.afip_mapuche_mi_simplificacion fallo');
+    /** Verifica si la tabla 'suc.afip_mapuche_mi_simplificacion' tiene datos y, si es así, la vacía.
+     *
+     * @param AfipMapucheMiSimplificacion $instance Instancia del modelo de la tabla 'suc.afip_mapuche_mi_simplificacion'.
+     * @return void
+     */
+    private function verificarYVaciarTabla($instance): void
+    {
+        $tableHasData = $instance->get();
+        if ($tableHasData) {
+            $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla no esta vacia. Intentando vaciar');
+            Log::info('La tabla no esta vacia. Intentando vaciar');
+            AfipMapucheMiSimplificacion::truncate();
+        }
     }
-}
+
+
+    /** Inserta datos en la tabla 'suc.tabla_temp_cuils'.
+     *
+     * @param string $nroLiqui Número de liquidación.
+     * @param string $periodoFiscal Período fiscal.
+     * @param array|null $cuils Lista de CUILs a insertar.
+     * @return bool Verdadero si la inserción se completó correctamente, falso en caso contrario.
+     */
+    private function insertarDatos($nroLiqui, $periodoFiscal, $cuils = null): bool
+    {
+        Log::info('Iniciando inserción de datos en tabla_temp_cuils');
+        try {
+            $result = TablaTempCuils::insertTable($cuils);
+            if ($result) {
+                $this->dispatch('success-tabla-temp-cuils', 'Inserción en suc.tabla_temp_cuils exitosa');
+                Log::info('Inserción en suc.tabla_temp_cuils completada');
+                return true;
+            } else {
+                $this->dispatch('error-tabla-temp-cuils', 'Fallo en la inserción en suc.tabla_temp_cuils');
+                Log::error('Fallo en la inserción en suc.tabla_temp_cuils');
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al insertar datos en tabla_temp_cuils: ' . $e->getMessage());
+            $this->dispatch('error-tabla-temp-cuils', 'Error al insertar datos en tabla_temp_cuils');
+            return false;
+        }
+    }
+
+    /** Verifica si la tabla 'suc.tabla_temp_cuils' existe en la base de datos.
+     *
+     * @return bool Verdadero si la tabla existe, falso en caso contrario.
+     */
+    public function verificarExistenciaTabla(): bool
+    {
+        $tableName = 'suc.tabla_temp_cuils';
+        $exists = Schema::connection('pgsql-mapuche')->hasTable($tableName);
+        Log::info("Verificación de existencia de tabla $tableName: " . ($exists ? 'Existe' : 'No existe'));
+        return $exists;
+    }
+
+
+
+    /** Verifica si la tabla 'suc.tabla_temp_cuils' existe en la base de datos y, si no existe, la crea.
+     *
+     * @return bool Verdadero si la tabla se creó exitosamente, falso si ya existía.
+     */
+    public function crearTablaSiNoExiste(): bool
+    {
+        if (!$this->verificarExistenciaTabla()) {
+            Schema::connection('pgsql-mapuche')->create('suc.tabla_temp_cuils', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->string('cuil', 11);
+            });
+            Log::info('Tabla suc.tabla_temp_cuils creada exitosamente');
+            return true;
+        }
+        Log::info('La tabla suc.tabla_temp_cuils ya existe, no se requiere creación');
+        return false;
+    }
+
+
+    /* Verifica si existe la tabla 'suc.tabla_temp_cuils' y, si es así, borra todos los registros de la tabla.
+     *
+     * @return bool Verdadero si la tabla existía y se borraron los registros, falso en caso contrario.
+     */
+    public function borrarDatosSiExisten(): bool
+    {
+        if ($this->verificarExistenciaTabla()) {
+            $count = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils')->count();
+            if ($count > 0) {
+                DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils')->truncate();
+                Log::info("Se borraron $count registros de la tabla suc.tabla_temp_cuils");
+                return true;
+            }
+            Log::info('La tabla suc.tabla_temp_cuils está vacía, no se requiere borrado');
+        }
+        return false;
+    }
+
 
 
 

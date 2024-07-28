@@ -47,24 +47,28 @@
                         <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuils Mapuche
                             que no
                             estan en Afip</h5>
-                        <x-mary-button wire:click="loadCuilsNotInAfip" class="btn-outline">
-                            Load
-                        </x-mary-button>
-                        @if ($cuilsNotInAfipLoaded)
+                        @if ($this->showLoadButton)
+                            <x-mary-button wire:click="loadCuilsNotInAfip" class="btn-outline">
+                                Load
+                            </x-mary-button>
+                        @endif
+                        @if ($this->showCreateTempTableButton)
                             <div class="mt-2 mb-2">
                                 <x-mary-button wire:click="showCuilsDetails" class="btn-outline">
                                     Crear tabla temporal
                                 </x-mary-button>
                                 <p class="font-normal text-gray-700 dark:text-gray-400">
-                                    Cantidad de cuils que no estan en Afip: {{ $cuilsNotInAfip->count() }}
+                                    Cantidad de cuils que no estan en Afip: {{ $cuilsCount }}
                                 </p>
                             </div>
                         @endif
-                        @if ($miSimButton)
+                        @if ($this->showExecuteStoredFunctionButton)
                             <x-mary-button wire:click="mapucheMiSimplificacion" class="btn-outline rounded">
                                 Generar tabla AfipMapucheMiSimplificacion
                             </x-mary-button>
                         @endif
+
+
                         @if ($tableTempCreated)
                             <x-mary-button wire:click="dropTableTemp" class="btn-outline rounded">
                                 Drop Table Temp

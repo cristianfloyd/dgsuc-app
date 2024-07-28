@@ -7,8 +7,8 @@ use App\Services\ProcessLogService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
-/**
- * Proporciona un servicio para gestionar el flujo de trabajo de un proceso.
+
+/** Proporciona un servicio para gestionar el flujo de trabajo de un proceso.
  *
  * La clase WorkflowService es responsable de administrar los pasos de un proceso de flujo de trabajo, incluido iniciar el proceso, obtener el paso actual, completar los pasos y determinar el siguiente paso. También proporciona métodos para obtener los pasos del flujo de trabajo y generar URL para cada paso.
  *
@@ -25,8 +25,8 @@ class WorkflowService
 
 
 
-    /**
-     * Inicia un nuevo proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
+
+    /* Inicia un nuevo proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
      *
      * Este método inicializa un nuevo proceso de flujo de trabajo creando un nuevo registro ProcessLog con el tipo de proceso 'afip_mi_simplificacion_workflow'. Se devuelve la instancia de ProcessLog creada.
      *
@@ -38,8 +38,8 @@ class WorkflowService
     }
 
 
-    /**
-     * Recupera el último registro del proceso de flujo de trabajo, si no se completó o falló.
+
+    /**  Recupera el último registro del proceso de flujo de trabajo, si no se completó o falló.
      *
      * Este método recupera el registro de proceso más reciente de ProcessLogService. Si el último proceso no está en un estado completo o fallido, devuelve el proceso log instance. Otherwise, it returns null.
      *
@@ -61,13 +61,13 @@ class WorkflowService
         return $latestProcess;
     }
 
-    /**
-     * Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
+
+    /* Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
      * Las keys son los nombres de los pasos y los valores son las descripciones de los pasos(stpes).
      *
      * @return array Una matriz asociativa de pasos del flujo de trabajo.
      */
-    public function getSteps()
+    public function getSteps(): array
     {
         return [
             'subir_archivo_afip' => 'Subir archivo de relaciones laborales activas',
@@ -82,13 +82,16 @@ class WorkflowService
         ];
     }
 
-    /**
-     * Obtenga el paso actual en el proceso de flujo de trabajo.
+
+
+    /** Obtiene el paso actual en el proceso de flujo de trabajo.
      *
-     * @param ProcessLog $processLog The process log instance.
-     * @return string The current step in the workflow process, or 'completed' if all steps are completed.
+     * Este método recorre los pasos del registro de proceso proporcionado y devuelve el primer paso que no está en estado "completed". Si todos los pasos están en estado "completed", devuelve "completed".
+     *
+     * @param ProcessLog $processLog La instancia de registro de proceso.
+     * @return string El paso actual en el proceso de flujo de trabajo, o "completed" si todos los pasos están completados.
      */
-    public function getCurrentStep(ProcessLog $processLog)
+    public function getCurrentStep(ProcessLog $processLog): string
     {
         $steps = $processLog->steps;
         foreach ($steps as $step => $status) {
@@ -99,8 +102,18 @@ class WorkflowService
         return 'completed';
     }
 
-    /* Update the status of a step in the process log.
-    */
+
+
+    /* Actualiza el estado de un paso en el registro del proceso de flujo de trabajo.
+     *
+     * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada al estado indicado. También realiza algunas acciones adicionales, como:
+     * - Registrar el cambio de estado en el log.
+     * - Si el paso se marca como "completed", obtener el siguiente paso en el flujo de trabajo y actualizarlo a "in_progress".
+     *
+     * @param ProcessLog $processLog La instancia de registro de proceso que se actualizará.
+     * @param string $step El nombre del paso a actualizar.
+     * @param string $status El nuevo estado del paso (por ejemplo, "completed", "in_progress", etc.).
+     */
     public function updateStep(ProcessLog $processLog, string $step, string $status)
     {
         // Actualiza el estado del step en el workflow
@@ -141,7 +154,7 @@ class WorkflowService
      * @param ProcessLog $processLog La instancia de registro de proceso que se actualizará.
      * @param string $step El nombre del paso a marcar como completado.
      */
-    public function completeStep(ProcessLog $processLog, string $step)
+    public function completeStep(ProcessLog $processLog, string $step): void
     {
         $this->updateStep($processLog, $step, 'completed');
         Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
@@ -209,4 +222,68 @@ class WorkflowService
 
         return $urls[$step] ?? '/';
     }
+
+    /** Obtiene los sub-pasos de un paso específico del flujo de trabajo.
+     *
+     * @param string $step El nombre del paso del flujo de trabajo.
+     * @return array Los sub-pasos del paso especificado.
+     */
+    public function getSubSteps($step): array
+    {
+        $subSteps = [
+            'poblar_tabla_temp_cuils' => [
+                'verificar_existencia_tabla',
+                'crear_tabla_si_no_existe',
+                'borrar_datos_si_existen',
+                'insertar_datos'
+            ]
+        ];
+        return $subSteps[$step] ?? [];
+    }
+
+
+
+    /** Actualiza el estado de un sub-paso del proceso.
+     *
+     * @param ProcessLog $processLog El registro del proceso.
+     * @param string $step El paso del proceso.
+     * @param string $subStep El sub-paso a actualizar.
+     * @param string $status El nuevo estado del sub-paso ('in_progress', 'completed', etc.).
+     */
+    public function updateSubStep(ProcessLog $processLog, string $step, string $subStep, string $status)
+    {
+        $steps = $processLog->steps;
+        if (!isset($steps[$step]['sub_steps'])) {
+            $steps[$step]['sub_steps'] = [];
+        }
+        $steps[$step]['sub_steps'][$subStep] = $status;
+
+        $this->processLogService->updateStep($processLog, $steps, $steps[$step]);
+
+        Log::info("Sub-paso actualizado en WorkflowService: $step - $subStep - $status", ['process_id' => $processLog->id]);
+    }
+
+
+
+    /**  Completa un sub-paso del proceso de flujo de trabajo.
+     *
+     * Si hay un siguiente sub-paso, lo marca como 'in_progress'. Si no hay más sub-pasos, marca el paso completo.
+     *
+     * @param ProcessLog $processLog El registro del proceso.
+     * @param string $step El paso del proceso.
+     * @param string $subStep El sub-paso a completar.
+     */
+    public function completeSubStep(ProcessLog $processLog, string $step, string $subStep): void
+    {
+        $subSteps = $this->getSubSteps($step);
+        $currentSubStepIndex = array_search($subStep, $subSteps);
+
+        if ($currentSubStepIndex !== false && isset($subSteps[$currentSubStepIndex + 1])) {
+            $nextSubStep = $subSteps[$currentSubStepIndex + 1];
+            $this->updateSubStep($processLog, $step, $nextSubStep, 'in_progress');
+        } else {
+            $this->completeStep($processLog, $step);
+        }
+    }
+
 }

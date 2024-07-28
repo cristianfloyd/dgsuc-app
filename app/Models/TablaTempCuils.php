@@ -19,6 +19,11 @@ class TablaTempCuils extends Model
     ];
     public $timestamps = false;
 
+    /** Verifica si la tabla suc.tabla_temp_cuils existe en la base de datos.
+    *
+    * Devuelve verdadero si la tabla existe, falso en caso contrario.
+     * @return bool
+     * */
     public static function tableExists()
     {
         $instance = new TablaTempCuils();
@@ -27,7 +32,12 @@ class TablaTempCuils extends Model
         return schema::connection($connection)->hasTable($table);
     }
 
-    public function createTable()
+    /** Crea la tabla suc.tabla_temp_cuils con una columna id como clave primaria
+     * y una columna cuil de tipo string de 11 caracteres que es única.
+     * @return void
+     *
+     */
+    public function createTable(): void
     {
         Schema::connection($this->connection)->create($this->table, function ($table) {
             $table->id();
@@ -35,6 +45,9 @@ class TablaTempCuils extends Model
         });
     }
 
+
+    /** Elimina la tabla suc.tabla_temp_cuils si existe.
+     */
     public static function dropTable(): void
     {
         $connection = (new TablaTempCuils())->getConnectionName();
@@ -42,6 +55,11 @@ class TablaTempCuils extends Model
         Schema::connection($connection)->dropIfExists($table);
     }
 
+    /** Inserta una lista de CUILs en la tabla suc.tabla_temp_cuils.
+     *
+     * @param array $cuils Lista de CUILs a insertar.
+     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
+     */
     public static function insertTable(array $cuils): bool
     {
         try {
@@ -65,6 +83,12 @@ class TablaTempCuils extends Model
         }
     }
 
+    /** Inserta datos en la tabla suc.afip_mapuche_mi_simplificacion utilizando la función suc.get_mi_simplificacion_tt.
+     *
+     * @param int $nroLiqui Número de liquidación.
+     * @param int $periodoFiscal Período fiscal.
+     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
+     */
     public static function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): bool
     {
         try {
