@@ -8,6 +8,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use Livewire\Attributes\Rule;
+use App\Services\WorkflowService;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,14 +28,23 @@ class ParaMiSimplificacion extends Component
     public $search = '';
     #[Url(history: true)]
     public int $perPage = 5;
-    #[Rule('required|gt:5')]
+    public $isFinished = false;
+    protected $workflowService;
+    protected $processLog;
+    protected $step;
 
+
+    public function boot(WorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
+
+    }
     public function updateSearch()
     {
         $this->resetPage();
     }
     public function mount(){
-        $this->dispatch('para-mi-simplificacion-mount');
+        //
     }
 
     #[Computed()]
@@ -92,6 +102,14 @@ class ParaMiSimplificacion extends Component
         // Descargar el archivo
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
+
+    public function toggleFinished()
+    {
+        //
+    }
+
+
+
 
     public function render()
     {

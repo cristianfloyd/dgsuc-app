@@ -124,6 +124,7 @@ class ProcessLogService
      */
     public function getLatestProcess(): ?ProcessLog
     {
+        Log::info("Buscando el último registro de ProcessLog en ProcessLogService");
         return ProcessLog::latest()->first();
     }
 }

@@ -23,6 +23,7 @@
                     hint="Mayor que 10."
                     class="range-accent float-right" />
             </div>
+                
             <div>
                 <x-mary-button wire:click="exportarTxt" label="Exportar TXT" class="btn-success" />
             </div>

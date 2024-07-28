@@ -19,9 +19,9 @@ class AfipMapucheMiSimplificacion extends Model
 
     protected $fillable = ['nro_legaj', 'nro_liqui', 'sino_cerra', 'desc_estado_liquidacion', 'nro_cargo', 'periodo_fiscal', 'tipo_registro', 'codigo_movimiento', 'cuil', 'trabajador_agropecuario', 'modalidad_contrato', 'inicio_rel_laboral', 'fin_rel_laboral', 'obra_social', 'codigo_situacion_baja', 'fecha_tel_renuncia', 'retribucion_pactada', 'modalidad_liquidacion', 'domicilio', 'actividad', 'puesto', 'rectificacion', 'ccct', 'tipo_servicio', 'categoria', 'fecha_susp_serv_temp', 'nro_form_agro', 'covid'];
 
-    // Metodo para crear la tabla en base al modelo.
-    /**
-     * Creates the `suc.afip_mapuche_mi_simplificacion` table in the `pgsql-mapuche` database connection if it doesn't already exist.
+
+    
+    /** Creates the `suc.afip_mapuche_mi_simplificacion` table in the `pgsql-mapuche` database connection if it doesn't already exist.
      *
      * If the table already exists, the method does nothing and returns `false`.
      * If the table is created successfully, the method returns `true`.

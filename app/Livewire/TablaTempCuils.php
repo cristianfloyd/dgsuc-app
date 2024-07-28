@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
+use App\Services\WorkflowService;
 
 class TablaTempCuils extends Component
 {
@@ -18,28 +19,37 @@ class TablaTempCuils extends Component
     public $cuilsNotInAfipLoaded;
 
     protected $tablaTempCuil;
+    protected $workflowService;
 
 
     #[On('iniciar-poblado-tabla-temp')]
     public function iniciarPobladoTablaTemp($nroLiqui, $periodoFiscal, $cuils)
     {
+        if ($cuils === null) {
+            log::info("iniciarPobladoTablaTemp: cuils es null");
+            $this->cuils = TableModel::all();
+            dd($nroLiqui, $periodoFiscal, $cuils);
+
+        } else {
+            $this->cuils = TableModel::whereIn('cuil', $cuils)->get();
+        }
+
         $processLog = $this->workflowService->getLatestWorkflow();
 
         $this->verificarExistenciaTabla();
-        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'verificar_existencia_tabla');
+        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'verificar_existencia_tabla');
 
         $this->crearTablaSiNoExiste();
-        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'crear_tabla_si_no_existe');
+        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'crear_tabla_si_no_existe');
 
         $this->borrarDatosSiExisten();
-        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'borrar_datos_si_existen');
+        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'borrar_datos_si_existen');
 
         $this->insertarDatos($nroLiqui, $periodoFiscal, $cuils);
-        $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'insertar_datos');
+        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'insertar_datos');
 
         $this->dispatch('success-poblado-tabla-temp-cuils');
     }
-
 
 
 
@@ -56,8 +66,11 @@ class TablaTempCuils extends Component
     #[On('mapuche-mi-simplificacion')]
     public function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): void
     {
+        Log::info('metodo para lanzar funcion almacenada en progreso');
+
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
             $this->dispatch('error-mapuche-mi-simplificacion', 'nroliqui o periodofiscal vacios');
+            Log::warning('nroliqui o periodofiscal vacios');
             return;
         }
 
@@ -118,7 +131,7 @@ class TablaTempCuils extends Component
                 Log::info('La tabla MapucheMiSim no se creo');
                 return false;
             }
-            $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla se creo exitosamente');
+            $this->dispatch('success-mapuche-mi-simplificacion-created', 'La tabla se creo exitosamente');
             Log::info('La tabla se creo exitosamente');
         }
         return true;
@@ -133,7 +146,6 @@ class TablaTempCuils extends Component
     {
         $tableHasData = $instance->get();
         if ($tableHasData) {
-            $this->dispatch('success-mapuche-mi-simplificacion', 'La tabla no esta vacia. Intentando vaciar');
             Log::info('La tabla no esta vacia. Intentando vaciar');
             AfipMapucheMiSimplificacion::truncate();
         }
@@ -151,7 +163,7 @@ class TablaTempCuils extends Component
     {
         Log::info('Iniciando inserción de datos en tabla_temp_cuils');
         try {
-            $result = TablaTempCuils::insertTable($cuils);
+            $result = TableModel::insertTable($cuils);
             if ($result) {
                 $this->dispatch('success-tabla-temp-cuils', 'Inserción en suc.tabla_temp_cuils exitosa');
                 Log::info('Inserción en suc.tabla_temp_cuils completada');
@@ -222,8 +234,9 @@ class TablaTempCuils extends Component
 
 
 
-    public function boot()
+    public function boot(WorkflowService $workflowService)
     {
+        $this->workflowService = $workflowService;
         Log::info('TablaTempCuils boot');
     }
     public function mount()

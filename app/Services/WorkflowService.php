@@ -48,15 +48,15 @@ class WorkflowService
     public function getLatestWorkflow(): ?ProcessLog
     {
         $latestProcess = $this->processLogService->getLatestProcess();
-
+        // dd($latestProcess);
         if (!$latestProcess) {
             return null;
         }
 
         // Verificar si el proceso mas reciente esta completado o fallido
-        if (in_array($latestProcess->status, [ 'completed','failed'])) {
-            return null; //Retorna null si el proceso esta completado o fallido
-        }
+        // if (in_array($latestProcess->status, [ 'completed','failed'])) {
+        //     return null; //Retorna null si el proceso esta completado o fallido
+        // }
 
         return $latestProcess;
     }
@@ -74,9 +74,9 @@ class WorkflowService
             'subir_archivo_mapuche' => 'Subir archivo de Mapuche SICOSS',
             'import_archivo_afip' => 'Importar relaciones laborales activas',
             'import_archivo_mapuche' => 'Importar Mapuche SICOSS',
-            'obtener_cuils_not_in_afip' => 'Comparar y extraer CUILs',
-            'poblar_tabla_temp_cuils' => 'Poblar tabla Mapuche MI Simplificación',
-            'ejecutar_funcion_almacenada' => 'Obtener diferencias de CUILs',
+            'obtener_cuils_not_in_afip' => 'CUILs no existentes en AFIP',
+            'poblar_tabla_temp_cuils' => 'Poblar tabla temp de CUILs',
+            'ejecutar_funcion_almacenada' => 'diferencias de CUILs',
             'obtener_cuils_no_insertados' => 'Cuils no insertados',
             'exportar_txt_para_afip' => 'Exportar resultados a AFIP',
         ];
@@ -96,6 +96,7 @@ class WorkflowService
         $steps = $processLog->steps;
         foreach ($steps as $step => $status) {
             if ($status !== 'completed') {
+                Log::info("Return en getCurrentStep: $step");
                 return $step;
             }
         }
@@ -146,8 +147,8 @@ class WorkflowService
         }
     }
 
-    /**
-     * Completa un paso en el proceso de flujo de trabajo y actualiza el siguiente paso si está disponible.
+
+    /** Completa un paso en el proceso de flujo de trabajo y actualiza el siguiente paso si está disponible.
      *
      * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada a "completed". Luego recupera el siguiente paso en el proceso de flujo de trabajo y actualiza el estado de ese paso a "in_progress".
      *
@@ -166,8 +167,8 @@ class WorkflowService
         }
     }
 
-    /**
- * Obtiene el siguiente paso de el flujo de trabajo.
+
+/** Obtiene el siguiente paso de el flujo de trabajo.
  *
  * @param string $currentStep El paso actual en el flujo de trabajo.
  * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
@@ -179,10 +180,10 @@ class WorkflowService
             throw new \InvalidArgumentException("Paso no válido: {$currentStep}");
         }
 
-        $processLog = $this->getLatestWorkflow();
-        Log::info("getNextStep() -> Paso actual: {$currentStep}", ['process_id' => $processLog->id]);
+        // $processLog = $this->getLatestWorkflow();
+        Log::info("getNextStep() -> Paso actual: {$currentStep}");
         $pasos = $steps[$currentStepIndex + 1] ?? null;
-        Log::info("getNextStep() -> Siguiente paso: {$pasos}", ['process_id' => $processLog->id]);
+        Log::info("getNextStep() -> Siguiente paso: {$pasos}");
         return $pasos;
     }
 
@@ -241,49 +242,5 @@ class WorkflowService
         return $subSteps[$step] ?? [];
     }
 
-
-
-    /** Actualiza el estado de un sub-paso del proceso.
-     *
-     * @param ProcessLog $processLog El registro del proceso.
-     * @param string $step El paso del proceso.
-     * @param string $subStep El sub-paso a actualizar.
-     * @param string $status El nuevo estado del sub-paso ('in_progress', 'completed', etc.).
-     */
-    public function updateSubStep(ProcessLog $processLog, string $step, string $subStep, string $status)
-    {
-        $steps = $processLog->steps;
-        if (!isset($steps[$step]['sub_steps'])) {
-            $steps[$step]['sub_steps'] = [];
-        }
-        $steps[$step]['sub_steps'][$subStep] = $status;
-
-        $this->processLogService->updateStep($processLog, $steps, $steps[$step]);
-
-        Log::info("Sub-paso actualizado en WorkflowService: $step - $subStep - $status", ['process_id' => $processLog->id]);
-    }
-
-
-
-    /**  Completa un sub-paso del proceso de flujo de trabajo.
-     *
-     * Si hay un siguiente sub-paso, lo marca como 'in_progress'. Si no hay más sub-pasos, marca el paso completo.
-     *
-     * @param ProcessLog $processLog El registro del proceso.
-     * @param string $step El paso del proceso.
-     * @param string $subStep El sub-paso a completar.
-     */
-    public function completeSubStep(ProcessLog $processLog, string $step, string $subStep): void
-    {
-        $subSteps = $this->getSubSteps($step);
-        $currentSubStepIndex = array_search($subStep, $subSteps);
-
-        if ($currentSubStepIndex !== false && isset($subSteps[$currentSubStepIndex + 1])) {
-            $nextSubStep = $subSteps[$currentSubStepIndex + 1];
-            $this->updateSubStep($processLog, $step, $nextSubStep, 'in_progress');
-        } else {
-            $this->completeStep($processLog, $step);
-        }
-    }
 
 }

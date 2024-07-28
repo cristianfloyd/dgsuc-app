@@ -25,7 +25,7 @@
                         <ul class="space-y-2">
                             @foreach ($this->workflowService->getSteps() as $step => $description)
                                 <li class="flex items-center">
-                                    <span class="mr-2">{{ $description }}:</span>
+                                    <span class="mr-2">{{ $step }}:</span>
                                     @if ($this->workflowService->isStepCompleted($latestWorkflow, $step))
                                         <span class="text-green-500">Completado</span>
                                     @elseif ($step === 'current_step')
@@ -52,7 +52,12 @@
                                 Load
                             </x-mary-button>
                         @endif
-                        @if ($this->showCreateTempTableButton)
+                        @if ($this->stepsCompleted)
+                        <x-mary-button wire:click="showParaMiSimplificacionAndCuilsNoEncontrados" class="btn-outline">
+                            Mostrar MiSimplificacion y CUILs sin datos
+                        </x-mary-button>
+                        @endif
+                        @if ($showCreateTempTableButton)
                             <div class="mt-2 mb-2">
                                 <x-mary-button wire:click="showCuilsDetails" class="btn-outline">
                                     Crear tabla temporal
@@ -65,18 +70,6 @@
                         @if ($this->showExecuteStoredFunctionButton)
                             <x-mary-button wire:click="mapucheMiSimplificacion" class="btn-outline rounded">
                                 Generar tabla AfipMapucheMiSimplificacion
-                            </x-mary-button>
-                        @endif
-
-
-                        @if ($tableTempCreated)
-                            <x-mary-button wire:click="dropTableTemp" class="btn-outline rounded">
-                                Drop Table Temp
-                            </x-mary-button>
-                        @endif
-                        @if ($insertTablaTemp)
-                            <x-mary-button wire:click="insertTableTemp" class="btn-outline rounded">
-                                Insertar en Table Temp
                             </x-mary-button>
                         @endif
                     </div>
