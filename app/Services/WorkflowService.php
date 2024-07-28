@@ -26,7 +26,7 @@ class WorkflowService
 
 
 
-    /* Inicia un nuevo proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
+    /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
      *
      * Este método inicializa un nuevo proceso de flujo de trabajo creando un nuevo registro ProcessLog con el tipo de proceso 'afip_mi_simplificacion_workflow'. Se devuelve la instancia de ProcessLog creada.
      *
@@ -187,8 +187,7 @@ class WorkflowService
         return $pasos;
     }
 
-    /**
- * Verifica si un paso del proceso ha sido completado.
+/** Verifica si un paso del proceso ha sido completado.
  *
  * @param ProcessLog $processLog El registro del proceso.
  * @param string $step El paso a verificar.
@@ -200,8 +199,7 @@ class WorkflowService
     }
 
 
-    /**
- * Obtiene la URL de un paso del flujo de trabajo.
+/** Obtiene la URL de un paso del flujo de trabajo.
  *
  * @param string $step El nombre del paso del flujo de trabajo.
  * @return string La URL del paso del flujo de trabajo.
@@ -242,5 +240,19 @@ class WorkflowService
         return $subSteps[$step] ?? [];
     }
 
-
+    /** Verifica si un proceso ha sido completado.
+     *
+     * @param \App\Models\ProcessLog $processLog
+     * @return bool Verdadero si el proceso ha sido completado, falso en caso contrario.
+     */
+    public function isProcessCompleted(ProcessLog $processLog): bool
+    {
+        $steps = $processLog->steps;
+        foreach ($steps as $step) {
+            if ($step!== 'completed') {
+                return false;
+            }
+        }
+        return true;
+    }
 }

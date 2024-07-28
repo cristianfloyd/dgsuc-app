@@ -19,11 +19,11 @@
                     min="5"
                     max="95"
                     step="5"
-                    label="Seleccione cantidad de registros por página"
+                    label="Seleccione cantidad de registros por página: {{$perPage}}"
                     hint="Mayor que 10."
                     class="range-accent float-right" />
             </div>
-                
+            <x-mary-toggle label="Right" wire:model="item2" right hint="Marcar Completado" />
             <div>
                 <x-mary-button wire:click="exportarTxt" label="Exportar TXT" class="btn-success" />
             </div>

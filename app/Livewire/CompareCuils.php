@@ -50,8 +50,9 @@ class CompareCuils extends Component
     public $insertTablaTemp = false;
     public $miSimButton = false;
     public $ShowMiSimplificacion = false;
-    protected $workflowService;
     protected $currentStep;
+    protected $processLog;
+    protected $workflowService;
 
 
 
@@ -63,10 +64,10 @@ class CompareCuils extends Component
 
     public function mount()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        // dd($processLog);
-        if ($processLog) {
-            $this->currentStep = $this->workflowService->getCurrentStep($processLog);
+        $this->processLog = $this->workflowService->getLatestWorkflow();
+        // dd($this->processLog);
+        if ($this->processLog) {
+            $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
             Log::info("mount: currentStep: {$this->currentStep}");
 
             // dd($this->currentStep);
@@ -75,20 +76,22 @@ class CompareCuils extends Component
                 $this->cuilsCount = TablaTempCuils::count();
                 if ($this->cuilsCount == 0) {
                     // volver al paso anterior
-                    $this->workflowService->updateStep($processLog, 'obtener_cuils_not_in_afip', 'in_pprogress');
+                    $this->workflowService->updateStep($this->processLog, 'obtener_cuils_not_in_afip', 'in_pprogress');
                     log::info("mount: volver al paso anterior");
                 }
             } else if ($this->currentStep === 'ejecutar_funcion_almacenada') {
                 $this->crearTablaTemp = true;
-            } else if ($this->currentStep === 'obtener_cuils_no_insertados' || $this->currentStep === 'exportar_txt_para_afip') {
-
-                $this->loadCuilsNotInserted();
+            } else if ($this->currentStep === 'obtener_cuils_no_insertados' ) {
+                $this->showParaMiSimplificacionAndCuilsNoEncontrados();
+            } else if ($this->currentStep === 'exportar_txt_para_afip') {
+                $this->showParaMiSimplificacionAndCuilsNoEncontrados();
             } else {
                 //metodo para mostrar tabla de cuils no encontrados y componente paraMiSimplificacion
             }
         } else {
             $this->currentStep = null;
         }
+        Log::info("mount: currentStep: {$this->currentStep}", ['processLog' => $this->processLog]);
     }
 
     #[Computed]
@@ -97,7 +100,11 @@ class CompareCuils extends Component
         return $this->currentStep === 'obtener_cuils_not_in_afip';
     }
 
-
+    #[Computed]
+    public function showCuilsNoInsertedButton()
+    {
+        return $this->currentStep === 'obtener_cuils_no_insertados';
+    }
 
     #[Computed]
     public function showExecuteStoredFunctionButton()
@@ -106,22 +113,34 @@ class CompareCuils extends Component
     }
 
 
-    public function showParaMiSimplificacionAndCuilsNoEncontrados()
+    public function completeStep()
     {
+        $processLog = $this->workflowService->getLatestWorkflow();
+        $step = $this->workflowService->getCurrentStep($processLog);
+
+        Log::info("completeStep: currentStep: {$step}");
+        $this->workflowService->completeStep($processLog, $step);
+    }
+
+    /** Metodo para poblar $cuilsNoInserted con los CUILs no encontrados
+     * @return void
+     */
+    public function showParaMiSimplificacionAndCuilsNoEncontrados(): void
+    {
+        $this->showCuilsTable = false;
         $this->ShowMiSimplificacion = true;
         $this->loadCuilsNotInserted();
-        $this->showCuilsNoEncontrados = true;
-        $this->showCuilsTable = false;
 
         // Asegúrate de que $cuilsNoInserted esté poblado con los CUILs no encontrados
         if (empty($this->cuilsNoInserted)) {
             // Aquí puedes agregar lógica para poblar $cuilsNoInserted si es necesario
+
         }
 
-        $this->dispatch('content-updated');
+        //$this->dispatch('content-updated');
     }
 
-    #[Computed]
+    #[Computed( persist: true)]
     public function stepsCompleted(): bool
     {
         $step = $this->currentStep;
@@ -215,12 +234,12 @@ class CompareCuils extends Component
         $result = count($this->cuilsToSearch) - $count;
         $this->ShowMiSimplificacion = true;
 
-        if ($result > 0) {
-            $this->loadCuilsNotInserted();
-            $this->successMessage .= ". CUILs no insertados: " . count($this->cuilsNoInserted);
-            $this->reset('cuilsNotInAfipLoaded', 'showCuilsTable');
-            $this->showCuilsNoEncontrados = true;
-        }
+        // if ($result > 0) {
+        //     $this->loadCuilsNotInserted();
+        //     $this->successMessage .= ". CUILs no insertados: " . count($this->cuilsNoInserted);
+        //     $this->reset('cuilsNotInAfipLoaded', 'showCuilsTable');
+        //     $this->showCuilsNoEncontrados = true;
+        // }
 
         // Iniciar el siguiente paso del workflow
         $nextStep = $this->workflowService->getNextStep('ejecutar_funcion_almacenada');
@@ -437,6 +456,10 @@ class CompareCuils extends Component
     }
 
 
+    /** Carga los CUILs que no están en la tabla afip_relaciones_activas
+     *
+     * @return void
+     */
     private function loadCuilsNotInserted()
     {
         $this->cuilsNoInserted = $this->cuilsNoEncontrados();
@@ -444,9 +467,15 @@ class CompareCuils extends Component
     }
 
 
+    public function startNewProcess()
+    {
+        $this->processLog = $this->workflowService->startWorkflow();
+    }
 
-
-
+    public function getIsProcessCompleteProperty()
+    {
+        return $this->workflowService->isProcessCompleted($this->processLog);
+    }
 
 
 

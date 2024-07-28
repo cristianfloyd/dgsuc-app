@@ -28,6 +28,7 @@
                                     <span class="mr-2">{{ $step }}:</span>
                                     @if ($this->workflowService->isStepCompleted($latestWorkflow, $step))
                                         <span class="text-green-500">Completado</span>
+                                        <input type="checkbox" class="toggle toggle-success" disabled checked="checked" />
                                     @elseif ($step === 'current_step')
                                         <span class="text-blue-500">En progreso</span>
                                     @else
@@ -52,11 +53,16 @@
                                 Load
                             </x-mary-button>
                         @endif
+
                         @if ($this->stepsCompleted)
-                        <x-mary-button wire:click="showParaMiSimplificacionAndCuilsNoEncontrados" class="btn-outline">
-                            Mostrar MiSimplificacion y CUILs sin datos
-                        </x-mary-button>
+                            <x-mary-button wire:click="showParaMiSimplificacionAndCuilsNoEncontrados" class="btn-outline">
+                                Mostrar MiSimplificacion y CUILs sin datos
+                            </x-mary-button>
+                            <x-mary-button class="btn-outline mt-2" wire:click="startNewProcess">
+                                Iniciar Nuevo Flujo de Trabajo
+                            </x-mary-button>
                         @endif
+
                         @if ($showCreateTempTableButton)
                             <div class="mt-2 mb-2">
                                 <x-mary-button wire:click="showCuilsDetails" class="btn-outline">
@@ -67,6 +73,13 @@
                                 </p>
                             </div>
                         @endif
+
+                        @if ($this->showCuilsNoInsertedButton)
+                            <x-mary-button wire:click="completeStep" class="btn-outline">
+                                Cuils no Encontrados
+                            </x-mary-button>
+                        @endif
+
                         @if ($this->showExecuteStoredFunctionButton)
                             <x-mary-button wire:click="mapucheMiSimplificacion" class="btn-outline rounded">
                                 Generar tabla AfipMapucheMiSimplificacion
