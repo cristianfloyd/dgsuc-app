@@ -1,18 +1,40 @@
 <div>
     <h1>Proceso de AFIP Mi Simplificación</h1>
-    <ul>
-        @foreach($steps as $stepKey => $stepName)
-            <li>
-                @if($processLog->steps[$stepKey] === 'completed')
-                    ✅
-                @elseif($stepKey === $currentStep)
-                    ➡️
-                @endif
-                <button wire:click="goToStep('{{ $stepKey }}')"
-                        @if($processLog->steps[$stepKey] !== 'completed' && $stepKey !== $currentStep) disabled @endif>
+
+    <div class="mb-4 container" id="process-container">
+        <div class="mb-4">
+            <button wire:click="iniciarProceso" class="btn btn-primary" @if($processFinished) disabled @endif>
+                Iniciar Proceso
+            </button>
+            <button wire:click="terminarProceso" class="btn btn-danger" @if($processFinished) disabled @endif>
+                Terminar Proceso
+            </button>
+        </div>
+        <h2>Pasos del Proceso:</h2>
+        <ul>
+            @foreach($steps as $stepKey => $stepName)
+                <li>
+                    @if($currentProcess->steps[$stepKey] === 'completed')
+                        ✅
+                    @elseif($stepKey === $currentStep)
+                        ➡️
+                    @endif
                     {{ $stepName }}
+                </li>
+            @endforeach
+        </ul>
+        @if($processFinished)
+            <div class="mt-4">
+                <button wire:click="showParaMiSimplificacion)" class="btn btn-success">
+                    Mostrar Para Mi Simplificación
                 </button>
-            </li>
-        @endforeach
-    </ul>
+            </div>
+        @endif
+    </div>
+
+    @if ($showParaMiSimplificacion)
+        <div class="mt-4">
+            <livewire:para-mi-simplificacion />
+        </div>
+    @endif
 </div>

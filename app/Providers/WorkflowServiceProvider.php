@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\WorkflowService;
 use App\Services\ProcessLogService;
 use Illuminate\Support\ServiceProvider;
+use app\Services\ProcessInitializationService;
 use Illuminate\Contracts\Support\DeferrableProvider;
 
 class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -22,6 +23,11 @@ class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvi
             return new WorkflowService($app->make(ProcessLogService::class));
         });
 
+        $this->app->singleton(ProcessInitializationService::class, function ($app) {
+            return new ProcessInitializationService(
+            $app->make(WorkflowService::class),
+            $app->make(ProcessLogService::class));
+        });
     }
 
     /**

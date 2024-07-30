@@ -9,13 +9,14 @@ use RuntimeException;
 class ValidationService
 {
     /**
-     * Create a new class instance.
+     * Valida el archivo seleccionado para la importación.
+     *
+     * Esta función verifica que se haya seleccionado un archivo, que el archivo exista en el sistema y que sea legible. También verifica que el tipo de archivo sea válido (txt o csv).
+     *
+     * @param UploadedFile $archivoSeleccionado El archivo seleccionado para importar.
+     * @throws InvalidArgumentException Si no se ha seleccionado ningún archivo o el tipo de archivo no es válido.
+     * @throws RuntimeException Si el archivo seleccionado no existe o no se puede leer.
      */
-    public function __construct()
-    {
-        //
-    }
-
     public function validateSelectedFile(UploadedFile $archivoSeleccionado): void
     {
         if (!$archivoSeleccionado) {

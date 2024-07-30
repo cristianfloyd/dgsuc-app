@@ -159,7 +159,7 @@ class WorkflowService
     {
         $this->updateStep($processLog, $step, 'completed');
         Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
-
+        $this->dispatch('paso-completado');
         $nextStep = $this->getNextStep($step);
         if ($nextStep) {
             $this->updateStep($processLog, $nextStep, 'in_progress');
