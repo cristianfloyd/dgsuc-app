@@ -21,12 +21,14 @@ class AfipMiSimplificacion extends Component
 
 
 
-
-    public function mount(WorkflowService $workflowService, ProcessLogService $processLogService)
+    public function boot(WorkflowService $workflowService, ProcessLogService $processLogService)
     {
-        log::info("Mounting AfipMiSimplificacion component");
         $this->workflowService = $workflowService;
         $this->processLogService = $processLogService;
+    }
+
+    public function mount()
+    {
 
         // Intentar obtener el proceso más reciente
         $this->currentProcess = $this->processLogService->getLatestProcess();
@@ -40,35 +42,27 @@ class AfipMiSimplificacion extends Component
         $this->processLogId = $this->currentProcess->id;
 
         // Ahora podemos obtener el paso actual de forma segura
-        $this->currentStep = $this->workflowService->getCurrentStep($this->currentStep);
-        $this->steps = $this->workflowService->getSteps();
-        Log::info("Current step: {$this->currentStep}");
-        Log::info("Steps: " . json_encode($this->steps));
+        $this->getStepAndCurrentStep();
     }
 
 
-    public function render(WorkflowService $workflowService, ProcessLogService $processLogService)
+    public function render()
     {
         $processLog = ProcessLog::find($this->processLogId);
-        $steps = $workflowService->getSteps();
 
         return view('livewire.afip-mi-simplificacion', [
-            'steps' => $steps,
+            'steps' => $this->steps,
             'currentStep' => $this->currentStep,
             'processLog' => $processLog,
             'processLogId' => $this->processLogId,
         ]);
     }
 
-    public function goToStep($step, WorkflowService $workflowService)
+    public function getStepAndCurrentStep()
     {
-        $processLog = ProcessLog::find($this->processLogId);
-        // dd($step, $this->currentStep, $this->processLogId, $this->currentProcess, $processLog);
-        if(
-            $workflowService->isStepCompleted($processLog, $step) || $step === $this->currentStep)
-        {
-            // dd($step, 'siguiente paso');
-            return redirect($workflowService->getStepUrl($step));
-        }
+        $this->steps = $this->workflowService->getSteps();
+        $this->currentStep = $this->workflowService->getCurrentStep($this->currentStep);
     }
+
+
 }

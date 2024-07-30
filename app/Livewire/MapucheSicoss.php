@@ -11,6 +11,7 @@ use App\Models\AfipSicossDesdeMapuche;
 use Illuminate\Support\Facades\Storage;
 use App\Models\AfipImportacionCrudaModel;
 use App\Services\WorkflowService;
+use Illuminate\Database\Eloquent\Collection;
 
 class MapucheSicoss extends Component
 {
@@ -18,17 +19,26 @@ class MapucheSicoss extends Component
     const TABLE_AFIP_IMPORT_CRUDO = 'AfipImportCrudo';
     const TABLE_AFIP_MAPUCHE_SICOSS = 'AfipMapucheSicoss';
 
+
+    /* @var UploadedFile|null El archivo seleccionado actualmente
+    *
+    */
     public ?UploadedFile $selectedArchivo;
-    public $listadoArchivos;
-    public ?int $selectedArchivoID;
-    public ?string $filename;
+    /** @var Collection|null Listado de archivos subidos
+     * 
+     */
+    public ?Collection $listadoArchivos;
+    public ?int $selectedArchivoID = null;
+    public ?string $filename = null;
 
-    protected ?string $filepath;
-    protected ?string $absolutePath;
-    protected ?string $periodoFiscal;
+    protected ?string $filepath = null;
+    protected ?string $absolutePath = null;
+    protected ?string $periodoFiscal = null;
 
-    protected $afipMapucheSicossTable;
-    protected $afipImportacionCrudaTable;
+    // protected $afipMapucheSicossTable;
+    // protected $afipImportacionCrudaTable;
+
+
     protected $importService;
     protected $tableVerificationService;
     protected $workflowService;
@@ -53,30 +63,23 @@ class MapucheSicoss extends Component
     public function importarArchivo($archivoId = null): void
     {
 
-        /*
-        *   Falta veriicar la tabla y limpiearla si es necesario.
-        *
-        */
-        if ($archivoId === null) {
-            $archivoId = $this->selectedArchivoID;
-        }
 
-        $archivo = UploadedFile::findOrFail($archivoId);
+        $archivoId ??= $this->selectedArchivoID;
 
-        if ($archivo) {
+
+        $file = UploadedFile::findOrFail($archivoId);
+
+        if ($file) {
             $this->dispatch('success', message: 'Archivo Encontrado');
             //obtener el ultimo workflow
             $latestWorkflow = $this->workflowService->getLatestWorkflow();
             $currentStep = $this->workflowService->getCurrentStep($latestWorkflow);
         }
 
-        $resultado = $this->importService->importFile($archivo);
+        $resultado = $this->importService->importFile($file);
 
         if ($resultado) {
-            //completar el workflow
             $this->workflowService->completeStep($latestWorkflow, 'import_archivo_mapuche');
-
-            //obtener el siguiente paso
             $nextStep = $this->workflowService->getNextStep($currentStep);
 
             if ($nextStep) {
@@ -105,21 +108,6 @@ class MapucheSicoss extends Component
         $this->filename = $this->selectedArchivo->original_name;
     }
 
-
-    /**
-     * Verifica las tablas necesarias para el funcionamiento del componente.
-     */
-    public function verifyTables(): void
-    {
-    }
-    private function emitTableVerificationResult(string $tableName, bool $isNotEmpty): void
-    {
-        if ($isNotEmpty) {
-            $this->dispatch('success', "La tabla $tableName no está vacía.");
-        } else {
-            $this->dispatch('error', "La tabla $tableName no está vacía.");
-        }
-    }
 
 
     public function render()

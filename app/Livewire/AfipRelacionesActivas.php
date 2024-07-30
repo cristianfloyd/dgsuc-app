@@ -12,8 +12,7 @@ use App\Models\AfipRelacionesActivas as ModelsAfipRelacionesActivas;
 use App\services\DatabaseService;
 use App\Services\ValidationService;
 
-/**
- * Componente Livewire que maneja la importación de archivos AFIP y el almacenamiento de las relaciones activas.
+/** Componente Livewire que maneja la importación de archivos AFIP y el almacenamiento de las relaciones activas.
  *
  * Este componente se encarga de:
  * - Mostrar la lista de archivos cargados y permitir la selección de uno de ellos.

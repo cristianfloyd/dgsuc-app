@@ -64,8 +64,7 @@ class Uploadtxt extends Component
     }
 
 
-    /**
-     * Saves the uploaded file, creates a new UploadedFile model, and updates the workflow.
+    /** Saves the uploaded file, creates a new UploadedFile model, and updates the workflow.
      *
      * This method is responsible for the following tasks:
      * 1. Validates the uploaded file, ensuring it is a .txt file and does not exceed 20MB.
@@ -88,25 +87,15 @@ class Uploadtxt extends Component
 
         Log::info('Archivo subido: ' . $this->archivotxt->getClientOriginalName());
 
-        $messages = [
-            'archivotxt.required' => 'Por favor, seleccione un archivo para subir.',
-            'archivotxt.mimes' => 'Solo se permiten archivos de tipo .txt.',
-            'archivotxt.max' => 'El archivo no debe superar los 20MB.',
-        ];
-
-        $this->validate([
-            'archivotxt' => 'required|file|mimes:txt,csv|max:20480',
-        ], $messages);
+        $this->validateInput();
 
         try {
 
             // Usar el UploadService para almacenar el archivo
-            $this->file_path = UploadService::uploadFile( $this->archivotxt, 'afiptxt');
+            $this->file_path = $this->uploadFile();
 
-            // dd($this->file_path);
+
             $this->uploadfilemodel();
-
-
 
             // Marcamos el paso como completado
             switch ($currentStep) {
@@ -133,15 +122,32 @@ class Uploadtxt extends Component
 
             // Resetear la propiedad para limpiar el formulario
             $this->reset('archivotxt');
-
+            
         } catch (ValidationException $e) {
             //Handle validation errors
             $this->dispatch('validationError', $e->errors());
-
         } catch (Exception $e) {
             //Handle file upload or other unexpected errors
             $this->dispatch('fileUploadError', $e->getMessage());
         }
+    }
+
+    private function validateInput()
+    {
+        $messages = [
+            'archivotxt.required' => 'Por favor, seleccione un archivo para subir.',
+            'archivotxt.mimes' => 'Solo se permiten archivos de tipo .txt.',
+            'archivotxt.max' => 'El archivo no debe superar los 20MB.',
+        ];
+
+        $this->validate([
+            'archivotxt' => 'required|file|mimes:txt,csv|max:20480',
+        ], $messages);
+    }
+
+    private function uploadFile()
+    {
+        return UploadService::uploadFile($this->archivotxt, 'afiptxt');
     }
 
     public function deleteFile($fileId)
@@ -164,7 +170,6 @@ class Uploadtxt extends Component
 
             // Actualizar la lista de archivos
             $this->importaciones = UploadedFile::all();
-
         } catch (Exception $e) {
             //Handle file deletion or other unexpected errors
             $this->dispatch('fileDeleteError', $e->getMessage());
