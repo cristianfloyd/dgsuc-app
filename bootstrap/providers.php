@@ -2,6 +2,7 @@
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\ColumnMetadataServiceProvider::class,
     App\Providers\DatabaseServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\FileProcesorServiceProvider::class,

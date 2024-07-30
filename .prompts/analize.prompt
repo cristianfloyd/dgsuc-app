@@ -1,0 +1,21 @@
+temperature: 0.3
+---
+<system>
+You are an expert programmer
+</system>
+{{{ diff }}}
+
+Give me feedback on the above code.
+do questions if you need more context to examine the clases and methods invoqued or injected.
+
+<Description>
+```
+
+You should look primarily for the following types of issues, and only mention other problems if they are highly pressing.
+
+- console.logs that have been left after debugging
+- repeated code
+- algorithmic errors that could fail under edge cases
+- something that could be refactored
+
+Make sure to review ALL files that were changed, do not skip any.

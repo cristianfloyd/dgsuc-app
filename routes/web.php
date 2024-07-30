@@ -6,27 +6,28 @@ use App\Livewire\Clicker;
 use App\Livewire\TodoList;
 use App\Livewire\UserList;
 use App\Livewire\ContactUs;
+use App\Livewire\TestCuils;
 use App\Livewire\Uploadtxt;
 use App\Livewire\UsersTable;
 use App\Livewire\CompareCuils;
+use App\Livewire\FileEncoding;
 use App\Livewire\RegisterForm;
 use App\Livewire\BuscarColumna;
 use App\Livewire\MapucheSicoss;
 use App\Livewire\ConvertirTabla;
+use App\services\ColumnMetadata;
 use App\Livewire\AfipImportCrudo;
+use App\Livewire\ShowCuilDetails;
 use App\Livewire\BuscarComentario;
 use App\Livewire\MapucheSicossTable;
 use App\Livewire\ReporteLiquidacion;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\AfipMiSimplificacion;
+use App\Livewire\ParaMiSimplificacion;
 use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
-use App\Livewire\AfipMiSimplificacion;
-use App\Livewire\FileEncoding;
-use App\Livewire\ParaMiSimplificacion;
-use App\Livewire\ShowCuilDetails;
-use App\Livewire\TestCuils;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
@@ -45,6 +46,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas');
     Route::get('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
     Route::post('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
+
+
+Route::get('/test-column-metadata', function () {
+    $columnMetadata = app(ColumnMetadata::class);
+    dd($columnMetadata->getWidths());
+});
+
 
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');
     Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('mapuchemisim');
