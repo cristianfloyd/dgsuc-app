@@ -1,6 +1,6 @@
 <?php
 
-namespace App\services;
+namespace app\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
