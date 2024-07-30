@@ -3,10 +3,10 @@
 
     <div class="mb-4 container" id="process-container">
         <div class="mb-4">
-            <button wire:click="iniciarProceso" class="btn btn-primary" @if($processFinished) disabled @endif>
+            <button wire:click="startProcess" class="btn btn-primary" @if($processFinished) disabled @endif>
                 Iniciar Proceso
             </button>
-            <button wire:click="terminarProceso" class="btn btn-danger" @if($processFinished) disabled @endif>
+            <button wire:click="endProcess" class="btn btn-danger" @if($processFinished) disabled @endif>
                 Terminar Proceso
             </button>
         </div>
