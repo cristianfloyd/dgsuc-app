@@ -48,10 +48,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::post('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
 
 
-Route::get('/test-column-metadata', function () {
-    $columnMetadata = app(ColumnMetadata::class);
-    dd($columnMetadata->getWidths());
-});
+    Route::get('/test-column-metadata', function () {
+        $columnMetadata = app(ColumnMetadata::class);
+        dd($columnMetadata->getWidths());
+    });
 
 
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');

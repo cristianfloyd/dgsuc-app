@@ -6,6 +6,7 @@ use App\Models\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile as HttpUploadedFile;
+use Illuminate\Contracts\Filesystem\Filesystem;
 
 class UploadService
 {
@@ -60,12 +61,12 @@ class UploadService
         return Storage::disk($disk)->delete($path);
     }
 
-    public static function url(string $path, string $disk = 'public'): string  {
+    public static function url(string $path, string $disk = 'public'): string
+    {
         return Storage::disk($disk)->url($path);
     }
 
-    /**
-     * Valida el nombre de la carpeta especificada para garantizar que solo contenga caracteres permitidos.
+    /** Valida el nombre de la carpeta especificada para garantizar que solo contenga caracteres permitidos.
      *
      * @param string $folder El nombre de la carpeta a validar.
      * @throws \InvalidArgumentException Si el nombre de la carpeta contiene caracteres no permitidos.
@@ -77,8 +78,7 @@ class UploadService
         }
     }
 
-    /**
-     * Limpiar un nombre de archivo reemplazando cualquier carácter no alfanumérico, sin guión, sin punto y sin guión por un guión bajo.
+    /** Limpiar un nombre de archivo reemplazando cualquier carácter no alfanumérico, sin guión, sin punto y sin guión por un guión bajo.
      *
      * @param string $fileName El nombre del archivo a limpiar.
      * @return string El nombre del archivo limpio.

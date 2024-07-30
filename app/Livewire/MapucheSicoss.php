@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\ImportService;
@@ -33,10 +34,11 @@ class MapucheSicoss extends Component
     protected $workflowService;
 
 
-    public function boot(ImportService $importService,
-            TableVerificationService $tableVerificationService,
+    public function boot(
+        ImportService $importService,
+        TableVerificationService $tableVerificationService,
         WorkflowService $workflowService
-    ){
+    ) {
         $this->importService = $importService;
         $this->tableVerificationService = $tableVerificationService;
         $this->workflowService = $workflowService;
@@ -61,7 +63,7 @@ class MapucheSicoss extends Component
 
         $archivo = UploadedFile::findOrFail($archivoId);
 
-        if($archivo){
+        if ($archivo) {
             $this->dispatch('success', message: 'Archivo Encontrado');
             //obtener el ultimo workflow
             $latestWorkflow = $this->workflowService->getLatestWorkflow();
@@ -109,11 +111,10 @@ class MapucheSicoss extends Component
      */
     public function verifyTables(): void
     {
-
     }
     private function emitTableVerificationResult(string $tableName, bool $isNotEmpty): void
     {
-        if($isNotEmpty){
+        if ($isNotEmpty) {
             $this->dispatch('success', "La tabla $tableName no está vacía.");
         } else {
             $this->dispatch('error', "La tabla $tableName no está vacía.");

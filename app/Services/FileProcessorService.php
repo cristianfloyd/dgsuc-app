@@ -13,16 +13,8 @@ use App\Models\UploadedFile;
  */
 class FileProcessorService
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-        //
-    }
 
-    /**
-     * Processes an uploaded file and returns an array of processed lines.
+    /** Processes an uploaded file and returns an array of processed lines.
      *
      * @param UploadedFile $file The uploaded file to process.
      * @param array $columnWidths An array of column widths to use when processing each line.
@@ -41,8 +33,7 @@ class FileProcessorService
         })->all();
     }
 
-    /**
-     * Processes a single line of the uploaded file using the provided column widths and fiscal period.
+    /** Processes a single line of the uploaded file using the provided column widths and fiscal period.
      *
      * @param string $line The line of the file to process.
      * @param array $columnWidths An array of column widths to use when processing the line.
