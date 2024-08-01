@@ -201,8 +201,6 @@ class AfipMiSimplificacion extends Component
  */
     public function showParaMiSimplificacion(): void
     {
-        dump($this->isProcessFinished());
-
         if ($this->isProcessFinished()) {
             $this->ParaMiSimplificacion = true;
         }
