@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Traits;
+
+trait MessageTrait
+{
+    public $message = null;
+
+    /** Set the message to be displayed.
+     *
+     * @param string $message The message to be displayed.
+     * @return void
+     */
+    public function showMessage($message): void
+    {
+        $this->message = $message;
+    }
+}

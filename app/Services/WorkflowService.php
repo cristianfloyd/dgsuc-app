@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\ProcessLog;
 use App\Services\ProcessLogService;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,7 +19,6 @@ use Illuminate\Support\ServiceProvider;
 class WorkflowService
 {
     protected $processLogService;
-
     public function __construct(ProcessLogService $processLogService)
     {
         $this->processLogService = $processLogService;
@@ -159,7 +160,7 @@ class WorkflowService
     {
         $this->updateStep($processLog, $step, 'completed');
         Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
-        $this->dispatch('paso-completado');
+        Event::dispatch('paso-completado');
         $nextStep = $this->getNextStep($step);
         if ($nextStep) {
             $this->updateStep($processLog, $nextStep, 'in_progress');

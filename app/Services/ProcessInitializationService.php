@@ -23,10 +23,11 @@ class ProcessInitializationService
      *
      * @return ProcessLog El nuevo registro de proceso creado.
      */
-    public function initializeNewProcess()
+    public function initializeNewProcess(string $processName): ProcessLog
     {
         $processLog = new ProcessLog();
-        $processLog->status = 'iniciado';
+        $processLog->process_name = $processName;
+        $processLog->status = 'in_progress';
         $processLog->steps = $this->workflowService->getSteps();
         $processLog->save();
 
