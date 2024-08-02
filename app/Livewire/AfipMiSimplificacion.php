@@ -55,7 +55,7 @@ class AfipMiSimplificacion extends Component
     public function handleProcesoTerminado(): void
     {
         $this->processFinished = true;
-        $this->getStepsAndCurrentStep();
+        $this->ParaMiSimplificacion = true;
         $this->showMessage('Proceso terminado correctamente');
     }
 
@@ -95,13 +95,23 @@ class AfipMiSimplificacion extends Component
  */
     public function endProcess(): void
     {
-        if ($this->canEndProcess()) {
-            $this->processLogService->completeProcess($this->currentProcess);
-            $this->processFinished = true;
+        
+
+        if ($this->canEndProcess())
+        {
+            $this->processFinished = false;
+            // $this->processLogService->completeProcess($this->currentProcess);
             $this->currentProcess->status = 'completed';
             $this->currentProcess->save();
+            $this->showParaMiSimplificacion();
+            Log::info('Proceso finalizado correctamente');
             $this->dispatch('proceso-terminado');
         }
+    }
+
+    public function updatedProcessFinished(): void
+    {
+        //
     }
 
     /** Marca un paso como completado en el proceso actual.
@@ -126,7 +136,7 @@ class AfipMiSimplificacion extends Component
  */
     public function showMessage($message): void
     {
-        if(emptyTraversable()){
+        if(!$message){
             return;
         }
         $this->message = $message;

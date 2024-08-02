@@ -49,28 +49,25 @@ class ProcessLogService
      */
     public function updateStep(ProcessLog $processLog, string $step, string $status)
     {
+        if (!is_array($processLog->steps)) {
+            throw new \InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
+        }
+
         $steps = $processLog->steps;
 
-        // dd($steps, $step, $status);
+        if (!isset($steps[$step])) {
+            throw new \OutOfBoundsException("Paso no encontrado: $step");
+        }
 
-        if (isset($steps[$step]))
-        {
         $steps[$step] = $status;
-        // dd($steps, $step, $status);
 
-        $processLog->update(['steps' => $steps]);
+        if (!$processLog->update(['steps' => $steps])) {
+            throw new \Exception('No se pudo actualizar el registro del proceso');
+        }
 
         Log::info("Paso actualizado: $step - $status", ['process_id' => $processLog->id]);
-
-            // dd($steps, $step, $status);
-
-        if($status === 'completed' && $this->allStepsCompleted($steps)){
-            $this->completeProcess($processLog);
-        }
-    } else {
-            Log::warning("Paso no encontrado: $step", ['process_id' => $processLog->id]);
     }
-    }
+
 
     /*
     * Verificar si todos los pasos del proceso han sido completados
@@ -80,7 +77,7 @@ class ProcessLogService
     */
     private function allStepsCompleted(array $steps): bool
     {
-        return collect($steps)->every(function ($status){
+        return collect($steps)->every(function ($status) {
             return $status === 'completed';
         });
     }

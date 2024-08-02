@@ -87,12 +87,12 @@ class WorkflowService
 
     /** Obtiene el paso actual en el proceso de flujo de trabajo.
      *
-     * Este método recorre los pasos del registro de proceso proporcionado y devuelve el primer paso que no está en estado "completed". Si todos los pasos están en estado "completed", devuelve "completed".
+     * Este método recorre los pasos del registro de proceso proporcionado y devuelve el primer paso que no está en estado "completed". Si todos los pasos están en estado "completed", devuelve "null".
      *
      * @param ProcessLog $processLog La instancia de registro de proceso.
-     * @return string El paso actual en el proceso de flujo de trabajo, o "completed" si todos los pasos están completados.
+     * @return string|null El paso actual en el proceso de flujo de trabajo, o "null" si todos los pasos están completados.
      */
-    public function getCurrentStep(ProcessLog $processLog): string
+    public function getCurrentStep(ProcessLog $processLog): string|null
     {
         $steps = $processLog->steps;
         foreach ($steps as $step => $status) {
@@ -101,7 +101,7 @@ class WorkflowService
                 return $step;
             }
         }
-        return 'completed';
+        return null;
     }
 
 
@@ -120,38 +120,22 @@ class WorkflowService
     {
         // Actualiza el estado del step en el workflow
         $steps = $processLog->steps;
-        if(isset($steps[$step])){
+        if (isset($steps[$step])) {
             $steps[$step] = $status;
 
-            // dd($steps, $step, $status);
             // Actualizar el ProcessLog
             $this->processLogService->updateStep($processLog, $step, $status);
 
-            // dd($steps, $step, $status);
-
-            // Logica adicional del workflow si es necesario
-            if($status === 'completed'){
-                // obtener el siguiente paso
-                $nextStep = $this->getNextStep($step);
-
-                // si hay un siguiente paso, actualiza el estado del siguiente paso a "in_progress"
-                if ($nextStep) {
-                    $this->processLogService->updateStep($processLog, $nextStep, 'in_progress');
-                }
-
-            }
-
             Log::info("Paso actualizado en WorkflowService: $step - $status", ['process_id' => $processLog->id]);
-            // dd($steps, $step, $status);
         } else {
             Log::warning("Paso no encontrado en WorkflowService: $step", ['process_id' => $processLog->id]);
         }
     }
 
 
-    /** Completa un paso en el proceso de flujo de trabajo y actualiza el siguiente paso si está disponible.
+    /** Completa un paso en el proceso de flujo de trabajo y no actualiza el siguiente paso si está disponible.
      *
-     * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada a "completed". Luego recupera el siguiente paso en el proceso de flujo de trabajo y actualiza el estado de ese paso a "in_progress".
+     * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada a "completed". Luego recupera el siguiente paso en el proceso de flujo de trabajo.
      *
      * @param ProcessLog $processLog La instancia de registro de proceso que se actualizará.
      * @param string $step El nombre del paso a marcar como completado.
@@ -160,20 +144,14 @@ class WorkflowService
     {
         $this->updateStep($processLog, $step, 'completed');
         Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
-        Event::dispatch('paso-completado');
-        $nextStep = $this->getNextStep($step);
-        if ($nextStep) {
-            $this->updateStep($processLog, $nextStep, 'in_progress');
-
-        }
     }
 
 
-/** Obtiene el siguiente paso de el flujo de trabajo.
- *
- * @param string $currentStep El paso actual en el flujo de trabajo.
- * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
- */
+    /** Obtiene el siguiente paso de el flujo de trabajo.
+     *
+     * @param string $currentStep El paso actual en el flujo de trabajo.
+     * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
+     */
     public function getNextStep(string $currentStep): ?string
     {
         $steps = array_keys($this->getSteps());
@@ -181,30 +159,36 @@ class WorkflowService
             throw new \InvalidArgumentException("Paso no válido: {$currentStep}");
         }
 
-        // $processLog = $this->getLatestWorkflow();
         Log::info("getNextStep() -> Paso actual: {$currentStep}");
+        /**
+         * Obtiene el siguiente paso en el flujo de trabajo.
+         *
+         * Si el paso actual es el último en el flujo de trabajo, devuelve null.
+         *
+         * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
+         */
         $pasos = $steps[$currentStepIndex + 1] ?? null;
         Log::info("getNextStep() -> Siguiente paso: {$pasos}");
         return $pasos;
     }
 
-/** Verifica si un paso del proceso ha sido completado.
- *
- * @param ProcessLog $processLog El registro del proceso.
- * @param string $step El paso a verificar.
- * @return bool Verdadero si el paso ha sido completado, falso en caso contrario.
- */
+    /** Verifica si un paso del proceso ha sido completado.
+     *
+     * @param ProcessLog $processLog El registro del proceso.
+     * @param string $step El paso a verificar.
+     * @return bool Verdadero si el paso ha sido completado, falso en caso contrario.
+     */
     public function isStepCompleted(ProcessLog $processLog, string $step): bool
     {
         return $processLog->steps[$step] === 'completed';
     }
 
 
-/** Obtiene la URL de un paso del flujo de trabajo.
- *
- * @param string $step El nombre del paso del flujo de trabajo.
- * @return string La URL del paso del flujo de trabajo.
- */
+    /** Obtiene la URL de un paso del flujo de trabajo.
+     *
+     * @param string $step El nombre del paso del flujo de trabajo.
+     * @return string La URL del paso del flujo de trabajo.
+     */
     public function getStepUrl(string $step): string
     {
         // return route('workflow.step', ['step' => $step]);
@@ -250,7 +234,7 @@ class WorkflowService
     {
         $steps = $processLog->steps;
         foreach ($steps as $step) {
-            if ($step!== 'completed') {
+            if ($step !== 'completed') {
                 return false;
             }
         }

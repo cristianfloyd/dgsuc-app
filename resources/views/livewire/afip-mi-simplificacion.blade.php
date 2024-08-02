@@ -16,11 +16,10 @@
     <div class="mb-4 container" id="process-container">
         <h1>Proceso de AFIP Mi Simplificación</h1>
         <div class="mb-4">
-            <button class="btn btn-primary btn-info" wire:click="startProcess"
-                @if (!$processFinished) disabled @endif>
+            <button class="btn btn-primary btn-info" wire:click="startProcess" :disabled="!processFinished">
                 Iniciar Proceso
             </button>
-            <button wire:click="endProcess" class="btn btn-neutral" @if ($processFinished) disabled @endif>
+            <button type="button" class="btn btn-neutral" wire:click="endProcess"  :disabled="processFinished">
                 Terminar Proceso
             </button>
         </div>
@@ -44,8 +43,8 @@
         </ul>
         @if ($processFinished)
             <div class="mt-4">
-                <button type="button" wire:click="showParaMiSimplificacion" class="btn btn-success">
-                    Mostrar Para Mi Simplificación
+                <button type="button" wire:click="showParaMiSimplificacion" @disabled(true)  class="btn btn-success">
+                    Mostrar Mi Simplificación
                 </button>
             </div>
         @endif
