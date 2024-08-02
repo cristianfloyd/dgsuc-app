@@ -69,7 +69,7 @@ class ProcessLogService
     }
 
 
-    /*
+    /**
     * Verificar si todos los pasos del proceso han sido completados
     *
     * @param array $steps

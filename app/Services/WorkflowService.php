@@ -49,16 +49,9 @@ class WorkflowService
     public function getLatestWorkflow(): ?ProcessLog
     {
         $latestProcess = $this->processLogService->getLatestProcess();
-        // dd($latestProcess);
         if (!$latestProcess) {
             return null;
         }
-
-        // Verificar si el proceso mas reciente esta completado o fallido
-        // if (in_array($latestProcess->status, [ 'completed','failed'])) {
-        //     return null; //Retorna null si el proceso esta completado o fallido
-        // }
-
         return $latestProcess;
     }
 

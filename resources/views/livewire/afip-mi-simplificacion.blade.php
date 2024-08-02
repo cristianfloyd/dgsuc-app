@@ -1,6 +1,6 @@
 <div>
-
-    <div x-data="{ ShowMessage: false, message: '' }"
+    <div>
+    {{-- <div x-data="{ ShowMessage: false, message: '' }"
         x-show="ShowMessage"
         x-on:show-message.window="
             ShowMessage = true;
@@ -9,17 +9,21 @@
             console.log($wire.message)"
         class="alert alert-success text-center" wire:loading.remove role="alert">
         <p x-text="message"></p>
-        <button @click="ShowMessage = false" class="btn btn-neutral">X</button>
+        <button @click="ShowMessage = false" class="btn btn-neutral">X</button> --}}
         {{$message}}
     </div>
 
     <div class="mb-4 container" id="process-container">
         <h1>Proceso de AFIP Mi Simplificación</h1>
         <div class="mb-4">
-            <button class="btn btn-primary btn-info" wire:click="startProcess" :disabled="!processFinished">
+            <button class="btn btn-primary btn-info" wire:click="startProcess" @if (!$processFinished) disabled
+
+            @endif>
                 Iniciar Proceso
             </button>
-            <button type="button" class="btn btn-neutral" wire:click="endProcess"  :disabled="processFinished">
+            <button type="button" class="btn btn-neutral" wire:click="endProcess"  @if ($processFinished) disabled
+
+            @endif>
                 Terminar Proceso
             </button>
         </div>
@@ -43,7 +47,7 @@
         </ul>
         @if ($processFinished)
             <div class="mt-4">
-                <button type="button" wire:click="showParaMiSimplificacion" @disabled(true)  class="btn btn-success">
+                <button type="button" wire:click="showParaMiSimplificacion" class="btn btn-success">
                     Mostrar Mi Simplificación
                 </button>
             </div>

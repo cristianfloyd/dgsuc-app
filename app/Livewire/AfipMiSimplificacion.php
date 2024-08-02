@@ -37,10 +37,13 @@ class AfipMiSimplificacion extends Component
 
     public function mount()
     {
-        $this->currentProcess = $this->processInitializationService->initializeOrGetLatestProcess();
-        $this->processLogId = $this->currentProcess->id;
-        $this->getStepsAndCurrentStep();
-        $this->processFinished = $this->isProcessFinished();
+        $this->currentProcess = $this->workflowService->getLatestWorkflow();
+        if(!$this->currentProcess){
+            $this->currentProcess = $this->processInitializationService->initializeOrGetLatestProcess();
+        }
+            $this->processLogId = $this->currentProcess->id;
+            $this->getStepsAndCurrentStep();
+            $this->processFinished = $this->isProcessFinished();
     }
 
     #[On('proceso-iniciado')]
@@ -75,7 +78,8 @@ class AfipMiSimplificacion extends Component
  */
     public function startProcess(): void
     {
-        if ($this->canStartProcess()) {
+        $status = $this->isNewProcessAllowed();
+        if ($status) {
             $processName = 'afip_mi_simplificacion_workflow';
             $this->currentProcess = $this->processInitializationService->initializeNewProcess($processName);
             $this->processLogId = $this->currentProcess->id;
@@ -95,16 +99,14 @@ class AfipMiSimplificacion extends Component
  */
     public function endProcess(): void
     {
-        
+
 
         if ($this->canEndProcess())
         {
-            $this->processFinished = false;
             // $this->processLogService->completeProcess($this->currentProcess);
             $this->currentProcess->status = 'completed';
             $this->currentProcess->save();
-            $this->showParaMiSimplificacion();
-            Log::info('Proceso finalizado correctamente');
+            // Log::info('Proceso finalizado correctamente');
             $this->dispatch('proceso-terminado');
         }
     }
@@ -143,13 +145,12 @@ class AfipMiSimplificacion extends Component
         $this->dispatch('show-message', ['message' => $this->message]);
     }
 
-/** Verifica si se puede iniciar un nuevo proceso.
- *
- * Este método verifica si el proceso actual no existe o si ha sido completado.
- *
- * @return bool Verdadero si se puede iniciar un nuevo proceso, falso en caso contrario.
- */
-    private function canStartProcess(): bool
+    /**
+     * Determina si se puede iniciar un nuevo proceso.
+     *
+     * @return bool Verdadero si se puede iniciar un nuevo proceso, falso en caso contrario.
+     */
+    private function isNewProcessAllowed(): bool
     {
         return $this->currentProcess === null || ($this->currentProcess !== null && $this->currentProcess->status === 'completed');
     }
