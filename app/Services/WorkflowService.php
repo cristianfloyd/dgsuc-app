@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Models\ProcessLog;
 use App\Services\ProcessLogService;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\WorkflowServiceInterface;
+use Illuminate\Contracts\Events\Dispatcher;
 
 
 /** Proporciona un servicio para gestionar el flujo de trabajo de un proceso.
@@ -16,7 +17,7 @@ use Illuminate\Support\ServiceProvider;
  *
  * @property ProcessLogService $processLogService El servicio para gestionar registros de procesos.
  */
-class WorkflowService
+class WorkflowService implements WorkflowServiceInterface
 {
     protected $processLogService;
     public function __construct(ProcessLogService $processLogService)
@@ -38,6 +39,28 @@ class WorkflowService
         return $this->processLogService->startProcess('afip_mi_simplificacion_workflow');
     }
 
+    /**
+     * Reinicia el flujo de trabajo de un proceso.
+     *
+     * Este método reinicia el flujo de trabajo de un proceso estableciendo todos los pasos en estado "pending".
+     * Se actualiza la instancia de ProcessLog proporcionada y se guarda en la base de datos.
+     * También se registra el evento de reinicio del flujo de trabajo en el log.
+     *
+     * @param ProcessLog $processLog La instancia de registro de proceso que se reiniciará.
+     * @return void
+     */
+    public function resetWorkflow(ProcessLog $processLog): void
+    {
+        $steps = array_keys($this->getSteps());
+        $updatedSteps = [];
+        foreach ($steps as $step) {
+            $updatedSteps[$step] = 'pending';
+        }
+        $processLog->steps = $updatedSteps;
+        $processLog->save();
+
+        Log::info("Flujo de trabajo reiniciado", ['process_id' => $processLog->id]);
+    }
 
 
     /**  Recupera el último registro del proceso de flujo de trabajo, si no se completó o falló.
@@ -225,12 +248,10 @@ class WorkflowService
      */
     public function isProcessCompleted(ProcessLog $processLog): bool
     {
-        $steps = $processLog->steps;
-        foreach ($steps as $step) {
-            if ($step !== 'completed') {
-                return false;
-            }
-        }
-        return true;
+        return array_reduce($processLog->steps,
+            function ($carry, $step) {
+                return $carry && $step === 'completed';
+        }, true);
     }
+
 }

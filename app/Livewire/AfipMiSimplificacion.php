@@ -2,14 +2,14 @@
 
 namespace App\Livewire;
 
-use App\Traits\MessageTrait;
 use Livewire\Component;
 use App\Models\ProcessLog;
-use App\Services\WorkflowService;
-use App\Services\ProcessLogService;
-use Illuminate\Support\Facades\Log;
-use App\Services\ProcessInitializationService;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Computed;
+use App\Contracts\MessageManagerInterface;
+use App\Contracts\WorkflowServiceInterface;
+use App\Services\WorkflowService;
+use App\Services\MessageManager;
 
 class AfipMiSimplificacion extends Component
 {
@@ -22,35 +22,40 @@ class AfipMiSimplificacion extends Component
     public $ParaMiSimplificacion = false;
     public $message = null;
 
-    protected $workflowService;
-    protected $processLogService;
-    protected $processInitializationService;
 
+    private WorkflowServiceInterface $workflowService;
+    private MessageManagerInterface $messageManager;
 
-
-    public function boot(WorkflowService $workflowService, ProcessLogService $processLogService, ProcessInitializationService $processInitializationService)
+    public function boot(WorkflowServiceInterface $workflowService, MessageManagerInterface $messageManager)
     {
         $this->workflowService = $workflowService;
-        $this->processLogService = $processLogService;
-        $this->processInitializationService = $processInitializationService;
+        $this->messageManager = $messageManager;
     }
 
     public function mount()
     {
         $this->currentProcess = $this->workflowService->getLatestWorkflow();
-        if(!$this->currentProcess){
-            $this->currentProcess = $this->processInitializationService->initializeOrGetLatestProcess();
+        if (!$this->currentProcess) {
+            $this->currentProcess = $this->workflowService->startWorkflow();
         }
-            $this->processLogId = $this->currentProcess->id;
-            $this->getStepsAndCurrentStep();
-            $this->processFinished = $this->isProcessFinished();
+        $this->processLogId = $this->currentProcess->id;
+        $this->getStepsAndCurrentStep();
+        $this->processFinished = $this->isProcessFinished();
     }
+
+    public function showMessage($message, $type = 'info'): void
+    {
+        $this->messageManager->addMessage($message, $type);
+        $this->dispatch('show-message', ['message' => $message, 'type' => $type]);
+    }
+
 
     #[On('proceso-iniciado')]
     public function handleProcesoIniciado(): void
     {
         $this->getStepsAndCurrentStep();
         $this->processFinished = false;
+        $this->ParaMiSimplificacion = false;
         $this->showMessage('Proceso iniciado correctamente');
     }
 
@@ -69,81 +74,84 @@ class AfipMiSimplificacion extends Component
         $this->showMessage('Paso completado correctamente');
     }
 
-/** Inicia un nuevo proceso.
- *
- * Este método verifica si se puede iniciar un nuevo proceso, y si es así, crea un nuevo proceso, actualiza el proceso actual,
- * actualiza la lista de pasos y notifica que el proceso ha sido iniciado.
- *
- * @return void
- */
+    /** Inicia un nuevo proceso.
+     *
+     * Este método verifica si se puede iniciar un nuevo proceso, y si es así, crea un nuevo proceso, actualiza el proceso actual,
+     * actualiza la lista de pasos y notifica que el proceso ha sido iniciado.
+     *
+     * @return void
+     */
     public function startProcess(): void
     {
         $status = $this->isNewProcessAllowed();
         if ($status) {
-            $processName = 'afip_mi_simplificacion_workflow';
-            $this->currentProcess = $this->processInitializationService->initializeNewProcess($processName);
+            $this->currentProcess = $this->workflowService->startWorkflow();
             $this->processLogId = $this->currentProcess->id;
             $this->getStepsAndCurrentStep();
             $this->processFinished = false;
             $this->currentProcess->save();
-            $this->dispatch('proceso-iniciado');
+            $this->showMessage('proceso-iniciado');
         }
     }
 
-/** Finaliza el proceso actual.
- *
- * Este método verifica si se puede finalizar el proceso actual, y si es así, marca el proceso como completado,
- * actualiza el estado del proceso y notifica que el proceso ha sido finalizado.
- *
- * @return void
- */
+
+    /** Finaliza el proceso actual.
+     *
+     * Este método verifica si se puede finalizar el proceso actual, y si es así, marca el proceso como completado,
+     * actualiza el estado del proceso y notifica que el proceso ha sido finalizado.
+     *
+     * @return void
+     */
     public function endProcess(): void
     {
-
-
-        if ($this->canEndProcess())
-        {
+        if ($this->canEndProcess()) {
             // $this->processLogService->completeProcess($this->currentProcess);
             $this->currentProcess->status = 'completed';
             $this->currentProcess->save();
             // Log::info('Proceso finalizado correctamente');
-            $this->dispatch('proceso-terminado');
+            $this->showMessage('proceso-terminado');
         }
     }
 
-    public function updatedProcessFinished(): void
-    {
-        //
-    }
-
-    /** Marca un paso como completado en el proceso actual.
+    /**
+     * Reinicia el flujo de trabajo del proceso actual.
      *
-     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para marcar un paso como completado en el proceso actual.
+     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para reiniciar el flujo de trabajo del proceso actual.
+     * Luego, actualiza el proceso actual, el paso actual y el estado de finalización del proceso.
      *
-     * @param mixed $step El paso a marcar como completado.
      * @return void
      */
+    public function resetWorkflow(): void
+    {
+        if ($this->currentProcess) {
+            $this->workflowService->resetWorkflow($this->currentProcess);
+            $this->currentProcess = $this->workflowService->getLatestWorkflow();
+            $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
+            $this->processFinished = $this->workflowService->isProcessCompleted($this->currentProcess);
+        }
+    }
+
+
+
+
     public function markStepAsCompleted($step): void
     {
         $this->workflowService->completeStep($this->currentProcess, $step);
-        $this->dispatch('paso-completado');
+        $this->showMessage('paso-completado');
     }
 
-/** Muestra un mensaje al usuario.
- *
- * Este método agrega un mensaje a la lista de mensajes del componente.
- *
- * @param string $message El mensaje a mostrar.
- * @return void
- */
-    public function showMessage($message): void
+    /** Obtiene la lista de pasos y el paso actual del proceso actual.
+     *
+     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para obtener la lista de pasos y el paso actual del proceso actual.
+     *
+     * @return void
+     */
+    public function getStepsAndCurrentStep(): void
     {
-        if(!$message){
-            return;
-        }
-        $this->message = $message;
-        $this->dispatch('show-message', ['message' => $this->message]);
+        $this->steps = $this->workflowService->getSteps();
+        $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
     }
+
 
     /**
      * Determina si se puede iniciar un nuevo proceso.
@@ -152,19 +160,41 @@ class AfipMiSimplificacion extends Component
      */
     private function isNewProcessAllowed(): bool
     {
-        return $this->currentProcess === null || ($this->currentProcess !== null && $this->currentProcess->status === 'completed');
+        return !$this->currentProcess || $this->currentProcess->status === 'completed';
     }
 
-/** Verifica si se puede finalizar el proceso actual.
- *
- * Este método verifica si el proceso actual existe, está en progreso y todos los pasos han sido completados.
- *
- * @return bool Verdadero si se puede finalizar el proceso actual, falso en caso contrario.
- */
+    /** Verifica si se puede finalizar el proceso actual.
+     *
+     * Este método verifica si el proceso actual existe, está en progreso y todos los pasos han sido completados.
+     *
+     * @return bool Verdadero si se puede finalizar el proceso actual, falso en caso contrario.
+     */
     private function canEndProcess(): bool
     {
-        return $this->currentProcess !== null && $this->currentProcess->status === 'in_progress' && $this->allStepsCompleted();
+        $status = $this->currentProcess && $this->currentProcess->status === 'in_progress' && $this->allStepsCompleted();
+        // dd($this->currentProcess->status);
+        return $status;
     }
+
+    /** Determina si el proceso actual ha sido completado.
+     *
+     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para verificar si el proceso actual ha sido completado.
+     *
+     * @return bool Verdadero si el proceso ha sido completado, falso en caso contrario.
+     */
+    public function isProcessFinished(): bool
+    {
+        $status = $this->workflowService->isProcessCompleted($this->currentProcess);
+        return $status;
+    }
+
+    #[Computed]
+    public function getStepUrl($step): string
+    {
+        return $this->workflowService->getStepUrl($step);
+    }
+
+
 
 
     /** Verifica si todos los pasos del proceso actual han sido completados.
@@ -178,56 +208,59 @@ class AfipMiSimplificacion extends Component
         if ($this->currentProcess->steps === null) {
             return false;
         }
-        return collect($this->currentProcess->steps)->every(fn ($step) => $step === 'completed');
+        return collect($this->currentProcess->steps)->every(fn($step) => $step === 'completed');
     }
 
-
-/** Retorna la lista de pasos del proceso actual.
- *
- * Este método devuelve la colección de pasos del proceso actual, que se utiliza para mostrar la progresión del proceso.
- *
- * @return array La lista de pasos del proceso actual.
- */
+    /** Retorna la lista de pasos del proceso actual.
+     *
+     * Este método devuelve la colección de pasos del proceso actual, que se utiliza para mostrar la progresión del proceso.
+     *
+     * @return array La lista de pasos del proceso actual.
+     */
     public function showSteps(): array
     {
         return $this->steps;
     }
 
-    /** Determina si el proceso actual ha sido completado.
-     *
-     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para verificar si el proceso actual ha sido completado.
-     *
-     * @return bool Verdadero si el proceso ha sido completado, falso en caso contrario.
-     */
-    public function isProcessFinished(): bool
+    #[Computed]
+    public function showResetButton()
     {
-        return $this->workflowService->isProcessCompleted($this->currentProcess);
+        $currentStepIndex = $this->getCurrentStepIndex();
+        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== 0 && $currentStepIndex !== count($this->steps) - 1;
     }
 
-/** Muestra el proceso de para mi simplificación si el proceso actual ha sido completado.
- *
- * Este método verifica si el proceso actual ha sido completado y si es así, muestra el proceso de para mi simplificación.
- *
- * @return void
- */
-    public function showParaMiSimplificacion(): void
+
+    public function getCurrentStepIndex()
+    {
+        $currentStep = $this->currentStep;
+        $steps = $this->steps;
+        $i = 0;
+        foreach ($steps as $index => $step) {
+            if ($index === $currentStep) {
+                return $i;
+            }
+            $i++;
+        }
+
+        return null; // si no se encuentra el paso actual
+    }
+
+
+
+    /** Muestra el proceso de para mi simplificación si el proceso actual ha sido completado.
+     *
+     * Este método verifica si el proceso actual ha sido completado y si es así, muestra el proceso de para mi simplificación.
+     *
+     * @return void
+     */
+    public function toggleParaMiSimplificacion(): void
     {
         if ($this->isProcessFinished()) {
-            $this->ParaMiSimplificacion = true;
+            $this->ParaMiSimplificacion = !$this->ParaMiSimplificacion;
         }
     }
 
-/** Obtiene la lista de pasos y el paso actual del proceso actual.
- *
- * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para obtener la lista de pasos y el paso actual del proceso actual.
- *
- * @return void
- */
-    public function getStepsAndCurrentStep(): void
-    {
-        $this->steps = $this->workflowService->getSteps();
-        $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
-    }
+
 
     public function render()
     {
@@ -238,7 +271,7 @@ class AfipMiSimplificacion extends Component
             'currentStep' => $this->currentStep,
             'processLog' => $processLog,
             'processLogId' => $this->processLogId,
+            'messages' => $this->messageManager->getMessages(),
         ]);
     }
 }
-
