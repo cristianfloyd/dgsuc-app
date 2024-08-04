@@ -17,7 +17,9 @@ class AfipMiSimplificacion extends Component
     public $processLogId;
     public $currentProcess;
     public $currentStep;
+    public $currentStepUrl;
     public $steps;
+    public $stepUrl;
     public $processFinished = false;
     public $ParaMiSimplificacion = false;
     public $message = null;
@@ -43,6 +45,13 @@ class AfipMiSimplificacion extends Component
         $this->processFinished = $this->isProcessFinished();
     }
 
+    /**
+     * Agrega un mensaje al gestor de mensajes y lo envía a través de un evento.
+     *
+     * @param string $message El mensaje a mostrar.
+     * @param string $type El tipo de mensaje (por ejemplo, 'info', 'error', etc.).
+     * @return void
+     */
     public function showMessage($message, $type = 'info'): void
     {
         $this->messageManager->addMessage($message, $type);
@@ -77,7 +86,7 @@ class AfipMiSimplificacion extends Component
     /** Inicia un nuevo proceso.
      *
      * Este método verifica si se puede iniciar un nuevo proceso, y si es así, crea un nuevo proceso, actualiza el proceso actual,
-     * actualiza la lista de pasos y notifica que el proceso ha sido iniciado.
+     * actualiza la lista de pasos, notifica que el proceso ha sido iniciado y redirige a la url correspondiente.
      *
      * @return void
      */
@@ -91,6 +100,8 @@ class AfipMiSimplificacion extends Component
             $this->processFinished = false;
             $this->currentProcess->save();
             $this->showMessage('proceso-iniciado');
+            // utilizando la interface workflowServiceinterface obtener la url que corresponde al primer paso
+            $this->redirect($this->currentStepUrl);
         }
     }
 
@@ -134,10 +145,10 @@ class AfipMiSimplificacion extends Component
 
 
 
-    public function markStepAsCompleted($step): void
+    public function goToCurrentStep($step): void
     {
-        $this->workflowService->completeStep($this->currentProcess, $step);
-        $this->showMessage('paso-completado');
+        $this->currentStep = $step;
+        $this->redirect($this->currentStepUrl);
     }
 
     /** Obtiene la lista de pasos y el paso actual del proceso actual.
@@ -150,8 +161,20 @@ class AfipMiSimplificacion extends Component
     {
         $this->steps = $this->workflowService->getSteps();
         $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
+        $this->getCurrentStepUrl();
     }
 
+    /**
+     * Obtiene la URL del paso actual del proceso.
+     *
+     * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para obtener la URL del paso actual del proceso actual.
+     *
+     * @return void
+     */
+    public function getCurrentStepUrl(): void
+    {
+        $this->currentStepUrl = $this->workflowService->getStepUrl($this->currentStep);
+    }
 
     /**
      * Determina si se puede iniciar un nuevo proceso.

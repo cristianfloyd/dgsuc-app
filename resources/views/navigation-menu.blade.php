@@ -43,8 +43,8 @@
 
                         <x-slot name="content">
                             <!-- Dropdown Links -->
-                            <x-dropdown-link href="{{ route('afip') }}" :active="request()->routeIs('afip')" >
-                                {{__('Afip')}}
+                            <x-dropdown-link href="{{ route('MiSimplificacion') }}" :active="request()->routeIs('MiSimplificacion')" >
+                                {{ __('Mi Simplificación') }}
                             </x-dropdown-link>
                             <x-dropdown-link href="{{ route('importar') }}" :active="request()->routeIs('importar')">
                                 {{__('Upload File')}}

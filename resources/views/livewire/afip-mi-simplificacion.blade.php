@@ -42,7 +42,7 @@
                     @elseif($stepKey === $currentStep)
                         ➡️
                         <button type="button" class="btn btn-accent"
-                            wire:click = "markStepAsCompleted('{{ $stepKey }}')">
+                            wire:click = "goToCurrentStep('{{ $stepKey }}')">
                             Completar Paso
                         </button>
                     @endif

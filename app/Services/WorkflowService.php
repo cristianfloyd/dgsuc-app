@@ -20,12 +20,12 @@ use Illuminate\Contracts\Events\Dispatcher;
 class WorkflowService implements WorkflowServiceInterface
 {
     protected $processLogService;
+
+
     public function __construct(ProcessLogService $processLogService)
     {
         $this->processLogService = $processLogService;
     }
-
-
 
 
     /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
