@@ -106,7 +106,6 @@ class Uploadtxt extends Component
         $processLog = $this->workflowService->getLatestWorkflow();
         Log::info("obtenemos el proceso actual: $processLog");
         $currentStep = $this->workflowService->getCurrentStep($processLog);
-        dump($currentStep);
 
         $this->validateInput();
 
