@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\TablaTempCuils;
@@ -9,14 +10,10 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
-use App\Services\WorkflowService;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\AfipRelacionesActivas;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -56,7 +53,7 @@ class CompareCuils extends Component
 
 
 
-    public function boot(WorkflowService $workflowService)
+    public function boot(WorkflowServiceInterface $workflowService)
     {
         $this->workflowService = $workflowService;
         $this->perPage = self::PER_PAGE;
@@ -65,19 +62,16 @@ class CompareCuils extends Component
     public function mount()
     {
         $this->processLog = $this->workflowService->getLatestWorkflow();
-        // dd($this->processLog);
         if ($this->processLog) {
             $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
-            Log::info("mount: currentStep: {$this->currentStep}");
 
-            // dd($this->currentStep);
             if ($this->currentStep === 'poblar_tabla_temp_cuils') {
                 $this->crearTablaTemp = true;
                 $this->cuilsCount = TablaTempCuils::count();
                 if ($this->cuilsCount == 0) {
                     // volver al paso anterior
                     $this->workflowService->updateStep($this->processLog, 'obtener_cuils_not_in_afip', 'in_pprogress');
-                    log::info("mount: volver al paso anterior");
+                    info("mount: volver al paso anterior");
                 }
             } else if ($this->currentStep === 'ejecutar_funcion_almacenada') {
                 $this->crearTablaTemp = true;
@@ -91,7 +85,6 @@ class CompareCuils extends Component
         } else {
             $this->currentStep = null;
         }
-        Log::info("mount: currentStep: {$this->currentStep}", ['processLog' => $this->processLog]);
     }
 
     #[Computed]
@@ -115,11 +108,8 @@ class CompareCuils extends Component
 
     public function completeStep()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $step = $this->workflowService->getCurrentStep($processLog);
-
-        Log::info("completeStep: currentStep: {$step}");
-        $this->workflowService->completeStep($processLog, $step);
+        $step = $this->workflowService->getCurrentStep($this->processLog);
+        $this->workflowService->completeStep($this->processLog, $step);
     }
 
     /** Metodo para poblar $cuilsNoInserted con los CUILs no encontrados
@@ -155,8 +145,7 @@ class CompareCuils extends Component
      */
     public function mapucheMiSimplificacion()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->updateStep($processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
 
         $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal);
         $this->reset('cuilsNotInAfipLoaded');
@@ -164,16 +153,9 @@ class CompareCuils extends Component
 
     public function showCuilsDetails(): void
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-
-        Log::info("showCuilsDetails currentStep: {$currentStep} | processLog: {$processLog->id}");
-
-        if ($currentStep === 'poblar_tabla_temp_cuils') {
-            $this->workflowService->updateStep($processLog, 'poblar_tabla_temp_cuils', 'in_progress');
+        if ($this->currentStep === 'poblar_tabla_temp_cuils') {
+            $this->workflowService->updateStep($this->processLog, 'poblar_tabla_temp_cuils', 'in_progress');
             $this->dispatch('iniciar-poblado-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilsToSearch);
-            Log::info("showCuilsDetails: iniciar-poblado-tabla-temp");
         }
     }
 
@@ -185,11 +167,10 @@ class CompareCuils extends Component
     #[On('success-tabla-temp-cuils')]
     public function handleTablaTempCuilsSuccess()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->completeStep($processLog, 'poblar_tabla_temp_cuils');
+        $this->workflowService->completeStep($this->processLog, 'poblar_tabla_temp_cuils');
 
         // Iniciar el siguiente paso: ejecutar_funcion_almacenada
-        $this->workflowService->updateStep($processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
         $this->ejecutarFuncionAlmacenada();
     }
 
@@ -222,8 +203,7 @@ class CompareCuils extends Component
     #[On('success-mapuche-mi-simplificacion')]
     public function handleSuccessMapucheMiSimplificacion(): void
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->completeStep($processLog, 'ejecutar_funcion_almacenada');
+        $this->workflowService->completeStep($this->processLog, 'ejecutar_funcion_almacenada');
 
         $this->successMessage = 'Datos insertados en Mi Simplificacion';
         $this->miSimButton = false;
@@ -246,7 +226,7 @@ class CompareCuils extends Component
 
 
         if ($nextStep) {
-            $this->workflowService->updateStep($processLog, $nextStep, 'in_progress');
+            $this->workflowService->updateStep($this->processLog, $nextStep, 'in_progress');
         }
     }
 
@@ -326,36 +306,21 @@ class CompareCuils extends Component
     {
         Log::info('loadCuilsNotInAfip iniciado');
 
-        $processLog = $this->workflowService->getLatestWorkflow();
-
-        log::info("processLog: {$processLog->id}");
-
-        if (!$processLog) {
-            $processLog = $this->workflowService->startWorkflow();
-        }
-
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-
-        log::info("currentStep: {$currentStep}");
-
-        if ($currentStep === 'obtener_cuils_not_in_afip') {
+        if ($this->currentStep === 'obtener_cuils_not_in_afip') {
             // Aquí va la lógica existente
             $this->showCuilsTable = true;
-            Log::info('CurrentStep es {$currentStep}, se carga tabla de cuils no encontrados');
             $this->cuilsNotInAfipLoaded = $this->toggleValue($this->cuilsNotInAfipLoaded);
             $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
-            Log::info('compareCuils iniciado');
 
             // Iniciamos el proceso de comparación de CUILs
             $this->compareCuils();
 
             // Marcamos el paso como completado
-            $this->workflowService->completeStep($processLog, $currentStep);
-            Log::info("completado: {$currentStep}");
+            $this->workflowService->completeStep($this->processLog, $this->currentStep);
             $this->showCreateTempTableButton = true;
         } else {
             // Estamos en el paso incorrecto, obtener la url y redireccionar
-            $url = $this->workflowService->getStepUrl($currentStep);
+            $url = $this->workflowService->getStepUrl($this->currentStep);
             Log::warning("url: {$url}");
         }
     }
