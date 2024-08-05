@@ -2,27 +2,37 @@
 
 namespace App\Livewire;
 
-use App\Models\Dh01;
-use App\Models\Dh03;
-use App\Models\TablaTempCuils;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
-use App\Models\AfipMapucheSicoss;
-use App\Services\WorkflowService;
+use App\Models\TablaTempCuils;
+use App\Services\EmployeeService;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\AfipRelacionesActivas;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Contracts\CuilOperationStrategy;
+use App\Strategies\CompareCuilsStrategy;
+use App\Contracts\CuilRepositoryInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
+use App\Strategies\LoadCuilsNotInAfipStrategy;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompareCuils extends Component
 {
     use WithPagination;
+
+    private const STEP_OBTENER_CUILS_NOT_IN_AFIP = 'obtener_cuils_not_in_afip';
+    private const STEP_OBTENER_CUILS_NO_INSERTADOS = 'obtener_cuils_no_insertados';
+    private const STEP_EJECUTAR_FUNCION_ALMACENADA = 'ejecutar_funcion_almacenada';
+    private const STEP_POBLAR_TABLA_TEMP = 'poblar_tabla_temp_cuils';
+    private const STEP_EXPORTAR_TXT_PARA_AFIP = 'exportar_txt_para_afip';
+    private const DEFAULT_NRO_LIQUI = 3;
+    private const DEFAULT_PERIODO_FISCAL = 202312;
+    private const STEP_CREAR_TABLA_TEMP = 'crear_tabla_temp';
+    private const STEP_INSERTAR_TABLA_TEMP = 'insertar_tabla_temp';
+    private const STEP_MOSTRAR_MI_SIMPLIFICACION = 'mostrar_mi_simplificacion';
+    private const STEP_SUBIR_ARCHIVO = 'subir_archivo';
 
     private const PER_PAGE = 10;
     public $cuilsNotInAfip = [];
@@ -50,40 +60,83 @@ class CompareCuils extends Component
     public $insertTablaTemp = false;
     public $miSimButton = false;
     public $ShowMiSimplificacion = false;
+    public string $nextStepUrl = '';
+    public bool $showUploadForm = false;
     protected $currentStep;
     protected $processLog;
-    protected $workflowService;
+
+    private $cuilRepository;
+    private $currentStrategy;
+    private $workflowService;
+    private $employeeService;
 
 
-
-    public function boot(WorkflowService $workflowService)
+    public function boot(
+        WorkflowServiceInterface $workflowService,
+        EmployeeService $employeeService,
+        CuilRepositoryInterface $cuilRepository)
     {
+        $this->cuilRepository = $cuilRepository;
         $this->workflowService = $workflowService;
+        $this->employeeService = $employeeService;
         $this->perPage = self::PER_PAGE;
+        $this->processLog = $this->workflowService->getLatestWorkflow();
+        $this->checkCurrentStep();
+        $strategy = config('cuil_operation_strategy', 'load_cuils_not_in_afip');
+
+        if ($strategy === 'compare_cuils') {
+            $this->setStrategy(
+                new CompareCuilsStrategy($cuilRepository, self::PER_PAGE));
+        } elseif ($strategy === 'load_cuils_not_in_afip') {
+            $this->setStrategy(
+                new LoadCuilsNotInAfipStrategy($cuilRepository, $workflowService, $this->processLog));
+        } else {
+            // Estrategia por defecto
+            $this->setStrategy(
+                new CompareCuilsStrategy($cuilRepository, self::PER_PAGE));
+        }
+    }
+
+    /**
+     * Establece la estrategia actual para la operación de comparación de CUIL.
+     *
+     * @param CuilOperationStrategy $strategy La estrategia de operación de CUIL a establecer.
+     * @return void
+     */
+    public function setStrategy(CuilOperationStrategy $strategy)
+    {
+        $this->currentStrategy = $strategy;
+    }
+
+    /**
+     * Ejecuta la operación de comparación de CUIL utilizando la estrategia de operación actual.
+     *
+     * @return mixed El resultado de la ejecución de la estrategia de operación actual.
+     */
+    public function executeOperation()
+    {
+        return $this->currentStrategy->execute();
     }
 
     public function mount()
     {
-        $this->processLog = $this->workflowService->getLatestWorkflow();
-        // dd($this->processLog);
         if ($this->processLog) {
             $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
             Log::info("mount: currentStep: {$this->currentStep}");
 
-            // dd($this->currentStep);
-            if ($this->currentStep === 'poblar_tabla_temp_cuils') {
+            if ($this->currentStep === self::STEP_POBLAR_TABLA_TEMP) {
                 $this->crearTablaTemp = true;
                 $this->cuilsCount = TablaTempCuils::count();
                 if ($this->cuilsCount == 0) {
                     // volver al paso anterior
-                    $this->workflowService->updateStep($this->processLog, 'obtener_cuils_not_in_afip', 'in_pprogress');
+                    $this->workflowService->updateStep($this->processLog, self::STEP_OBTENER_CUILS_NOT_IN_AFIP, 'in_pprogress');
                     log::info("mount: volver al paso anterior");
                 }
-            } else if ($this->currentStep === 'ejecutar_funcion_almacenada') {
+            } else if ($this->currentStep === self::STEP_EJECUTAR_FUNCION_ALMACENADA) {
                 $this->crearTablaTemp = true;
-            } else if ($this->currentStep === 'obtener_cuils_no_insertados' ) {
+            } else if ($this->currentStep === self::STEP_OBTENER_CUILS_NO_INSERTADOS ) {
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
-            } else if ($this->currentStep === 'exportar_txt_para_afip') {
+            } else if ($this->currentStep === self::STEP_EXPORTAR_TXT_PARA_AFIP) {
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
             } else {
                 //metodo para mostrar tabla de cuils no encontrados y componente paraMiSimplificacion
@@ -94,32 +147,56 @@ class CompareCuils extends Component
         Log::info("mount: currentStep: {$this->currentStep}", ['processLog' => $this->processLog]);
     }
 
-    #[Computed]
-    public function showLoadButton()
+    /** Verifica el paso actual del flujo de trabajo y actualiza el estado de la interfaz de usuario en consecuencia.
+     *
+     *Este método se encarga de:
+     * Obtener el registro de flujo de trabajo más reciente.
+     * Obtener el paso actual del flujo de trabajo.
+     * Establecer si se debe mostrar el formulario de carga en función del paso actual.
+     * Obtener la URL del siguiente paso del flujo de trabajo.
+     *
+     *@return void
+     **/
+    public function checkCurrentStep(): void
     {
-        return $this->currentStep === 'obtener_cuils_not_in_afip';
+        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
+        $this->showUploadForm = in_array($this->currentStep, [self::STEP_POBLAR_TABLA_TEMP, self::STEP_EJECUTAR_FUNCION_ALMACENADA]);
+        $this->nextStepUrl = $this->workflowService->getStepUrl($this->currentStep);
+    }
+    #[Computed]
+    public function showLoadButton(): bool
+    {
+        return $this->currentStep === self::STEP_OBTENER_CUILS_NOT_IN_AFIP;
     }
 
     #[Computed]
     public function showCuilsNoInsertedButton()
     {
-        return $this->currentStep === 'obtener_cuils_no_insertados';
+        return $this->currentStep === self::STEP_OBTENER_CUILS_NO_INSERTADOS;
     }
 
     #[Computed]
     public function showExecuteStoredFunctionButton()
     {
-        return $this->currentStep === 'ejecutar_funcion_almacenada';
+        return $this->currentStep === self::STEP_EJECUTAR_FUNCION_ALMACENADA;
     }
 
 
+    /**
+     * Completa el paso actual del flujo de trabajo y actualiza el registro de flujo de trabajo.
+     *
+     * Este método se encarga de:
+     * - Obtener el paso actual del flujo de trabajo.
+     * - Marcar el paso actual como completado en el registro de flujo de trabajo.
+     *
+     * @return void
+     */
     public function completeStep()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $step = $this->workflowService->getCurrentStep($processLog);
+        $step = $this->currentStep;
 
         Log::info("completeStep: currentStep: {$step}");
-        $this->workflowService->completeStep($processLog, $step);
+        $this->workflowService->completeStep($this->processLog, $step);
     }
 
     /** Metodo para poblar $cuilsNoInserted con los CUILs no encontrados
@@ -134,10 +211,7 @@ class CompareCuils extends Component
         // Asegúrate de que $cuilsNoInserted esté poblado con los CUILs no encontrados
         if (empty($this->cuilsNoInserted)) {
             // Aquí puedes agregar lógica para poblar $cuilsNoInserted si es necesario
-
         }
-
-        //$this->dispatch('content-updated');
     }
 
     #[Computed( persist: true)]
@@ -155,41 +229,37 @@ class CompareCuils extends Component
      */
     public function mapucheMiSimplificacion()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->updateStep($processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, self::STEP_EJECUTAR_FUNCION_ALMACENADA, 'in_progress');
 
-        $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal);
+        $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal); // Llamada al método del componente TablaTempCuils
         $this->reset('cuilsNotInAfipLoaded');
     }
 
     public function showCuilsDetails(): void
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
+        $currentStep = $this->currentStep;
 
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
+        Log::info("showCuilsDetails currentStep: {$currentStep} | processLog: {$this->processLog->id}");
 
-        Log::info("showCuilsDetails currentStep: {$currentStep} | processLog: {$processLog->id}");
-
-        if ($currentStep === 'poblar_tabla_temp_cuils') {
-            $this->workflowService->updateStep($processLog, 'poblar_tabla_temp_cuils', 'in_progress');
-            $this->dispatch('iniciar-poblado-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilsToSearch);
+        if ($currentStep === self::STEP_POBLAR_TABLA_TEMP) {
+            $this->workflowService->updateStep($this->processLog, self::STEP_POBLAR_TABLA_TEMP, 'in_progress');
+            $this->dispatch('iniciar-poblado-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilsToSearch);  // Llamada al método del componente TablaTempCuils
             Log::info("showCuilsDetails: iniciar-poblado-tabla-temp");
         }
     }
 
 
     /** Maneja el éxito de la población de la tabla temporal de CUILs.
-     * Completa el paso 'poblar_tabla_temp_cuils' en el registro de flujo de trabajo y actualiza el paso 'ejecutar_funcion_almacenada' a 'in_progress'.
+     * Completa el paso self::STEP_POBLAR_TABLA_TEMP en el registro de flujo de trabajo y actualiza el paso self::STEP_EJECUTAR_FUNCION_ALMACENADA a 'in_progress'.
      * Luego, llama al método 'ejecutarFuncionAlmacenada()' para iniciar el siguiente paso del flujo de trabajo.
      */
     #[On('success-tabla-temp-cuils')]
     public function handleTablaTempCuilsSuccess()
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->completeStep($processLog, 'poblar_tabla_temp_cuils');
+        $this->workflowService->completeStep($this->processLog, self::STEP_POBLAR_TABLA_TEMP);
 
         // Iniciar el siguiente paso: ejecutar_funcion_almacenada
-        $this->workflowService->updateStep($processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, self::STEP_EJECUTAR_FUNCION_ALMACENADA, 'in_progress');
         $this->ejecutarFuncionAlmacenada();
     }
 
@@ -202,28 +272,18 @@ class CompareCuils extends Component
     }
 
 
-
-
-
-
-
-
-
-
-
-
     /** Maneja el éxito de la ejecución de la función "mapuche-mi-simplificacion".
      * Este método se ejecuta cuando se recibe un evento de éxito de la función "mapuche-mi-simplificacion".
      * Actualiza el estado de la aplicación, completa el paso "ejecutar_funcion_almacenada" en el flujo de trabajo,
      * muestra un mensaje de éxito, y verifica si hay CUILs que no se insertaron en la tabla "afip_mapuche_mi_simplificacion".
      * Si hay CUILs no insertados, los guarda en la propiedad "cuilsNoInserted" y muestra un mensaje con esa información.
      * Finalmente, inicia el siguiente paso del flujo de trabajo si existe.
+     * @return void
      */
     #[On('success-mapuche-mi-simplificacion')]
     public function handleSuccessMapucheMiSimplificacion(): void
     {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->completeStep($processLog, 'ejecutar_funcion_almacenada');
+        $this->workflowService->completeStep($this->processLog, self::STEP_EJECUTAR_FUNCION_ALMACENADA);
 
         $this->successMessage = 'Datos insertados en Mi Simplificacion';
         $this->miSimButton = false;
@@ -234,24 +294,15 @@ class CompareCuils extends Component
         $result = count($this->cuilsToSearch) - $count;
         $this->ShowMiSimplificacion = true;
 
-        // if ($result > 0) {
-        //     $this->loadCuilsNotInserted();
-        //     $this->successMessage .= ". CUILs no insertados: " . count($this->cuilsNoInserted);
-        //     $this->reset('cuilsNotInAfipLoaded', 'showCuilsTable');
-        //     $this->showCuilsNoEncontrados = true;
-        // }
 
         // Iniciar el siguiente paso del workflow
-        $nextStep = $this->workflowService->getNextStep('ejecutar_funcion_almacenada');
+        $nextStep = $this->workflowService->getNextStep(self::STEP_EJECUTAR_FUNCION_ALMACENADA);
 
 
         if ($nextStep) {
-            $this->workflowService->updateStep($processLog, $nextStep, 'in_progress');
+            $this->workflowService->updateStep($this->processLog, $nextStep, 'in_progress');
         }
     }
-
-
-
 
 
 
@@ -259,7 +310,7 @@ class CompareCuils extends Component
      *
      * @return array The array of CUILs that are present in the temporary table but not in the afip_mapuche_mi_simplificacion table.
      */
-    public function cuilsNoEncontrados(): array
+    private function cuilsNoEncontrados(): array
     {
         $cuilsNoEncontrados = DB::connection('pgsql-mapuche')
             ->table('suc.tabla_temp_cuils as ttc')
@@ -290,7 +341,7 @@ class CompareCuils extends Component
      *
      * Esto se utiliza para limpiar el estado de la clase y preparar para una nueva ejecución.
      */
-    public function restart()
+    private function restart()
     {
         $this->reset('cuilsNotInAfipLoaded');
         $this->reset('showCuilsTable');
@@ -299,7 +350,6 @@ class CompareCuils extends Component
         $this->reset('insertTablaTemp');
         $this->reset('miSimButton');
     }
-
 
     /** Alterna el valor booleano de una variable.
      *
@@ -313,50 +363,33 @@ class CompareCuils extends Component
 
 
 
-    /** Carga los CUILs que no se encuentran en AFIP.
-     *
-     * Este método se encarga de cargar los CUILs que no se encuentran en la tabla AFIP_RELACIONES_ACTIVAS.
-     * Primero verifica si existe un registro de flujo de trabajo, y si no, lo inicia. Luego, obtiene el paso actual
-     * del flujo de trabajo. Si el paso actual es "obtener_cuils_not_in_afip", entonces se ejecuta la lógica
-     * para cargar los CUILs no encontrados en AFIP, se marca el paso como completado y se actualiza el estado
-     * de algunas propiedades de la clase. Si el paso actual no es el correcto, se obtiene la URL del paso
-     * correcto y se redirige al usuario.
-     */
-    public function loadCuilsNotInAfip()
+
+    /** Carga los CUIL que no se encuentran en AFIP.
+    *
+    * Este método establece una estrategia de carga de CUIL que no se encuentran en AFIP, ejecuta la operación y actualiza varias propiedades de la clase Livewire con los resultados.
+    *
+    * - `cuilsNotInAfip`: La lista de CUIL que no se encuentran en AFIP.
+    * - `showCuilsTable`: Indica si se debe mostrar la tabla de CUIL.
+    * - `cuilsNotInAfipLoaded`: Indica si se han cargado los CUIL que no se encuentran en AFIP.
+    * - `crearTablaTemp`: Indica si se debe crear una tabla temporal.
+    * - `showCreateTempTableButton`: Indica si se debe mostrar el botón para crear la tabla temporal.
+    */
+    public function loadCuilsNotInAfip(): void
     {
-        Log::info('loadCuilsNotInAfip iniciado');
+        $this->setStrategy(
+            new LoadCuilsNotInAfipStrategy(
+                    $this->cuilRepository,
+                    $this->workflowService,
+                    $this->processLog)
+                );
+        $result = $this->executeOperation();
 
-        $processLog = $this->workflowService->getLatestWorkflow();
-
-        log::info("processLog: {$processLog->id}");
-
-        if (!$processLog) {
-            $processLog = $this->workflowService->startWorkflow();
-        }
-
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-
-        log::info("currentStep: {$currentStep}");
-
-        if ($currentStep === 'obtener_cuils_not_in_afip') {
-            // Aquí va la lógica existente
-            $this->showCuilsTable = true;
-            Log::info('CurrentStep es {$currentStep}, se carga tabla de cuils no encontrados');
-            $this->cuilsNotInAfipLoaded = $this->toggleValue($this->cuilsNotInAfipLoaded);
-            $this->crearTablaTemp = $this->toggleValue($this->crearTablaTemp);
-            Log::info('compareCuils iniciado');
-
-            // Iniciamos el proceso de comparación de CUILs
-            $this->compareCuils();
-
-            // Marcamos el paso como completado
-            $this->workflowService->completeStep($processLog, $currentStep);
-            Log::info("completado: {$currentStep}");
-            $this->showCreateTempTableButton = true;
-        } else {
-            // Estamos en el paso incorrecto, obtener la url y redireccionar
-            $url = $this->workflowService->getStepUrl($currentStep);
-            Log::warning("url: {$url}");
+        if ($result) {
+            $this->cuilsNotInAfip = $result['cuilsNotInAfip'];
+            $this->showCuilsTable = $result['showCuilsTable'];
+            $this->cuilsNotInAfipLoaded = $result['cuilsNotInAfipLoaded'];
+            $this->crearTablaTemp = $result['crearTablaTemp'];
+            $this->showCreateTempTableButton = $result['showCreateTempTableButton'];
         }
     }
 
@@ -367,30 +400,20 @@ class CompareCuils extends Component
      * Los CUIL resultantes que no están en el modelo AfipRelacionesActivas se almacenan en la propiedad $cuilsNotInAfip.
      */
     #[Computed()]
-    public function compareCuils(): LengthAwarePaginator
+    public function compareCuils()
     {
-        try {
-            $this->cuilsNotInAfip = AfipMapucheSicoss::select('cuil')
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('suc.afip_relaciones_activas')
-                        ->whereColumn('afip_relaciones_activas.cuil', 'afip_mapuche_sicoss.cuil');
-                })
-                ->pluck('cuil');
+        $this->setStrategy(new CompareCuilsStrategy($this->cuilRepository));
+    $result = $this->executeOperation();
 
-            $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
-
-            // contar los campos en cuilsToSearch
-            $this->cuilsCount = count($this->cuilsToSearch);
-
-            return $this->paginateResults($this->cuilsNotInAfip, $this->perPage);
-        } catch (QueryException $e) {
-            Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
-            throw new \Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.');
-        }
+    if ($result['success']) {
+        $this->cuils = $result['cuils'];
+        $this->success = $result['success'];
+        $this->message = $result['message'];
+    } else {
+        $this->success = $result['success'];
+        $this->message = $result['message'];
     }
-
-
+    }
     private function paginateResults($collection, $perPage)
     {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -403,24 +426,36 @@ class CompareCuils extends Component
     }
 
 
+
+    /**
+     * Busca la información de un empleado por su número de documento.
+     *
+     * Este método recupera la información del empleado con el número de documento proporcionado y la almacena en la propiedad $employeeInfo.
+     * Además, establece la propiedad $showModal en true para mostrar un modal con la información del empleado.
+     *
+     * @param int $dni El número de documento del empleado a buscar.
+     * @return void
+     */
     public function searchEmployee($dni)
     {
         $this->selectedDni = $dni;
-        $employee = Dh01::where('nro_docum', $dni)->first();
+        $this->employeeInfo = $this->employeeService->searchEmployee($dni);
+        $this->showModal = true;
+    }
+    /** Muestra los cargos asociados a un número de legajo específico.
+    *
+    * Este método recupera los cargos del empleado con el número de legajo proporcionado y los muestra en un modal.
+    * Después de mostrar los cargos, cierra el modal principal.
+    *
+    * @param int $nroLegaj El número de legajo del empleado cuyos cargos se deben mostrar.
+    * @return void
+     */
+    public function showCargos($nroLegaj): void
+    {
+        $this->cargos = $this->employeeService->getCargos($nroLegaj);
 
-        if ($employee) {
-            $this->employeeInfo = [
-                'nombre' => $employee->desc_nombr,
-                'apellido' => $employee->desc_appat . ' ' . $employee->desc_apmat,
-                'nro_legaj' => $employee->nro_legaj,
-                'DNI' => $employee->nro_docum,
-                'fecha_inicio' => $employee->dh03()->orderBy('fec_alta', 'asc')->value('fec_alta'),
-            ];
-            $this->showModal = true;
-        } else {
-            $this->employeeInfo = null;
-            $this->showModal = true;
-        }
+        $this->showCargoModal();
+        $this->closeShowModal();
     }
     public function closeModal()
     {
@@ -428,23 +463,11 @@ class CompareCuils extends Component
         $this->employeeInfo = null;
         $this->selectedDni = null;
     }
-
-    public function showCargos($nroLegaj)
-    {
-        $this->cargos = Dh03::where('nro_legaj', $nroLegaj)
-            ->orderBy('fec_alta', 'desc')
-            ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq'])
-            ->toArray();
-
-        $this->showCargoModal();
-        $this->closeShowModal();
-    }
-
-    protected function showCargoModal()
+    public function showCargoModal()
     {
         $this->showCargoModal = true;
     }
-    protected function closeShowModal()
+    public function closeShowModal()
     {
         $this->showModal = false;
     }

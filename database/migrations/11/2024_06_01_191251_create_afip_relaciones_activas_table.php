@@ -21,7 +21,7 @@ return new class extends Migration
             $table->char('periodo_fiscal', 6);
             $table->char('codigo_movimiento', 2)->nullable();
             $table->char('tipo_registro', 2)->nullable();
-            $table->char('cuil', 11);
+            $table->char('cuil', 11)->index();
             $table->char('marca_trabajador_agropecuario', 1)->nullable();
             $table->char('modalidad_contrato', 3)->nullable();
             $table->char('fecha_inicio_relacion_laboral', 10);

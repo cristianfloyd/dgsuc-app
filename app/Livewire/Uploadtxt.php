@@ -29,6 +29,7 @@ class Uploadtxt extends Component
     public $origenes = ['afip', 'mapuche'];
     public $selectedOrigen;
     public $showUploadForm = false;
+    public $nextStepUrl = null;
 
     protected $workflowService;
 
@@ -49,6 +50,7 @@ class Uploadtxt extends Component
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
         $this->showUploadForm = in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
+        $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
     }
 
 
@@ -233,7 +235,7 @@ class Uploadtxt extends Component
             return view('livewire.uploadtxt');
         } else {
             return view('livewire.uploadtxtcompleted', [
-                'redirectUrl' => route('MiSimplificacion'),
+                'redirectUrl' => $this->nextStepUrl,
             ]);
         }
     }

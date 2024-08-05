@@ -62,7 +62,7 @@ class AfipRelacionesActivas extends Model
             // DB::connection($conexion)->statement('ALTER TABLE afip_sicoss_desde_mapuche DROP CONSTRAINT afip_sicoss_desde_mapuche_pkey');
 
             foreach (array_chunk($datosMapeados, $chunkSize) as $chunk) {
-                DB::connection($conexion)->table((new self)->getTable() )->insert($chunk);
+                static::upsert($chunk, ['cuil'], array_keys($chunk[0]));
             }
 
             // Reestablecer la clave primaria: afip_sicoss_desde_mapuche_pkey
@@ -121,7 +121,12 @@ class AfipRelacionesActivas extends Model
      */
     public function scopeSearch($query, $search)
     {
-        return empty($search) ? $query : $query->where('cuil', 'ilike', "%$search%");
+        // return empty($search) ? $query : $query->where('cuil', 'ilike', "%$search%");
+        return empty($search) ? $query : $query->where('cuil', 'ilike', $search); //optimizacion del search
     }
 
+    public function scopeByCuil($query, $cuil)
+    {
+        return $query->where('cuil', $cuil);
+    }
 }

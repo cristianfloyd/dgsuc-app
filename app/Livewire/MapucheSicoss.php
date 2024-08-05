@@ -2,41 +2,33 @@
 
 namespace App\Livewire;
 
+use App\Contracts\WorkflowServiceInterface;
 use App\ImportService;
 use Livewire\Component;
 use App\Models\UploadedFile;
-use App\Models\AfipMapucheSicoss;
 use App\TableVerificationService;
-use App\Models\AfipSicossDesdeMapuche;
 use Illuminate\Support\Facades\Storage;
-use App\Models\AfipImportacionCrudaModel;
-use App\Services\WorkflowService;
 use Illuminate\Database\Eloquent\Collection;
 
 class MapucheSicoss extends Component
 {
 
-    const TABLE_AFIP_IMPORT_CRUDO = 'AfipImportCrudo';
-    const TABLE_AFIP_MAPUCHE_SICOSS = 'AfipMapucheSicoss';
 
-
-    /* @var UploadedFile|null El archivo seleccionado actualmente
+    /** @var UploadedFile|null El archivo seleccionado actualmente
     *
     */
     public ?UploadedFile $selectedArchivo;
     /** @var Collection|null Listado de archivos subidos
-     * 
+     *
      */
     public ?Collection $listadoArchivos;
     public ?int $selectedArchivoID = null;
     public ?string $filename = null;
-
+    public ?string $nextstepUrl = null;
+    public ?string $showUploadForm = null;
     protected ?string $filepath = null;
     protected ?string $absolutePath = null;
     protected ?string $periodoFiscal = null;
-
-    // protected $afipMapucheSicossTable;
-    // protected $afipImportacionCrudaTable;
 
 
     protected $importService;
@@ -47,11 +39,12 @@ class MapucheSicoss extends Component
     public function boot(
         ImportService $importService,
         TableVerificationService $tableVerificationService,
-        WorkflowService $workflowService
+        WorkflowServiceInterface $workflowService
     ) {
         $this->importService = $importService;
         $this->tableVerificationService = $tableVerificationService;
         $this->workflowService = $workflowService;
+        $this->checkCurrentStep();
     }
 
 
@@ -60,10 +53,22 @@ class MapucheSicoss extends Component
         $this->listadoArchivos = UploadedFile::all();
     }
 
+    public function checkCurrentStep()
+    {
+        $processLog = $this->workflowService->getLatestWorkflow();
+        $currentStep = $this->workflowService->getCurrentStep($processLog);
+        $this->showUploadForm = in_array($currentStep, ['import_archivo_mapuche']);
+        $this->nextstepUrl = $this->workflowService->getStepUrl($currentStep);
+    }
+
+    /**
+     * Importa un archivo de AFIP SICOSS y completa los pasos del flujo de trabajo correspondiente.
+     *
+     * @param int|null $archivoId El ID del archivo a importar. Si no se proporciona, se utilizará el ID del archivo seleccionado actualmente.
+     * @return void
+     */
     public function importarArchivo($archivoId = null): void
     {
-
-
         $archivoId ??= $this->selectedArchivoID;
 
 
@@ -81,24 +86,27 @@ class MapucheSicoss extends Component
         if ($resultado) {
             $this->workflowService->completeStep($latestWorkflow, 'import_archivo_mapuche');
             $nextStep = $this->workflowService->getNextStep($currentStep);
+            $this->dispatch('success', 'Importación completada con éxito.');
+            $this->dispatch('paso-completado', ['nextStep' => $nextStep]);
+            $this->nextstepUrl = $this->workflowService->getStepUrl($nextStep);
 
-            if ($nextStep) {
-                //ir al siguiente paso
-                $nextStepUrl = $this->workflowService->getStepUrl($nextStep);
-                $this->dispatch('success', 'Importación completada con éxito.');
-                redirect()->to($nextStepUrl);
-            } else {
-                $this->dispatch('success', 'Importación completada con éxito. Proceso finalizado.');
-            }
         } else {
             $this->dispatch('error', 'Hubo un problema durante la importación.');
         }
     }
 
-    public function seleccionarArchivo()
+    public function seleccionarArchivo(): void
     {
         //
     }
+
+
+    /**
+     * Actualiza la propiedad `$selectedArchivo` con el archivo seleccionado, y establece las propiedades `$filepath`, `$absolutePath`, `$periodoFiscal` y `$filename` con los valores correspondientes del archivo.
+     *
+     * @param int $archivoId El ID del archivo seleccionado.
+     * @return void
+     */
     public function updatedSelectedArchivoID($archivoId): void
     {
         $this->selectedArchivo = UploadedFile::findOrFail($archivoId);
@@ -112,6 +120,12 @@ class MapucheSicoss extends Component
 
     public function render()
     {
-        return view('livewire.mapuche-sicoss');
+        if ($this->showUploadForm) {
+            return view('livewire.mapuche-sicoss');
+        } else {
+            return view('livewire.uploadtxtcompleted',[
+                'redirectUrl' => $this->nextstepUrl,
+            ]);
+        }
     }
 }

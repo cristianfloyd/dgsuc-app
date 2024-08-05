@@ -145,6 +145,14 @@ class AfipMiSimplificacion extends Component
 
 
 
+    /**
+     * Redirige al usuario al URL del paso actual del proceso.
+     *
+     * Este método establece el paso actual y luego redirige al usuario al URL correspondiente a ese paso.
+     *
+     * @param int $step El ID del paso actual del proceso.
+     * @return void
+     */
     public function goToCurrentStep($step): void
     {
         $this->currentStep = $step;

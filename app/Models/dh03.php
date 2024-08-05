@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class dh03 extends Model
+class Dh03 extends Model
 {
     protected $connection = 'pgsql-mapuche';
     protected $table = 'mapuche.dh03';

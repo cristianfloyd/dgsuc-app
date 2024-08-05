@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Contracts\TransactionServiceInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\Services\ColumnMetadata;
 use App\Services\FileProcessorService;
 use Livewire\Component;
 use App\Models\UploadedFile;
-use App\Services\WorkflowService;
 use Illuminate\Support\Facades\Log;
-use App\Models\AfipRelacionesActivas as ModelsAfipRelacionesActivas;
 use App\services\DatabaseService;
 use App\Services\ValidationService;
 
@@ -26,6 +26,7 @@ class AfipRelacionesActivas extends Component
     public $archivosCargados;
     public $archivoSeleccionado; //este es el archivo que se va a abrir en la vista
     public int $archivoSeleccionadoId; //este es el id del archivo que se va a abrir en la vista
+    public $nextStepUrl = null;
     protected array $columnWidths = [
         6,  //periodo fiscal
         2,  //codigo movimiento
@@ -58,20 +59,25 @@ class AfipRelacionesActivas extends Component
     protected $workflowService;
     private $validationService;
     private $columnMetadata;
+    private $transactionService;
+    private $showUploadForm;
 
 
     public function boot(
         FileProcessorService $fileProcessor,
         DatabaseService $databaseService,
-        WorkflowService $workflowService,
+        WorkflowServiceInterface $workflowService,
         ValidationService $validationService,
         ColumnMetadata $columnMetadata,
+        TransactionServiceInterface $transactionService,
         ) {
             $this->fileProcessor = $fileProcessor;
             $this->databaseService = $databaseService;
             $this->workflowService = $workflowService;
             $this->validationService = $validationService;
             $this->columnMetadata = $columnMetadata;
+            $this->transactionService = $transactionService;
+            $this->checkCurrentStep();
         }
 
     public function mount()
@@ -84,6 +90,13 @@ class AfipRelacionesActivas extends Component
         $this->archivoSeleccionado = $this->archivosCargados->find($value);
     }
 
+    private function checkCurrentStep()
+    {
+        $processLog = $this->workflowService->getLatestWorkflow();
+        $currentStep = $this->workflowService->getCurrentStep($processLog);
+        $this->showUploadForm = in_array($currentStep, ['import_archivo_afip']);
+        $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
+    }
 
     /** Importa un archivo AFIP y almacena las líneas procesadas en la base de datos.
      *
@@ -92,21 +105,26 @@ class AfipRelacionesActivas extends Component
      *
      * @return void
      */
-    public function importar()
+    public function importar():void
     {
-        $processLog = $this->workflowService->getLatestWorkflow() ?? $this->workflowService->startWorkflow();
+        $processLog = $this->workflowService->getLatestWorkflow();
         $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'in_progress');
 
         try {
-            $this->validateFileSelection();
-            $lineasProcesadas = $this->processFile();
-            $this->storeProcessedLines($lineasProcesadas);
-            $this->completeWorkflowStep($processLog);
+            $this->transactionService->executeInTransaction(
+                function () use ($processLog) {
+                    $this->validateFileSelection();
+                    $lineasProcesadas = $this->processFile();
+                    $this->storeProcessedLines($lineasProcesadas);
+                    $this->completeWorkflowStep($processLog);
+                }
+            );
 
             $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
-            $this->dispatch('datos-importados'); // Event to load RelacionesActivasTable
+            $this->dispatch('datos-importados'); // Event para cargar RelacionesActivasTable
 
-            $this->redirectToNextStep('import_archivo_afip');
+            $currentStep = $this->workflowService->getCurrentStep($processLog);
+            $this->workflowService->getStepUrl($this->workflowService->getNextStep($currentStep) );
         } catch (\Exception $e) {
             $this->handleImportError($e, $processLog);
         }
@@ -183,6 +201,13 @@ class AfipRelacionesActivas extends Component
 
     public function render()
     {
-        return view('livewire.afip-relaciones-activas');
+
+        if ($this->showUploadForm) {
+            return view('livewire.afip-relaciones-activas');
+        } else {
+            return view('livewire.uploadtxtcompleted', [
+                'redirectUrl' => $this->nextStepUrl,
+            ]);
+        }
     }
 }

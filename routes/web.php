@@ -43,9 +43,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/', function () { return view('index'); })->name('index');
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
-    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas');
-    Route::get('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
+    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas'); // 2.- paso relaciones activas
+    Route::get('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss'); // 3.- paso mapuche sicoss
     Route::post('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
+    Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
+    Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
 
 
     Route::get('/test-column-metadata', function () {
@@ -57,8 +59,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');
     Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('mapuchemisim');
     Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
-    Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
-    Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
     Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
     Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
     Route::get('/importar-crudo'  , AfipImportCrudo::class )->name('upload');
@@ -68,7 +68,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
     Route::get('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
     Route::get('/encoding', FileEncoding::class)->name('encoding');
-    Route::get('/prueba', ParaMiSimplificacion::class)->name('misimplificacion');
+    Route::get('/prueba', ParaMiSimplificacion::class)->name('prueba');
 
     Route::get('/afip/misim', AfipMapucheMiSimplificacionTable::class)->name('misim');
 });
