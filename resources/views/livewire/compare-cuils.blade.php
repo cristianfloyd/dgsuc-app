@@ -1,12 +1,13 @@
 <div>
     <!-- Sección de alertas -->
     <div class="fixed top-0 right-0 m-4">
-        @if ($successMessage)
-            <x-alert-success>
-                {{ __($successMessage) }}
-            </x-alert-success>
-        @endif
+        @foreach ($this->messages as $message)
+            <div class="alert alert-{{ $message['type'] }}">
+                {{ $message['message'] }}
+            </div>
+        @endforeach
     </div>
+    
 
     <!-- Contenedor principal -->
     <div class="container mx-auto w-2/3">
@@ -28,7 +29,8 @@
                                     <span class="mr-2">{{ $step }}:</span>
                                     @if ($this->workflowService->isStepCompleted($latestWorkflow, $step))
                                         <span class="text-green-500">Completado</span>
-                                        <input type="checkbox" class="toggle toggle-success" disabled checked="checked" />
+                                        <input type="checkbox" class="toggle toggle-success" disabled
+                                            checked="checked" />
                                     @elseif ($step === 'current_step')
                                         <span class="text-blue-500">En progreso</span>
                                     @else
@@ -55,7 +57,8 @@
                         @endif
 
                         @if ($this->stepsCompleted)
-                            <x-mary-button wire:click="showParaMiSimplificacionAndCuilsNoEncontrados" class="btn-outline">
+                            <x-mary-button wire:click="showParaMiSimplificacionAndCuilsNoEncontrados"
+                                class="btn-outline">
                                 Mostrar MiSimplificacion y CUILs sin datos
                             </x-mary-button>
                             <x-mary-button class="btn-outline mt-2" wire:click="startNewProcess">
