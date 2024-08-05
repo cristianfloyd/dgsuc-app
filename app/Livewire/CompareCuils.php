@@ -2,10 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\TablaTempCuils;
+use App\Services\TempTableService;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 use App\Models\AfipMapucheMiSimplificacion;
+use App\Services\CuilCompareService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompareCuils extends Component
@@ -50,12 +53,22 @@ class CompareCuils extends Component
     protected $currentStep;
     protected $processLog;
     protected $workflowService;
+    private $messageManager;
+    private $cuilCompareService;
+    private $tempTableService;
 
 
 
-    public function boot(WorkflowServiceInterface $workflowService)
-    {
+    public function boot(
+        WorkflowServiceInterface $workflowService,
+        MessageManagerInterface $messageManager,
+        CuilCompareService $cuilCompareService,
+        TempTableService $tempTableService,
+    ){
         $this->workflowService = $workflowService;
+        $this->messageManager = $messageManager;
+        $this->cuilCompareService = $cuilCompareService;
+        $this->tempTableService = $tempTableService;
         $this->perPage = self::PER_PAGE;
     }
 
@@ -155,6 +168,9 @@ class CompareCuils extends Component
     {
         if ($this->currentStep === 'poblar_tabla_temp_cuils') {
             $this->workflowService->updateStep($this->processLog, 'poblar_tabla_temp_cuils', 'in_progress');
+            $this->tempTableService->populateTempTable($this->cuilsToSearch);
+            $this->cuilsCount = $this->tempTableService->getTempTableCount();
+
             $this->dispatch('iniciar-poblado-tabla-temp', $this->nroLiqui, $this->periodoFiscal, $this->cuilsToSearch);
         }
     }
@@ -335,20 +351,13 @@ class CompareCuils extends Component
     public function compareCuils(): LengthAwarePaginator
     {
         try {
-            $this->cuilsNotInAfip = AfipMapucheSicoss::select('cuil')
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('suc.afip_relaciones_activas')
-                        ->whereColumn('afip_relaciones_activas.cuil', 'afip_mapuche_sicoss.cuil');
-                })
-                ->pluck('cuil');
-
-            $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
-
+            $this->cuilsNotInAfip = $this->cuilCompareService->compareCuils($this->perPage);
+            $this->cuilsToSearch = $this->cuilsNotInAfip->pluck('cuil')->toArray();
             // contar los campos en cuilsToSearch
             $this->cuilsCount = count($this->cuilsToSearch);
+            dd($this->cuilsNotInAfip);
+            return $this->cuilsNotInAfip;
 
-            return $this->paginateResults($this->cuilsNotInAfip, $this->perPage);
         } catch (QueryException $e) {
             Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
             throw new \Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.');

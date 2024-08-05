@@ -23,7 +23,17 @@ class TablaTempCuils extends Component
 
 
     #[On('iniciar-poblado-tabla-temp')]
-    public function iniciarPobladoTablaTemp($nroLiqui, $periodoFiscal, $cuils)
+    /**
+     * Inicia el poblado de la tabla temporal de CUIL.
+     *
+     * Este método se encarga de verificar la existencia de la tabla 'suc.tabla_temp_cuils', crearla si no existe, y luego borrar y llenar la tabla con los datos proporcionados.
+     *
+     * @param int $nroLiqui Número de liquidación.
+     * @param string $periodoFiscal Período fiscal.
+     * @param array $cuils Lista de CUIL a procesar.
+     * @return void
+     */
+    public function iniciarPobladoTablaTemp($nroLiqui, $periodoFiscal, $cuils): void
     {
         if ($cuils === null) {
             log::info("iniciarPobladoTablaTemp: cuils es null");
@@ -37,16 +47,12 @@ class TablaTempCuils extends Component
         $processLog = $this->workflowService->getLatestWorkflow();
 
         $this->verificarExistenciaTabla();
-        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'verificar_existencia_tabla');
 
         $this->crearTablaSiNoExiste();
-        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'crear_tabla_si_no_existe');
 
         $this->borrarDatosSiExisten();
-        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'borrar_datos_si_existen');
 
         $this->insertarDatos($nroLiqui, $periodoFiscal, $cuils);
-        // $this->workflowService->completeSubStep($processLog, 'poblar_tabla_temp_cuils', 'insertar_datos');
 
         $this->dispatch('success-poblado-tabla-temp-cuils');
     }
@@ -55,7 +61,7 @@ class TablaTempCuils extends Component
 
 
 
-    /** Procesa la simplificación de AFIP Mapuche.
+    /** simplificación de AFIP Mapuche.
      *
      * Este método se encarga de verificar la existencia de la tabla 'suc.afip_mapuche_mi_simplificacion', crearla si no existe, y luego vaciar y llenar la tabla con los datos proporcionados.
      *
