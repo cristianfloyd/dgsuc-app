@@ -1,3 +1,4 @@
+@php use App\Enum\WorkflowStatus; @endphp
 <div>
     <!-- Sección de alertas -->
     <div class="fixed top-0 right-0 m-4">
@@ -7,7 +8,6 @@
             </div>
         @endforeach
     </div>
-    
 
     <!-- Contenedor principal -->
     <div class="container mx-auto w-2/3">
@@ -24,14 +24,12 @@
                     <div class="mt-8 w-full">
                         <h3 class="text-lg font-semibold mb-2">Progreso del Flujo de Trabajo</h3>
                         <ul class="space-y-2">
-                            @foreach ($this->workflowService->getSteps() as $step => $description)
+                            @foreach (WorkflowStatus::cases() as $step)
                                 <li class="flex items-center">
-                                    <span class="mr-2">{{ $step }}:</span>
-                                    @if ($this->workflowService->isStepCompleted($latestWorkflow, $step))
+                                    <span class="mr-2">{{ $step->value }}:</span>
+                                    @if ($this->workflowService->isStepCompleted($this->processLog, $step->value))
                                         <span class="text-green-500">Completado</span>
-                                        <input type="checkbox" class="toggle toggle-success" disabled
-                                            checked="checked" />
-                                    @elseif ($step === 'current_step')
+                                    @elseif ($step->value === $this->currentStep)
                                         <span class="text-blue-500">En progreso</span>
                                     @else
                                         <span class="text-gray-500">Pendiente</span>
@@ -47,9 +45,9 @@
                 <div>
                     <div
                         class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuils Mapuche
-                            que no
-                            estan en Afip</h5>
+                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            Cuils Mapuche que no estan en Afip
+                        </h5>
                         @if ($this->showLoadButton)
                             <x-mary-button wire:click="loadCuilsNotInAfip" class="btn-outline">
                                 Load

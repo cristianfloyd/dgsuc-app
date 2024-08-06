@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\TablaTempCuils;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use App\Models\AfipMapucheMiSimplificacion;
+use App\Contracts\MapucheMiSimplificacionServiceInterface;
+
+class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceInterface
+{
+    private $afipMapucheMiSimplificacion;
+    private $tablaTempCuils;
+
+    public function __construct(AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion, TablaTempCuils $tablaTempCuils)
+    {
+        $this->afipMapucheMiSimplificacion = $afipMapucheMiSimplificacion;
+        $this->tablaTempCuils = $tablaTempCuils;
+    }
+
+
+    /**
+     * Ejecuta el proceso principal de MapucheMiSimplificacion.
+     *
+     * Este método realiza las siguientes operaciones:
+     * 1. Valida los parámetros de entrada.
+     * 2. Verifica y crea la tabla si es necesario.
+     * 3. Verifica y vacía la tabla si contiene registros.
+     * 4. Ejecuta la función almacenada con los parámetros proporcionados.
+     *
+     * @param int $nroLiqui Número de liquidación
+     * @param string $periodoFiscal Período fiscal
+     * @return bool Verdadero si el proceso se ejecutó correctamente, falso en caso contrario
+     */
+    public function execute($nroLiqui, $periodoFiscal): bool
+    {
+        if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
+            return false;
+        }
+
+        if (!$this->verificarYCrearTabla()) {
+            return false;
+        }
+
+        $this->verificarYVaciarTabla();
+
+        return $this->ejecutarFuncionAlmacenada($nroLiqui, $periodoFiscal);
+    }
+
+    /**
+     * Valida los parámetros de entrada para el proceso de MapucheMiSimplificacion.
+     *
+     * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos. Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
+     *
+     * @param int $nroLiqui Número de liquidación
+     * @param string $periodoFiscal Período fiscal
+     * @return bool Verdadero si los parámetros son válidos, falso en caso contrario
+     */
+    private function validarParametros($nroLiqui, $periodoFiscal): bool
+    {
+        if (empty($nroLiqui) || empty($periodoFiscal)) {
+            Log::warning('nroliqui o periodofiscal vacios');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Verifica si la tabla 'MapucheMiSim' existe y la crea si no existe.
+     *
+     * Esta función verifica si la tabla 'MapucheMiSim' existe en la base de datos. Si la tabla no existe, intenta crearla utilizando el método `createTable()` del modelo `$afipMapucheMiSimplificacion`. Si la creación de la tabla falla, se registra un mensaje de error en el log y se devuelve `false`.
+     *
+     * @return bool Verdadero si la tabla existe o se creó correctamente, falso en caso contrario
+     */
+    private function verificarYCrearTabla(): bool
+    {
+        $table = $this->afipMapucheMiSimplificacion->getTable();
+        $connection = $this->afipMapucheMiSimplificacion->getConnectionName();
+
+        if (!Schema::connection($connection)->hasTable($table)) {
+            if (!$this->afipMapucheMiSimplificacion->createTable()) {
+                Log::error('La tabla MapucheMiSim no se creó');
+                return false;
+            }
+            Log::info('La tabla se creó exitosamente');
+        }
+        return true;
+    }
+
+    /**
+     * Verifica si la tabla no está vacía y la vacía en caso de que contenga registros.
+     *
+     * Esta función se encarga de verificar si la tabla `MapucheMiSim` contiene registros y, en caso afirmativo, la vacía utilizando el método `truncate()`.
+     * El objetivo de esta función es asegurar que la tabla esté vacía antes de ejecutar la función almacenada `mapucheMiSimplificacion`.
+     */
+    private function verificarYVaciarTabla(): void
+    {
+        if ($this->afipMapucheMiSimplificacion->count() > 0) {
+            Log::info('La tabla no está vacía. Intentando vaciar');
+            $this->afipMapucheMiSimplificacion->truncate();
+        }
+    }
+
+    /**
+     * Ejecuta la función almacenada 'mapucheMiSimplificacion' con los parámetros proporcionados.
+     *
+     * @param int $nroLiqui Número de liquidación
+     * @param string $periodoFiscal Período fiscal
+     * @return bool Verdadero si la ejecución de la función almacenada fue exitosa, falso en caso contrario
+     * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada
+     */
+    private function ejecutarFuncionAlmacenada($nroLiqui, $periodoFiscal): bool
+    {
+        try {
+            $result = $this->tablaTempCuils->mapucheMiSimplificacion($nroLiqui, $periodoFiscal);
+            if ($result) {
+                Log::info('Función almacenada ejecutada exitosamente');
+                return true;
+            } else {
+                Log::error('Error al ejecutar la función almacenada');
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
+            return false;
+        }
+    }
+}

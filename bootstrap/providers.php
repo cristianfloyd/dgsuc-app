@@ -12,6 +12,7 @@ return [
     App\Providers\FortifyServiceProvider::class,
     App\Providers\ImportServiceProvider::class,
     App\Providers\JetstreamServiceProvider::class,
+    App\Providers\MapucheMiSimplificacionProvider::class,
     App\Providers\MessageManagerProvider::class,
     App\Providers\TableVerificationServiceProvider::class,
     App\Providers\TransactionServiceProvider::class,
