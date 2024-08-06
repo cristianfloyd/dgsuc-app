@@ -52,7 +52,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 
     Route::get('/test-column-metadata', function () {
         $columnMetadata = app(ColumnMetadata::class);
-        dd($columnMetadata->getWidths());
     });
 
 

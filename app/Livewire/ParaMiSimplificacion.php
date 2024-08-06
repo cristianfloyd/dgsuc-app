@@ -37,13 +37,13 @@ class ParaMiSimplificacion extends Component
     public function boot(WorkflowService $workflowService)
     {
         $this->workflowService = $workflowService;
-
     }
     public function updateSearch()
     {
         $this->resetPage();
     }
-    public function mount(){
+    public function mount()
+    {
         //
     }
 
@@ -58,50 +58,51 @@ class ParaMiSimplificacion extends Component
 
     public function exportarTxt()
     {
-        // Recopilar los datos de las columnas que deseas exportar
-        $data = AfipMapucheMiSimplificacion::all([
-            'tipo_registro',
-            'codigo_movimiento',
-            'cuil',
-            'trabajador_agropecuario',
-            'modalidad_contrato',
-            'inicio_rel_laboral',
-            'fin_rel_laboral',
-            'obra_social',
-            'codigo_situacion_baja',
-            'fecha_tel_renuncia',
-            'retribucion_pactada',
-            'modalidad_liquidacion',
-            'domicilio',
-            'actividad',
-            'puesto',
-            'rectificacion',
-            'ccct',
-            'tipo_servicio',
-            'categoria',
-            'fecha_susp_serv_temp',
-            'nro_form_agro',
-            'covid'
-        ])->toArray();
+        $fieldLengths = [
+            'tipo_registro' => 1,
+            'codigo_movimiento' => 1,
+            'cuil' => 11,
+            'trabajador_agropecuario' => 1,
+            'modalidad_contrato' => 2,
+            'inicio_rel_laboral' => 8,
+            'fin_rel_laboral' => 8,
+            'obra_social' => 6,
+            'codigo_situacion_baja' => 2,
+            'fecha_tel_renuncia' => 8,
+            'retribucion_pactada' => 12,
+            'modalidad_liquidacion' => 1,
+            'domicilio' => 50,
+            'actividad' => 3,
+            'puesto' => 3,
+            'rectificacion' => 1,
+            'ccct' => 18,
+            'tipo_servicio' => 1,
+            'categoria' => 3,
+            'fecha_susp_serv_temp' => 8,
+            'nro_form_agro' => 12,
+            'covid' => 1
+        ];
 
-        // Generar el contenido del archivo TXT
+        $data = AfipMapucheMiSimplificacion::all(array_keys($fieldLengths))->toArray();
+
         $txtContent = "";
         foreach ($data as $row) {
-            $txtContent .= implode("", $row) . "\n";
+            $line = "";
+            foreach ($fieldLengths as $field => $length) {
+                $value = $row[$field] ?? '';
+                $value = $value === null ? '' : $value;
+                $line .= str_pad($value, $length, '0', STR_PAD_LEFT);
+            }
+            $txtContent .= $line . "\n";
         }
 
-        // Crear un nombre de archivo único
         $fileName = 'exportacion_' . now()->format('Ymd_His') . '.txt';
-
-        // Guardar el archivo temporalmente
         Storage::disk('local')->put($fileName, $txtContent);
-
-        // Generar la URL de descarga
         $filePath = storage_path("app/$fileName");
 
-        // Descargar el archivo
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
+
 
     public function toggleFinished()
     {
@@ -116,10 +117,9 @@ class ParaMiSimplificacion extends Component
         $instance = new AfipMapucheMiSimplificacion();
         $dataTable = $instance->search($this->search)->take(10)->paginate(5);
 
-        return view('livewire.para-mi-simplificacion',[
+        return view('livewire.para-mi-simplificacion', [
             'dataTable' => AfipMapucheMiSimplificacion::search($this->search)
-                ->paginate($this->perPage)
-                ,
+                ->paginate($this->perPage),
         ]);
     }
 }

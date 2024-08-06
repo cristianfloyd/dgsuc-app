@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Dh21;
 use App\Models\TablaTempCuils;
+use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use App\Models\AfipMapucheMiSimplificacion;
@@ -35,6 +37,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      */
     public function execute($nroLiqui, $periodoFiscal): bool
     {
+
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
             return false;
         }
@@ -49,6 +52,34 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     }
 
     /**
+     * Valida que los parámetros $nroLiqui y $periodoFiscal existan en la base de datos.
+     *
+     * Esta función verifica si el número de liquidación y el período fiscal
+     * proporcionados existen en la base de datos. Utiliza el modelo correspondiente
+     * para realizar la consulta.
+     *
+     * @param int $nroLiqui Número de liquidación
+     * @param string $periodoFiscal Período fiscal
+     * @return bool Verdadero si los parámetros existen en la base de datos, falso en caso contrario
+     */
+    private function validarExistenciaEnBaseDeDatos($nroLiqui, $periodoFiscal): bool
+    {
+        // Verificamos la existencia del número de liquidación en Dh21
+        $existeNroLiqui = Dh21::where('nro_liqui', $nroLiqui)->exists();
+
+        // Verificamos la existencia del período fiscal en AfipMapucheSicoss
+        $existePeriodoFiscal = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal)->exists();
+
+        $existeEnBD = $existeNroLiqui && $existePeriodoFiscal;
+
+        if (!$existeEnBD) {
+            Log::warning("El número de liquidación $nroLiqui o el período fiscal $periodoFiscal no existen en la base de datos.");
+        }
+
+        return $existeEnBD;
+    }
+
+    /**
      * Valida los parámetros de entrada para el proceso de MapucheMiSimplificacion.
      *
      * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos. Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
@@ -59,6 +90,9 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      */
     private function validarParametros($nroLiqui, $periodoFiscal): bool
     {
+        if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui, $periodoFiscal)) {
+            return false;
+        }
         if (empty($nroLiqui) || empty($periodoFiscal)) {
             Log::warning('nroliqui o periodofiscal vacios');
             return false;

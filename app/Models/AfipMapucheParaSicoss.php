@@ -21,13 +21,13 @@ class AfipMapucheParaSicoss extends Model
         'sino_cerra',
         'desc_estado_liquidacion',
         'nro_cargo',
-        'tipo_de_registro',
+        'tipo_registro',
         'codigo_movimiento',
         'cuil',
         'trabajador_agropecuario',
         'modalidad_contrato',
-        'inicio_rel_lab',
-        'fin_rel_lab',
+        'inicio_rel_laboral',
+        'fin_rel_laboral',
         'obra_social',
         'codigo_situacion_baja',
         'fecha_tel_renuncia',
@@ -41,7 +41,7 @@ class AfipMapucheParaSicoss extends Model
         'tipo_servicio',
         'categoria',
         'fecha_suspencion_servicios',
-        'numero_form_agrop',
+        'no_form_agro',
         'covid'
     ];
 
@@ -59,13 +59,13 @@ class AfipMapucheParaSicoss extends Model
                 d4.sino_cerra,
                 el.desc_estado_liquidacion,
                 d.nro_cargo,
-                '01' AS tipo_de_registro,
+                '01' AS tipo_registro,
                 'AT' AS codigo_movimiento,
                 concat(d2.nro_cuil1 , d2.nro_cuil , d2.nro_cuil2) AS cuil,
                 'N' AS trabajador_agropecuario,
                 '008' AS modalidad_contrato,
-                d3.fec_alta AS inicio_rel_lab,
-                d3.fec_baja AS fin_rel_lab,
+                d3.fec_alta AS inicio_rel_laboral,
+                d3.fec_baja AS fin_rel_laboral,
                 '000000' AS obra_social,
                 '01' AS codigo_situacion_baja,
                 '0000000000' AS fecha_tel_renuncia,
@@ -79,7 +79,7 @@ class AfipMapucheParaSicoss extends Model
                 '000' AS tipo_servicio,
                 '000000' AS categoria,
                 NULL AS fecha_suspencion_servicios,
-                '0000000000' AS numero_form_agrop,
+                '0000000000' AS nro_form_agro,
                 '0' AS covid
             ")
             ->from('mapuche.dh21 as d')

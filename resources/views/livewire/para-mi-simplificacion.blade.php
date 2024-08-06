@@ -23,7 +23,7 @@
                     hint="Mayor que 10."
                     class="range-accent float-right" />
             </div>
-            <x-mary-toggle label="Right" wire:model="item2" right hint="Marcar Completado" />
+            <x-mary-toggle label="Right" wire:model="" right hint="Marcar Completado" />
             <div>
                 <x-mary-button wire:click="exportarTxt" label="Exportar TXT" class="btn-success" />
             </div>

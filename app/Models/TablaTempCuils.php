@@ -101,7 +101,7 @@ class TablaTempCuils extends Model
                 SELECT * FROM suc.get_mi_simplificacion_tt(?, ?)',
                 [$nroLiqui, $periodoFiscal]
             );
-            Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
+            Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso. Desde tablaTemCuils model');
             // Devolver un valor que indique éxito
             return true;
         } catch (\Exception $e) {

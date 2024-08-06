@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\TablaTempCuils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class TempTableService extends DatabaseService
 {
@@ -20,25 +22,32 @@ class TempTableService extends DatabaseService
      */
     public function populateTempTable(array $cuils): bool
     {
-        $connection = DB::connection('pgsql-mapuche');
-
         try {
-            $connection->beginTransaction();
+            DB::connection('pgsql-mapuche')->beginTransaction();
 
+            // Verificar si la tabla existe
+            if (!Schema::connection('pgsql-mapuche')->hasTable($this->tempTableName)) {
+                // Si no existe, crearla
+                TablaTempCuils::class()->createTable();
+            } else {
+                // Si existe, vaciarla
+                $this->clearTempTable();
+            }
+
+            // Insertar los nuevos datos
             foreach (array_chunk($cuils, 1000) as $chunk) {
-                $connection->table($this->tempTableName)->insert(
+                DB::connection('pgsql-mapuche')->table($this->tempTableName)->insert(
                     array_map(function ($cuil) {
                         return ['cuil' => $cuil];
                     }, $chunk)
                 );
             }
 
-            $connection->commit();
+            DB::connection('pgsql-mapuche')->commit();
             Log::info('Datos insertados correctamente en la tabla temporal.');
             return true;
         } catch (\Exception $e) {
-            // Manejar la excepción aquí
-            $connection->rollBack();
+            DB::connection('pgsql-mapuche')->rollBack();
             Log::error('Error al insertar datos en la tabla temporal: ' . $e->getMessage());
             return false;
         }

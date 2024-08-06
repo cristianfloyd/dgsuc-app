@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Contracts\CuilRepositoryInterface;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+
 class CuilCompareService
 {
     protected $cuilRepository;
@@ -19,7 +20,7 @@ class CuilCompareService
      * @param int $perPage Número de resultados a devolver por página.
      * @return \Illuminate\Pagination\LengthAwarePaginator Paginador con los CUILs que no se encuentran en AFIP.
      */
-    public function compareCuils($perPage = 10): LengthAwarePaginator
+    public function compareCuils($perPage = 10): Collection
     {
         return $this->cuilRepository->getCuilsNotInAfip($perPage);
     }

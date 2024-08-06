@@ -47,19 +47,18 @@ class ConvertirTabla extends Component
         $tabla = $afipSicoss->procesarTabla($this->filasExtraidas, $this->periodoFiscal);
         $resultado = $afipSicoss::insertarDatosMasivos($tabla);
         if ($resultado) {
-            dd( "Datos insertados correctamente");
+            dump( "Datos insertados correctamente");
         }else {
-            dd("Algo malo paso :( ");
+            dump("Algo malo paso :( ");
         }
     }
 
-    public function contarLineas()
+    public function contarLineas(): void
     {
         $archivoRuta = Storage::path("/public/{$this->filepath}");
         $AfipimportacionCruda = new AfipSicossDesdeMapuche();
         $resultado = $AfipimportacionCruda->contarCaracteresPorLinea($archivoRuta);
 
-        dd($resultado);
     }
     public function procesarLinea($linea)
     {
