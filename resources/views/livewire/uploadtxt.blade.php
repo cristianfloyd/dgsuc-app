@@ -32,7 +32,7 @@
             </div>
             <div>
                 @error('archivotxt')
-                    <span class="error">{{ $message }}</span>
+                    <span class="error">{{ $message }}....</span>
                 @enderror
             </div>
             <x-mary-button class="btn-outline flex" type="submit">Guardar TXT</x-mary-button>
