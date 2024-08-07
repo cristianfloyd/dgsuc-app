@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\UploadedFile;
+use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\FileUploadRepositoryInterface;
 
 class UploadedFileRepository implements FileUploadRepositoryInterface
@@ -25,7 +26,7 @@ class UploadedFileRepository implements FileUploadRepositoryInterface
      * @param array $data
      * @return \App\Models\UploadedFile
      */
-    public function create(array $data)
+    public function create(array $data): UploadedFile
     {
         return UploadedFile::create($data);
     }
@@ -46,7 +47,7 @@ class UploadedFileRepository implements FileUploadRepositoryInterface
      *
      * @return \Illuminate\Database\Eloquent\Collection|UploadedFile[]
      */
-    public function all()
+    public function all(): Collection|array
     {
         return UploadedFile::all();
     }

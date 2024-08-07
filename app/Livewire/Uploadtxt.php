@@ -50,7 +50,7 @@ class Uploadtxt extends Component
         FileUploadRepositoryInterface $fileUploadRepository,
         OrigenRepositoryInterface $origenRepository,
         FileUploadService $fileUploadService
-    ){
+    ) {
         $this->workflowService = $workflowService;
         $this->fileUploadRepository = $fileUploadRepository;
         $this->origenRepository = $origenRepository;
@@ -201,12 +201,12 @@ class Uploadtxt extends Component
     }
 
     private function resetForm()
-        {
-            $this->archivotxt = null;
-            $this->periodo_fiscal = '';
-            $this->file_path = '';
-            $this->resetValidation();
-        }
+    {
+        $this->archivotxt = null;
+        $this->periodo_fiscal = '';
+        $this->file_path = '';
+        $this->resetValidation();
+    }
 
     private function updateWorkflowStep()
     {
@@ -261,29 +261,29 @@ class Uploadtxt extends Component
     {
         try {
             DB::transaction(function () use ($fileId) {
-                // Find the file or throw an exception if not found
-                $file = $this->uploadedFileRepository->findOrFail($fileId);
-
-                // Attempt to delete the file from the server
-                if ($this->fileUploadService->deleteFile($file->file_path)) {
-                    // If successful, delete the database record
-                    $this->uploadedFileRepository->delete($file);
-                    $this->dispatch('success', 'Archivo eliminado correctamente.');
-                } else {
-                    throw new Exception('Error al eliminar el archivo del servidor.');
-                }
+                $file = $this->fileUploadRepository->findOrFail($fileId);
+                $this->deleteFileAndRecord($file);
             });
-
-            // Notify the frontend that a file was deleted
-            $this->dispatch('fileDeleted');
-
-            // Refresh the list of uploaded files
-            $this->importaciones = $this->uploadedFileRepository->all();
+            $this->handleSuccessfulDeletion();
         } catch (Exception $e) {
             $this->dispatch('error', 'Error: ' . $e->getMessage());
         }
     }
 
+    private function deleteFileAndRecord($file)
+    {
+        if (!$this->fileUploadService->deleteFile($file->file_path)) {
+            throw new Exception('Error al eliminar el archivo del servidor.');
+        }
+        $this->fileUploadRepository->delete($file);
+    }
+
+    private function handleSuccessfulDeletion()
+    {
+        $this->dispatch('success', 'Archivo eliminado correctamente.');
+        $this->dispatch('fileDeleted');
+        $this->importaciones = $this->fileUploadRepository->all();
+    }
     public function updatedImportaciones()
     {
         //
