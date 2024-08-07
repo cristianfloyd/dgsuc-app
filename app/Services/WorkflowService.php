@@ -159,7 +159,7 @@ class WorkflowService implements WorkflowServiceInterface
     public function completeStep(ProcessLog $processLog, string $step): void
     {
         $this->updateStep($processLog, $step, 'completed');
-        Log::info("Paso completado ( completeStep() ): {$step}", ['process_id' => $processLog->id]);
+        Log::info("Paso completado: {$step}", ['process_id' => $processLog->id]);
     }
 
 
@@ -260,7 +260,7 @@ class WorkflowService implements WorkflowServiceInterface
             },
             true
         );
-
+        
         if ($allCompleted && $processLog->status !== 'completed') {
             $processLog->update([
                 'status' => 'completed',

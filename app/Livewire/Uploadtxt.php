@@ -4,22 +4,21 @@ namespace App\Livewire;
 
 use Exception;
 use Livewire\Component;
+use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
-use Livewire\WithFileUploads;
 use App\Services\UploadService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Contracts\WorkflowServiceInterface;
-use App\Contracts\OrigenRepositoryInterface;
+use App\Services\WorkflowService;
+use Livewire\Attributes\Rule;
+use Livewire\WithFileUploads;
+use Illuminate\Http\UploadedFile as HttpUploadedFile;
 use Illuminate\Validation\ValidationException;
-use App\Contracts\FileUploadRepositoryInterface;
-use App\Services\FileUploadService;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Log;
 
 class Uploadtxt extends Component
 {
     use WithFileUploads;
-
-
+    #[Rule('max:20480')] // 20MB Max
     public $archivotxt;
 
     public $headers = [];
@@ -33,48 +32,20 @@ class Uploadtxt extends Component
     public $nextStepUrl = null;
 
     protected $workflowService;
-    protected $processLog;
-    protected $currentStep;
-    private $fileUploadRepository;
-    private $origenRepository;
-    private $fileUploadService;
-    /**
-     * Constructor del componente.
-     *
-     * @param FileUploadRepositoryInterface $fileUploadRepository
-     * @param OrigenRepositoryInterface $origenRepository
-     */
-    public function boot(
-        WorkflowServiceInterface $workflowService,
-        FileUploadRepositoryInterface $fileUploadRepository,
-        OrigenRepositoryInterface $origenRepository,
-        FileUploadService $fileUploadService
-    ) {
-        $this->workflowService = $workflowService;
-        $this->fileUploadRepository = $fileUploadRepository;
-        $this->origenRepository = $origenRepository;
-        $this->fileUploadService = $fileUploadService;
 
+    public function boot(WorkflowService $workflowService)
+    {
+        $this->workflowService = $workflowService;
         $this->checkCurrentStep();
     }
 
     public function mount()
     {
-        $this->importaciones = $this->fileUploadRepository->all();
+        $this->importaciones = UploadedFile::all();
         $this->origenes = OrigenesModel::all();
     }
 
-    /**
-     * Comprueba el paso actual en el flujo de trabajo y actualiza las propiedades de la vista.
-     *
-     * Este método realiza las siguientes tareas:
-     * 1. Obtiene el último registro de flujo de trabajo utilizando el WorkflowService.
-     * 2. Obtiene el paso actual en el flujo de trabajo utilizando el WorkflowService.
-     * 3. Establece la propiedad 'showUploadForm' en función de si el paso actual es 'subir_archivo_afip' o 'subir_archivo_mapuche'.
-     * 4. Establece la propiedad 'nextStepUrl' con la URL del siguiente paso en el flujo de trabajo.
-     * @return void
-     */
-    public function checkCurrentStep(): void
+    public function checkCurrentStep()
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
@@ -91,85 +62,94 @@ class Uploadtxt extends Component
      * 2. Crea un nuevo modelo de UploadedFile con los detalles del archivo.
      * 3. Establece los atributos del modelo, como el nombre de archivo, la ruta del archivo, el período fiscal y el origen.
      * 4. Establece el usuario que cargó el archivo y guarda el modelo en la base de datos.
-     * @return void
      */
-    public function uploadFileModel(): void
+    public function uploadfilemodel()
     {
-        $this->validate([
-            'archivotxt' => 'required|file',
-            'file_path' => 'required|string',
-            'periodo_fiscal' => 'required|string',
-            'selectedOrigen' => 'required|exists:origenes,id',
-        ]);
+        $file = $this->archivotxt;
+        $originalName = $this->archivotxt->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        $time = time();
+        $file_path = $this->file_path;
+        $filename = "{$originalName}_$time.$extension";
 
-        DB::transaction(function () {
-            $origen = $this->origenRepository->findById($this->selectedOrigen);
 
-            $this->fileUploadRepository->create([
-                'filename' => basename($this->file_path),
-                'original_name' => $this->archivotxt->getClientOriginalName(),
-                'file_path' => $this->file_path,
-                'periodo_fiscal' => $this->periodo_fiscal,
-                'origen' => $origen->name,
-                'user_id' => auth()->id(),
-                'user_name' => auth()->user()->name,
-            ]);
-        });
+        $this->archivoModel = new UploadedFile();
+        $this->archivoModel->filename = basename($this->file_path);
+        $this->archivoModel->original_name = $file->getClientOriginalName();
+        $this->archivoModel->file_path = $file_path;
+        $this->archivoModel->periodo_fiscal = $this->periodo_fiscal;
+
+        $this->archivoModel->origen = OrigenesModel::find($this->selectedOrigen)->name;
+        $this->archivoModel->user_id = auth()->user()->id;
+        $this->archivoModel->user_name = auth()->user()->name;
+        $this->archivoModel->save();
     }
 
 
-
-
-    /**
-     * Guarda un archivo cargado en la base de datos y actualiza el flujo de trabajo.
+    /** Guarda el archivo subido, crea un nuevo modelo UploadedFile y actualiza el flujo de trabajo.
      *
-     * Este método realiza las siguientes tareas:
-     * 1. Valida y prepara los datos de entrada.
-     * 2. Procesa la carga del archivo.
-     * 3. Actualiza el paso actual en el flujo de trabajo y redirige al siguiente paso.
+     * Este método es responsable de las siguientes tareas:
+     * 1. Valida el archivo subido, asegurándose de que sea un archivo .txt y no exceda los 20MB.
+     * 2. Sube el archivo utilizando el UploadService y almacena la ruta del archivo.
+     * 3. Crea un nuevo modelo UploadedFile con los detalles del archivo y lo guarda en la base de datos.
+     * 4. Recupera o inicia un nuevo flujo de trabajo utilizando el WorkflowService.
+     * 5. Marca el paso 'subir_archivo_afip' como completado en el flujo de trabajo.
+     * 6. Redirige al siguiente paso en el flujo de trabajo, si está disponible.
+     * 7. Reinicia la propiedad 'archivotxt' para limpiar el formulario.
      *
-     * @return void
+     * @throws ValidationException si la validación del archivo falla
+     * @throws Exception si hay un error durante la subida del archivo u otros errores inesperados
      */
     public function save()
     {
-        try {
-            $this->validateAndPrepare();
+        // obtenemos el proceso actual.
+        $processLog = $this->workflowService->getLatestWorkflow();
+        Log::info("obtenemos el proceso actual: $processLog");
+        $currentStep = $this->workflowService->getCurrentStep($processLog);
 
-            // 1. Cargar el archivo en el servidor
-            $filePath = $this->fileUploadService->uploadFile($this->archivotxt, 'afiptxt');
-
-            if (!$filePath) {
-                throw new Exception('Error al cargar el archivo en el servidor.');
-            }
-
-            // 2. Almacenar en la base de datos del modelo UploadedFile
-            $uploadedFile = $this->fileUploadRepository->create([
-                'filename' => basename($filePath),
-                'original_name' => $this->archivotxt->getClientOriginalName(),
-                'file_path' => $filePath,
-                'periodo_fiscal' => $this->periodo_fiscal,
-                'origen' => $this->origenRepository->findById($this->selectedOrigen)->name,
-                'user_id' => auth()->id(),
-                'user_name' => auth()->user()->name,
-            ]);
-
-            if (!$uploadedFile) {
-                throw new Exception('Error al guardar la información del archivo en la base de datos.');
-            }
-
-            // 3. Actualizar el flujo de trabajo y redirigir
-            $this->updateWorkflowAndRedirect();
-        } catch (Exception $e) {
-            $this->handleException($e);
-        }
-    }
-
-    private function validateAndPrepare()
-    {
         $this->validateInput();
-        $this->processLog = $this->workflowService->getLatestWorkflow();
-        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
-        Log::info("Proceso actual: {$this->processLog}, Paso actual: {$this->currentStep}");
+
+        try {
+
+            // Usar el UploadService para almacenar el archivo
+            $this->file_path = $this->uploadFile();
+            // Guardar el archivo en la base de datos
+            $this->uploadfilemodel();
+
+            Log::info("Antes de actualizar la tabla de archivos");
+            // Actualizar la tabla de archivos
+            $this->importaciones = UploadedFile::all();
+
+            // Resetear la propiedad para limpiar el formulario
+            $this->reset('archivotxt', 'selectedOrigen', 'periodo_fiscal');
+
+            // Marcamos el paso como completado
+            switch ($currentStep) {
+                case 'subir_archivo_afip':
+                    $this->workflowService->completeStep($processLog, 'subir_archivo_afip');
+                    break;
+                case 'subir_archivo_mapuche':
+                    $this->workflowService->completeStep($processLog, 'subir_archivo_mapuche');
+                    break;
+            }
+
+            // Redirigir al siguiente paso porque se cargaron los 2 archivos
+            $nextStep = $this->workflowService->getNextStep($currentStep);
+            if ($nextStep) {
+                // Notificar al componente principal
+                $this->dispatch('paso-completado', ['step' => $this->stepKey]);
+                // Redirigir de vuelta al componente principal
+                $this->redirect(route('afip-mi-simplificacion'));
+            }
+
+
+        } catch (ValidationException $e) {
+            //Handle validation errors
+            $this->dispatch('validationError', $e->errors());
+        } catch (Exception $e) {
+            //Handle file upload or other unexpected errors
+            $this->dispatch('fileUploadError', $e->getMessage());
+        }
     }
 
     /**
@@ -192,56 +172,6 @@ class Uploadtxt extends Component
         ], $messages);
     }
 
-    private function updateWorkflowAndRedirect()
-    {
-        $this->updateWorkflowStep();
-        $this->resetForm();
-        $this->handleNextStep();
-    }
-
-    private function resetForm()
-    {
-        $this->archivotxt = null;
-        $this->periodo_fiscal = '';
-        $this->file_path = '';
-        $this->resetValidation();
-    }
-
-    private function updateWorkflowStep()
-    {
-        $stepToComplete = $this->currentStep === 'subir_archivo_afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
-        $this->workflowService->completeStep($this->processLog, $stepToComplete);
-        Log::info("Paso completado updateWorkflowStep(): {$stepToComplete}");
-    }
-
-    private function handleNextStep()
-    {
-        $nextStep = $this->workflowService->getNextStep($this->currentStep);
-        if ($nextStep) {
-            $this->dispatch('paso-completado');
-            $this->redirect(route('MiSimplificacion'));
-            Log::info("(handleNextStep) Redirigiendo al siguiente paso: {$nextStep}");
-        }
-    }
-
-    /**
-     * Maneja una excepción que ocurre durante la subida de un archivo.
-     *
-     * Esta función se encarga de manejar las excepciones que pueden ocurrir durante la subida de un archivo.
-     * Dependiendo del tipo de excepción, se envía un evento al frontend con el tipo de error y el mensaje de error correspondiente.
-     * También se registra el error en el log de la aplicación.
-     *
-     * @param Exception $e La excepción que se produjo.
-     * @return void
-     */
-    private function handleException(Exception $e)
-    {
-        $errorType = $e instanceof ValidationException ? 'validationError' : 'fileUploadError';
-        $errorMessage = $e instanceof ValidationException ? $e->errors() : $e->getMessage();
-        $this->dispatch($errorType, $errorMessage);
-        Log::error("Error en save(): {$e->getMessage()}");
-    }
-
     /**
      * Sube un archivo al servidor.
      *
@@ -255,34 +185,43 @@ class Uploadtxt extends Component
         return UploadService::uploadFile($this->archivotxt, 'afiptxt');
     }
 
-
+    /**
+     * Elimina un archivo cargado previamente.
+     *
+     * Esta función se encarga de eliminar un archivo cargado previamente del servidor y de la base de datos.
+     * Primero, busca el archivo en la base de datos utilizando el ID proporcionado. Luego, intenta eliminar el archivo
+     * del servidor. Si la eliminación es exitosa, también se elimina el registro de la base de datos. Si ocurre
+     * algún error durante el proceso, se envían los mensajes de error correspondientes.
+     *
+     * @param int $fileId El ID del archivo a eliminar.
+     * @return void
+     */
     public function deleteFile($fileId)
     {
         try {
-            DB::transaction(function () use ($fileId) {
-                $file = $this->fileUploadRepository->findOrFail($fileId);
-                $this->deleteFileAndRecord($file);
-            });
-            $this->handleSuccessfulDeletion();
+            $file = UploadedFile::findOrFail($fileId);
+
+            // Eliminar el archivo del servidor
+            $deleted = UploadService::deleteFile($file->file_path);
+            // dd($deleted);
+            $this->dispatch('fileDeleted');
+
+            if ($deleted) {
+                // Si el archivo se elimino correctamente, eliminar el registro de la base de datos
+                $file->delete();
+                $this->dispatch('success', 'Archivo eliminado correctamente.');
+            } else {
+                $this->dispatch('error', 'Error al eliminar el archivo.');
+            }
+
+            // Actualizar la lista de archivos
+            $this->importaciones = UploadedFile::all();
         } catch (Exception $e) {
-            $this->dispatch('error', 'Error: ' . $e->getMessage());
+            //Handle file deletion or other unexpected errors
+            $this->dispatch('fileDeleteError', $e->getMessage());
         }
     }
 
-    private function deleteFileAndRecord($file)
-    {
-        if (!$this->fileUploadService->deleteFile($file->file_path)) {
-            throw new Exception('Error al eliminar el archivo del servidor.');
-        }
-        $this->fileUploadRepository->delete($file);
-    }
-
-    private function handleSuccessfulDeletion()
-    {
-        $this->dispatch('success', 'Archivo eliminado correctamente.');
-        $this->dispatch('fileDeleted');
-        $this->importaciones = $this->fileUploadRepository->all();
-    }
     public function updatedImportaciones()
     {
         //

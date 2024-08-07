@@ -1,7 +1,6 @@
 <?php
 
 return [
-    App\Providers\AfipProvider::class,
     App\Providers\AppServiceProvider::class,
     App\Providers\ColumnMetadataServiceProvider::class,
     App\Providers\CuilOperationStrategyProvider::class,
