@@ -212,7 +212,7 @@ class Uploadtxt extends Component
     {
         $stepToComplete = $this->currentStep === 'subir_archivo_afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
         $this->workflowService->completeStep($this->processLog, $stepToComplete);
-        Log::info("Paso completado: {$stepToComplete}");
+        Log::info("Paso completado updateWorkflowStep(): {$stepToComplete}");
     }
 
     private function handleNextStep()
@@ -220,11 +220,21 @@ class Uploadtxt extends Component
         $nextStep = $this->workflowService->getNextStep($this->currentStep);
         if ($nextStep) {
             $this->dispatch('paso-completado');
-            $this->redirect(route('afip-mi-simplificacion'));
-            Log::info("Redirigiendo al siguiente paso: {$nextStep}");
+            $this->redirect(route('MiSimplificacion'));
+            Log::info("(handleNextStep) Redirigiendo al siguiente paso: {$nextStep}");
         }
     }
 
+    /**
+     * Maneja una excepción que ocurre durante la subida de un archivo.
+     *
+     * Esta función se encarga de manejar las excepciones que pueden ocurrir durante la subida de un archivo.
+     * Dependiendo del tipo de excepción, se envía un evento al frontend con el tipo de error y el mensaje de error correspondiente.
+     * También se registra el error en el log de la aplicación.
+     *
+     * @param Exception $e La excepción que se produjo.
+     * @return void
+     */
     private function handleException(Exception $e)
     {
         $errorType = $e instanceof ValidationException ? 'validationError' : 'fileUploadError';
