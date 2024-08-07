@@ -135,8 +135,30 @@ class Uploadtxt extends Component
     {
         try {
             $this->validateAndPrepare();
-            // $this->processFileUpload();
-            $this->fileUploadService->uploadFile($this->archivotxt, $this->periodo_fiscal);
+
+            // 1. Cargar el archivo en el servidor
+            $filePath = $this->fileUploadService->uploadFile($this->archivotxt, 'afiptxt');
+
+            if (!$filePath) {
+                throw new Exception('Error al cargar el archivo en el servidor.');
+            }
+
+            // 2. Almacenar en la base de datos del modelo UploadedFile
+            $uploadedFile = $this->fileUploadRepository->create([
+                'filename' => basename($filePath),
+                'original_name' => $this->archivotxt->getClientOriginalName(),
+                'file_path' => $filePath,
+                'periodo_fiscal' => $this->periodo_fiscal,
+                'origen' => $this->origenRepository->findById($this->selectedOrigen)->name,
+                'user_id' => auth()->id(),
+                'user_name' => auth()->user()->name,
+            ]);
+
+            if (!$uploadedFile) {
+                throw new Exception('Error al guardar la información del archivo en la base de datos.');
+            }
+
+            // 3. Actualizar el flujo de trabajo y redirigir
             $this->updateWorkflowAndRedirect();
         } catch (Exception $e) {
             $this->handleException($e);

@@ -19,6 +19,8 @@ class UploadedFileRepository implements FileUploadRepositoryInterface
         return UploadedFile::findOrFail($id);
     }
 
+
+
     /**
      * Elimina un archivo cargado.
      *

@@ -21,15 +21,23 @@ class UploadedFile extends Model
         'user_name',
     ];
 
+
     /**
-     * Crea un nuevo registro de archivo cargado en la base de datos.
+     * Create a new uploaded file record in the database.
      *
-     * @param array $data Los datos del archivo cargado.
-     * @return \Illuminate\Database\Eloquent\Model|mixed
+     * This method creates a new instance of UploadedFile with the given data
+     * and saves it to the database.
+     *
+     * @param array $data An associative array containing the attributes for the new UploadedFile
+     * @return \App\Models\UploadedFile The newly created UploadedFile instance
      */
-    public function create(array $data)
+    public static function create(array $data)
     {
-        return $this->create($data);
+        $uploadedFile = new static();
+        $uploadedFile->fill($data);
+        $uploadedFile->save();
+
+        return $uploadedFile;
     }
 
 
