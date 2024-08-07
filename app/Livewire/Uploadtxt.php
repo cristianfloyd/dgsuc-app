@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Exception;
 use Livewire\Component;
-use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
 use Livewire\WithFileUploads;
 use App\Services\UploadService;
