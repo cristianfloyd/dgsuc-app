@@ -59,27 +59,27 @@ class ParaMiSimplificacion extends Component
     public function exportarTxt()
     {
         $fieldLengths = [
-            'tipo_registro' => 1,
-            'codigo_movimiento' => 1,
+            'tipo_registro' => 2,
+            'codigo_movimiento' => 2,
             'cuil' => 11,
             'trabajador_agropecuario' => 1,
-            'modalidad_contrato' => 2,
-            'inicio_rel_laboral' => 8,
-            'fin_rel_laboral' => 8,
+            'modalidad_contrato' => 3,
+            'inicio_rel_laboral' => 10,
+            'fin_rel_laboral' => 10,
             'obra_social' => 6,
             'codigo_situacion_baja' => 2,
-            'fecha_tel_renuncia' => 8,
-            'retribucion_pactada' => 12,
+            'fecha_tel_renuncia' => 10,
+            'retribucion_pactada' => 15,
             'modalidad_liquidacion' => 1,
-            'domicilio' => 50,
-            'actividad' => 3,
-            'puesto' => 3,
-            'rectificacion' => 1,
-            'ccct' => 18,
-            'tipo_servicio' => 1,
-            'categoria' => 3,
-            'fecha_susp_serv_temp' => 8,
-            'nro_form_agro' => 12,
+            'domicilio' => 5,
+            'actividad' => 6,
+            'puesto' => 4,
+            'rectificacion' => 2,
+            'ccct' => 10,
+            'tipo_servicio' => 3,
+            'categoria' => 6,
+            'fecha_susp_serv_temp' => 10,
+            'nro_form_agro' => 10,
             'covid' => 1
         ];
 
@@ -99,7 +99,7 @@ class ParaMiSimplificacion extends Component
         $fileName = 'exportacion_' . now()->format('Ymd_His') . '.txt';
         Storage::disk('local')->put($fileName, $txtContent);
         $filePath = storage_path("app/$fileName");
-
+        $this->dispatch('download-mi-simplificacion', $filePath);
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 

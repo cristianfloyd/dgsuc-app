@@ -8,8 +8,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Computed;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
-use App\Services\WorkflowService;
-use App\Services\MessageManager;
+use illuminate\Support\Facades\Log;
 
 class AfipMiSimplificacion extends Component
 {
@@ -43,6 +42,7 @@ class AfipMiSimplificacion extends Component
         $this->processLogId = $this->currentProcess->id;
         $this->getStepsAndCurrentStep();
         $this->processFinished = $this->isProcessFinished();
+        $this->getCurrentStepUrl();
     }
 
     /**
@@ -116,11 +116,11 @@ class AfipMiSimplificacion extends Component
     public function endProcess(): void
     {
         if ($this->canEndProcess()) {
-            // $this->processLogService->completeProcess($this->currentProcess);
             $this->currentProcess->status = 'completed';
             $this->currentProcess->save();
-            // Log::info('Proceso finalizado correctamente');
+            Log::info('Proceso finalizado correctamente');
             $this->showMessage('proceso-terminado');
+            $this->processFinished = false;
         }
     }
 
@@ -169,7 +169,6 @@ class AfipMiSimplificacion extends Component
     {
         $this->steps = $this->workflowService->getSteps();
         $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
-        $this->getCurrentStepUrl();
     }
 
     /**
@@ -181,7 +180,9 @@ class AfipMiSimplificacion extends Component
      */
     public function getCurrentStepUrl(): void
     {
-        $this->currentStepUrl = $this->workflowService->getStepUrl($this->currentStep);
+        if (!$this->allStepsCompleted()) {
+            $this->currentStepUrl = $this->workflowService->getStepUrl($this->currentStep);
+        }
     }
 
     /**
@@ -216,6 +217,7 @@ class AfipMiSimplificacion extends Component
     public function isProcessFinished(): bool
     {
         $status = $this->workflowService->isProcessCompleted($this->currentProcess);
+
         return $status;
     }
 

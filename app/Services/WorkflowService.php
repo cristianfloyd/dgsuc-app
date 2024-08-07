@@ -241,17 +241,35 @@ class WorkflowService implements WorkflowServiceInterface
         return $subSteps[$step] ?? [];
     }
 
-    /** Verifica si un proceso ha sido completado.
+    /**
+     * Verifica si todos los pasos del proceso están completados y actualiza el estado del ProcessLog si es necesario.
      *
-     * @param \App\Models\ProcessLog $processLog
-     * @return bool Verdadero si el proceso ha sido completado, falso en caso contrario.
+     * Este método comprueba si todos los pasos en el ProcessLog están marcados como 'completed'.
+     * Si todos los pasos están completados y el estado del ProcessLog no es 'completed',
+     * actualiza el estado a 'completed' y establece la fecha de finalización.
+     *
+     * @param ProcessLog $processLog El registro del proceso a verificar y potencialmente actualizar.
+     * @return bool Retorna true si todos los pasos están completados, false en caso contrario.
      */
     public function isProcessCompleted(ProcessLog $processLog): bool
     {
-        return array_reduce($processLog->steps,
+        $allCompleted = array_reduce(
+            $processLog->steps,
             function ($carry, $step) {
                 return $carry && $step === 'completed';
-        }, true);
-    }
+            },
+            true
+        );
+        
+        if ($allCompleted && $processLog->status !== 'completed') {
+            $processLog->update([
+                'status' => 'completed',
+                'completed_at' => now()
+            ]);
+        } elseif (!$allCompleted){
+            return false;
+        }
 
+        return $allCompleted;
+    }
 }

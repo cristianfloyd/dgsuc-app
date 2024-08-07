@@ -244,6 +244,14 @@ class CompareCuils extends Component
         $this->ejecutarFuncionAlmacenada();
     }
 
+    #[On('download-mi-simplificacion')]
+    public function handleExportTxtSuccess()
+    {
+        $this->processLog = $this->workflowService->getLatestWorkflow();
+        $this->currentStep = WorkflowStatus::EXPORTAR_TXT_PARA_AFIP->value;
+        $this->workflowService->completeStep($this->processLog, $this->currentStep);
+
+    }
     public function funcionAlmacenada()
     {
         $this->processLog = $this->workflowService->getLatestWorkflow();
@@ -263,6 +271,17 @@ class CompareCuils extends Component
         } else {
             $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
         }
+    }
+
+    /** Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
+     *
+     * @return array The array of CUILs that are present in the temporary table but not in the afip_mapuche_mi_simplificacion table.
+     */
+    public function cuilsNoEncontrados(): array
+    {
+        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+
+        return $cuilsNoEncontrados;
     }
 
     /** Maneja el éxito de la ejecución de la función "mapuche-mi-simplificacion".
@@ -296,16 +315,7 @@ class CompareCuils extends Component
         }
     }
 
-    /** Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
-     *
-     * @return array The array of CUILs that are present in the temporary table but not in the afip_mapuche_mi_simplificacion table.
-     */
-    public function cuilsNoEncontrados(): array
-    {
-        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
 
-        return $cuilsNoEncontrados;
-    }
 
     #[On('error-mapuche-mi-simplificacion')]
     public function handleErrorMapucheMiSimplificacion()
@@ -404,10 +414,8 @@ class CompareCuils extends Component
                 break;
             case WorkflowStatus::OBTENER_CUILS_NO_INSERTADOS:
                 $this->loadCuilsNotInserted();
-                dump('cuilsNoEncontrados');
                 $this->dispatch('workflow-completed');
             case WorkflowStatus::EXPORTAR_TXT_PARA_AFIP:
-                dump('exportar_txt_para_afip');
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
                 break;
         }
@@ -419,7 +427,6 @@ class CompareCuils extends Component
      * que no están presentes en el modelo AfipRelacionesActivas.
      * Los CUIL resultantes que no están en el modelo AfipRelacionesActivas se almacenan en la propiedad $cuilsNotInAfip.
      */
-    #[Computed()]
     public function compareCuils(): Collection
     {
         try {
@@ -504,10 +511,6 @@ class CompareCuils extends Component
     }
 
 
-    public function getIsProcessCompleteProperty()
-    {
-        return $this->workflowService->isProcessCompleted($this->processLog);
-    }
 
     public function render()
     {

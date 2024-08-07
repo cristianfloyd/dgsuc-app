@@ -14,14 +14,14 @@
 
         <!-- Resto del contenido -->
     </div>
-
+    @dump($this->processFinished)
     <div class="mb-4 container" id="process-container">
         <h1>Proceso de AFIP Mi Simplificación</h1>
         <div class="mb-4">
             <button class="btn btn-primary btn-info" wire:click="startProcess" @if (!$processFinished) disabled @endif>
                 Iniciar
             </button>
-            @if (!$this->showResetButton && !$processFinished)
+            @if (!$processFinished)
                 <button type="button" class="btn btn-neutral" wire:click="endProcess">
                     Terminar
                 </button>
