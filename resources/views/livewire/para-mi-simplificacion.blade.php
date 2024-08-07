@@ -5,14 +5,6 @@
             <div class="flex flex-col w-1/2">
                 <x-mary-input wire:model.live.debounce.300ms="search" placeholder="{{ __('Search') }}" icon="o-magnifying-glass" hint="Buscar..."/>
             </div>
-            {{-- <select wire:model.live="perPage" class="form-select ml-2">
-                <option value="5">5</option>
-                <option value="7">7</option>
-                <option value="10">10</option>
-                <option>20</option>
-                <option>50</option>
-                <option>100</option>
-            </select> --}}
             <div class="w-5/12 m-4 float-right">
                 <x-mary-range
                 wire:model.live.debounce="perPage"

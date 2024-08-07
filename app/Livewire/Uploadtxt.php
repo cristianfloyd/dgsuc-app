@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Contracts\WorkflowServiceInterface;
 use Exception;
 use Livewire\Component;
 use App\Models\UploadedFile;
@@ -32,8 +33,10 @@ class Uploadtxt extends Component
     public $nextStepUrl = null;
 
     protected $workflowService;
+    protected $processLog;
+    protected $currentStep;
 
-    public function boot(WorkflowService $workflowService)
+    public function boot(WorkflowServiceInterface $workflowService)
     {
         $this->workflowService = $workflowService;
         $this->checkCurrentStep();
@@ -45,7 +48,17 @@ class Uploadtxt extends Component
         $this->origenes = OrigenesModel::all();
     }
 
-    public function checkCurrentStep()
+    /**
+     * Comprueba el paso actual en el flujo de trabajo y actualiza las propiedades de la vista.
+     *
+     * Este método realiza las siguientes tareas:
+     * 1. Obtiene el último registro de flujo de trabajo utilizando el WorkflowService.
+     * 2. Obtiene el paso actual en el flujo de trabajo utilizando el WorkflowService.
+     * 3. Establece la propiedad 'showUploadForm' en función de si el paso actual es 'subir_archivo_afip' o 'subir_archivo_mapuche'.
+     * 4. Establece la propiedad 'nextStepUrl' con la URL del siguiente paso en el flujo de trabajo.
+     * @return void
+     */
+    public function checkCurrentStep(): void
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
@@ -62,8 +75,9 @@ class Uploadtxt extends Component
      * 2. Crea un nuevo modelo de UploadedFile con los detalles del archivo.
      * 3. Establece los atributos del modelo, como el nombre de archivo, la ruta del archivo, el período fiscal y el origen.
      * 4. Establece el usuario que cargó el archivo y guarda el modelo en la base de datos.
+     * @return void
      */
-    public function uploadfilemodel()
+    public function uploadfilemodel(): void
     {
         $file = $this->archivotxt;
         $originalName = $this->archivotxt->getClientOriginalName();
@@ -82,74 +96,29 @@ class Uploadtxt extends Component
         $this->archivoModel->origen = OrigenesModel::find($this->selectedOrigen)->name;
         $this->archivoModel->user_id = auth()->user()->id;
         $this->archivoModel->user_name = auth()->user()->name;
+        // Log::info($this->archivoModel->file_path);
         $this->archivoModel->save();
     }
 
 
-    /** Guarda el archivo subido, crea un nuevo modelo UploadedFile y actualiza el flujo de trabajo.
-     *
-     * Este método es responsable de las siguientes tareas:
-     * 1. Valida el archivo subido, asegurándose de que sea un archivo .txt y no exceda los 20MB.
-     * 2. Sube el archivo utilizando el UploadService y almacena la ruta del archivo.
-     * 3. Crea un nuevo modelo UploadedFile con los detalles del archivo y lo guarda en la base de datos.
-     * 4. Recupera o inicia un nuevo flujo de trabajo utilizando el WorkflowService.
-     * 5. Marca el paso 'subir_archivo_afip' como completado en el flujo de trabajo.
-     * 6. Redirige al siguiente paso en el flujo de trabajo, si está disponible.
-     * 7. Reinicia la propiedad 'archivotxt' para limpiar el formulario.
-     *
-     * @throws ValidationException si la validación del archivo falla
-     * @throws Exception si hay un error durante la subida del archivo u otros errores inesperados
-     */
+
     public function save()
     {
-        // obtenemos el proceso actual.
-        $processLog = $this->workflowService->getLatestWorkflow();
-        Log::info("obtenemos el proceso actual: $processLog");
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-
-        $this->validateInput();
-
         try {
-
-            // Usar el UploadService para almacenar el archivo
-            $this->file_path = $this->uploadFile();
-            // Guardar el archivo en la base de datos
-            $this->uploadfilemodel();
-
-            Log::info("Antes de actualizar la tabla de archivos");
-            // Actualizar la tabla de archivos
-            $this->importaciones = UploadedFile::all();
-
-            // Resetear la propiedad para limpiar el formulario
-            $this->reset('archivotxt', 'selectedOrigen', 'periodo_fiscal');
-
-            // Marcamos el paso como completado
-            switch ($currentStep) {
-                case 'subir_archivo_afip':
-                    $this->workflowService->completeStep($processLog, 'subir_archivo_afip');
-                    break;
-                case 'subir_archivo_mapuche':
-                    $this->workflowService->completeStep($processLog, 'subir_archivo_mapuche');
-                    break;
-            }
-
-            // Redirigir al siguiente paso porque se cargaron los 2 archivos
-            $nextStep = $this->workflowService->getNextStep($currentStep);
-            if ($nextStep) {
-                // Notificar al componente principal
-                $this->dispatch('paso-completado', ['step' => $this->stepKey]);
-                // Redirigir de vuelta al componente principal
-                $this->redirect(route('afip-mi-simplificacion'));
-            }
-
-
-        } catch (ValidationException $e) {
-            //Handle validation errors
-            $this->dispatch('validationError', $e->errors());
+            $this->validateAndPrepare();
+            $this->processFileUpload();
+            $this->updateWorkflowAndRedirect();
         } catch (Exception $e) {
-            //Handle file upload or other unexpected errors
-            $this->dispatch('fileUploadError', $e->getMessage());
+            $this->handleException($e);
         }
+    }
+
+    private function validateAndPrepare()
+    {
+        $this->validateInput();
+        $this->processLog = $this->workflowService->getLatestWorkflow();
+        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
+        Log::info("Proceso actual: {$this->processLog}, Paso actual: {$this->currentStep}");
     }
 
     /**
@@ -170,6 +139,38 @@ class Uploadtxt extends Component
         $this->validate([
             'archivotxt' => 'required|file|mimes:txt,csv|max:20480',
         ], $messages);
+    }
+
+    private function updateWorkflowAndRedirect()
+    {
+        $this->updateWorkflowStep();
+        $this->resetForm();
+        $this->handleNextStep();
+    }
+
+    private function updateWorkflowStep()
+    {
+        $stepToComplete = $this->currentStep === 'subir_archivo_afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
+        $this->workflowService->completeStep($this->processLog, $stepToComplete);
+        Log::info("Paso completado: {$stepToComplete}");
+    }
+
+    private function handleNextStep()
+    {
+        $nextStep = $this->workflowService->getNextStep($this->currentStep);
+        if ($nextStep) {
+            $this->dispatch('paso-completado', ['step' => $this->stepKey]);
+            $this->redirect(route('afip-mi-simplificacion'));
+            Log::info("Redirigiendo al siguiente paso: {$nextStep}");
+        }
+    }
+
+    private function handleException(Exception $e)
+    {
+        $errorType = $e instanceof ValidationException ? 'validationError' : 'fileUploadError';
+        $errorMessage = $e instanceof ValidationException ? $e->errors() : $e->getMessage();
+        $this->dispatch($errorType, $errorMessage);
+        Log::error("Error en save(): {$e->getMessage()}");
     }
 
     /**
