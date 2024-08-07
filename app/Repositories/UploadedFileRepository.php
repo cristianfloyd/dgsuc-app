@@ -19,7 +19,16 @@ class UploadedFileRepository implements FileUploadRepositoryInterface
         return UploadedFile::findOrFail($id);
     }
 
-
+    /**
+     * Create a new uploaded file record.
+     *
+     * @param array $data
+     * @return \App\Models\UploadedFile
+     */
+    public function create(array $data)
+    {
+        return UploadedFile::create($data);
+    }
 
     /**
      * Elimina un archivo cargado.
