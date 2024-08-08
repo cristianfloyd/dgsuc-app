@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
-use app\Services\ProcesarLinea;
-use App\Providers\LineProcessor;
 use App\Services\WorkflowService;
-use App\Models\AfipSicossDesdeMapuche;
+use App\Listeners\JobFailedListener;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Queue\Events\JobFailed;
+use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\ProcesarLineaContract;
+use Illuminate\Queue\Events\JobProcessed;
 use App\Contracts\WorkflowServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
         }
+
+        Event::listen(
+            JobFailed::class,
+            JobFailedListener::class,
+        );
+
+        Event::listen(
+            JobProcessed::class, // Asumiendo que el evento está en App\Events
+            JobProcessedListener::class
+        );
     }
 
     /**

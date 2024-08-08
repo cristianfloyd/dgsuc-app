@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\UploadedFile;
+use App\Contracts\FileProcessorInterface;
 
 /**
  * Procesa un archivo subido UploadedFile y devuelve un array de líneas procesadas.
@@ -11,7 +12,7 @@ use App\Models\UploadedFile;
  * @param array $columnWidths Una matriz de anchos de columna para usar al procesar cada línea.
  * @return array Un array de líneas procesadas.
  */
-class FileProcessorService
+class FileProcessorService implements FileProcessorInterface
 {
 
     /** Processes an uploaded file and returns an array of processed lines.
@@ -20,7 +21,7 @@ class FileProcessorService
      * @param array $columnWidths An array of column widths to use when processing each line.
      * @return array An array of processed lines.
      */
-    public function processFile(UploadedFile $file, array $columnWidths)
+    public function processFile(UploadedFile $file, array $columnWidths): array
     {
         $filePath = storage_path("/app/{$file->file_path}");
         $lines = collect(file($filePath));
@@ -58,5 +59,6 @@ class FileProcessorService
         }
         return $lineaProcesada;
     }
+
 
 }

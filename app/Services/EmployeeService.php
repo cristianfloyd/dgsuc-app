@@ -2,17 +2,20 @@
 
 namespace App\Services;
 
-use App\Contracts\EmployeeRepositoryInterface;
 use App\DTOs\EmployeeInfoDTO;
-use App\Repositories\EmployeeRepository;
+use Illuminate\Support\Facades\Log;
+use App\Contracts\EmployeeServiceInterface;
+use App\Contracts\EmployeeRepositoryInterface;
 
-class EmployeeService
+class EmployeeService implements EmployeeServiceInterface
 {
     private $employeeRepository;
+    private $databaseService;
 
-    public function __construct(EmployeeRepositoryInterface $employeeRepository)
+    public function __construct(EmployeeRepositoryInterface $employeeRepository, DatabaseService $databaseService)
     {
         $this->employeeRepository = $employeeRepository;
+        $this->databaseService = $databaseService;
     }
 
     /**
@@ -46,5 +49,26 @@ class EmployeeService
     public function getCargos(string $nroLegaj): array
     {
         return $this->employeeRepository->getCargos($nroLegaj);
+    }
+
+    public function storeProcessedLines(array $lineasProcesadas): void
+    {
+        $datosMapeados = $this->mapearDatos($lineasProcesadas);
+        $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
+        $this->handleResultado($resultado);
+    }
+
+    private function mapearDatos(array $lineasProcesadas): array
+    {
+        return collect($lineasProcesadas)
+            ->map(fn($linea) => $this->databaseService->mapearDatosAlModelo($linea))
+            ->all();
+    }
+
+    private function handleResultado(bool $resultado): void
+    {
+        $message = $resultado ? 'Se importó correctamente' : 'No se importó correctamente';
+
+        Log::info($message);
     }
 }

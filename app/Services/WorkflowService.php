@@ -223,22 +223,27 @@ class WorkflowService implements WorkflowServiceInterface
         return $urls[$step] ?? '/';
     }
 
-    /** Obtiene los sub-pasos de un paso específico del flujo de trabajo.
+    /**
+     * Marca un paso del flujo de trabajo como fallido.
      *
-     * @param string $step El nombre del paso del flujo de trabajo.
-     * @return array Los sub-pasos del paso especificado.
+     * @param string $step El nombre del paso a marcar como fallido.
+     * @param string $errorMessage El mensaje de error (opcional).
      */
-    public function getSubSteps($step): array
+    public function failStep(string $step, string $errorMessage = null): void
     {
-        $subSteps = [
-            'poblar_tabla_temp_cuils' => [
-                'verificar_existencia_tabla',
-                'crear_tabla_si_no_existe',
-                'borrar_datos_si_existen',
-                'insertar_datos'
-            ]
-        ];
-        return $subSteps[$step] ?? [];
+        $processLog = $this->getLatestWorkflow(); // Obtiene el proceso actual
+        if ($processLog) {
+            $this->updateStep($processLog, $step, 'failed'); // Marca el paso como 'failed'
+
+            // Registra el error en el log del proceso (opcional)
+            if ($errorMessage) {
+                $processLog->logs()->create([
+                    'step' => $step,
+                    'status' => 'failed',
+                    'message' => $errorMessage,
+                ]);
+            }
+        }
     }
 
     /**
@@ -266,7 +271,7 @@ class WorkflowService implements WorkflowServiceInterface
                 'status' => 'completed',
                 'completed_at' => now()
             ]);
-        } elseif (!$allCompleted){
+        } elseif (!$allCompleted) {
             return false;
         }
 

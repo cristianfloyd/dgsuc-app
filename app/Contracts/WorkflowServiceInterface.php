@@ -20,7 +20,6 @@ use App\Models\ProcessLog;
  * @method string|null getNextStep(string $currentStep)
  * @method bool isStepCompleted(ProcessLog $processLog, string $step)
  * @method string|null getStepUrl()
- * @method array getSubSteps(string $step)
  * @method bool isProcessCompleted(ProcessLog $processLog)
  *
  * @version 1.0.0
@@ -118,12 +117,13 @@ interface WorkflowServiceInterface
     public function getStepUrl(string $step): string;
 
     /**
-     * Obtiene los subpasos de un paso específico.
+     * Marca un paso como fallido en el flujo de trabajo.
      *
-     * @param mixed $step
-     * @return array
+     * @param string $step El paso que se ha marcado como fallido.
+     * @param string|null $message Un mensaje opcional que describe el motivo del fallo.
+     * @return void
      */
-    public function getSubSteps($step): array;
+    public function failStep(string $step, string $message = null): void;
 
     /**
      * Verifica si el proceso completo está finalizado.
