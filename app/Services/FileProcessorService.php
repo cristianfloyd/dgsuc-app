@@ -22,7 +22,7 @@ class FileProcessorService
      */
     public function processFile(UploadedFile $file, array $columnWidths)
     {
-        $filePath = storage_path("/app/public/{$file->file_path}");
+        $filePath = storage_path("/app/{$file->file_path}");
         $lines = collect(file($filePath));
         $periodoFiscal = $file->periodo_fiscal;
 
