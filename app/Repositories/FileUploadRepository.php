@@ -6,7 +6,7 @@ use App\Models\UploadedFile;
 use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\FileUploadRepositoryInterface;
 
-class UploadedFileRepository implements FileUploadRepositoryInterface
+class FileUploadRepository implements FileUploadRepositoryInterface
 {
     /**
      * Obtiene un archivo cargado por su ID o lanza una excepción si no se encuentra.

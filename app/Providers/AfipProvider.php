@@ -2,11 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\FileUploadRepository;
 use App\Contracts\OrigenRepositoryInterface;
-use App\Repositories\UploadedFileRepository;
 use App\Contracts\FileUploadRepositoryInterface;
 
 class AfipProvider extends ServiceProvider
@@ -16,7 +15,7 @@ class AfipProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(FileUploadRepositoryInterface::class, UploadedFileRepository::class);
+        $this->app->bind(FileUploadRepositoryInterface::class, FileUploadRepository::class);
         $this->app->bind(OrigenRepositoryInterface::class, OrigenesModel::class);
     }
 

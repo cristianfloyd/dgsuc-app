@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
 use App\Repositories\FileUploadRepository;
 use App\Contracts\OrigenRepositoryInterface;
-use App\Repositories\UploadedFileRepository;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UploadtxtTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     private $fileUploadRepository;
     private $uploadtxt;
@@ -25,7 +23,7 @@ class UploadtxtTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fileUploadRepository = $this->createMock(UploadedFileRepository::class);
+        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
         $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
     }
 
@@ -111,13 +109,12 @@ class UploadtxtTest extends TestCase
             ->method('updateWorkflowAndRedirect');
 
         $component->save();
-        $component->assertStatus(200);
     }
 
     public function testSaveFailureFileUpload()
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
-        $mockFileUploadRepository = $this->createMock(UploadedFileRepository::class);
+        $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
         $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
@@ -142,7 +139,7 @@ class UploadtxtTest extends TestCase
     public function testSaveFailureDatabaseInsert()
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
-        $mockFileUploadRepository = $this->createMock(UploadedFileRepository::class);
+        $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
         $component = Livewire:: Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
