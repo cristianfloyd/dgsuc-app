@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Events\JobFailed;
+use App\Events\JobProcessed;
 use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
@@ -14,15 +16,20 @@ use App\Contracts\WorkflowServiceInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Contracts\TransactionServiceInterface;
-use Illuminate\Support\Facades\Log;
 
 class ImportAfipRelacionesActivasJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $uploadedFileId;
 
-    public function __construct($uploadedFileId)
+    public function __construct(
+        private FileProcessorInterface $fileProcessor,
+        private EmployeeService $employeeService,
+        private ValidationService $validationService,
+        private TransactionServiceInterface $transactionService,
+        private WorkflowServiceInterface $workflowService,
+        private ColumnMetadata $columnMetadata,
+        protected $uploadedFileId)
     {
         $this->uploadedFileId = $uploadedFileId;
     }
@@ -30,42 +37,36 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(
-        FileProcessorInterface $fileProcessor,
-        EmployeeService $employeeService,
-        ValidationService $validationService,
-        TransactionServiceInterface $transactionService,
-        WorkflowServiceInterface $workflowService,
-        ColumnMetadata $columnMetadata
-    ) {
+    public function handle(): void
+    {
         $uploadedFile = UploadedFile::findOrFail($this->uploadedFileId);
         Log::info('Iniciando ImportAfipRelacionesActivasJob');
+
         try {
-            $processLog = $workflowService->getLatestWorkflow();
-            $currentStep = $workflowService->getCurrentStep($processLog);
+            $processLog = $this->workflowService->getLatestWorkflow();
+            $currentStep = $this->workflowService->getCurrentStep($processLog);
+            $this->workflowService->updateStep($processLog, $currentStep, 'in_progress');
 
-            $workflowService->updateStep($processLog, $currentStep, 'in_progress');
+            $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
+                $this->validationService->validateSelectedFile($uploadedFile);
 
-            $transactionService->executeInTransaction(function () use ($uploadedFile, $fileProcessor, $employeeService, $validationService, $columnMetadata) {
-                $validationService->validateSelectedFile($uploadedFile);
-
-                $lineasProcesadas = $fileProcessor->processFile(
+                $lineasProcesadas = $this->fileProcessor->processFile(
                     $uploadedFile,
-                    $columnMetadata->getWidths()
+                    $this->columnMetadata->getWidths()
                 );
 
-                $employeeService->storeProcessedLines($lineasProcesadas);
+                $this->employeeService->storeProcessedLines($lineasProcesadas);
             });
 
-            $workflowService->completeStep($processLog, 'import_archivo_afip');
+            $this->workflowService->completeStep($processLog, 'import_archivo_afip');
 
-            // Log::info('Archivo importado correctamente.');
+            event(new JobProcessed($uploadedFile));
         } catch (\Exception $e) {
-            $workflowService->failStep('import_archivo_afip', $e->getMessage());
+            $this->workflowService->failStep('import_archivo_afip', $e->getMessage());
+            event(new JobFailed($e->getMessage()));
 
-            // Log::error('Error al importar el archivo: ' . $e->getMessage());
-            // Puedes manejar el error aquí o lanzarlo de nuevo para que lo maneje un listener
-            throw $e;
+            // Puedes manejar el error aquí o lanzarlo de nuevo
+            // throw $e;
         }
     }
 }
