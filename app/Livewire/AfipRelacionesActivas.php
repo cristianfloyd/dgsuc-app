@@ -70,15 +70,15 @@ class AfipRelacionesActivas extends Component
         ValidationService $validationService,
         ColumnMetadata $columnMetadata,
         TransactionServiceInterface $transactionService,
-        ) {
-            $this->fileProcessor = $fileProcessor;
-            $this->databaseService = $databaseService;
-            $this->workflowService = $workflowService;
-            $this->validationService = $validationService;
-            $this->columnMetadata = $columnMetadata;
-            $this->transactionService = $transactionService;
-            $this->checkCurrentStep();
-        }
+    ) {
+        $this->fileProcessor = $fileProcessor;
+        $this->databaseService = $databaseService;
+        $this->workflowService = $workflowService;
+        $this->validationService = $validationService;
+        $this->columnMetadata = $columnMetadata;
+        $this->transactionService = $transactionService;
+        $this->checkCurrentStep();
+    }
 
     public function mount()
     {
@@ -98,50 +98,87 @@ class AfipRelacionesActivas extends Component
         $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
     }
 
-    /** Importa un archivo AFIP y almacena las líneas procesadas en la base de datos.
-     *
-     * Este método se encarga de validar el archivo seleccionado, procesar su contenido y almacenar los datos en la base de datos.
-     * También actualiza el estado del flujo de trabajo y envía mensajes de éxito o error según corresponda.
-     *
-     * @return void
-     */
-    public function importar():void
-    {
-        $processLog = $this->workflowService->getLatestWorkflow();
-        $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'in_progress');
 
-        try {
-            $this->transactionService->executeInTransaction(
-                function () use ($processLog) {
-                    $this->validateFileSelection();
-                    $lineasProcesadas = $this->processFile();
-                    $this->storeProcessedLines($lineasProcesadas);
-                    $this->completeWorkflowStep($processLog);
-                }
-            );
 
-            $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
-            $this->dispatch('datos-importados'); // Event para cargar RelacionesActivasTable
 
-            $currentStep = $this->workflowService->getCurrentStep($processLog);
-            $this->workflowService->getStepUrl($this->workflowService->getNextStep($currentStep) );
-        } catch (\Exception $e) {
-            $this->handleImportError($e, $processLog);
-        }
+
+public function importar(): void
+{
+    $processLog = $this->workflowService->getLatestWorkflow();
+    $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'in_progress');
+
+    try {
+        $this->transactionService->executeInTransaction(
+            function () use ($processLog) {
+                $this->validateAndProcessFile($processLog);
+            }
+        );
+
+        $this->handleSuccessfulImport($processLog);
+    } catch (\Exception $e) {
+        $this->handleImportError($e, $processLog);
+    }
+}
+
+private function validateAndProcessFile(object $processLog): void
+{
+    $this->validateFileSelection();
+    $lineasProcesadas = $this->processFile();
+    $this->storeProcessedLines($lineasProcesadas);
+    $this->completeWorkflowStep($processLog);
+}
+
+private function handleSuccessfulImport(object $processLog): void
+{
+    $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
+    $this->dispatch('datos-importados');
+
+    $currentStep = $this->workflowService->getCurrentStep($processLog);
+    $this->nextStepUrl = $this->workflowService->getStepUrl($this->workflowService->getNextStep($currentStep));
+}
+
+private function validateFileSelection(): void
+{
+    if (!$this->archivoSeleccionado) {
+        throw new \InvalidArgumentException('No se ha seleccionado ningún archivo.');
     }
 
-    private function validateFileSelection()
-    {
-        if (!$this->archivoSeleccionado) {
-            throw new \Exception('No se ha seleccionado ningún archivo.');
-        }
+    $this->validationService->validateSelectedFile($this->archivoSeleccionado);
+}
 
-        $this->validationService->validateSelectedFile($this->archivoSeleccionado);
-    }
-    private function processFile()
-    {
-        return $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnMetadata->getWidths());
-    }
+private function processFile(): array
+{
+    return $this->fileProcessor->processFile($this->archivoSeleccionado, $this->columnMetadata->getWidths());
+}
+
+private function storeProcessedLines(array $lineasProcesadas): void
+{
+    $datosMapeados = $this->mapearDatos($lineasProcesadas);
+    $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
+    $this->handleResultado($resultado);
+}
+
+private function mapearDatos(array $lineasProcesadas): array
+{
+    return collect($lineasProcesadas)
+        ->map(fn($linea) => $this->databaseService->mapearDatosAlModelo($linea))
+        ->all();
+}
+
+private function handleResultado(bool $resultado): void
+{
+    $message = $resultado ? 'Se importó correctamente' : 'No se importó correctamente';
+    $eventName = $resultado ? 'show-success-message' : 'show-error-message';
+
+    Log::info($message);
+    $this->dispatch($eventName, ['message' => $message]);
+}
+
+
+
+
+
+
     private function completeWorkflowStep($processLog)
     {
         $this->workflowService->completeStep($processLog, 'import_archivo_afip');
@@ -162,16 +199,7 @@ class AfipRelacionesActivas extends Component
         $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'failed');
     }
 
-    private function storeProcessedLines($lineasProcesadas)
-    {
-        $datosMapeados = collect($lineasProcesadas)
-            ->map(function ($linea) {
-                return $this->databaseService->mapearDatosAlModelo($linea);
-            })->all();
 
-        $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
-        $this->handleResultado($resultado);
-    }
 
     private function almacenarLineas($lineasProcesadas)
     {
@@ -185,18 +213,7 @@ class AfipRelacionesActivas extends Component
         $this->handleResultado($resultado);
     }
 
-    private function handleResultado($resultado)
-    {
-        if ($resultado) {
-            // mostrar un mensaje que se importo correctamente
-            Log::info('Se importo correctamente');
-            $this->dispatch('show-success-message', ['message' => 'Se importo correctamente']);
-        } else {
-            // mostrar un mensaje que no se importo correctamente
-            Log::error('No se importo correctamente');
-            $this->dispatch('show-error-message', ['message' => 'No se importo correctamente']);
-        }
-    }
+
 
 
     public function render()
