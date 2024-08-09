@@ -189,7 +189,7 @@ class AfipRelacionesActivas extends Component
     public function render()
     {
 
-        if (!$this->showUploadForm) {
+        if ($this->showUploadForm) {
             return view('livewire.afip-relaciones-activas');
         } else {
             return view('livewire.uploadtxtcompleted', [

@@ -8,6 +8,7 @@ use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Contracts\FileProcessorInterface;
@@ -21,17 +22,29 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private $fileProcessor;
+    private $employeeService;
+    private $validationService;
+    private $transactionService;
+    private $workflowService;
+    private $columnMetadata;
 
     public function __construct(
-        private FileProcessorInterface $fileProcessor,
-        private EmployeeService $employeeService,
-        private ValidationService $validationService,
-        private TransactionServiceInterface $transactionService,
-        private WorkflowServiceInterface $workflowService,
-        private ColumnMetadata $columnMetadata,
-        protected $uploadedFileId)
-    {
+        FileProcessorInterface $fileProcessor,
+        EmployeeService $employeeService,
+        ValidationService $validationService,
+        TransactionServiceInterface $transactionService,
+        WorkflowServiceInterface $workflowService,
+        ColumnMetadata $columnMetadata,
+        protected $uploadedFileId
+    ){
         $this->uploadedFileId = $uploadedFileId;
+        $this->fileProcessor = $fileProcessor;
+        $this->employeeService = $employeeService;
+        $this->validationService = $validationService;
+        $this->transactionService = $transactionService;
+        $this->workflowService = $workflowService;
+        $this->columnMetadata = $columnMetadata;
     }
 
     /**

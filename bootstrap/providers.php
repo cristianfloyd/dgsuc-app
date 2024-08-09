@@ -11,6 +11,7 @@ return [
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\FileProcesorServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
+    App\Providers\ImportJobServiceProvider::class,
     App\Providers\ImportServiceProvider::class,
     App\Providers\JetstreamServiceProvider::class,
     App\Providers\MapucheMiSimplificacionProvider::class,
