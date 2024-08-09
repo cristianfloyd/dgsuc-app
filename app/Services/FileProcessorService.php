@@ -60,5 +60,42 @@ class FileProcessorService implements FileProcessorInterface
         return $lineaProcesada;
     }
 
+    /**
+     * Maneja la importación de un archivo.
+     *
+     * Este método procesa un archivo cargado utilizando los anchos de columna proporcionados.
+     * Si el procesamiento se realiza correctamente, devuelve true. En caso de error, devuelve false.
+     *
+     * @param UploadedFile $file El archivo cargado a procesar.
+     * @param array $columnWidths Un array con los anchos de columna a utilizar durante el procesamiento.
+     * @return bool True si el procesamiento se realizó correctamente, false en caso de error.
+     */
+    public function handleFileImport(UploadedFile $file, array $columnWidths): bool
+    {
+        try {
+            $processedLines = $this->processFile($file, $columnWidths);
+            // Aquí iría la lógica para guardar o manejar las líneas procesadas
+            return true;
+        } catch (\Exception $e) {
+            // Manejar el error, posiblemente registrándolo
+            return false;
+        }
+    }
+
+    /**
+     * Obtiene los detalles de un archivo cargado.
+     *
+     * @param UploadedFile $file El archivo cargado para el que se deben obtener los detalles.
+     * @return array Un array que contiene información sobre el archivo cargado, como la ruta del archivo, la ruta absoluta, el período fiscal y el nombre original del archivo.
+     */
+    public function getFileDetails(UploadedFile $file): array
+    {
+        return [
+            'filepath' => $file->file_path,
+            'absolutePath' => storage_path("app/{$file->file_path}"),
+            'periodoFiscal' => $file->periodo_fiscal,
+            'filename' => $file->original_name,
+        ];
+    }
 
 }

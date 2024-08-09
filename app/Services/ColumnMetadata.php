@@ -34,7 +34,7 @@ class ColumnMetadata
         ];
     }
 
-    public function getWidths()
+    public  function getWidths()
     {
         return $this->widths;
     }
