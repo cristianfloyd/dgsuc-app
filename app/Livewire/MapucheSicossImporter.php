@@ -2,17 +2,26 @@
 
 namespace App\Livewire;
 
-use App\Contracts\WorkflowServiceInterface;
 use App\ImportService;
 use Livewire\Component;
 use App\Models\UploadedFile;
-use App\TableVerificationService;
 use Illuminate\Support\Facades\Storage;
+use App\Contracts\WorkflowServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\TableManagementServiceInterface;
 
-class MapucheSicoss extends Component
+/**
+ * Componente Livewire que maneja la importación de archivos AFIP SICOSS y el flujo de trabajo correspondiente.
+ *
+ * Este componente se encarga de:
+ * - Mostrar el formulario de carga de archivos cuando corresponde según el flujo de trabajo actual.
+ * - Permitir la selección de un archivo previamente cargado.
+ * - Importar el archivo seleccionado y completar los pasos del flujo de trabajo.
+ * - Actualizar las propiedades del componente con la información del archivo seleccionado.
+ * - Redirigir al usuario al siguiente paso del flujo de trabajo una vez completada la importación.
+ */
+class MapucheSicossImporter extends Component
 {
-
 
     /** @var UploadedFile|null El archivo seleccionado actualmente
     *
@@ -32,17 +41,17 @@ class MapucheSicoss extends Component
 
 
     protected $importService;
-    protected $tableVerificationService;
+    protected $tableManagementService;
     protected $workflowService;
 
 
     public function boot(
         ImportService $importService,
-        TableVerificationService $tableVerificationService,
+        TableManagementServiceInterface $tableManagementService,
         WorkflowServiceInterface $workflowService
     ) {
         $this->importService = $importService;
-        $this->tableVerificationService = $tableVerificationService;
+        $this->tableManagementService = $tableManagementService;
         $this->workflowService = $workflowService;
         $this->checkCurrentStep();
     }
@@ -120,7 +129,7 @@ class MapucheSicoss extends Component
 
     public function render()
     {
-        if ($this->showUploadForm) {
+        if (!$this->showUploadForm) {
             return view('livewire.mapuche-sicoss');
         } else {
             return view('livewire.uploadtxtcompleted',[

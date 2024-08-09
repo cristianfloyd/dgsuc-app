@@ -122,10 +122,19 @@ class AfipRelacionesActivas extends Component
             $uploadedFileId = $this->archivoSeleccionadoId;
 
             // Despachar el Job
-            ImportAfipRelacionesActivasJob::dispatch($uploadedFileId);
+            ImportAfipRelacionesActivasJob::dispatch(
+                $this->fileProcessor,
+                $this->employeeService ,
+                $this->validationService ,
+                $this->transactionService,
+                $this->workflowService,
+                $this->columnMetadata,
+                $uploadedFileId
+            );
 
             // Mostrar un mensaje de éxito si la importación fue correcta
             Log::info('El archivo se ha importado correctamente.');
+
             // Emitir un evento Livewire para actualizar la tabla
             $this->dispatch('show-success', ['message' => 'Se inició la importación en segundo plano.']);
         } catch (\Exception $e) {

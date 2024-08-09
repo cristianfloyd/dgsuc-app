@@ -58,13 +58,13 @@ class ImportJobServiceProvider extends ServiceProvider
     // Registramos el job en el contenedor de servicios
     $this->app->bind(ImportAfipRelacionesActivasJob::class, function ($app, $parameters) {
         return new ImportAfipRelacionesActivasJob(
-            $parameters['uploadedFileId'],
             $app->make(FileProcessorInterface::class),
             $app->make(EmployeeService::class),
             $app->make(ValidationService::class),
             $app->make(TransactionServiceInterface::class),
             $app->make(WorkflowServiceInterface::class),
             $app->make(ColumnMetadata::class),
+            $parameters['uploadedFileId'],
         );
     });
 }

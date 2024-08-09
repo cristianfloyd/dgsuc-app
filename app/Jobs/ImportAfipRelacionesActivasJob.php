@@ -36,15 +36,15 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
         TransactionServiceInterface $transactionService,
         WorkflowServiceInterface $workflowService,
         ColumnMetadata $columnMetadata,
-        protected $uploadedFileId
+        protected $uploadedFileId = null,
     ){
-        $this->uploadedFileId = $uploadedFileId;
         $this->fileProcessor = $fileProcessor;
         $this->employeeService = $employeeService;
         $this->validationService = $validationService;
         $this->transactionService = $transactionService;
         $this->workflowService = $workflowService;
         $this->columnMetadata = $columnMetadata;
+        $this->uploadedFileId = $uploadedFileId;
     }
 
     /**
@@ -52,6 +52,9 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
      */
     public function handle(): void
     {
+        if (!$this->uploadedFileId) {
+            throw new \Exception('No se proporcionó un archivo cargado.');
+        }
         $uploadedFile = UploadedFile::findOrFail($this->uploadedFileId);
         Log::info('Iniciando ImportAfipRelacionesActivasJob');
 

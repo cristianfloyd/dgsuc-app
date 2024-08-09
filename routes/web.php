@@ -13,7 +13,7 @@ use App\Livewire\CompareCuils;
 use App\Livewire\FileEncoding;
 use App\Livewire\RegisterForm;
 use App\Livewire\BuscarColumna;
-use App\Livewire\MapucheSicoss;
+use App\Livewire\MapucheSicossImporter;
 use App\Livewire\ConvertirTabla;
 use App\services\ColumnMetadata;
 use App\Livewire\AfipImportCrudo;
@@ -44,8 +44,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
     Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas'); // 2.- paso relaciones activas
-    Route::get('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss'); // 3.- paso mapuche sicoss
-    Route::post('/afip/mapuchesicoss', MapucheSicoss::class)->name('mapuche-sicoss');
+    Route::get('/afip/MapucheSicossImporter', MapucheSicossImporter::class)->name('mapuche-sicoss'); // 3.- paso mapuche sicoss
+    Route::post('/afip/MapucheSicossImporter', MapucheSicossImporter::class)->name('mapuche-sicoss');
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
     Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
 

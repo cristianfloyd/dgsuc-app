@@ -291,7 +291,7 @@ class Uploadtxt extends Component
 
     public function render()
     {
-        if ($this->showUploadForm) {
+        if (!$this->showUploadForm) {
             return view('livewire.uploadtxt');
         } else {
             return view('livewire.uploadtxtcompleted', [

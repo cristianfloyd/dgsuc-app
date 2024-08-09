@@ -242,7 +242,7 @@ class AfipSicossDesdeMapuche extends Model
 
          // Calcular el ancho total de la línea
         $anchoLinea = $this->calcularAnchoLinea($line) - 2 + 6; // -1 se le resta la ultima posicion de la fila. Y +6 por la columna del periodo fiscal.
-        
+
         // Calcular la suma de los anchos de columna
         $sumaAnchoColumnas = array_sum($columnWidths); // -1 se resta la ultima posicion de la fila.
 
@@ -311,32 +311,32 @@ class AfipSicossDesdeMapuche extends Model
      * 5. Lee el contenido del archivo y lo procesa utilizando el método procesarTabla().
      * 6. Inserta los datos procesados en la base de datos utilizando el método insertarDatosMasivos().
      *
-     * @param string $filename Nombre del archivo a importar.
+     * @param string $filePath El path del archivo a importar.
      * @param string $periodoFiscal Periodo fiscal al que pertenecen los datos.
      * @return bool Verdadero si la importación fue exitosa, falso en caso contrario.
      * @throws \InvalidArgumentException Si los parámetros de entrada están vacíos o el archivo no existe.
      * @throws Exception Si no se puede abrir el archivo.
      */
-    public static function importarDesdeArchivo($filename, $periodoFiscal): bool
+    public static function importarDesdeArchivo($filePath, $periodoFiscal): bool
     {
-        if (empty($filename) || empty($periodoFiscal)) {
+        if (empty($filePath) || empty($periodoFiscal)) {
             throw new \InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
         }
 
 
-        if (Storage::exists("/public/$filename"))
+        if (Storage::exists((string) $filePath))
         {
-            $filename = Storage::path("/public/$filename");
+            $filePath = Storage::path((string) $filePath);
         } else {
             throw new \InvalidArgumentException('El archivo no existe.');
         }
 
         $model = new self();
         $model->periodoFiscal = $periodoFiscal;
-        //probar si se puede leer el archivo almacenado en $filename
-        if(is_readable($filename)){
+        //probar si se puede leer el archivo almacenado en $filePath
+        if(is_readable($filePath)){
             $lineasExtraidas = [];
-            $archivo = fopen($filename, "r");
+            $archivo = fopen($filePath, "r");
 
             if ($archivo) {
                 while (($linea = fgets($archivo)) !== false ) {

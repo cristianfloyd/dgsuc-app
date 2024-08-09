@@ -15,7 +15,8 @@ class InspectJobDependencies
         foreach ($properties as $property) {
             $property->setAccessible(true);
             $value = $property->getValue($job);
-            Log::info("Job dependency: {$property->getName()} - " . get_class($value));
+            Log::info("Job dependency: {$property->getName()} - " . (is_object($value) ? get_class($value) : gettype($value)));
+
         }
 
         return $next($job);

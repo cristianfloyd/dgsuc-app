@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\TableManagementServiceInterface;
 
 class TableManagementServiceProvider extends ServiceProvider
 {
@@ -11,6 +12,10 @@ class TableManagementServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(TableManagementServiceInterface::class, function ($app) {
+            return new TableManagementService();
+        });
+
         $this->app->bind(TableManagementService::class, function ($app) {
             return new TableManagementService();
         });

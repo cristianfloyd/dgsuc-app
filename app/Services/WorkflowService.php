@@ -212,7 +212,7 @@ class WorkflowService implements WorkflowServiceInterface
             'subir_archivo_afip' => '/afip/subir-archivo',
             'subir_archivo_mapuche' => '/afip/subir-archivo',
             'import_archivo_afip' => '/afip/relaciones-activas',
-            'import_archivo_mapuche' => '/afip/mapuchesicoss',
+            'import_archivo_mapuche' => '/afip/MapucheSicossImporter',
             'obtener_cuils_not_in_afip' => '/afip/compare-cuils',
             'poblar_tabla_temp_cuils' => '/afip/compare-cuils',
             'ejecutar_funcion_almacenada' => '/afip/compare-cuils',
