@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use RuntimeException;
 use App\Models\UploadedFile;
+use App\Services\AbstractFileProcessor;
 use App\Contracts\FileProcessorInterface;
 
 /**
@@ -12,52 +14,13 @@ use App\Contracts\FileProcessorInterface;
  * @param array $columnWidths Una matriz de anchos de columna para usar al procesar cada línea.
  * @return array Un array de líneas procesadas.
  */
-class FileProcessorService implements FileProcessorInterface
+class FileProcessorService extends AbstractFileProcessor implements FileProcessorInterface
 {
+    private $databaseService;
 
-    /** Processes an uploaded file and returns an array of processed lines.
-     *
-     * @param UploadedFile $file The uploaded file to process.
-     * @param array $columnWidths An array of column widths to use when processing each line.
-     * @return array An array of processed lines.
-     */
-    public function processFile(UploadedFile $file, array $columnWidths): array
+    public function __construct(DatabaseService $databaseService)
     {
-        $filePath = storage_path("/app/{$file->file_path}");
-        $lines = collect(file($filePath));
-        $periodoFiscal = $file->periodo_fiscal;
-
-
-
-        return $lines->map(function ($line) use ($columnWidths, $periodoFiscal) {
-            return $this->processLine($line, $columnWidths, $periodoFiscal);
-        })->all();
-    }
-
-    /** Processes a single line of the uploaded file using the provided column widths and fiscal period.
-     *
-     * @param string $line The line of the file to process.
-     * @param array $columnWidths An array of column widths to use when processing the line.
-     * @param string $periodoFiscal The fiscal period associated with the uploaded file.
-     * @return array An array of processed fields from the line.
-     */
-    private function processLine($line, array $columnWidths, $periodoFiscal)
-    {
-        $lineaProcesada = [];
-        $posicion = 0;
-        foreach ($columnWidths as $key => $width) {
-            switch ($key) {
-                case 0:
-                    $lineaProcesada[] = str_replace(' ', '0', $periodoFiscal);
-                    break;
-                default:
-                    $campo = substr($line, $posicion, $width);
-                    $lineaProcesada[] = str_replace(' ', '0', $campo);
-                    $posicion += $width;
-                    break;
-            }
-        }
-        return $lineaProcesada;
+        $this->databaseService = $databaseService;
     }
 
     /**
@@ -75,6 +38,8 @@ class FileProcessorService implements FileProcessorInterface
         try {
             $processedLines = $this->processFile($file, $columnWidths);
             // Aquí iría la lógica para guardar o manejar las líneas procesadas
+            // TODO: Implementar la lógica para guardar o manejar las líneas procesadas
+
             return true;
         } catch (\Exception $e) {
             // Manejar el error, posiblemente registrándolo
@@ -98,4 +63,70 @@ class FileProcessorService implements FileProcessorInterface
         ];
     }
 
+
+    /**
+     * Procesa un archivo cargado utilizando los anchos de columna proporcionados.
+     *
+     * Este método lee las líneas del archivo cargado, procesa cada línea utilizando los anchos de columna proporcionados y el período fiscal asociado con el archivo, y devuelve un array con las líneas procesadas.
+     *
+     * @param UploadedFile $file El archivo cargado a procesar.
+     * @param array $columnWidths Una matriz de anchos de columna a utilizar al procesar cada línea.
+     * @return array Un array de líneas procesadas.
+     */
+    public function processFile(UploadedFile $file, array $columnWidths): array
+    {
+        $filePath = storage_path("/app/{$file->file_path}");
+        $lines = collect(file($filePath));
+        $periodoFiscal = $file->periodo_fiscal;
+
+
+
+        $processedLines = $lines->map(function ($line) use ($columnWidths, $periodoFiscal) {
+            return $this->processLine($line, $columnWidths, $periodoFiscal);
+        })->all();
+
+        return $processedLines;
+    }
+
+
+    /**
+     * Procesa una línea del archivo cargado utilizando los anchos de columna proporcionados y el período fiscal.
+     *
+     * @param string $line La línea del archivo a procesar.
+     * @param array $columnWidths Un array de anchos de columna a utilizar al procesar la línea.
+     * @param int $periodoFiscal El período fiscal asociado con el archivo cargado.
+     * @return array $processedLines Un array de campos procesados de la línea.
+     */
+    private function processLine(string $line, array $columnWidths, $periodoFiscal): array
+    {
+        $processedLines = [];
+        $posicion = 0;
+        foreach ($columnWidths as $key => $width) {
+            switch ($key) {
+                case 0:
+                    $processedLines[] = str_replace(' ', '0', $periodoFiscal);
+                    break;
+                default:
+                    $campo = substr($line, $posicion, $width);
+                    $processedLines[] = str_replace(' ', '0', $campo);
+                    $posicion += $width;
+                    break;
+            }
+        }
+        return $processedLines;
+    }
+
+    /**
+     * Lee y extrae las líneas de un archivo dado.
+     *
+     * Este método abre el archivo en modo de lectura, lee cada línea del archivo y la convierte a UTF-8 si es necesario. Las líneas extraídas se devuelven en un array.
+     *
+     * @param string $filePath La ruta del archivo a leer.
+     * @return array Las líneas extraídas del archivo.
+     * @throws RuntimeException Si el archivo no se puede leer o abrir.
+     */
+    public function extractLines(string $filePath): array
+    {
+        return $this->readFileLines($filePath);
+    }
 }

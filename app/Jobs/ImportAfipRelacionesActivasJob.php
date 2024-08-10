@@ -66,12 +66,12 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
             $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
                 $this->validationService->validateSelectedFile($uploadedFile);
 
-                $lineasProcesadas = $this->fileProcessor->processFile(
+                $processedLines = $this->fileProcessor->processFile(
                     $uploadedFile,
                     $this->columnMetadata->getWidths()
                 );
 
-                $this->employeeService->storeProcessedLines($lineasProcesadas);
+                $this->employeeService->storeProcessedLines($processedLines);
             });
 
             $this->workflowService->completeStep($processLog, 'import_archivo_afip');

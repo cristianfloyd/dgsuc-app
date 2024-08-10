@@ -4,18 +4,34 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
+use App\Services\DataMapperService;
 use Illuminate\Support\Facades\Log;
+use App\Services\FileProcessorService;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
+
+/**
+ * Modelo para representar los datos de AFIP SICOSS desde Mapuche.
+ *
+ * @property string $periodo_fiscal
+ * @property string $cuil
+ */
 class AfipSicossDesdeMapuche extends Model
 {
-    // Especificar la tabla
-    protected $table = 'suc.afip_mapuche_sicoss';
-    protected $connection = 'pgsql-mapuche';
+
+    use MapucheConnectionTrait;
+
+    const string TABLE_NAME = 'suc.afip_mapuche_sicoss';
+
+    protected $table = self::TABLE_NAME;
+    protected $connection = $this->getConnectionName();
+
     // Definir la clave primaria compuesta entre el perido_fiscal y el cuil
-    protected $primaryKey = ['periodo_fiscal', 'CUIL'];
+    protected $primaryKey = ['periodo_fiscal', 'cuil'];
     // Asegurar que la clave primaria no es autoincremental
     public $incrementing = false;
 
@@ -96,7 +112,14 @@ class AfipSicossDesdeMapuche extends Model
     ];
     protected $periodoFiscal = 202312;
 
+    private FileProcessorService $fileProcessor;
+    private DataMapperService $dataMapper;
 
+    public function __construct(FileProcessorService $fileProcessor, DataMapperService $dataMapper)
+    {
+        $this->fileProcessor = $fileProcessor;
+        $this->dataMapper = $dataMapper;
+    }
 
     // ##########################################################################
     // ############## METODOS  ##################################################
@@ -107,7 +130,7 @@ class AfipSicossDesdeMapuche extends Model
      *
      * @param array $lineasExtraidas Un array de líneas extraídas de una tabla de una sola columna y ancho fijo.
      * @return array Un array de líneas procesadas.
-     * @throws \InvalidArgumentException Si los parámetros de entrada no son válidos.
+     * @throws InvalidArgumentException Si los parámetros de entrada no son válidos.
      */
     public function procesarTabla(array $lineasExtraidas, int $periodoFiscal): array
     {
@@ -116,7 +139,7 @@ class AfipSicossDesdeMapuche extends Model
         }
         // Validación de entrada
         if (empty($lineasExtraidas)){
-            throw new \InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
+            throw new InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
         }
 
         // Inicialización de la tabla procesada
@@ -192,9 +215,9 @@ class AfipSicossDesdeMapuche extends Model
      */
     public function procesar(string $line, array $columnWidths): array
     {
-        $lineaProcesada = $this->procesarLinea($line, $columnWidths);
-        $lineaMapeada = $this->mapearDatosAlModelo($lineaProcesada);
-        // dd($lineaProcesada);
+        $processedLine = $this->processLine($line, $columnWidths);
+        $lineaMapeada = $this->dataMapper->mapDataToModel($processedLine, $this->periodoFiscal);
+        // dd($processedLine);
         // Retorno de la línea procesada.
         return $lineaMapeada;
     }
@@ -209,12 +232,12 @@ class AfipSicossDesdeMapuche extends Model
      * @param Request $line La solicitud HTTP que contiene la línea y los anchos de las columnas.
      * @return [] Los datos procesados en formato Array.
      */
-    public function procesarlinea(string $line,array $columnWidths):array
+    public function processLine(string $line,array $columnWidths):array
     {
         // Validacion de entrada.
         if (is_null($line) || is_null($columnWidths) || !is_array($columnWidths))
         {
-            Throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+            Throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
         $datosProcesados = $this->procesarlineainterna($line, $columnWidths);
@@ -237,7 +260,7 @@ class AfipSicossDesdeMapuche extends Model
         //Validad la entrada
         if(empty($line) || empty($columnWidths))
         {
-            Throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+            Throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
          // Calcular el ancho total de la línea
@@ -248,7 +271,7 @@ class AfipSicossDesdeMapuche extends Model
 
         // Validar que el ancho de la línea coincida con la suma de los anchos de columna
         if ($anchoLinea !== $sumaAnchoColumnas) {
-            throw new \InvalidArgumentException('linea: '.$this->contador  .' El ancho de línea '.$anchoLinea .' no coincide con la suma de los anchos de columna ' .$sumaAnchoColumnas);
+            throw new InvalidArgumentException('linea: '.$this->contador  .' El ancho de línea '.$anchoLinea .' no coincide con la suma de los anchos de columna ' .$sumaAnchoColumnas);
         }
 
 
@@ -299,64 +322,48 @@ class AfipSicossDesdeMapuche extends Model
 
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
 
-    /**
-     * Importa datos desde un archivo y los procesa para insertarlos en la tabla afip_sicoss_desde_mapuche.
-     *
-     * Este método recibe el nombre del archivo y el periodo fiscal como parámetros, y realiza las siguientes tareas:
-     *
-     * 1. Verifica que los parámetros de entrada no estén vacíos.
-     * 2. Verifica que el archivo exista en el sistema de archivos.
-     * 3. Crea una nueva instancia del modelo AfipSicossDesdeMapuche.
-     * 4. Establece el periodo fiscal en la instancia del modelo.
-     * 5. Lee el contenido del archivo y lo procesa utilizando el método procesarTabla().
-     * 6. Inserta los datos procesados en la base de datos utilizando el método insertarDatosMasivos().
-     *
-     * @param string $filePath El path del archivo a importar.
-     * @param string $periodoFiscal Periodo fiscal al que pertenecen los datos.
-     * @return bool Verdadero si la importación fue exitosa, falso en caso contrario.
-     * @throws \InvalidArgumentException Si los parámetros de entrada están vacíos o el archivo no existe.
-     * @throws Exception Si no se puede abrir el archivo.
-     */
-    public static function importarDesdeArchivo($filePath, $periodoFiscal): bool
+
+    public function importFromFile($filePath, $periodoFiscal): bool
     {
-        if (empty($filePath) || empty($periodoFiscal)) {
-            throw new \InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
-        }
+        $this->validateInput($filePath, $periodoFiscal);
+        $lineasExtraidas = $this->fileProcessor->extractLines($filePath);
+        $datosProcesados = $this->procesarDatos($lineasExtraidas, $periodoFiscal);
 
 
-        if (Storage::exists((string) $filePath))
-        {
-            $filePath = Storage::path((string) $filePath);
-        } else {
-            throw new \InvalidArgumentException('El archivo no existe.');
-        }
-
-        $model = new self();
-        $model->periodoFiscal = $periodoFiscal;
-        //probar si se puede leer el archivo almacenado en $filePath
-        if(is_readable($filePath)){
-            $lineasExtraidas = [];
-            $archivo = fopen($filePath, "r");
-
-            if ($archivo) {
-                while (($linea = fgets($archivo)) !== false ) {
-                    // Convertir a UTF-8
-                    $lineaUTF8 = mb_convert_encoding($linea, 'UTF-8', mb_detect_encoding($linea, 'UTF-8, ISO-8859-1', true));
-                    $lineasExtraidas[] = $lineaUTF8;
-                }
-                fclose($archivo);
-            } else {
-                throw new Exception('No se pudo abrir el archivo.');
-            }
-            $tablaProcesada = $model->procesarTabla($lineasExtraidas, $periodoFiscal);
-        } else {
-            //el archivo no es legible
-            throw new \InvalidArgumentException('El archivo no es legible.');
-        }
-
-        return self::insertarDatosMasivos($tablaProcesada);
+        return self::insertBulkData($datosProcesados);
     }
 
+    private function procesarDatos(array $lineasExtraidas, int $periodoFiscal): array
+    {
+        return array_map(function ($linea) use ($periodoFiscal) {
+            $columnWidths = $this->columnWidths;
+            $processedLine = $this->processLine($linea, $columnWidths);
+            return $this->dataMapper->mapDataToModel($processedLine, $periodoFiscal);
+        }, $lineasExtraidas);
+    }
+
+    private function validateInput(string $filePath, int $periodoFiscal): void
+    {
+        // Verifica que los parámetros no estén vacíos.
+        if (empty($filePath) || empty($periodoFiscal)) {
+            throw new InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
+        }
+
+        // Comprueba que el archivo exista en el almacenamiento.
+        if (!Storage::exists($filePath)) {
+            throw new InvalidArgumentException('El archivo no existe.');
+        }
+
+        // Verifica que el archivo sea legible.
+        if (!is_readable(Storage::path($filePath))) {
+            throw new InvalidArgumentException('El archivo no es legible.');
+        }
+
+        // Valida que el periodo fiscal sea un valor razonable (mayor que 0 y no superior al año actual más 12 meses).
+        if ($periodoFiscal <= 0 || $periodoFiscal > date('Y') * 100 + 12) {
+            throw new InvalidArgumentException('El periodo fiscal no es válido.');
+        }
+    }
 
     /**
      * Procesa los datos de la tabla afip_importacion_cruda y los inserta en la tabla afip_sicoss_desde_mapuche.
@@ -400,8 +407,8 @@ class AfipSicossDesdeMapuche extends Model
             // Anchos de columna para cada campo
             6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
         ];
-        $datosProcessados = $this->procesarLinea($lineaImportadaCruda, $columnWidths);
-        $this->mapearDatosAlModelo($datosProcessados);
+        $datosProcessados = $this->processLine($lineaImportadaCruda, $columnWidths);
+        $this->dataMapper->mapDataToModel($datosProcessados, $this->periodoFiscal );
 
     }
 
@@ -411,29 +418,28 @@ class AfipSicossDesdeMapuche extends Model
     /**
      * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
      *
-     * @param array $datosMapeados
+     * @param array $mappedData
      * @param int $chunkSize
      * @return bool
      */
-    public static function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
+    public  function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
     {
-        //
         // Nombre de la conexión de base de datos a utilizar
-        $conexion = 'pgsql-mapuche';
+        $conexion = $this->connection;
         // Iniciar la transacion en la conexion especificada
         DB::connection($conexion)->beginTransaction();
         $chunkSize = 1000; // Tamaño del chunk de la base de datos
 
         //Eliminar la clave primaria temporalmente: afip_sicoss_desde_mapuche_pkey
         // DB::connection($conexion)->statement('ALTER TABLE afip_sicoss_desde_mapuche DROP CONSTRAINT afip_sicoss_desde_mapuche_pkey');
-        foreach (array_chunk($datosMapeados, $chunkSize) as $chunk) {
+        foreach (array_chunk($mappedData, $chunkSize) as $chunk) {
             foreach ($chunk as &$data) {
                 // Elimina la clave 'id' si existe en los datos
                 unset($data['id']);
             }
 
             try {
-                DB::connection($conexion)->table((new self)->getTable())->insert($chunk);
+                DB::connection($conexion)->table($this->getTable())->insert($chunk);
             } catch (Exception $e) {
                 // Registro de depuración en caso de error
                 Log::error('Error al insertar los datos: ' . $e->getMessage());
@@ -520,5 +526,14 @@ class AfipSicossDesdeMapuche extends Model
         ];
         return $datosMapeados;
     }
+
+
+
+	/**
+	 * @return mixed
+	 */
+	public function getPeriodoFiscal() {
+		return $this->periodoFiscal;
+	}
 }
 

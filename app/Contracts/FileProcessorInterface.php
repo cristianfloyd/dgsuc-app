@@ -6,6 +6,7 @@ use App\Models\UploadedFile;
 
 interface FileProcessorInterface
 {
+
     /**
      * Procesa un archivo cargado y devuelve un array con los resultados.
      *
@@ -14,6 +15,7 @@ interface FileProcessorInterface
      * @return array Los resultados del procesamiento del archivo.
      */
     public function processFile(UploadedFile $file, array $columnWidths): array;
+
     /**
      * Obtiene los detalles del archivo cargado.
      *
@@ -21,6 +23,7 @@ interface FileProcessorInterface
      * @return array Los detalles del archivo.
      */
     public function getFileDetails(UploadedFile $file): array;
+    
     /**
      * Importa un archivo y procesa su contenido.
      *

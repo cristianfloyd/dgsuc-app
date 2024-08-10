@@ -74,13 +74,13 @@ class ImportAfipRelacionesActivas extends Command
                 $this->validationService->validateSelectedFile($uploadedFile);
 
                 // 4. Procesar el archivo
-                $lineasProcesadas = $this->fileProcessor->processFile(
+                $processedLines = $this->fileProcessor->processFile(
                     $uploadedFile,
                     $this->columnMetadata->getWidths()
                 );
 
                 // 5. Guardar las líneas procesadas
-                $this->employeeService->storeProcessedLines($lineasProcesadas);
+                $this->employeeService->storeProcessedLines($processedLines);
             });
 
             // 6. Marcar el step como completado

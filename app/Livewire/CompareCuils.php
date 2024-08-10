@@ -28,7 +28,7 @@ class CompareCuils extends Component
     public $cuilsNotInAfip;
     public $cuilsCount = 0;
     public $nroLiqui = 1;
-    public $periodoFiscal = 202312;
+    public int $periodoFiscal = 202312;
     public $cuilsToSearch = [];
 
     public $cuilsNoInserted = [];
@@ -204,10 +204,12 @@ class CompareCuils extends Component
         return false;
     }
 
-    /** Ejecuta la lógica de "mapuche-mi-simplificacion" y actualiza el paso "ejecutar_funcion_almacenada" en el registro de flujo de trabajo a "in_progress".
-     * También restablece la propiedad "cuilsNotInAfipLoaded".
+
+    /**
+     * Ejecuta la función almacenada 'mapuche-mi-simplificacion' y actualiza el paso del flujo de trabajo a 'in_progress'.
+     * Luego, restablece la propiedad 'cuilsNotInAfipLoaded'.
      */
-    public function mapucheMiSimplificacion()
+    public function mapucheMiSimplificacion(): void
     {
         $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
 

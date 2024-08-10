@@ -51,16 +51,16 @@ class EmployeeService implements EmployeeServiceInterface
         return $this->employeeRepository->getCargos($nroLegaj);
     }
 
-    public function storeProcessedLines(array $lineasProcesadas): void
+    public function storeProcessedLines(array $processedLines): void
     {
-        $datosMapeados = $this->mapearDatos($lineasProcesadas);
+        $datosMapeados = $this->mapearDatos($processedLines);
         $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
         $this->handleResultado($resultado);
     }
 
-    private function mapearDatos(array $lineasProcesadas): array
+    private function mapearDatos(array $processedLines): array
     {
-        return collect($lineasProcesadas)
+        return collect($processedLines)
             ->map(fn($linea) => $this->databaseService->mapearDatosAlModelo($linea))
             ->all();
     }

@@ -33,7 +33,7 @@ class SicossImporter extends Component
     // Propiedades protegidas
     protected ?string $filepath = null;
     protected ?string $absolutePath = null;
-    protected ?string $periodoFiscal = null;
+    protected ?int $periodoFiscal = null;
 
     // Servicios inyectados
     private readonly ImportService $importService;
@@ -83,7 +83,7 @@ class SicossImporter extends Component
             $processLog = $this->workflowService->getLatestWorkflow();
 
             // Utilizamos el nuevo método handleFileImport del FileProcessorService
-            if ($this->fileProcessorService->handleFileImport($file, $this->getColumnWidths())) {
+            if ($this->fileProcessor->handleFileImport($file, $this->getColumnWidths())) {
                 $this->workflowService->completeStep($processLog, self::STEP_IMPORT_ARCHIVO);
                 $nextStep = $this->workflowService->getNextStep(self::STEP_IMPORT_ARCHIVO);
                 $this->dispatch('success', 'Importación completada con éxito.');
@@ -96,32 +96,16 @@ class SicossImporter extends Component
         }
     }
 
-    // /**
-    //  * Importa un archivo y maneja el proceso después de una importación exitosa.
-    //  *
-    //  * @param int|null $archivoId El ID del archivo a importar. Si no se proporciona, se utilizará el valor de `$this->selectedArchivoID`.
-    //  * @return void
-    //  */
-    // public function importarArchivo(?int $archivoId = null): void
-    // {
-    //     try {
-    //         $file = UploadedFile::findOrFail($archivoId ?? $this->selectedArchivoID);
-    //         $processLog = $this->workflowService->getLatestWorkflow();
 
-    //         if ($this->fileProcessorService->processFile($file, $this->getColumnWidths())) {
-    //             $this->workflowService->completeStep($processLog, self::STEP_IMPORT_ARCHIVO);
-    //             $nextStep = $this->workflowService->getNextStep(self::STEP_IMPORT_ARCHIVO);
-    //             $this->dispatch('success', 'Importación completada con éxito.');
-    //             $this->dispatch('paso-completado', ['nextStep' => $nextStep]);
-    //         } else {
-    //             $this->dispatch('error', 'Hubo un problema durante la importación.');
-    //         }
-    //     } catch (\Exception $e) {
-    //         $this->dispatch('error', 'Error al procesar el archivo: ' . $e->getMessage());
-    //     }
-    // }
+    public function seleccionarArchivo()
+    {
+        $this->selectedArchivo = UploadedFile::find($this->selectedArchivoID);
+        $this->filename = $this->selectedArchivo->filename;
+        $this->periodoFiscal = $this->selectedArchivo->periodo_fiscal;
+        $this->filepath = $this->selectedArchivo->filepath;
+        $this->absolutePath = $this->selectedArchivo->absolute_path;
+    }
 
-    
 
     private function getColumnWidths(): array
     {

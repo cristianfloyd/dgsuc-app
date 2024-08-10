@@ -53,7 +53,7 @@ class AfipRelacionesActivas extends Component
         7,  //Código de Convenio Colectivo de Trabajo
         4,  //Sin valores, en blanco
     ];
-    public array $lineasProcesadas; //este es el array que va a devolver la funcion procesarLinea
+    public array $processedLines; //este es el array que va a devolver la funcion processLine
     public string $periodo_fiscal; //este es el periodo fiscal que se va a cargar en la tabla relaciones_activas
 
     private $fileProcessor;
@@ -151,45 +151,6 @@ class AfipRelacionesActivas extends Component
         }
 
         $this->validationService->validateSelectedFile($this->archivoSeleccionado);
-    }
-
-
-
-    private function validateAndProcessFile(): void
-    {
-        $this->validateFileSelection();
-        // Procesamiento del archivo usando FileProcessorService
-        $lineasProcesadas = $this->fileProcessor->processFile(
-            $this->archivoSeleccionado,
-            $this->columnMetadata->getWidths()
-        );
-
-        $this->employeeService->storeProcessedLines($lineasProcesadas);
-        $this->workflowService->completeStep($this->workflowService->getLatestWorkflow(), 'import_archivo_afip'); // Completar el paso
-    }
-
-    private function handleSuccessfulImport(object $processLog): void
-    {
-        $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
-        $this->dispatch('datos-importados');
-
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->nextStepUrl = $this->workflowService->getStepUrl($this->workflowService->getNextStep($currentStep));
-    }
-
-
-
-
-
-
-
-
-
-    private function handleImportError(\Exception $e, $processLog)
-    {
-        Log::error('Error en la importación: ' . $e->getMessage());
-        $this->dispatch('show-error-message', ['message' => 'No se importó correctamente: ' . $e->getMessage()]);
-        $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'failed');
     }
 
 
