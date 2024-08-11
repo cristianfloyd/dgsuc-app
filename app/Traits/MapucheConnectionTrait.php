@@ -11,18 +11,11 @@ namespace App\Traits;
 trait MapucheConnectionTrait
 {
     /**
-     * El nombre de la conexión de base de datos que se utilizará para este modelo.
-     *
-     * @var string
-     */
-    protected $connection = 'pgsql-mapuche';
-
-    /**
      * Obtiene el nombre de la conexión de base de datos.
      * @return string
      */
     public function getConnectionName(): string
     {
-        return $this->connection;
+        return 'pgsql-mapuche';
     }
 }

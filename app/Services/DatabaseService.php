@@ -2,13 +2,20 @@
 
 namespace app\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\LazyCollection;
 
 class DatabaseService
 {
+    use MapucheConnectionTrait;
+    private const int DEFAULT_CHUNK_SIZE = 1000;
+    private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
+
     /**
      * Create a new class instance.
      */
@@ -45,7 +52,7 @@ class DatabaseService
             // Registra un mensaje de éxito en el log
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revierte la transacción en caso de error
             DB::rollBack();
             // Registra un mensaje de error en el log
@@ -88,14 +95,63 @@ class DatabaseService
 
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $connection->rollBack(); // Revierte la transacción en caso de error
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
             return false;
         }
     }
 
+    /**
+     * Inserta datos en lotes en la tabla especificada.
+     *
+     * @param Collection $mappedData Colección de datos a insertar.
+     * @param string $tableName Nombre de la tabla en la que se insertarán los datos.
+     * @param int $chunkSize Tamaño del lote para las inserciones (predeterminado: 1000).
+     * @return int Número de filas insertadas.
+     * @throws Exception Si ocurre un error durante la inserción.
+     */
+    public  function insertBulkData(Collection $mappedData, string $tableName, int $chunkSize = self::DEFAULT_CHUNK_SIZE): int
+    {
+        // Nombre de la conexión de base de datos en el trait MapucheConnectionTrait
+        $conexion = $this->getConnectionName();
 
+        if($mappedData->isEmpty()){
+            Log::warning("No se encontraron datos para insertar en la tabla: $tableName");
+            return false;
+        }
+
+        $rowInserted = 0;
+
+        try {
+            // Iniciar la transacción en la conexión especificada.
+            DB::connection($conexion)->beginTransaction();
+
+            $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted){
+                //eliminar la clave id de cada fila si existe
+                $processedChunk = $chunk->map(function ($data){
+                    $sanitizedData = collect($data)->except('id')->toArray();
+                    return $sanitizedData;
+                });
+
+                // Insertar el lote en la base de datos
+                $inserted = DB::connection($conexion)->table($tableName)->insert($processedChunk->toArray());
+                $rowInserted += $inserted;
+            });
+
+            // Confirmar la transacción
+            DB::connection($conexion)->commit();
+
+            Log::info("Se insertaron $rowInserted filas en la tabla: $tableName");
+            return $rowInserted;
+
+        } catch (Exception $e) {
+            // En caso de error, revertir la transacción y lanzar una excepción.
+            DB::connection($conexion)->rollBack();
+            Log::error('Error al insertar datos en ' . $tableName . ': ' . $e->getMessage());
+            throw new Exception("Error al iniciar la transacción: " . $e->getMessage());
+        }
+    }
 
     /** Mapea los datos de una línea al modelo AfipRelacionesActivas.
      *
@@ -109,4 +165,12 @@ class DatabaseService
     {
         return AfipRelacionesActivas::mapearDatosAlModelo($linea);
     }
+
+    private function sanitizeData($data)
+    {
+        return array_map(function($item) {
+            return preg_replace('/[\x00-\x1F\x7F-\xFF]/', '?', $item);
+        }, $data);
+    }
+
 }

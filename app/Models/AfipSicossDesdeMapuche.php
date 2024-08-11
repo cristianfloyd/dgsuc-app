@@ -25,16 +25,15 @@ class AfipSicossDesdeMapuche extends Model
 
     use MapucheConnectionTrait;
 
+
     const string TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
     protected $table = self::TABLE_NAME;
-    protected $connection = $this->getConnectionName();
 
     // Definir la clave primaria compuesta entre el perido_fiscal y el cuil
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
     // Asegurar que la clave primaria no es autoincremental
     public $incrementing = false;
-
 
 
     // Agregar las columnas que pueden ser asignadas masivamente
@@ -117,6 +116,7 @@ class AfipSicossDesdeMapuche extends Model
 
     public function __construct(FileProcessorService $fileProcessor, DataMapperService $dataMapper)
     {
+        parent::__construct();
         $this->fileProcessor = $fileProcessor;
         $this->dataMapper = $dataMapper;
     }
@@ -216,7 +216,7 @@ class AfipSicossDesdeMapuche extends Model
     public function procesar(string $line, array $columnWidths): array
     {
         $processedLine = $this->processLine($line, $columnWidths);
-        $lineaMapeada = $this->dataMapper->mapDataToModel($processedLine, $this->periodoFiscal);
+        $lineaMapeada = $this->dataMapper->mapDataToModel($processedLine);
         // dd($processedLine);
         // Retorno de la línea procesada.
         return $lineaMapeada;
@@ -323,14 +323,13 @@ class AfipSicossDesdeMapuche extends Model
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
 
 
-    public function importFromFile($filePath, $periodoFiscal): bool
+    private function importFromFile($filePath, $periodoFiscal): bool
     {
-        $this->validateInput($filePath, $periodoFiscal);
-        $lineasExtraidas = $this->fileProcessor->extractLines($filePath);
-        $datosProcesados = $this->procesarDatos($lineasExtraidas, $periodoFiscal);
+        $this->fileProcessor->setPeriodoFiscal($periodoFiscal);
+        $processedLines = $this->fileProcessor->processFile($filePath, $this->columnWidths);
 
 
-        return self::insertBulkData($datosProcesados);
+        return self::insertBulkData($processedLines);
     }
 
     private function procesarDatos(array $lineasExtraidas, int $periodoFiscal): array
@@ -338,32 +337,11 @@ class AfipSicossDesdeMapuche extends Model
         return array_map(function ($linea) use ($periodoFiscal) {
             $columnWidths = $this->columnWidths;
             $processedLine = $this->processLine($linea, $columnWidths);
-            return $this->dataMapper->mapDataToModel($processedLine, $periodoFiscal);
+            return $this->dataMapper->mapDataToModel($processedLine);
         }, $lineasExtraidas);
     }
 
-    private function validateInput(string $filePath, int $periodoFiscal): void
-    {
-        // Verifica que los parámetros no estén vacíos.
-        if (empty($filePath) || empty($periodoFiscal)) {
-            throw new InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
-        }
 
-        // Comprueba que el archivo exista en el almacenamiento.
-        if (!Storage::exists($filePath)) {
-            throw new InvalidArgumentException('El archivo no existe.');
-        }
-
-        // Verifica que el archivo sea legible.
-        if (!is_readable(Storage::path($filePath))) {
-            throw new InvalidArgumentException('El archivo no es legible.');
-        }
-
-        // Valida que el periodo fiscal sea un valor razonable (mayor que 0 y no superior al año actual más 12 meses).
-        if ($periodoFiscal <= 0 || $periodoFiscal > date('Y') * 100 + 12) {
-            throw new InvalidArgumentException('El periodo fiscal no es válido.');
-        }
-    }
 
     /**
      * Procesa los datos de la tabla afip_importacion_cruda y los inserta en la tabla afip_sicoss_desde_mapuche.
@@ -408,21 +386,26 @@ class AfipSicossDesdeMapuche extends Model
             6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
         ];
         $datosProcessados = $this->processLine($lineaImportadaCruda, $columnWidths);
-        $this->dataMapper->mapDataToModel($datosProcessados, $this->periodoFiscal );
+        $this->dataMapper->mapDataToModel($datosProcessados);
 
     }
 
 
 
 
+
     /**
-     * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
+     * Inserta datos en lotes en la tabla 'afip_sicoss_desde_mapuche'.
      *
-     * @param array $mappedData
-     * @param int $chunkSize
-     * @return bool
+     * Este método recibe un array de datos mapeados y los inserta en la tabla en
+     * chunks de un tamaño configurable. Utiliza una transacción para garantizar
+     * la integridad de los datos.
+     *
+     * @param array $mappedData Los datos mapeados a insertar.
+     * @param int $chunkSize El tamaño de los chunks a insertar (predeterminado: 1000).
+     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
      */
-    public  function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
+    private  function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
     {
         // Nombre de la conexión de base de datos a utilizar
         $conexion = $this->connection;
@@ -454,86 +437,18 @@ class AfipSicossDesdeMapuche extends Model
 
 
 
-    /**
-    * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
-    * @param array $datosProcessados Los datos procesados.
-    * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
-    */
-    private function mapearDatosAlModelo(array $datosProcesados):array
-    {
-        $datosMapeados = [
-            'periodo_fiscal' => $datosProcesados[0],
-            'cuil' => $datosProcesados[1],
-            'apnom' => $datosProcesados[2],
-            'conyuge' => $datosProcesados[3],
-            'cant_hijos' => $datosProcesados[4],
-            'cod_situacion' => $datosProcesados[5],
-            'cod_cond' => $datosProcesados[6],
-            'cod_act' => $datosProcesados[7],
-            'cod_zona' => $datosProcesados[8],
-            'porc_aporte' => $datosProcesados[9],
-            'cod_mod_cont' => $datosProcesados[10],
-            'cod_os' => $datosProcesados[11],
-            'cant_adh' => $datosProcesados[12],
-            'rem_total' => $datosProcesados[13],
-            'rem_impo1' => $datosProcesados[14],
-            'asig_fam_pag' => $datosProcesados[15],
-            'aporte_vol' => $datosProcesados[16],
-            'imp_adic_os' => $datosProcesados[17],
-            'exc_aport_ss' => $datosProcesados[18],
-            'exc_aport_os' => $datosProcesados[19],
-            'prov' => $datosProcesados[20],
-            'rem_impo2' => $datosProcesados[21],
-            'rem_impo3' => $datosProcesados[22],
-            'rem_impo4' => $datosProcesados[23],
-            'cod_siniestrado' => $datosProcesados[24],
-            'marca_reduccion' => $datosProcesados[25],
-            'recomp_lrt' => $datosProcesados[26],
-            'tipo_empresa' => $datosProcesados[27],
-            'aporte_adic_os' => $datosProcesados[28],
-            'regimen' => $datosProcesados[29],
-            'sit_rev1' => $datosProcesados[30],
-            'dia_ini_sit_rev1' => $datosProcesados[31],
-            'sit_rev2' => $datosProcesados[32],
-            'dia_ini_sit_rev2' => $datosProcesados[33],
-            'sit_rev3' => $datosProcesados[34],
-            'dia_ini_sit_rev3' => $datosProcesados[35],
-            'sueldo_adicc' => $datosProcesados[36],
-            'sac' => $datosProcesados[37],
-            'horas_extras' => $datosProcesados[38],
-            'zona_desfav' => $datosProcesados[39],
-            'vacaciones' => $datosProcesados[40],
-            'cant_dias_trab' => $datosProcesados[41],
-            'rem_impo5' => $datosProcesados[42],
-            'convencionado' => $datosProcesados[43],
-            'rem_impo6' => $datosProcesados[44],
-            'tipo_oper' => $datosProcesados[45],
-            'adicionales' => $datosProcesados[46],
-            'premios' => $datosProcesados[47],
-            'rem_dec_788_05' => $datosProcesados[48],
-            'rem_imp7' => $datosProcesados[49],
-            'nro_horas_ext' => $datosProcesados[50],
-            'cpto_no_remun' => $datosProcesados[51],
-            'maternidad' => $datosProcesados[52],
-            'rectificacion_remun' => $datosProcesados[53],
-            'rem_imp9' => $datosProcesados[54],
-            'contrib_dif' => $datosProcesados[55],
-            'hstrab' => $datosProcesados[56],
-            'seguro' => $datosProcesados[57],
-            'ley_27430' => $datosProcesados[58],
-            'incsalarial' => $datosProcesados[59],
-            'remimp11' => $datosProcesados[60],
-        ];
-        return $datosMapeados;
-    }
-
-
-
 	/**
 	 * @return mixed
 	 */
 	public function getPeriodoFiscal() {
 		return $this->periodoFiscal;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getTable() {
+		return $this->table;
 	}
 }
 

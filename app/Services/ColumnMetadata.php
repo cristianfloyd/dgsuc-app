@@ -5,7 +5,9 @@ namespace App\Services;
 class ColumnMetadata
 {
      /** @var array<int, int> */
-    private array $widths;
+    private array $widthsAfip;
+    private array $widthsMapuche;
+    private string $currentSystem;
 
     /**
      * @var array<string, int> Mapeo de nombres de columnas a índices
@@ -39,6 +41,7 @@ class ColumnMetadata
     public function __construct()
     {
         $this->initializeWidths();
+        $this->currentSystem = 'afip'; // Por defecto
     }
 
     /**
@@ -46,7 +49,7 @@ class ColumnMetadata
      */
     private function initializeWidths(): void
     {
-        $this->widths = [
+        $this->widthsAfip = [
             6,  // periodo fiscal
             2,  // codigo movimiento
             2,  // Tipo de registro
@@ -70,6 +73,19 @@ class ColumnMetadata
             7,  // Código de Convenio Colectivo de Trabajo
             4,  // Sin valores, en blanco
         ];
+
+        $this->widthsMapuche = [
+            // Anchos pra Mapuche
+            6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
+        ];
+    }
+
+    public function setSystem(string $system): void
+    {
+        if (!in_array($system, ['afip', 'mapuche'])) {
+            throw new \InvalidArgumentException('Sistema no válido');
+        }
+        $this->currentSystem = $system;
     }
 
     /**
@@ -79,19 +95,19 @@ class ColumnMetadata
      */
     public  function getWidths(): array
     {
-        return $this->widths;
+        return $this->currentSystem === 'afip' ? $this->widthsAfip : $this->widthsMapuche;
     }
 
     /**
-     * Obtiene el ancho de una columna específica
+     * Obtiene el ancho de una columna específica.
      *
-     * @param int|string $identifier Índice o nombre de la columna
+     * @param int $index Índice de la columna
      * @return int Ancho de la columna
      */
-    public function getColumnWidth(int|string $identifier): int
+    public function getColumnWidth(int $index): int
     {
-        $index = is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
-        return $this->widths[$index] ?? 0;
+        $widths = $this->getWidths();
+        return $widths[$index] ?? 0;
     }
 
     /**
@@ -103,7 +119,7 @@ class ColumnMetadata
     public function setColumnWidth(int|string $identifier, int $width): void
     {
         $index = is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
-        $this->widths[$index] = $width;
+        $this->widthsAfip[$index] = $width;
     }
 
     /**
@@ -113,6 +129,6 @@ class ColumnMetadata
      */
     public function getTotalWidth(): int
     {
-        return array_sum($this->widths);
+        return array_sum($this->widthsAfip);
     }
 }

@@ -79,9 +79,9 @@ class AfipRelacionesActivas extends Model
         }
     }
 
-    /** Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+    /** Mapea los datos procesados al modelo AfipRelacionesActivas.
     * @param array $datosProcessados Los datos procesados.
-    * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
+    * @return array Los datos mapeados al modelo AfipRelacionesActivas.
     */
     static function mapearDatosAlModelo(array $datosProcesados):array
     {

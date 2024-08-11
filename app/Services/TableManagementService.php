@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -11,6 +12,8 @@ use App\Contracts\TableManagementServiceInterface;
 
 class TableManagementService implements TableManagementServiceInterface
 {
+    private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
+
     /**
      * Verifica si una tabla existe en la base de datos y la prepara para su uso.
      *
@@ -18,19 +21,44 @@ class TableManagementService implements TableManagementServiceInterface
      * Si la tabla ya existe y contiene datos, la trunca para limpiar su contenido.
      *
      * @param string $tableName Nombre de la tabla a verificar y preparar.
-     * @param string|null $connection Nombre de la conexión de base de datos a utilizar, o null para usar la conexión predeterminada.
+     * @param string|null $connection Nombre de la conexión de base de datos a utilizar.
+     * @return bool True si la operación fue exitosa, False en caso contrario.
+     * @throws \Exception Si ocurre un error durante la operación.
      */
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): void
+    public static function verifyAndPrepareTable(string $tableName, string $connection = null): bool
     {
-        $schema = $connection ? Schema::connection($connection) : Schema::connection(config('database.default'));
-        $db = $connection ? DB::connection($connection) : DB::connection(config('database.default'));
+        try {
+            $connection = $connection ?: self::DEFAULT_CONNECTION;
+            $schema = self::getSchemaConnection($connection);
+            $db = self::getDbConnection($connection);
 
-        if(!$schema->hasTable($tableName)){
-            static::createTable($tableName, $schema);
-        } else if (static::tableHasData($tableName, $db)) {
-            static::truncateTable($tableName, $db);
+            if (!$schema->hasTable($tableName))
+            {
+                static::createTable($tableName, $schema);
+            } elseif (static::tableHasData($tableName, $db))
+            {
+                static::truncateTable($tableName, $db);
+            }
+            Log::info("Tabla {$tableName} verificada y preparada.");
+            return true;
+        } catch (Exception $e) {
+            Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
+            return false;
         }
     }
+
+
+    private static function getSchemaConnection(string $connection = null)
+    {
+        return $connection ? Schema::connection($connection) : Schema::connection(config(self::DEFAULT_CONNECTION));
+    }
+
+    private static function getDbConnection(string $connection = null)
+    {
+        return $connection ? DB::connection($connection) : DB::connection(config(self::DEFAULT_CONNECTION));
+    }
+
+
     private static function createTable(string $tableName, $schema): void
     {
         $schema->create($tableName, function (Blueprint $table) {
@@ -127,8 +155,8 @@ class TableManagementService implements TableManagementServiceInterface
      */
     private static function truncateTable(string $tableName, $db): void
     {
-        $db->table($tableName)->truncate();
-        Log::info("Tabla $tableName truncada.");
+        $db->statement("TRUNCATE TABLE {$tableName} RESTART IDENTITY CASCADE");
+        Log::info("Tabla $tableName truncada y secuencias reiniciadas.");
     }
 
     /**

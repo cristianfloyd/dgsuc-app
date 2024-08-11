@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
+use App\Contracts\DataMapperInterface;
+use Exception;
 use RuntimeException;
 use App\Models\UploadedFile;
+use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
 use App\Services\AbstractFileProcessor;
+use Illuminate\Support\Facades\Storage;
 use App\Contracts\FileProcessorInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Procesa un archivo subido UploadedFile y devuelve un array de líneas procesadas.
@@ -16,12 +22,24 @@ use App\Contracts\FileProcessorInterface;
  */
 class FileProcessorService extends AbstractFileProcessor implements FileProcessorInterface
 {
-    private $databaseService;
+    private const string TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
-    public function __construct(DatabaseService $databaseService)
+    private int $periodoFiscal;
+    private string $absolutePath;
+    private string $tableName;
+
+
+    public function __construct(
+        private DatabaseService $databaseService,
+        private ColumnMetadata $columnMetadata,
+        private DataMapperInterface $dataMapper
+    ) {}
+
+    public function setPeriodoFiscal(int $periodoFiscal): void
     {
-        $this->databaseService = $databaseService;
+        $this->periodoFiscal = $periodoFiscal;
     }
+
 
     /**
      * Maneja la importación de un archivo.
@@ -33,18 +51,44 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      * @param array $columnWidths Un array con los anchos de columna a utilizar durante el procesamiento.
      * @return bool True si el procesamiento se realizó correctamente, false en caso de error.
      */
-    public function handleFileImport(UploadedFile $file, array $columnWidths): bool
+    public function handleFileImport(UploadedFile $file, string $system): Collection
     {
-        try {
-            $processedLines = $this->processFile($file, $columnWidths);
-            // Aquí iría la lógica para guardar o manejar las líneas procesadas
-            // TODO: Implementar la lógica para guardar o manejar las líneas procesadas
+        Log::info('Asignando variables');;
+        $this->assignValues($file);
+        $filePath = $file->file_path;
 
-            return true;
-        } catch (\Exception $e) {
-            // Manejar el error, posiblemente registrándolo
-            return false;
+        try {
+            $this->validateInput($filePath, $this->periodoFiscal);
+        } catch (Exception $e) {
+            Log::error('Error al validar el archivo: ' . $e->getMessage());
+            return collect();
         }
+        $this->columnMetadata->setSystem($system);
+
+        // Validación de $filePatfh, que pueda abrirse y leerse
+        if (!is_readable($this->absolutePath)) {
+            Log::error('El archivo no se puede leer.');
+            throw new RuntimeException('El archivo no se puede leer.');
+        }
+
+        Log::info("Archivo válido para lectura.: $this->absolutePath");
+        try {
+            $columnWidths = $this->columnMetadata->getWidths();
+            $processedLines = $this->processFile($this->absolutePath, $columnWidths);
+            // Aquí iría la lógica para guardar o manejar las líneas procesadas
+            return  $this->mapearDatos($processedLines);
+        } catch (Exception $e) {
+            // Manejar el error, posiblemente registrándolo
+            Log::error('Error al procesar el archivo: ' . $e->getMessage());
+            return collect();
+        }
+    }
+
+    private function mapearDatos(Collection $processedLines): Collection
+    {
+        $mappedData = $processedLines
+            ->map(fn($linea) => $this->dataMapper->mapDataToModel($linea->toArray()));
+        return new Collection($mappedData);
     }
 
     /**
@@ -65,27 +109,80 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
 
     /**
-     * Procesa un archivo cargado utilizando los anchos de columna proporcionados.
+     * Procesa un archivo dado utilizando los anchos de columna proporcionados.
      *
-     * Este método lee las líneas del archivo cargado, procesa cada línea utilizando los anchos de columna proporcionados y el período fiscal asociado con el archivo, y devuelve un array con las líneas procesadas.
+     * Este método lee cada línea del archivo, las procesa utilizando el método `processLine()` y devuelve un array con las líneas procesadas.
      *
-     * @param UploadedFile $file El archivo cargado a procesar.
-     * @param array $columnWidths Una matriz de anchos de columna a utilizar al procesar cada línea.
-     * @return array Un array de líneas procesadas.
+     * @param string $filePath La ruta del archivo a procesar.
+     * @param array $columnWidths Un array de anchos de columna a utilizar al procesar cada línea.
+     * @return Collection  Una Coleccion con las líneas del archivo procesadas.
      */
-    public function processFile(UploadedFile $file, array $columnWidths): array
+    public function processFile(string $filePath, array $columnWidths): Collection
     {
-        $filePath = storage_path("/app/{$file->file_path}");
-        $lines = collect(file($filePath));
-        $periodoFiscal = $file->periodo_fiscal;
+        Log::info("Procesando archivo: $filePath");
+        try {
+            $fileContent = $this->readFileContent($filePath);
+            $encoding = $this->detectEncoding($fileContent);
+            $lines = $this->convertToUtf8($fileContent, $encoding);
 
+            return $this->processLines($lines, $columnWidths);
+        } catch (Exception $e) {
+            Log::error('Error al procesar el archivo: ' . $e->getMessage());
+            return collect();
+        }
 
+        // Convertir la Illuminate\Support\Collection a Illuminate\Database\Eloquent\Collection
+        // return new Collection($data->all());
+    }
 
-        $processedLines = $lines->map(function ($line) use ($columnWidths, $periodoFiscal) {
-            return $this->processLine($line, $columnWidths, $periodoFiscal);
-        })->all();
+    /**
+     * Lee el contenido del archivo.
+     *
+     * @param string $filePath
+     * @return string
+     */
+    private function readFileContent(string $filePath): string
+    {
+        return file_get_contents($filePath);
+    }
 
-        return $processedLines;
+    /**
+     * Detecta la codificación del contenido del archivo.
+     *
+     * @param string $content
+     * @return string
+     */
+    private function detectEncoding(string $content): string
+    {
+        return mb_detect_encoding($content, mb_list_encodings(), true) ?: 'UTF-8';
+    }
+
+    /**
+     * Convierte el contenido del archivo a UTF-8.
+     *
+     * @param string $content
+     * @param string $fromEncoding
+     * @return array
+     */
+    private function convertToUtf8(string $content, string $fromEncoding): array
+    {
+        $utf8Content = mb_convert_encoding($content, 'UTF-8', $fromEncoding);
+        return explode("\n", $utf8Content);
+    }
+
+    /**
+     * Procesa las líneas del archivo.
+     *
+     * @param array $lines
+     * @param array $columnWidths
+     * @return Collection
+     */
+    private function processLines(array $lines, array $columnWidths): Collection
+    {
+        $data = collect($lines)
+            ->filter()
+            ->map(fn($line) => $this->processLine($line, $columnWidths));
+        return new Collection($data->all());
     }
 
 
@@ -94,26 +191,41 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @param string $line La línea del archivo a procesar.
      * @param array $columnWidths Un array de anchos de columna a utilizar al procesar la línea.
-     * @param int $periodoFiscal El período fiscal asociado con el archivo cargado.
      * @return array $processedLines Un array de campos procesados de la línea.
      */
-    private function processLine(string $line, array $columnWidths, $periodoFiscal): array
+    protected function processLine(string $line, array $columnWidths): Collection
     {
-        $processedLines = [];
         $posicion = 0;
-        foreach ($columnWidths as $key => $width) {
-            switch ($key) {
-                case 0:
-                    $processedLines[] = str_replace(' ', '0', $periodoFiscal);
-                    break;
-                default:
-                    $campo = substr($line, $posicion, $width);
-                    $processedLines[] = str_replace(' ', '0', $campo);
-                    $posicion += $width;
-                    break;
-            }
+        // Creamos una colección a partir de los anchos de columna
+        $data = collect($columnWidths)
+            ->map(function ($width, $key) use ($line, &$posicion) {
+                if ($key === 0) {
+                    return $campo = $this->periodoFiscal;
+                }
+                $campo = $this->processField($key, $line, $width, $posicion);
+                $posicion += $width;
+                return $campo;
+            });
+        // Convertir la Illuminate\Support\Collection a Illuminate\Database\Eloquent\Collection
+        return new Collection($data->all());
+    }
+
+    /**
+     * Procesa un campo individual de la línea.
+     *
+     * @param int $key El índice del campo.
+     * @param string $line La línea completa del archivo.
+     * @param int $width El ancho del campo.
+     * @param int $posicion La posición inicial del campo en la línea.
+     * @return string El campo procesado.
+     */
+    private function processField(int $key, string $line, int $width, int $posicion): string
+    {
+        if ($key === 0) {
+            return $this->periodoFiscal;
         }
-        return $processedLines;
+        $campo = substr($line, $posicion, $width);
+        return str_replace(' ', '-', $campo);
     }
 
     /**
@@ -125,8 +237,38 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      * @return array Las líneas extraídas del archivo.
      * @throws RuntimeException Si el archivo no se puede leer o abrir.
      */
-    public function extractLines(string $filePath): array
+    public function extractLines(string $filePath): Collection
     {
-        return $this->readFileLines($filePath);
+        $data = collect($this->readFileLines($filePath));
+        return new Collection($data->all());
+    }
+
+    private function assignValues(UploadedFile $file): void
+    {
+        $fileDetails = $this->getFileDetails($file);
+        $this->absolutePath = $fileDetails['absolutePath'];
+        $this->periodoFiscal = $fileDetails['periodoFiscal'];
+    }
+    private function validateInput(string $filePath, int $periodoFiscal): void
+    {
+        // Verifica que los parámetros no estén vacíos.
+        if (empty($filePath) || empty($periodoFiscal)) {
+            throw new InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
+        }
+
+        // Comprueba que el archivo exista en el almacenamiento.
+        if (!Storage::exists($filePath)) {
+            throw new InvalidArgumentException('El archivo no existe.');
+        }
+
+        // Verifica que el archivo sea legible.
+        if (!is_readable(Storage::path($filePath))) {
+            throw new InvalidArgumentException('El archivo no es legible.');
+        }
+
+        // Valida que el periodo fiscal sea un valor razonable (mayor que 0 y no superior al año actual más 12 meses).
+        if ($periodoFiscal <= 0 || $periodoFiscal > date('Y') * 100 + 12) {
+            throw new InvalidArgumentException('El periodo fiscal no es válido.');
+        }
     }
 }

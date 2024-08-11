@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Storage;
@@ -38,13 +39,12 @@ abstract class AbstractFileProcessor
     }
 
     // Método abstracto para procesar una línea
-    abstract protected function processLine(string $line, array $columnWidths): array;
+    abstract protected function processLine(string $line, array $columnWidths): Collection;
 
     // Método para procesar todo el archivo
-    public function processFile(string $filePath, array $columnWidths): array
+    public function processFile(string $filePath, array $columnWidths): Collection
     {
         return collect($this->readFileLines($filePath))
-            ->map(fn($line) => $this->processLine($line, $columnWidths))
-            ->toArray();
+            ->map(fn($line) => $this->processLine($line, $columnWidths));
     }
 }
