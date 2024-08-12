@@ -95,7 +95,7 @@ class SicossImporter extends Component
             // Paso 1: Procesar el archivo y obtener los datos mapeados
             $mappedData = $this->fileProcessor->handleFileImport($file, $system);
             Log::info('Datos mapeados:', [$mappedData->count()]);
-            
+
 
             if ($mappedData->isNotEmpty()) {
                 // Paso 2: Verificar y preparar la tabla
@@ -154,7 +154,7 @@ class SicossImporter extends Component
 
     public function render(): View
     {
-        if (!$this->showUploadForm) {
+        if ($this->showUploadForm) {
             return view('livewire.mapuche-sicoss');
         } else {
             return view('livewire.uploadtxtcompleted',[

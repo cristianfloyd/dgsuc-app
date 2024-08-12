@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class FileProcessorService extends AbstractFileProcessor implements FileProcessorInterface
 {
-    private const string TABLE_NAME = 'suc.afip_mapuche_sicoss';
+    private const string UTF8_ENCODING = 'UTF-8';
 
     private int $periodoFiscal;
     private string $absolutePath;
@@ -49,7 +49,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @param UploadedFile $file El archivo cargado a procesar.
      * @param array $columnWidths Un array con los anchos de columna a utilizar durante el procesamiento.
-     * @return bool True si el procesamiento se realizó correctamente, false en caso de error.
+     * @return Collection True si el procesamiento se realizó correctamente, false en caso de error.
      */
     public function handleFileImport(UploadedFile $file, string $system): Collection
     {
@@ -154,7 +154,9 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      */
     private function detectEncoding(string $content): string
     {
-        return mb_detect_encoding($content, mb_list_encodings(), true) ?: 'UTF-8';
+        $encoding = mb_detect_encoding($content, mb_list_encodings(), true) ?: self::UTF8_ENCODING;
+        dump($encoding);
+        return $encoding;
     }
 
     /**
@@ -166,7 +168,8 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      */
     private function convertToUtf8(string $content, string $fromEncoding): array
     {
-        $utf8Content = mb_convert_encoding($content, 'UTF-8', $fromEncoding);
+        $utf8Content = mb_convert_encoding($content, self::UTF8_ENCODING, 'auto');
+
         return explode("\n", $utf8Content);
     }
 
