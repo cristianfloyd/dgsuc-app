@@ -28,4 +28,9 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
     {
         return $this->find($id);
     }
+
+    public function findByName(string $name): ?OrigenesModel
+    {
+        return $this->where('name', $name)->first();
+    }
 }

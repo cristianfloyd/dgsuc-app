@@ -382,7 +382,7 @@ class CompareCuils extends Component
         }
     }
 
-    private function executeWorkflowSteps()
+    public function executeWorkflowSteps()
     {
         $steps = [
             WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP,

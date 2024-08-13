@@ -9,6 +9,7 @@ use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use app\Services\DatabaseService;
 use Illuminate\Support\Facades\Log;
+use App\Services\SicossImportService;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\WorkflowServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -44,6 +45,7 @@ class SicossImporter extends Component
     private readonly FileProcessorInterface $fileProcessor;
     private readonly TableManagementServiceInterface $tableManagementService;
     private readonly DatabaseService $databaseService;
+    private SicossImportService $sicossImporterService;
 
 
     public function boot(
@@ -52,12 +54,14 @@ class SicossImporter extends Component
         FileProcessorInterface $fileProcessor,
         TableManagementServiceInterface $tableManagementService,
         DatabaseService $databaseService,
+        SicossImportService $sicossImporterService,
     ) {
         $this->importService = $importService;
         $this->workflowService = $workflowService;
         $this->fileProcessor = $fileProcessor;
         $this->tableManagementService = $tableManagementService;
         $this->databaseService = $databaseService;
+        $this->sicossImporterService = $sicossImporterService;
         $this->checkCurrentStep();
     }
 
@@ -78,6 +82,17 @@ class SicossImporter extends Component
         $this->showUploadForm = in_array($currentStep, [self::STEP_IMPORT_ARCHIVO]);
         $this->nextstepUrl = $this->workflowService->getStepUrl($currentStep);
     }
+
+    public function importar(int $archivoId = null): void
+    {
+        $file = UploadedFile::findOrFail($archivoId ?? $this->selectedArchivoID);
+        if ($this->sicossImportService->importarArchivo($file)) {
+            $this->dispatch('success', 'Importación completada con éxito.');
+        } else {
+            $this->dispatch('error', 'Hubo un problema durante la importación.');
+        }
+    }
+
 
     /**
      * Importa un archivo y maneja el proceso después de una importación exitosa.
@@ -125,13 +140,19 @@ class SicossImporter extends Component
     }
 
 
+
     public function seleccionarArchivo()
     {
-        $this->selectedArchivo = UploadedFile::find($this->selectedArchivoID);
+        $this->selectedArchivo = $this->getArchivoById($this->selectedArchivoID);
         $this->filename = $this->selectedArchivo->filename;
         $this->periodoFiscal = $this->selectedArchivo->periodo_fiscal;
         $this->filepath = $this->selectedArchivo->filepath;
         $this->absolutePath = $this->selectedArchivo->absolute_path;
+    }
+
+    private function getArchivoById(int $archivoId): UploadedFile
+    {
+        return UploadedFile::find($archivoId);
     }
 
     private function verifyAndPrepareTable($tableName): void
@@ -161,5 +182,16 @@ class SicossImporter extends Component
                 'redirectUrl' => $this->nextstepUrl,
             ]);
         }
+    }
+
+    /**
+     * Set the value of selectedArchivo
+     *
+     * @return  self
+     */
+    public function setSelectedArchivo($selectedArchivo)
+    {
+        $this->selectedArchivo = $selectedArchivo;
+        return $this;
     }
 }

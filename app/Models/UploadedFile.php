@@ -19,6 +19,7 @@ class UploadedFile extends Model
         'file_path',
         'user_id',
         'user_name',
+        'process_id', // Nuevo  campo para el ID del proceso
     ];
 
 

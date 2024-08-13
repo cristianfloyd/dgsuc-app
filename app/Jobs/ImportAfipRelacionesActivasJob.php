@@ -65,13 +65,15 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
 
             $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
                 $this->validationService->validateSelectedFile($uploadedFile);
-
+                $filePath = $uploadedFile->file_path;
+                log::info("Desde el Job, invocamos a processFile(): $filePath");
                 $processedLines = $this->fileProcessor->processFile(
+                    $uploadedFile->file_path,
+                    $this->columnMetadata->getWidths(),
                     $uploadedFile,
-                    $this->columnMetadata->getWidths()
                 );
 
-                $this->employeeService->storeProcessedLines($processedLines);
+                $this->employeeService->storeProcessedLines($processedLines->toArray());
             });
 
             $this->workflowService->completeStep($processLog, 'import_archivo_afip');

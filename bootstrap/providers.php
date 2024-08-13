@@ -10,6 +10,7 @@ return [
     App\Providers\DatabaseServiceProvider::class,
     App\Providers\EmployeeRepositoryProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
+    App\Providers\FileProcessingServiceProvider::class,
     App\Providers\FileProcessorServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
     App\Providers\ImportJobServiceProvider::class,

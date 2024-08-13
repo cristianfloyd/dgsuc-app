@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\LazyCollection;
+use App\Contracts\DatabaseServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 
-class DatabaseService
+class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
     private const int DEFAULT_CHUNK_SIZE = 1000;
@@ -115,6 +116,7 @@ class DatabaseService
     {
         // Nombre de la conexión de base de datos en el trait MapucheConnectionTrait
         $conexion = $this->getConnectionName();
+        Log::info("Iniciando inserción en la tabla: $tableName y la conexion $conexion");
 
         if($mappedData->isEmpty()){
             Log::warning("No se encontraron datos para insertar en la tabla: $tableName");
@@ -161,7 +163,7 @@ class DatabaseService
      * @param array $linea Los datos que se desean mapear.
      * @return array Los datos mapeados al modelo.
      */
-    public function mapearDatosAlModelo(array $linea)
+    public function mapearDatosAlModelo(array $linea): array
     {
         return AfipRelacionesActivas::mapearDatosAlModelo($linea);
     }

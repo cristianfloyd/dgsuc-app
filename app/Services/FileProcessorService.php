@@ -32,8 +32,12 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     public function __construct(
         private DatabaseService $databaseService,
         private ColumnMetadata $columnMetadata,
-        private DataMapperInterface $dataMapper
-    ) {}
+        private DataMapperInterface $dataMapper,
+        int $periodoFiscal = 0
+    ) {
+        $this->periodoFiscal = $periodoFiscal;
+
+    }
 
     public function setPeriodoFiscal(int $periodoFiscal): void
     {
@@ -74,12 +78,15 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         Log::info("Archivo válido para lectura.: $this->absolutePath");
         try {
             $columnWidths = $this->columnMetadata->getWidths();
-            $processedLines = $this->processFile($this->absolutePath, $columnWidths);
+
+            Log::info("filepath para processFile: $filePath");
+
+            $processedLines = $this->processFile($filePath, $columnWidths);
             // Aquí iría la lógica para guardar o manejar las líneas procesadas
             return  $this->mapearDatos($processedLines);
         } catch (Exception $e) {
             // Manejar el error, posiblemente registrándolo
-            Log::error('Error al procesar el archivo: ' . $e->getMessage());
+            Log::error('Error al procesar el archivo (handleFileImport): ' . $e->getMessage());
             return collect();
         }
     }
@@ -115,20 +122,39 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @param string $filePath La ruta del archivo a procesar.
      * @param array $columnWidths Un array de anchos de columna a utilizar al procesar cada línea.
+     * @param UploadedFile $uploadedFile El archivo subido a procesar.
      * @return Collection  Una Coleccion con las líneas del archivo procesadas.
      */
-    public function processFile(string $filePath, array $columnWidths): Collection
+    public function processFile(string $filePath, array $columnWidths, UploadedFile $uploadedFile = null): Collection
     {
+        if ($uploadedFile) {
+            $this->assignValues($uploadedFile);
+        }
+
+        if (empty($this->periodoFiscal)) {
+            Log::error('El periodo fiscal no está inicializado.');
+            throw new RuntimeException('El periodo fiscal no está inicializado.');
+        }
+
         Log::info("Procesando archivo: $filePath");
         try {
-            $fileContent = $this->readFileContent($filePath);
+            // Use Storage facade to get the full path
+            $fullPath = Storage::path($filePath);
+
+
+            // Check if the file exists
+            if (!Storage::exists($filePath)) {
+                throw new RuntimeException("El archivo no existe: $filePath");
+            }
+
+            $fileContent = Storage::get($filePath);
             $encoding = $this->detectEncoding($fileContent);
             $lines = $this->convertToUtf8($fileContent, $encoding);
 
             return $this->processLines($lines, $columnWidths);
         } catch (Exception $e) {
-            Log::error('Error al procesar el archivo: ' . $e->getMessage());
-            return collect();
+            Log::error('Error al procesar el archivo en FileProcessorService processFile(): ' . $e->getMessage());
+            return new Collection();;
         }
 
         // Convertir la Illuminate\Support\Collection a Illuminate\Database\Eloquent\Collection
@@ -143,7 +169,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      */
     private function readFileContent(string $filePath): string
     {
-        return file_get_contents($filePath);
+        return file_get_contents(Storage::path($filePath));
     }
 
     /**
@@ -155,7 +181,6 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     private function detectEncoding(string $content): string
     {
         $encoding = mb_detect_encoding($content, mb_list_encodings(), true) ?: self::UTF8_ENCODING;
-        dump($encoding);
         return $encoding;
     }
 
@@ -261,12 +286,13 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
         // Comprueba que el archivo exista en el almacenamiento.
         if (!Storage::exists($filePath)) {
-            throw new InvalidArgumentException('El archivo no existe.');
+            throw new InvalidArgumentException("El archivo no existe: $filePath");
         }
 
         // Verifica que el archivo sea legible.
-        if (!is_readable(Storage::path($filePath))) {
-            throw new InvalidArgumentException('El archivo no es legible.');
+        $fullPath = Storage::path($filePath);
+        if (!is_readable($fullPath)) {
+            throw new InvalidArgumentException("El archivo no es legible: $fullPath");
         }
 
         // Valida que el periodo fiscal sea un valor razonable (mayor que 0 y no superior al año actual más 12 meses).

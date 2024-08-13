@@ -15,7 +15,7 @@ interface FileProcessorInterface
      * @param array $columnWidths Las anchas de las columnas del archivo.
      * @return Collection Los resultados del procesamiento del archivo.
      */
-    public function processFile(string $filePath, array $columnWidths): Collection;
+    public function processFile(string $filePath, array $columnWidths, UploadedFile $uploadedFile = null): Collection;
 
     /**
      * Obtiene los detalles del archivo cargado.

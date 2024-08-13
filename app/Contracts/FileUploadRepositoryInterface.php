@@ -38,4 +38,12 @@ interface FileUploadRepositoryInterface
      */
     public function all(): Collection|array;
 
+    /**
+     * Verifica si existe un archivo cargado con el origen especificado.
+     *
+     * @param string $origen El origen a buscar.
+     * @return bool Verdadero si existe un archivo cargado con el origen especificado, falso en caso contrario.
+     */
+    public function existsByOrigen(string $origen): bool;
+
 }
