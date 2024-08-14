@@ -27,15 +27,6 @@ class Dh11Resource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('codc_categ')
-                    ->required()
-                    ->maxLength(4),
-                TextInput::make('equivalencia')
-                    ->maxLength(3),
-                TextInput::make('tipo_escal')
-                    ->maxLength(1),
-                TextInput::make('nro_escal')
-                    ->numeric(),
                 TextInput::make('impp_basic')
                         ->numeric()
                         //->reactive()
@@ -47,8 +38,17 @@ class Dh11Resource extends Resource
 
                 TextInput::make('impp_asign')
                     ->numeric(),
-                // Forms\Components\TextInput::make('codc_dedic')
-                    // ->maxLength(4),
+                TextInput::make('codc_categ')
+                    ->required()
+                    ->maxLength(4),
+                TextInput::make('codc_dedic')
+                    ->maxLength(4),
+                //TextInput::make('equivalencia')
+                    //->maxLength(3),
+                TextInput::make('tipo_escal')
+                    ->maxLength(1),
+                //TextInput::make('nro_escal')
+                    //->numeric(),
                 // Forms\Components\TextInput::make('sino_mensu')
                     // ->maxLength(1),
                 // Forms\Components\TextInput::make('sino_djpat')
@@ -121,29 +121,29 @@ class Dh11Resource extends Resource
                 TextColumn::make('codc_categ')
                     ->searchable()
                     ->sortable(),
-                    TextColumn::make('desc_categ')->label('Descripción Categoría')->searchable()->sortable(),
-                    TextColumn::make('dh89.descesc')->label('Escalafón')->toggleable(),
-                    TextColumn::make('nro_escal')->label('Número Escalafón')->toggleable(),
-                    TextColumn::make('impp_basic')->label('Importe Básico')->money('usd', true)->sortable(),
-                    textColumn::make('impp_asign')->label('Importe Asignación')->money('usd', true)->sortable(),
-                    //llamar a la tabla dh31
-                    TextColumn::make('dh31.desc_dedic')->label('Dedicación')->toggleable(),
-                    TextColumn::make('codc_dedic')->label('Código')->toggleable(),
-                    ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(),
-                    ToggleColumn::make('sino_djpat')->label('Declaración Jurada Patrimonial')->toggleable(),
-                    TextColumn::make('vig_caano')->label('Vigencia Año')->toggleable(),
-                    TextColumn::make('vig_cames')->label('Vigencia Mes')->toggleable(),
-                    ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(),
-                    ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(),
-                    ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(),
-                    ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(),
-                    TextColumn::make('nivel')->label('Nivel'),
-                    // TextColumn::make('tipocargo')->label('Tipo de Cargo'),
-                    // TextColumn::make('remunbonif')->label('Remuneración Bonificada'),
-                    // TextColumn::make('noremunbonif')->label('No Remuneración Bonificada'),
-                    // TextColumn::make('remunnobonif')->label('Remuneración No Bonificada'),
-                    // TextColumn::make('noremunnobonif')->label('No Remuneración No Bonificada'),
-                    // TextColumn::make('otrasrem')->label('Otras Remuneraciones'),
+                TextColumn::make('codc_dedic')->label('Código')->toggleable()->sortable(),
+                TextColumn::make('desc_categ')->label('Descripción Categoría')->searchable()->sortable(),
+                TextColumn::make('dh89.descesc')->label('Escalafón')->toggleable(),
+                TextColumn::make('nro_escal')->label('Número Escalafón')->toggleable(),
+                TextColumn::make('impp_basic')->label('Importe Básico')->sortable(),
+                textColumn::make('impp_asign')->label('Importe Asignación')->sortable()->money('arp'),
+                //llamar a la tabla dh31
+                TextColumn::make('dh31.desc_dedic')->label('Dedicación')->toggleable(),
+                ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(),
+                ToggleColumn::make('sino_djpat')->label('Declaración Jurada Patrimonial')->toggleable(),
+                TextColumn::make('vig_caano')->label('Vigencia Año')->toggleable(),
+                TextColumn::make('vig_cames')->label('Vigencia Mes')->toggleable(),
+                ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(),
+                ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(),
+                ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(),
+                ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(),
+                TextColumn::make('nivel')->label('Nivel'),
+                // TextColumn::make('tipocargo')->label('Tipo de Cargo'),
+                // TextColumn::make('remunbonif')->label('Remuneración Bonificada'),
+                // TextColumn::make('noremunbonif')->label('No Remuneración Bonificada'),
+                // TextColumn::make('remunnobonif')->label('Remuneración No Bonificada'),
+                // TextColumn::make('noremunnobonif')->label('No Remuneración No Bonificada'),
+                // TextColumn::make('otrasrem')->label('Otras Remuneraciones'),
             ])
             ->filters([
                 //
@@ -153,9 +153,9 @@ class Dh11Resource extends Resource
                 //Tables\Actions\EditAction::make()->modal(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -171,7 +171,7 @@ class Dh11Resource extends Resource
         return [
             'index' => Pages\ListDh11s::route('/'),
             'create' => Pages\CreateDh11::route('/create'),
-            'edit' => Pages\EditDh11::route('/{record}/edit'),
+            //'edit' => Pages\EditDh11::route('/{record}/edit'),
         ];
     }
 }
