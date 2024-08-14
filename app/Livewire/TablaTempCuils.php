@@ -29,7 +29,7 @@ class TablaTempCuils extends Component
      * Este método se encarga de verificar la existencia de la tabla 'suc.tabla_temp_cuils', crearla si no existe, y luego borrar y llenar la tabla con los datos proporcionados.
      *
      * @param int $nroLiqui Número de liquidación.
-     * @param string $periodoFiscal Período fiscal.
+     * @param int $periodoFiscal Período fiscal.
      * @param array $cuils Lista de CUIL a procesar.
      * @return void
      */
@@ -66,7 +66,7 @@ class TablaTempCuils extends Component
      * Este método se encarga de verificar la existencia de la tabla 'suc.afip_mapuche_mi_simplificacion', crearla si no existe, y luego vaciar y llenar la tabla con los datos proporcionados.
      *
      * @param int $nroLiqui Número de liquidación.
-     * @param string $periodoFiscal Período fiscal.
+     * @param int $periodoFiscal Período fiscal.
      * @return void
      */
     #[On('mapuche-mi-simplificacion')]
@@ -109,7 +109,7 @@ class TablaTempCuils extends Component
      *
      *
      * @param int $nroLiqui Número de liquidación.
-     * @param string $periodoFiscal Período fiscal.
+     * @param int $periodoFiscal Período fiscal.
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario.
      */
     private function validarParametros($nroLiqui, $periodoFiscal)
@@ -161,7 +161,7 @@ class TablaTempCuils extends Component
     /** Inserta datos en la tabla 'suc.tabla_temp_cuils'.
      *
      * @param string $nroLiqui Número de liquidación.
-     * @param string $periodoFiscal Período fiscal.
+     * @param int $periodoFiscal Período fiscal.
      * @param array|null $cuils Lista de CUILs a insertar.
      * @return bool Verdadero si la inserción se completó correctamente, falso en caso contrario.
      */

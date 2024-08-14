@@ -32,10 +32,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * 4. Ejecuta la función almacenada con los parámetros proporcionados.
      *
      * @param int $nroLiqui Número de liquidación
-     * @param string $periodoFiscal Período fiscal
+     * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si el proceso se ejecutó correctamente, falso en caso contrario
      */
-    public function execute($nroLiqui, $periodoFiscal): bool
+    public function execute(int $nroLiqui, int $periodoFiscal): bool
     {
 
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
@@ -59,10 +59,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * para realizar la consulta.
      *
      * @param int $nroLiqui Número de liquidación
-     * @param string $periodoFiscal Período fiscal
+     * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si los parámetros existen en la base de datos, falso en caso contrario
      */
-    private function validarExistenciaEnBaseDeDatos($nroLiqui, $periodoFiscal): bool
+    private function validarExistenciaEnBaseDeDatos(int $nroLiqui, int $periodoFiscal): bool
     {
         // Verificamos la existencia del número de liquidación en Dh21
         $existeNroLiqui = Dh21::where('nro_liqui', $nroLiqui)->exists();
@@ -85,10 +85,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos. Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
      *
      * @param int $nroLiqui Número de liquidación
-     * @param string $periodoFiscal Período fiscal
+     * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario
      */
-    private function validarParametros($nroLiqui, $periodoFiscal): bool
+    private function validarParametros(int $nroLiqui, int $periodoFiscal): bool
     {
         if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui, $periodoFiscal)) {
             return false;
@@ -140,11 +140,11 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * Ejecuta la función almacenada 'mapucheMiSimplificacion' con los parámetros proporcionados.
      *
      * @param int $nroLiqui Número de liquidación
-     * @param string $periodoFiscal Período fiscal
+     * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si la ejecución de la función almacenada fue exitosa, falso en caso contrario
      * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada
      */
-    private function ejecutarFuncionAlmacenada($nroLiqui, $periodoFiscal): bool
+    private function ejecutarFuncionAlmacenada(int $nroLiqui, int $periodoFiscal): bool
     {
         try {
             $result = $this->tablaTempCuils->mapucheMiSimplificacion($nroLiqui, $periodoFiscal);

@@ -4,16 +4,20 @@ namespace App\Livewire;
 
 use Exception;
 use Livewire\Component;
+use Illuminate\Support\Str;
+use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
 use Livewire\WithFileUploads;
 use App\Services\UploadService;
 use Illuminate\Support\Facades\DB;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
+use App\Services\FileProcessingService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Contracts\OrigenRepositoryInterface;
 use Illuminate\Validation\ValidationException;
 use App\Contracts\FileUploadRepositoryInterface;
-use App\Services\FileUploadService;
+
 
 class Uploadtxt extends Component
 {
@@ -21,7 +25,8 @@ class Uploadtxt extends Component
 
 
     public $archivotxt;
-
+    public $archivotxtAfip;
+    public $archivotxtMapuche;
     public $headers = [];
     public $importaciones;
     public $archivoModel = [];
@@ -31,6 +36,8 @@ class Uploadtxt extends Component
     public $selectedOrigen;
     public $showUploadForm = false;
     public $nextStepUrl = null;
+    public $processId;
+    public $showButtonProcessFiles = false;
 
     protected $workflowService;
     protected $processLog;
@@ -38,22 +45,31 @@ class Uploadtxt extends Component
     private $fileUploadRepository;
     private $origenRepository;
     private $fileUploadService;
+    private $fileProcessingService;
+
+
     /**
      * Constructor del componente.
      *
+     * @param WorkflowServiceInterface $workflowService
      * @param FileUploadRepositoryInterface $fileUploadRepository
      * @param OrigenRepositoryInterface $origenRepository
+     * @param FileUploadService $fileUploadService
+     * @param FileProcessingService $file
+     *
      */
     public function boot(
         WorkflowServiceInterface $workflowService,
         FileUploadRepositoryInterface $fileUploadRepository,
         OrigenRepositoryInterface $origenRepository,
-        FileUploadService $fileUploadService
+        FileUploadService $fileUploadService,
+        FileProcessingService $file,
     ) {
         $this->workflowService = $workflowService;
         $this->fileUploadRepository = $fileUploadRepository;
         $this->origenRepository = $origenRepository;
         $this->fileUploadService = $fileUploadService;
+        $this->fileProcessingService = $file;
 
         $this->checkCurrentStep();
     }
@@ -62,6 +78,8 @@ class Uploadtxt extends Component
     {
         $this->importaciones = $this->fileUploadRepository->all();
         $this->origenes = OrigenesModel::all();
+        $this->processId = (string)Str::uuid(); // generar un ID de proceso único y convertirlo a string
+        Log::info("Process ID: {$this->processId}");
     }
 
     /**
@@ -80,41 +98,17 @@ class Uploadtxt extends Component
         $currentStep = $this->workflowService->getCurrentStep($processLog);
         $this->showUploadForm = in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
         $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
+        $this->checkShowButtonProcessFiles();
     }
 
-
-    /**
-     * Guarda un nuevo modelo de archivo cargado en la base de datos.
-     *
-     * Este método realiza las siguientes tareas:
-     * 1. Obtiene los detalles del archivo cargado, como el nombre original, la extensión y la ruta del archivo.
-     * 2. Crea un nuevo modelo de UploadedFile con los detalles del archivo.
-     * 3. Establece los atributos del modelo, como el nombre de archivo, la ruta del archivo, el período fiscal y el origen.
-     * 4. Establece el usuario que cargó el archivo y guarda el modelo en la base de datos.
-     * @return void
-     */
-    public function uploadFileModel(): void
+    public function saveAfip()
     {
-        $this->validate([
-            'archivotxt' => 'required|file',
-            'file_path' => 'required|string',
-            'periodo_fiscal' => 'required|string',
-            'selectedOrigen' => 'required|exists:origenes,id',
-        ]);
+        $this->save('afip');
+    }
 
-        DB::transaction(function () {
-            $origen = $this->origenRepository->findById($this->selectedOrigen);
-
-            $this->fileUploadRepository->create([
-                'filename' => basename($this->file_path),
-                'original_name' => $this->archivotxt->getClientOriginalName(),
-                'file_path' => $this->file_path,
-                'periodo_fiscal' => $this->periodo_fiscal,
-                'origen' => $origen->name,
-                'user_id' => auth()->id(),
-                'user_name' => auth()->user()->name,
-            ]);
-        });
+    public function saveMapuche()
+    {
+        $this->save('mapuche');
     }
 
 
@@ -130,14 +124,18 @@ class Uploadtxt extends Component
      *
      * @return void
      */
-    public function save()
+    public function save($origen): void
     {
         try {
-            $this->validateAndPrepare();
+            $this->validateAndPrepare($origen);
+
+            // Verifica el orden de subidaa de archivos
+            if ($origen == 'mapuche' && !$this->fileUploadRepository->existsByOrigen('afip')) {
+                throw new Exception('Primero debe cargar el archivo de AFIP');
+            }
 
             // 1. Cargar el archivo en el servidor
-            $filePath = $this->fileUploadService->uploadFile($this->archivotxt, 'afiptxt');
-
+            $filePath = $this->fileUploadService->uploadFile($origen === 'afip' ? $this->archivotxtAfip : $this->archivotxtMapuche, 'afiptxt');
             if (!$filePath) {
                 throw new Exception('Error al cargar el archivo en el servidor.');
             }
@@ -145,12 +143,13 @@ class Uploadtxt extends Component
             // 2. Almacenar en la base de datos del modelo UploadedFile
             $uploadedFile = $this->fileUploadRepository->create([
                 'filename' => basename($filePath),
-                'original_name' => $this->archivotxt->getClientOriginalName(),
+                'original_name' => $origen === 'afip' ? $this->archivotxtAfip->getClientOriginalName() : $this->archivotxtMapuche->getClientOriginalName(),
                 'file_path' => $filePath,
                 'periodo_fiscal' => $this->periodo_fiscal,
-                'origen' => $this->origenRepository->findById($this->selectedOrigen)->name,
-                'user_id' => auth()->id(),
-                'user_name' => auth()->user()->name,
+                'origen' => $this->origenRepository->findByName($origen)->name,
+                'user_id' => 1,
+                'user_name' => 'admin',
+                'process_id' => $this->processId, // Asignar el UUID del proceso
             ]);
 
             if (!$uploadedFile) {
@@ -158,61 +157,150 @@ class Uploadtxt extends Component
             }
 
             // 3. Actualizar el flujo de trabajo y redirigir
-            $this->updateWorkflowAndRedirect();
+            $this->updateWorkflowAndRedirect($origen);
+
+            if($this->fileUploadRepository->existsByOrigen('afip'))
+            {
+                log::info("Archivo AFIP cargado correctamente");
+            }
+            elseif ($this->fileUploadRepository->existsByOrigen('mapuche'))
+            {
+                log::info("Archivo MAPACHE cargado correctamente");
+            }
+
+            // 4. Procesar los archivos si ambos han sido cargados
+            if ($this->fileUploadRepository->existsByOrigen('afip') && $this->fileUploadRepository->existsByOrigen('mapuche')) {
+                $fileAfip = UploadedFile::where('origen', 'afip')->latest()->first();
+                $fileMapuche = UploadedFile::where('origen', 'mapuche')->latest()->first();
+                Log::info("Ambos archivos han sido cargados. Iniciando procesamiento...");
+
+                $this->showButtonProcessFiles = true;
+
+                if ($fileAfip->process_id == $fileMapuche->process_id){
+                    Log::info('UUID iguales, redirigiendo');
+                    $this->handleNextStep(); // Redirige solo si ambos archivos han sido cargados
+                }
+            }
         } catch (Exception $e) {
             $this->handleException($e);
         }
     }
 
-    private function validateAndPrepare()
-    {
-        $this->validateInput();
-        $this->processLog = $this->workflowService->getLatestWorkflow();
-        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
-        Log::info("Proceso actual: {$this->processLog}, Paso actual: {$this->currentStep}");
-    }
-
     /**
-     * Valida los datos de entrada del archivo que se va a subir.
-     * Verifica que el archivo sea requerido, que sea de tipo .txt o .csv, y que no supere los 20MB.
-     * Si alguna de estas validaciones falla, se lanzará una excepción de validación con los mensajes de error correspondientes.
+     * Valida y prepara los datos de entrada antes de procesar el archivo.
+     * Este método realiza las siguientes tareas:
+     * 1. Valida los datos de entrada utilizando la función `validateInput()`.
+     * 2. Obtiene el registro de flujo de trabajo más reciente utilizando `getLatestWorkflow()`.
+     * 3. Obtiene el paso actual del flujo de trabajo utilizando `getCurrentStep()`.
+     * 4. Registra información sobre el proceso y el paso actual en el registro.
      *
      * @return void
      */
-    private function validateInput(): void
+    private function validateAndPrepare($origen)
+    {
+        $this->validateInput($origen);
+        $this->processLog = $this->workflowService->getLatestWorkflow();
+        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
+        Log::info("uploadtxt->validateAndPrepare, Paso actual: {$this->currentStep}");
+    }
+
+    public function processFiles(): void
+    {
+        Log::info("uploadtxt->processFiles");
+        $this->fileProcessingService->processFiles();
+    }
+
+    public function checkShowButtonProcessFiles(): void
+    {
+        // Verificar si ambos archivos han sido subidos
+        $afipFile = UploadedFile::where('origen', 'afip')->latest()->first();
+        $mapucheFile = UploadedFile::where('origen','mapuche')->latest()->first();
+        if ($afipFile->process_id == $mapucheFile->process_id) {
+            $this->showButtonProcessFiles = true;
+        }
+    }
+
+
+    /**
+     * Valida los datos de entrada antes de procesar el archivo.
+     *
+     * Esta función realiza las siguientes validaciones:
+     * - Verifica que se haya seleccionado un archivo para subir.
+     * - Verifica que el archivo sea de tipo .txt o .csv.
+     * - Verifica que el archivo no supere los 20MB de tamaño.
+     *
+     * @param string $origen El origen del archivo a validar ('afip' o 'mapuche').
+     * @return void
+     */
+    private function validateInput($origen): void
     {
         $messages = [
-            'archivotxt.required' => 'Por favor, seleccione un archivo para subir.',
-            'archivotxt.mimes' => 'Solo se permiten archivos de tipo .txt.',
-            'archivotxt.max' => 'El archivo no debe superar los 20MB.',
+            'archivotxtAfip.required' => 'Por favor, seleccione un archivo para subir.',
+            'archivotxtAfip.mimes' => 'Solo se permiten archivos de tipo .txt.',
+            'archivotxtAfip.max' => 'El archivo no debe superar los 20MB.',
+            'archivotxtMapuche.required' => 'Por favor, seleccione un archivo para subir.',
+            'archivotxtMapuche.mimes' => 'Solo se permiten archivos de tipo .txt.',
+            'archivotxtMapuche.max' => 'El archivo no debe superar los 20MB.',
         ];
 
         $this->validate([
-            'archivotxt' => 'required|file|mimes:txt,csv|max:20480',
+            'archivotxt' . ucfirst($origen) => 'required|file|mimes:txt,csv|max:20480',
         ], $messages);
     }
 
-    private function updateWorkflowAndRedirect()
+    /**
+     * Actualiza el paso actual del flujo de trabajo, restablece el formulario y maneja el siguiente paso.
+     *
+     * Esta función se encarga de completar el paso actual del flujo de trabajo, restablecer los campos del formulario a sus valores predeterminados y redirigir al usuario al siguiente paso del flujo de trabajo, si lo hay.
+     * @param string $name
+     * @return void
+     */
+    private function updateWorkflowAndRedirect($origen)
     {
-        $this->updateWorkflowStep();
-        $this->resetForm();
-        $this->handleNextStep();
+        $this->updateWorkflowStep($origen);
+        // $this->resetForm($origen);
+        // $this->handleNextStep();
     }
 
-    private function resetForm()
+    /**
+     * Restablece los campos del formulario a sus valores predeterminados.
+     *
+     * Esta función se encarga de restablecer los campos del formulario, como el archivo cargado, el período fiscal y la ruta del archivo, y también restablece la validación del formulario.
+     * @param string $name
+     * @return void
+     */
+    private function resetForm($origen)
     {
-        $this->archivotxt = null;
-        $this->periodo_fiscal = '';
-        $this->file_path = '';
+        switch ($origen) {
+            case 'afip':
+                $this->archivotxt = null;
+                $this->periodo_fiscal = '';
+                $this->file_path = '';
+                break;
+            default:
+                $this->archivotxt = null;
+                $this->periodo_fiscal = '';
+                $this->file_path = '';
+                break;
+        }
         $this->resetValidation();
     }
 
-    private function updateWorkflowStep()
+    /**
+     * Actualiza el paso actual del flujo de trabajo.
+     *
+     * Esta función se encarga de completar el paso actual del flujo de trabajo, ya sea 'subir_archivo_afip' o 'subir_archivo_mapuche', según el paso actual.
+     * Después de completar el paso, se registra un mensaje informativo en el log de la aplicación.
+     *
+     * @return void
+     */
+    private function updateWorkflowStep($origen)
     {
-        $stepToComplete = $this->currentStep === 'subir_archivo_afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
+        $stepToComplete = $origen == 'afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
         $this->workflowService->completeStep($this->processLog, $stepToComplete);
         Log::info("Paso completado updateWorkflowStep(): {$stepToComplete}");
     }
+
 
     private function handleNextStep()
     {
@@ -242,18 +330,7 @@ class Uploadtxt extends Component
         Log::error("Error en save(): {$e->getMessage()}");
     }
 
-    /**
-     * Sube un archivo al servidor.
-     *
-     * Esta función se encarga de subir un archivo al servidor utilizando el servicio UploadService.
-     * El archivo a subir se pasa como parámetro en la propiedad 'archivotxt' y se guarda en la carpeta 'afiptxt'.
-     *
-     * @return string La ruta del archivo subido.
-     */
-    private function uploadFile()
-    {
-        return UploadService::uploadFile($this->archivotxt, 'afiptxt');
-    }
+
 
 
     public function deleteFile($fileId)
@@ -291,7 +368,7 @@ class Uploadtxt extends Component
 
     public function render()
     {
-        if ($this->showUploadForm) {
+        if (!$this->showUploadForm) {
             return view('livewire.uploadtxt');
         } else {
             return view('livewire.uploadtxtcompleted', [

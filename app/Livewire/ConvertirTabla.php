@@ -45,7 +45,7 @@ class ConvertirTabla extends Component
 
         $afipSicoss = new AfipSicossDesdeMapuche();
         $tabla = $afipSicoss->procesarTabla($this->filasExtraidas, $this->periodoFiscal);
-        $resultado = $afipSicoss::insertarDatosMasivos($tabla);
+        $resultado = $afipSicoss::insertBulkData($tabla);
         if ($resultado) {
             dump( "Datos insertados correctamente");
         }else {
@@ -60,10 +60,10 @@ class ConvertirTabla extends Component
         $resultado = $AfipimportacionCruda->contarCaracteresPorLinea($archivoRuta);
 
     }
-    public function procesarLinea($linea)
+    public function processLine($linea)
     {
 
-        //$this->procesarLinea($linea);
+        //$this->processLine($linea);
     }
 
     public function cantRegistros( )

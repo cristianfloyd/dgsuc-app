@@ -15,6 +15,7 @@ class CuilRepository implements CuilRepositoryInterface
      *
      * @param int $perPage Número de resultados por página (opcional, por defecto 10)
      *  Paginador de los CUIL que no se encuentran en la tabla afip_mapuche_mi_simplificacion
+     * 
      */
     public function getCuilsNotInAfip($perPage = 10): Collection
     {
@@ -27,7 +28,7 @@ class CuilRepository implements CuilRepositoryInterface
         })
         ->pluck('cuil');
     // return $this->paginateResults($cuils, $perPage);
-        return $cuils;
+        return new Collection($cuils);
     }
 
 

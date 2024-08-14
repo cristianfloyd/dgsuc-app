@@ -53,43 +53,48 @@ class AfipRelacionesActivas extends Component
         7,  //Código de Convenio Colectivo de Trabajo
         4,  //Sin valores, en blanco
     ];
-    public array $lineasProcesadas; //este es el array que va a devolver la funcion procesarLinea
+    public array $processedLines; //este es el array que va a devolver la funcion processLine
     public string $periodo_fiscal; //este es el periodo fiscal que se va a cargar en la tabla relaciones_activas
 
     private $fileProcessor;
-    protected $workflowService;
+    private $workflowService;
     private $validationService;
     private $columnMetadata;
     private $transactionService;
     private $showUploadForm;
     private $employeeService;
+    private $uploadedFileModel;
 
 
     public function boot(
         FileProcessorInterface $fileProcessor,
         EmployeeServiceInterface $employeeService,
-        WorkflowServiceInterface $workflowService,
         ValidationService $validationService,
-        ColumnMetadata $columnMetadata,
         TransactionServiceInterface $transactionService,
-    ) {
+        WorkflowServiceInterface $workflowService,
+        ColumnMetadata $columnMetadata,
+        UploadedFile $uploadedFileModel,
+        ) {
+        Log::info('Se ha iniciado el componente AfipRelacionesActivas');
         $this->fileProcessor = $fileProcessor;
         $this->workflowService = $workflowService;
         $this->validationService = $validationService;
         $this->columnMetadata = $columnMetadata;
         $this->transactionService = $transactionService;
         $this->employeeService = $employeeService;
+        $this->uploadedFileModel = $uploadedFileModel;
         $this->checkCurrentStep();
     }
 
+
     public function mount()
     {
-        $this->archivosCargados = UploadedFile::all();
+
     }
 
     public function updatedarchivoSeleccionadoId($value)
     {
-        $this->archivoSeleccionado = $this->archivosCargados->find($value);
+        $this->archivoSeleccionado = $this->uploadedFileModel->find($value);
     }
 
     private function checkCurrentStep()
@@ -103,8 +108,13 @@ class AfipRelacionesActivas extends Component
 
 
 
-    public function importar()
+    public function importar(int $archivoId = null)
     {
+        if ($archivoId !== null) {
+            $this->archivoSeleccionadoId = $archivoId;
+            $this->archivoSeleccionado = UploadedFile::find($archivoId);
+            Log::info("importar() en AfipRelacionesActivas \$archivoId pasado como argumento: $archivoId");
+        }
         $this->validateFileSelection();
 
         try {
@@ -114,18 +124,24 @@ class AfipRelacionesActivas extends Component
                 return;
             }
 
-            // Ejecutar el comando Artisan para importar las relaciones activas
-            // Artisan::call('afip:import', [
-            //     'uploadedFileId' => $this->archivoSeleccionadoId, // Pasar el ID del archivo como argumento
-            // ]);
+
 
             $uploadedFileId = $this->archivoSeleccionadoId;
 
             // Despachar el Job
-            ImportAfipRelacionesActivasJob::dispatch($uploadedFileId);
+            ImportAfipRelacionesActivasJob::dispatch(
+                $this->fileProcessor,
+                $this->employeeService ,
+                $this->validationService ,
+                $this->transactionService,
+                $this->workflowService,
+                $this->columnMetadata,
+                $uploadedFileId
+            );
 
             // Mostrar un mensaje de éxito si la importación fue correcta
             Log::info('El archivo se ha importado correctamente.');
+
             // Emitir un evento Livewire para actualizar la tabla
             $this->dispatch('show-success', ['message' => 'Se inició la importación en segundo plano.']);
         } catch (\Exception $e) {
@@ -146,55 +162,31 @@ class AfipRelacionesActivas extends Component
 
 
 
-    private function validateAndProcessFile(): void
-    {
-        $this->validateFileSelection();
-        // Procesamiento del archivo usando FileProcessorService
-        $lineasProcesadas = $this->fileProcessor->processFile(
-            $this->archivoSeleccionado,
-            $this->columnMetadata->getWidths()
-        );
-
-        $this->employeeService->storeProcessedLines($lineasProcesadas);
-        $this->workflowService->completeStep($this->workflowService->getLatestWorkflow(), 'import_archivo_afip'); // Completar el paso
-    }
-
-    private function handleSuccessfulImport(object $processLog): void
-    {
-        $this->dispatch('show-success-message', ['message' => 'Se importó correctamente']);
-        $this->dispatch('datos-importados');
-
-        $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->nextStepUrl = $this->workflowService->getStepUrl($this->workflowService->getNextStep($currentStep));
-    }
-
-
-
-
-
-
-
-
-
-    private function handleImportError(\Exception $e, $processLog)
-    {
-        Log::error('Error en la importación: ' . $e->getMessage());
-        $this->dispatch('show-error-message', ['message' => 'No se importó correctamente: ' . $e->getMessage()]);
-        $this->workflowService->updateStep($processLog, 'import_archivo_afip', 'failed');
-    }
-
-
-
 
     public function render()
     {
 
-        if (!$this->showUploadForm) {
-            return view('livewire.afip-relaciones-activas');
+        if ($this->showUploadForm) {
+            $archivosCargados = $this->uploadedFileModel->all();
+            return view('livewire.afip-relaciones-activas',[
+                'archivosCargados' => $archivosCargados,
+            ]);
         } else {
             return view('livewire.uploadtxtcompleted', [
                 'redirectUrl' => $this->nextStepUrl,
             ]);
         }
+    }
+
+    /**
+     * Set the value of archivoSeleccionado
+     *
+     * @return  self
+     */
+    public function setArchivoSeleccionado($archivoSeleccionado)
+    {
+        $this->archivoSeleccionado = $archivoSeleccionado;
+
+        return $this;
     }
 }

@@ -8,6 +8,7 @@ use App\Contracts\FileUploadRepositoryInterface;
 
 class FileUploadRepository implements FileUploadRepositoryInterface
 {
+    
     /**
      * Obtiene un archivo cargado por su ID o lanza una excepción si no se encuentra.
      *
@@ -52,4 +53,14 @@ class FileUploadRepository implements FileUploadRepositoryInterface
         return UploadedFile::all();
     }
 
+    /**
+     * Verifica si existe un archivo cargado con el origen especificado.
+     *
+     * @param string $origen El origen del archivo cargado a buscar.
+     * @return bool Verdadero si existe un archivo cargado con el origen especificado, falso en caso contrario.
+     */
+    public function existsByOrigen(string $origen): bool
+    {
+        return UploadedFile::where('origen', $origen)->exists();
+    }
 }

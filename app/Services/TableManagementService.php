@@ -2,24 +2,63 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use App\Contracts\TableManagementServiceInterface;
 
-class TableManagementService
+class TableManagementService implements TableManagementServiceInterface
 {
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): void
-    {
-        $schema = $connection ? Schema::connection($connection) : Schema::connection(config('database.default'));
-        $db = $connection ? DB::connection($connection) : DB::connection(config('database.default'));
+    private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
 
-        if(!$schema->hasTable($tableName)){
-            static::createTable($tableName, $schema);
-        } else if (static::tableHasData($tableName, $db)) {
-            static::truncateTable($tableName, $db);
+    /**
+     * Verifica si una tabla existe en la base de datos y la prepara para su uso.
+     *
+     * Si la tabla no existe, la crea utilizando el esquema proporcionado.
+     * Si la tabla ya existe y contiene datos, la trunca para limpiar su contenido.
+     *
+     * @param string $tableName Nombre de la tabla a verificar y preparar.
+     * @param string|null $connection Nombre de la conexión de base de datos a utilizar.
+     * @return bool True si la operación fue exitosa, False en caso contrario.
+     * @throws \Exception Si ocurre un error durante la operación.
+     */
+    public static function verifyAndPrepareTable(string $tableName, string $connection = null): bool
+    {
+        try {
+            $connection = $connection ?: self::DEFAULT_CONNECTION;
+            $schema = self::getSchemaConnection($connection);
+            $db = self::getDbConnection($connection);
+
+            if (!$schema->hasTable($tableName))
+            {
+                static::createTable($tableName, $schema);
+            } elseif (static::tableHasData($tableName, $db))
+            {
+                static::truncateTable($tableName, $db);
+            }
+            Log::info("Tabla {$tableName} verificada y preparada.");
+            return true;
+        } catch (Exception $e) {
+            Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
+            return false;
         }
     }
+
+
+    private static function getSchemaConnection(string $connection = null)
+    {
+        return $connection ? Schema::connection($connection) : Schema::connection(config(self::DEFAULT_CONNECTION));
+    }
+
+    private static function getDbConnection(string $connection = null)
+    {
+        return $connection ? DB::connection($connection) : DB::connection(config(self::DEFAULT_CONNECTION));
+    }
+
+
     private static function createTable(string $tableName, $schema): void
     {
         $schema->create($tableName, function (Blueprint $table) {
@@ -93,16 +132,49 @@ class TableManagementService
 
         Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
     }
+
+    /**
+     * Verifica si una tabla de la base de datos tiene datos.
+     *
+     * @param string $tableName Nombre de la tabla a verificar.
+     * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     * @return bool Verdadero si la tabla tiene datos, falso de lo contrario.
+     */
     private static function tableHasData(string $tableName, $db): bool
     {
         $count = $db->table($tableName)->count();
         return $count > 0;
     }
 
+    /**
+     * Trunca una tabla de la base de datos.
+     *
+     * @param string $tableName Nombre de la tabla a truncar.
+     * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     * @return void
+     */
     private static function truncateTable(string $tableName, $db): void
     {
-        $db->table($tableName)->truncate();
-        Log::info("Tabla $tableName truncada.");
+        $db->statement("TRUNCATE TABLE {$tableName} RESTART IDENTITY CASCADE");
+        Log::info("Tabla $tableName truncada y secuencias reiniciadas.");
+    }
+
+    /**
+     * Verifica si una tabla está vacía.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model Modelo Eloquent de la tabla a verificar.
+     * @param string $tableName Nombre de la tabla a verificar.
+     * @return bool Verdadero si la tabla está vacía, falso de lo contrario.
+     */
+    public static function verifyTableIsEmpty(Model $model,string $tableName): bool
+    {
+        $tableIsEmpty = $model->all()->isEmpty();
+
+        if ($tableIsEmpty) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 

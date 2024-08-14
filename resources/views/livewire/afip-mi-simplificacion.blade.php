@@ -14,7 +14,6 @@
 
         <!-- Resto del contenido -->
     </div>
-    @dump($this->processFinished)
     <div class="mb-4 container" id="process-container">
         <h1>Proceso de AFIP Mi Simplificación</h1>
         <div class="mb-4">

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\DatabaseServiceInterface;
 use App\services\DatabaseService;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,9 +13,7 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(DatabaseService::class, function () {
-            return new DatabaseService();
-        });
+        $this->app->bind(DatabaseServiceInterface::class, DatabaseService::class);
     }
 
     /**

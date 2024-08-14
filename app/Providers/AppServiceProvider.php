@@ -5,11 +5,13 @@ namespace App\Providers;
 use App\Services\WorkflowService;
 use App\Listeners\JobFailedListener;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Queue\Events\JobFailed;
 use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
 use App\Contracts\WorkflowServiceInterface;
+use App\Jobs\Middleware\InspectJobDependencies;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
         }
+
 
         Event::listen(
             JobFailed::class,
@@ -40,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Queue::before(function ($job) {
+            return (new InspectJobDependencies)->handle($job, function ($job) {
+                return $job;
+            });
+        });
     }
 }

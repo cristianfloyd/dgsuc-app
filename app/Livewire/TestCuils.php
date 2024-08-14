@@ -14,7 +14,6 @@ class TestCuils extends Component
     {
         $data = DB::connection('pgsql-mapuche')
             ->select('select * from suc.get_mi_simplificacion(?, ?, ?)', [$this->nroLiqui, $this->periodoFiscal, $this->cuil]);
-        dump($data);
         return view('livewire.test-cuils');
     }
 }

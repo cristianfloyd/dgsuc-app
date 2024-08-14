@@ -23,12 +23,6 @@ class AfipMapucheMiSimplificacion extends Component
 
     public function mount()
     {
-        $this->afipMapucheMiSimplificacion();
-    }
-    public function afipMapucheMiSimplificacion()
-    {
-        //obtengo los datos de la tabla afip_mapuche_mi_simplificacion paginados de a 10
-        //$this->datos = ModelsAfipMapucheMiSimplificacion::paginate(10);
     }
 
 

@@ -3,13 +3,15 @@
 namespace App;
 
 use App\Models\UploadedFile;
-use Doctrine\DBAL\Schema\Table;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Log;
 use App\Models\AfipSicossDesdeMapuche;
 use App\Services\TableManagementService;
 
+
 class ImportService
 {
+    use MapucheConnectionTrait;
     protected $tableManagementService;
 
 
@@ -28,7 +30,7 @@ class ImportService
     public function importFile(UploadedFile $file): bool
     {
         $tableName = 'suc.afip_mapuche_sicoss';
-        $connection = 'pgsql-mapuche';
+        $connection = $this->getConnectionName();
         $this->tableManagementService->verifyAndPrepareTable($tableName, $connection);
 
         AfipSicossDesdeMapuche::importarDesdeArchivo($file->file_path, $file->periodo_fiscal);

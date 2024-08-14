@@ -8,6 +8,7 @@ use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Contracts\FileProcessorInterface;
@@ -21,16 +22,28 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private $fileProcessor;
+    private $employeeService;
+    private $validationService;
+    private $transactionService;
+    private $workflowService;
+    private $columnMetadata;
 
     public function __construct(
-        private FileProcessorInterface $fileProcessor,
-        private EmployeeService $employeeService,
-        private ValidationService $validationService,
-        private TransactionServiceInterface $transactionService,
-        private WorkflowServiceInterface $workflowService,
-        private ColumnMetadata $columnMetadata,
-        protected $uploadedFileId)
-    {
+        FileProcessorInterface $fileProcessor,
+        EmployeeService $employeeService,
+        ValidationService $validationService,
+        TransactionServiceInterface $transactionService,
+        WorkflowServiceInterface $workflowService,
+        ColumnMetadata $columnMetadata,
+        protected $uploadedFileId = null,
+    ){
+        $this->fileProcessor = $fileProcessor;
+        $this->employeeService = $employeeService;
+        $this->validationService = $validationService;
+        $this->transactionService = $transactionService;
+        $this->workflowService = $workflowService;
+        $this->columnMetadata = $columnMetadata;
         $this->uploadedFileId = $uploadedFileId;
     }
 
@@ -39,6 +52,9 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
      */
     public function handle(): void
     {
+        if (!$this->uploadedFileId) {
+            throw new \Exception('No se proporcionó un archivo cargado.');
+        }
         $uploadedFile = UploadedFile::findOrFail($this->uploadedFileId);
         Log::info('Iniciando ImportAfipRelacionesActivasJob');
 
@@ -49,13 +65,15 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
 
             $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
                 $this->validationService->validateSelectedFile($uploadedFile);
-
-                $lineasProcesadas = $this->fileProcessor->processFile(
+                $filePath = $uploadedFile->file_path;
+                log::info("Desde el Job, invocamos a processFile(): $filePath");
+                $processedLines = $this->fileProcessor->processFile(
+                    $uploadedFile->file_path,
+                    $this->columnMetadata->getWidths(),
                     $uploadedFile,
-                    $this->columnMetadata->getWidths()
                 );
 
-                $this->employeeService->storeProcessedLines($lineasProcesadas);
+                $this->employeeService->storeProcessedLines($processedLines->toArray());
             });
 
             $this->workflowService->completeStep($processLog, 'import_archivo_afip');
