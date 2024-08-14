@@ -24,11 +24,26 @@ class CompareCuils extends Component
 {
     use WithPagination;
 
+    // Constantes
     private const int PER_PAGE = 10;
+    private const string IN_PROGRESS = 'in_progress';
+    private const string COMPLETED = 'completed';
+
+    private const string MSG_WORKFLOW_COMPLETED = 'Flujo de trabajo completado';
+    private const string MSG_DATA_INSERTED = 'Datos insertados en Mi Simplificacion';
+    private const string MSG_ERROR_INSERT = 'Error al insertar Mi Simplificacion';
+    private const string LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
+
+    private const int DEFAULT_PERIODO_FISCAL = 202312;
+    private const string EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+    private const string EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
+    private const string EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+    private const string EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
+
     public $cuilsNotInAfip;
     public $cuilsCount = 0;
     public $nroLiqui = 1;
-    public int $periodoFiscal = 202312;
+    public int $periodoFiscal = self::DEFAULT_PERIODO_FISCAL;
     public $cuilsToSearch = [];
 
     public $cuilsNoInserted = [];
@@ -114,7 +129,7 @@ class CompareCuils extends Component
         $this->crearTablaTemp = true;
         $this->cuilsCount = $this->tempTableService->getTempTableCount();
         if ($this->cuilsCount == 0) {
-            $this->workflowService->updateStep($this->processLog, WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, 'in_progress');
+            $this->workflowService->updateStep($this->processLog, WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, self::IN_PROGRESS);
             $this->addMessage('Volviendo al paso anterior: ' . WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, 'info');
         }
     }
@@ -135,7 +150,7 @@ class CompareCuils extends Component
     #[Computed]
     public function isTableTempCreationRequired(): bool
     {
-        return $this->currentStep === 'poblar_tabla_temp_cuils' || $this->currentStep === 'ejecutar_funcion_almacenada';
+        return $this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value || $this->currentStep === WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value;
     }
 
 
@@ -172,10 +187,10 @@ class CompareCuils extends Component
         return $this->currentStep === WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value;
     }
 
-    #[On('workflow-completed')]
+    #[On(self::EVENT_WORKFLOW_COMPLETED)]
     public function handleWorkflowCompleted(): void
     {
-        $this->addMessage('Flujo de trabajo completado', 'success');
+        $this->addMessage(self::MSG_WORKFLOW_COMPLETED, 'success');
         $this->showParaMiSimplificacionAndCuilsNoEncontrados();
     }
 
@@ -188,8 +203,9 @@ class CompareCuils extends Component
         $this->ShowMiSimplificacion = true;
 
         $this->loadCuilsNotInserted();
-
     }
+
+
     public function updateShowMiSimplificacion()
     {
         $this->ShowMiSimplificacion = !$this->ShowMiSimplificacion;
@@ -198,7 +214,7 @@ class CompareCuils extends Component
     public function stepsCompleted(): bool
     {
         $step = $this->currentStep;
-        if ($step === 'completed') {
+        if ($step === self::COMPLETED) {
             return true;
         }
         return false;
@@ -206,12 +222,12 @@ class CompareCuils extends Component
 
 
     /**
-     * Ejecuta la función almacenada 'mapuche-mi-simplificacion' y actualiza el paso del flujo de trabajo a 'in_progress'.
+     * Ejecuta la función almacenada 'mapuche-mi-simplificacion' y actualiza el paso del flujo de trabajo a self::IN_PROGRESS.
      * Luego, restablece la propiedad 'cuilsNotInAfipLoaded'.
      */
     public function mapucheMiSimplificacion(): void
     {
-        $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value , self::IN_PROGRESS);
 
         $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal);
         $this->reset('cuilsNotInAfipLoaded');
@@ -222,27 +238,27 @@ class CompareCuils extends Component
         if ($this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value)
         {
             $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
-            $this->workflowService->updateStep($this->processLog, 'poblar_tabla_temp_cuils', 'in_progress');
+            $this->workflowService->updateStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value, self::IN_PROGRESS);
             if($this->tempTableService->populateTempTable($this->cuilsToSearch))
             {
                 $this->cuilsCount = $this->tempTableService->getTempTableCount();
-                Log::info("iniciar-poblado-tabla-temp: {$this->nroLiqui} . {$this->periodoFiscal} {$this->cuilsCount}");
+                Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui}" . "{$this->periodoFiscal} {$this->cuilsCount}");
             };
 
         }
     }
 
     /** Maneja el éxito de la población de la tabla temporal de CUILs.
-     * Completa el paso 'poblar_tabla_temp_cuils' en el registro de flujo de trabajo y actualiza el paso 'ejecutar_funcion_almacenada' a 'in_progress'.
+     * Completa el paso 'poblar_tabla_temp_cuils' en el registro de flujo de trabajo y actualiza el paso 'ejecutar_funcion_almacenada' a self::IN_PROGRESS.
      * Luego, llama al método 'ejecutarFuncionAlmacenada()' para iniciar el siguiente paso del flujo de trabajo.
      */
-    #[On('success-tabla-temp-cuils')]
+    #[On(self::EVENT_SUCCESS_TABLA_TEMP_CUILS)]
     public function handleTablaTempCuilsSuccess()
     {
-        $this->workflowService->completeStep($this->processLog, 'poblar_tabla_temp_cuils');
+        $this->workflowService->completeStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value);
 
         // Iniciar el siguiente paso: ejecutar_funcion_almacenada
-        $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value , self::IN_PROGRESS);
         $this->ejecutarFuncionAlmacenada();
     }
 
@@ -259,9 +275,9 @@ class CompareCuils extends Component
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
         if ($this->currentStep === WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value){
-            $this->workflowService->updateStep($this->processLog, 'ejecutar_funcion_almacenada', 'in_progress');
+            $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value, self::IN_PROGRESS);
             $this->ejecutarFuncionAlmacenada();
-            $this->dispatch('success-mapuche-mi-simplificacion', $this->currentStep, $this->processLog);
+            $this->dispatch(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, $this->currentStep, $this->processLog);
         }
     }
 
@@ -269,9 +285,9 @@ class CompareCuils extends Component
     {
         $result = $this->mapucheMiSimplificacionService->execute($this->nroLiqui, $this->periodoFiscal);
         if ($result) {
-            $this->dispatch('success-mapuche-mi-simplificacion', 'Función almacenada ejecutada exitosamente');
+            $this->dispatch(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, 'Función almacenada ejecutada exitosamente');
         } else {
-            $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
+            $this->dispatch(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, 'Error al ejecutar la función almacenada');
         }
     }
 
@@ -293,15 +309,15 @@ class CompareCuils extends Component
      * Si hay CUILs no insertados, los guarda en la propiedad "cuilsNoInserted" y muestra un mensaje con esa información.
      * Finalmente, inicia el siguiente paso del flujo de trabajo si existe.
      */
-    #[On('success-mapuche-mi-simplificacion')]
+    #[On(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION)]
     public function handleSuccessMapucheMiSimplificacion(): void
     {
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
 
-        $this->workflowService->completeStep($this->processLog, 'ejecutar_funcion_almacenada');
+        $this->workflowService->completeStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value);
 
-        $this->successMessage = 'Datos insertados en Mi Simplificacion';
+        $this->successMessage = self::MSG_DATA_INSERTED;
         $this->miSimButton = false;
 
         $count = AfipMapucheMiSimplificacion::count();
@@ -310,19 +326,19 @@ class CompareCuils extends Component
         $result = count($this->cuilsToSearch) - $count;
         $this->ShowMiSimplificacion = true;
 
-        $nextStep = $this->workflowService->getNextStep('ejecutar_funcion_almacenada');
+        $nextStep = $this->workflowService->getNextStep(WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value);
 
         if ($nextStep) {
-            $this->workflowService->updateStep($this->processLog, $nextStep, 'in_progress');
+            $this->workflowService->updateStep($this->processLog, $nextStep, self::IN_PROGRESS);
         }
     }
 
 
 
-    #[On('error-mapuche-mi-simplificacion')]
+    #[On(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION)]
     public function handleErrorMapucheMiSimplificacion()
     {
-        $this->successMessage = 'Error al insertar Mi Simplificacion';
+        $this->successMessage = self::MSG_ERROR_INSERT;
         $this->restart();
     }
 
@@ -398,7 +414,7 @@ class CompareCuils extends Component
             $this->currentStep = $this->workflowService->getNextStep($step->value);
         }
 
-        $this->dispatch('workflow-completed');
+        $this->dispatch(self::EVENT_WORKFLOW_COMPLETED);
     }
 
     private function executeStep($step)
@@ -416,7 +432,7 @@ class CompareCuils extends Component
                 break;
             case WorkflowStatus::OBTENER_CUILS_NO_INSERTADOS:
                 $this->loadCuilsNotInserted();
-                $this->dispatch('workflow-completed');
+                $this->dispatch(self::EVENT_WORKFLOW_COMPLETED);
             case WorkflowStatus::EXPORTAR_TXT_PARA_AFIP:
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
                 break;
@@ -472,7 +488,7 @@ class CompareCuils extends Component
     {
         $this->cargos = Dh03::where('nro_legaj', $nroLegaj)
             ->orderBy('fec_alta', 'desc')
-            ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq'])
+            ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq' ])
             ->toArray();
 
         $this->showCargoModal();
