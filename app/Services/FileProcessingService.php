@@ -13,6 +13,7 @@ use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
 use App\Contracts\TransactionServiceInterface;
 use App\Contracts\FileUploadRepositoryInterface;
+use App\Contracts\WorkflowExecutionInterface;
 
 class FileProcessingService
 {
@@ -27,6 +28,7 @@ class FileProcessingService
     private $workflowService;
     private $columnMetadata;
     private $sicossImporterService;
+    private $workflowExecutionService;
 
     public function __construct(
         AfipRelacionesActivas $afipRelacionesActivas,
@@ -40,6 +42,7 @@ class FileProcessingService
         WorkflowServiceInterface $workflowService,
         ColumnMetadata $columnMetadata,
         SicossImportService $sicossImporterService,
+        WorkflowExecutionInterface $workflowExecutionService,
     ){
         $this->afipRelacionesActivas = $afipRelacionesActivas;
         $this->sicossImporter = $sicossImporter;
@@ -52,6 +55,7 @@ class FileProcessingService
         $this->workflowService = $workflowService;
         $this->columnMetadata = $columnMetadata;
         $this->sicossImporterService = $sicossImporterService;
+        $this->workflowExecutionService = $workflowExecutionService;
     }
 
     public function processFiles()
@@ -81,10 +85,15 @@ class FileProcessingService
             Log::info('Archivos procesados e importados correctamente.');
 
             // Ejecutar el paso de comparación de CUILs
-            $this->executeCompareCuilsStep();
+            // $this->executeCompareCuilsStep();
+            $this->workflowExecutionService
+                ->setPerPage(10)
+                ->setPeriodoFiscal($afipFile->periodo_fiscal)
+                ->setNroLiqui(1)
+                ->executeWorkflowSteps();
 
             // Eliminar ambos archivos
-            // $this->deleteFiles($afipFile, $mapucheFile);
+            // $this->deleteFiles($afipFile, $mapucheFile); ese solo elimina de la base de datos, no del disco
         } else {
             Log::error('No se han subido ambos archivos.');
         }

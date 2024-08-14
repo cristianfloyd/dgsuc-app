@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\CuilRepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class CuilCompareService
 {
@@ -22,7 +22,8 @@ class CuilCompareService
      */
     public function compareCuils($perPage = 10): Collection
     {
-        return $this->cuilRepository->getCuilsNotInAfip($perPage);
+        $data = $this->cuilRepository->getCuilsNotInAfip($perPage);
+        return new Collection($data);
     }
 
     /**

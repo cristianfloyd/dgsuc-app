@@ -13,6 +13,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
+use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\TransactionServiceInterface;
 use App\Contracts\FileUploadRepositoryInterface;
 
@@ -34,6 +35,7 @@ class FileProcessingServiceProvider extends ServiceProvider
                 $app->make(WorkflowServiceInterface::class),
                 $app->make(ColumnMetadata::class),
                 $app->make(SicossImportService::class),
+                $app->make(WorkflowExecutionInterface::class),
             );
         });
     }

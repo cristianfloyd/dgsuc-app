@@ -20,11 +20,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     //constantes
     private const int PER_PAGE = 10;
     private const string IN_PROGRESS = 'in_progress';
-    private const string COMPLETED = 'completed';
 
-    private const string MSG_WORKFLOW_COMPLETED = 'Flujo de trabajo completado';
-    private const string MSG_DATA_INSERTED = 'Datos insertados en Mi Simplificacion';
-    private const string MSG_ERROR_INSERT = 'Error al insertar Mi Simplificacion';
     private const string LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
 
     public const string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
@@ -62,12 +58,13 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         TempTableService $tempTableService,
         MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacion,
         MessageManagerInterface $messageManager,
-    ){
+    ) {
         $this->workflowService = $workflowService;
         $this->cuilCompareService = $cuilCompareService;
         $this->tempTableService = $tempTableService;
         $this->mapucheMiSimplificacion = $mapucheMiSimplificacion;
         $this->messageManager = $messageManager;
+        $this->processLog = $this->workflowService->getLatestWorkflow();
     }
 
     public function executeWorkflowSteps()
@@ -114,6 +111,51 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         }
     }
 
+    /**
+     * Establece el número de elementos por página.
+     *
+     * @param int $perPage
+     * @return self
+     */
+    public function setPerPage(int $perPage): self
+    {
+        $this->perPage = $perPage;
+        return $this;
+    }
+
+    /**
+     * Obtiene el número actual de elementos por página.
+     *
+     * @return int
+     */
+    public function getPerPage(): int
+    {
+        return $this->perPage;
+    }
+
+    /**
+     * Establece el período fiscal.
+     *
+     * @param int $periodoFiscal
+     * @return self
+     */
+    public function setPeriodoFiscal(int $periodoFiscal): self
+    {
+        $this->periodoFiscal = $periodoFiscal;
+        return $this;
+    }
+
+    /**
+     * Obtiene el período fiscal actual.
+     *
+     * @return int
+     */
+    public function getPeriodoFiscal(): int
+    {
+        return $this->periodoFiscal;
+    }
+
+
     /** Compara las CUIL (Clave Única de Identificación Laboral) del modelo AfipMapucheSicoss con las CUIL del modelo AfipRelacionesActivas.
      *
      * Este método recupera todos los CUIL del modelo AfipRelacionesActivas, y luego encuentra todos los CUIL del modelo AfipMapucheSicoss
@@ -133,16 +175,13 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
 
     private function poblarTablaTempCuils(): void
     {
-        if ($this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value)
-        {
+        if ($this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value) {
             $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value, self::IN_PROGRESS);
-            if($this->tempTableService->populateTempTable($this->cuilsToSearch))
-            {
+            if ($this->tempTableService->populateTempTable($this->cuilsToSearch)) {
                 $this->cuilsCount = $this->tempTableService->getTempTableCount();
                 Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui}" . "{$this->periodoFiscal} {$this->cuilsCount}");
             };
-
         }
     }
 
@@ -213,5 +252,25 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     private function dispatchEvent(string $eventName, array $payload = []): void
     {
         Event::dispatch($eventName, $payload);
+    }
+
+    /**
+     * Get the value of nroLiqui
+     */
+    public function getNroLiqui(): int
+    {
+        return $this->nroLiqui;
+    }
+
+    /**
+     * Set the value of nroLiqui
+     *
+     * @return  self
+     */
+    public function setNroLiqui($nroLiqui): self
+    {
+        $this->nroLiqui = $nroLiqui;
+
+        return $this;
     }
 }
