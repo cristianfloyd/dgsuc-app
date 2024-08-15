@@ -99,10 +99,12 @@ class Dh13 extends Model
      */
     public function newQuery()
     {
-        return parent::newQuery()->addSelect('*',
-            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id"));
-            // ->orderBy('nro_orden_formula')
-            // ->orderBy('codn_conce');
+        return parent::newQuery()->addSelect(
+            '*',
+            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
+        );
+        // ->orderBy('nro_orden_formula')
+        // ->orderBy('codn_conce');
     }
 
     /**
@@ -127,9 +129,24 @@ class Dh13 extends Model
         if ($field === 'id') {
             list($codn_conce, $nro_orden_formula) = explode('-', $key);
             return $this->where('codn_conce', $codn_conce)
-                        ->where('nro_orden_formula', $nro_orden_formula)
-                        ->first();
+                ->where('nro_orden_formula', $nro_orden_formula)
+                ->first();
         }
         return parent::resolveRouteBinding($key, $field);
+    }
+
+    /**
+     * Recupera un modelo por su clave única compuesta.
+     *
+     * @param string $id La clave única compuesta en el formato "codn_conce-nro_orden_formula".
+     * @param array $columns Los campos a recuperar (por defecto, todos los campos).
+     * @return \Illuminate\Database\Eloquent\Model|null El modelo encontrado, o null si no se encuentra.
+     */
+    public function find($id, $columns = ['*'])
+    {
+        list($codn_conce, $nro_orden_formula) = explode('-', $id);
+        return $this->where('codn_conce', $codn_conce)
+            ->where('nro_orden_formula', $nro_orden_formula)
+            ->first($columns);
     }
 }

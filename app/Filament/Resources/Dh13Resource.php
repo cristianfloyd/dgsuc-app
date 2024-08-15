@@ -21,7 +21,10 @@ class Dh13Resource extends Resource
 {
     protected static ?string $model = Dh13::class;
     protected static string $relationship = 'dh13s';
+    protected static ?string $modelLabel = 'Formulas';
+    protected static ?string $navigationGroup = 'Conceptos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $activeNavigationIcon = 'heroicon-o-document-text';
     protected static ?string $recordTitleAttribute = 'id';
 
 

@@ -3,21 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AfipMapucheMiSimplificacionResource\Pages;
-use App\Filament\Resources\AfipMapucheMiSimplificacionResource\RelationManagers;
 use App\Models\AfipMapucheMiSimplificacion;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AfipMapucheMiSimplificacionResource extends Resource
 {
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
+    protected static ?string $navigationLabel = 'Mi Simplificacion';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected  static ?string $navigationGroup = 'Afip';
 
     public static function form(Form $form): Form
     {

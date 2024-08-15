@@ -12,14 +12,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ToggleColumn;
 use App\Filament\Resources\Dh11Resource\Pages;
-use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Filters\SelectFilter;
 
 class Dh11Resource extends Resource
 {
     protected static ?string $model = Dh11::class;
+    protected static ?string $modelLabel = 'Categorias';
+    protected static ?string $navigationLabel = 'Categorias';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form
     {

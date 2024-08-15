@@ -25,6 +25,15 @@ class EditDh13 extends EditRecord
         ];
     }
 
+    /**
+     * Resuelve el registro Dh13 a partir de una clave compuesta.
+     *
+     * Divide la clave compuesta en sus partes individuales (codn_conce y nro_orden_formula),
+     * y luego busca el registro correspondiente en la base de datos.
+     *
+     * @param int|string $key La clave compuesta del registro a resolver.
+     * @return \Illuminate\Database\Eloquent\Model El registro Dh13 encontrado.
+     */
     protected function resolveRecord(int|string $key): Model
     {
         $resource = static::getResource();

@@ -18,8 +18,12 @@ use App\Filament\Resources\AfipMapucheSicossResource\Pages;
 class AfipMapucheSicossResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicoss::class;
+    protected static ?string $modelLabel = 'Sicoss';
+    protected static ?string $navigationLabel = 'Sicoss';
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+    protected static ?string $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Afip';
 
     public static function form(Form $form): Form
     {

@@ -3,26 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\Dh41Resource\Pages;
-use App\Filament\Resources\Dh41Resource\RelationManagers;
 use App\Models\Dh41;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use PhpParser\Node\Stmt\Label;
 
 class Dh41Resource extends Resource
 {
     protected static ?string $model = Dh41::class;
-    protected static ?string $label = 'Dh41';
+    protected static ?string $label = 'Ganancias';
+    protected static ?string $navigationLabel = 'Ganancias Iniciales';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = 'Liquidaciones';
 
     public static function form(Form $form): Form
     {
