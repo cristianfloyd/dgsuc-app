@@ -81,4 +81,9 @@ class Dh22 extends Model
     {
         return $query->where('sino_cerra', '!=', 'C'); // Asumiendo que 'C' significa cerrada
     }
+
+    public function scopeDefinitiva($query)
+    {
+        return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
+    }
 }

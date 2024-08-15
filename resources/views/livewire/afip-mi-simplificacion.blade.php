@@ -1,5 +1,6 @@
 <div>
-
+    {{-- <livewire:mapuche.components.select-liquidacion-definitiva :year="2023" :month="6" /> --}}
+    @include('livewire.mapuche.components.select-liquidacion-definitiva')
     <div>
         @foreach($messages as $message)
             <div x-data="{ show: true }"

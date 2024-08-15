@@ -23,6 +23,10 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Livewire::make('SelectLiquidacionDefinitva')
+                    ->label('Select Liquidacion')
+                    ->extraAttributes(['wire:key' => 'select-liquidacion'])
+                    ->extraAttributes(['year' => 2023, 'month' => 6]),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
