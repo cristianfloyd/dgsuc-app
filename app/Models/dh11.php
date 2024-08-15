@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class dh11 extends Model
 {
-    protected $connection = 'pgsql-mapuchito';
+    use MapucheConnectionTrait;
+
+    // protected $connection = 'pgsql-mapuchito';
+
     protected $table = 'mapuche.dh11';
     public $timestamps = false;
     protected $primaryKey = 'codc_categ';

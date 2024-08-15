@@ -11,10 +11,17 @@ class EditDh13 extends EditRecord
 {
     protected static string $resource = Dh13Resource::class;
 
+    /**
+     * Devuelve las acciones de encabezado para la página de edición de registros Dh13.
+     *
+     * Las acciones de encabezado son las opciones que se muestran en la parte superior de la página de edición, como la opción de eliminar el registro.
+     *
+     * @return array Las acciones de encabezado para la página de edición.
+     */
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            // Actions\DeleteAction::make(),
         ];
     }
 

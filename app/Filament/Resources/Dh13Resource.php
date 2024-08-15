@@ -71,9 +71,7 @@ class Dh13Resource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //
             ])
             ->defaultSort('codn_conce', 'asc')
             ->defaultSort('nro_orden_formula', 'asc');

@@ -2,11 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use Closure;
-use Filament\Forms;
 use App\Models\Dh11;
 use Filament\Tables;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -15,7 +12,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ToggleColumn;
 use App\Filament\Resources\Dh11Resource\Pages;
-use Ramsey\Uuid\Type\Integer;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class Dh11Resource extends Resource
 {
@@ -35,7 +33,6 @@ class Dh11Resource extends Resource
                             $set('impp_asign', $state);
                             //fn (Set $set, ?int $state) => $set('impp_asign', $state)
                         }),
-
                 TextInput::make('impp_asign')
                     ->numeric(),
                 TextInput::make('codc_categ')
@@ -125,8 +122,11 @@ class Dh11Resource extends Resource
                 TextColumn::make('desc_categ')->label('Descripción Categoría')->searchable()->sortable(),
                 TextColumn::make('dh89.descesc')->label('Escalafón')->toggleable(),
                 TextColumn::make('nro_escal')->label('Número Escalafón')->toggleable(),
+                // TextInputColumn::make('impp_basic')->label('Importe Básico')->sortable(),
                 TextColumn::make('impp_basic')->label('Importe Básico')->sortable(),
-                textColumn::make('impp_asign')->label('Importe Asignación')->sortable()->money('arp'),
+                // TextInputColumn::make('impp_asign')->label('Importe Asignación')->sortable(),
+                TextColumn::make('impp_asign')->label('Importe Asignación')->sortable(),
+                TextColumn::make('estadolaboral')->label('est lab')->sortable(),
                 //llamar a la tabla dh31
                 TextColumn::make('dh31.desc_dedic')->label('Dedicación')->toggleable(),
                 ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(),
@@ -146,11 +146,21 @@ class Dh11Resource extends Resource
                 // TextColumn::make('otrasrem')->label('Otras Remuneraciones'),
             ])
             ->filters([
-                //
+                SelectFilter::make('tipo_escal')
+                ->options([
+                        'D' => 'Docente',
+                        'N' => 'NoDo',
+                        'S' => 'Superior',
+                ]),
+                SelectFilter::make('estadolaboral')
+                ->options([
+                        'A' => 'Ad',
+                        'B' => 'Baja',
+                        'P' => 'P',
+                ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->modal(),
-                //Tables\Actions\EditAction::make()->modal(),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
