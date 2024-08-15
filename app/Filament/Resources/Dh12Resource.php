@@ -16,8 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class Dh12Resource extends Resource
 {
     protected static ?string $model = Dh12::class;
+    protected static ?string $navigationLabel = 'Conceptos';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $activeNavigationIcon = 'heroicon-o-document-text';
+
+    protected static ?string $navigationGroup = 'Conceptos';
 
     public static function form(Form $form): Form
     {
@@ -179,9 +183,10 @@ class Dh12Resource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('codn_conce', 'asc');
     }
 
     public static function getRelations(): array

@@ -3,21 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AfipSicossDesdeMapucheResource\Pages;
-use App\Filament\Resources\AfipSicossDesdeMapucheResource\RelationManagers;
 use App\Models\AfipSicossDesdeMapuche;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AfipSicossDesdeMapucheResource extends Resource
 {
     protected static ?string $model = AfipSicossDesdeMapuche::class;
+    protected static ?string $navigationLabel = 'Sicoss desde Mapuche';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Afip';
 
     public static function form(Form $form): Form
     {

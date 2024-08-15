@@ -2,23 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\Dh21Resource\Pages;
-use App\Filament\Resources\Dh21Resource\RelationManagers;
-use App\Models\Dh21;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Dh21;
 use Filament\Tables;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
+use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Resources\Dh21Resource\Pages;
+use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
+use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 
 class Dh21Resource extends Resource
 {
     protected static ?string $model = Dh21::class;
+    protected static ?string $modelLabel = 'Liquidaciones';
+    protected static ?string $navigationLabel = 'Liquidaciones';
+
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Liquidaciones';
 
     public static function form(Form $form): Form
     {
@@ -219,6 +222,15 @@ class Dh21Resource extends Resource
             'index' => Pages\ListDh21s::route('/'),
             'create' => Pages\CreateDh21::route('/create'),
             'edit' => Pages\EditDh21::route('/{record}/edit'),
+            'conceptos-totales' => Pages\ConceptosTotales::route('/conceptos-totales'),
         ];
     }
+
+    public static function getWidgets(): array
+{
+    return [
+        Dh21LegajoCounter::class,
+        Dh21Concepto101Total::class,
+    ];
+}
 }
