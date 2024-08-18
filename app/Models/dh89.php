@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Dh11;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class dh89 extends Model
+class Dh89 extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
+
     // Especifica la tabla asociada al modelo
     protected $table = 'mapuche.dh89';
 
@@ -44,4 +48,12 @@ class dh89 extends Model
         'tipo_perm_tran' => 'string',
         'infoadiccateg' => 'string',
     ];
+
+    /**
+     * Relación con el modelo Dh11
+     */
+    public function dh11s(): HasMany
+    {
+        return $this->hasMany(Dh11::class, 'codigoescalafon', 'codigoescalafon');
+    }
 }

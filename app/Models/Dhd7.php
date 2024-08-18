@@ -2,35 +2,33 @@
 
 namespace App\Models;
 
-use App\Models\Dh03;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Dhc9 extends Model
+class Dhd7 extends Model
 {
     use MapucheConnectionTrait;
-    
+
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dhc9';
+    protected $table = 'mapuche.dhd7';
 
     // Especificar la clave primaria
-    protected $primaryKey = 'codagrup';
+    protected $primaryKey = 'cod_clasif_cargo';
 
     // Indicar que la clave primaria no es auto-incremental
     public $incrementing = false;
 
-    // Indicar que la clave primaria es de tipo string
-    protected $keyType = 'string';
+    // Indicar que la clave primaria es de tipo entero
+    protected $keyType = 'int';
 
     // Deshabilitar timestamps si no existen en la tabla
     public $timestamps = false;
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [
-        'codagrup',
-        'descagrup',
-        'codigo_sirhu',
+        'cod_clasif_cargo',
+        'desc_clasif_cargo',
     ];
 
     /**
@@ -38,7 +36,7 @@ class Dhc9 extends Model
      */
     public function dh03s(): HasMany
     {
-        return $this->hasMany(Dh03::class, 'codc_agrup', 'codagrup');
+        return $this->hasMany(Dh03::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
     }
 }
 

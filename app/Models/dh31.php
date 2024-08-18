@@ -6,7 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class dh31 extends Model
+class Dh31 extends Model
 {
     use MapucheConnectionTrait;
     // protected $connection = 'pgsql-mapuchito';

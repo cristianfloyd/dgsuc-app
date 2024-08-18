@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use App\Models\Dh03;
+use App\Models\Mapuche\Dh05;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Dhc9 extends Model
+class Dl09 extends Model
 {
     use MapucheConnectionTrait;
-    
+
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dhc9';
+    protected $table = 'mapuche.dl09';
 
     // Especificar la clave primaria
-    protected $primaryKey = 'codagrup';
+    protected $primaryKey = 'nombre_tipo_norma';
 
     // Indicar que la clave primaria no es auto-incremental
     public $incrementing = false;
@@ -28,17 +28,14 @@ class Dhc9 extends Model
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [
-        'codagrup',
-        'descagrup',
-        'codigo_sirhu',
+        'nombre_tipo_norma',
     ];
 
     /**
-     * Relación con el modelo Dh03
+     * Relación con el modelo Dh05
      */
-    public function dh03s(): HasMany
+    public function dh05s(): HasMany
     {
-        return $this->hasMany(Dh03::class, 'codc_agrup', 'codagrup');
+        return $this->hasMany(Dh05::class, 'tipo_norma_alta', 'nombre_tipo_norma');
     }
 }
-

@@ -14,6 +14,8 @@ use App\Filament\Resources\PersonalResource\Pages;
 class PersonalResource extends Resource
 {
     protected static ?string $model = Personal::class;
+    protected static ?string $label = 'Personal';
+
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Personal';
@@ -30,31 +32,30 @@ class PersonalResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nro_legaj')
-                    ->searchable(),
-                    TextColumn::make('desc_appat')->toggleable(true)->toggledHiddenByDefault(),
-                    TextColumn::make('desc_apmat')->toggleable(true),
-                    TextColumn::make('desc_apcas')->toggleable(true),
-                    TextColumn::make('desc_nombr')->toggleable(true),
-                    TextColumn::make('nro_tabla')->toggleable(true),
-                    TextColumn::make('tipo_docum')->toggleable(true),
-                    TextColumn::make('nro_docum')->toggleable(true),
-                    TextColumn::make('nro_cuil1')->toggleable(true),
-                    TextColumn::make('nro_cuil')->toggleable(true),
-                    TextColumn::make('nro_cuil2')->toggleable(true),
-                    TextColumn::make('tipo_sexo')->toggleable(true),
-                    TextColumn::make('fec_nacim')->toggleable(true),
-                    TextColumn::make('tipo_facto')->toggleable(true),
-                    TextColumn::make('tipo_rh')->toggleable(true),
-                    TextColumn::make('nro_ficha')->toggleable(true),
-                    TextColumn::make('tipo_estad')->toggleable(true),
-                    TextColumn::make('nombrelugarnac')->toggleable(true),
-                    TextColumn::make('periodoalta')->toggleable(true),
-                    TextColumn::make('anioalta')->toggleable(true),
-                    TextColumn::make('periodoactualizacion')->toggleable(true),
-                    TextColumn::make('anioactualizacion')->toggleable(true),
-                    TextColumn::make('pcia_nacim')->searchable()->toggleable(true),
-                    TextColumn::make('pais_nacim')->searchable()->toggleable(true),
+                TextColumn::make('nro_legaj')->searchable(),
+                TextColumn::make('desc_appat')->toggleable(true)->toggledHiddenByDefault(),
+                TextColumn::make('desc_apmat')->toggleable(true),
+                TextColumn::make('desc_apcas')->toggleable(true),
+                TextColumn::make('desc_nombr')->toggleable(true),
+                TextColumn::make('nro_tabla')->toggleable(true),
+                TextColumn::make('tipo_docum')->toggleable(true),
+                TextColumn::make('nro_docum')->toggleable(true),
+                TextColumn::make('nro_cuil1')->toggleable(true),
+                TextColumn::make('nro_cuil')->toggleable(true),
+                TextColumn::make('nro_cuil2')->toggleable(true),
+                TextColumn::make('tipo_sexo')->toggleable(true),
+                TextColumn::make('fec_nacim')->toggleable(true),
+                TextColumn::make('tipo_facto')->toggleable(true),
+                TextColumn::make('tipo_rh')->toggleable(true),
+                TextColumn::make('nro_ficha')->toggleable(true),
+                TextColumn::make('tipo_estad')->toggleable(true),
+                TextColumn::make('nombrelugarnac')->toggleable(true),
+                TextColumn::make('periodoalta')->toggleable(true),
+                TextColumn::make('anioalta')->toggleable(true),
+                TextColumn::make('periodoactualizacion')->toggleable(true),
+                TextColumn::make('anioactualizacion')->toggleable(true),
+                TextColumn::make('pcia_nacim')->searchable()->toggleable(true),
+                TextColumn::make('pais_nacim')->searchable()->toggleable(true),
             ])
             ->filters([
                 //
@@ -70,7 +71,7 @@ class PersonalResource extends Resource
             ])
             ->defaultSort('nro_legaj', 'desc')
             ->paginated(5) //configurar la paginacion
-            ->paginationPageOptions([5,10,25,50,100, 250, 500, 1000])
+            ->paginationPageOptions([5,10,25,50,100, 250])
             ->searchable();
     }
 

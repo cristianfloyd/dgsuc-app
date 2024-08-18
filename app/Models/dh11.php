@@ -6,11 +6,10 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class dh11 extends Model
+class Dh11 extends Model
 {
     use MapucheConnectionTrait;
 
-    // protected $connection = 'pgsql-mapuchito';
 
     protected $table = 'mapuche.dh11';
     public $timestamps = false;
@@ -91,4 +90,6 @@ class dh11 extends Model
         {
             return $this->hasMany(dh03::class, 'codc_categ', 'codc_categ');
         }
+
+
 }

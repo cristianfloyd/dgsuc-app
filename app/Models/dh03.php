@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\SpuDisc;
+use App\Models\Mapuche\Dh05;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dh03 extends Model
 {
@@ -35,17 +38,43 @@ class Dh03 extends Model
         return Dh03::count();
     }
 
-    public function dh01()
-    {
-        return $this->belongsTo(dh01::class, 'nro_legaj', 'nro_legaj');
-    }
-    public function dh11()
-    {
-        return $this->belongsTo(Dh11::class, 'codc_categ', 'codc_categ');
-    }
+
 
     public function dh21()
     {
         return $this->hasMany(Dh21::class, 'nro_cargo', 'nro_cargo');
+    }
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
+
+    public function dh11(): BelongsTo
+    {
+        return $this->belongsTo(Dh11::class, 'codc_categ', 'codc_categ');
+    }
+
+    public function dhc9(): BelongsTo
+    {
+        return $this->belongsTo(Dhc9::class, 'codc_agrup', 'codagrup');
+    }
+
+
+    public function dhd7(): BelongsTo
+    {
+        return $this->belongsTo(Dhd7::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
+    }
+
+
+    public function spuDisc(): BelongsTo
+    {
+        return $this->belongsTo(SpuDisc::class, 'rama', 'rama')
+                ->where('disciplina', $this->disciplina)
+                ->where('area', $this->area);
+    }
+
+    public function dh05(): BelongsTo
+    {
+        return $this->belongsTo(Dh05::class, 'nro_licencia', 'nro_licencia');
     }
 }
