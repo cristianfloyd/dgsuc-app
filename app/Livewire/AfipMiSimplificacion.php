@@ -83,6 +83,13 @@ class AfipMiSimplificacion extends Component
         $this->showMessage('Paso completado correctamente');
     }
 
+    #[On('liquidacionSeleccionada')]
+    public function handleLiquidacionSeleccionada(): void
+    {
+
+        $this->showMessage('Liquidación seleccionada correctamente');
+    }
+
     /** Inicia un nuevo proceso.
      *
      * Este método verifica si se puede iniciar un nuevo proceso, y si es así, crea un nuevo proceso, actualiza el proceso actual,

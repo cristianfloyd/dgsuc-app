@@ -199,14 +199,13 @@ class Dh21Resource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('nro_legaj', 'desc')
             ->paginated(5) //configurar la paginacion
-            ->paginationPageOptions([5,10,25,50,100, 250, 500, 1000])
-            ->searchable('nro_legaj','nro_cargo');
-            ;
+            ->paginationPageOptions([5, 10, 25, 50, 100, 250, 500, 1000])
+        ;
     }
 
     public static function getRelations(): array
@@ -227,10 +226,10 @@ class Dh21Resource extends Resource
     }
 
     public static function getWidgets(): array
-{
-    return [
-        Dh21LegajoCounter::class,
-        Dh21Concepto101Total::class,
-    ];
-}
+    {
+        return [
+            Dh21LegajoCounter::class,
+            Dh21Concepto101Total::class,
+        ];
+    }
 }

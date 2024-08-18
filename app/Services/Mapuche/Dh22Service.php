@@ -3,9 +3,9 @@
 namespace App\Services\Mapuche;
 
 use App\Models\Mapuche\Dh22;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dh22Service
 {

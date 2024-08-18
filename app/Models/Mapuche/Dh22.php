@@ -2,6 +2,8 @@
 
 namespace App\Models\Mapuche;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\EstadoLiquidacionModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -69,6 +71,15 @@ class Dh22 extends Model
         return $this->belongsTo(Dh22Tipo::class, 'id_tipo_liqui', 'id');
     }
 
+    public static function getLiquidacionesForWidget()
+    {
+        return static::query()
+            ->select('nro_liqui',
+                DB::raw("CONCAT(per_liano,per_limes) as periodo_fiscal"),
+            'desc_liqui')
+            ->orderBy('nro_liqui', 'desc');
+    }
+
     /**
      * Obtiene el estado de liquidación asociado.
      */
@@ -85,5 +96,47 @@ class Dh22 extends Model
     public function scopeDefinitiva($query)
     {
         return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
+    }
+
+    public static function getDescripcionLiquidacion($nro_liqui): string
+    {
+        return static::select('desc_liqui')
+            ->where('nro_liqui', $nro_liqui)
+            ->first()
+            ->desc_liqui;
+    }
+
+    /**
+     * Obtiene la ultima liquidación abierta.
+     *
+     */
+    public static function getUltimaLiquidacionAbierta(): self
+    {
+        return static::query()
+                ->where('sino_cerra', '!=', 'C')
+                ->orderBy('nro_liqui', 'desc')
+                ->first();
+    }
+
+    /**
+     * Obtiene el último nro_liqui de la tabla dh22.
+     *
+     * @return int
+     */
+    public static function getLastIdLiquidacion(): int
+    {
+        try {
+            // Realiza la consulta utilizando Eloquent y DB Facade
+            $lastId = self::orderBy('nro_liqui', 'desc')
+                ->value('nro_liqui');
+
+            // Retorna el último nro_liqui o 0 si no se encuentra ninguno
+            return $lastId ?? 0;
+        } catch (\Exception $e) {
+            // Manejo de excepciones
+            // Puedes registrar el error o manejarlo según tus necesidades
+            Log::error('Error al obtener el último nro_liqui: ' . $e->getMessage());
+            return 0;
+        }
     }
 }

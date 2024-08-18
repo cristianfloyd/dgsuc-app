@@ -30,6 +30,11 @@ class Dh03 extends Model
         'cargo_concursado'
     ];
 
+    public static function getCargoCount()
+    {
+        return Dh03::count();
+    }
+
     public function dh01()
     {
         return $this->belongsTo(dh01::class, 'nro_legaj', 'nro_legaj');

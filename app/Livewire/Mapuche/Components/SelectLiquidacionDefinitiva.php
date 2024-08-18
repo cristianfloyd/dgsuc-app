@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Mapuche\Components;
 
 use Livewire\Component;
 use App\Services\Mapuche\Dh22Service;
+use Illuminate\Container\Attributes\Log;
 
 class SelectLiquidacionDefinitiva extends Component
 {

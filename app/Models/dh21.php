@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use App\Models\Mapuche\Dh22;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -106,15 +107,27 @@ class dh21 extends Model
         return static::query()->distinct('nro_cargo')->count();
     }
 
+    public static function distinctCodigoEscalafon(): array
+    {
+        return static::query()->distinct('codigoescalafon')->get()->pluck('codigoescalafon')->toArray();
+    }
+
     /**
      * Obtiene la suma total del concepto 101 en la tabla.
      *
      * @return float
      */
-    public static function totalConcepto101()
+    public static function totalConcepto101(int $nro_liqui = null)
     {
-        return static::query()->where('codn_conce', '101')->sum('impp_conce');
+        $query = static::query()->where('codn_conce', '101');
+
+        if ($nro_liqui !== null) {
+            $query->where('nro_liqui', $nro_liqui);
+        }
+
+        return $query->sum('impp_conce');
     }
+
 
     /**
      * Obtiene la suma total de todos los conceptos en la tabla.
@@ -134,26 +147,54 @@ class dh21 extends Model
     }
 
     /**
-     * Obtiene los totales de cada concepto en la tabla.
+     * Obtiene la relación de liquidaciones asociadas a este registro.
      *
-     * @return Builder
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public static function conceptosTotales()
-    {
-        return static::query()
-            ->select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY codn_conce) as id_liquidacion'),
-                'codn_conce',
-                DB::raw('SUM(impp_conce) as total_impp'))
-            ->where('nro_liqui', '=', 2)
-            ->where('codn_conce', '>', '100')
-            ->whereRaw('codn_conce/100 IN (1,3)')
-            ->groupBy('codn_conce')
-            ->orderBy('codn_conce');
-    }
-
     private function getLiquidaciones()
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
+    }
+
+    /**
+     * Obtiene los totales de cada concepto en la tabla.
+     *
+     * @param int|null $nro_liqui Número de liquidación (opcional)
+     * @param int|null $codn_fuent Código de fuente (opcional)
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function conceptosTotales(int $nro_liqui = null, int $codn_fuent = null): Builder
+    {
+        try {
+            // Construcción de la consulta base
+            $query = static::query()
+                ->select(
+                    DB::raw('ROW_NUMBER() OVER (ORDER BY codn_conce) as id_liquidacion'),
+                    'codn_conce',
+                    DB::raw('SUM(impp_conce) as total_impp')
+                )
+                // Filtro opcional por nro_liqui
+                ->when($nro_liqui !== null, function ($query) use ($nro_liqui) {
+                    return $query->where('nro_liqui', '=', $nro_liqui);
+                })
+                // Filtro por codn_conce mayor a 100
+                ->where('codn_conce', '>', '100')
+                // Filtro opcional por codn_fuent
+                ->when($codn_fuent !== null, function ($query) use ($codn_fuent) {
+                    return $query->where('codn_fuent', '=', $codn_fuent);
+                })
+                // Filtro adicional por codn_conce
+                ->whereRaw('codn_conce/100 IN (1,3)')
+                // Agrupación por codn_conce
+                ->groupBy('codn_conce')
+                // Ordenación por codn_conce
+                ->orderBy('codn_conce');
+
+            return $query;
+        } catch (\Exception $e) {
+            // Manejo de excepciones
+            Log::error('Error en conceptosTotales: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

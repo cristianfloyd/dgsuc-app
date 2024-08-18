@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ListRecords;
 use App\Filament\Widgets\LiquidacionesWidget;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
+use App\Filament\Widgets\IdLiquiSelector;
 
 class ListDh21s extends ListRecords
 {
@@ -28,7 +29,7 @@ class ListDh21s extends ListRecords
         return [
             Dh21LegajoCounter::class,
             Dh21Concepto101Total::class,
-            LiquidacionesWidget::class,
+            IdLiquiSelector::class,
         ];
     }
 }

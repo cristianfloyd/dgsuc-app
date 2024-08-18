@@ -15,6 +15,6 @@ class Dh21LegajoCounter extends BaseWidget
                 ->description('Número total de legajos únicos')
                 ->descriptionIcon('heroicon-o-user-group'),
         ];
-        
+
     }
 }
