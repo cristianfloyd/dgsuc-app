@@ -55,7 +55,7 @@ return [
             'username' => env('DB2_USERNAME', 'postgres'),
             'password' => env('DB2_PASSWORD', '1234'),
             'charset' => env('DB2_CHARSET', 'utf8'),
-            'collate' => env('DB2_COLLATION', 'utf8'),
+            'collate' => env('DB2_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'suc',

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\Dh01;
 use Filament\Tables;
-use App\Models\Personal;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
@@ -13,7 +13,7 @@ use App\Filament\Resources\PersonalResource\Pages;
 
 class PersonalResource extends Resource
 {
-    protected static ?string $model = Personal::class;
+    protected static ?string $model = Dh01::class;
     protected static ?string $label = 'Personal';
 
 

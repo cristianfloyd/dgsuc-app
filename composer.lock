@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "62a28bfa2f3e5ca3a25469b502319009",
+    "content-hash": "d1f02bba0137e88e90e863f8388b2336",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -6414,6 +6414,63 @@
                 }
             ],
             "time": "2024-04-27T21:32:50+00:00"
+        },
+        {
+            "name": "reedware/laravel-composite-relations",
+            "version": "v4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tylernathanreed/laravel-composite-relations.git",
+                "reference": "4aee57cb4577be114ceed6384a03e6b0ce26dff3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tylernathanreed/laravel-composite-relations/zipball/4aee57cb4577be114ceed6384a03e6b0ce26dff3",
+                "reference": "4aee57cb4577be114ceed6384a03e6b0ce26dff3",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^10.48|^11.0",
+                "illuminate/support": "^10.48|^11.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.5",
+                "mockery/mockery": "^1.6.6",
+                "php-coveralls/php-coveralls": "^2.4",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5",
+                "reedware/laravel-relation-joins": "^6.0",
+                "symfony/var-dumper": "^6.4.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Reedware\\LaravelCompositeRelations\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tyler Reed",
+                    "email": "tylernathanreed@gmail.com"
+                }
+            ],
+            "description": "Adds the ability define composite eloquent relations.",
+            "keywords": [
+                "composite",
+                "eloquent",
+                "laravel",
+                "relation"
+            ],
+            "support": {
+                "issues": "https://github.com/tylernathanreed/laravel-composite-relations/issues",
+                "source": "https://github.com/tylernathanreed/laravel-composite-relations/tree/v4.0.0"
+            },
+            "time": "2024-03-22T20:51:55+00:00"
         },
         {
             "name": "robsontenorio/mary",

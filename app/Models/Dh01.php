@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+
 class Dh01 extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
+
     protected $table = 'mapuche.dh01';
     public $timestamps = false;
     protected $primaryKey = 'nro_legaj';
@@ -47,7 +50,6 @@ class Dh01 extends Model
     {
         return $this->hasOne(AfipMapucheSicoss::class, 'cuil', 'cuil_completo');
     }
-
 }
 
 

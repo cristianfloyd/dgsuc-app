@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\SpuDisc;
 use App\Models\Mapuche\Dh05;
+use App\Models\Mapuche\Catalogo\Dh30;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -76,5 +77,10 @@ class Dh03 extends Model
     public function dh05(): BelongsTo
     {
         return $this->belongsTo(Dh05::class, 'nro_licencia', 'nro_licencia');
+    }
+
+    public function dh30(): BelongsTo
+    {
+        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev');
     }
 }
