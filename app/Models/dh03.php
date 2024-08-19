@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\SpuDisc;
 use App\Models\Mapuche\Dh05;
 use App\Models\Mapuche\Catalogo\Dh30;
+use App\Models\Mapuche\Catalogo\Dh36;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -82,5 +83,15 @@ class Dh03 extends Model
     public function dh30(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev');
+    }
+
+    /**
+     * Obtiene la dependencia asociada al cargo.
+     *
+     * @return BelongsTo
+     */
+    public function dh36(): BelongsTo
+    {
+        return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
 }

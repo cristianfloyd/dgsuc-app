@@ -9,6 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Representa un modelo de la tabla 'mapuche.dh30' en la base de datos.
+ * Esta tabla contiene información sobre los ítems de una tabla específica.
+ * Tabla multiple de abreviaturas.
+ *
+ * @property int $nro_tabla
+ * @property string $desc_abrev
+ * @property string $desc_item
+ *
+ * @method HasMany dh08()
+ *     Obtiene una colección de modelos Dh08 relacionados con este modelo.
+ *
+ * @method HasMany dh03()
+ *     Obtiene una colección de modelos Dh03 relacionados con este modelo.
+ */
 class Dh30 extends Model
 {
     use MapucheConnectionTrait;
@@ -43,7 +58,7 @@ class Dh30 extends Model
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
-                     ->where('desc_abrev', $this->getAttribute('desc_abrev'));
+                    ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
     public function dh08(): HasMany
