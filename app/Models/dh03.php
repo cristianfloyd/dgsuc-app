@@ -6,13 +6,16 @@ use App\Models\SpuDisc;
 use App\Models\Mapuche\Dh05;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Dh03 extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
+
+
     protected $table = 'mapuche.dh03';
     public $timestamps = false;
     protected $primaryKey = 'nro_cargo';
@@ -80,13 +83,19 @@ class Dh03 extends Model
         return $this->belongsTo(Dh05::class, 'nro_licencia', 'nro_licencia');
     }
 
+    /**
+     * Obtiene la unidad académica asociada al cargo.
+     *
+     * @return BelongsTo
+     */
     public function dh30(): BelongsTo
     {
-        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev');
+        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
+            ->where('nro_tabla', 13);
     }
 
     /**
-     * Obtiene la dependencia asociada al cargo.
+     * Obtiene la dependencia de desempeño asociada al cargo.
      *
      * @return BelongsTo
      */

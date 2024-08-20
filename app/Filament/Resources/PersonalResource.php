@@ -15,6 +15,7 @@ class PersonalResource extends Resource
 {
     protected static ?string $model = Dh01::class;
     protected static ?string $label = 'Personal';
+    protected static ?string $plurallabel = 'Personal';
 
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

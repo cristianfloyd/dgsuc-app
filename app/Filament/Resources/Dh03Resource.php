@@ -73,10 +73,10 @@ class Dh03Resource extends Resource
                 TextColumn::make('dh11.desc_categ')->label('Categoria')->sortable()->toggleable(),
             TextColumn::make('codc_agrup')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('dhc9.descagrup')->label('Agrupacion')->sortable()->toggleable(),
-            TextColumn::make('tipo_norma'),
+                TextColumn::make('tipo_norma')->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('codc_uacad')->label('Dependencia')->sortable()->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('dh30.desc_item')->label('Dependencia')->sortable()->toggleable(),
-            TextColumn::make('dh36.descdependesemp')->label('Tarea')->sortable()->toggleable(),
+            TextColumn::make('dh36.descdependesemp')->label('Dep. des.')->sortable()->toggleable(),
             TextColumn::make('porc_aplic')->numeric()->sortable(),
             TextColumn::make('hs_dedic')->numeric()->sortable(),
             TextColumn::make('fecha_norma_baja')->date()->sortable(),
@@ -88,12 +88,11 @@ class Dh03Resource extends Resource
             TextColumn::make('cod_clasif_cargo')->numeric()->sortable(),
         ])
             ->filters([
-                SelectFilter::make('dh11.de_categ')->label('Categoria')
-                    ->relationship( 'dh11',  'desc_categ')
-                    ->options(Dh11::pluck('desc_categ', 'codc_categ')->toArray())
-                    ->searchable()
-                    ->preload()
-                    ,
+                // SelectFilter::make('dh11.de_categ')->label('Categoria')
+                //     ->searchable()
+                //     ->preload()
+                //     ->relationship( 'dh11',  'desc_categ')
+                //     ->options(Dh11::all()->pluck('desc_categ', 'codc_categ')->toArray()),
                 SelectFilter::make('codc_agrup')
                     ->label('Agrupacion')
                     ->relationship('dhc9', 'descagrup')
@@ -116,12 +115,10 @@ class Dh03Resource extends Resource
                             default => $query,
                         };
                     }),
-                SelectFilter::make('codc_uacad')
-                    ->label('Unidad Académica')
+                SelectFilter::make('codc_uacad')->label('Dependencia')
+                    ->relationship('dh30', 'desc_item')
                     ->searchable()
-                    ->preload()
-
-                    ,
+                    ->preload(),
                 Filter::make('chkstopliq')
                     ->label('Stop Liquidacion')
                     ->toggle()

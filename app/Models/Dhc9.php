@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Dhc9 extends Model
 {
     use MapucheConnectionTrait;
-    
+
     // Especificar la tabla asociada al modelo
     protected $table = 'mapuche.dhc9';
 

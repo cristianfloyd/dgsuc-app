@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use App\Models\Mapuche\Dhe2;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,5 +65,10 @@ class Dhe4 extends Model
     public function dh36(): HasMany
     {
         return $this->hasMany(Dh36::class, 'cod_organismo', 'cod_organismo');
+    }
+
+    public function dhe2(): HasMany
+    {
+        return $this->hasMany(Dhe2::class, 'cod_organismo', 'cod_organismo');
     }
 }

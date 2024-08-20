@@ -3,11 +3,12 @@
 namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh03;
+use App\Models\Mapuche\Dhe2;
 use App\Models\Mapuche\Catalogo\Dh08;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh30' en la base de datos.
@@ -71,5 +72,11 @@ class Dh30 extends Model
     public function dh03(): HasMany
     {
         return $this->hasMany(Dh03::class, 'codc_uacad',  'desc_abrev');
+    }
+
+    public function dhe2(): HasMany
+    {
+        return $this->hasMany(Dhe2::class, 'nro_tabla', 'nro_tabla')
+            ->where('desc_abrev', $this->desc_abrev);
     }
 }
