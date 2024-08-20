@@ -7,12 +7,15 @@ use App\Models\Dh03;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Filament\Forms\Components\DatePicker;
 
 class CargosOverTime extends ChartWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?string $heading = 'Cargos';
 
     public ?string $startDate = '2023-01-01';
@@ -44,18 +47,27 @@ class CargosOverTime extends ChartWidget
     // Obtener los datos para el gráfico
     protected function getData(): array
     {
-        $startDate = $this->startDate ? Carbon::parse($this->startDate) : now()->subYear();
-        $endDate = $this->endDate ? Carbon::parse($this->endDate) : now();
+        $start =    $this->filters['startDate'];
+        $start = $start ? Carbon::parse($start) : Carbon::now()->subMonths(6);
+        $end =    $this->filters['endDate'];
+        $end = $end ? Carbon::parse($end) : Carbon::now();
+
+
 
         try {
             // Cachear la consulta para mejorar el rendimiento
             // $data = Cache::remember('cargos_over_time', now()->addHours(1), function () {
+
                 // Obtener los datos de alta
                 $altas = Dh03::select(
                     DB::raw('TO_CHAR(fec_alta, \'YYYY-MM\') as month'),
                     DB::raw('count(*) as count')
                 )
-                ->whereBetween('fec_alta', [$this->startDate, $this->endDate])
+                ->whereBetween(
+                    'fec_alta',
+                    [$start ,
+                    $end ]
+                    )
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -65,9 +77,16 @@ class CargosOverTime extends ChartWidget
                     DB::raw('TO_CHAR(fec_baja, \'YYYY-MM\') as month'),
                     DB::raw('count(*) as count')
                 )
-                ->whereBetween('fec_alta', [$this->startDate, $this->endDate])
+                ->where(
+                    'fec_baja',
+                    '<=',
+                    $end
+                )
                 ->whereNotNull('fec_baja')
-                    ->where('fec_baja', '<=', now())
+                ->whereBetween('fec_alta', [
+                    $start,
+                    $end ? Carbon::parse($end) : Carbon::now()
+                    ])
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -78,7 +97,7 @@ class CargosOverTime extends ChartWidget
                     DB::raw('count(*) as count')
                 )
                 ->whereNull('fec_baja')
-                ->whereBetween('fec_alta', [$this->startDate, $this->endDate])
+                ->whereBetween('fec_alta', [$start, $end])
                 ->where('codc_carac', '=', 'PERM')
                 ->groupBy('month')
                 ->orderBy('month')

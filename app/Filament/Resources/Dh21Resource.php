@@ -8,6 +8,7 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Resources\Dh21Resource\Pages;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
@@ -97,105 +98,90 @@ class Dh21Resource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nro_liqui')
+                TextColumn::make('nro_liqui')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nro_legaj')
+                TextColumn::make('nro_legaj')
                     ->numeric()
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nro_cargo')
+                TextColumn::make('nro_cargo')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_conce')
+                TextColumn::make('codn_conce')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('impp_conce')
+                TextColumn::make('impp_conce')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tipo_conce')
+                TextColumn::make('tipo_conce')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nov1_conce')
+                TextColumn::make('nov1_conce')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nov2_conce')
+                TextColumn::make('nov2_conce')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nro_orimp')
+                TextColumn::make('nro_orimp')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tipoescalafon'),
-                Tables\Columns\TextColumn::make('nrogrupoesc')
+                TextColumn::make('tipoescalafon'),
+                TextColumn::make('nrogrupoesc')
                     ->numeric(),
-                Tables\Columns\TextColumn::make('codigoescalafon'),
-                Tables\Columns\TextColumn::make('codc_regio'),
-                Tables\Columns\TextColumn::make('codc_uacad'),
-                Tables\Columns\TextColumn::make('codn_area')
+                TextColumn::make('codigoescalafon'),
+                TextColumn::make('codc_regio'),
+                TextColumn::make('codc_uacad'),
+                TextColumn::make('codn_area')
                     ->numeric(),
-                Tables\Columns\TextColumn::make('codn_subar')
+                TextColumn::make('codn_subar')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_fuent')
+                TextColumn::make('codn_fuent')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_progr')
+                TextColumn::make('codn_progr')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_subpr')
+                TextColumn::make('codn_subpr')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_proye')
+                TextColumn::make('codn_proye')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_activ')
+                TextColumn::make('codn_activ')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_obra')
+                TextColumn::make('codn_obra')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_final')
+                TextColumn::make('codn_final')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_funci')
+                TextColumn::make('codn_funci')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ano_retro')
+                TextColumn::make('ano_retro')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mes_retro')
+                TextColumn::make('mes_retro')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('detallenovedad')
+                TextColumn::make('detallenovedad')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codn_grupo_presup')
+                TextColumn::make('codn_grupo_presup')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tipo_ejercicio')
+                TextColumn::make('tipo_ejercicio')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codn_subsubar')
+                TextColumn::make('codn_subsubar')
                     ->numeric()
                     ->sortable(),
             ])
             ->filters([
                 //
-                SelectFilter::make('codn_conce')
-                    ->multiple()
-                    ->options([
-                        '101' => '1 - Sueldo',
-                        '102' => '2 - Viaticos',
-                        '103' => '3 - Antiguedad',
-                    ])
-                    ->label('Tipo de Concepto'),
-                SelectFilter::make('nro_liqui')
-                    ->options([
-                        '1' => '1 - Enero',
-                        '2' => '2 - Febrero',
-                        '3' => '3 - Marzo',
-                        '4' => '4 - def marzo',
-                    ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
