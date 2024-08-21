@@ -19,7 +19,7 @@ class Dh22Tipo extends Model
      *
      * @var string
      */
-    protected $table = 'mapuche.dh22_tipos';
+    protected $table = 'dh22_tipos';
 
     /**
      * La clave primaria asociada con la tabla.

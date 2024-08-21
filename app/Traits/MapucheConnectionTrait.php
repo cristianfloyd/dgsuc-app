@@ -16,6 +16,17 @@ trait MapucheConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-mapuche';
+        return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
     }
+
+    /**
+     * Obtiene el nombre de la tabla calificado con el esquema.
+     *
+     * @return string
+     */
+    public function getTable()
+    {
+        return 'mapuche.' . parent::getTable();
+    }
+
 }

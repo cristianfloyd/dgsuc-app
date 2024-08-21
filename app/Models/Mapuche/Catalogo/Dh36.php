@@ -25,7 +25,7 @@ class Dh36 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh36';
+    protected $table = 'dh36';
     protected $primaryKey = 'coddependesemp';
     public $incrementing = false;
     protected $keyType = 'string';

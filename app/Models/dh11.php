@@ -11,7 +11,7 @@ class Dh11 extends Model
     use MapucheConnectionTrait;
 
 
-    protected $table = 'mapuche.dh11';
+    protected $table = 'dh11';
     public $timestamps = false;
     protected $primaryKey = 'codc_categ';
     public $incrementing = false;

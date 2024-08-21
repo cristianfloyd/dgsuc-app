@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Dh21 extends Model
 {
     use MapucheConnectionTrait;
-    protected $table = 'mapuche.dh21';
+    protected $table = 'dh21';
     public $timestamps = false;
     protected $primaryKey = 'id_liquidacion';
 

@@ -27,7 +27,7 @@ class Dh08 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh08';
+    protected $table = 'dh08';
     public $timestamps = false;
     protected $primaryKey = ['nro_legaj', 'codc_nacio'];
     public $incrementing = false;

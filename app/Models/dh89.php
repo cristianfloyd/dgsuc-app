@@ -13,7 +13,7 @@ class Dh89 extends Model
     use MapucheConnectionTrait;
 
     // Especifica la tabla asociada al modelo
-    protected $table = 'mapuche.dh89';
+    protected $table = 'dh89';
 
     // Especifica la clave primaria de la tabla
     protected $primaryKey = 'nroesc';

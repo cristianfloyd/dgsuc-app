@@ -19,7 +19,7 @@ class Dh12 extends Model
      *
      * @var string
      */
-    protected $table = 'mapuche.dh12';
+    protected $table = 'dh12';
 
     /**
      * La clave primaria asociada con la tabla.

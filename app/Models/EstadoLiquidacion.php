@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class EstadoLiquidacion extends Model
 {
     use MapucheConnectionTrait;
-    protected $table = 'mapuche.estado_liquidacion';
+
+    protected $table = 'estado_liquidacion';
     protected $primaryKey = 'cod_estado_liquidacion';
     public $incrementing = false;
     public $timestamps = false;

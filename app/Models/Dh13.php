@@ -17,7 +17,7 @@ class Dh13 extends Model
      *
      * @var string
      */
-    protected $table = 'mapuche.dh13';
+    protected $table = 'dh13';
 
     /**
      * Indica si el modelo debe ser timestamped.

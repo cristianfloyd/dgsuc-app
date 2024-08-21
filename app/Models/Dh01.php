@@ -13,7 +13,7 @@ class Dh01 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh01';
+    protected $table = 'dh01';
     public $timestamps = false;
     protected $primaryKey = 'nro_legaj';
 

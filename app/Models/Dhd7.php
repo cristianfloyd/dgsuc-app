@@ -11,7 +11,7 @@ class Dhd7 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dhd7';
+    protected $table = 'dhd7';
 
     // Especificar la clave primaria
     protected $primaryKey = 'cod_clasif_cargo';

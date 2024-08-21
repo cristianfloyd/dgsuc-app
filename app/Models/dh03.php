@@ -16,7 +16,7 @@ class Dh03 extends Model
     use MapucheConnectionTrait;
 
 
-    protected $table = 'mapuche.dh03';
+    protected $table = 'dh03';
     public $timestamps = false;
     protected $primaryKey = 'nro_cargo';
 

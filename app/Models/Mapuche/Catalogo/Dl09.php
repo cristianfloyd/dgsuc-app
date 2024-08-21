@@ -12,7 +12,7 @@ class Dl09 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dl09';
+    protected $table = 'dl09';
 
     // Especificar la clave primaria
     protected $primaryKey = 'nombre_tipo_norma';

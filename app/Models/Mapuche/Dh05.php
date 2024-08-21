@@ -15,7 +15,7 @@ class Dh05 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dh05';
+    protected $table = 'dh05';
 
     // Especificar la clave primaria
     protected $primaryKey = 'nro_licencia';

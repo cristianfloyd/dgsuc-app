@@ -10,7 +10,7 @@ class Dh31 extends Model
 {
     use MapucheConnectionTrait;
     // protected $connection = 'pgsql-mapuchito';
-    protected $table = 'mapuche.dh31';
+    protected $table = 'dh31';
     public $timestamps = false;
     protected $primaryKey = 'codc_dedic';
     public $incrementing = false;

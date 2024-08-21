@@ -12,7 +12,7 @@ class Dhc9 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dhc9';
+    protected $table = 'dhc9';
 
     // Especificar la clave primaria
     protected $primaryKey = 'codagrup';

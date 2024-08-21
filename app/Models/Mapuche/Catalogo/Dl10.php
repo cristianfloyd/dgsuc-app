@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Dl10 extends Model
 {
     use MapucheConnectionTrait;
-    
+
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.dl10';
+    protected $table = 'dl10';
 
     // Especificar la clave primaria
     protected $primaryKey = 'quien_emite_norma';

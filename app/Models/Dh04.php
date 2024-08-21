@@ -5,68 +5,114 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo Eloquent para la tabla mapuche.dh04
+ *
+ * Esta clase representa las otras actividades de los empleados en el sistema Mapuche.
+ */
 class Dh04 extends Model
 {
     use MapucheConnectionTrait;
-    protected $table = 'mapuche.dh04';
+
+    /**
+     * Nombre de la tabla asociada al modelo.
+     *
+     * @var string
+     */
+    protected $table = 'dh04';
+
+    /**
+     * La clave primaria asociada con la tabla.
+     *
+     * @var string
+     */
     protected $primaryKey = 'nro_otra_actividad';
+
+    /**
+     * Indica si el modelo debe ser timestamped.
+     *
+     * @var bool
+     */
     public $timestamps = false;
 
+    /**
+     * Los atributos que son asignables en masa.
+     *
+     * @var array
+     */
     protected $fillable = [
         'nro_legaj', 'tipo_activ', 'desc_entid', 'nro_cuit', 'desc_cargo',
         'cant_hs', 'fec_ingre', 'fec_egres', 'codc_dedic', 'vig_otano',
-        'vig_otmes', 'nro_otra_actividad', 'dominstitucion', 'relprofesion',
-        'aporta_antig_remun', 'aporta_antig_lao', 'aporta_ant_jubil',
-        'mes_vigencia', 'anio_vigencia', 'codmotivobaja', 'codescalafonoa',
-        'codcategoriaoa', 'codsistemaacceso', 'codgradooa'
+        'vig_otmes', 'dominstitucion', 'relprofesion', 'aporta_antig_remun',
+        'aporta_antig_lao', 'aporta_ant_jubil', 'mes_vigencia', 'anio_vigencia',
+        'codmotivobaja', 'codescalafonoa', 'codcategoriaoa', 'codsistemaacceso', 'codgradooa'
     ];
 
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     *
+     * @var array
+     */
     protected $casts = [
-        'nro_legaj' => 'integer',
         'nro_cuit' => 'decimal:0',
-        'cant_hs' => 'integer',
         'fec_ingre' => 'date',
         'fec_egres' => 'date',
-        'vig_otano' => 'integer',
-        'vig_otmes' => 'integer',
-        'nro_otra_actividad' => 'integer',
         'relprofesion' => 'boolean',
         'aporta_antig_remun' => 'boolean',
         'aporta_antig_lao' => 'boolean',
         'aporta_ant_jubil' => 'boolean',
-        'mes_vigencia' => 'integer',
-        'anio_vigencia' => 'integer',
-        'codmotivobaja' => 'integer',
     ];
 
-    public function dh01()
+    /**
+     * Obtiene el legajo asociado a esta actividad.
+     */
+    public function legajo()
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
-    // public function dhb3()
-    // {
-    //     return $this->belongsTo(Dhb3::class, 'codmotivobaja', 'codigo');
-    // }
+    /**
+     * Obtiene el motivo de baja asociado a esta actividad.
+     */
+    public function motivoBaja()
+    {
+        return $this->belongsTo(MotivoBaja::class, 'codmotivobaja', 'codigo');
+    }
 
-    // public function dhe5()
-    // {
-    //     return $this->belongsTo(Dhe5::class, 'codescalafonoa', 'codigoescalafonoa');
-    // }
+    /**
+     * Obtiene el escalafón asociado a esta actividad.
+     */
+    public function escalafon()
+    {
+        return $this->belongsTo(Dhe5::class, 'codescalafonoa', 'codigoescalafonoa');
+    }
 
-    // public function dhe6()
-    // {
-    //     return $this->belongsTo(Dhe6::class, 'codcategoriaoa', 'codigocategoriaoa');
-    // }
+    /**
+     * Obtiene la categoría asociada a esta actividad.
+     */
+    public function categoria()
+    {
+        return $this->belongsTo(Dhe6::class, 'codcategoriaoa', 'codigocategoriaoa');
+    }
 
-    // public function dhe7()
-    // {
-    //     return $this->belongsTo(Dhe7::class, 'codsistemaacceso', 'codigoaccesoescalafon');
-    // }
+    /**
+     * Obtiene el sistema de acceso asociado a esta actividad.
+     */
+    public function sistemaAcceso()
+    {
+        return $this->belongsTo(Dhe7::class, 'codsistemaacceso', 'codigoaccesoescalafon');
+    }
 
-    // public function dhe8()
-    // {
-    //     return $this->belongsTo(Dhe8::class, 'codgradooa', 'codigogradooa');
-    // }
+    /**
+     * Obtiene el grado asociado a esta actividad.
+     */
+    public function grado()
+    {
+        return $this->belongsTo(Dhe8::class, 'codgradooa', 'codigogradooa');
+    }
+
+    public function scopeActivo($query)
+    {
+        return $query->whereNull('fec_egres');
+    }
 }
-

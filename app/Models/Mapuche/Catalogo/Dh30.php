@@ -29,7 +29,7 @@ class Dh30 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh30';
+    protected $table = 'dh30';
     public $timestamps = false;
     protected $primaryKey = ['nro_tabla', 'desc_abrev'];
     public $incrementing = false;

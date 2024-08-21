@@ -12,7 +12,7 @@ class SpuDisc extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'mapuche.spu_disc';
+    protected $table = 'spu_disc';
 
     // Especificar la clave primaria compuesta
     protected $primaryKey = ['rama', 'disciplina', 'area'];
