@@ -76,7 +76,7 @@ class Dh04 extends Model
      */
     public function motivoBaja()
     {
-        return $this->belongsTo(MotivoBaja::class, 'codmotivobaja', 'codigo');
+        return $this->belongsTo(Dhb3::class, 'codmotivobaja', 'codigo');
     }
 
     /**

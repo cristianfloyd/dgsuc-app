@@ -52,7 +52,7 @@ class Dh89 extends Model
     /**
      * Relación con el modelo Dh11
      */
-    public function dh11s(): HasMany
+    public function dh11(): HasMany
     {
         return $this->hasMany(Dh11::class, 'codigoescalafon', 'codigoescalafon');
     }
