@@ -36,11 +36,23 @@ class Dashboard extends \Filament\Pages\Dashboard
                             ->merge([
                                 'DOCS' => 'Docente Secundario',
                                 'DOCU' => 'Docente Universitario',
+                                'AUTU' => 'Autoridad Universitario',
+                                'AUTS' => 'Autoridad Secundario',
                             ])
                         );
                     })
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
+                        /**
+                         * Almacena los códigos de categoría seleccionados en la sesión basados en el código de escalafón seleccionado.
+                         *
+                         * Esta función se ejecuta después de que se actualiza el estado del campo de selección de escalafón.
+                         * Obtiene los códigos de categoría de la tabla 'dh11' que coinciden con el código de escalafón seleccionado,
+                         * y los almacena en la sesión con la clave 'selected_codc_categs'.
+                         *
+                         * @param string $state El código de escalafón seleccionado.
+                         * @param callable $set Función para establecer el estado del campo de selección.
+                         */
                         $codc_categs = Dh11::where('codigoescalafon', $state)
                             ->pluck('codc_categ')
                             ->toArray();

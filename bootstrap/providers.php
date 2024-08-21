@@ -3,6 +3,7 @@
 return [
     App\Providers\AfipProvider::class,
     App\Providers\AppServiceProvider::class,
+    App\Providers\CargoFilterServiceProvider::class,
     App\Providers\ColumnMetadataServiceProvider::class,
     App\Providers\CuilOperationStrategyProvider::class,
     App\Providers\CuilsRepositoryProvider::class,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -11,30 +12,290 @@ class Dh11 extends Model
 {
     use MapucheConnectionTrait;
 
-
     protected $table = 'dh11';
     public $timestamps = false;
     protected $primaryKey = 'codc_categ';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected static array $secundario = [
-        'SE25',
-        'SE20',
-        'SE16',
-        'SE12',
-        'SE30',
-        'SE06',
-        'SE40',
-        'SE15',
-        'SE35',
-        'SE01',
+
+
+    /**
+     * Constantes agrupadas para las categorías de cargos.
+     * Estos valores corresponden a la columna codc_categ del modelo Dh11.
+     */
+    public const array CATEGORIAS = [
+        'SECUNDARIO' => [
+            'SE25',
+            'SE20',
+            'SE16',
+            'SE12',
+            'SE30',
+            'SE06',
+            'SE40',
+            'SE15',
+            'SE35',
+            'SE01',
+        ],
+        'UNIVERSITARIO' => [
+            'EXCL',
+            'SEMI',
+            'PARC',
+            'COMP',
+        ],
+        'DOCS' => [
+            'HOME',
+            'PEO6',
+            'ACPN',
+            'AYCP',
+            'AYEO',
+            'ATTP',
+            'JTPM',
+            'PR15',
+            'JTEP',
+            'JGEP',
+            'MEPS',
+            'MEPR',
+            'MC20',
+            'MENI',
+            'MEPI',
+            'MJMA',
+            'PREO',
+            'ASPE',
+            'BIPH',
+            'BIBL',
+            'JBIB',
+            'JEPR',
+            'MCOR',
+            'PR25',
+            'REG1',
+            'BI30',
+            'HOLU',
+        ],
+        'AUTS' => [
+            'VD20',
+            'PRSE',
+            'RESE',
+            'SECR',
+            'SREH',
+            'SREG',
+            'SRE1',
+            'SRG3',
+            'VRSE',
+            'VD30',
+            'VD35',
+            'DI40',
+        ],
+        'AUTU' => [
+            'DECC',
+            'SEFC',
+            'SEUC',
+            'VICC',
+            'VIDC',
+            'VIRC',
+            'DECE',
+            'RECT',
+            'SUHE',
+            'SEFE',
+            'SEUE',
+            'SSUN',
+            'VIDE',
+            'VIRE',
+            'DECP',
+            'SFHP',
+            'SEFP',
+            'SEUP',
+            'VDPH',
+            'VIPH',
+            'VIDP',
+            'VIRP',
+        ],
+        'DOCU' => [
+            'A1EH',
+            'AY1E',
+            'JTEH',
+            'JTPE',
+            'ADEH',
+            'ASEH',
+            'TIEH',
+            'ADJE',
+            'ASOE',
+            'TITE',
+            'TIAE',
+            'A1PH',
+            'A2PH',
+            'AY1P',
+            'AY2P',
+            'JTPH',
+            'JTPP',
+            'ADPH',
+            'ASPH',
+            'TIPH',
+            'ADJP',
+            'ASOP',
+            'TITP',
+            'TIAP',
+            'A1SH',
+            'AY1S',
+            'JTSH',
+            'JTPS',
+            'ADSH',
+            'ASSH',
+            'TISH',
+            'ADJS',
+            'ASOS',
+            'TITS',
+            'TIAS',
+            'HOCO',
+            'HODI',
+            'HOJE',
+            'HOSU',
+        ],
+        'NODO' => [
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            'DOCA',
+            'DOCC',
+            'DOCE',
+            'ESTI',
+            'INVE',
+            'MAEA',
+            'MAEE',
+            'MAEO',
+        ],
     ];
-    protected static array $universitario = [
-        'EXCL',
-        'SEMI',
-        'PARC',
-        'COMP',
-    ];
+
+
+
+    // protected static array $doceSecundario = [
+    //     'HOME',
+    //     'PEO6',
+    //     'ACPN',
+    //     'AYCP',
+    //     'AYEO',
+    //     'ATTP',
+    //     'JTPM',
+    //     'PR15',
+    //     'JTEP',
+    //     'JGEP',
+    //     'MEPS',
+    //     'MEPR',
+    //     'MC20',
+    //     'MENI',
+    //     'MEPI',
+    //     'MJMA',
+    //     'PREO',
+    //     'ASPE',
+    //     'BIPH',
+    //     'BIBL',
+    //     'JBIB',
+    //     'JEPR',
+    //     'MCOR',
+    //     'PR25',
+    //     'REG1',
+    //     'BI30',
+    //     'HOLU',
+    // ];
+    // protected static array $autoSecundario = [
+    //     'VD20',
+    //     'PRSE',
+    //     'RESE',
+    //     'SECR',
+    //     'SREH',
+    //     'SREG',
+    //     'SRE1',
+    //     'SRG3',
+    //     'VRSE',
+    //     'VD30',
+    //     'VD35',
+    //     'DI40',
+    // ];
+    // protected static array $autoSuperior = [
+    //     'DECC',
+    //     'SEFC',
+    //     'SEUC',
+    //     'VICC',
+    //     'VIDC',
+    //     'VIRC',
+    //     'DECE',
+    //     'RECT',
+    //     'SUHE',
+    //     'SEFE',
+    //     'SEUE',
+    //     'SSUN',
+    //     'VIDE',
+    //     'VIRE',
+    //     'DECP',
+    //     'SFHP',
+    //     'SEFP',
+    //     'SEUP',
+    //     'VDPH',
+    //     'VIPH',
+    //     'VIDP',
+    //     'VIRP',
+    // ];
+    // protected static array $doceSuperior = [
+    //     'A1EH',
+    //     'AY1E',
+    //     'JTEH',
+    //     'JTPE',
+    //     'ADEH',
+    //     'ASEH',
+    //     'TIEH',
+    //     'ADJE',
+    //     'ASOE',
+    //     'TITE',
+    //     'TIAE',
+    //     'A1PH',
+    //     'A2PH',
+    //     'AY1P',
+    //     'AY2P',
+    //     'JTPH',
+    //     'JTPP',
+    //     'ADPH',
+    //     'ASPH',
+    //     'TIPH',
+    //     'ADJP',
+    //     'ASOP',
+    //     'TITP',
+    //     'TIAP',
+    //     'A1SH',
+    //     'AY1S',
+    //     'JTSH',
+    //     'JTPS',
+    //     'ADSH',
+    //     'ASSH',
+    //     'TISH',
+    //     'ADJS',
+    //     'ASOS',
+    //     'TITS',
+    //     'TIAS',
+    //     'HOCO',
+    //     'HODI',
+    //     'HOJE',
+    //     'HOSU',
+    // ];
+    // protected static array $noDocente = [
+    //     '1',
+    //     '2',
+    //     '3',
+    //     '4',
+    //     '5',
+    //     '6',
+    //     '7',
+    //     'DOCA',
+    //     'DOCC',
+    //     'DOCE',
+    //     'ESTI',
+    //     'INVE',
+    //     'MAEA',
+    //     'MAEE',
+    //     'MAEO',
+    // ];
 
     protected $fillable = [
         'codc_categ',
@@ -110,21 +371,58 @@ class Dh11 extends Model
         return $this->hasMany(dh03::class, 'codc_categ', 'codc_categ');
     }
 
-    public static function getCargosSecundario(): int
+    public static function getCargosDoceSecundario(): int
     {
-        return Cache::remember('cargos_secundario', 3600, function () {
-            return self::whereIn('dh11.codc_dedic', self::$secundario)
+        return Cache::remember('cargos_doce_secundario', 3600, function () {
+            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['DOCS'])
                 ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
                 ->count();
         });
     }
 
-    public static function getCargosUniversitario(): int
+    public static function getCargosDoceUniversitario(): int
     {
-        return Cache::remember('cargos_universitario', 3600, function () {
-            return self::whereIn('dh11.codc_dedic', self::$universitario)
+        return Cache::remember('cargos_doce_universitario', 3600, function () {
+            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['DOCU'])
                 ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
                 ->count();
         });
+    }
+    public static function getCargosAutoUniversitario(): int
+    {
+        return Cache::remember('cargos_auto_universitario', 3600, function () {
+            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['AUTU'])
+                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+                ->count();
+        });
+    }
+
+    public static function getCargosAutoSecundario(): int
+    {
+        return Cache::remember('cargos_auto_secundario', 3600, function () {
+            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['AUTS'])
+                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+                ->count();
+        });
+    }
+
+    public static function getCargosNoDocente(): int
+    {
+        return Cache::remember('cargos_no_docente', 3600, function () {
+            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['NODO'])
+                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+                ->count();
+        });
+    }
+
+    /**
+     * Obtiene los códigos de categoría para un tipo específico.
+     *
+     * @param string $tipo
+     * @return array
+     */
+    public static function getCategoriasPorTipo(string $tipo): array
+    {
+        return self::CATEGORIAS[$tipo] ?? [];
     }
 }

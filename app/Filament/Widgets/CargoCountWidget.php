@@ -7,6 +7,7 @@ use App\Models\Dh11;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Symfony\Component\String\LazyString;
 
 class CargoCountWidget extends BaseWidget
 {
@@ -22,10 +23,19 @@ class CargoCountWidget extends BaseWidget
                 $cargoCount = Dh03::count();
                 break;
             case 'DOCS':
-                $cargoCount = Dh11::getCargosSecundario();
+                $cargoCount = Dh11::getCargosDoceSecundario();
                 break;
             case 'DOCU':
-                $cargoCount = Dh11::getCargosUniversitario();
+                $cargoCount = Dh11::getCargosDoceUniversitario();
+                break;
+            case 'AUTU':
+                $cargoCount = Dh11::getCargosAutoUniversitario();
+                break;
+            case 'AUTS':
+                $cargoCount = Dh11::getCargosAutoSecundario();
+                break;
+            case 'AUTO':
+                $cargoCount = Dh11::getCargosAutoUniversitario();
                 break;
             default:
                 $codc_categs = session('selected_codc_categs', []);
@@ -38,7 +48,7 @@ class CargoCountWidget extends BaseWidget
 
         return [
             Stat::make('Total de Cargos', $cargoCount)
-                ->description('Basado en el escalafon seleccionado')
+                ->description('Basado en el escalafon: ' . $codigoescalafon)
                 ->descriptionIcon('heroicon-m-academic-cap'),
         ];
     }
