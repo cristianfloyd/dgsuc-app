@@ -14,6 +14,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 class IdLiquiSelector extends Widget implements HasForms
 {
     use InteractsWithForms;
+    protected static ?int $sort = 2;
 
     protected $casts = [
         'form' => 'array',

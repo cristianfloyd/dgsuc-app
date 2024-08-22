@@ -20,6 +20,7 @@ class CargosOverTime extends ChartWidget
 
     public ?string $startDate = null;
     public ?string $endDate = null;
+    protected static ?int  $sort = 1;
     protected static ?string $heading = 'Cargos';
     private CargoFilterServiceInterface $filterService;
 
