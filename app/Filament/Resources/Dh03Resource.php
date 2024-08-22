@@ -4,26 +4,19 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use App\Models\Dh03;
-use App\Models\Dh11;
 use App\Models\Dhc9;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Livewire\Attributes\Layout;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
-use App\Models\Mapuche\Catalogo\Dh30;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Dh03Resource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\Dh03Resource\RelationManagers;
 
 class Dh03Resource extends Resource
 {
@@ -64,11 +57,11 @@ class Dh03Resource extends Resource
     {
         return $table
         ->columns([
-            TextColumn::make('nro_cargo')->searchable()->numeric()->sortable(),
-            TextColumn::make('nro_legaj')->numeric()->sortable()->searchable(),
+            TextColumn::make('nro_cargo')->label('Cargo')->numeric()->sortable(),
+            TextColumn::make('nro_legaj')->label('Legajo')->numeric()->sortable()->searchable(),
             TextColumn::make('fec_alta')->date()->sortable()->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('fec_baja')->date()->sortable()->toggleable()->toggledHiddenByDefault(),
-            TextColumn::make('codc_carac'),
+            TextColumn::make('codc_carac')->label('Caracter Escalafon')->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('codc_categ')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('dh11.desc_categ')->label('Categoria')->sortable()->toggleable(),
             TextColumn::make('codc_agrup')->toggleable()->toggledHiddenByDefault(),

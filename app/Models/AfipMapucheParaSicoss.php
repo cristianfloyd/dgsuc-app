@@ -16,7 +16,6 @@ class AfipMapucheParaSicoss extends Model
     protected $collection;
 
     protected $fillable = [
-        '   ',
         'nro_liqui',
         'sino_cerra',
         'desc_estado_liquidacion',
@@ -50,11 +49,42 @@ class AfipMapucheParaSicoss extends Model
         return str_pad($value, 8, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Consulta SQL que devuelve un conjunto de registros para armar la tabla `suc.afip_mapuche_sicoss` con los siguientes campos:
+     * - `nro_legaj`: Número de legajo
+     * - `nro_liqui`: Número de liquidación
+     * - `sino_cerra`: Indicador de si la liquidación está cerrada
+     * - `desc_estado_liquidacion`: Descripción del estado de la liquidación
+     * - `nro_cargo`: Número de cargo
+     * - `tipo_registro`: Tipo de registro, siempre '01'
+     * - `codigo_movimiento`: Código de movimiento, siempre 'AT'
+     * - `cuil`: Número de CUIL concatenado
+     * - `trabajador_agropecuario`: Indicador de si es un trabajador agropecuario, siempre 'N'
+     * - `modalidad_contrato`: Modalidad de contrato, siempre '008'
+     * - `inicio_rel_laboral`: Fecha de inicio de la relación laboral
+     * - `fin_rel_laboral`: Fecha de fin de la relación laboral
+     * - `obra_social`: Código de obra social, siempre '000000'
+     * - `codigo_situacion_baja`: Código de situación de baja, siempre '01'
+     * - `fecha_tel_renuncia`: Fecha de renuncia telefónica, siempre '0000000000'
+     * - `retribucion_pactada`: Retribución pactada
+     * - `modalidad_liquidaicon`: Modalidad de liquidación, siempre 1
+     * - `domicilio`: Código de domicilio
+     * - `actividad`: Actividad, siempre NULL
+     * - `puesto`: Puesto, siempre NULL
+     * - `rectificacion`: Rectificación, siempre '00'
+     * - `ccct`: Convenio colectivo de trabajo, siempre '9999/99'
+     * - `tipo_servicio`: Tipo de servicio, siempre '000'
+     * - `categoria`: Categoría, siempre '000000'
+     * - `fecha_suspencion_servicios`: Fecha de suspensión de servicios, siempre NULL
+     * - `no_form_agro`: Número de formulario agropecuario, siempre '0000000000'
+     * - `covid`: Indicador de COVID, siempre '0'
+     *
+     * La consulta filtra los registros donde `d.tipo_conce` es 'C' y `d3.chkstopliq` es 0, y los agrupa por los campos mencionados anteriormente.
+     */
     public static function scopeSicossAll($query)
         {
         // Consulta SQL
         return $query->selectRaw("
-                d.nro_legaj,
                 d4.nro_liqui,
                 d4.sino_cerra,
                 el.desc_estado_liquidacion,

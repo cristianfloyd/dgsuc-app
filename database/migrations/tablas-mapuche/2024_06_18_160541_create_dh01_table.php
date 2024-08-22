@@ -45,7 +45,7 @@ return new class extends Migration
             // $table->foreign('pais_nacim')->references('codigo_pais')->on('mapuche.dha3')->onUpdate('cascade')->deferrable();
             // $table->foreign('pcia_nacim')->references('codigo_pcia')->on('mapuche.dha5')->onUpdate('cascade')->deferrable();
             $table->index(['nro_cuil1', 'nro_cuil', 'nro_cuil2'], 'cuil_completo_index');
-            $table->foreign('cuil_completo')->references('cuil')->on('suc.afip_mapuche_sicoss');
+            $table->foreign('cuil')->references('cuil')->on('suc.afip_mapuche_sicoss');
 
 
         });
