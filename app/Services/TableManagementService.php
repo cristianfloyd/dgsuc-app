@@ -126,7 +126,7 @@ class TableManagementService implements TableManagementServiceInterface
 
             // Definir la clave primaria compuesta.
             $table->primary(['periodo_fiscal', 'cuil']);
-            // $table->foreign('cuil')->references('cuil_completo')->on('mapuche.dh01');
+            // $table->foreign('cuil')->references('cuil')->on('mapuche.dh01');
         });
 
 

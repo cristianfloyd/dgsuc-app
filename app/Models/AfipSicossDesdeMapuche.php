@@ -329,7 +329,7 @@ class AfipSicossDesdeMapuche extends Model
         $processedLines = $this->fileProcessor->processFile($filePath, $this->columnWidths);
 
 
-        return self::insertBulkData($processedLines);
+        return self::insertBulkData( $processedLines->toArray() );
     }
 
     private function procesarDatos(array $lineasExtraidas, int $periodoFiscal): array

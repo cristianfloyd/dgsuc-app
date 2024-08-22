@@ -3,10 +3,7 @@
 namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
 class Dh01 extends Model
@@ -46,9 +43,9 @@ class Dh01 extends Model
             ->orWhere('desc_nombr', 'like', '%'.strtoupper($val).'%');
     }
 
-    public function afipMapucheSicoss(): HasOne
+    public function getCuilCompletoAttribute()
     {
-        return $this->hasOne(AfipMapucheSicoss::class, 'cuil', 'cuil_completo');
+        return "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}";
     }
 }
 

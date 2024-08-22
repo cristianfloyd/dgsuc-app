@@ -79,7 +79,7 @@ return new class extends Migration
 
             // Definir la clave primaria compuesta.
             $table->primary(['periodo_fiscal', 'cuil']);
-            // $table->foreign('cuil')->references('cuil_completo')->on('mapuche.dh01');
+            // $table->foreign('cuil')->references('cuil')->on('mapuche.dh01');
         });
     }
 

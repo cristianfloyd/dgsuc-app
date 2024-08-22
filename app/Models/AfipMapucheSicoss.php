@@ -2,19 +2,16 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\Log;
 
 class AfipMapucheSicoss extends Model
 {
     use HasFactory;
 
-    // Especificar la tabla
     protected $connection = 'pgsql-mapuche';
+    // Especificar la tabla
     protected $table = 'suc.afip_mapuche_sicoss';
 
     // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
@@ -90,14 +87,18 @@ class AfipMapucheSicoss extends Model
 
     public function dh01()
     {
-        return $this->belongsTo(Dh01::class, 'cuil', 'cuil_completo');
+        return $this->belongsTo(Dh01::class, 'cuil', 'nro_cuil')
+            ->where(function ($query) {
+                $query->whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil]);
+            });
     }
+
 
 
     public function scopeSearch($query, $search)
     {
         return $query->where('cuil', 'ilike', '%' . $search . '%')
-            ->orWhere('apnom', 'ilike', '%' . $search . '%');
+            ->orWhere('apnom', 'ilike', "%$search%");
     }
 
     // Agregar un nuevo método para obtener el periodo fiscal formateado si es necesario
@@ -110,7 +111,7 @@ class AfipMapucheSicoss extends Model
 
     public function getKey()
     {
-        return $this->periodo_fiscal . '|' . $this->cuil;
+        return "{$this->periodo_fiscal}|{$this->cuil}";
     }
 
     public function getKeyName()
