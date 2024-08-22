@@ -24,24 +24,6 @@ class Dh11 extends Model
      * Estos valores corresponden a la columna codc_categ del modelo Dh11.
      */
     public const array CATEGORIAS = [
-        'SECUNDARIO' => [
-            'SE25',
-            'SE20',
-            'SE16',
-            'SE12',
-            'SE30',
-            'SE06',
-            'SE40',
-            'SE15',
-            'SE35',
-            'SE01',
-        ],
-        'UNIVERSITARIO' => [
-            'EXCL',
-            'SEMI',
-            'PARC',
-            'COMP',
-        ],
         'DOCS' => [
             'HOME',
             'PEO6',
@@ -70,44 +52,6 @@ class Dh11 extends Model
             'REG1',
             'BI30',
             'HOLU',
-        ],
-        'AUTS' => [
-            'VD20',
-            'PRSE',
-            'RESE',
-            'SECR',
-            'SREH',
-            'SREG',
-            'SRE1',
-            'SRG3',
-            'VRSE',
-            'VD30',
-            'VD35',
-            'DI40',
-        ],
-        'AUTU' => [
-            'DECC',
-            'SEFC',
-            'SEUC',
-            'VICC',
-            'VIDC',
-            'VIRC',
-            'DECE',
-            'RECT',
-            'SUHE',
-            'SEFE',
-            'SEUE',
-            'SSUN',
-            'VIDE',
-            'VIRE',
-            'DECP',
-            'SFHP',
-            'SEFP',
-            'SEUP',
-            'VDPH',
-            'VIPH',
-            'VIDP',
-            'VIRP',
         ],
         'DOCU' => [
             'A1EH',
@@ -149,6 +93,44 @@ class Dh11 extends Model
             'HODI',
             'HOJE',
             'HOSU',
+        ],
+        'AUTS' => [
+            'VD20',
+            'PRSE',
+            'RESE',
+            'SECR',
+            'SREH',
+            'SREG',
+            'SRE1',
+            'SRG3',
+            'VRSE',
+            'VD30',
+            'VD35',
+            'DI40',
+        ],
+        'AUTU' => [
+            'DECC',
+            'SEFC',
+            'SEUC',
+            'VICC',
+            'VIDC',
+            'VIRC',
+            'DECE',
+            'RECT',
+            'SUHE',
+            'SEFE',
+            'SEUE',
+            'SSUN',
+            'VIDE',
+            'VIRE',
+            'DECP',
+            'SFHP',
+            'SEFP',
+            'SEUP',
+            'VDPH',
+            'VIPH',
+            'VIDP',
+            'VIRP',
         ],
         'NODO' => [
             '1',
@@ -423,6 +405,11 @@ class Dh11 extends Model
      */
     public static function getCategoriasPorTipo(string $tipo): array
     {
-        return self::CATEGORIAS[$tipo] ?? [];
+        return match ($tipo) {
+            'DOCE' => array_merge(self::CATEGORIAS['DOCU'], self::CATEGORIAS['DOCS']),
+            'AUTO' => array_merge(self::CATEGORIAS['AUTU'], self::CATEGORIAS['AUTS']),
+            default => self::CATEGORIAS[$tipo] ?? [],
+        };
+        // return self::CATEGORIAS[$tipo] ?? [];
     }
 }
