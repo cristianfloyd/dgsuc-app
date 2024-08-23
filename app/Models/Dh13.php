@@ -92,20 +92,7 @@ class Dh13 extends Model
         $this->primaryKey = $key;
     }
 
-    /**
-     * Obtiene una nueva instancia de query para el modelo.
-     *
-     * @return Builder
-     */
-    public function newQuery()
-    {
-        return parent::newQuery()->addSelect(
-            '*',
-            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
-        );
-        // ->orderBy('nro_orden_formula')
-        // ->orderBy('codn_conce');
-    }
+
 
     /**
      * Obtiene el valor de la clave única para rutas.
@@ -133,6 +120,21 @@ class Dh13 extends Model
                 ->first();
         }
         return parent::resolveRouteBinding($key, $field);
+    }
+
+    /**
+     * Obtiene una nueva instancia de query para el modelo.
+     *
+     * @return Builder
+     */
+    public function newQuery()
+    {
+        return parent::newQuery()->addSelect(
+            '*',
+            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
+        );
+        // ->orderBy('nro_orden_formula')
+        // ->orderBy('codn_conce');
     }
 
     /**

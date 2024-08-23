@@ -85,44 +85,24 @@ class AfipMapucheSicoss extends Model
         'remimp11',
     ];
 
-    public function dh01()
-    {
-        return $this->belongsTo(Dh01::class, 'cuil', 'nro_cuil')
-            ->where(function ($query) {
-                $query->whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil]);
-            });
-    }
 
 
 
-    public function scopeSearch($query, $search)
-    {
-        return $query->where('cuil', 'ilike', '%' . $search . '%')
-            ->orWhere('apnom', 'ilike', "%$search%");
-    }
-
-    // Agregar un nuevo método para obtener el periodo fiscal formateado si es necesario
-    public function getPeriodoFiscalFormateado()
-    {
-        $periodo = $this->attributes['periodo_fiscal'];
-        return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
-    }
-
-
-    public function getKey()
+    public function getKey(): string
     {
         return "{$this->periodo_fiscal}|{$this->cuil}";
     }
 
-    public function getKeyName()
+    public function getKeyName(): array
     {
         return ['periodo_fiscal', 'cuil'];
     }
-    public function getRouteKey()
+    public function getRouteKey(): string
     {
         return "{$this->periodo_fiscal}|{$this->cuil}";
     }
-    public function getRouteKeyName() {
+    public function getRouteKeyName(): string
+    {
         return 'unique_id';
     }
 
@@ -157,6 +137,30 @@ class AfipMapucheSicoss extends Model
         return $this->where('periodo_fiscal', $periodo_fiscal)
                     ->where('cuil', $cuil)
                     ->firstOrFail();
+    }
+
+
+    public function dh01()
+    {
+        return $this->belongsTo(Dh01::class, 'cuil', 'nro_cuil')
+            ->where(function ($query) {
+                $query->whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil]);
+            });
+    }
+
+
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where('cuil', 'ilike', '%' . $search . '%')
+            ->orWhere('apnom', 'ilike', "%$search%");
+    }
+
+    // Agregar un nuevo método para obtener el periodo fiscal formateado si es necesario
+    public function getPeriodoFiscalFormateado()
+    {
+        $periodo = $this->attributes['periodo_fiscal'];
+        return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
     }
 
 }

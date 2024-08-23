@@ -53,7 +53,7 @@ class UploadedFile extends Model
     }
     public function scopeSearch($query, $search)
     {
-        return $query->where('filename', 'like', '%' . $search . '%')
-            ->orWhere('original_name', 'like', '%' . $search . '%');
+        return $query->where('filename', 'like', "%$search%")
+            ->orWhere('original_name', 'like', "%$search%");
     }
 }

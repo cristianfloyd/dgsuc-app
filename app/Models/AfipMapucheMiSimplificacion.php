@@ -17,12 +17,13 @@ class AfipMapucheMiSimplificacion extends Model
     protected $table = 'suc.afip_mapuche_mi_simplificacion';
     public $timestamps = false;
 
-    // Definición de la clave primaria compuesta
+
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
     public $incrementing = false;
 
     // Campos que se pueden asignar masivament
     protected $fillable = [
+        'id',
         'nro_legaj',
         'nro_liqui',
         'sino_cerra',
@@ -54,13 +55,23 @@ class AfipMapucheMiSimplificacion extends Model
     ];
 
     /**
+     * Obtiene el valor de la clave primaria.
+     *
+     * @return string
+     */
+    public function getKey(): string
+    {
+        return "{$this->periodo_fiscal}-{$this->cuil}";
+    }
+
+    /**
      * Obtiene la clave primaria del modelo.
      *
-     * @return array
+     * @return string
      */
-    public function getKeyName()
+    public function getKeyName(): string
     {
-        return $this->primaryKey;
+        return 'id';
     }
 
     /**
@@ -73,37 +84,85 @@ class AfipMapucheMiSimplificacion extends Model
         return $this->incrementing;
     }
 
-    /**
-     * Obtiene el valor de la clave primaria.
-     *
-     * @return array
-     */
-    public function getKey()
+    public function getRouteKey(): string
     {
-        $attributes = [];
-        foreach ($this->getKeyName() as $key) {
-            $attributes[$key] = $this->getAttribute($key);
-        }
-        return $attributes;
+        return "{$this->periodo_fiscal}|{$this->cuil}";
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
     }
 
     /**
-     * Establece el valor de la clave primaria.
+     * Recupera el modelo por su clave única.
      *
-     * @param mixed $value
-     * @return void
+     * @param  mixed  $key
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
      */
-    public function setKeysForSaveQuery($query)
+    public function resolveRouteBinding($key, $field = null)
     {
-        foreach ($this->getKeyName() as $key) {
-            if (isset($this->attributes[$key])) {
-                $query->where($key, '=', $this->attributes[$key]);
-            } else {
-                throw new \Exception("No value for primary key '$key' provided.");
-            }
+        if ($field === 'id') {
+            [$periodo_fiscal, $cuil] = explode('-', $key);
+            return $this->where('periodo_fiscal', $periodo_fiscal)
+                ->where('cuil', $cuil)
+                ->first();
         }
-        return $query;
+        return parent::resolveRouteBinding($key, $field);
     }
+
+    /**
+     * Recupera un modelo por su clave única compuesta.
+     *
+     * @param string $id La clave única compuesta en el formato "periodo_fiscal-cuil".
+     * @param array $columns Los campos a recuperar (por defecto, todos los campos).
+     * @return \Illuminate\Database\Eloquent\Model|null El modelo encontrado, o null si no se encuentra.
+     */
+    public function find($id, $columns = ['*'])
+    {
+        list($periodo_fiscal, $cuil) = explode('-', $id);
+        return $this->where('periodo_fiscal', $periodo_fiscal)
+            ->where('cuil', $cuil)
+            ->first($columns);
+    }
+
+    /**
+     * Obtiene una nueva instancia de query para el modelo.
+     *
+     * @return Builder
+     */
+    public function newQuery()
+    {
+        return parent::newQuery()->addSelect(
+            '*',
+            DB::raw("CONCAT(periodo_fiscal, '-', cuil) as id")
+        )
+        ->orderBy('periodo_fiscal')
+        ->orderBy('cuil');
+    }
+
+
+
+
+
+    // /**
+    //  * Establece el valor de la clave primaria.
+    //  *
+    //  * @param mixed $value
+    //  * @return void
+    //  */
+    // public function setKeysForSaveQuery($query)
+    // {
+    //     foreach ($this->getKeyName() as $key) {
+    //         if (isset($this->attributes[$key])) {
+    //             $query->where($key, '=', $this->attributes[$key]);
+    //         } else {
+    //             throw new \Exception("No value for primary key '$key' provided.");
+    //         }
+    //     }
+    //     return $query;
+    // }
 
 
     /** Creates the `suc.afip_mapuche_mi_simplificacion` table in the `pgsql-mapuche` database connection if it doesn't already exist.
