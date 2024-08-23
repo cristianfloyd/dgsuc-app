@@ -160,4 +160,33 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             return false;
         }
     }
+
+
+    /**
+     * Verifica si la tabla `MapucheMiSim` no está vacía.
+     *
+     * Esta función comprueba si la tabla `afip_mapuche_mi_simplificacion` existe en la base de datos y, en caso afirmativo, verifica si contiene registros. Devuelve `true` si la tabla no está vacía, y `false` en caso contrario.
+     *
+     * @return bool Verdadero si la tabla no está vacía, falso en caso contrario.
+     */
+    public function isNotEmpty(): bool
+    {
+        $table = $this->afipMapucheMiSimplificacion->getTable();
+        $connection = $this->afipMapucheMiSimplificacion->getConnectionName();
+        //Verifica si la tabla existe
+        if (!Schema::connection($connection)->hasTable($table)) {
+            Log::info("La tabla {$table} no existe en la base de datos {$connection}.");
+            return false;
+        }
+        //Verifica si la tabla contiene datos
+        $count = $this->afipMapucheMiSimplificacion->count();
+
+        if ($count > 0) {
+            Log::info("La tabla {$table} no está vacía y contiene {$count} registros.");
+            return true;
+        } else {
+            Log::info("La tabla {$table} está vacía.");
+            return false;
+        }
+    }
 }

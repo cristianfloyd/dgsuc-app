@@ -129,7 +129,7 @@ class AfipRelacionesActivas extends Component
             $uploadedFileId = $this->archivoSeleccionadoId;
 
             // Despachar el Job
-            ImportAfipRelacionesActivasJob::dispatch(
+            ImportAfipRelacionesActivasJob::dispatchSync(
                 $this->fileProcessor,
                 $this->employeeService ,
                 $this->validationService ,

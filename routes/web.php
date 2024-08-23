@@ -54,7 +54,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         $columnMetadata = app(ColumnMetadata::class);
     });
 
-
+    Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');
     Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('mapuchemisim');
     Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');

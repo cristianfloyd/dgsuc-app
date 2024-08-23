@@ -12,35 +12,98 @@ use Illuminate\Support\Facades\Log;
 
 class AfipMapucheMiSimplificacion extends Model
 {
+    // Configuración de la conexión y tabla
     protected $connection = 'pgsql-mapuche';
     protected $table = 'suc.afip_mapuche_mi_simplificacion';
     public $timestamps = false;
-    protected $collection;
 
-    protected $fillable = ['nro_legaj', 'nro_liqui', 'sino_cerra', 'desc_estado_liquidacion', 'nro_cargo', 'periodo_fiscal',
-    'tipo_registro',
-    'codigo_movimiento',
-    'cuil',
-    'trabajador_agropecuario',
-    'modalidad_contrato',
-    'inicio_rel_laboral',
-    'fin_rel_laboral',
-    'obra_social',
-    'codigo_situacion_baja',
-    'fecha_tel_renuncia',
-    'retribucion_pactada',
-    'modalidad_liquidacion',
-    'domicilio',
-    'actividad',
-    'puesto',
-    'rectificacion',
-    'ccct',
-    'tipo_servicio',
-    'categoria',
-    'fecha_susp_serv_temp',
-    'nro_form_agro', 'covid'
-];
+    // Definición de la clave primaria compuesta
+    protected $primaryKey = ['periodo_fiscal', 'cuil'];
+    public $incrementing = false;
 
+    // Campos que se pueden asignar masivament
+    protected $fillable = [
+        'nro_legaj',
+        'nro_liqui',
+        'sino_cerra',
+        'desc_estado_liquidacion',
+        'nro_cargo',
+        'periodo_fiscal',
+        'tipo_registro',
+        'codigo_movimiento',
+        'cuil',
+        'trabajador_agropecuario',
+        'modalidad_contrato',
+        'inicio_rel_laboral',
+        'fin_rel_laboral',
+        'obra_social',
+        'codigo_situacion_baja',
+        'fecha_tel_renuncia',
+        'retribucion_pactada',
+        'modalidad_liquidacion',
+        'domicilio',
+        'actividad',
+        'puesto',
+        'rectificacion',
+        'ccct',
+        'tipo_servicio',
+        'categoria',
+        'fecha_susp_serv_temp',
+        'nro_form_agro',
+        'covid'
+    ];
+
+    /**
+     * Obtiene la clave primaria del modelo.
+     *
+     * @return array
+     */
+    public function getKeyName()
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * Determina si la clave primaria es compuesta.
+     *
+     * @return bool
+     */
+    public function getIncrementing()
+    {
+        return $this->incrementing;
+    }
+
+    /**
+     * Obtiene el valor de la clave primaria.
+     *
+     * @return array
+     */
+    public function getKey()
+    {
+        $attributes = [];
+        foreach ($this->getKeyName() as $key) {
+            $attributes[$key] = $this->getAttribute($key);
+        }
+        return $attributes;
+    }
+
+    /**
+     * Establece el valor de la clave primaria.
+     *
+     * @param mixed $value
+     * @return void
+     */
+    public function setKeysForSaveQuery($query)
+    {
+        foreach ($this->getKeyName() as $key) {
+            if (isset($this->attributes[$key])) {
+                $query->where($key, '=', $this->attributes[$key]);
+            } else {
+                throw new \Exception("No value for primary key '$key' provided.");
+            }
+        }
+        return $query;
+    }
 
 
     /** Creates the `suc.afip_mapuche_mi_simplificacion` table in the `pgsql-mapuche` database connection if it doesn't already exist.
@@ -52,8 +115,6 @@ class AfipMapucheMiSimplificacion extends Model
     {
         if (!Schema::connection($this->connection)->hasTable($this->table)) {
             Schema::connection($this->connection)->create($this->table, function (Blueprint $table) {
-                // $table->increments('id');
-                $table->id();
                 $table->integer('nro_legaj');
                 $table->char('nro_liqui', 6);
                 $table->char('sino_cerra', 1);
@@ -83,7 +144,8 @@ class AfipMapucheMiSimplificacion extends Model
                 $table->char('nro_form_agro', 10)->nullable();
                 $table->char('covid', 1)->nullable();
 
-                // $table->primary(['periodo_fiscal', 'cuil']);
+                // Definición de la clave primaria compuesta
+                $table->primary(['periodo_fiscal', 'cuil']);
             });
             Log::info("Tabla {$this->table} creada en la base de datos {$this->connection}, desde el modelo");
             return true; // Table created successfully
@@ -92,23 +154,42 @@ class AfipMapucheMiSimplificacion extends Model
         return false; // Table already exists
     }
 
-    // Metodo para truncar y resetear identitys.
+    /**
+     * Trunca la tabla y reinicia las identidades.
+     */
     public static function truncate()
     {
 
         DB::connection('pgsql-mapuche')->statement('TRUNCATE TABLE suc.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
     }
 
-    // Metodo para retornar las columas de la tabla.
+    /**
+     * Retorna las columnas de la tabla.
+     *
+     * @return array
+     */
     public function getTableHeaders()
     {
         return $this->fillable;
     }
 
+    /**
+     * Retorna el nombre de la tabla en la base de datos.
+     *
+     * @return string
+     */
     static function getDatabaseTableName()
     {
         return static::getTable();
     }
+
+    /**
+     * Scope para búsqueda por CUIL o número de legajo.
+     *
+     * @param Builder $query
+     * @param string $value
+     * @return Builder
+     */
     public function scopeSearch($query, $value)
     {
         return empty($value) ? $query :  $query->where('cuil', 'ilike', "%$value%")

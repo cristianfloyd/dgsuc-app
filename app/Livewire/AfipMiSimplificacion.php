@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Contracts\FileUploadRepositoryInterface;
+use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use Livewire\Component;
 use App\Models\ProcessLog;
 use Livewire\Attributes\On;
@@ -23,7 +24,7 @@ class AfipMiSimplificacion extends Component
     public $steps;
     public $stepUrl;
     public $processFinished = false;
-    public $ParaMiSimplificacion = false;
+    public $ButtonMiSimplificacion = false;
     public $message = null;
 
 
@@ -31,18 +32,21 @@ class AfipMiSimplificacion extends Component
     private MessageManagerInterface $messageManager;
     private FileUploadRepositoryInterface $fileUploadRepository;
     private FileProcessingService $fileProcessingService;
+    private MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService;
 
     public function boot(
         WorkflowServiceInterface $workflowService,
         MessageManagerInterface $messageManager,
         FileUploadRepositoryInterface $fileUploadRepository,
         FileProcessingService $fileProcessingService,
+        MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService,
         )
     {
         $this->workflowService = $workflowService;
         $this->messageManager = $messageManager;
         $this->fileUploadRepository = $fileUploadRepository;
         $this->fileProcessingService = $fileProcessingService;
+        $this->mapucheMiSimplificacionService = $mapucheMiSimplificacionService;
     }
 
     public function mount()
@@ -56,6 +60,7 @@ class AfipMiSimplificacion extends Component
         $this->processFinished = $this->isProcessFinished();
         $this->getCurrentStepUrl();
         $this->checkShowGenerateRelationsButton();
+        $this->checkMiSimplificacion();
     }
 
     /**
@@ -71,13 +76,27 @@ class AfipMiSimplificacion extends Component
         $this->dispatch('show-message', ['message' => $message, 'type' => $type]);
     }
 
+    public function checkMiSimplificacion()
+    {
+        // este metodo verifica si la tabla afip_mi_simplificacion tiene datos, y si tiene datos, muestra el boton de mi simplificacion
+        $hasDatos = $this->mapucheMiSimplificacionService->isNotEmpty();
+
+        if ($hasDatos) {
+            $this->ButtonMiSimplificacion = true;
+            $this->showMessage('Se han encontrado datos en Mi Simplificación', 'info');
+        } else {
+            $this->ButtonMiSimplificacion = false;
+            $this->showMessage('No se encontraron datos en Mi Simplificación', 'info');
+        }
+
+    }
 
     #[On('proceso-iniciado')]
     public function handleProcesoIniciado(): void
     {
         $this->getStepsAndCurrentStep();
         $this->processFinished = false;
-        $this->ParaMiSimplificacion = false;
+        $this->ButtonMiSimplificacion = false;
         $this->showMessage('Proceso iniciado correctamente');
     }
 
@@ -85,7 +104,7 @@ class AfipMiSimplificacion extends Component
     public function handleProcesoTerminado(): void
     {
         $this->processFinished = true;
-        $this->ParaMiSimplificacion = true;
+        $this->ButtonMiSimplificacion = true;
         $this->showMessage('Proceso terminado correctamente');
     }
 
@@ -279,7 +298,7 @@ class AfipMiSimplificacion extends Component
     public function showResetButton()
     {
         $currentStepIndex = $this->getCurrentStepIndex();
-        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== 0 && $currentStepIndex !== count($this->steps) - 1;
+        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== count($this->steps) - 1;
     }
 
 
@@ -309,7 +328,7 @@ class AfipMiSimplificacion extends Component
     public function toggleParaMiSimplificacion(): void
     {
         if ($this->isProcessFinished()) {
-            $this->ParaMiSimplificacion = !$this->ParaMiSimplificacion;
+            $this->ButtonMiSimplificacion = !$this->ButtonMiSimplificacion;
         }
     }
 

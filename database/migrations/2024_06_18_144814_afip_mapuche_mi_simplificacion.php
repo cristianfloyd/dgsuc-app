@@ -16,7 +16,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suc.afip_mapuche_mi_simplificacion', function (Blueprint $table) {
-            // $table->integer('id');
             $table->integer('nro_legaj');
             $table->char('nro_liqui',6);
             $table->char('sino_cerra', 1);
@@ -41,7 +40,7 @@ return new class extends Migration
             $table->char('rectificacion',2)->nullable();
             $table->char('ccct',10)->nullable()->default('0000000000');
             $table->char('tipo_servicio',3)->nullable();
-            $table->char('caregoria',6)->nullable();
+            $table->char('categoria',6)->nullable();
             $table->char('fecha_susp_serv_temp',10)->nullable();
             $table->char('nro_form_agro',10)->nullable();
             $table->char('covid',1)->nullable();

@@ -62,7 +62,7 @@
             </div>
         @endif
     </div>
-    @if ($ParaMiSimplificacion)
+    @if ($ButtonMiSimplificacion)
         <div class="mt-4">
             <livewire:para-mi-simplificacion />
         </div>
