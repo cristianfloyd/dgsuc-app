@@ -2,17 +2,20 @@
 
 namespace App\Livewire;
 
+use App\Contracts\FileUploadRepositoryInterface;
 use Livewire\Component;
 use App\Models\ProcessLog;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Computed;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
+use App\Services\FileProcessingService;
 use illuminate\Support\Facades\Log;
 
 class AfipMiSimplificacion extends Component
 {
     // use MessageTrait;
+    public $showGenerateRelationsButton = false;
     public $processLogId;
     public $currentProcess;
     public $currentStep;
@@ -26,11 +29,20 @@ class AfipMiSimplificacion extends Component
 
     private WorkflowServiceInterface $workflowService;
     private MessageManagerInterface $messageManager;
+    private FileUploadRepositoryInterface $fileUploadRepository;
+    private FileProcessingService $fileProcessingService;
 
-    public function boot(WorkflowServiceInterface $workflowService, MessageManagerInterface $messageManager)
+    public function boot(
+        WorkflowServiceInterface $workflowService,
+        MessageManagerInterface $messageManager,
+        FileUploadRepositoryInterface $fileUploadRepository,
+        FileProcessingService $fileProcessingService,
+        )
     {
         $this->workflowService = $workflowService;
         $this->messageManager = $messageManager;
+        $this->fileUploadRepository = $fileUploadRepository;
+        $this->fileProcessingService = $fileProcessingService;
     }
 
     public function mount()
@@ -43,6 +55,7 @@ class AfipMiSimplificacion extends Component
         $this->getStepsAndCurrentStep();
         $this->processFinished = $this->isProcessFinished();
         $this->getCurrentStepUrl();
+        $this->checkShowGenerateRelationsButton();
     }
 
     /**
@@ -300,7 +313,23 @@ class AfipMiSimplificacion extends Component
         }
     }
 
+    public function checkShowGenerateRelationsButton(): void
+    {
+        $afipFile = $this->fileUploadRepository->getLatestByOrigen('afip');
+        $mapucheFile = $this->fileUploadRepository->getLatestByOrigen('mapuche');
 
+        $this->showGenerateRelationsButton = $afipFile && $mapucheFile && $afipFile->process_id === $mapucheFile->process_id;
+    }
+
+    /**
+     * Genera las relaciones entre los archivos AFIP y Mapuche.
+     * Este método se encarga de procesar los archivos cargados y establecer las relaciones correspondientes.
+     */
+    public function generateRelations(): void
+    {
+        Log::info("AfipMiSimplificacion->generateRelations");
+        $this->fileProcessingService->processFiles();
+    }
 
     public function render()
     {

@@ -8,7 +8,7 @@ use App\Contracts\FileUploadRepositoryInterface;
 
 class FileUploadRepository implements FileUploadRepositoryInterface
 {
-    
+
     /**
      * Obtiene un archivo cargado por su ID o lanza una excepción si no se encuentra.
      *
@@ -62,5 +62,18 @@ class FileUploadRepository implements FileUploadRepositoryInterface
     public function existsByOrigen(string $origen): bool
     {
         return UploadedFile::where('origen', $origen)->exists();
+    }
+
+    /**
+     * Get the latest uploaded file by origen.
+     *
+     * @param string $origen
+     * @return UploadedFile|null
+     */
+    public function getLatestByOrigen(string $origen): ?UploadedFile
+    {
+        return UploadedFile::where('origen', $origen)
+            ->latest()
+            ->first();
     }
 }

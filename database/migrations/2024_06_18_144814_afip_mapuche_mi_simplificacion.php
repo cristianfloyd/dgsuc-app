@@ -16,7 +16,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suc.afip_mapuche_mi_simplificacion', function (Blueprint $table) {
-            $table->integer('id');
+            // $table->integer('id');
             $table->integer('nro_legaj');
             $table->char('nro_liqui',6);
             $table->char('sino_cerra', 1);
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->char('fin_rel_laboral',10)->nullable();
             $table->char('obra_social',6)->default('000000')->nullable();
             $table->char('codigo_situacion_baja',2)->nullable();
-            $table->char('fecha_telegrama_renuncia',10)->nullable();
+            $table->char('fecha_tel_renuncia',10)->nullable();
             $table->char('retribucion_pactada',15)->nullable();
             $table->char('modalidad_liquidacion',1)->default('1');
             $table->char('domicilio',5)->nullable();
@@ -46,7 +46,7 @@ return new class extends Migration
             $table->char('nro_form_agro',10)->nullable();
             $table->char('covid',1)->nullable();
 
-            // $table->primary(['periodo_fiscal', 'cuil']);
+            $table->primary(['periodo_fiscal', 'cuil']);
         });
     }
 

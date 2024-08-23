@@ -46,4 +46,12 @@ interface FileUploadRepositoryInterface
      */
     public function existsByOrigen(string $origen): bool;
 
+
+    /**
+     * Obtiene el último archivo cargado con el origen especificado.
+     *
+     * @param string $origen El origen a buscar.
+     * @return \App\Models\UploadedFile|null El último archivo cargado con el origen especificado, o null si no se encuentra.
+     */
+    public function getLatestByOrigen(string $origen): ?UploadedFile;
 }

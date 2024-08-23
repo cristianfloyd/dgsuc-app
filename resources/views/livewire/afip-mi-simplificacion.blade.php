@@ -1,12 +1,9 @@
 <div>
     {{-- <livewire:mapuche.components.select-liquidacion-definitiva :year="2023" :month="6" /> --}}
     <div>
-        @foreach($messages as $message)
-            <div x-data="{ show: true }"
-                x-show="show"
-                x-init="setTimeout(() => show = false, 3000)"
-                class="alert alert-{{ $message['type'] }} text-center"
-                role="alert">
+        @foreach ($messages as $message)
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+                class="alert alert-{{ $message['type'] }} text-center" role="alert">
                 <p>{{ $message['message'] }}</p>
                 <button @click="show = false" class="btn btn-neutral">X</button>
             </div>
@@ -17,7 +14,8 @@
     <div class="mb-4 container" id="process-container">
         <h1>Proceso de AFIP Mi Simplificación</h1>
         <div class="mb-4">
-            <button class="btn btn-primary btn-info" wire:click="startProcess" @if (!$processFinished) disabled @endif>
+            <button class="btn btn-primary btn-info" wire:click="startProcess"
+                @if (!$processFinished) disabled @endif>
                 Iniciar
             </button>
             @if (!$processFinished)
@@ -29,6 +27,12 @@
             @if ($this->showResetButton)
                 <button type="button" class="btn btn-warning" wire:click="resetWorkflow">
                     Reiniciar
+                </button>
+            @endif
+            @if ($showGenerateRelationsButton)
+                <button wire:click="generateRelations"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Generar Relaciones
                 </button>
             @endif
         </div>

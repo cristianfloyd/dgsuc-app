@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use Filament\Forms\Form;
 use App\Models\Mapuche\Dh22;
 use Filament\Widgets\Widget;
-use Filament\Facades\Filament;
 use Livewire\Attributes\Computed;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;

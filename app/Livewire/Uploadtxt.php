@@ -135,18 +135,28 @@ class Uploadtxt extends Component
             }
 
             // 1. Cargar el archivo en el servidor
-            $filePath = $this->fileUploadService->uploadFile($origen === 'afip' ? $this->archivotxtAfip : $this->archivotxtMapuche, 'afiptxt');
+            $filePath = $this->fileUploadService->uploadFile(
+                $origen === 'afip' ? $this->archivotxtAfip : $this->archivotxtMapuche, 'afiptxt'
+            );
+
             if (!$filePath) {
                 throw new Exception('Error al cargar el archivo en el servidor.');
             }
 
+
             // 2. Almacenar en la base de datos del modelo UploadedFile
+
+            $origenModel = $this->origenRepository->findByName($origen);
+            if (!$origenModel) {
+                throw new Exception("No se encontró el origen '{$origen}'.");
+            }
+
             $uploadedFile = $this->fileUploadRepository->create([
                 'filename' => basename($filePath),
                 'original_name' => $origen === 'afip' ? $this->archivotxtAfip->getClientOriginalName() : $this->archivotxtMapuche->getClientOriginalName(),
                 'file_path' => $filePath,
                 'periodo_fiscal' => $this->periodo_fiscal,
-                'origen' => $this->origenRepository->findByName($origen)->name,
+                'origen' => $origenModel->name,
                 'user_id' => 1,
                 'user_name' => 'admin',
                 'process_id' => $this->processId, // Asignar el UUID del proceso
@@ -198,6 +208,7 @@ class Uploadtxt extends Component
      */
     private function validateAndPrepare($origen)
     {
+        Log::debug("uploadtxt->validateAndPrepare, Paso actual: {$origen}");
         $this->validateInput($origen);
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
@@ -214,9 +225,12 @@ class Uploadtxt extends Component
     {
         // Verificar si ambos archivos han sido subidos
         $afipFile = UploadedFile::where('origen', 'afip')->latest()->first();
-        $mapucheFile = UploadedFile::where('origen','mapuche')->latest()->first();
-        if ($afipFile->process_id == $mapucheFile->process_id) {
+        $mapucheFile = UploadedFile::where('origen', 'mapuche')->latest()->first();
+
+        if ($afipFile && $mapucheFile && $afipFile->process_id == $mapucheFile->process_id) {
             $this->showButtonProcessFiles = true;
+        } else {
+            $this->showButtonProcessFiles = false;
         }
     }
 
@@ -368,7 +382,7 @@ class Uploadtxt extends Component
 
     public function render()
     {
-        if (!$this->showUploadForm) {
+        if ( $this->showUploadForm) {
             return view('livewire.uploadtxt');
         } else {
             return view('livewire.uploadtxtcompleted', [
