@@ -1,6 +1,7 @@
 <?php
 
 return [
+    App\Providers\AfipMapucheArtProvider::class,
     App\Providers\AfipProvider::class,
     App\Providers\AppServiceProvider::class,
     App\Providers\CargoFilterServiceProvider::class,
