@@ -66,7 +66,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $this->validateInput($filePath, $this->periodoFiscal);
         } catch (Exception $e) {
             Log::error('Error al validar el archivo: ' . $e->getMessage());
-            return collect();
+            return new Collection();
         }
         $this->columnMetadata->setSystem($system);
 
@@ -75,29 +75,63 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             Log::error('El archivo no se puede leer.');
             throw new RuntimeException('El archivo no se puede leer.');
         }
-
         Log::info("Archivo válido para lectura.: $this->absolutePath");
+
         try {
             $columnWidths = $this->columnMetadata->getWidths();
-
+            Log::info('columnWidths: ',[json_encode($columnWidths)]);
             Log::info("filepath para processFile: $filePath");
 
             $processedLines = $this->processFile($filePath, $columnWidths);
-            // Aquí iría la lógica para guardar o manejar las líneas procesadas
-            return  $this->mapearDatos($processedLines);
+            $mappedData = $this->mapearDatos($processedLines, $system);
+
+            Log::info('Datos mapeados handleFileImport:', [$mappedData->count()]);
+            return  $mappedData;
         } catch (Exception $e) {
             // Manejar el error, posiblemente registrándolo
             Log::error('Error al procesar el archivo (handleFileImport): ' . $e->getMessage());
-            return collect();
+            return new Collection();
         }
     }
 
-    private function mapearDatos(Collection $processedLines): Collection
+    /**
+     * Mapea los datos procesados de un archivo según el sistema especificado.
+     *
+     * Este método se encarga de seleccionar el método de mapeo adecuado en función del sistema proporcionado.
+     * Si el sistema es 'mapuche', se utilizará el método `mapearDatosMapucheSicoss()`.
+     * Si el sistema es 'afip', se utilizará el método `mapearDatosRelacionesActivas()`.
+     * Si el sistema no es válido, se lanzará una excepción.
+     *
+     * @param Collection $processedLines Las líneas procesadas del archivo.
+     * @param string $system El sistema al que pertenece el archivo.
+     * @return Collection Una colección con los datos mapeados.
+     * @throws RuntimeException Si el sistema proporcionado no es válido.
+     */
+    private function mapearDatos(Collection $processedLines, $system = 'mapuche'): Collection
+    {
+        if ($system === 'mapuche') {
+            return $this->mapearDatosMapucheSicoss($processedLines);
+        } elseif ($system === 'afip') {
+            return $this->mapearDatosRelacionesActivas($processedLines);
+        } else {
+            throw new RuntimeException('Sistema no válido: ' . $system);
+        }
+    }
+
+    private function mapearDatosRelacionesActivas(Collection $processedLines): Collection
+    {
+        $mappedData = $processedLines
+            ->map(fn($linea) => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
+        return new Collection($mappedData);
+    }
+
+    private function mapearDatosMapucheSicoss(Collection $processedLines): Collection
     {
         $mappedData = $processedLines
             ->map(fn($linea) => $this->dataMapper->mapDataToModel($linea->toArray()));
         return new Collection($mappedData);
     }
+
 
     /**
      * Obtiene los detalles de un archivo cargado.
@@ -148,11 +182,18 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
                 throw new RuntimeException("El archivo no existe: $filePath");
             }
 
-            $fileContent = Storage::get($filePath);
+            if($fileContent = Storage::get($filePath)){
+                Log::info(sprintf('El archivo existe: %s', $filePath));
+            };
             $encoding = $this->detectEncoding($fileContent);
-            $lines = $this->convertToUtf8($fileContent, $encoding);
+            Log::info("Encoding detected: $encoding");
 
-            return $this->processLines($lines, $columnWidths);
+            $lines = $this->convertToUtf8($fileContent, $encoding);
+            Log::info('Líneas del archivo: ' . $lines->count() );
+
+            $mappedData = $this->processLines($lines->toArray(), $columnWidths);
+            Log::info('Datos mapeados:', [$mappedData->count()]);
+            return $mappedData;
         } catch (Exception $e) {
             Log::error('Error al procesar el archivo en FileProcessorService processFile(): ' . $e->getMessage());
             return new Collection();;
@@ -186,17 +227,19 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     }
 
     /**
-     * Convierte el contenido del archivo a UTF-8.
+     * Convierte el contenido del archivo a un array de líneas en formato UTF-8.
      *
-     * @param string $content
-     * @param string $fromEncoding
-     * @return array
+     * @param string $content El contenido del archivo a convertir.
+     * @param string|null $fromEncoding La codificación de origen del contenido, si se conoce. Si se omite, se intentará detectar automáticamente.
+     * @return Collection Una colección de líneas en formato UTF-8.
      */
-    private function convertToUtf8(string $content, string $fromEncoding): array
+    private function convertToUtf8(string $content, string $fromEncoding = null): Collection
     {
         $utf8Content = mb_convert_encoding($content, self::UTF8_ENCODING, 'auto');
 
-        return explode("\n", $utf8Content);
+
+        $data = explode("\n", $utf8Content);
+        return new Collection($data);
     }
 
     /**
@@ -211,6 +254,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         $data = collect($lines)
             ->filter()
             ->map(fn($line) => $this->processLine($line, $columnWidths));
+        Log::info('Datos procesados en ProcessLines : ' . $data->count());
         return new Collection($data->all());
     }
 

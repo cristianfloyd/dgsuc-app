@@ -56,8 +56,18 @@ class SicossImportService
 
             // Paso 2: Verificar y preparar la tabla
             Log::info('Verificando y preparando tabla:', [$tableName]);
-            $this->tableManagementService->verifyAndPrepareTable($tableName);
-            Log::info('Tabla verificada y preparada:', [$tableName]);
+            $tableResult = $this->tableManagementService->verifyAndPrepareTable($tableName);
+
+            if (!$tableResult['success']) {
+                return [
+                    'success' => false,
+                    'message' => 'Error al verificar y preparar la tabla: ' . $tableResult['message'],
+                    'data' => array_merge(['file' => $file->id, 'step' => $step], $tableResult['data']),
+                    'error' => $tableResult['error'] ?? null
+                ];
+            }
+
+            Log::info('Tabla verificada y preparada:', $tableResult['actions']);
 
             // Paso 3: Insertar los datos mapeados en la base de datos
             $inserted = $this->databaseService->insertBulkData($mappedData, $tableName);

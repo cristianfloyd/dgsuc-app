@@ -22,14 +22,15 @@ interface DatabaseServiceInterface
      */
     public function insertarDatosMasivos2(array $datosMapeados): bool;
 
+
     /**
      * Inserta datos en masa en la base de datos.
      *
      * @param Collection $mappedData Datos mapeados a insertar.
      * @param string $tableName Nombre de la tabla donde se insertarán los datos.
-     * @return int Número de filas insertadas.
+     * @return array Resultado de la inserción de datos.
      */
-    public function insertBulkData(Collection $mappedData, string $tableName): int;
+    public function insertBulkData(Collection $mappedData, string $tableName): array;
 
     public function mapearDatosAlModelo(array $linea): array;
 }

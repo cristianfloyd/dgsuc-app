@@ -11,11 +11,13 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Services\FileProcessingService;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\FileProcessorInterface;
+use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\TransactionServiceInterface;
 use App\Contracts\FileUploadRepositoryInterface;
+use App\Contracts\TableManagementServiceInterface;
 
 class FileProcessingServiceProvider extends ServiceProvider
 {
@@ -36,6 +38,8 @@ class FileProcessingServiceProvider extends ServiceProvider
                 $app->make(ColumnMetadata::class),
                 $app->make(SicossImportService::class),
                 $app->make(WorkflowExecutionInterface::class),
+                $app->make(DatabaseServiceInterface::class),
+                $app->make(TableManagementServiceInterface::class),
             );
         });
     }

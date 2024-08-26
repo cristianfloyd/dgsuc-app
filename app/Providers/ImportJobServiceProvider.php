@@ -5,13 +5,13 @@ namespace App\Providers;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\FileProcessorInterface;
+use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
 use App\Contracts\TransactionServiceInterface;
-use App\Jobs\Middleware\InspectJobDependencies;
+use App\Contracts\TableManagementServiceInterface;
 
 class ImportJobServiceProvider extends ServiceProvider
 {
@@ -55,6 +55,19 @@ class ImportJobServiceProvider extends ServiceProvider
             return $app->make(ColumnMetadata::class);
         });
 
+    $this->app->when(ImportAfipRelacionesActivasJob::class)
+        ->needs('$DatabaseService')
+        ->give(function ($app) {
+            return $app->make(DatabaseServiceInterface::class);
+        });
+
+    $this->app->when(ImportAfipRelacionesActivasJob::class)
+        ->needs('$TableManagementService')
+        ->give(function ($app) {
+            return $app->make(TableManagementServiceInterface::class);
+        });
+
+
     // Registramos el job en el contenedor de servicios
     $this->app->bind(ImportAfipRelacionesActivasJob::class, function ($app, $parameters) {
         return new ImportAfipRelacionesActivasJob(
@@ -64,6 +77,8 @@ class ImportJobServiceProvider extends ServiceProvider
             $app->make(TransactionServiceInterface::class),
             $app->make(WorkflowServiceInterface::class),
             $app->make(ColumnMetadata::class),
+            $app->make(DatabaseServiceInterface::class),
+            $app->make(TableManagementServiceInterface::class),
             $parameters['uploadedFileId'],
         );
     });

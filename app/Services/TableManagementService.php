@@ -14,38 +14,53 @@ class TableManagementService implements TableManagementServiceInterface
 {
     private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
 
+
     /**
-     * Verifica si una tabla existe en la base de datos y la prepara para su uso.
+     * Verifica y prepara una tabla de base de datos.
      *
-     * Si la tabla no existe, la crea utilizando el esquema proporcionado.
-     * Si la tabla ya existe y contiene datos, la trunca para limpiar su contenido.
+     * Este método se encarga de verificar si una tabla existe en la base de datos y, si no existe, la crea. Si la tabla ya existe y contiene datos, los elimina.
      *
-     * @param string $tableName Nombre de la tabla a verificar y preparar.
-     * @param string|null $connection Nombre de la conexión de base de datos a utilizar.
-     * @return bool True si la operación fue exitosa, False en caso contrario.
-     * @throws \Exception Si ocurre un error durante la operación.
+     * @param string $tableName El nombre de la tabla a verificar y preparar.
+     * @param string|null $connection El nombre de la conexión de base de datos a utilizar. Si se omite, se utilizará la conexión predeterminada.
+     * @return array Un arreglo que contiene información sobre el estado de la tabla, incluyendo si se creó, truncó o simplemente se verificó.
      */
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): bool
+    public static function verifyAndPrepareTable(string $tableName, string $connection = null): array
     {
         try {
             $connection = $connection ?: self::DEFAULT_CONNECTION;
             $schema = self::getSchemaConnection($connection);
             $db = self::getDbConnection($connection);
 
-            if (!$schema->hasTable($tableName))
-            {
+            $result = [
+                'success' => true,
+                'message' => "Tabla {$tableName} verificada y preparada.",
+                'actions' => [],
+                'data' => ['tableName' => $tableName, 'connection' => $connection]
+            ];
+
+            if (!$schema->hasTable($tableName)) {
                 static::createTable($tableName, $schema);
-            } elseif (static::tableHasData($tableName, $db))
-            {
+                $result['actions'][] = 'created';
+            } elseif (static::tableHasData($tableName, $db)) {
                 static::truncateTable($tableName, $db);
+                $result['actions'][] = 'truncated';
+            } else {
+                $result['actions'][] = 'verified';
             }
-            Log::info("Tabla {$tableName} verificada y preparada.");
-            return true;
+
+            Log::info($result['message'], $result['actions']);
+            return $result;
         } catch (Exception $e) {
             Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
-            return false;
+            return [
+                'success' => false,
+                'message' => "Error al verificar y preparar la tabla {$tableName}",
+                'error' => $e->getMessage(),
+                'data' => ['tableName' => $tableName, 'connection' => $connection]
+            ];
         }
     }
+
 
 
     /**
@@ -76,7 +91,7 @@ class TableManagementService implements TableManagementServiceInterface
 
     private static function createTable(string $tableName, $schema): void
     {
-        if($tableName === 'afip_mapuche_sicoss'){
+        if ($tableName === 'afip_mapuche_sicoss') {
             static::createTableMapucheSicoss($tableName, $schema);
         } elseif ($tableName === 'afip_relaciones_activas') {
             static::createTableRelacionesActivas($tableName, $schema);
@@ -84,6 +99,14 @@ class TableManagementService implements TableManagementServiceInterface
     }
 
 
+    /**
+     * Crea la tabla 'afip_mapuche_sicoss' con un esquema de base de datos específico.
+     *
+     * Este método se encarga de crear la tabla 'afip_mapuche_sicoss' con el esquema de base de datos proporcionado.
+     *
+     * @param string $tableName El nombre de la tabla a crear.
+     * @param $schema El esquema de base de datos a utilizar para crear la tabla.
+     */
     private static function createTableMapucheSicoss(string $tableName, $schema): void
     {
         $schema->create($tableName, function (Blueprint $table) {
@@ -158,17 +181,11 @@ class TableManagementService implements TableManagementServiceInterface
         Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
     }
 
-    /**
-     * Crea una tabla en la base de datos para almacenar las relaciones activas.
-     *
-     * @param string $tableName Nombre de la tabla a crear.
-     * @param \Illuminate\Database\Schema\Blueprint $schema Objeto de esquema de base de datos para crear la tabla.
-     * @return void
-     */
+
     private static function createTableRelacionesActivas(string $tableName, $schema): void
     {
-        Schema::create($tableName, function (Blueprint $table) {
-            $table->id();
+        $schema->create($tableName, function (Blueprint $table) {
+            // $table->id();
             $table->char('periodo_fiscal', 6);
             $table->char('codigo_movimiento', 2)->nullable();
             $table->char('tipo_registro', 2)->nullable();
@@ -190,8 +207,9 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('tipo_servicio', 3)->nullable();
             $table->char('categoria_profesional', 6)->nullable();
             $table->char('ccct', 7)->nullable();
-            $table->char('no_hay_datos',4)->nullable();
+            $table->char('no_hay_datos', 4)->nullable();
         });
+        Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
     }
 
     /**
@@ -227,7 +245,7 @@ class TableManagementService implements TableManagementServiceInterface
      * @param string $tableName Nombre de la tabla a verificar.
      * @return bool Verdadero si la tabla está vacía, falso de lo contrario.
      */
-    public static function verifyTableIsEmpty(Model $model,string $tableName): bool
+    public static function verifyTableIsEmpty(Model $model, string $tableName): bool
     {
         $tableIsEmpty = $model->all()->isEmpty();
 
@@ -238,4 +256,3 @@ class TableManagementService implements TableManagementServiceInterface
         }
     }
 }
-

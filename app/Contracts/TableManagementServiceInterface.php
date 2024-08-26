@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 interface TableManagementServiceInterface
 {
+
     /**
      * Verifica y prepara una tabla de base de datos.
      *
      * @param string $tableName Nombre de la tabla a verificar y preparar.
-     * @param string|null $connection Nombre de la conexión de base de datos a utilizar.
-     * @return void
+     * @param string|null $connection Nombre de la conexión de base de datos a utilizar (opcional).
+     * @return array Devuelve un array con información sobre la tabla, como si está vacía o no.
      */
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): bool;
+    public static function verifyAndPrepareTable(string $tableName, string $connection = null): array;
 
     /**
      * Verifica si una tabla de base de datos está vacía.

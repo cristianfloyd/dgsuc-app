@@ -17,5 +17,9 @@ interface DataMapperInterface
     * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
     */
     public function mapearDatosAlModelo(array $datosProcesados):array;
+
+    public function mapDataToModelAfipRelacionesActivas(array $datosProcesados):array;
+
     public function mapLineToDatabaseModel(array $line): array;
+
 }

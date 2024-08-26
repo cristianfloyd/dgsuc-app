@@ -79,11 +79,17 @@ class DataMapperService implements DataMapperInterface
         return $datosMapeados;
     }
 
+    /**
+     * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     * @param array $line Los datos a mapear.
+     * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
+     */
     public function mapLineToDatabaseModel(array $line):array
     {
         return $this->mapDataToModel($line);
     }
 
+    
     /**
     * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
     * @param array $datosProcessados Los datos procesados.

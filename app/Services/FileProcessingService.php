@@ -8,12 +8,14 @@ use App\Livewire\SicossImporter;
 use Illuminate\Support\Facades\Log;
 use App\Livewire\AfipRelacionesActivas;
 use App\Contracts\FileProcessorInterface;
+use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
+use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\TransactionServiceInterface;
 use App\Contracts\FileUploadRepositoryInterface;
-use App\Contracts\WorkflowExecutionInterface;
+use App\Contracts\TableManagementServiceInterface;
 
 class FileProcessingService
 {
@@ -29,6 +31,8 @@ class FileProcessingService
     private $columnMetadata;
     private $sicossImporterService;
     private $workflowExecutionService;
+    private $databaseService;
+    private $tableManagementService;
 
     public function __construct(
         AfipRelacionesActivas $afipRelacionesActivas,
@@ -43,6 +47,8 @@ class FileProcessingService
         ColumnMetadata $columnMetadata,
         SicossImportService $sicossImporterService,
         WorkflowExecutionInterface $workflowExecutionService,
+        DatabaseServiceInterface $databaseService,
+        TableManagementServiceInterface $tableManagementService,
     ) {
         $this->afipRelacionesActivas = $afipRelacionesActivas;
         $this->sicossImporter = $sicossImporter;
@@ -56,6 +62,8 @@ class FileProcessingService
         $this->columnMetadata = $columnMetadata;
         $this->sicossImporterService = $sicossImporterService;
         $this->workflowExecutionService = $workflowExecutionService;
+        $this->databaseService = $databaseService;
+        $this->tableManagementService = $tableManagementService;
     }
 
     public function processFiles()
@@ -166,9 +174,12 @@ class FileProcessingService
             $this->transactionService,
             $this->workflowService,
             $this->columnMetadata,
+            $this->databaseService,
+            $this->tableManagementService,
             $uploadedFileId
         );
 
+        dd($result);
         if ($result['success']) {
             Log::info('ImportAfipRelacionesActivasJob completado exitosamente. ' . $result['message']);
             Log::info('Líneas procesadas: ' . $result['data']['linesProcessed']);

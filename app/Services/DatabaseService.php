@@ -104,56 +104,73 @@ class DatabaseService implements DatabaseServiceInterface
     }
 
     /**
-     * Inserta datos en lotes en la tabla especificada.
+     * Inserta datos de manera masiva en la base de datos utilizando una conexión específica.
      *
-     * @param Collection $mappedData Colección de datos a insertar.
-     * @param string $tableName Nombre de la tabla en la que se insertarán los datos.
-     * @param int $chunkSize Tamaño del lote para las inserciones (predeterminado: 1000).
-     * @return int Número de filas insertadas.
-     * @throws Exception Si ocurre un error durante la inserción.
+     * Este método recibe una colección de datos mapeados y los inserta en lotes en la base de datos
+     * utilizando una conexión específica. Si no se encuentran datos para insertar, se devuelve un
+     * mensaje de error. En caso de éxito, se registra un mensaje informativo en el log y se devuelve
+     * un array con información sobre la inserción. En caso de error, se revierte la transacción y se
+     * registra un mensaje de error en el log.
+     *
+     * @param Collection $mappedData La colección de datos mapeados que se desean insertar.
+     * @param string $tableName El nombre de la tabla donde se insertarán los datos.
+     * @param int $chunkSize El tamaño de los lotes en los que se dividirán los datos. Por defecto es 1000.
+     * @return array Un array con información sobre el resultado de la inserción.
      */
-    public  function insertBulkData(Collection $mappedData, string $tableName, int $chunkSize = self::DEFAULT_CHUNK_SIZE): int
+    public function insertBulkData(Collection $mappedData, string $tableName, int $chunkSize = self::DEFAULT_CHUNK_SIZE): array
     {
-        // Nombre de la conexión de base de datos en el trait MapucheConnectionTrait
         $conexion = $this->getConnectionName();
         Log::info("Iniciando inserción en la tabla: $tableName y la conexion $conexion");
 
-        if($mappedData->isEmpty()){
-            Log::warning("No se encontraron datos para insertar en la tabla: $tableName");
-            return false;
+        if ($mappedData->isEmpty()) {
+            return [
+                'success' => false,
+                'message' => "No se encontraron datos para insertar en la tabla: $tableName",
+                'data' => ['tableName' => $tableName, 'connection' => $conexion]
+            ];
         }
 
         $rowInserted = 0;
 
         try {
-            // Iniciar la transacción en la conexión especificada.
             DB::connection($conexion)->beginTransaction();
 
-            $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted){
-                //eliminar la clave id de cada fila si existe
-                $processedChunk = $chunk->map(function ($data){
-                    $sanitizedData = collect($data)->except('id')->toArray();
-                    return $sanitizedData;
+            $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted) {
+                $processedChunk = $chunk->map(function ($data) {
+                    return collect($data)->except('id')->toArray();
                 });
 
-                // Insertar el lote en la base de datos
                 $inserted = DB::connection($conexion)->table($tableName)->insert($processedChunk->toArray());
                 $rowInserted += $inserted;
             });
 
-            // Confirmar la transacción
             DB::connection($conexion)->commit();
 
             Log::info("Se insertaron $rowInserted filas en la tabla: $tableName");
-            return $rowInserted;
-
+            return [
+                'success' => true,
+                'message' => "Inserción completada con éxito",
+                'data' => [
+                    'tableName' => $tableName,
+                    'connection' => $conexion,
+                    'rowsInserted' => $rowInserted
+                ]
+            ];
         } catch (Exception $e) {
-            // En caso de error, revertir la transacción y lanzar una excepción.
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos en ' . $tableName . ': ' . $e->getMessage());
-            throw new Exception("Error al iniciar la transacción: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => "Error al insertar datos en $tableName",
+                'data' => [
+                    'tableName' => $tableName,
+                    'connection' => $conexion,
+                    'error' => $e->getMessage()
+                ]
+            ];
         }
     }
+
 
     /** Mapea los datos de una línea al modelo AfipRelacionesActivas.
      *
@@ -170,9 +187,8 @@ class DatabaseService implements DatabaseServiceInterface
 
     private function sanitizeData($data)
     {
-        return array_map(function($item) {
+        return array_map(function ($item) {
             return preg_replace('/[\x00-\x1F\x7F-\xFF]/', '?', $item);
         }, $data);
     }
-
 }
