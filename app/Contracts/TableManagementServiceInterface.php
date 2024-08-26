@@ -24,6 +24,4 @@ interface TableManagementServiceInterface
      * @return bool Verdadero si la tabla está vacía, falso en caso contrario.
      */
     public static function verifyTableIsEmpty(Model $model, string $tableName): bool;
-    // public static function verifyAndPrepareTable(string $tableName, string $connection = null): void;
-    // public static function verifyTableIsEmpty(Model $model, string $tableName): bool;
 }

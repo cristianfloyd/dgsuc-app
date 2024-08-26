@@ -25,11 +25,12 @@ interface FileProcessorInterface
      */
     public function getFileDetails(UploadedFile $file): array;
 
+
     /**
-     * Importa un archivo y procesa su contenido.
+     * Maneja la importación de un archivo.
      *
-     * @param UploadedFile $file El archivo cargado a importar.
-     * @param array $columnWidths Las anchas de las columnas del archivo.
+     * @param UploadedFile $file El archivo cargado.
+     * @param string $system El sistema al que pertenece el archivo.
      * @return Collection Los resultados del procesamiento del archivo.
      */
     public function handleFileImport(UploadedFile $file, string $system): Collection;

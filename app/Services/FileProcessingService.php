@@ -166,31 +166,76 @@ class FileProcessingService
     private function processFileAfip($afipFile): array
     {
         $uploadedFileId = $afipFile->id;
+        $processLog = $this->workflowService->getLatestWorkflow();
+        $step = $this->workflowService->getCurrentStep($processLog);
+        $uploadedFile = UploadedFile::findOrFail($uploadedFileId);
+        $system = $uploadedFile->origen;
+        $tableName = 'afip_relaciones_activas';
 
-        $result = ImportAfipRelacionesActivasJob::dispatchSync(
-            $this->fileProcessor,
-            $this->employeeService,
-            $this->validationService,
-            $this->transactionService,
-            $this->workflowService,
-            $this->columnMetadata,
-            $this->databaseService,
-            $this->tableManagementService,
-            $uploadedFileId
-        );
+        // Paso 1: Procesar el archivo y obtener los datos mapeados
+        $mappedData = $this->fileProcessor->handleFileImport($uploadedFile, $system);
+        Log::info('Datos mapeados:', [$mappedData->count()]);
 
-        dd($result);
-        if ($result['success']) {
-            Log::info('ImportAfipRelacionesActivasJob completado exitosamente. ' . $result['message']);
-            Log::info('Líneas procesadas: ' . $result['data']['linesProcessed']);
-        } else {
-            Log::error('Error en ImportAfipRelacionesActivasJob: ' . $result['message']);
-            if (isset($result['error'])) {
-                Log::error('Detalles del error: ' . $result['error']);
-            }
+        // $result = ImportAfipRelacionesActivasJob::dispatchSync(
+        //     $this->fileProcessor,
+        //     $this->employeeService,
+        //     $this->validationService,
+        //     $this->transactionService,
+        //     $this->workflowService,
+        //     $this->columnMetadata,
+        //     $this->databaseService,
+        //     $this->tableManagementService,
+        //     $uploadedFileId
+        // );
+
+
+        if ($mappedData->isEmpty()) {
+            return [
+                'success' => false,
+                'message' => 'No se encontraron datos para procesar',
+                'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step]
+            ];
         }
 
-        return $result;
+        // Paso 2: Verificar y preparar la tabla
+        Log::info('Verificando y preparando tabla:', [$tableName]);
+        $tableResult = $this->tableManagementService->verifyAndPrepareTable($tableName);
+
+        if (!$tableResult['success']) {
+            return [
+                'success' => false,
+                'message' => 'Error al verificar y preparar la tabla: ' . $tableResult['message'],
+                'data' => array_merge(['file' => $uploadedFile->id, 'step' => $step], $tableResult['data']),
+                'error' => $tableResult['error'] ?? null
+            ];
+        }
+
+        Log::info('Tabla verificada y preparada:', $tableResult['actions']);
+
+        // Paso 3: Insertar los datos mapeados en la base de datos
+        $inserted = $this->databaseService->insertBulkData($mappedData, $tableName);
+
+        if ($inserted) {
+            // Actualizar el flujo de trabajo y notificar al usuario
+            $this->workflowService->completeStep($processLog, $step);
+            return [
+                'success' => true,
+                'message' => 'Importación completada con éxito',
+                'data' => [
+                    'file' => $uploadedFile->id,
+                    'tableName' => $tableName,
+                    'step' => $step,
+                    'recordsProcessed' => $mappedData->count()
+                ]
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Error al insertar los datos en la base de datos',
+                'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step]
+            ];
+        }
+
     }
 
 
