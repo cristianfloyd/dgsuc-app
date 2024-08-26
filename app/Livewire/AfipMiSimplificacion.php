@@ -350,6 +350,11 @@ class AfipMiSimplificacion extends Component
         $this->fileProcessingService->processFiles();
     }
 
+    public function generateAfipArt():void
+    {
+        // va a ejecutar la funcion almacenada
+    }
+
     public function render()
     {
         $processLog = ProcessLog::find($this->processLogId);

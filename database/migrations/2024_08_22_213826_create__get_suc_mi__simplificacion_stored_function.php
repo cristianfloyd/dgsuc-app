@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class CreateGetMiSimplificacionStoredFunction extends Migration
+return new class extends Migration
 {
     protected $connection = 'pgsql-mapuche';
 
@@ -131,3 +131,4 @@ class CreateGetMiSimplificacionStoredFunction extends Migration
         DB::unprepared('DROP FUNCTION IF EXISTS suc.get_mi_simplificacion_tt');
     }
 }
+;

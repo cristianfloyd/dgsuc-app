@@ -35,6 +35,11 @@
                     Generar Relaciones
                 </button>
             @endif
+            @if ($ButtonMiSimplificacion)
+            <button type="button" class="btn btn-neutral" wire:click="generateAfipArt">
+                Mapuche ART
+            </button>
+            @endif
         </div>
         <h2>Pasos del Proceso:</h2>
         <ul>

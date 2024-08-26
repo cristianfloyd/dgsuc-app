@@ -19,7 +19,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('uploaded_files', function (Blueprint $table) {
+        Schema::table('suc.uploaded_files', function (Blueprint $table) {
             $table->dropColumn('process_id');
         });
     }

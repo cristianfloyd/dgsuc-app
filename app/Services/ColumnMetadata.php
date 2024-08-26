@@ -49,6 +49,7 @@ class ColumnMetadata
      */
     private function initializeWidths(): void
     {
+
         $this->widthsAfip = [
             6,  // periodo fiscal
             2,  // codigo movimiento

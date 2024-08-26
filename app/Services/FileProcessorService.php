@@ -45,15 +45,16 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     }
 
 
+
     /**
-     * Maneja la importación de un archivo.
+     * Maneja la importación de un archivo subido.
      *
-     * Este método procesa un archivo cargado utilizando los anchos de columna proporcionados.
-     * Si el procesamiento se realiza correctamente, devuelve true. En caso de error, devuelve false.
+     * Este método se encarga de asignar los valores del archivo subido, validar el archivo, establecer el sistema y procesar el archivo utilizando el servicio de procesamiento de archivos.
+     * Finalmente, mapea los datos procesados y los devuelve como una colección.
      *
-     * @param UploadedFile $file El archivo cargado a procesar.
-     * @param array $columnWidths Un array con los anchos de columna a utilizar durante el procesamiento.
-     * @return Collection True si el procesamiento se realizó correctamente, false en caso de error.
+     * @param UploadedFile $file El archivo subido a procesar.
+     * @param string $system El sistema al que pertenece el archivo.
+     * @return Collection Una colección con los datos procesados del archivo.
      */
     public function handleFileImport(UploadedFile $file, string $system): Collection
     {
@@ -253,7 +254,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             return $this->periodoFiscal;
         }
         $campo = substr($line, $posicion, $width);
-        return str_replace(' ', '-', $campo);
+        return str_replace(' ', ' ', $campo);
     }
 
     /**

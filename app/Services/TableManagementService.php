@@ -48,18 +48,43 @@ class TableManagementService implements TableManagementServiceInterface
     }
 
 
+    /**
+     * Obtiene una instancia de la conexión de base de datos especificada.
+     *
+     * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
+     *
+     * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     * @return \Illuminate\Database\Schema\Builder La instancia de la conexión de base de datos.
+     */
     private static function getSchemaConnection(string $connection = null)
     {
         return $connection ? Schema::connection($connection) : Schema::connection(config(self::DEFAULT_CONNECTION));
     }
 
+    /**
+     * Obtiene una instancia de la conexión de base de datos especificada.
+     *
+     * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
+     *
+     * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     * @return \Illuminate\Database\Connection La instancia de la conexión de base de datos.
+     */
     private static function getDbConnection(string $connection = null)
     {
         return $connection ? DB::connection($connection) : DB::connection(config(self::DEFAULT_CONNECTION));
     }
 
-
     private static function createTable(string $tableName, $schema): void
+    {
+        if($tableName === 'afip_mapuche_sicoss'){
+            static::createTableMapucheSicoss($tableName, $schema);
+        } elseif ($tableName === 'afip_relaciones_activas') {
+            static::createTableRelacionesActivas($tableName, $schema);
+        }
+    }
+
+
+    private static function createTableMapucheSicoss(string $tableName, $schema): void
     {
         $schema->create($tableName, function (Blueprint $table) {
             $table->char('periodo_fiscal', 6);
@@ -131,6 +156,42 @@ class TableManagementService implements TableManagementServiceInterface
 
 
         Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
+    }
+
+    /**
+     * Crea una tabla en la base de datos para almacenar las relaciones activas.
+     *
+     * @param string $tableName Nombre de la tabla a crear.
+     * @param \Illuminate\Database\Schema\Blueprint $schema Objeto de esquema de base de datos para crear la tabla.
+     * @return void
+     */
+    private static function createTableRelacionesActivas(string $tableName, $schema): void
+    {
+        Schema::create($tableName, function (Blueprint $table) {
+            $table->id();
+            $table->char('periodo_fiscal', 6);
+            $table->char('codigo_movimiento', 2)->nullable();
+            $table->char('tipo_registro', 2)->nullable();
+            $table->char('cuil', 11)->index();
+            $table->char('marca_trabajador_agropecuario', 1)->nullable();
+            $table->char('modalidad_contrato', 3)->nullable();
+            $table->char('fecha_inicio_relacion_laboral', 10);
+            $table->char('fecha_fin_relacion_laboral', 10)->nullable();
+            $table->char('codigo_o_social', 6)->nullable();
+            $table->char('cod_situacion_baja', 2)->nullable();
+            $table->char('fecha_telegrama_renuncia', 10)->nullable();
+            $table->char('retribucion_pactada', 15);
+            $table->char('modalidad_liquidacion', 1);
+            $table->char('suc_domicilio_desem', 5)->nullable();
+            $table->char('actividad_domicilio_desem', 6)->nullable();
+            $table->char('puesto_desem', 4)->nullable();
+            $table->char('rectificacion', 1)->nullable();
+            $table->char('numero_formulario_agro', 10)->nullable();
+            $table->char('tipo_servicio', 3)->nullable();
+            $table->char('categoria_profesional', 6)->nullable();
+            $table->char('ccct', 7)->nullable();
+            $table->char('no_hay_datos',4)->nullable();
+        });
     }
 
     /**

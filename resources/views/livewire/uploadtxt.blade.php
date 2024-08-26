@@ -21,9 +21,6 @@
             @endphp
 
             <div>
-                {{-- <x-mary-radio  :options="$origenes" option-label="name"
-                    wire:model="selectedOrigen" hint="Elige los archivos a cargar" class="bg-red-50 w-auto" /> --}}
-
                 <x-mary-datepicker label="Periodo Fiscal" wire:model="periodo_fiscal" icon="o-calendar"
                     :config="$config1" />
             </div>

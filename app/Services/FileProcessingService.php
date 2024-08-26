@@ -43,7 +43,7 @@ class FileProcessingService
         ColumnMetadata $columnMetadata,
         SicossImportService $sicossImporterService,
         WorkflowExecutionInterface $workflowExecutionService,
-    ){
+    ) {
         $this->afipRelacionesActivas = $afipRelacionesActivas;
         $this->sicossImporter = $sicossImporter;
         $this->compareCuils = $compareCuils;
@@ -66,55 +66,122 @@ class FileProcessingService
 
 
         // Verificar que ambos archivos tienen el mismo UUID
-        if ($afipFile->process_id !== $mapucheFile->process_id) {
-            Log::error('Los archivos no tienen el mismo UUID.');
-            return;
+        if (!$afipFile || !$mapucheFile || $afipFile->process_id !== $mapucheFile->process_id) {
+            return [
+                'success' => false,
+                'message' => 'Los archivos no están disponibles o no coinciden.',
+                'data' => []
+            ];
+        }
+        // if ($afipFile->process_id !== $mapucheFile->process_id) {
+        //     Log::error('Los archivos no tienen el mismo UUID.');
+        //     return;
+        // }
+
+        $result = [
+            'success' => true,
+            'message' => 'Procesamiento completado',
+            'data' => [
+                'afip' => [],
+                'mapuche' => [],
+                'workflow' => []
+            ]
+        ];
+
+        // Procesar archivo AFIP
+        $afipResult = $this->processFileAfip($afipFile);
+        $result['data']['afip'] = $afipResult;
+        if (!$afipResult['success']) {
+            $result['success'] = false;
+            $result['message'] = 'Error en el procesamiento del archivo AFIP';
+            return $result;
         }
 
+        // Procesar archivo Mapuche
+        $mapucheResult = $this->processFileMapuche($mapucheFile);
+        $result['data']['mapuche'] = $mapucheResult;
+        if (!$mapucheResult['success']) {
+            $result['success'] = false;
+            $result['message'] = 'Error en el procesamiento del archivo Mapuche';
+            return $result;
+        }
 
-        if($afipFile && $mapucheFile)
-        {
-            // Procesar e importar el archivo AFIP
-            $this->processFileAfip($afipFile);
-
-
-            // Procesar e importar el archivo Mapuche
-            $this->processFileMapuche($mapucheFile);
-
-
-            Log::info('Archivos procesados e importados correctamente.');
-
-            // Ejecutar el paso de comparación de CUILs
-            // $this->executeCompareCuilsStep();
-            $this->workflowExecutionService
+        // Ejecutar workflow
+        try {
+            $workflowResult = $this->workflowExecutionService
                 ->setPerPage(10)
                 ->setPeriodoFiscal($afipFile->periodo_fiscal)
                 ->setNroLiqui(1)
                 ->executeWorkflowSteps();
-
-            // Eliminar ambos archivos
-            // $this->deleteFiles($afipFile, $mapucheFile); ese solo elimina de la base de datos, no del disco
-        } else {
-            Log::error('No se han subido ambos archivos.');
+            $result['data']['workflow'] = $workflowResult;
+        } catch (\Exception $e) {
+            $result['success'] = false;
+            $result['message'] = 'Error en la ejecución del workflow: ' . $e->getMessage();
+            $result['data']['workflow'] = ['error' => $e->getMessage()];
         }
+
+        return $result;
+
+
+        // if ($afipFile && $mapucheFile) {
+        //     // Procesar e importar el archivo AFIP
+        //     $this->processFileAfip($afipFile);
+        //
+        //
+        //     // Procesar e importar el archivo Mapuche
+        //     $this->processFileMapuche($mapucheFile);
+        //
+        //
+        //     Log::info('Archivos procesados e importados correctamente.');
+        //
+        //     // Ejecutar el paso de comparación de CUILs
+        //     // $this->executeCompareCuilsStep();
+        //     $this->workflowExecutionService
+        //         ->setPerPage(10)
+        //         ->setPeriodoFiscal($afipFile->periodo_fiscal)
+        //         ->setNroLiqui(1)
+        //         ->executeWorkflowSteps();
+        //
+        //     // Eliminar ambos archivos
+        //     // $this->deleteFiles($afipFile, $mapucheFile); ese solo elimina de la base de datos, no del disco
+        // } else {
+        //     Log::error('No se han subido ambos archivos.');
+        // }
     }
 
-    private function processFileAfip($afipFile)
+    /**
+     * Procesa el archivo AFIP y ejecuta el trabajo de importación de relaciones activas.
+     *
+     * @param UploadedFile $afipFile El archivo AFIP a procesar.
+     * @return array El resultado de la ejecución del trabajo de importación.
+     */
+    private function processFileAfip($afipFile): array
     {
-            $uploadedFileId = $afipFile->id;
+        $uploadedFileId = $afipFile->id;
 
-            // Despachar el Job
-            ImportAfipRelacionesActivasJob::dispatch(
-                $this->fileProcessor,
-                $this->employeeService ,
-                $this->validationService ,
-                $this->transactionService,
-                $this->workflowService,
-                $this->columnMetadata,
-                $uploadedFileId
-            );
-        Log::info('ImportAfipRelacionesActivasJob disparado correctamente.');
+        $result = ImportAfipRelacionesActivasJob::dispatchSync(
+            $this->fileProcessor,
+            $this->employeeService,
+            $this->validationService,
+            $this->transactionService,
+            $this->workflowService,
+            $this->columnMetadata,
+            $uploadedFileId
+        );
+
+        if ($result['success']) {
+            Log::info('ImportAfipRelacionesActivasJob completado exitosamente. ' . $result['message']);
+            Log::info('Líneas procesadas: ' . $result['data']['linesProcessed']);
+        } else {
+            Log::error('Error en ImportAfipRelacionesActivasJob: ' . $result['message']);
+            if (isset($result['error'])) {
+                Log::error('Detalles del error: ' . $result['error']);
+            }
+        }
+
+        return $result;
     }
+
 
     private function processFileMapuche($mapucheFile)
     {
@@ -122,12 +189,45 @@ class FileProcessingService
         $tableName = 'suc.afip_mapuche_sicoss';
         $step = 'import_archivo_mapuche';
 
-        if ($this->sicossImporterService->importarArchivo($mapucheFile, $tableName, $step)) {
-            Log::info('Archivo Mapuche procesado e importado correctamente.');
-        } else {
-            Log::error('Error al procesar el archivo Mapuche.');
-        }
+        try {
+            $result = $this->sicossImporterService->importarArchivo($mapucheFile, $tableName, $step);
 
+            if ($result) {
+                Log::info('Archivo Mapuche procesado e importado correctamente.');
+                return [
+                    'success' => true,
+                    'message' => 'Archivo Mapuche procesado e importado correctamente.',
+                    'data' => [
+                        'tableName' => $tableName,
+                        'step' => $step,
+                        'fileId' => $mapucheFile->id
+                    ]
+                ];
+            } else {
+                Log::error('Error al procesar el archivo Mapuche.');
+                return [
+                    'success' => false,
+                    'message' => 'Error al procesar el archivo Mapuche.',
+                    'data' => [
+                        'tableName' => $tableName,
+                        'step' => $step,
+                        'fileId' => $mapucheFile->id
+                    ]
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Excepción al procesar el archivo Mapuche: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Excepción al procesar el archivo Mapuche: ' . $e->getMessage(),
+                'data' => [
+                    'tableName' => $tableName,
+                    'step' => $step,
+                    'fileId' => $mapucheFile->id,
+                    'error' => $e->getMessage()
+                ]
+            ];
+        }
     }
 
     private function executeCompareCuilsStep()
@@ -153,4 +253,3 @@ class FileProcessingService
         }
     }
 }
-

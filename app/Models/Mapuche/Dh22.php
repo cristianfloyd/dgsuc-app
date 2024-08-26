@@ -139,4 +139,15 @@ class Dh22 extends Model
             return 0;
         }
     }
+
+    /**
+     *  Metodo estatico para verificar si existe un nro_liqui en la tabla dh22.
+     *
+     * @param int $nroLiqui
+     * @return bool True si la función se ejecutó correctamente, false en caso contrario.
+     */
+    public static function verificarNroLiqui($nroLiqui): bool
+    {
+        return static::where('nro_liqui', $nroLiqui)->exists();
+    }
 }

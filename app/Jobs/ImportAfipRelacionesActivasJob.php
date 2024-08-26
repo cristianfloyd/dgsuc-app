@@ -22,6 +22,7 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+
     private $fileProcessor;
     private $employeeService;
     private $validationService;
@@ -37,7 +38,7 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
         WorkflowServiceInterface $workflowService,
         ColumnMetadata $columnMetadata,
         protected $uploadedFileId = null,
-    ){
+    ) {
         $this->fileProcessor = $fileProcessor;
         $this->employeeService = $employeeService;
         $this->validationService = $validationService;
@@ -50,41 +51,52 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(): array
     {
-        if (!$this->uploadedFileId) {
-            throw new \Exception('No se proporcionó un archivo cargado.');
-        }
         $uploadedFile = UploadedFile::findOrFail($this->uploadedFileId);
-        Log::info('Iniciando ImportAfipRelacionesActivasJob');
 
-        try {
-            $processLog = $this->workflowService->getLatestWorkflow();
-            $currentStep = $this->workflowService->getCurrentStep($processLog);
-            $this->workflowService->updateStep($processLog, $currentStep, 'in_progress');
+        return $this->transactionService->executeInTransaction(
+            function () use ($uploadedFile): array {
+                try {
+                    // Validar el archivo seleccionado
+                    $this->validationService->validateSelectedFile($uploadedFile);
 
-            $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
-                $this->validationService->validateSelectedFile($uploadedFile);
-                $filePath = $uploadedFile->file_path;
-                log::info("Desde el Job, invocamos a processFile(): $filePath");
-                $processedLines = $this->fileProcessor->processFile(
-                    $uploadedFile->file_path,
-                    $this->columnMetadata->getWidths(),
-                    $uploadedFile,
-                );
+                    // Obtener la ruta del archivo
+                    $filePath = $uploadedFile->file_path;
+                    Log::info("Iniciando procesamiento del archivo: $filePath");
 
-                $this->employeeService->storeProcessedLines($processedLines->toArray());
-            });
+                    // Procesar el archivo
+                    $processedLines = $this->fileProcessor->processFile(
+                        $uploadedFile->file_path,
+                        $this->columnMetadata->getWidths(),
+                        $uploadedFile
+                    );
 
-            $this->workflowService->completeStep($processLog, 'import_archivo_afip');
+                    $storeResult = $this->employeeService->storeProcessedLines($processedLines->toArray());
 
-            event(new JobProcessed($uploadedFile));
-        } catch (\Exception $e) {
-            $this->workflowService->failStep('import_archivo_afip', $e->getMessage());
-            event(new JobFailed($e->getMessage()));
-
-            // Puedes manejar el error aquí o lanzarlo de nuevo
-            // throw $e;
-        }
+                    if ($storeResult) {
+                        return [
+                            'success' => true,
+                            'message' => "Importación exitosa",
+                            'data' => ['linesProcessed' => count($processedLines)]
+                        ];
+                    } else {
+                        return [
+                            'success' => false,
+                            'message' => "Error al almacenar las líneas procesadas",
+                            'data' => []
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Error durante la importación: " . $e->getMessage());
+                    return [
+                        'success' => false,
+                        'message' => "Error durante la importación: " . $e->getMessage(),
+                        'data' => [],
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+        );
     }
 }
