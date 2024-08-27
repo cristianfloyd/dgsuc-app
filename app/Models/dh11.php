@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class Dh11 extends Model
 {
@@ -285,5 +286,29 @@ class Dh11 extends Model
             default => self::CATEGORIAS[$tipo] ?? [],
         };
         // return self::CATEGORIAS[$tipo] ?? [];
+    }
+
+    /**
+     * Actualiza el campo impp_basic del modelo actual aplicando un porcentaje de incremento.
+     *
+     * @param float $porcentaje El porcentaje de incremento a aplicar.
+     * @return bool Verdadero si la actualización se realizó correctamente, falso en caso contrario.
+     */
+    public function actualizarImppBasicPorPorcentaje(float $porcentaje): bool
+    {
+        try {
+            // Calcular el factor de incremento con 4 decimales de precisión
+            $factor = round(1 + $porcentaje / 100, 4);
+
+            // Actualizar el campo impp_basic
+            $this->impp_basic = round($this->impp_basic * $factor, 2);
+            $this->save();
+
+            return true;
+        } catch (\Exception $e) {
+            // Manejar cualquier error que pueda ocurrir durante la actualización
+            Log::error('Error al actualizar impp_basic: ' . $e->getMessage());
+            return false;
+        }
     }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Dh11Resource\Pages;
 
-use App\Filament\Resources\Dh11Resource;
 use Filament\Actions;
+use App\Filament\Resources\Dh11Resource;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 
 class ListDh11s extends ListRecords
 {
@@ -14,6 +15,13 @@ class ListDh11s extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ActualizarImppBasicWidget::class,
         ];
     }
 }

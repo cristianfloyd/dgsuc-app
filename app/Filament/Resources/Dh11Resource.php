@@ -11,8 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ToggleColumn;
-use App\Filament\Resources\Dh11Resource\Pages;
 use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Resources\Dh11Resource\Pages;
+use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 
 class Dh11Resource extends Resource
 {
@@ -28,13 +29,13 @@ class Dh11Resource extends Resource
         return $form
             ->schema([
                 TextInput::make('impp_basic')
-                        ->numeric()
-                        //->reactive()
-                        ->live()
-                        ->afterStateUpdated(function (Set $set, ?int $state) {
-                            $set('impp_asign', $state);
-                            //fn (Set $set, ?int $state) => $set('impp_asign', $state)
-                        }),
+                    ->numeric()
+                    //->reactive()
+                    ->live()
+                    ->afterStateUpdated(function (Set $set, ?int $state) {
+                        $set('impp_asign', $state);
+                        //fn (Set $set, ?int $state) => $set('impp_asign', $state)
+                    }),
                 TextInput::make('impp_asign')
                     ->numeric(),
                 TextInput::make('codc_categ')
@@ -43,15 +44,15 @@ class Dh11Resource extends Resource
                 TextInput::make('codc_dedic')
                     ->maxLength(4),
                 //TextInput::make('equivalencia')
-                    //->maxLength(3),
+                //->maxLength(3),
                 TextInput::make('tipo_escal')
                     ->maxLength(1),
                 //TextInput::make('nro_escal')
-                    //->numeric(),
+                //->numeric(),
                 // Forms\Components\TextInput::make('sino_mensu')
-                    // ->maxLength(1),
+                // ->maxLength(1),
                 // Forms\Components\TextInput::make('sino_djpat')
-                    // ->maxLength(1),
+                // ->maxLength(1),
                 // Forms\Components\TextInput::make('vig_caano')
                 //     ->numeric(),
                 // Forms\Components\TextInput::make('vig_cames')
@@ -67,7 +68,7 @@ class Dh11Resource extends Resource
                 // Forms\Components\Toggle::make('controlpuntos'),
                 // Forms\Components\Toggle::make('controlpresup'),
                 // Forms\Components\TextInput::make('horasmenanual')
-                    // ->maxLength(1),
+                // ->maxLength(1),
                 // Forms\Components\TextInput::make('cantpuntos')
                 //     ->numeric(),
                 // Forms\Components\TextInput::make('estadolaboral')
@@ -149,17 +150,17 @@ class Dh11Resource extends Resource
             ])
             ->filters([
                 SelectFilter::make('tipo_escal')
-                ->options([
+                    ->options([
                         'D' => 'Docente',
                         'N' => 'NoDo',
                         'S' => 'Superior',
-                ]),
+                    ]),
                 SelectFilter::make('estadolaboral')
-                ->options([
+                    ->options([
                         'A' => 'Ad',
                         'B' => 'Baja',
                         'P' => 'P',
-                ])
+                    ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->modal(),
@@ -184,6 +185,12 @@ class Dh11Resource extends Resource
             'index' => Pages\ListDh11s::route('/'),
             'create' => Pages\CreateDh11::route('/create'),
             //'edit' => Pages\EditDh11::route('/{record}/edit'),
+        ];
+    }
+    public static function getWidgets(): array
+    {
+        return [
+            ActualizarImppBasicWidget::class,
         ];
     }
 }
