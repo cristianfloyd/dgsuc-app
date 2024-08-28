@@ -53,14 +53,14 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     {
         $this->validate();
 
-        $factor = round(1 + $this->porcentaje / 100, 3);
+        $factor = 1 + $this->porcentaje / 100;
 
         $this->previewData = Dh11::select('codc_categ', 'impp_basic')
             ->where('impp_basic', '>', 0)
-            ->where('codc_categ', '=', '1')
+            ->orderBy('codc_categ')
             ->get()
             ->map(function ($item) use ($factor) {
-                $newImppBasic = round($item->impp_basic * $factor, 3);
+                $newImppBasic = $this->round_up($item->impp_basic * $factor, 3);
                 return [
                     'codc_categ' => $item->codc_categ,
                     'impp_basic_actual' => $item->impp_basic,
@@ -90,7 +90,18 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
         $this->porcentaje = null;
     }
 
-
+    /**
+     * Redondea un número hacia arriba con un número específico de decimales.
+     *
+     * @param float $number El número a redondear.
+     * @param int $precision El número de decimales a mantener.
+     * @return float El número redondeado hacia arriba.
+     */
+    function round_up($number, $precision = 2)
+    {
+        $fig = (int) str_pad('1', $precision, '0');
+        return ceil($number * $fig) / $fig;
+    }
 
     public static function canView():bool
     {
