@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Dh61;
+use App\Traits\HasCompositePrimaryKey;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dh11 extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, HasCompositePrimaryKey;
 
     protected $table = 'dh11';
     public $timestamps = false;
@@ -215,6 +216,17 @@ class Dh11 extends Model
         'gastosrepre' => 'double',
         'factor_hs_catedra' => 'double',
     ];
+
+    // Relación con el modelo Dh61
+    public function dh61(): HasMany
+    {
+        return $this->compositeHasMany(
+            Dh61::class,
+            ['codc_categ', 'vig_caano', 'vig_cames'],
+            ['codc_categ', 'vig_caano', 'vig_cames']
+        );
+    }
+
     public function dh31()
     {
         return $this->belongsTo(dh31::class, 'codc_dedic', 'codc_dedic');
