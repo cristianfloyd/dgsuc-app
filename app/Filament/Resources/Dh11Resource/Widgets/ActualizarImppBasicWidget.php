@@ -90,6 +90,14 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
         $this->porcentaje = null;
     }
 
+    public function cancelarCambios()
+    {
+        $this->previewData = collect();
+        $this->showConfirmButton = false;
+        $this->porcentaje = null;
+    }
+
+
     /**
      * Redondea un número hacia arriba con un número específico de decimales.
      *
