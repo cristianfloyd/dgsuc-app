@@ -2,6 +2,9 @@
 
 namespace App\Services\Mapuche;
 
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
+
 class PeriodoFiscalService
 {
     /**
@@ -13,6 +16,7 @@ class PeriodoFiscalService
     public function setPeriodoFiscal(int $year, int $month): void
     {
         session(['year' => $year, 'month' => $month]);
+        Log::debug("Período fiscal establecido en la sesión: $year-$month");
     }
 
     /**
@@ -23,8 +27,8 @@ class PeriodoFiscalService
     public function getPeriodoFiscal(): array
     {
         return [
-            'year' => session('fiscal_year'),
-            'month' => session('fiscal_month'),
+            'year' => session('year'),
+            'month' => session('month'),
         ];
     }
 }

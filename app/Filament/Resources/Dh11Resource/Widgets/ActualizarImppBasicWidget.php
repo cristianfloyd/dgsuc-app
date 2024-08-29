@@ -26,12 +26,16 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     private $periodoFiscalService;
 
 
-    public function mount( CategoryUpdateServiceInterface $categoryUpdateService, PeriodoFiscalService $periodoFiscalService): void
+    public function boot(PeriodoFiscalService $periodoFiscalService, CategoryUpdateServiceInterface $categoryUpdateService): void
+    {
+        $this->periodoFiscalService = $periodoFiscalService;
+        $this->categoryUpdateService = $categoryUpdateService;
+
+    }
+    public function mount(): void
     {
         $this->form->fill();
         $this->previewData = collect();
-        $this->categoryUpdateService = $categoryUpdateService;
-        $this->periodoFiscalService = $periodoFiscalService;
     }
 
     public function form(Form $form): Form
