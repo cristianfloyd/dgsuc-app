@@ -9,15 +9,61 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dh61 extends Model
 {
-    use MapucheConnectionTrait, HasCompositePrimaryKey;
+    use HasCompositePrimaryKey;
+
+    protected $connection = 'pgsql-mapuche';
 
     // Definimos la tabla asociada al modelo
-    protected $table = 'dh61';
+    protected $table = 'mapuche.dh61';
 
     // Definimos la clave primaria compuesta
     protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
     public $incrementing = false;
     protected $keyType = 'string';
+
+    // Definir los atributos que se pueden asignar en masa
+    protected $fillable = [
+        'codc_categ',
+        'equivalencia',
+        'tipo_escal',
+        'nro_escal',
+        'impp_basic',
+        'codc_dedic',
+        'sino_mensu',
+        'sino_djpat',
+        'vig_caano',
+        'vig_cames',
+        'desc_categ',
+        'sino_jefat',
+        'impp_asign',
+        'computaantig',
+        'controlcargos',
+        'controlhoras',
+        'controlpuntos',
+        'controlpresup',
+        'horasmenanual',
+        'cantpuntos',
+        'estadolaboral',
+        'nivel',
+        'tipocargo',
+        'remunbonif',
+        'noremunbonif',
+        'remunnobonif',
+        'noremunnobonif',
+        'otrasrem',
+        'dto1610',
+        'reflaboral',
+        'refadm95',
+        'critico',
+        'jefatura',
+        'gastosrepre',
+        'codigoescalafon',
+        'noinformasipuver',
+        'noinformasirhu',
+        'imppnooblig',
+        'aportalao',
+        'factor_hs_catedra',
+    ];
 
     // Definimos los tipos de datos de las columnas
     protected $casts = [

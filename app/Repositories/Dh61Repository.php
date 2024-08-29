@@ -57,7 +57,6 @@ class Dh61Repository implements Dh61RepositoryInterface
             'imppnooblig' => $category->imppnooblig,
             'aportalao' => $category->aportalao,
             'factor_hs_catedra' => $category->factor_hs_catedra,
-
         ]);
     }
 }
