@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\Dh11Resource\Widgets;
 
-
+use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh11;
+use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
@@ -21,11 +22,16 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     public Collection $previewData;
     public bool $showConfirmButton = false;
 
+    private $categoryUpdateService;
+    private $periodoFiscalService;
 
-    public function mount(): void
+
+    public function mount( CategoryUpdateServiceInterface $categoryUpdateService, PeriodoFiscalService $periodoFiscalService): void
     {
         $this->form->fill();
         $this->previewData = collect();
+        $this->categoryUpdateService = $categoryUpdateService;
+        $this->periodoFiscalService = $periodoFiscalService;
     }
 
     public function form(Form $form): Form
@@ -57,6 +63,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
         $this->previewData = Dh11::select('codc_categ', 'impp_basic')
             ->where('impp_basic', '>', 0)
+            ->where('codc_dedic', '=', 'NODO')
             ->orderBy('codc_categ')
             ->get()
             ->map(function ($item) use ($factor) {
@@ -72,13 +79,30 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
     public function confirmarCambios(): void
     {
-        $factor = round(1 + $this->porcentaje / 100, 4);
+        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
 
-        Dh11::chunk(100, function ($items) use ($factor) {
-            foreach ($items as $item) {
-                $item->actualizarImppBasicPorPorcentaje($this->porcentaje);
+        if (!$periodoFiscal['year'] || !$periodoFiscal['month']) {
+            $this->addError('periodo_fiscal', 'Debe seleccionar un período fiscal antes de actualizar.');
+            return;
+        }
+
+        foreach ($this->previewData as $codc_categ => $data) {
+            /**
+             * Obtiene la instancia de la categoría Dh11 con el código de categoría especificado.
+             *
+             * @param string $codc_categ El código de categoría a buscar.
+             * @return Dh11|null La instancia de la categoría Dh11 si se encuentra, de lo contrario null.
+             */
+            $categoria = Dh11::where('codc_categ', $codc_categ)->first();
+            // Verifica si se encontró una categoría con el código de categoría especificado.
+            if ($categoria) {
+                $this->categoryUpdateService->updateCategoryWithHistory(
+                    $categoria,
+                    $data['impp_basic_nuevo'],
+                    $periodoFiscal
+                );
             }
-        });
+        }
 
         Notification::make()
             ->title('Cambios confirmados')

@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh61;
-use App\Traits\HasCompositePrimaryKey;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dh11 extends Model
 {
-    use MapucheConnectionTrait, HasCompositePrimaryKey;
+    use MapucheConnectionTrait;
 
     protected $table = 'dh11';
     public $timestamps = false;
@@ -220,11 +219,9 @@ class Dh11 extends Model
     // Relación con el modelo Dh61
     public function dh61(): HasMany
     {
-        return $this->compositeHasMany(
-            Dh61::class,
-            ['codc_categ', 'vig_caano', 'vig_cames'],
-            ['codc_categ', 'vig_caano', 'vig_cames']
-        );
+        return $this->hasMany(Dh61::class,'codc_categ','codc_categ')
+            ->where('dh61.vig_caano', '=', $this->vig_caano)
+            ->where('dh61.vig_cames', '=', $this->vig_cames);
     }
 
     public function dh31()
@@ -308,19 +305,7 @@ class Dh11 extends Model
      */
     public function actualizarImppBasicPorPorcentaje(float $porcentaje): bool
     {
-        try {
-            // Calcular el factor de incremento con 4 decimales de precisión
-            $factor = round(1 + $porcentaje / 100, 4);
-
-            // Actualizar el campo impp_basic
-            $this->impp_basic = round($this->impp_basic * $factor, 2);
-            $this->save();
-
-            return true;
-        } catch (\Exception $e) {
-            // Manejar cualquier error que pueda ocurrir durante la actualización
-            Log::error('Error al actualizar impp_basic: ' . $e->getMessage());
-            return false;
-        }
+        $service = app(CategoryUpdateServiceInterface::class);
+        return $service->updateCategoryWithHistory($this, $porcentaje);
     }
 }

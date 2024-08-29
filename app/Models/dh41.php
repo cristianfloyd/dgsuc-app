@@ -6,7 +6,7 @@ use App\Models\Mapuche\Dh22;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class dh41 extends Model
+class Dh41 extends Model
 {
 	use HasFactory;
 	protected $connection = 'pgsql-mapuche';
