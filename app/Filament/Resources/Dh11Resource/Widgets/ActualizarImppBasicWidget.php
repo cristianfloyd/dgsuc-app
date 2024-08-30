@@ -102,7 +102,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
             if ($categoria) {
                 $this->categoryUpdateService->updateCategoryWithHistory(
                     $categoria,
-                    $data['impp_basic_nuevo'],
+                    $this->porcentaje,
                     $periodoFiscal
                 );
             }

@@ -15,6 +15,7 @@ class Dh61 extends Model
 
     // Definimos la tabla asociada al modelo
     protected $table = 'mapuche.dh61';
+    public $timestamps = false;
 
     // Definimos la clave primaria compuesta
     protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];

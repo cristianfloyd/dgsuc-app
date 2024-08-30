@@ -26,7 +26,7 @@ trait MapucheConnectionTrait
      */
     public function getTable()
     {
-        return 'mapuche.' . parent::getTable();
+        $table = parent::getTable();
+        return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
-
 }

@@ -24,7 +24,7 @@ class CategoryUpdateService implements CategoryUpdateServiceInterface
      * Actualiza la categoría con un registro histórico.
      *
      * @param Dh11 $category La categoría a actualizar.
-     * @param float $percentage El porcentaje a actualizar en el campo impp_basic de Dh11.
+     * @param int $percentage El porcentaje a actualizar en el campo impp_basic de Dh11.
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */
     public function updateCategoryWithHistory(Dh11 $category, float $percentage,array $periodoFiscal ): bool
