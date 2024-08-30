@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use App\Models\Dh99;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
 
@@ -26,9 +27,24 @@ class PeriodoFiscalService
      */
     public function getPeriodoFiscal(): array
     {
+        if (session()->has('year') && session()->has('month')) {
+            return [
+                'year' => session('year'),
+                'month' => session('month'),
+            ];
+        } else {
+            // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
+            return $this->getPeriodoFiscalFromDatabase();
+
+        }
+    }
+
+    private function getPeriodoFiscalFromDatabase(): array
+    {
+        $periodoFiscal = Dh99::first();
         return [
-            'year' => session('year'),
-            'month' => session('month'),
+            'year' => $periodoFiscal->per_anoct,
+            'month' => $periodoFiscal->per_mesct,
         ];
     }
 }

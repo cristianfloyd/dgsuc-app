@@ -89,7 +89,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
             $this->addError('periodo_fiscal', 'Debe seleccionar un período fiscal antes de actualizar.');
             return;
         }
-
+        // dd($this->previewData);
         foreach ($this->previewData as $codc_categ => $data) {
             /**
              * Obtiene la instancia de la categoría Dh11 con el código de categoría especificado.
@@ -97,7 +97,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
              * @param string $codc_categ El código de categoría a buscar.
              * @return Dh11|null La instancia de la categoría Dh11 si se encuentra, de lo contrario null.
              */
-            $categoria = Dh11::where('codc_categ', $codc_categ)->first();
+            $categoria = Dh11::where('codc_categ','=', $codc_categ)->first();
             // Verifica si se encontró una categoría con el código de categoría especificado.
             if ($categoria) {
                 $this->categoryUpdateService->updateCategoryWithHistory(
