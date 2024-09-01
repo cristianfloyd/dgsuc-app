@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use Mockery;
 use Tests\TestCase;
 use App\Models\AfipArt;
+use Mockery\MockInterface;
 use App\Services\AfipArtService;
 use App\Repositories\AfipArtRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,12 +15,16 @@ class AfipArtServiceTest extends TestCase
     use RefreshDatabase;
 
     protected $afipArtService;
-    protected $afipArtRepository;
+    protected AfipArtRepository|MockInterface $afipArtRepository;
+
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->afipArtRepository = Mockery::mock(AfipArtRepository::class);
+        $this->afipArtRepository->shouldReceive('getAll')->andReturn(collect([]));
+
         $this->afipArtService = new AfipArtService($this->afipArtRepository);
     }
 
