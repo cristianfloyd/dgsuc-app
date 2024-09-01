@@ -17,14 +17,19 @@ use Filament\Forms\Components\Actions\Action;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Contracts\CategoryUpdateServiceInterface;
+use App\Dh11Service;
 use App\Services\Dh11RestoreService;
 use Filament\Forms\Components\Actions;
-use Livewire\Attributes\On;// Importar la clase Actions
+use App\Events\PeriodoFiscalActualizado;
+use Livewire\Attributes\On;
+use Spatie\LaravelIgnition\Recorders\DumpRecorder\Dump;
 
 class ActualizarImppBasicWidget extends Widget implements HasForms
 {
     use InteractsWithForms, CategoriasConstantTrait;
     protected static string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
+
+
     public ?float $porcentaje = null;
     public Collection $previewData;
     public bool $showConfirmButton = false;
@@ -34,16 +39,18 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     private $periodoFiscalService;
     private $periodoFiscal;
     private $dh11RestoreService;
-
+    private $dh11Service;
 
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
         CategoryUpdateServiceInterface $categoryUpdateService,
-        Dh11RestoreService $dh11RestoreService,): void
+        Dh11RestoreService $dh11RestoreService,
+        Dh11Service $dh11Service): void
     {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->categoryUpdateService = $categoryUpdateService;
         $this->dh11RestoreService = $dh11RestoreService;
+        $this->dh11Service = $dh11Service;
     }
     public function mount(): void
     {
@@ -58,7 +65,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
             ->schema([
                 Select::make('codigoescalafon')->label('Escalafon')
                     ->options(function () {
-                        return collect(['TODOS' => 'Todos'])
+                        $codc_categs = collect(['TODO' => 'Todos'])
                             ->merge(
                                 Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
                                     ->select('dh89.descesc', 'dh11.codigoescalafon')
@@ -71,14 +78,18 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                                 'AUTU' => 'Autoridad Universitario',
                                 'AUTS' => 'Autoridad Secundario',
                             ]);
+                        return $codc_categs;
                 })
                 ->reactive()
                 ->afterStateUpdated(function ($state, callable $set) {
                     $codc_categs = match ($state) {
+                        'DOCE' => array_merge(self::CATEGORIAS['DOCS'],self::CATEGORIAS['DOCU']), // es la suma de DOCS + DOCU
                         'DOCS' => self::CATEGORIAS['DOCS'],
                         'DOCU' => self::CATEGORIAS['DOCU'],
                         'AUTU' => self::CATEGORIAS['AUTU'],
                         'AUTS' => self::CATEGORIAS['AUTS'],
+                        'NODO' => self::CATEGORIAS['NODO'],
+                        'TODO' => $this->dh11Service->getAllCodcCateg(),
                         default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
                     };
                     session(['selected_codc_categs' => $codc_categs]);
@@ -95,11 +106,25 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                             ->label('Previsualizar')
                             ->icon('heroicon-m-arrow-left-circle')
                             ->requiresConfirmation()
+                            ->tooltip('Establecer el porcentaje de incremento')
                             ->action('previsualizar'),
                     ]),
                 Actions::make([
                     Action::make('restore')->label('Restaurar')->icon('heroicon-m-arrow-path')
-                        ->color('info')->requiresConfirmation()->action('restoreData'),
+                        ->color('info')
+                        ->badge(function(){
+                             // Verificar si $this->periodoFiscal es válido antes de acceder a sus índices
+                            if (isset($this->periodoFiscal['year']) && isset($this->periodoFiscal['month'])) {
+                                $year = $this->periodoFiscal['year'];
+                                $month = $this->periodoFiscal['month'];
+                                return "{$year}-{$month}";
+                            }
+                            $year = $this->periodoFiscalService->getPeriodoFiscal()['year'];
+                            $month = $this->periodoFiscalService->getPeriodoFiscal()['month'];
+                            return "{$year}-{$month}"; // Valor por defecto en caso de que no esté inicializado
+                        })
+                        ->requiresConfirmation()
+                        ->action('restoreData'),
                 ])
                 ->alignCenter()
                 ->verticallyAlignEnd()
@@ -114,13 +139,11 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
         $this->validate();
 
-        // Log::debug($selectedCategs);
 
         $factor = 1 + $this->porcentaje / 100;
 
         $this->previewData = Dh11::select('codc_categ', 'impp_basic')
             ->where('impp_basic', '>', 0)
-            // ->where('codc_dedic', '=', 'NODO')
             ->whereIn('codc_categ', $selectedCategs)
             ->orderBy('codc_categ')
             ->get()
@@ -137,13 +160,15 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
     public function confirmarCambios(): void
     {
-        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
+        // Verificar si $this->periodoFiscal es válido
+        $periodoFiscal =  $this->periodoFiscalService->getPeriodoFiscal();
+        Log::debug("Periodo fiscal en confirmarCambios: {$periodoFiscal['year']} - {$periodoFiscal['month']}");
+
 
         if (!$periodoFiscal['year'] || !$periodoFiscal['month']) {
             $this->addError('periodo_fiscal', 'Debe seleccionar un período fiscal antes de actualizar.');
             return;
         }
-        // Log::debug($this->previewData);
 
         try {
             foreach ($this->previewData as $data) {
@@ -204,7 +229,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal($periodoFiscal): void
     {
-        Log::debug('Periodo fiscal actualizado: ' . $periodoFiscal);
+        Log::debug('Periodo fiscal actualizado en imppWidget:' . json_encode($periodoFiscal));
         $this->resetForm();
         $this->periodoFiscal = $periodoFiscal;
         $this->addNotification('Período fiscal actualizado correctamente.');

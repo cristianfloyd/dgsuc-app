@@ -28,8 +28,10 @@ class PeriodoFiscalService
      */
     public function setPeriodoFiscal(int $year, int $month): void
     {
-        session(['year' => $year, 'month' => $month]);
-        Log::debug("Período fiscal establecido en la sesión: $year-$month");
+        $formattedYear = strval($year);
+        $formattedMonth = sprintf('%02d', $month);
+        session(['year' => $formattedYear, 'month' => $formattedMonth]);
+        Log::debug("Período fiscal establecido en la sesión: $formattedYear-$formattedMonth");
     }
 
     /**
@@ -39,7 +41,8 @@ class PeriodoFiscalService
      */
     public function getPeriodoFiscal(): array
     {
-        if (session()->has('year') && session()->has('month')) {
+        if (session()->has(['year', 'month'])) {
+            log::debug("Período fiscal obtenido de la sesión: " . session('year') . "-" . session('month'));
             return [
                 'year' => session('year'),
                 'month' => session('month'),
@@ -51,12 +54,23 @@ class PeriodoFiscalService
         }
     }
 
+    /**
+     * Obtiene el periodo fiscal de la base de datos.
+     *
+     * @return array Un array con el año y el mes del periodo fiscal en el formato ['year' => 'YYYY', 'month' => 'MM'].
+     */
     public function getPeriodoFiscalFromDatabase(): array
     {
+        // Obtiene el primer registro de la tabla Dh99. Asumimos que siempre existe un periodo fiscal definido.
         $periodoFiscal = Dh99::first();
+
+        // Formatea el año y el mes al formato deseado.
+        $formattedYear = strval($periodoFiscal->per_anoct);
+        $formattedMonth = sprintf('%02d', $periodoFiscal->per_mesct);
+
         return [
-            'year' => $periodoFiscal->per_anoct,
-            'month' => $periodoFiscal->per_mesct,
+            'year' => $formattedYear,
+            'month' => $formattedMonth,
         ];
     }
 

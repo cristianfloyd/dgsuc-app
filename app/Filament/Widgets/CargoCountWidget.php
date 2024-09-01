@@ -49,7 +49,7 @@ class CargoCountWidget extends BaseWidget
 
         return [
             Stat::make('Total de Cargos', $cargoCount)
-                ->description('Basado en el escalafon: ' . $codigoescalafon)
+                ->description("Basado en el escalafon: $codigoescalafon")
                 ->descriptionIcon('heroicon-m-academic-cap'),
         ];
     }

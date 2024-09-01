@@ -24,19 +24,25 @@ class Dashboard extends \Filament\Pages\Dashboard
                 DatePicker::make('endDate')->label('Fin'),
                 Select::make('codigoescalafon')->label('Escalafon')
                     ->options(function () {
-                        return collect(['TODOS' => 'Todos'])
+                        $codc_categs = collect(['TODO' => 'Todos'])
                         ->merge(
+                            /**
+                             * La colección se construye combinando los códigos de escalafón distintos obtenidos de la tabla 'dh11' con las descripciones de escalafón de la tabla 'dh89', y luego se agrega la opción 'Todos' y las opciones para los diferentes tipos de escalafón.
+                             *
+                             * @return \Illuminate\Support\Collection Una colección de opciones de escalafón.
+                             */
                             Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
-                            ->select('dh89.descesc', 'dh11.codigoescalafon')
-                            ->distinct()
-                            ->pluck('dh89.descesc', 'dh11.codigoescalafon')
-                            ->merge([
+                                ->select('dh89.descesc', 'dh11.codigoescalafon')
+                                ->distinct()
+                                ->pluck('dh89.descesc', 'dh11.codigoescalafon')
+                                ->merge([
                                 'DOCS' => 'Docente Secundario',
                                 'DOCU' => 'Docente Universitario',
                                 'AUTU' => 'Autoridad Universitario',
                                 'AUTS' => 'Autoridad Secundario',
                             ])
                         );
+                        return $codc_categs;
                     })
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {

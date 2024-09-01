@@ -2,9 +2,11 @@
 namespace App\Repositories;
 
 use App\Models\Dh11;
-use App\Services\Mapuche\PeriodoFiscalService;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Dh61;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Collection;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
@@ -73,7 +75,39 @@ class Dh11Repository implements Dh11RepositoryInterface
      */
     public function updateOrCreate(array $attributes, array $values = []): Dh11
     {
-        return Dh11::updateOrCreate($attributes, $values);
+        try {
+            // Intenta actualizar o crear el registro en la tabla Dh11
+            return Dh11::updateOrCreate($attributes, $values);
+        } catch (QueryException $e) {
+            // Manejo de excepción en caso de violación de unicidad
+            if ($e->getCode() == '23505') {
+                // Si el registro ya existe, intenta actualizarlo
+                $dh11 = Dh11::where($attributes)->first();
+                if ($dh11) {
+                    $dh11->update($values);
+                    return $dh11;
+                }
+            }
+            // Lanza la excepción si no es una violación de unicidad
+            throw $e;
+        }
+    }
+
+    /**
+     * Actualiza un registro Dh11 en la base de datos.
+     *
+     * @param array $attributes Atributos para identificar el registro.
+     * @param DH61 $values Valores a actualizar.
+     * @return bool
+     */
+    public function update(array $attributes, Dh61 $values): bool
+    {
+        $dh11 = Dh11::where('codc_categ','=', $attributes['codc_categ'])->first();
+
+        if ($dh11) {
+            return $dh11->update($values->toArray());
+        }
+        return false;
     }
 
     /**
@@ -84,5 +118,15 @@ class Dh11Repository implements Dh11RepositoryInterface
     public function getAllCurrentRecords(): Collection
     {
         return Dh11::all()->where('impp_basic', '>', 0);
+    }
+
+    /**
+     * Obtiene una lista de todas las codc_categ.
+     *
+     * @return array
+     */
+    public function getAllCodcCateg(): array
+    {
+        return Dh11::pluck('codc_categ')->toArray();
     }
 }

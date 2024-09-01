@@ -5,11 +5,12 @@ namespace App\Filament\Widgets;
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Components\Actions;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Actions\Action;
+use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
+use App\Events\PeriodoFiscalActualizado;
 
 /**
  * Widget que permite seleccionar el período fiscal actual.
@@ -40,9 +41,10 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
         $this->form->fill();
     }
 
-    public function submit()
+    public function submit(): void
     {
         $this->periodoFiscalService->setPeriodoFiscal($this->year, $this->month);
+        $this->periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
         $this->dispatch('fiscalPeriodUpdated');
     }
 
@@ -63,30 +65,19 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             Actions::make([
                     Action::make('set')->label('Establecer')
                         ->color('success')
+                        ->button()
+                        ->badge("{$this->year}{$this->month}")
                         ->icon('heroicon-o-cog-6-tooth')
-                        ->action('submit')
-                        ->dispatch('updated-periodo-fiscal', [$this->periodoFiscal]),
+                        ->action(function ($livewire) {
+                            $this->submit();
+                            $livewire->dispatch('updated-periodo-fiscal', $this->periodoFiscal);
+                        }),
                 ])
                     ->alignCenter()
                     ->verticallyAlignEnd(),
             ])
             ->columns(3);
     }
-
-    // protected function getFormSchema(): array
-    // {
-    //     return [
-    //         Select::make('year aaaa')
-    //             ->label('Año Fiscal')
-    //             ->options($this->getYearOptions())
-    //             ->required(),
-    //         Select::make('month')
-    //             ->label('Mes Fiscal')
-    //             ->options($this->getMonthOptions())
-    //             ->required(),
-    //     ];
-    // }
-
 
     private function getYearOptions(): array
     {
@@ -102,6 +93,8 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
         ];
     }
+
+
 
     public static function canView(): bool
     {
