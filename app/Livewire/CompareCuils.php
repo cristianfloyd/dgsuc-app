@@ -6,7 +6,7 @@ use App\Models\Dh01;
 use App\Models\Dh03;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Enum\WorkflowStatus;
+use App\Enums\WorkflowStatus;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 use App\Services\TempTableService;

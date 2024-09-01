@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Dhb3;
+use App\Models\Dhe5;
+use App\Models\Dhe6;
+use App\Models\Dhe7;
+use App\Models\Dhe8;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
