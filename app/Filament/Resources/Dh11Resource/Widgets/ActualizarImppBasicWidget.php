@@ -2,39 +2,53 @@
 
 namespace App\Filament\Resources\Dh11Resource\Widgets;
 
-use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh11;
-use App\Services\Mapuche\PeriodoFiscalService;
+use App\Models\Dh89;
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
+use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\Actions\Action;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Filament\Forms\Concerns\InteractsWithForms;
+use App\Contracts\CategoryUpdateServiceInterface;
+use App\Services\Dh11RestoreService;
+use Filament\Forms\Components\Actions;
+use Livewire\Attributes\On;// Importar la clase Actions
 
 class ActualizarImppBasicWidget extends Widget implements HasForms
 {
-    use InteractsWithForms;
+    use InteractsWithForms, CategoriasConstantTrait;
     protected static string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
     public ?float $porcentaje = null;
     public Collection $previewData;
     public bool $showConfirmButton = false;
+    public ?string $codigoescalafon = null;
 
     private $categoryUpdateService;
     private $periodoFiscalService;
+    private $periodoFiscal;
+    private $dh11RestoreService;
 
 
-    public function boot(PeriodoFiscalService $periodoFiscalService, CategoryUpdateServiceInterface $categoryUpdateService): void
+    public function boot(
+        PeriodoFiscalService $periodoFiscalService,
+        CategoryUpdateServiceInterface $categoryUpdateService,
+        Dh11RestoreService $dh11RestoreService,): void
     {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->categoryUpdateService = $categoryUpdateService;
-
+        $this->dh11RestoreService = $dh11RestoreService;
     }
     public function mount(): void
     {
         $this->form->fill();
+        $this->periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
         $this->previewData = collect();
     }
 
@@ -42,6 +56,33 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     {
         return $form
             ->schema([
+                Select::make('codigoescalafon')->label('Escalafon')
+                    ->options(function () {
+                        return collect(['TODOS' => 'Todos'])
+                            ->merge(
+                                Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
+                                    ->select('dh89.descesc', 'dh11.codigoescalafon')
+                                    ->distinct()
+                                    ->pluck('dh89.descesc', 'dh11.codigoescalafon')
+                            )
+                            ->merge([
+                                'DOCS' => 'Docente Secundario',
+                                'DOCU' => 'Docente Universitario',
+                                'AUTU' => 'Autoridad Universitario',
+                                'AUTS' => 'Autoridad Secundario',
+                            ]);
+                })
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $codc_categs = match ($state) {
+                        'DOCS' => self::CATEGORIAS['DOCS'],
+                        'DOCU' => self::CATEGORIAS['DOCU'],
+                        'AUTU' => self::CATEGORIAS['AUTU'],
+                        'AUTS' => self::CATEGORIAS['AUTS'],
+                        default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
+                    };
+                    session(['selected_codc_categs' => $codc_categs]);
+                }),
                 TextInput::make('porcentaje')
                     ->label('Porcentaje')
                     ->numeric()
@@ -56,18 +97,31 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                             ->requiresConfirmation()
                             ->action('previsualizar'),
                     ]),
-            ]);
+                Actions::make([
+                    Action::make('restore')->label('Restaurar')->icon('heroicon-m-arrow-path')
+                        ->color('info')->requiresConfirmation()->action('restoreData'),
+                ])
+                ->alignCenter()
+                ->verticallyAlignEnd()
+            ])
+            ->columns(3)
+            ;
     }
 
     public function previsualizar(): void
     {
+        $selectedCategs = Session('selected_codc_categs');
+
         $this->validate();
+
+        // Log::debug($selectedCategs);
 
         $factor = 1 + $this->porcentaje / 100;
 
         $this->previewData = Dh11::select('codc_categ', 'impp_basic')
             ->where('impp_basic', '>', 0)
-            ->where('codc_dedic', '=', 'NODO')
+            // ->where('codc_dedic', '=', 'NODO')
+            ->whereIn('codc_categ', $selectedCategs)
             ->orderBy('codc_categ')
             ->get()
             ->map(function ($item) use ($factor) {
@@ -89,40 +143,96 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
             $this->addError('periodo_fiscal', 'Debe seleccionar un período fiscal antes de actualizar.');
             return;
         }
-        // dd($this->previewData);
-        foreach ($this->previewData as $codc_categ => $data) {
-            /**
-             * Obtiene la instancia de la categoría Dh11 con el código de categoría especificado.
-             *
-             * @param string $codc_categ El código de categoría a buscar.
-             * @return Dh11|null La instancia de la categoría Dh11 si se encuentra, de lo contrario null.
-             */
-            $categoria = Dh11::where('codc_categ','=', $codc_categ)->first();
-            // Verifica si se encontró una categoría con el código de categoría especificado.
-            if ($categoria) {
-                $this->categoryUpdateService->updateCategoryWithHistory(
-                    $categoria,
-                    $this->porcentaje,
-                    $periodoFiscal
-                );
+        // Log::debug($this->previewData);
+
+        try {
+            foreach ($this->previewData as $data) {
+                $codc_categ = trim($data['codc_categ']);
+                $categoria = Dh11::where('codc_categ', $codc_categ)->first();
+
+                if ($categoria) {
+                    $this->categoryUpdateService->updateCategoryWithHistory(
+                        $categoria,
+                        $this->porcentaje,
+                        $periodoFiscal
+                    );
+                } else {
+                    Log::warning("No se encontró la categoría con código: {$codc_categ}");
+                }
             }
+
+            $this->addNotification('Cambios aplicados correctamente');
+            $this->resetForm();
+
+        } catch (\Exception $e) {
+            Log::error('Error al confirmar cambios: ' . $e->getMessage());
+            $this->addError('general', 'Ocurrió un error al aplicar los cambios. Por favor, inténtelo de nuevo.');
         }
-
-        Notification::make()
-            ->title('Cambios confirmados')
-            ->success()
-            ->send();
-
-        $this->previewData = collect();
-        $this->showConfirmButton = false;
-        $this->porcentaje = null;
     }
 
+    /**
+     * Restaura los datos de las categorías de la tabla Dh11 para un período fiscal específico.
+     *
+     * Este método se encarga de restaurar los datos de las categorías de la tabla Dh11 para un período fiscal determinado.
+     * Si no se selecciona un período fiscal válido, se mostrará un mensaje de error.
+     * En caso de éxito, se mostrará una notificación indicando que las categorías se han restaurado correctamente.
+     * Si ocurre un error durante el proceso, se mostrará un mensaje de error general.
+     */
+    public function restoreData(): void
+    {
+        try {
+            $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
+
+            if (!$periodoFiscal['year'] || !$periodoFiscal['month']) {
+                $this->addError('periodo_fiscal', 'Debe seleccionar un período fiscal antes de restaurar.');
+                return;
+            }
+
+            $this->dh11RestoreService->restoreFiscalPeriod(
+                $periodoFiscal['year'],
+                $periodoFiscal['month']
+            );
+
+            $this->addNotification('Categorías restauradas correctamente.');
+
+        } catch (\Exception $e) {
+            Log::error('Error al restaurar datos: ' . $e->getMessage());
+            $this->addError('general', 'Ocurrió un error al restaurar los datos. Por favor, inténtelo de nuevo.');
+        }
+    }
+
+    #[On('updated-periodo-fiscal')]
+    public function updatedPeriodoFiscal($periodoFiscal): void
+    {
+        Log::debug('Periodo fiscal actualizado: ' . $periodoFiscal);
+        $this->resetForm();
+        $this->periodoFiscal = $periodoFiscal;
+        $this->addNotification('Período fiscal actualizado correctamente.');
+    }
+
+    /**
+     * Restablece el formulario a su estado inicial.
+     */
     public function cancelarCambios()
     {
+        $this->resetForm();
+    }
+
+    private function addNotification($message)
+    {
+        Notification::make()
+            ->title($message)
+            ->success()
+            ->send();
+    }
+
+    private function resetForm(): void
+    {
+        $this->form->fill();
         $this->previewData = collect();
         $this->showConfirmButton = false;
         $this->porcentaje = null;
+        $this->codigoescalafon = null;
     }
 
 
@@ -133,7 +243,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
      * @param int $precision El número de decimales a mantener.
      * @return float El número redondeado hacia arriba.
      */
-    function round_up($number, $precision = 2)
+    private function round_up($number, $precision = 2)
     {
         $fig = (int) str_pad('1', $precision, '0');
         return ceil($number * $fig) / $fig;

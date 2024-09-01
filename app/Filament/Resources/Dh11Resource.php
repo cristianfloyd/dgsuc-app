@@ -14,6 +14,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Resources\Dh11Resource\Pages;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 class Dh11Resource extends Resource
 {
@@ -163,7 +164,7 @@ class Dh11Resource extends Resource
                     ])
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->modal(),
+                //Tables\Actions\EditAction::make()->modal(),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
@@ -190,7 +191,6 @@ class Dh11Resource extends Resource
     public static function getWidgets(): array
     {
         return [
-            ActualizarImppBasicWidget::class,
         ];
     }
 }

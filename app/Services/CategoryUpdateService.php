@@ -27,7 +27,7 @@ class CategoryUpdateService implements CategoryUpdateServiceInterface
      * @param int $percentage El porcentaje a actualizar en el campo impp_basic de Dh11.
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */
-    public function updateCategoryWithHistory(Dh11 $category, float $percentage,array $periodoFiscal ): bool
+    public function updateCategoryWithHistory(Dh11 $category, float $percentage,array $periodoFiscal = null): bool
     {
         // Primero, crear un registro histórico en Dh61
         $this->dh61Repository->createHistoricalRecord($category);

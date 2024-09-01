@@ -6,13 +6,9 @@ use App\Models\Dh11;
 use App\Models\Dh89;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
-use App\Filament\Widgets\CargoCountWidget;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
-use Illuminate\Database\Eloquent\Factories\Relationship;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -29,7 +25,8 @@ class Dashboard extends \Filament\Pages\Dashboard
                 Select::make('codigoescalafon')->label('Escalafon')
                     ->options(function () {
                         return collect(['TODOS' => 'Todos'])
-                        ->merge(Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
+                        ->merge(
+                            Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
                             ->select('dh89.descesc', 'dh11.codigoescalafon')
                             ->distinct()
                             ->pluck('dh89.descesc', 'dh11.codigoescalafon')

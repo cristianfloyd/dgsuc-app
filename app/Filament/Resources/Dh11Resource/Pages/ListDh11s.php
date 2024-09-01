@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Dh11Resource\Pages;
 use Filament\Actions;
 use App\Filament\Resources\Dh11Resource;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 
 class ListDh11s extends ListRecords
@@ -22,6 +23,7 @@ class ListDh11s extends ListRecords
     {
         return [
             ActualizarImppBasicWidget::class,
+            PeriodoFiscalSelectorWidget::class,
         ];
     }
 }

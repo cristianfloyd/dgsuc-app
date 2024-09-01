@@ -120,4 +120,18 @@ class Dh61 extends Model
         );
     }
 
+    /**
+     * Restaura los valores de la categoría desde un registro histórico.
+     *
+     * @param Dh11 $category La categoría a la que se le restaurarán los valores.
+     * @return bool Verdadero si la restauración fue exitosa, falso en caso contrario.
+     */
+    public function restoreCategory(Dh11 $category): bool
+    {
+        // Llenar la categoría con los valores del registro histórico.
+        $category->fill($this->toArray());
+
+        // Guardar los cambios en la categoría.
+        return $category->save();
+    }
 }

@@ -4,154 +4,22 @@ namespace App\Models;
 
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh61;
+use App\Traits\CategoriasConstantTrait;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 
 class Dh11 extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, CategoriasConstantTrait;
 
     protected $table = 'dh11';
     public $timestamps = false;
     protected $primaryKey = 'codc_categ';
     public $incrementing = false;
     protected $keyType = 'string';
-
-
-    /**
-     * Constantes agrupadas para las categorías de cargos.
-     * Estos valores corresponden a la columna codc_categ del modelo Dh11.
-     */
-    public const array CATEGORIAS = [
-        'DOCS' => [
-            'HOME',
-            'PEO6',
-            'ACPN',
-            'AYCP',
-            'AYEO',
-            'ATTP',
-            'JTPM',
-            'PR15',
-            'JTEP',
-            'JGEP',
-            'MEPS',
-            'MEPR',
-            'MC20',
-            'MENI',
-            'MEPI',
-            'MJMA',
-            'PREO',
-            'ASPE',
-            'BIPH',
-            'BIBL',
-            'JBIB',
-            'JEPR',
-            'MCOR',
-            'PR25',
-            'REG1',
-            'BI30',
-            'HOLU',
-        ],
-        'DOCU' => [
-            'A1EH',
-            'AY1E',
-            'JTEH',
-            'JTPE',
-            'ADEH',
-            'ASEH',
-            'TIEH',
-            'ADJE',
-            'ASOE',
-            'TITE',
-            'TIAE',
-            'A1PH',
-            'A2PH',
-            'AY1P',
-            'AY2P',
-            'JTPH',
-            'JTPP',
-            'ADPH',
-            'ASPH',
-            'TIPH',
-            'ADJP',
-            'ASOP',
-            'TITP',
-            'TIAP',
-            'A1SH',
-            'AY1S',
-            'JTSH',
-            'JTPS',
-            'ADSH',
-            'ASSH',
-            'TISH',
-            'ADJS',
-            'ASOS',
-            'TITS',
-            'TIAS',
-            'HOCO',
-            'HODI',
-            'HOJE',
-            'HOSU',
-        ],
-        'AUTS' => [
-            'VD20',
-            'PRSE',
-            'RESE',
-            'SECR',
-            'SREH',
-            'SREG',
-            'SRE1',
-            'SRG3',
-            'VRSE',
-            'VD30',
-            'VD35',
-            'DI40',
-        ],
-        'AUTU' => [
-            'DECC',
-            'SEFC',
-            'SEUC',
-            'VICC',
-            'VIDC',
-            'VIRC',
-            'DECE',
-            'RECT',
-            'SUHE',
-            'SEFE',
-            'SEUE',
-            'SSUN',
-            'VIDE',
-            'VIRE',
-            'DECP',
-            'SFHP',
-            'SEFP',
-            'SEUP',
-            'VDPH',
-            'VIPH',
-            'VIDP',
-            'VIRP',
-        ],
-        'NODO' => [
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            'DOCA',
-            'DOCC',
-            'DOCE',
-            'ESTI',
-            'INVE',
-            'MAEA',
-            'MAEE',
-            'MAEO',
-        ],
-    ];
-
 
 
     protected $fillable = [
@@ -293,8 +161,8 @@ class Dh11 extends Model
             'DOCE' => array_merge(self::CATEGORIAS['DOCU'], self::CATEGORIAS['DOCS']),
             'AUTO' => array_merge(self::CATEGORIAS['AUTU'], self::CATEGORIAS['AUTS']),
             default => self::CATEGORIAS[$tipo] ?? [],
+
         };
-        // return self::CATEGORIAS[$tipo] ?? [];
     }
 
     /**
@@ -307,5 +175,11 @@ class Dh11 extends Model
     {
         $service = app(CategoryUpdateServiceInterface::class);
         return $service->updateCategoryWithHistory($this, $porcentaje);
+    }
+
+    public static function scopeOfTipo(Builder $query, string $tipo): Builder
+    {
+        $categorias = self::getCategoriasPorTipo($tipo);
+        return $query->whereIn('codc_categ', $categorias);
     }
 }

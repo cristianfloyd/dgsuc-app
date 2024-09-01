@@ -7,7 +7,7 @@ use App\Repositories\Dh11Repository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class dh11RestoreService
+class Dh11RestoreService
 {
     protected $dh61Repository;
     protected $dh11Repository;

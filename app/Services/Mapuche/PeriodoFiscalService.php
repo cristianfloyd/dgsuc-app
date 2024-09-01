@@ -2,10 +2,22 @@
 
 namespace App\Services\Mapuche;
 
+use App\Models\Dh61;
 use App\Models\Dh99;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Clase PeriodoFiscalService
+ *
+ * Esta clase proporciona servicios relacionados con los períodos fiscales.
+ *
+ * @package App\Services\Mapuche
+ *
+ * @method setPeriodoFiscal(int $year, int $month) Establece el período fiscal actual en la sesión.
+ * @method array getPeriodoFiscal() Obtiene el período fiscal actual almacenado en la sesión.
+ * @method array getPeriodoFiscalFromDatabase() Obtiene el período fiscal actual almacenado en la base de datos.
+ *
+ */
 class PeriodoFiscalService
 {
     /**
@@ -39,12 +51,27 @@ class PeriodoFiscalService
         }
     }
 
-    private function getPeriodoFiscalFromDatabase(): array
+    public function getPeriodoFiscalFromDatabase(): array
     {
         $periodoFiscal = Dh99::first();
         return [
             'year' => $periodoFiscal->per_anoct,
             'month' => $periodoFiscal->per_mesct,
+        ];
+    }
+
+    /**
+     * Obtiene los distintos periodos fiscales almacenados en dh61 y los devuelve en un array.
+     *
+     * @return array Devuelve un array con los periodos fiscales almacenados en dh61.
+     */
+    public function getPeriodosFiscales(): array
+    {
+        $periodosFiscales = Dh61::select('per_anoct', 'per_mesct')
+            ->distinct()
+            ->get();
+        return [
+            'periodosFiscales' => $periodosFiscales,
         ];
     }
 }
