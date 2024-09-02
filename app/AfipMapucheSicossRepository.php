@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\AfipMapucheSicoss;
 use App\DTOs\AfipMapucheSicossDTO;
-use App\Repositories\Interfaces\AfipMapucheSicossRepositoryInterface;
+use App\Contracts\AfipMapucheSicossRepositoryInterface;
 
 class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterface
 {

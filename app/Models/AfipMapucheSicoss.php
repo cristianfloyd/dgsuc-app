@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ class AfipMapucheSicoss extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
+    use HasCompositePrimaryKey;
 
     // Especificar la tabla
     protected $table = 'afip_mapuche_sicoss';
@@ -102,23 +104,23 @@ class AfipMapucheSicoss extends Model
     ];
 
 
-    public function getKey(): string
-    {
-        return "{$this->periodo_fiscal}|{$this->cuil}";
-    }
+    // public function getKey(): string
+    // {
+    //     return "{$this->periodo_fiscal}|{$this->cuil}";
+    // }
 
-    public function getKeyName(): array
-    {
-        return ['periodo_fiscal', 'cuil'];
-    }
-    public function getRouteKey(): string
-    {
-        return "{$this->periodo_fiscal}|{$this->cuil}";
-    }
-    public function getRouteKeyName(): string
-    {
-        return 'unique_id';
-    }
+    // public function getKeyName(): array
+    // {
+    //     return ['periodo_fiscal', 'cuil'];
+    // }
+    // public function getRouteKey(): string
+    // {
+    //     return "{$this->periodo_fiscal}|{$this->cuil}";
+    // }
+    // public function getRouteKeyName(): string
+    // {
+    //     return 'unique_id';
+    // }
 
     /**
      * Obtains the unique string representation of the model.
@@ -127,31 +129,32 @@ class AfipMapucheSicoss extends Model
      *
      * @return string The unique string representation of the model.
      */
-    public function getKeyString(): string
-    {
-        return (string) $this->getKey();
-    }
+    // public function getKeyString(): string
+    // {
+    //     return (string) $this->getKey();
+    // }
 
 
 
     /**
- * Obtiene la representación de cadena única del modelo.
- *
- * Este método devuelve una representación de cadena única del modelo, que se utiliza para identificar de manera inequívoca a la instancia del modelo.
- *
- * @return string La representación de cadena única del modelo.
- */    public function getUniqueIdAttribute()
-    {
-        return "{$this->periodo_fiscal}|{$this->cuil}";
-    }
+     * Obtiene la representación de cadena única del modelo.
+     *
+     * Este método devuelve una representación de cadena única del modelo, que se utiliza para identificar de manera inequívoca a la instancia del modelo.
+     *
+     * @return string La representación de cadena única del modelo.
+     */
+    // public function getUniqueIdAttribute()
+    // {
+    //     return "{$this->periodo_fiscal}|{$this->cuil}";
+    // }
 
-    public function resolveRouteBinding($value, $field = null)
-    {
-        [$periodo_fiscal, $cuil] = explode('|', $value);
-        return $this->where('periodo_fiscal', $periodo_fiscal)
-                    ->where('cuil', $cuil)
-                    ->firstOrFail();
-    }
+    // public function resolveRouteBinding($value, $field = null)
+    // {
+    //     [$periodo_fiscal, $cuil] = explode('|', $value);
+    //     return $this->where('periodo_fiscal', $periodo_fiscal)
+    //         ->where('cuil', $cuil)
+    //         ->firstOrFail();
+    // }
 
 
     public function dh01()
@@ -172,8 +175,8 @@ class AfipMapucheSicoss extends Model
     public static function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss
     {
         return static::where('periodo_fiscal', $periodoFiscal)
-                    ->where('cuil', $cuil)
-                    ->first();
+            ->where('cuil', $cuil)
+            ->first();
     }
 
     public function scopeSearch($query, $search)
@@ -188,6 +191,4 @@ class AfipMapucheSicoss extends Model
         $periodo = $this->attributes['periodo_fiscal'];
         return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
     }
-
 }
-
