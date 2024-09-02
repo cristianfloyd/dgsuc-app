@@ -10,7 +10,7 @@ return new class extends Migration
 
     public function up()
     {
-        Schema::connection($this->connection)->create('suc.tabla_temp_cuils', function (Blueprint $table) {
+        Schema::connection($this->connection)->create('suc.afip_tabla_temp_cuils', function (Blueprint $table) {
             $table->id();
             $table->string('cuil', 11)->unique();
         });
@@ -18,6 +18,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::connection($this->connection)->dropIfExists('suc.tabla_temp_cuils');
+        Schema::connection($this->connection)->dropIfExists('suc.afip_tabla_temp_cuils');
     }
 };

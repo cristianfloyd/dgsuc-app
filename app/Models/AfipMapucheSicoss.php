@@ -6,13 +6,18 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * Modelo AfipMapucheSicoss
+ *
+ * Representa los datos de AFIP Mapuche SICOSS en la base de datos.
+ */
 class AfipMapucheSicoss extends Model
 {
     use HasFactory;
+    use MapucheConnectionTrait;
 
-    protected $connection = 'pgsql-mapuche';
     // Especificar la tabla
-    protected $table = 'suc.afip_mapuche_sicoss';
+    protected $table = 'afip_mapuche_sicoss';
 
     // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
@@ -85,7 +90,16 @@ class AfipMapucheSicoss extends Model
         'remimp11',
     ];
 
-
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'periodo_fiscal' => 'string',
+        'cuil' => 'string',
+        // Agrega aquí los demás campos con sus respectivos tipos
+    ];
 
 
     public function getKey(): string
@@ -148,7 +162,19 @@ class AfipMapucheSicoss extends Model
             });
     }
 
-
+    /**
+     * Obtiene el registro por período fiscal y CUIL.
+     *
+     * @param string $periodoFiscal
+     * @param string $cuil
+     * @return AfipMapucheSicoss|null
+     */
+    public static function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss
+    {
+        return static::where('periodo_fiscal', $periodoFiscal)
+                    ->where('cuil', $cuil)
+                    ->first();
+    }
 
     public function scopeSearch($query, $search)
     {
