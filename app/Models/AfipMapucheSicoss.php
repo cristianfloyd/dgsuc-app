@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Reedware\LaravelCompositeRelations\HasCompositeRelations;
 
 /**
  * Modelo AfipMapucheSicoss
@@ -15,14 +18,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class AfipMapucheSicoss extends Model
 {
     use HasFactory;
-    use MapucheConnectionTrait;
-    use HasCompositePrimaryKey;
+    use HasCompositeRelations;
+
+
+    protected $connection = 'pgsql-suc';
 
     // Especificar la tabla
     protected $table = 'afip_mapuche_sicoss';
 
     // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
-    protected $primaryKey = ['periodo_fiscal', 'cuil'];
+    //protected $primaryKey = ['periodo_fiscal', 'cuil'];
+
+    protected $primaryKey = ['id'];
+
+    protected $appends = ['id'];
+
     public $incrementing = false;
     // No necesitas usar timestamps
     public $timestamps = false;
@@ -103,59 +113,76 @@ class AfipMapucheSicoss extends Model
         // Agrega aquí los demás campos con sus respectivos tipos
     ];
 
+    // ##################################################################################################################
+    // Métodos para obtener el ID para FilamentPHP
 
-    // public function getKey(): string
-    // {
-    //     return "{$this->periodo_fiscal}|{$this->cuil}";
-    // }
-
-    // public function getKeyName(): array
-    // {
-    //     return ['periodo_fiscal', 'cuil'];
-    // }
-    // public function getRouteKey(): string
-    // {
-    //     return "{$this->periodo_fiscal}|{$this->cuil}";
-    // }
-    // public function getRouteKeyName(): string
-    // {
-    //     return 'unique_id';
-    // }
+    public function getKeyName()
+    {
+        return 'id';
+    }
 
     /**
-     * Obtains the unique string representation of the model.
+     * Devuelve la clave compuesta del modelo, que es una combinación del período fiscal y el CUIL.
+     * Devolver una representación única de la clave primaria compuesta.
      *
-     * This method returns a unique string representation of the model, which is used to uniquely identify the model instance.
-     *
-     * @return string The unique string representation of the model.
+     * @return string La clave compuesta en el formato "periodo_fiscal-cuil".
      */
-    // public function getKeyString(): string
-    // {
-    //     return (string) $this->getKey();
-    // }
-
-
+    public function getKey()
+    {
+        return "{$this->periodo_fiscal}-{$this->cuil}";
+    }
 
     /**
-     * Obtiene la representación de cadena única del modelo.
+     * Resuelve el enlace de ruta para este modelo.
+     * Este método debe resolver la entidad a partir de la clave compuesta.
      *
-     * Este método devuelve una representación de cadena única del modelo, que se utiliza para identificar de manera inequívoca a la instancia del modelo.
-     *
-     * @return string La representación de cadena única del modelo.
+     * @param string $value El valor de la clave compuesta (periodo_fiscal-cuil).
+     * @param string|null $field El campo opcional a utilizar para la resolución de la ruta.
+     * @return AfipMapucheSicoss|null El modelo correspondiente al valor de la clave compuesta, o null si no se encuentra.
      */
-    // public function getUniqueIdAttribute()
-    // {
-    //     return "{$this->periodo_fiscal}|{$this->cuil}";
-    // }
+    public function resolveRouteBinding($value, $field = null)
+    {
+        [$periodoFiscal, $cuil] = explode('-', $value);
+        return $this->where('periodo_fiscal', $periodoFiscal)
+            ->where('cuil', $cuil)
+            ->first();
+    }
 
-    // public function resolveRouteBinding($value, $field = null)
-    // {
-    //     [$periodo_fiscal, $cuil] = explode('|', $value);
-    //     return $this->where('periodo_fiscal', $periodo_fiscal)
-    //         ->where('cuil', $cuil)
-    //         ->firstOrFail();
-    // }
+    /**
+     * Devuelve el nombre de la key de ruta para este modelo.
+     * Este método se utiliza para generar las rutas de Filament PHP.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
 
+    /**
+     * Agregar un atributo id virtual:
+     * Añade un atributo id que combine periodo_fiscal y cuil.
+     * @return string
+     */
+    public function getIdAttribute()
+    {
+        return "{$this->periodo_fiscal}-{$this->cuil}";
+    }
+
+    // Método para obtener el ID virtual para FilamentPHP
+    public function getFilamentId(): string
+    {
+        return $this->id;
+    }
+
+    // Método para establecer el ID para FilamentPHP
+    public function setFilamentId($value): void
+    {
+        [$this->periodo_fiscal, $this->cuil] = explode('-', $value);
+    }
+
+
+    // ##################################################################################################################
 
     public function dh01()
     {

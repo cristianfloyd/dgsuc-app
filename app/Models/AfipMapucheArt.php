@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\DB;
 class AfipMapucheArt extends Model
 {
     // Configuración de la conexión y tabla
-    protected $connection = 'pgsql-mapuche';
-    protected $table = 'suc.afip_art';
+    protected $connection = 'pgsql-suc';
+    protected $table = 'afip_art';
 
     // Configuración de la clave primaria
     protected $primaryKey = 'cuil_original';
@@ -53,7 +53,11 @@ class AfipMapucheArt extends Model
         $this->setAttribute($this->getKeyName(), $value);
     }
 
-    // Atributo computado para el nombre completo
+    /**
+     * Obtiene el nombre completo del usuario.
+     *
+     * @return string El nombre completo del usuario.
+     */
     protected function nombreCompleto(): Attribute
     {
         return Attribute::make(
@@ -99,7 +103,7 @@ class AfipMapucheArt extends Model
     }
 
     /**
-     * Método para verificar el número de liquidación, que exita en la tabla mapuche.dh21
+     * Método para verificar el número de liquidación exista en la tabla mapuche.dh21
      * @param int $nroLiqui
      * @return bool True si nroLiqui existe, false en caso contrario.
      */

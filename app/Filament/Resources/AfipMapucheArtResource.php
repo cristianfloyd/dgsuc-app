@@ -5,10 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AfipMapucheArtResource\Pages;
 use App\Filament\Resources\AfipMapucheArtResource\RelationManagers;
 use App\Models\AfipMapucheArt;
+use Faker\Provider\ar_EG\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -23,7 +25,7 @@ class AfipMapucheArtResource extends Resource
     {
         return $form
             ->schema([
-                //
+                TextColumn::make('cuil_original')->label('CUIL'),
             ]);
     }
 

@@ -29,7 +29,7 @@ class AfipArt extends Model
      *
      * @var string
      */
-    protected $connection = 'pgsql';
+    protected $connection = 'pgsql-suc';
 
     /**
      * Especifica la tabla asociada al modelo
