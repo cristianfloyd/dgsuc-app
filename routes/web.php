@@ -13,8 +13,8 @@ use App\Livewire\CompareCuils;
 use App\Livewire\FileEncoding;
 use App\Livewire\RegisterForm;
 use App\Livewire\BuscarColumna;
-use App\Livewire\SicossImporter;
 use App\Livewire\ConvertirTabla;
+use App\Livewire\SicossImporter;
 use App\services\ColumnMetadata;
 use App\Livewire\AfipImportCrudo;
 use App\Livewire\ShowCuilDetails;
@@ -26,6 +26,7 @@ use App\Livewire\AfipMiSimplificacion;
 use App\Livewire\ParaMiSimplificacion;
 use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
+use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
 
@@ -48,7 +49,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::post('/afip/sicossimporter', SicossImporter::class)->name('mapuche-sicoss');
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
     Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
-
+    Route::get('/reporte/orden-pago', OrdenPagoReporte::class)->name('reporte-orden-pago');
 
     Route::get('/test-column-metadata', function () {
         $columnMetadata = app(ColumnMetadata::class);
