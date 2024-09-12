@@ -2,13 +2,15 @@
 
 namespace App\Providers;
 
-use App\Services\CategoryUpdateService;
 use App\Repositories\Dh11Repository;
 use App\Repositories\Dh61Repository;
+use App\Services\CategoryUpdateService;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\RepOrdenPagoRepository;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Contracts\CategoryUpdateServiceInterface;
+use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(Dh11RepositoryInterface::class, Dh11Repository::class);
         $this->app->bind(Dh61RepositoryInterface::class, Dh61Repository::class);
         $this->app->bind(CategoryUpdateServiceInterface::class, CategoryUpdateService::class);
+        $this->app->bind(RepOrdenPagoRepositoryInterface::class, RepOrdenPagoRepository::class);
 
     }
 

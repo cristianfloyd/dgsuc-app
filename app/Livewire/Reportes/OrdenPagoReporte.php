@@ -3,11 +3,23 @@
 namespace App\Livewire\Reportes;
 
 use App\Models\Reportes\OrdenPagoMapuche;
+use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
 use Livewire\Component;
 
 class OrdenPagoReporte extends Component
 {
     public $reportData;
+    protected $repOrdenPagoRepository;
+
+    public function __construct(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
+    {
+        $this->repOrdenPagoRepository = $repOrdenPagoRepository;
+    }
+
+    public function boot()
+    {
+
+    }
 
     public function mount()
     {
@@ -17,9 +29,8 @@ class OrdenPagoReporte extends Component
 
     public function loadReportData()
     {
-        $ordenPagoModel = new OrdenPagoMapuche();
         $this->reportData = $this->convertToBaseCollection(
-            $ordenPagoModel->getOrdenPago()
+            $this->repOrdenPagoRepository->getAll()
                 ->groupBy(['banco', 'codn_funci', 'codn_fuent', 'codc_uacad', 'codc_carac', 'codn_progr'])
         );
         // dd($this->reportData);
