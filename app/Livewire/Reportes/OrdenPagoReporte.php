@@ -20,8 +20,9 @@ class OrdenPagoReporte extends Component
         $ordenPagoModel = new OrdenPagoMapuche();
         $this->reportData = $this->convertToBaseCollection(
             $ordenPagoModel->getOrdenPago()
-                ->groupBy(['banco', 'codn_funci', 'codn_fuent', 'codc_uacad'])
+                ->groupBy(['banco', 'codn_funci', 'codn_fuent', 'codc_uacad', 'codc_carac', 'codn_progr'])
         );
+        // dd($this->reportData);
     }
 
     private function convertToBaseCollection($collection)

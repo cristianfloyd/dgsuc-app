@@ -25,30 +25,38 @@ class OrdenPagoMapuche extends Model
                 'dh21.codn_funci',
                 'dh21.codn_fuent',
                 'dh21.codc_uacad',
+                DB::raw("CASE WHEN dh03.codc_carac IN ('PERM','PLEN','REGU') THEN 'PERM' ELSE 'CONT' END AS codc_carac"),
                 'dh21.codn_progr',
-                DB::raw('0 as estipendio'),
-                DB::raw('0 as productividad'),
-                DB::raw('0 as med_resid'),
-                DB::raw('0 as sal_fam'),
-                DB::raw('(SUM(CASE WHEN dh21.tipo_conce = \'C\' THEN impp_conce ELSE 0 END) +
-                    SUM(CASE WHEN dh21.tipo_conce = \'S\' THEN impp_conce ELSE 0 END) +
-                    SUM(CASE WHEN dh21.codn_conce IN (121, 124) THEN impp_conce ELSE 0 END)) AS total'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.tipo_conce = \'C\' AND dh21.codn_conce NOT IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS remunerativo'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.tipo_conce = \'S\' AND dh21.codn_conce != 186 THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS no_remunerativo'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.tipo_conce = \'D\' THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS descuentos'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.tipo_conce = \'A\' THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS aportes'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.codn_conce = 173 THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS estipendio'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.codn_conce = 186 THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS med_resid'),
+                DB::raw('0::NUMERIC(10,2) AS productividad'),
+                DB::raw('0::NUMERIC(10,2) AS sal_fam'),
+                DB::raw('ROUND(SUM(CASE WHEN dh21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS hs_extras'),
+                DB::raw('ROUND((
+                    SUM(CASE WHEN dh21.tipo_conce = \'C\' AND dh21.codn_conce NOT IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END) +
+                    SUM(CASE WHEN dh21.tipo_conce = \'S\' AND dh21.codn_conce != 186 THEN impp_conce ELSE 0 END) -
+                    SUM(CASE WHEN dh21.tipo_conce = \'D\' THEN impp_conce ELSE 0 END) +
+                    SUM(CASE WHEN dh21.codn_conce = 173 THEN impp_conce ELSE 0 END) +
+                    SUM(CASE WHEN dh21.codn_conce = 186 THEN impp_conce ELSE 0 END) +
+                    0 +
+                    0 +
+                    SUM(CASE WHEN dh21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)
+                )::NUMERIC, 2) AS total')
             ])
             ->selectRaw('SUM(CASE WHEN dh21.tipo_conce = \'C\' THEN impp_conce ELSE 0 END) AS remunerativo')
             ->selectRaw('SUM(CASE WHEN dh21.tipo_conce = \'S\' THEN impp_conce ELSE 0 END) AS no_remunerativo')
             ->selectRaw('SUM(CASE WHEN dh21.codn_conce IN (121, 124) THEN impp_conce ELSE 0 END) AS hs_extras')
-            ->groupBy([
-                'dh92.codn_banco',
-                'dh21.codn_funci',
-                'dh21.codn_fuent',
-                'dh21.codc_uacad',
-                //'dh03.codc_carac',
-                'dh21.codn_progr',
-            ])
-            ->orderBy('banco') // Agregar orderBy para el orden deseado
+            ->groupBy('banco', 'dh21.codn_funci', 'dh21.codn_fuent', 'dh21.codc_uacad', 'codc_carac', 'dh21.codn_progr')
+            ->orderBy('banco', 'desc') // Agregar orderBy para el orden deseado
             ->orderBy('codn_funci')
             ->orderBy('codn_fuent')
             ->orderBy('codc_uacad')
+            ->orderBy('codc_carac')
+            ->orderBy('dh21.codn_progr')
             ->get();
     }
 }
