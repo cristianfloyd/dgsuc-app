@@ -19,18 +19,25 @@
                                             class="text-md text-left font-medium mb-2 my-1 border-solid border-2 border-slate-500 py-1 rounded pl-2 text-gray-900">
                                             Unidad Académica: {{ $codc_uacad }}
                                         </h5>
-                                        <div class="overflow-x-auto">
-                                            <table class="w-full bg-gray-550 shadow-md rounded-lg overflow-hidden">
-                                                <thead class="bg-gray-300 text-gray-800">
-                                                    <tr>
-                                                        <th class="py-3 px-4 text-center">Programa</th>
-                                                        <th class="py-3 px-4 text-center">Sueldo</th>
-                                                        <th class="py-3 px-4 text-center">Estipendio</th>
-                                                        <th class="py-3 px-4 text-center">Productividad</th>
-                                                        <th class="py-3 px-4 text-center">Méd. Resid.</th>
-                                                        <th class="py-3 px-4 text-center">Sal. Fam.</th>
-                                                        <th class="py-3 px-4 text-center">Hs. Extras</th>
-                                                        <th class="py-3 px-4 text-center">Total</th>
+                                        @foreach ($porCarac as $codn_progr => $data)
+                                            <div class="mb-1">
+                                                {{-- <h6 class="textarea-xs text-left font-thin my-1 border-solid border-1 border-slate-500 py-0 rounded pl-2 text-gray-900">
+                                                    Personal {{ $codn_progr  }}
+                                                </h6> --}}
+                                                <table border="1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th colspan="8">Dependencia {{ $codn_progr }}</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Programa</th>
+                                                            <th>Sueldo</th>
+                                                            <th>Estipendio</th>
+                                                            <th>Productividad</th>
+                                                            <th>Méd. Resid.</th>
+                                                            <th>Sal. Fam.</th>
+                                                            <th>Hs. Extras</th>
+                                                            <th>Total</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
