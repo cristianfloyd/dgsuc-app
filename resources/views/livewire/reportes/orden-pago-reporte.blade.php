@@ -1,20 +1,27 @@
-<div class="container mx-auto w-7/12">
+<div class="container mx-auto w-7/12 bg-white">
     <div class="bg-gray p-6 rounded-lg shadow-lg">
         @foreach($reportData as $banco => $porBanco)
             <div class="mb-8">
-                <h2 class="text-2xl font-bold mb-4 text-center bg-gray-800 py-2 rounded">Banco: {{ $banco }}</h2>
+                <h2 class="text-2xl text-white font-bold pl-3 mb-0 text-left bg-slate-700  py-1 rounded">
+                    FORMA PAGO: {{  $banco == '0' ? 'BANCO' : 'EFECTIVO' }}</h2>
                 @foreach($porBanco as $codn_funci => $porFunci)
                     <div class="mb-6">
-                        <h3 class="text-xl font-semibold mb-3 text-center bg-gray-700 py-1 rounded">Función: {{ $codn_funci }}</h3>
+                        <h3 class="text-xl text-white font-semibold mb-0 text-center bg-slate-600 py-1 rounded">
+                            FORMA DE PAGO {{  $banco == '0' ? 'BANCO' : 'EFECTIVO' }} | Función: {{ $codn_funci }}
+                        </h3>
                         @foreach($porFunci as $codn_fuent => $porFuente)
                             <div class="mb-4">
-                                <h4 class="text-lg font-medium mb-2 text-center bg-gray-600 py-1 rounded">Fuente: {{ $codn_fuent }}</h4>
+                                <h4 class="text-lg text-white font-medium mb-0 text-center bg-slate-500 py-1 rounded">
+                                    Fuente de financiamiento: {{ $codn_fuent }}</h4>
                                 @foreach($porFuente as $codc_uacad => $data)
                                     <div class="mb-4">
-                                        <h5 class="text-md font-medium mb-2 text-center">Unidad Académica: {{ $codc_uacad }}</h5>
+                                        <h5
+                                            class="text-md text-left font-medium mb-2 my-1 border-solid border-2 border-slate-500 py-1 rounded pl-2 text-gray-900">
+                                            Unidad Académica: {{ $codc_uacad }}
+                                        </h5>
                                         <div class="overflow-x-auto">
                                             <table class="w-full bg-gray-550 shadow-md rounded-lg overflow-hidden">
-                                                <thead class="bg-gray-500 text-gray-100">
+                                                <thead class="bg-gray-300 text-gray-800">
                                                     <tr>
                                                         <th class="py-3 px-4 text-center">Programa</th>
                                                         <th class="py-3 px-4 text-center">Sueldo</th>
