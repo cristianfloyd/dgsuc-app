@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Interfaces;
+namespace App\Contracts;
 
 use App\Models\Reportes\RepOrdenPagoModel;
 use Illuminate\Database\Eloquent\Collection;

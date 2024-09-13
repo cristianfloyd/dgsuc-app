@@ -10,7 +10,7 @@ use App\Repositories\RepOrdenPagoRepository;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Contracts\CategoryUpdateServiceInterface;
-use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

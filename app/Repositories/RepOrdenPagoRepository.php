@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Reportes\RepOrdenPagoModel;
-use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface

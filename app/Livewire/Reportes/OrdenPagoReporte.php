@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Reportes;
 
-use App\Models\Reportes\OrdenPagoMapuche;
-use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 use Livewire\Component;
 
 class OrdenPagoReporte extends Component
@@ -11,15 +10,12 @@ class OrdenPagoReporte extends Component
     public $reportData;
     protected $repOrdenPagoRepository;
 
-    public function __construct(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
+    public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
     {
         $this->repOrdenPagoRepository = $repOrdenPagoRepository;
     }
 
-    public function boot()
-    {
 
-    }
 
     public function mount()
     {
