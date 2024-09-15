@@ -8,6 +8,9 @@ use Livewire\Component;
 class OrdenPagoReporte extends Component
 {
     public $reportData;
+    public $totalGeneral;
+    public $totalesPorFormaPago = [];
+
     protected $repOrdenPagoRepository;
 
     public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
@@ -20,6 +23,7 @@ class OrdenPagoReporte extends Component
     public function mount()
     {
         $this->loadReportData();
+        $this->calculateTotalesGenerales();
     }
 
 
@@ -49,10 +53,10 @@ class OrdenPagoReporte extends Component
                                                 ->map(function ($items) use (&$totalUacad, &$totalFuente, &$totalFuncion, &$totalBanco) {
 
                                                     $totals = $this->calculateTotals($items);
-                                                    $this->addTotals(totalUacad: $totalUacad, totals: $totals);
-                                                    $this->addTotals(totalUacad: $totalFuente, totals: $totals);
-                                                    $this->addTotals(totalUacad: $totalFuncion, totals: $totals);
-                                                    $this->addTotals(totalUacad: $totalBanco, totals: $totals);
+                                                    $this->addTotals( totalAcumulado: $totalUacad,  totalsToAdd: $totals);
+                                                    $this->addTotals( totalAcumulado: $totalFuente,  totalsToAdd: $totals);
+                                                    $this->addTotals( totalAcumulado: $totalFuncion,  totalsToAdd: $totals);
+                                                    $this->addTotals( totalAcumulado: $totalBanco,  totalsToAdd: $totals);
 
                                                     $retorno = [
                                                         'items' => $items,
@@ -145,16 +149,95 @@ class OrdenPagoReporte extends Component
     }
 
     /**
-     * Agrega los totales acumulados a la variable $totalUacad.
+     * Suma los totales de un array a otro array de totales.
      *
-     * @param array $totalUacad Referencia al array de totales acumulados.
-     * @param array $totals Array de totales a agregar.
+     * @param array &$totalAcumulado Array donde se acumularán los totales
+     * @param array $totalsToAdd Array con los totales a sumar
      */
-    private function addTotals(&$totalUacad, $totals)
+    private function addTotals(&$totalAcumulado, $totalsToAdd)
     {
-        foreach ($totalUacad as $key => $value) {
-            $totalUacad[$key] += $totals[$key];
+        foreach ($totalAcumulado as $key => $value) {
+            $totalAcumulado[$key] += $totalsToAdd[$key];
         }
+    }
+
+    private function calculateTotalGeneral()
+    {
+        $this->totalGeneral = [
+            'remunerativo' => 0,
+            'estipendio' => 0,
+            'productividad' => 0,
+            'med_resid' => 0,
+            'sal_fam' => 0,
+            'hs_extras' => 0,
+            'total' => 0
+        ];
+
+        foreach ($this->reportData as $banco) {
+            $this->addTotals($this->totalGeneral, $banco['totalBanco']);
+        }
+    }
+
+    public function calculateTotalesGenerales()
+    {
+        $this->totalesPorFormaPago = [
+            'banco' => [],
+            'efectivo' => []
+        ];
+
+        foreach ($this->reportData as $banco => $porBanco) {
+            $formaPago = $banco == '1' ? 'banco' : 'efectivo';
+
+            foreach ($porBanco['funciones'] as $funcion => $porFuncion) {
+                foreach ($porFuncion['fuentes'] as $fuente => $porFuente) {
+                    if (!isset($this->totalesPorFormaPago[$formaPago][$funcion][$fuente])) {
+                        $this->totalesPorFormaPago[$formaPago][$funcion][$fuente] = $this->initializeTotals();
+                    }
+                    $this->addTotals($this->totalesPorFormaPago[$formaPago][$funcion][$fuente], $porFuente['totalFuente']);
+                }
+            }
+        }
+
+        $this->totalGeneral = $this->initializeTotals();
+        foreach (['banco', 'efectivo'] as $formaPago) {
+            foreach ($this->totalesPorFormaPago[$formaPago] as $funcionTotals) {
+                foreach ($funcionTotals as $fuenteTotals) {
+                    $this->addTotals($this->totalGeneral, $fuenteTotals);
+                }
+            }
+        }
+    }
+
+    /**
+     * Calcula el total por función sumando los totales de todas las fuentes de financiamiento.
+     *
+     * @param array $porFuncion Array con los datos de una función específica
+     * @return array Array con los totales calculados para la función
+     */
+    public function calcularTotalPorFuncion($porFuncion): array
+    {
+        $total = $this->initializeTotals();
+        foreach ($porFuncion as $fuenteTotals) {
+            $this->addTotals($total, $fuenteTotals);
+        }
+        return $total;
+    }
+
+    /**
+     * Calcula el total por forma de pago sumando los totales de todas las funciones.
+     *
+     * @param array $formaPagoData Array con los datos de una forma de pago específica
+     * @return array Array con los totales calculados para la forma de pago
+     */
+    public function calcularTotalPorFormaPago($formaPagoData): array
+    {
+        $total = $this->initializeTotals();
+        foreach ($formaPagoData as $funcionData) {
+            foreach ($funcionData as $fuenteTotals) {
+                $this->addTotals($total, $fuenteTotals);
+            }
+        }
+        return $total;
     }
 
     public function render()
