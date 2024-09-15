@@ -16,9 +16,9 @@ class RepOrdenPagoModel extends Model
 
 
     /**
-     * Indica que el modelo RepOrdenPago no tiene campos de fecha de creación y actualización.
+     * Indica que el modelo RepOrdenPago tiene campos de fecha de creación y actualización.
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
 
     /**

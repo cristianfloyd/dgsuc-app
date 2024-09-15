@@ -1,73 +1,71 @@
-<div class="container mx-auto w-7/12 bg-white">
-    <div class="bg-gray p-6 rounded-lg shadow-lg">
-        @foreach($reportData as $banco => $porBanco)
-            <div class="mb-8">
-                <h2 class="text-2xl text-white font-bold pl-3 mb-0 text-left bg-slate-700  py-1 rounded">
-                    FORMA PAGO: {{  $banco == '1' ? 'BANCO' : 'EFECTIVO' }}</h2>
-                @foreach($porBanco as $codn_funci => $porFunci)
-                    <div class="mb-6">
-                        <h3 class="text-xl text-white font-semibold mb-0 text-center bg-slate-600 py-1 rounded">
-                            FORMA DE PAGO {{  $banco == '0' ? 'BANCO' : 'EFECTIVO' }} | Función: {{ $codn_funci }}
-                        </h3>
-                        @foreach($porFunci as $codn_fuent => $porFuente)
-                            <div class="mb-4">
-                                <h4 class="text-lg text-white font-medium mb-0 text-center bg-slate-500 py-1 rounded">
-                                    Fuente de financiamiento: {{ $codn_fuent }}</h4>
-                                @foreach($porFuente as $codc_uacad => $porCarac)
-                                    <div class="mb-4">
-                                        <h5
-                                            class="text-md text-left font-medium mb-2 my-1 border-solid border-2 border-slate-500 py-1 rounded pl-2 text-gray-900">
-                                            Unidad Académica: {{ $codc_uacad }}
-                                        </h5>
-                                        @foreach ($porCarac as $codc_carac => $data)
-                                            <div class="mb-1">
-                                                {{-- <h6 class="textarea-xs text-left font-thin my-1 border-solid border-1 border-slate-500 py-0 rounded pl-2 text-gray-900">
-                                                    Personal {{ $codn_progr  }}
-                                                </h6> --}}
-                                                <table border="1">
-                                                    <thead>
-                                                        <tr>
-                                                            <th colspan="8">Dependencia {{ $codc_carac }}</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Programa</th>
-                                                            <th>Sueldo</th>
-                                                            <th>Estipendio</th>
-                                                            <th>Productividad</th>
-                                                            <th>Méd. Resid.</th>
-                                                            <th>Sal. Fam.</th>
-                                                            <th>Hs. Extras</th>
-                                                            <th>Total</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($data as $row)
-                                                            @dump($row)
-                                                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+<div class="container mx-auto w-10/12 bg-white p-6">
+    @foreach ($reportData as $banco => $porBanco)
 
-                                                            </tr>
-                                                        @endforeach
-                                                        <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                                            <td>Total</td>
-                                                            <td>{{ $data->sum('remunerativo') }}</td>
-                                                            <td>{{ $data->sum('no_remunerativo') }}</td>
-                                                            <td>{{ $data->sum('productividad') ?? 'N/A' }}</td>
-                                                            <td>{{ $data->sum('med_resid') ?? 'N/A' }}</td>
-                                                            <td>{{ $data->sum('sal_fam') ?? 'N/A' }}</td>
-                                                            <td>{{ $data->sum('hs_extras') }}</td>
-                                                            <td>{{ $data->sum('total') }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endforeach
-                            </div>
+            <x-reportes.section-header :level="2">
+                FORMA PAGO: {{ $banco == '1' ? 'BANCO' : 'EFECTIVO' }}
+            </x-reportes.section-header>
+
+            @foreach ($porBanco['funciones'] as $funcion => $porFunci)
+
+                    <x-reportes.section-header :level="3">
+                        FUNCIÓN: {{ $funcion }}
+                    </x-reportes.section-header>
+                    @foreach ($porFunci['fuentes'] as $fuente => $porFuente)
+
+                        <x-reportes.section-header :level="4">
+                            FUENTE DE FINANCIAMIENTO: {{ $fuente }}
+                        </x-reportes.section-header>
+                        @foreach ($porFuente['unidades'] as $uacad => $porUacad)
+
+                            <x-reportes.section-header :level="5">
+                                UNIDAD ACADÉMICA: {{ $uacad }}
+                            </x-reportes.section-header>
+                            @foreach ($porUacad['caracteres'] as $caracter => $data)
+
+                                <x-reportes.section-header :level="6">
+                                    modalidad: {{ $caracter == 'CONT' ? 'contratado' : 'permanente' }}
+                                </x-reportes.section-header>
+                                <x-reportes.table-component :headers="['Programa','Sueldo','Estipendio','Productividad','Méd. Resid.','Sal. Fam.','Hs. Extras','Total',]">
+                                    @foreach ($data['items'] as  $item)
+                                        <tr>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ $item->codn_progr }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->remunerativo) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->estipendio) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->productividad) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->med_resid) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->sal_fam) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->hs_extras) }}</td>
+                                            <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right">{{ money($item->total) }}</td>
+                                        </tr>
+                                    @endforeach
+                                    <x-reportes.totals-row :totals="$data['totals']" />
+                                </x-reportes.table-component>
+                            @endforeach
+                            <x-reportes.table-component class="b-slate-500" :headers="['Total: '. $uacad .'' ,'Sueldo', 'Estipendio', 'Productividad', 'Med. Resid.', 'Sal. Fam.', 'Hs. Extras', 'Total']">
+                                <x-reportes.totals-row :totals="$porUacad['totalUacad']" />
+                            </x-reportes.table-component>
+
                         @endforeach
-                    </div>
-                @endforeach
-            </div>
-        @endforeach
-    </div>
+                        <x-reportes.section-header :level="4">
+                            TOTAL FUENTE DE FINANCIAMIENTO: {{ $fuente }}
+                        </x-reportes.section-header>
+                        <x-reportes.table-component :headers="['','Remunerativo', 'Estipendio', 'Productividad', 'Med. Resid.', 'Sal. Fam.', 'Hs. Extras', 'Total']">
+                            <x-reportes.totals-row :totals="$porFuente['totalFuente']" />
+                        </x-reportes.table-component>
+                    @endforeach
+                    <x-reportes.section-header :level="3">
+                        TOTAL FUNCIÓN: {{ $funcion }}
+                    </x-reportes.section-header>
+                    <x-reportes.table-component :headers="['','Remunerativo', 'Estipendio', 'Productividad', 'Med. Resid.', 'Sal. Fam.', 'Hs. Extras', 'Total']">
+                        <x-reportes.totals-row :totals="$porFunci['totalFuncion']" />
+                    </x-reportes.table-component>
+            @endforeach
+
+            <x-reportes.section-header :level="2">
+                TOTAL FORMA DE PAGO: {{ $funcion }}
+            </x-reportes.section-header>
+            <x-reportes.table-component :headers="['','Remunerativo', 'Estipendio', 'Productividad', 'Med. Resid.', 'Sal. Fam.', 'Hs. Extras', 'Total']">
+                <x-reportes.totals-row :totals="$porBanco['totalBanco']" />
+            </x-reportes.table-component>
+    @endforeach
 </div>

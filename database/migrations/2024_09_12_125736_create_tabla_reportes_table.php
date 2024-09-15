@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suc.rep_orden_pago', function (Blueprint $table) {
+            $table->id();
             $table->integer('nro_liqui')->nullable();
             $table->integer('banco')->nullable();
             $table->string('codn_funci')->nullable();
@@ -29,6 +30,7 @@ return new class extends Migration
             $table->decimal('sal_fam', 10, 2)->nullable();
             $table->decimal('hs_extras', 15, 2)->nullable();
             $table->decimal('total', 15, 2)->nullable();
+            $table->timestamps();
         });
     }
 
