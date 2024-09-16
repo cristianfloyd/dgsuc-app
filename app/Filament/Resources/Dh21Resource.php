@@ -269,6 +269,8 @@ class Dh21Resource extends Resource
         );
     }
 
+    
+
     // Añadir la acción en el header
     protected function getHeaderActions(): array
     {

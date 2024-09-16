@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Reportes;
 
-use App\Contracts\RepOrdenPagoRepositoryInterface;
+use Livewire\Component;
 use App\DTOs\ReportHeaderDTO;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ReportHeaderService;
 use Illuminate\Contracts\Support\Htmlable;
-use Livewire\Component;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
@@ -272,6 +273,26 @@ class OrdenPagoReporte extends Component implements Htmlable
         }
         return $total;
     }
+
+
+    /**
+     * Descarga un reporte en formato PDF de la orden de pago.
+     *
+     * Este método genera un archivo PDF a partir de los datos públicos de la clase y lo descarga para el usuario.
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse Respuesta de descarga del archivo PDF.
+     */
+    public function descargarPDF()
+    {
+        $html = $this->render()->with($this->getPublicProperties())->render();
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+        return response()->streamDownload(
+            fn() => print($pdf->output()),
+            'orden_pago_' . $this->liquidacionId . '_' . now()->format('YmdHis') . '.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
 
     public function toHtml()
     {

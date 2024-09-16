@@ -9,7 +9,8 @@ export default {
 		 './vendor/laravel/jetstream/**/*.blade.php',
 		 './storage/framework/views/*.php',
 		 './resources/views/**/*.blade.php',
-		 "./vendor/robsontenorio/mary/src/View/Components/**/*.php"
+		 "./vendor/robsontenorio/mary/src/View/Components/**/*.php",
+         './app/**/*.php',
 	],
 
     theme: {
