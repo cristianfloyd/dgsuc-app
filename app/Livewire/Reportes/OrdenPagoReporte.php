@@ -3,35 +3,56 @@
 namespace App\Livewire\Reportes;
 
 use App\Contracts\RepOrdenPagoRepositoryInterface;
+use App\DTOs\ReportHeaderDTO;
+use App\Services\ReportHeaderService;
+use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Component;
 
-class OrdenPagoReporte extends Component
+class OrdenPagoReporte extends Component implements Htmlable
 {
     public $reportData;
     public $totalGeneral;
+    public $liquidacionId = null;
     public $totalesPorFormaPago = [];
+    public array $reportHeader;
 
     protected $repOrdenPagoRepository;
 
-    public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
+    public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository, ReportHeaderService $reportHeaderService)
     {
         $this->repOrdenPagoRepository = $repOrdenPagoRepository;
+        $dto = $reportHeaderService->getReportHeader($this->getLiquidationNumber());
+        $this->reportHeader = [
+            'logoPath' => $dto->logoPath,
+            'orderNumber' => $dto->orderNumber,
+            'liquidationNumber' => $dto->liquidationNumber,
+            'liquidationDescription' => $dto->liquidationDescription,
+            'generationDate' => $dto->generationDate,
+        ];
     }
 
 
 
-    public function mount()
+    public function mount(int $liquidacionId = null)
     {
-        $this->loadReportData();
+        $this->liquidacionId = $liquidacionId;
+        $this->loadReportData($this->liquidacionId);
         $this->calculateTotalesGenerales();
     }
 
 
-    public function loadReportData()
+    public function loadReportData(array|int|null $liquidacionId = null)
     {
+        $data = $this->repOrdenPagoRepository->getAll($liquidacionId);
+
+        // Asegurar que $data sea una colección
+        if (!$data instanceof \Illuminate\Support\Collection) {
+            $data = collect($data);
+            dd($data);
+        }
+
         $this->reportData = $this->convertToBaseCollection(
-            collection: $this->repOrdenPagoRepository->getAll()
-                ->groupBy('banco')
+            collection: $data->groupBy('banco')
 
                 ->map(function ($porBanco) {
 
@@ -149,6 +170,18 @@ class OrdenPagoReporte extends Component
     }
 
     /**
+     * Obtiene el número de liquidación.
+     *
+     * Este método privado devuelve el número de liquidación, que se obtiene a partir de la propiedad `$liquidacionId`. Si `$liquidacionId` es nulo, se devuelve el valor predeterminado de 1.
+     *
+     * @return int El número de liquidación.
+     */
+    private function getLiquidationNumber(): int
+    {
+        return $this->liquidacionId ?? 1;
+    }
+
+    /**
      * Suma los totales de un array a otro array de totales.
      *
      * @param array &$totalAcumulado Array donde se acumularán los totales
@@ -238,6 +271,11 @@ class OrdenPagoReporte extends Component
             }
         }
         return $total;
+    }
+
+    public function toHtml()
+    {
+        return $this->render()->with($this->getPublicProperties());
     }
 
     public function render()

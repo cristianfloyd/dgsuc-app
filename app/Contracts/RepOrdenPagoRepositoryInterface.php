@@ -12,7 +12,7 @@ interface RepOrdenPagoRepositoryInterface
      *
      * @return Collection
      */
-    public function getAll(): Collection;
+    public function getAll(array|int|null $nroLiquis = null): Collection;
 
     /**
      * Obtener un registro de RepOrdenPago por su número de liquidación.

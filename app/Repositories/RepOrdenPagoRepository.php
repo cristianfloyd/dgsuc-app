@@ -13,9 +13,17 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAll(): Collection
+    public function getAll(array|int|null $nroLiquis = null): Collection
     {
-        return RepOrdenPagoModel::all();
+        $query = RepOrdenPagoModel::query();
+
+        if (is_array($nroLiquis)) {
+            $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
+        } elseif (is_int(value: $nroLiquis)) {
+            $query->where(column: 'nro_liqui', operator: $nroLiquis);
+        }
+
+        return $query->get();
     }
 
 

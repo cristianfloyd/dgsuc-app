@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\AfipMapucheSicoss;
 use App\DTOs\AfipMapucheSicossDTO;
 use App\Exceptions\AfipMapucheSicossNotFoundException;
-use App\Repositories\Interfaces\AfipMapucheSicossRepositoryInterface;
+use App\Contracts\AfipMapucheSicossRepositoryInterface;
 
 class AfipMapucheSicossService
 {

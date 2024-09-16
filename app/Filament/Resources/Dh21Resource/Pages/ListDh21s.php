@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
+use Livewire\Livewire;
 use Filament\Actions\Action;
 use App\Filament\Resources\Dh21Resource;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Widgets\LiquidacionesWidget;
-use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
-use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 use App\Filament\Widgets\IdLiquiSelector;
+use Filament\Resources\Pages\ListRecords;
+use App\Livewire\Reportes\OrdenPagoReporte;
+use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 
 class ListDh21s extends ListRecords
 {
@@ -21,13 +21,21 @@ class ListDh21s extends ListRecords
             Action::make('conceptos-totales')
             ->label('Ver Conceptos Totales')
             ->url(static::getResource()::getUrl('conceptos-totales')),
+            Action::make('abrirModal')
+                ->label('Abrir Modal')
+                ->icon('heroicon-o-plus')
+                ->modalContent(function () {
+                    return view('modals.orden-pago-reporte', ['liquidacionId' => 1]);
+                })
+                ->modalDescription('Orden de pago') // Contenido vacío
+                ->modalWidth('7xl'), // Ancho del modal
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            Dh21LegajoCounter::class,
+            //Dh21LegajoCounter::class,
             Dh21Concepto101Total::class,
             IdLiquiSelector::class,
         ];

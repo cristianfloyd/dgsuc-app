@@ -5,11 +5,16 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use App\Models\Dh21;
 use Filament\Tables;
+use Livewire\Livewire;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Filament\Resources\Dh21Resource\Pages;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
@@ -28,67 +33,67 @@ class Dh21Resource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nro_liqui')
+                TextInput::make('nro_liqui')
                     ->numeric(),
-                Forms\Components\TextInput::make('nro_legaj')
+                TextInput::make('nro_legaj')
                     ->numeric(),
-                Forms\Components\TextInput::make('nro_cargo')
+                TextInput::make('nro_cargo')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_conce')
+                TextInput::make('codn_conce')
                     ->numeric(),
-                Forms\Components\TextInput::make('impp_conce')
+                TextInput::make('impp_conce')
                     ->numeric(),
-                Forms\Components\TextInput::make('tipo_conce')
+                TextInput::make('tipo_conce')
                     ->maxLength(1),
-                Forms\Components\TextInput::make('nov1_conce')
+                TextInput::make('nov1_conce')
                     ->numeric(),
-                Forms\Components\TextInput::make('nov2_conce')
+                TextInput::make('nov2_conce')
                     ->numeric(),
-                Forms\Components\TextInput::make('nro_orimp')
+                TextInput::make('nro_orimp')
                     ->numeric(),
-                Forms\Components\TextInput::make('tipoescalafon')
+                TextInput::make('tipoescalafon')
                     ->maxLength(1),
-                Forms\Components\TextInput::make('nrogrupoesc')
+                TextInput::make('nrogrupoesc')
                     ->numeric(),
-                Forms\Components\TextInput::make('codigoescalafon')
+                TextInput::make('codigoescalafon')
                     ->maxLength(4),
-                Forms\Components\TextInput::make('codc_regio')
+                TextInput::make('codc_regio')
                     ->maxLength(4),
-                Forms\Components\TextInput::make('codc_uacad')
+                TextInput::make('codc_uacad')
                     ->maxLength(4),
-                Forms\Components\TextInput::make('codn_area')
+                TextInput::make('codn_area')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_subar')
+                TextInput::make('codn_subar')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_fuent')
+                TextInput::make('codn_fuent')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_progr')
+                TextInput::make('codn_progr')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_subpr')
+                TextInput::make('codn_subpr')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_proye')
+                TextInput::make('codn_proye')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_activ')
+                TextInput::make('codn_activ')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_obra')
+                TextInput::make('codn_obra')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_final')
+                TextInput::make('codn_final')
                     ->numeric(),
-                Forms\Components\TextInput::make('codn_funci')
+                TextInput::make('codn_funci')
                     ->numeric(),
-                Forms\Components\TextInput::make('ano_retro')
+                TextInput::make('ano_retro')
                     ->numeric(),
-                Forms\Components\TextInput::make('mes_retro')
+                TextInput::make('mes_retro')
                     ->numeric(),
-                Forms\Components\TextInput::make('detallenovedad')
+                TextInput::make('detallenovedad')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('codn_grupo_presup')
+                TextInput::make('codn_grupo_presup')
                     ->numeric()
                     ->default(1),
-                Forms\Components\TextInput::make('tipo_ejercicio')
+                TextInput::make('tipo_ejercicio')
                     ->maxLength(1)
                     ->default('A'),
-                Forms\Components\TextInput::make('codn_subsubar')
+                TextInput::make('codn_subsubar')
                     ->numeric()
                     ->default(0),
             ]);
@@ -114,66 +119,66 @@ class Dh21Resource extends Resource
                 TextColumn::make('impp_conce')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('tipo_conce')
+                TextColumn::make('tipo_conce')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                TextColumn::make('nov1_conce')
+                TextColumn::make('nov1_conce')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('nov2_conce')
+                TextColumn::make('nov2_conce')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('nro_orimp')
+                TextColumn::make('nro_orimp')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('tipoescalafon'),
-                TextColumn::make('nrogrupoesc')
+                TextColumn::make('tipoescalafon')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('nrogrupoesc')->toggleable()->toggledHiddenByDefault()
                     ->numeric(),
-                TextColumn::make('codigoescalafon'),
-                TextColumn::make('codc_regio'),
-                TextColumn::make('codc_uacad'),
-                TextColumn::make('codn_area')
+                TextColumn::make('codigoescalafon')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('codc_regio')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('codc_uacad')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('codn_area')->toggleable()->toggledHiddenByDefault()
                     ->numeric(),
-                TextColumn::make('codn_subar')
+                TextColumn::make('codn_subar')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_fuent')
+                TextColumn::make('codn_fuent')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_progr')
+                TextColumn::make('codn_progr')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_subpr')
+                TextColumn::make('codn_subpr')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_proye')
+                TextColumn::make('codn_proye')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_activ')
+                TextColumn::make('codn_activ')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_obra')
+                TextColumn::make('codn_obra')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_final')
+                TextColumn::make('codn_final')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('codn_funci')
+                TextColumn::make('codn_funci')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('ano_retro')
+                TextColumn::make('ano_retro')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('mes_retro')
+                TextColumn::make('mes_retro')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('detallenovedad')
+                TextColumn::make('detallenovedad')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                TextColumn::make('codn_grupo_presup')
+                TextColumn::make('codn_grupo_presup')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('tipo_ejercicio')
+                TextColumn::make('tipo_ejercicio')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                TextColumn::make('codn_subsubar')
+                TextColumn::make('codn_subsubar')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
             ])
@@ -182,6 +187,13 @@ class Dh21Resource extends Resource
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
+                Action::make(name: 'gerearReporte')
+                    ->label('Generar Reporte')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->action(function (Dh21 $record) {
+                        static::generarReporte($record);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -216,6 +228,57 @@ class Dh21Resource extends Resource
         return [
             Dh21LegajoCounter::class,
             Dh21Concepto101Total::class,
+        ];
+    }
+
+    public static function generarReporte($record)
+    {
+
+        // Verificamos que el registro tenga un ID válido
+        if (!$record->nro_liqui) {
+            Notification::make()
+                ->title('Error')
+                ->body('No se pudo generar el reporte. Liquidación inválida.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Renderizamos el componente Livewire en un modal
+        return Action::make('verReporte')
+            ->label('Ver Reporte')
+            ->icon('heroicon-o-document-text')
+            ->color('success')
+            ->modalHeading('Reporte de Orden de Pago')
+            ->modalContent(
+                fn() => Livewire::mount(
+                    name: OrdenPagoReporte::class, params: ['liquidacionId' => $record->nro_liqui]
+                    ))
+            ->modalWidth('7xl');
+    }
+
+    protected static function descargarReportePDF($liquidacionId)
+    {
+        $reporteHtml = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
+        $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
+        $pdf = Pdf::loadHTML($reporteHtml);
+        return response()->streamDownload(
+            fn() => print($pdf->output()),
+            $nombreArchivo,
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    // Añadir la acción en el header
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('abrirModal')
+                ->label('Abrir Modal')
+                ->icon('heroicon-o-plus')
+                ->modalContent() // Contenido vacío
+                ->modalDescription('modal de preuba') // Contenido vacío
+                ->modalWidth('7xl'), // Ancho del modal
         ];
     }
 }

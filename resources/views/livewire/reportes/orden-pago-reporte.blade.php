@@ -1,4 +1,16 @@
 <div class="container mx-auto w-10/12 bg-white p-6">
+    <div class="mb-6 h-36 flex justify-between items-center">
+        <div class="w-1/3">
+            <img src="{{ $reportHeader['logoPath'] }}" alt="Logo" class="h-36">
+        </div>
+        <div class="w-1/3 text-center h-36 pt-7">
+            <h1 class="text-2xl text-slate-950 font-bold">Orden de Pago: {{ $reportHeader['orderNumber'] }}</h1>
+            <p>Liquidación: {{ $reportHeader['liquidationNumber'] }} - {{ $reportHeader['liquidationDescription'] }}</p>
+        </div>
+        <div class="w-1/3 text-right h-36 mt-2">
+            <p>Fecha de generación: {{ $reportHeader['generationDate'] }}</p>
+        </div>
+    </div>
     @foreach ($reportData as $banco => $porBanco)
 
             <x-reportes.section-header :level="2">
