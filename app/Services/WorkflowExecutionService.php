@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enum\WorkflowStatus;
+use App\Enums\WorkflowStatus;
 use App\Services\TempTableService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
