@@ -4,6 +4,12 @@ namespace App\ValueObjects;
 
 use InvalidArgumentException;
 
+
+/**
+ * Representa un periodo de tiempo en formato YYYYMM.
+ *
+ * Esta clase encapsula la validación y el acceso al valor del periodo.
+ */
 class Periodo
 {
     private string $value;
@@ -16,11 +22,13 @@ class Periodo
         $this->value = $periodo;
     }
 
+    /// Obtiene el valor del periodo como una cadena de texto.
     public function getValue(): string
     {
         return $this->value;
     }
 
+    /// Devuelve el valor del periodo como una cadena de texto.
     public function __toString(): string
     {
         return $this->value;
