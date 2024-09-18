@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    protected $connection = 'pgsql-suc';
+
     public function up(): void
     {
         Schema::create('suc.rep_orden_pago', function (Blueprint $table) {

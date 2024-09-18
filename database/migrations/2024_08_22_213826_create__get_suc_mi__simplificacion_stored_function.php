@@ -102,7 +102,7 @@ return new class extends Migration
             INNER JOIN MinCargos
                 ON d.nro_legaj = MinCargos.nro_legaj
                 AND d.nro_cargo = MinCargos.nro_cargo
-            INNER JOIN suc.tabla_temp_cuils tc
+            INNER JOIN suc.afip_tabla_temp_cuils tc
                 ON CONCAT(d2.nro_cuil1, d2.nro_cuil, d2.nro_cuil2) = tc.cuil
             WHERE
                 d.tipo_conce = 'C'

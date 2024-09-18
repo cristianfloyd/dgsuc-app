@@ -15,7 +15,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      */
     public function getAll(array|int|null $nroLiquis = null): Collection
     {
-        $query = RepOrdenPagoModel::query();
+        $query = RepOrdenPagoModel::query()
+            ->orderBy('banco', 'desc')
+            ->orderBy('codn_funci', 'asc')
+            ->orderBy('codn_fuent', 'asc')
+            ->orderBy('codc_uacad', 'asc');
 
         if (is_array($nroLiquis)) {
             $query->whereIn(column: 'nro_liqui', values: $nroLiquis);

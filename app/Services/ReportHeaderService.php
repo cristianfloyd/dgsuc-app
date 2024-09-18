@@ -10,7 +10,7 @@ class ReportHeaderService
     {
         // Lógica para obtener la información del encabezado
         return new ReportHeaderDTO(
-            logoPath: asset(path: 'storage/logo.png'),
+            logoPath: asset(path: 'storage/uba40_sinfondo.png'),
             orderNumber: 'OP-' . uniqid(),
             liquidationNumber: (string) $liquidationNumber,
             liquidationDescription: 'Descripción de la liquidación',

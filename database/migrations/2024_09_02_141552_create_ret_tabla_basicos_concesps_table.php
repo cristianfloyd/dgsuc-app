@@ -10,7 +10,7 @@ return new class extends Migration
     /**
      * Establece la conexión de base de datos a utilizar para esta migración.
      */
-    protected $connection = 'pgsql_suc';
+    protected $connection = 'pgsql-mapuche';
 
 
     /**
@@ -31,11 +31,11 @@ return new class extends Migration
         });
 
         // Asignamos el propietario y los permisos
-        DB::statement('ALTER TABLE suc.ret_tabla_basicos_conc_esp OWNER TO "ramon.ces"');
-        DB::statement('REVOKE ALL ON TABLE suc.ret_tabla_basicos_conc_esp FROM liqui_ro');
-        DB::statement('GRANT SELECT ON TABLE suc.ret_tabla_basicos_conc_esp TO liqui_ro');
-        DB::statement('GRANT ALL ON TABLE suc.ret_tabla_basicos_conc_esp TO liqui_rw');
-        DB::statement('GRANT ALL ON TABLE suc.ret_tabla_basicos_conc_esp TO "ramon.ces"');
+        //DB::statement('ALTER TABLE suc.ret_tabla_basicos_conc_esp OWNER TO "ramon.ces"');
+        //DB::statement('REVOKE ALL ON TABLE suc.ret_tabla_basicos_conc_esp FROM liqui_ro');
+        //DB::statement('GRANT SELECT ON TABLE suc.ret_tabla_basicos_conc_esp TO liqui_ro');
+        //DB::statement('GRANT ALL ON TABLE suc.ret_tabla_basicos_conc_esp TO liqui_rw');
+        //DB::statement('GRANT ALL ON TABLE suc.ret_tabla_basicos_conc_esp TO "ramon.ces"');
     }
     /**
      * Revierte la migración.
