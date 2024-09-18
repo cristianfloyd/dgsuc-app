@@ -2,18 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\ReporteResource\RelationManagers;
+use Filament\Pages\Page;
 
-class ReporteResource extends Resource
+class ReporteResource extends Page
 {
     protected static ?string $model = null;
 
@@ -29,6 +25,12 @@ class ReporteResource extends Resource
         return $table;
     }
 
+
+    public function getEloquentQuery()
+    {
+        // Sobreescribir este método para evitar que intente acceder a un modelo
+        return null;
+    }
 
     public static function getPages(): array
     {
