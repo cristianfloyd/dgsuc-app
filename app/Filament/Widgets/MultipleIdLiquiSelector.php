@@ -11,7 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 
-class IdLiquiSelector extends Widget implements HasForms
+class MultipleIdLiquiSelector extends Widget implements HasForms
 {
     use InteractsWithForms;
     protected static ?int $sort = 2;
@@ -22,7 +22,7 @@ class IdLiquiSelector extends Widget implements HasForms
 
     protected static string $view = 'filament.widgets.id-liqui-selector';
 
-    public ?string $selectedIdLiqui = null;
+    public ?array $selectedIdLiqui = null;
 
 
 
@@ -44,11 +44,12 @@ class IdLiquiSelector extends Widget implements HasForms
             ->schema([
                 Select::make('selectedIdLiqui')
                     ->label('Seleccionar Liquidaciones')
+                    ->multiple()
                     ->options(Dh22::getLiquidacionesForWidget()->pluck('desc_liqui', 'nro_liqui'))
                     ->reactive()
                     ->afterStateUpdated(function ($state) {
-                        $this->dispatch('idLiquiSelected', $state);
-                        Log::debug("idLiquiSelected", ['state' => $state]);
+                        $this->dispatch('idsLiquiSelected', $state);
+                        Log::debug("idsLiquiSelected", ['state' => $state]);
                     }),
             ]);
     }

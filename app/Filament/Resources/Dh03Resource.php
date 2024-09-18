@@ -13,6 +13,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,7 +32,7 @@ class Dh03Resource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nro_cargo')->numeric()->required(),
+                TextInput::make('nro_cargo')->numeric()->required(),
                 Forms\Components\TextInput::make('nro_legaj')->numeric()->required(),
                 Forms\Components\DatePicker::make('fec_alta')->required(),
                 Forms\Components\DatePicker::make('fec_baja')->required(),

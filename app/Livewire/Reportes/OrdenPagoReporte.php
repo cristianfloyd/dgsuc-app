@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Reportes;
 
+use Livewire\Livewire;
 use Livewire\Component;
 use App\DTOs\ReportHeaderDTO;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -275,24 +276,29 @@ class OrdenPagoReporte extends Component implements Htmlable
     }
 
 
-    /**
-     * Descarga un reporte en formato PDF de la orden de pago.
-     *
-     * Este método genera un archivo PDF a partir de los datos públicos de la clase y lo descarga para el usuario.
-     *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse Respuesta de descarga del archivo PDF.
-     */
+
     public function descargarPDF()
     {
-        $html = $this->render()->with($this->getPublicProperties())->render();
-        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte', data: [
+            'reportData' => $this->reportData,
+            'reportHeader' => $this->reportHeader,
+            'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        ]);
+        return $pdf->download('op.pdf');
+    }
+
+    public function descargarReportePDF($liquidacionId = null)
+    {
+        $component = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => 1]);
+        dump($component);
+        $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
+        $pdf = Pdf::loadHTML($component);
         return response()->streamDownload(
             fn() => print($pdf->output()),
-            'orden_pago_' . $this->liquidacionId . '_' . now()->format('YmdHis') . '.pdf',
+            $nombreArchivo,
             ['Content-Type' => 'application/pdf']
         );
     }
-
 
     public function toHtml()
     {
@@ -301,6 +307,13 @@ class OrdenPagoReporte extends Component implements Htmlable
 
     public function render()
     {
-        return view(view: 'livewire.reportes.orden-pago-reporte', data: ['reportData' => $this->reportData]);
+        //return view(view: 'livewire.reportes.orden-pago-reporte', data: ['reportData' => $this->reportData]);
+        
+        return view(view: 'livewire.reportes.orden-pago-reporte', data: [
+                'reportData' => $this->reportData,
+                'reportHeader' => $this->reportHeader,
+                'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        ]);
+
     }
 }
