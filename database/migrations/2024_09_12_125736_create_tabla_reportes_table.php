@@ -11,7 +11,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suc.rep_orden_pago', function (Blueprint $table) {
-            $table->id();
             $table->integer('nro_liqui')->nullable();
             $table->integer('banco')->nullable();
             $table->string('codn_funci')->nullable();
