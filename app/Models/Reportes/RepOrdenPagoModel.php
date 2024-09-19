@@ -2,12 +2,12 @@
 
 namespace App\Models\Reportes;
 
-use App\Traits\MapucheSchemaSuc;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class RepOrdenPagoModel extends Model
 {
-    use MapucheSchemaSuc;
+    protected $connection = 'pgsql-mapuche';
 
     /**
      * Tabla de la base de datos utilizada por el modelo RepOrdenPago.

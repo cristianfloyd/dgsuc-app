@@ -1,10 +1,7 @@
-<div class="container mx-auto w-10/12 bg-white p-6">
-    <div>
-        <button wire:click="descargarPDF" class="btn btn-primary">
-            Exportar a PDF
-        </button>
+<div class="container mx-auto w-10/12 bg-slate-800 p-6">
+    <div class="mb-6 h-36 flex justify-between items-center bg-slate-800">
         <button wire:click="descargarReportePDF" class="btn btn-primary">
-            Exportar
+            Descargar pdf
         </button>
     </div>
     <div class="container mx-auto w-10/12 bg-white p-6" label="reporteOP">
@@ -118,7 +115,7 @@
                 'Hs. Extras',
                 'Total',
             ]" type="generales">
-                @foreach ($totalesPorFormaPago[$formaPago] as $funcion => $porFuncion)
+                @foreach ($totalesPorFinanciamiento[$formaPago] as $funcion => $porFuncion)
                     @foreach ($porFuncion as $financiamiento => $datos)
                         <tr>
                             <td class="text-right text-gray-950 font-bold border-2 border-gray-900 pr-2">{{ $funcion }}</td>
@@ -132,9 +129,9 @@
                             <td class="text-right text-gray-950 font-bold border-2 border-gray-900 pr-2">{{ money($datos['total']) }}</td>
                         </tr>
                     @endforeach
-                    <x-reportes.totals-row :totals="$this->calcularTotalPorFuncion($porFuncion)" type="subtotal-funcion" />
-                @endforeach
-                <x-reportes.totals-row :totals="$this->calcularTotalPorFormaPago($totalesPorFormaPago[$formaPago])" type="subtotal-forma-pago" />
+                    <x-reportes.totals-row :totals="$totalesPorFuncion[$formaPago][$funcion]" type="subtotal-funcion" />
+                    @endforeach
+                <x-reportes.totals-row :totals="$totalesPorFormaPago[$formaPago]" type="subtotal-forma-pago" />
             </x-reportes.table-component>
         @endforeach
         <x-reportes.section-header :level="2">

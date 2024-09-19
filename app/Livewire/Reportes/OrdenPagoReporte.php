@@ -4,7 +4,6 @@ namespace App\Livewire\Reportes;
 
 use Livewire\Livewire;
 use Livewire\Component;
-use App\DTOs\ReportHeaderDTO;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ReportHeaderService;
 use Illuminate\Contracts\Support\Htmlable;
@@ -13,9 +12,11 @@ use App\Contracts\RepOrdenPagoRepositoryInterface;
 class OrdenPagoReporte extends Component implements Htmlable
 {
     public $reportData;
-    public $totalGeneral;
     public $liquidacionId = null;
+    public $totalGeneral;
     public $totalesPorFormaPago = [];
+    public $totalesPorFuncion; // propiedad para almacenar los totales por función
+    public $totalesPorFinanciamiento = [];
     public array $reportHeader;
 
     protected $repOrdenPagoRepository;
@@ -196,109 +197,63 @@ class OrdenPagoReporte extends Component implements Htmlable
         }
     }
 
-    private function calculateTotalGeneral()
-    {
-        $this->totalGeneral = [
-            'remunerativo' => 0,
-            'estipendio' => 0,
-            'productividad' => 0,
-            'med_resid' => 0,
-            'sal_fam' => 0,
-            'hs_extras' => 0,
-            'total' => 0
-        ];
-
-        foreach ($this->reportData as $banco) {
-            $this->addTotals($this->totalGeneral, $banco['totalBanco']);
-        }
-    }
-
     public function calculateTotalesGenerales()
     {
-        $this->totalesPorFormaPago = [
-            'banco' => [],
-            'efectivo' => []
-        ];
+        // Inicializar la estructura de datos
+        $this->totalesPorFinanciamiento = ['banco' => [], 'efectivo' => []];
+        $this->totalesPorFuncion = ['banco' => [], 'efectivo' => []];
+        $this->totalesPorFormaPago = ['banco' => $this->initializeTotals(), 'efectivo' => $this->initializeTotals()];
 
         foreach ($this->reportData as $banco => $porBanco) {
             $formaPago = $banco == '1' ? 'banco' : 'efectivo';
 
             foreach ($porBanco['funciones'] as $funcion => $porFuncion) {
+                if (!isset($this->totalesPorFuncion[$formaPago][$funcion])) {
+                    $this->totalesPorFuncion[$formaPago][$funcion] = $this->initializeTotals();
+                }
+
                 foreach ($porFuncion['fuentes'] as $fuente => $porFuente) {
-                    if (!isset($this->totalesPorFormaPago[$formaPago][$funcion][$fuente])) {
-                        $this->totalesPorFormaPago[$formaPago][$funcion][$fuente] = $this->initializeTotals();
+                    if (!isset($this->totalesPorFinanciamiento[$formaPago][$funcion][$fuente])) {
+                        $this->totalesPorFinanciamiento[$formaPago][$funcion][$fuente] = $this->initializeTotals();
                     }
-                    $this->addTotals($this->totalesPorFormaPago[$formaPago][$funcion][$fuente], $porFuente['totalFuente']);
+                    $this->addTotals($this->totalesPorFinanciamiento[$formaPago][$funcion][$fuente], $porFuente['totalFuente']);
+                    $this->addTotals($this->totalesPorFuncion[$formaPago][$funcion], $porFuente['totalFuente']);
+                    $this->addTotals($this->totalesPorFormaPago[$formaPago], $porFuente['totalFuente']);
                 }
             }
         }
 
         $this->totalGeneral = $this->initializeTotals();
         foreach (['banco', 'efectivo'] as $formaPago) {
-            foreach ($this->totalesPorFormaPago[$formaPago] as $funcionTotals) {
-                foreach ($funcionTotals as $fuenteTotals) {
-                    $this->addTotals($this->totalGeneral, $fuenteTotals);
-                }
-            }
+            $this->addTotals($this->totalGeneral, $this->totalesPorFormaPago[$formaPago]);
         }
     }
 
-    /**
-     * Calcula el total por función sumando los totales de todas las fuentes de financiamiento.
-     *
-     * @param array $porFuncion Array con los datos de una función específica
-     * @return array Array con los totales calculados para la función
-     */
-    public function calcularTotalPorFuncion($porFuncion): array
+
+
+
+
+
+    public function descargarReportePDF()
     {
-        $total = $this->initializeTotals();
-        foreach ($porFuncion as $fuenteTotals) {
-            $this->addTotals($total, $fuenteTotals);
-        }
-        return $total;
-    }
-
-    /**
-     * Calcula el total por forma de pago sumando los totales de todas las funciones.
-     *
-     * @param array $formaPagoData Array con los datos de una forma de pago específica
-     * @return array Array con los totales calculados para la forma de pago
-     */
-    public function calcularTotalPorFormaPago($formaPagoData): array
-    {
-        $total = $this->initializeTotals();
-        foreach ($formaPagoData as $funcionData) {
-            foreach ($funcionData as $fuenteTotals) {
-                $this->addTotals($total, $fuenteTotals);
-            }
-        }
-        return $total;
-    }
-
-
-
-    public function descargarPDF()
-    {
-        $pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte', data: [
+        $data = [
             'reportData' => $this->reportData,
             'reportHeader' => $this->reportHeader,
             'totalesPorFormaPago' => $this->totalesPorFormaPago,
-        ]);
-        return $pdf->download('op.pdf');
+            'totalesPorFuncion' => $this->totalesPorFuncion,
+            'totalesPorFinanciamiento' => $this->totalesPorFinanciamiento,
+            'totalGeneral' => $this->totalGeneral,
+        ];
+
+        $pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte-exportable', data: $data);
+
+        // return $pdf->download('op.pdf');
+        dd($pdf);
+        return response()->streamDownload(function() use($pdf){
+            echo $pdf->stream();
+        },'users.pdf');
     }
 
-    public function descargarReportePDF($liquidacionId = null)
-    {
-        $component = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => 1]);
-        dump($component);
-        $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
-        $pdf = Pdf::loadHTML($component);
-        return response()->streamDownload(
-            fn() => print($pdf->output()),
-            $nombreArchivo,
-            ['Content-Type' => 'application/pdf']
-        );
-    }
 
     public function toHtml()
     {
@@ -307,7 +262,13 @@ class OrdenPagoReporte extends Component implements Htmlable
 
     public function render()
     {
-        return view(view: 'livewire.reportes.orden-pago-reporte', data: ['reportData' => $this->reportData]);
+        return view(view: 'livewire.reportes.orden-pago-reporte', data: [
+            'reportData' => $this->reportData,
+            'reportHeader' => $this->reportHeader,
+            'totalesPorFormaPago' => $this->totalesPorFormaPago,
+            'totalGeneral' => $this->totalGeneral,
+]);
+
 
         // return view(view: 'livewire.reportes.orden-pago-reporte', data: [
         //         'reportData' => $this->reportData,
