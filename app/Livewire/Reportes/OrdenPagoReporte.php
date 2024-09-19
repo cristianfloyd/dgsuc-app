@@ -307,13 +307,13 @@ class OrdenPagoReporte extends Component implements Htmlable
 
     public function render()
     {
-        //return view(view: 'livewire.reportes.orden-pago-reporte', data: ['reportData' => $this->reportData]);
-        
-        return view(view: 'livewire.reportes.orden-pago-reporte', data: [
-                'reportData' => $this->reportData,
-                'reportHeader' => $this->reportHeader,
-                'totalesPorFormaPago' => $this->totalesPorFormaPago,
-        ]);
+        return view(view: 'livewire.reportes.orden-pago-reporte', data: ['reportData' => $this->reportData]);
+
+        // return view(view: 'livewire.reportes.orden-pago-reporte', data: [
+        //         'reportData' => $this->reportData,
+        //         'reportHeader' => $this->reportHeader,
+        //         'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        // ]);
 
     }
 }

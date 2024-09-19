@@ -45,7 +45,6 @@
                                                 <td class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">{{ money($item->total) }}</td>
                                             </tr>
                                         @endforeach
-                                        @dump($data)
                                         <x-reportes.totals-row :totals="$data['totals']" type="section"  />
                                     </x-reportes.table-component>
                                 @endforeach
