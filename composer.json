@@ -14,6 +14,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
+        "maatwebsite/excel": "^3.1",
         "reedware/laravel-composite-relations": "^4.0",
         "robsontenorio/mary": "^1.32",
         "spatie/data-transfer-object": "^3.9"

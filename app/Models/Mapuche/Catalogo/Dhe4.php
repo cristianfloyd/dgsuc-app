@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Modelo Eloquent para la tabla 'mapuche.dhe4' que representa un organismo dentro del sistema Mapuche.
@@ -67,8 +68,24 @@ class Dhe4 extends Model
         return $this->hasMany(Dh36::class, 'cod_organismo', 'cod_organismo');
     }
 
+    /**
+     * Relación de uno a muchos entre el modelo Dhe4 y el modelo Dhe2, donde cada Dhe4 puede tener múltiples Dhe2.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function dhe2(): HasMany
     {
         return $this->hasMany(Dhe2::class, 'cod_organismo', 'cod_organismo');
+    }
+
+    /**
+     * Relación de muchos a muchos entre el modelo Dhe4 y el modelo Dh30 a través de la tabla pivote dhe2.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function dh30Items(): BelongsToMany
+    {
+        return $this->belongsToMany(related: Dh30::class, table: 'dhe2', foreignPivotKey: 'cod_organismo', relatedPivotKey: 'nro_tabla')
+            ->withPivot('desc_abrev');
     }
 }

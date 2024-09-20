@@ -3,6 +3,7 @@
 namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh03;
+use App\Models\Dh19;
 use App\Models\Mapuche\Dhe2;
 use App\Models\Mapuche\Catalogo\Dh08;
 use App\Traits\MapucheConnectionTrait;
@@ -59,7 +60,7 @@ class Dh30 extends Model
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
-                    ->where('desc_abrev', $this->getAttribute('desc_abrev'));
+            ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
     public function dh08(): HasMany
@@ -78,5 +79,21 @@ class Dh30 extends Model
     {
         return $this->hasMany(related: Dhe2::class, foreignKey: 'nro_tabla', localKey: 'nro_tabla')
             ->where(column: 'desc_abrev', operator: $this->desc_abrev);
+    }
+
+    public function dh19(): BelongsToMany
+    {
+        return $this->belongsToMany(Dh19::class, 'dh30_dh19', 'nro_tabla', 'codc_uacad', 'nro_tabla', 'codc_uacad');
+    }
+
+    public function dhe4(): BelongsToMany
+    {
+        return $this->belongsToMany(related: Dhe4::class, table: 'dhe2', foreignPivotKey: 'nro_tabla', relatedPivotKey: 'cod_organismo', parentKey: 'nro_tabla', relatedKey: 'cod_organismo');
+    }
+
+    public function organismos(): BelongsToMany
+    {
+        return $this->belongsToMany(related: Dhe4::class, table: 'dhe2', foreignPivotKey: 'nro_tabla', relatedPivotKey: 'cod_organismo')
+            ->withPivot('desc_abrev');
     }
 }

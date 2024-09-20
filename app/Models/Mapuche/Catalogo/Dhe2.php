@@ -7,6 +7,7 @@ use App\Models\Mapuche\Catalogo\Dhe4;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Dhe2 extends Model
 {
@@ -65,4 +66,5 @@ class Dhe2 extends Model
     {
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
     }
+
 }
