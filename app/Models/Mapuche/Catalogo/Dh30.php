@@ -76,7 +76,7 @@ class Dh30 extends Model
 
     public function dhe2(): HasMany
     {
-        return $this->hasMany(Dhe2::class, 'nro_tabla', 'nro_tabla')
-            ->where('desc_abrev', $this->desc_abrev);
+        return $this->hasMany(related: Dhe2::class, foreignKey: 'nro_tabla', localKey: 'nro_tabla')
+            ->where(column: 'desc_abrev', operator: $this->desc_abrev);
     }
 }
