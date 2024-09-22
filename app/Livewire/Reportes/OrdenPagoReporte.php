@@ -245,13 +245,18 @@ class OrdenPagoReporte extends Component implements Htmlable
             'totalGeneral' => $this->totalGeneral,
         ];
 
-        $pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte-exportable', data: $data);
+        $view = view('livewire.reportes.orden-pago-reporte-exportable')->with($data);
+        $html = $view->render();
+        $pdfss = Pdf::loadHTML($html)->setPaper('a4', 'landscape');
 
-        // return $pdf->download('op.pdf');
-        Log::debug('pdf: ',$pdf);
 
-        return response()->streamDownload(function() use($pdf){
-            echo $pdf->stream();
+        //$pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte-exportable', data: $data);
+
+
+        Log::info('PDF generado');
+
+        return response()->streamDownload(function() use($pdfss){
+            echo $pdfss->stream();
         },'users.pdf');
     }
 
@@ -263,19 +268,19 @@ class OrdenPagoReporte extends Component implements Htmlable
 
     public function render()
     {
-        return view(view: 'livewire.reportes.orden-pago-reporte', data: [
-            'reportData' => $this->reportData,
-            'reportHeader' => $this->reportHeader,
-            'totalesPorFormaPago' => $this->totalesPorFormaPago,
-            'totalGeneral' => $this->totalGeneral,
-        ]);
-
-
         // return view(view: 'livewire.reportes.orden-pago-reporte', data: [
-        //         'reportData' => $this->reportData,
-        //         'reportHeader' => $this->reportHeader,
-        //         'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        //     'reportData' => $this->reportData,
+        //     'reportHeader' => $this->reportHeader,
+        //     'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        //     'totalGeneral' => $this->totalGeneral,
         // ]);
+
+
+        return view(view: 'livewire.reportes.orden-pago-reporte-exportable', data: [
+                'reportData' => $this->reportData,
+                'reportHeader' => $this->reportHeader,
+                'totalesPorFormaPago' => $this->totalesPorFormaPago,
+        ]);
 
     }
 }

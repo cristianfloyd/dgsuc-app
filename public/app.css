@@ -1,0 +1,62 @@
+
+/* resources\css\reportes.css */
+
+.container[label="reporteOP"] {
+    font-family: Arial, sans-serif; /* Define una fuente genérica */
+}
+
+.h-36 {
+    height: 9rem; /* 1rem = 16px, por lo que 9rem = 144px */
+}
+
+.pt-7 {
+    padding-top: 1.75rem; /* 1rem = 16px, por lo que 1.75rem = 28px */
+}
+
+.mt-2 {
+    margin-top: 0.5rem; /* 1rem = 16px, por lo que 0.5rem = 8px */
+}
+
+.text-right {
+    text-align: right;
+}
+
+.pr-1 {
+    padding-right: 0.25rem; /* 1rem = 16px, por lo que 0.25rem = 4px */
+}
+
+.pr-2 {
+    padding-right: 0.5rem; /* 1rem = 16px, por lo que 0.5rem = 8px */
+}
+
+.bg-gray-200 {
+    background-color: #edf2f7; /* Color gris claro */
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.text-gray-900 {
+    color: #1a202c; /* Color gris oscuro */
+}
+
+.border {
+    border-width: 1px;
+}
+
+.border-gray-600 {
+    border-color: #718096; /* Color gris medio */
+}
+
+.b-slate-500 {
+    border-bottom-color: #64748b; /* Color azul pizarra */
+}
+
+.border-2 {
+    border-width: 2px;
+}
+
+.border-gray-900 {
+    border-color: #1a202c; /* Color gris oscuro */
+}

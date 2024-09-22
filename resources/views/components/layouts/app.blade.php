@@ -15,7 +15,7 @@
             display: none !important;
         }
     </style>
-
+    
     @livewireStyles
     @filamentStyles
     @vite('resources/css/app.css')
