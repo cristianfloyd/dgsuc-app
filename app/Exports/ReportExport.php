@@ -2,37 +2,56 @@
 
 namespace App\Exports;
 
-use Filament\Notifications\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class ReportExport implements FromQuery
+class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
 {
     use Exportable;
-    protected $export;
+    protected $query;
+    protected $collection;
+    protected $type;
 
     public function __construct(Builder $query)
     {
-        $this->export = $query;
+        $this->query = $query;
     }
 
+    public function headings(): array
+    {
+        return [
+            'Dep',
+            'periodo_fiscal',
+            'liquidaion',
+            'legajo',
+            'cuil',
+            'apellido',
+            'nombre',
+            'oficina_pago',
+            'codigoescalafon',
+            'secuencia',
+            'categoria_completa',
+            'codn_conce',
+            'tipo_conce',
+            'impp_conce'
+        ];
+    }
     public function array(): array
     {
-        return $this->export->get()->toArray();
+        return $this->query->get()->toArray();
     }
 
     public function query()
     {
-        return $this->export;
+        return $this->query;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
-    {
-        $data = $this->query()->get();
-        return $data;
-    }
+
+    // public function collection()
+    // {
+    //     return $this->query()->all();
+    // }
 }
