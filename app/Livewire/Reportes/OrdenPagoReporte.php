@@ -7,6 +7,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ReportHeaderService;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
@@ -247,7 +248,8 @@ class OrdenPagoReporte extends Component implements Htmlable
         $pdf = Pdf::loadView(view: 'livewire.reportes.orden-pago-reporte-exportable', data: $data);
 
         // return $pdf->download('op.pdf');
-        dd($pdf);
+        Log::debug('pdf: ',$pdf);
+
         return response()->streamDownload(function() use($pdf){
             echo $pdf->stream();
         },'users.pdf');
