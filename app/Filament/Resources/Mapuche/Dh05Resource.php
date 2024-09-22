@@ -21,7 +21,6 @@ class Dh05Resource extends Resource
     protected static ?string $pluralLabel = 'Licencias de empleados/cargos';
     protected static ?string $navigationLabel = 'Licencias';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form

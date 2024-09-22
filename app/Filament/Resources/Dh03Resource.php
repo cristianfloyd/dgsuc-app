@@ -25,7 +25,6 @@ class Dh03Resource extends Resource
     protected static ?string $modelLabel = 'Cargos';
     protected static ?string $navigationLabel = 'Cargos';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form

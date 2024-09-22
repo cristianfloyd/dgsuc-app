@@ -18,8 +18,9 @@ use App\Filament\Resources\ReporteResource\Pages;
 class ReporteResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
+    protected static ?string $modelLabel = 'Orden de Pago';
+    protected static ?string $navigationGroup = 'Reportes';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {

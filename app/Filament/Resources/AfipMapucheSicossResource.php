@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AfipMapucheSicossResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicoss::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Afip Sicoss';
+    protected static ?string $navigationGroup = 'Afip';
 
     public static function form(Form $form): Form
     {

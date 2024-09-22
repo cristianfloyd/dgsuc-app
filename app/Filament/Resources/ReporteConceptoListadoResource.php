@@ -25,8 +25,10 @@ use Illuminate\Container\Attributes\Log;
 class ReporteConceptoListadoResource extends Resource
 {
     protected static ?string $model = ConceptoListado::class;
+    protected static ?string $modelLabel = 'Concepto Listado';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Reportes';
 
     public static function form(Form $form): Form
     {
@@ -60,14 +62,14 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
             ->filters([
-                SelectFilter::make('codn_conce')
-                    ->options([
-                        225 => '225',
-                        258 => '258',
-                        266 => '266',
-                    ])
-                    ->label('Concepto')
-                    ->default(225),
+                // SelectFilter::make('codn_conce')
+                //     ->options([
+                //         225 => '225',
+                //         258 => '258',
+                //         266 => '266',
+                //     ])
+                //     ->label('Concepto')
+                //     ->default(225),
             ])
             ->actions([
                 //Tables\Actions\EditAction::make(),
@@ -77,41 +79,41 @@ class ReporteConceptoListadoResource extends Resource
                     //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->headerActions([
-                Action::make('csv')->label('CSV')
-                ->icon('heroicon-o-document-arrow-down')
-                ->button()
-                ->action(function ($data)  {
-                    //implementar un servicio que pase la query a excel a traves de laravel-excel
-                    //https://github.com/Maatwebsite/Laravel-Excel
-                        $query = static::getEloquentQuery();
+            // ->headerActions([
+            //     Action::make('csv')->label('CSV')
+            //     ->icon('heroicon-o-document-arrow-down')
+            //     ->button()
+            //     ->action(function ($data)  {
+            //         //implementar un servicio que pase la query a excel a traves de laravel-excel
+            //         //https://github.com/Maatwebsite/Laravel-Excel
+            //             $query = static::getEloquentQuery();
 
-                        // return Excel::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
+            //             // return Excel::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
 
-                        return (new ReportExport($query))->download('invoices.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
+            //             return (new ReportExport($query))->download('invoices.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
 
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Desea descargar el reporte?')
-                    ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
-                    ->modalSubmitActionLabel('Descargar'),
-                Action::make('excel')->label('EXCEL')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (Builder $query) {
-                        //implementar una accrion que pase los datos de la tabla a un pdf a ttraves de laravel-exc
-                        //https://github.com/Maatwebsite/Laravel-Excel
-                        $query = static::getEloquentQuery();
-                        return (new ReportExport($query))->download('invoices.xlsx', Excel::XLSX);
-                            })
-                            ->requiresConfirmation()
-                            ->modalHeading('¿Desea descargar el reporte en PDF?')
-                            ->modalDescription('Se generará un archivo PDF con los datos filtrados.')
-                            ->modalSubmitActionLabel('Descargar')
-            ])
-            ->groups([
-                Group::make('codc_uacad')->label('Dep')->collapsible(),
-                'coddependesemp',
-            ])
+            //         })
+            //         ->requiresConfirmation()
+            //         ->modalHeading('¿Desea descargar el reporte?')
+            //         ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
+            //         ->modalSubmitActionLabel('Descargar'),
+            //     Action::make('excel')->label('EXCEL')
+            //         ->icon('heroicon-o-arrow-down-tray')
+            //         ->action(function (Builder $query) {
+            //             //implementar una accrion que pase los datos de la tabla a un pdf a ttraves de laravel-exc
+            //             //https://github.com/Maatwebsite/Laravel-Excel
+            //             $query = static::getEloquentQuery();
+            //             return (new ReportExport($query))->download('invoices.xlsx', Excel::XLSX);
+            //                 })
+            //                 ->requiresConfirmation()
+            //                 ->modalHeading('¿Desea descargar el reporte en PDF?')
+            //                 ->modalDescription('Se generará un archivo PDF con los datos filtrados.')
+            //                 ->modalSubmitActionLabel('Descargar')
+            // ])
+            // ->groups([
+            //     Group::make('codc_uacad')->label('Dep')->collapsible(),
+            //     'coddependesemp',
+            // ])
             ;
     }
 

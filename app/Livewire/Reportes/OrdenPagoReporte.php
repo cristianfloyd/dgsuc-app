@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Reportes;
 
-use Livewire\Livewire;
 use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\ReportHeaderService;
@@ -267,7 +266,7 @@ class OrdenPagoReporte extends Component implements Htmlable
             'reportHeader' => $this->reportHeader,
             'totalesPorFormaPago' => $this->totalesPorFormaPago,
             'totalGeneral' => $this->totalGeneral,
-]);
+        ]);
 
 
         // return view(view: 'livewire.reportes.orden-pago-reporte', data: [
