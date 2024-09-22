@@ -50,9 +50,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
     Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
     Route::get('/reporte/orden-pago', OrdenPagoReporte::class)->name('reporte-orden-pago');
-    Route::get('/reporte/orden-pago-pdf', function(){
+    Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
-    });
+    })->name('reporte-orden-pago-pdf');
     Route::get('/test-column-metadata', function () {
         $columnMetadata = app(ColumnMetadata::class);
     });

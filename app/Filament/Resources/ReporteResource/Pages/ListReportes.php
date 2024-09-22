@@ -17,21 +17,27 @@ class ListReportes extends ListRecords
     protected static string $resource = ReporteResource::class;
     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
+    public $reporteGenerado = false;
+
+    public function boot()
+    {
+        Log::info('ListReportes booted', ['session' => session()->all()]);
+    }
 
     protected function getHeaderActions(): array
     {
         return [
             // Actions\CreateAction::make(),
             //ReporteResource::getActions(),
-            Action::make('ordenPagoReporte')
+            Action::make('verOP')
                 ->label('Ver OP')
-                ->modalContent(fn () => view('modals.orden-pago-reporte', ['liquidacionId' => 1]))
-                ->modalWidth('7xl'),
+                ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
+                ->visible(fn () => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar OP')
                 //->action(fn() => $this->generarReporte())
                 ->action(function () {
-                    // Aquí se llamaría a un servicio que ejecute la función almacenada
+                    // metodo que ejecute la función almacenada
                     if($this->generarReporte())
                     {
                         Notification::make()->title('Reporte generado')->success()->send();
@@ -42,14 +48,26 @@ class ListReportes extends ListRecords
 
     public function generarReporte(): bool
     {
+        $selectedLiquidaciones = $this->getLiquidacionesSeleccionadas();
+
+
+        if (empty($selectedLiquidaciones)) {
+            Notification::make()
+                ->title('Seleccione una liquidación')
+                ->warning()
+                ->send();
+            return false;
+        }
+
         try {
-            $selectedLiquidaciones = $this->getLiquidacionesSeleccionadas();
             DB::connection('pgsql-mapuche')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
             Notification::make()->title('Reporte generado')->success()->send();
+            $this->reporteGenerado = true;
             return true;
         } catch (\Exception $e) {
             Log::error('Error al generar el reporte: ' . $e->getMessage());
             Notification::make()->title('Error al generar el reporte')->danger()->send();
+            $this->reporteGenerado = false;
             return false;
         }
     }
@@ -74,5 +92,16 @@ class ListReportes extends ListRecords
     {
         session(['idsLiquiSelected' => $liquidaciones]);
         Log::debug("se graba en la session --> isdLiquiSelected", ['state' => $liquidaciones]);
+    }
+
+    /**
+     * Set the value of reporteGenerado
+     *
+     * @return  self
+     */
+    public function setReporteGenerado($reporteGenerado)
+    {
+        $this->reporteGenerado = $reporteGenerado;
+        return $this;
     }
 }

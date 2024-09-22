@@ -1,25 +1,25 @@
 <!-- resources/views/livewire/reporte.blade.php -->
 @extends('layouts.custom')
 
-@section('title', 'Reporte de Ventas')
+@section('title', 'Orden de Pago')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/app.css') }}">
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+<link rel="stylesheet" href="{{ asset('css/reporte.css') }}">
 @endsection
 
 @section('header')
-<h1>Orden de pago</h1>
-@endsection
 
+@endsection
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+@livewireStyles()
 @section('content')
 <div>
-        <!-- Aquí el contenido del componente Livewire -->
-        @livewire('livewire.reportes.reporte-orden-pago-exportable')
+    <!-- Aquí iría el contenido del componente Livewire -->
+        @livewire('reportes.orden-pago-reporte')
+    @livewireScripts()
 </div>
 @endsection
 
 @section('scripts')
 <script src="{{ asset('js/reporte.js') }}"></script>
 @endsection
-

@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Filament\Resources\ReporteResource\Pages;
+use App\Filament\Resources\ReporteResource\Pages\ListReportes;
 
 class ReporteResource extends Resource
 {
@@ -21,6 +22,13 @@ class ReporteResource extends Resource
     protected static ?string $modelLabel = 'Orden de Pago';
     protected static ?string $navigationGroup = 'Reportes';
 
+    public function mount()
+    {
+        session()->forget('idsLiquiSelected');
+        Log::info('ReporteResource::mount', ['session' => session()->all()]);
+        $listReportes = new ListReportes();
+        $listReportes->setReporteGenerado(false);
+    }
 
     public static function form(Form $form): Form
     {
@@ -66,7 +74,6 @@ class ReporteResource extends Resource
     public static function getPages(): array
     {
         return [
-            //'index' => Pages\ListReportes::route('/'),
             //'create' => Pages\CreateReporte::route('/create'),
             //'edit' => Pages\EditReporte::route('/{record}/edit'),
             'index' => Pages\ListReportes::route('/'),
@@ -100,7 +107,7 @@ class ReporteResource extends Resource
         try {
             $selectedLiquidaciones = $this->getLiquidacionesSeleccionadas();
             DB::select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
-            Notification::make()->title('Reporte generado')->success()->send();
+            //Notification::make()->title('Reporte generado')->success()->send();
             return true;
         } catch (\Exception $e) {
             Log::error('Error al generar el reporte: ' . $e->getMessage());

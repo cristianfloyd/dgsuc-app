@@ -277,9 +277,10 @@ class OrdenPagoReporte extends Component implements Htmlable
 
 
         return view(view: 'livewire.reportes.orden-pago-reporte-exportable', data: [
-                'reportData' => $this->reportData,
-                'reportHeader' => $this->reportHeader,
-                'totalesPorFormaPago' => $this->totalesPorFormaPago,
+            'reportData' => $this->reportData,
+            'reportHeader' => $this->reportHeader,
+            'totalesPorFormaPago' => $this->totalesPorFormaPago,
+            'totalGeneral' => $this->totalGeneral,
         ]);
 
     }
