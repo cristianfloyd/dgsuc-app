@@ -14,6 +14,7 @@ use Filament\Actions\Exports\Enums\ExportFormat;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
 use App\Filament\Exports\Reportes\ConceptoListadoExporter;
 use App\Filament\Resources\ReporteConceptoListadoResource;
+use App\Services\Dh12Service;
 
 class ListReporteConceptoListados extends ListRecords
 {
@@ -51,28 +52,10 @@ class ListReporteConceptoListados extends ListRecords
                     ->modalHeading('¿Desea descargar el reporte?')
                     ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                     ->modalSubmitActionLabel('Descargar'),
+            Actions\SelectAction::make('concepto')->label('concepto')
+                ->options(function () {
+                    return Dh12Service::getConceptosParaSelect();
+                })
         ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make('Todos'),
-            '225' => Tab::make('225')->query(function ($query) {
-                return $query->where('codn_conce', 225);
-            }),
-            '258' => Tab::make('258')->query(function ($query) {
-                return $query->where('codn_conce', 258);
-            }),
-            '266' => Tab::make('266')->query(function ($query) {
-                return $query->where('codn_conce', 266);
-            })
-        ];
-    }
-
-    public function getEloquentQuery(): Builder
-    {
-        $service = app(ConceptoListadoService::class);
-        return $service->getQueryForConcepto(request()->input('tableFilters.codn_conce', 225));
     }
 }

@@ -14,6 +14,7 @@ class ConceptoListado extends Model
     protected $fillable = [
         'codc_uacad',
         'periodo_fiscal',
+        'nro_liqui',
         'desc_liqui',
         'nro_legaj',
         'cuil',

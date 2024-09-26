@@ -25,6 +25,7 @@ class ConceptoListadoService
             ->select([
                 'dh03.codc_uacad',
                 DB::raw("concat(dh22.per_liano, dh22.per_limes) AS periodo_fiscal"),
+                'dh22.nro_liqui',
                 'dh22.desc_liqui',
                 'dh01.nro_legaj',
                 DB::raw("concat(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil"),
@@ -32,13 +33,13 @@ class ConceptoListadoService
                 'dh01.desc_nombr',
                 'dh03.coddependesemp',
                 'dh11.codigoescalafon',
+                'dh03.nro_cargo',
                 DB::raw("'secuencia' AS secuencia"),
                 DB::raw("concat(dh11.desc_categ, dh03.codc_agrup, ' ', dh03.codc_carac) AS cargo"),
                 'dh21.codn_conce',
                 'dh21.tipo_conce',
                 'dh21.impp_conce'
             ])
-            ->where('dh21.codn_conce', $codn_conce)
             ->orderBy('codc_uacad')
             ->orderBy('coddependesemp')
             ;
@@ -55,6 +56,7 @@ class ConceptoListadoService
             ->select([
                 'codc_uacad',
                 'periodo_fiscal',
+                'nro_liqui',
                 'desc_liqui',
                 'nro_legaj',
                 'cuil',
