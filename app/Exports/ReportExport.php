@@ -24,7 +24,8 @@ class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
     {
         return [
             'Dep',
-            'periodo_fiscal',
+            'periodo fiscal',
+            'Nro Liquidacion',
             'liquidaion',
             'legajo',
             'cuil',
@@ -33,10 +34,10 @@ class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
             'oficina_pago',
             'codigoescalafon',
             'secuencia',
-            'categoria_completa',
-            'codn_conce',
+            'Categoria',
+            'Concepto',
             'tipo_conce',
-            'impp_conce'
+            'Importe'
         ];
     }
     public function array(): array
@@ -49,9 +50,4 @@ class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
         return $this->query;
     }
 
-
-    // public function collection()
-    // {
-    //     return $this->query()->all();
-    // }
 }

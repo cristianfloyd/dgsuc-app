@@ -9,19 +9,19 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
+use App\Services\Dh12Service;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Grouping\Group;
+use Illuminate\Support\Facades\Log;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\ConceptoListadoService;
+use Filament\Tables\Actions\SelectAction;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
-use App\Services\Dh12Service;
-use Illuminate\Container\Attributes\Log;
 
 class ReporteConceptoListadoResource extends Resource
 {
@@ -47,7 +47,7 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('periodo_fiscal')->label('Periodo'),
                 TextColumn::make('nro_liqui')->label('Nro. Liq.')
                     ->sortable(),
-                TextColumn::make('desc_liqui'),
+                TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('cuil')->label('CUIL')->searchable(),
                 TextColumn::make('desc_appat')->label('Apellido'),
@@ -62,8 +62,13 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
             ->filters([
-                SelectFilter::make('codn_conce')->label('Concepto')
+                SelectFilter::make('codn_conce')
+                    ->label('Concepto')
                     ->options(Dh12Service::getConceptosParaSelect())
+                    ->searchable(),
+                SelectFilter::make('periodo_fiscal')
+                    ->label('Periodo')
+                    
             ])
             ->actions([
                 //Tables\Actions\EditAction::make(),
@@ -91,6 +96,7 @@ class ReporteConceptoListadoResource extends Resource
             'edit' => EditReporteConceptoListado::route('/{record}/edit'),
         ];
     }
+
 
     public static function getEloquentQuery(): Builder
     {
