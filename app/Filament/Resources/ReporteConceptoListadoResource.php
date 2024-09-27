@@ -7,12 +7,14 @@ use Filament\Forms\Get;
 use Barryvdh\DomPDF\PDF;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Mapuche\Dh22;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
 use App\Services\Dh12Service;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
+use App\Services\Mapuche\Dh22Service;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\ConceptoListadoService;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
+use Carbon\Carbon;
 
 class ReporteConceptoListadoResource extends Resource
 {
@@ -68,7 +71,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->searchable(),
                 SelectFilter::make('periodo_fiscal')
                     ->label('Periodo')
-                    
+                    ->options(Dh22::getPeriodosFiscales())
             ])
             ->actions([
                 //Tables\Actions\EditAction::make(),
@@ -101,6 +104,13 @@ class ReporteConceptoListadoResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $service = app(ConceptoListadoService::class);
-        return $service->getQueryForConcepto(request()->input('tableFilters.codn_conce', 225));
-    }
-}
+        $concepto = request()->input('tableFilters.codn_conce', 225);
+        $periodoFiscal = request()->input('tableFilters.periodo_fiscal', null);
+        $query = $service->getQueryForConcepto($concepto);
+
+        if ($periodoFiscal) {
+            $query->havingRaw("CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) = ?", [$periodoFiscal]);
+        }
+
+        return $query;
+    }}

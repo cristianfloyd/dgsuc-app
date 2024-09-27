@@ -24,7 +24,7 @@ class ConceptoListadoService
             ->join('mapuche.dh22', 'dh21.nro_liqui', '=', 'dh22.nro_liqui')
             ->select([
                 'dh03.codc_uacad',
-                DB::raw("concat(dh22.per_liano, dh22.per_limes) AS periodo_fiscal"),
+                DB::raw("CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) as periodo_fiscal"),
                 'dh22.nro_liqui',
                 'dh22.desc_liqui',
                 'dh01.nro_legaj',

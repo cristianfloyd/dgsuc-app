@@ -150,4 +150,20 @@ class Dh22 extends Model
     {
         return static::where('nro_liqui', $nroLiqui)->exists();
     }
+
+    /**
+     * Obtiene los distintos períodos fiscales formateados como YYYYMM.
+     *
+     * @return array
+     */
+    public static function getPeriodosFiscales(): array
+{
+    return self::query()
+        ->select(DB::raw("CONCAT(per_liano, LPAD(CAST(per_limes AS TEXT), 2, '0')) as periodo_fiscal"))
+        ->distinct()
+        ->orderBy('periodo_fiscal', 'desc')
+        ->pluck('periodo_fiscal', 'periodo_fiscal')
+        ->toArray();
+}
+
 }

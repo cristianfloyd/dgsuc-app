@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ReporteConceptoListadoResource\Pages;
 
 use Filament\Actions;
+use App\Models\Mapuche\Dh22;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
 use App\Services\Dh12Service;
@@ -50,6 +51,8 @@ class ListReporteConceptoListados extends ListRecords
                     ->modalHeading('¿Desea descargar el reporte?')
                     ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                     ->modalSubmitActionLabel('Descargar'),
+            Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
+                ->options(Dh22::getPeriodosFiscales()),
             Actions\SelectAction::make('codn_conce')
                 ->label('concepto')
                 ->options(function () {

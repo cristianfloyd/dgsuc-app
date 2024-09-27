@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
 use App\Models\Dh21;
+use Filament\Forms\Get;
 use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use App\Models\Mapuche\Dh22;
+use App\Services\Dh21Service;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Log;
 use Filament\Support\Enums\MaxWidth;
@@ -13,7 +15,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use App\Filament\Resources\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Concerns\InteractsWithTable;
 
@@ -71,12 +72,12 @@ class ConceptosTotales extends Page implements HasTable
             if ($this->lastNroLiqui == null) {
                 $this->lastNroLiqui = Dh22::getLastIdLiquidacion();
                 $this->nro_liqui = $this->lastNroLiqui;
-                return Dh21::conceptosTotales($this->nro_liqui);
+                return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
             }
-            return Dh21::conceptosTotales($nro_liqui);
+            return app(Dh21Service::class)->conceptosTotales($nro_liqui);
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
-            return Dh21::conceptosTotales($this->nro_liqui);
+            return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
         }
     }
 
