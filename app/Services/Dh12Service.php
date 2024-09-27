@@ -23,7 +23,9 @@ class Dh12Service
             ->whereRaw('codn_conce/100 IN (1,2)')
             ->orderBy('codn_conce')
             ->get()
-            ->pluck('desc_conce', 'codn_conce')
+            ->mapWithKeys(function ($item) {
+                return [$item->codn_conce => "{$item->codn_conce} - {$item->desc_conce}"];
+            })
             ->toArray();
     }
 }

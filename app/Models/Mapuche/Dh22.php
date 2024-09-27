@@ -173,7 +173,6 @@ class Dh22 extends Model
             ->orderBy('periodo_fiscal', 'desc')
             ->pluck('periodo', 'periodo_fiscal')
             ->toArray();
-        Log::info('Periodos fiscales obtenidos: ' . json_encode($periodos));
         return $periodos;
     }
 }

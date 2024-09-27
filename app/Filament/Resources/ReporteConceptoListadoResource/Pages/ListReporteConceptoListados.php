@@ -7,15 +7,10 @@ use App\Models\Mapuche\Dh22;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
 use App\Services\Dh12Service;
-use Filament\Actions\ExportAction;
-use Illuminate\Support\Facades\Log;
-use Filament\Resources\Components\Tab;
 use App\Services\ConceptoListadoService;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Actions\Exports\Enums\ExportFormat;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
-use App\Filament\Exports\Reportes\ConceptoListadoExporter;
 use App\Filament\Resources\ReporteConceptoListadoResource;
 
 class ListReporteConceptoListados extends ListRecords
@@ -31,7 +26,6 @@ class ListReporteConceptoListados extends ListRecords
                 ->action(function () {
                             $query = $this->getFilteredTableQuery();
                             return (new ReportExport($query))->download('invoices.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
-
                         })
                         ->requiresConfirmation()
                         ->modalHeading('¿Desea descargar el reporte?')
