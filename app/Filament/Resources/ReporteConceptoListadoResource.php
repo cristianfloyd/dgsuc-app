@@ -47,7 +47,12 @@ class ReporteConceptoListadoResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('codc_uacad')->label('dep'),
-                TextColumn::make('periodo_fiscal')->label('Periodo'),
+                // TextColumn::make('periodo_fiscal')->label('Periodo'),
+                TextColumn::make('periodo_fiscal')
+                    ->label('Periodo')
+                    ->sortable()
+                    ->getStateUsing(fn($record) => $record->periodo_fiscal)
+                    ->searchable(),
                 TextColumn::make('nro_liqui')->label('Nro. Liq.')
                     ->sortable(),
                 TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
@@ -72,6 +77,18 @@ class ReporteConceptoListadoResource extends Resource
                 SelectFilter::make('periodo_fiscal')
                     ->label('Periodo')
                     ->options(Dh22::getPeriodosFiscales())
+                    ->searchable()
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        $year = substr($data['value'], 0, 4);
+                        $month = substr($data['value'], 4, 2);
+                        return $query->where('per_liano', $year)
+                            ->where('per_limes', $month);
+                        // Log::info('$data en el select', [$data['value']]);
+                        // return $query;
+                    }),
             ])
             ->actions([
                 //Tables\Actions\EditAction::make(),
@@ -105,12 +122,8 @@ class ReporteConceptoListadoResource extends Resource
     {
         $service = app(ConceptoListadoService::class);
         $concepto = request()->input('tableFilters.codn_conce', 225);
-        $periodoFiscal = request()->input('tableFilters.periodo_fiscal', null);
         $query = $service->getQueryForConcepto($concepto);
 
-        if ($periodoFiscal) {
-            $query->havingRaw("CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) = ?", [$periodoFiscal]);
-        }
-
         return $query;
-    }}
+    }
+}

@@ -63,6 +63,13 @@ class Dh22 extends Model
         'sino_genimp' => 'boolean',
     ];
 
+
+    public function getPeriodoFiscalAttribute()
+    {
+        return $this->per_liano . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT);
+    }
+
+
     /**
      * Obtiene el tipo de liquidación asociado.
      */
@@ -157,13 +164,16 @@ class Dh22 extends Model
      * @return array
      */
     public static function getPeriodosFiscales(): array
-{
-    return self::query()
-        ->select(DB::raw("CONCAT(per_liano, LPAD(CAST(per_limes AS TEXT), 2, '0')) as periodo_fiscal"))
-        ->distinct()
-        ->orderBy('periodo_fiscal', 'desc')
-        ->pluck('periodo_fiscal', 'periodo_fiscal')
-        ->toArray();
-}
-
+    {
+        $periodos = self::query()
+            ->select('per_liano', 'per_limes')
+            ->selectRaw("CONCAT(per_liano, LPAD(CAST(per_limes AS VARCHAR), 2, '0')) as periodo_fiscal")
+            ->selectRaw("CONCAT(per_liano, LPAD(CAST(per_limes AS VARCHAR), 2, '0')) as periodo")
+            ->distinct()
+            ->orderBy('periodo_fiscal', 'desc')
+            ->pluck('periodo', 'periodo_fiscal')
+            ->toArray();
+        Log::info('Periodos fiscales obtenidos: ' . json_encode($periodos));
+        return $periodos;
+    }
 }
