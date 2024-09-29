@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+    'toba' => [
+        'driver' => 'session',
+        'provider' => 'toba',
+        ],
     ],
 
     /*
@@ -63,12 +67,15 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],
-
+        ],  
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+        'toba' => [
+            'driver' => 'toba',
+            'model' => App\Models\User::class,
+        ],
     ],
 
     /*
