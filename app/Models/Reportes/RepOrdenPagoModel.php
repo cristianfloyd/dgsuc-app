@@ -2,7 +2,6 @@
 
 namespace App\Models\Reportes;
 
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class RepOrdenPagoModel extends Model

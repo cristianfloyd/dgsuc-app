@@ -34,7 +34,6 @@ class ConceptoListadoService
                 'dh03.coddependesemp',
                 'dh11.codigoescalafon',
                 'dh03.nro_cargo as secuencia',
-                // DB::raw("'secuencia' AS secuencia"),
                 DB::raw("concat(dh11.desc_categ, dh03.codc_agrup, ' ', dh03.codc_carac) AS cargo"),
                 'dh21.codn_conce',
                 'dh21.tipo_conce',
