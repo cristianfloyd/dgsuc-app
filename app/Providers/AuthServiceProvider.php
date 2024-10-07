@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Auth\TobaUserProvider;
+use App\Services\TobaApiService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -15,9 +16,12 @@ class AuthServiceProvider extends ServiceProvider
     {
         // $this->registerPolicies();
 
-        // Auth::provider('toba', function ($app, array $config) {
-        //     return new TobaUserProvider($app['hash'], $config['model']);
-        // });
+        Auth::provider('toba', function ($app, array $config) {
+            return new TobaUserProvider(
+                $app->make(TobaApiService::class),
+                $app['hash'],
+                $config['model']);
+        });
     }
 
     /**

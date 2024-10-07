@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'toba' => [
+        'url' => env('TOBA_API_URL', 'http://mapuchetest.rec.uba.ar'),
+    ],
 
 ];
