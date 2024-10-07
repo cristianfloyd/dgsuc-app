@@ -15,7 +15,7 @@ use App\Filament\Widgets\MultipleIdLiquiSelector;
 class ListReportes extends ListRecords
 {
     protected static string $resource = ReporteResource::class;
-    protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
+     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
     public $reporteGenerado = false;
 

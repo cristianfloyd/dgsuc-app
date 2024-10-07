@@ -14,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->registerPolicies();
+        // $this->registerPolicies();
 
         Auth::provider('toba', function ($app, array $config) {
             return new TobaUserProvider(
