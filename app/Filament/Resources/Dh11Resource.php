@@ -19,8 +19,8 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 class Dh11Resource extends Resource
 {
     protected static ?string $model = Dh11::class;
-    protected static ?string $modelLabel = 'Categorias';
-    protected static ?string $navigationLabel = 'Categorias';
+    protected static ?string $modelLabel = 'Categorias dh11';
+    protected static ?string $navigationLabel = 'Categorias dh11';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Personal';
@@ -185,7 +185,7 @@ class Dh11Resource extends Resource
         return [
             'index' => Pages\ListDh11s::route('/'),
             'create' => Pages\CreateDh11::route('/create'),
-            //'edit' => Pages\EditDh11::route('/{record}/edit'),
+            'edit' => Pages\EditDh11::route('/{record}/edit'),
         ];
     }
     public static function getWidgets(): array
