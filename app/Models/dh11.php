@@ -7,13 +7,14 @@ use App\Models\Dh61;
 use App\Traits\CategoriasConstantTrait;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
+use App\Traits\MapucheLiquiConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 
 class Dh11 extends Model
 {
-    use MapucheConnectionTrait, CategoriasConstantTrait;
+    use MapucheLiquiConnectionTrait, CategoriasConstantTrait;
 
     protected $table = 'dh11';
     public $timestamps = false;
