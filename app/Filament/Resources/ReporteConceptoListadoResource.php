@@ -86,8 +86,6 @@ class ReporteConceptoListadoResource extends Resource
                         $month = substr($data['value'], 4, 2);
                         return $query->where('per_liano', $year)
                             ->where('per_limes', $month);
-                        // Log::info('$data en el select', [$data['value']]);
-                        // return $query;
                     }),
             ])
             ->actions([

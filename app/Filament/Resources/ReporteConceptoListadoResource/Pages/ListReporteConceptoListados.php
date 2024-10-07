@@ -20,24 +20,28 @@ class ListReporteConceptoListados extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('csv')->label('CSV')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->button()
-                ->action(function () {
-                            $query = $this->getFilteredTableQuery();
-                            return (new ReportExport($query))->download('invoices.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
-                        })
-                        ->requiresConfirmation()
-                        ->modalHeading('¿Desea descargar el reporte?')
-                        ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
-                        ->modalSubmitActionLabel('Descargar'),
+            // Actions\Action::make('csv')->label('CSV')
+            //         ->icon('heroicon-o-document-arrow-down')
+            //         ->button()
+            //     ->action(function () {
+            //                 $query = $this->getFilteredTableQuery();
+            //                 return (new ReportExport($query))->download('invoices.csv', Excel::CSV, ['Content-Type' => 'text/csv']);
+            //             })
+            //             ->requiresConfirmation()
+            //             ->modalHeading('¿Desea descargar el reporte?')
+            //             ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
+            //             ->modalSubmitActionLabel('Descargar'),
             Actions\Action::make('download')->label('Excel')
                 ->icon('heroicon-o-document-arrow-down')
                 ->button()
                 ->action(function ($data)  {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
-                    //https://github.com/Maatwebsite/Laravel-Excel
                         $query = $this->getFilteredTableQuery();
+                        // comprobar que el query no este vacion
+                        if($query->count() == 0){
+                            return redirect()->route('filament.resources.reporte-concepto-listado.index')
+                                ->with('error', 'No se encontraron registros con los filtros seleccionados.');
+                        }
 
                         return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                     })
@@ -64,4 +68,5 @@ class ListReporteConceptoListados extends ListRecords
         $service = app(ConceptoListadoService::class);
         return $service->getQueryForConcepto(request()->input('tableFilters.codn_conce', 225));
     }
+
 }
