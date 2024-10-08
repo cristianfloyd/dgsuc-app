@@ -107,7 +107,6 @@ class ReporteResource extends Resource
         try {
             $selectedLiquidaciones = $this->getLiquidacionesSeleccionadas();
             DB::select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
-            //Notification::make()->title('Reporte generado')->success()->send();
             return true;
         } catch (\Exception $e) {
             Log::error('Error al generar el reporte: ' . $e->getMessage());
