@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Reportes;
 
-use App\Filament\Resources\Reportes\RepOrdenPagoModelResource\Pages;
-use App\Models\Reportes\RepOrdenPagoModel;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Models\Reportes\RepOrdenPagoModel;
+use App\Filament\Resources\Reportes\RepOrdenPagoModelResource\Pages;
 
 class RepOrdenPagoModelResource extends Resource
 {
@@ -29,10 +29,8 @@ class RepOrdenPagoModelResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('codn_fuent')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codc_uacad')->label('Unidad Académica')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('codn_progr')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('dh30.desc_abrev')->label('uAcad')->searchable(),
+                Tables\Columns\TextColumn::make('codn_progr')->searchable(),
                 Tables\Columns\TextColumn::make('remunerativo')
                     ->numeric()
                     ->sortable(),
@@ -99,8 +97,8 @@ class RepOrdenPagoModelResource extends Resource
     {
         return [
             'index' => Pages\ListRepOrdenPagoModels::route('/'),
-//            'create' => Pages\CreateRepOrdenPagoModel::route('/create'),
-//            'edit' => Pages\EditRepOrdenPagoModel::route('/{record}/edit'),
+            //            'create' => Pages\CreateRepOrdenPagoModel::route('/create'),
+            //            'edit' => Pages\EditRepOrdenPagoModel::route('/{record}/edit'),
         ];
     }
 }

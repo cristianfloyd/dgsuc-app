@@ -68,4 +68,9 @@ class RepOrdenPagoModel extends Model
         return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
             ->where('nro_tabla', 13);
     }
+    public function dh30(): BelongsTo
+    {
+        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
+            ->where('nro_tabla', 13);
+    }
 }
