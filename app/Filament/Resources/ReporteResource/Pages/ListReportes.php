@@ -2,26 +2,63 @@
 
 namespace App\Filament\Resources\ReporteResource\Pages;
 
-use Livewire\Attributes\On;
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Filament\Notifications\Notification;
-use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\ReporteResource;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
+use App\Services\RepOrdenPagoService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class ListReportes extends ListRecords
 {
     protected static string $resource = ReporteResource::class;
-     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
+    protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
-    public $reporteGenerado = false;
+    public bool $reporteGenerado = false;
+    protected RepOrdenPagoService $ordenPagoService;
 
-    public function boot()
+    public static function getEloquentQuery(): Builder
     {
-        Log::info('ListReportes booted', ['session' => session()->all()]);
+//        return parent::getEloquentQuery()
+//            ->with('unidadAcademica')
+//            ->orderBy('nro_liqui', 'asc');
+        // Usar el servicio RepOrdenPagoService para obtener los datos
+        $repOrdenPagoService = app(RepOrdenPagoService::class);
+        $repOrdenPagoRecords = $repOrdenPagoService->getAllRepOrdenPago();
+
+        /**
+         * Devuelve una instancia de generador de consultas para los registros RepOrdenPago.
+         *
+         * @return Builder
+         */
+        return $repOrdenPagoRecords->toQuery();
+    }
+
+    public function boot(RepOrdenPagoService $ordenPagoService): void
+    {
+        $this->ordenPagoService = $ordenPagoService;
+    }
+
+    #[On('idsLiquiSelected')]
+    public function actualizarLiquidacionesSeleccionadas($liquidaciones): void
+    {
+        session(['idsLiquiSelected' => $liquidaciones]);
+        Log::debug("se graba en la session --> isdLiquiSelected", ['state' => $liquidaciones]);
+    }
+
+
+    /**
+     * @param $reporteGenerado
+     * @return $this
+     */
+    public function setReporteGenerado($reporteGenerado): static
+    {
+        $this->reporteGenerado = $reporteGenerado;
+        return $this;
     }
 
     protected function getHeaderActions(): array
@@ -32,14 +69,13 @@ class ListReportes extends ListRecords
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn () => $this->reporteGenerado),
+                ->visible(fn() => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar OP')
                 //->action(fn() => $this->generarReporte())
                 ->action(function () {
                     // metodo que ejecute la función almacenada
-                    if($this->generarReporte())
-                    {
+                    if ($this->generarReporte()) {
                         Notification::make()->title('Reporte generado')->success()->send();
                     }
                 })
@@ -79,37 +115,11 @@ class ListReportes extends ListRecords
         return $data;
     }
 
-
     protected function getHeaderWidgets(): array
     {
         return [
             MultipleIdLiquiSelector::class,
         ];
-    }
-
-    #[On('idsLiquiSelected')]
-    public function actualizarLiquidacionesSeleccionadas($liquidaciones)
-    {
-        session(['idsLiquiSelected' => $liquidaciones]);
-        Log::debug("se graba en la session --> isdLiquiSelected", ['state' => $liquidaciones]);
-    }
-
-    /**
-     * Set the value of reporteGenerado
-     *
-     * @return  self
-     */
-    public function setReporteGenerado($reporteGenerado)
-    {
-        $this->reporteGenerado = $reporteGenerado;
-        return $this;
-    }
-
-    public static function getEloquentQuery()
-    {
-        return parent::getEloquentQuery()
-            ->with('unidadAcademica')
-            ->orderBy('nro_liqui', 'asc');
     }
 
 }

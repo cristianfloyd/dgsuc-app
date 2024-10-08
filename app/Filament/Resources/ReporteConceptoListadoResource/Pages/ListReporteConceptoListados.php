@@ -34,21 +34,21 @@ class ListReporteConceptoListados extends ListRecords
             Actions\Action::make('download')->label('Excel')
                 ->icon('heroicon-o-document-arrow-down')
                 ->button()
-                ->action(function ($data)  {
+                ->action(function ($data) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
-                        $query = $this->getFilteredTableQuery();
-                        // comprobar que el query no este vacion
-                        if($query->count() == 0){
-                            return redirect()->route('filament.resources.reporte-concepto-listado.index')
-                                ->with('error', 'No se encontraron registros con los filtros seleccionados.');
-                        }
+                    $query = $this->getFilteredTableQuery();
+                    // comprobar que el query no este vacion
+                    if ($query->count() == 0) {
+                        return redirect()->route('filament.resources.reporte-concepto-listado.index')
+                            ->with('error', 'No se encontraron registros con los filtros seleccionados.');
+                    }
 
-                        return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Desea descargar el reporte?')
-                    ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
-                    ->modalSubmitActionLabel('Descargar'),
+                    return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
+                })
+                ->requiresConfirmation()
+                ->modalHeading('¿Desea descargar el reporte?')
+                ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
+                ->modalSubmitActionLabel('Descargar'),
             Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
                 ->options(Dh22::getPeriodosFiscales()),
             Actions\SelectAction::make('codn_conce')
@@ -56,17 +56,21 @@ class ListReporteConceptoListados extends ListRecords
                 ->options(function () {
                     return Dh12Service::getConceptosParaSelect();
                 })
-                ->action(function($record, $data){
+                ->action(function ($record, $data) {
                     $this->tableFilters['codn_conce'] = $data;
                     $this->refreshTable();
                 })
         ];
     }
 
+    /**
+     * Obtiene la consulta de Eloquent para el listado de conceptos.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public static function getEloquentQuery(): Builder
     {
         $service = app(ConceptoListadoService::class);
         return $service->getQueryForConcepto(request()->input('tableFilters.codn_conce', 225));
     }
-
 }

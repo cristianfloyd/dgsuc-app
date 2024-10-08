@@ -8,20 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepOrdenPagoModel extends Model
 {
-    protected $connection = 'pgsql-mapuche';
-
-    /**
-     * Tabla de la base de datos utilizada por el modelo RepOrdenPago.
-     */
-    protected $table = 'suc.rep_orden_pago';
-
 
     /**
      * Indica que el modelo RepOrdenPago tiene campos de fecha de creación y actualización.
      */
     public $timestamps = true;
-
-
+    protected $connection = 'pgsql-mapuche';
+    /**
+     * Tabla de la base de datos utilizada por el modelo RepOrdenPago.
+     */
+    protected $table = 'suc.rep_orden_pago';
     /**
      * Los atributos que se pueden rellenar masivamente.
      * @var array

@@ -2,34 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms\Form;
-use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
+use App\Filament\Resources\ReporteResource\Pages;
+use App\Models\Reportes\RepOrdenPagoModel;
 use Filament\Actions\Action;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Reportes\RepOrdenPagoModel;
-use App\Filament\Resources\ReporteResource\Pages;
-use App\Filament\Resources\ReporteResource\Pages\ListReportes;
+use Livewire\Attributes\On;
 
 class ReporteResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
     protected static ?string $modelLabel = 'Orden de Pago';
     protected static ?string $navigationGroup = 'Reportes';
-
-    public function mount()
-    {
-        session()->forget('idsLiquiSelected');
-        Log::info('ReporteResource::mount', ['session' => session()->all()]);
-        $listReportes = new ListReportes();
-        $listReportes->setReporteGenerado(false);
-    }
 
     public static function form(Form $form): Form
     {
@@ -66,11 +56,8 @@ class ReporteResource extends Resource
             ])
             ->bulkActions([
                 //
-            ])
-            ;
+            ]);
     }
-
-
 
     public static function getPages(): array
     {
@@ -86,14 +73,13 @@ class ReporteResource extends Resource
         return [
             Action::make('ordenPagoReporte')
                 ->label('Orden de Pago')
-                ->modalContent(fn () => view('modals.orden-pago-reporte', ['liquidacionId' => 1]))
+                ->modalContent(fn() => view('modals.orden-pago-reporte', ['liquidacionId' => 1]))
                 ->modalWidth('7xl'),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
                 ->action(function () {
                     // Aquí se llamaría a un servicio que ejecute la función almacenada
-                    if($this->generarReporte())
-                    {
+                    if ($this->generarReporte()) {
                         Notification::make()->title('Reporte generado')->success()->send();
                     }
                 })
@@ -122,17 +108,41 @@ class ReporteResource extends Resource
         return $data;
     }
 
-    #[On('liquidaciones-seleccionadas')]
-    public function actualizarLiquidacionesSeleccionadas($liquidaciones)
-    {
-        session(['idsLiquiSelected' => $liquidaciones]);
-        Log::debug("isdLiquiSelected", ['state' => $liquidaciones]);
-    }
-
     public static function getEloquentQuery(): Builder
     {
+        // Devuelve una consulta Eloquent modificada para el modelo Reporte
         return parent::getEloquentQuery()
+            // Carga anticipadamente la relación 'unidadAcademica' para evitar el problema N+1
             ->with('unidadAcademica')
+            // Ordena los resultados por el campo 'nro_liqui' en orden ascendente
             ->orderBy('nro_liqui', 'asc');
+    }
+
+    public function mount(): void
+    {
+        // Elimina la variable de sesión 'idsLiquiSelected'
+        session()->forget('idsLiquiSelected');
+        // Registra información de depuración sobre el montaje del componente
+        Log::info('ReporteResource::mount', ['session' => session()->all()]);
+        // Crea una nueva instancia de ListReportes
+        $listReportes = new ListReportes();
+        // Establece el estado de 'reporteGenerado' a falso
+        $listReportes->setReporteGenerado(false);
+    }
+
+
+    /**
+     * Actualiza las liquidaciones seleccionadas en la sesión.
+     *
+     * @param array $liquidaciones Las liquidaciones seleccionadas.
+     * @return void
+     */
+    #[On('liquidaciones-seleccionadas')]
+    public function actualizarLiquidacionesSeleccionadas(array $liquidaciones): void
+    {
+        // Almacena las liquidaciones seleccionadas en la sesión
+        session(['idsLiquiSelected' => $liquidaciones]);
+        // Registra información de depuración sobre las liquidaciones seleccionadas
+        Log::debug("isdLiquiSelected", ['state' => $liquidaciones]);
     }
 }

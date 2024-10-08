@@ -4,10 +4,22 @@ namespace App\Services;
 
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Repositories\RepOrdenPagoRepository;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Proporciona una capa de servicio para administrar registros de RepOrdenPago.
+ *
+ *
+ * Esta clase de servicio proporciona métodos para interactuar con los registros de RepOrdenPago, incluidos:
+ *  recuperar todos los registros, recuperar un registro por su nro_liqui, crear un nuevo registro,
+ *  actualizar un registro existente y eliminar un registro.
+ *
+ * La clase de servicio utiliza una clase de repositorio para manejar la lógica de acceso a datos.
+ *
+ */
 class RepOrdenPagoService
 {
-    protected $repository;
+    protected RepOrdenPagoRepository $repository;
 
     /**
      * Crear una nueva instancia
@@ -18,11 +30,11 @@ class RepOrdenPagoService
     }
 
     /**
-     * Get all RepOrdenPago records.
+     * Obtiene todos los registros de RepOrdenPago.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
-    public function getAllRepOrdenPago()
+    public function getAllRepOrdenPago(): Collection
     {
         return $this->repository->getAll();
     }
