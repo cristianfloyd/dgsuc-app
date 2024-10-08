@@ -92,6 +92,9 @@
                             <x-dropdown-link href="{{ route('reporteLiquidacion') }}" :active="request()->routeIs('reporteLiquidacion')">
                                 {{__('Reporte liqui')}}
                             </x-dropdown-link>
+                            <x-dropdown-link href="{{ route('reporte-orden-pago') }}" :active="request()->routeIs('reporte-orden-pago')">
+                                {{ __('Orden de pago') }}
+                            </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
                 </div>

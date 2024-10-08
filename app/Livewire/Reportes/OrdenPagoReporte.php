@@ -4,10 +4,10 @@ namespace App\Livewire\Reportes;
 
 use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 use App\Services\ReportHeaderService;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
-use Illuminate\Support\Facades\Log;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
@@ -46,8 +46,7 @@ class OrdenPagoReporte extends Component implements Htmlable
 
     public function loadReportData(array|int|null $liquidacionId = null)
     {
-        $data = $this->repOrdenPagoRepository->getAll($liquidacionId);
-
+        $data = $this->repOrdenPagoRepository->getAllWithUnidadAcademica($liquidacionId);
         // Asegurar que $data sea una colección
         if (!$data instanceof \Illuminate\Support\Collection) {
             $data = collect($data);
@@ -77,10 +76,10 @@ class OrdenPagoReporte extends Component implements Htmlable
                                                 ->map(function ($items) use (&$totalUacad, &$totalFuente, &$totalFuncion, &$totalBanco) {
 
                                                     $totals = $this->calculateTotals($items);
-                                                    $this->addTotals( totalAcumulado: $totalUacad,  totalsToAdd: $totals);
-                                                    $this->addTotals( totalAcumulado: $totalFuente,  totalsToAdd: $totals);
-                                                    $this->addTotals( totalAcumulado: $totalFuncion,  totalsToAdd: $totals);
-                                                    $this->addTotals( totalAcumulado: $totalBanco,  totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalUacad,  totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalFuente,  totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalFuncion,  totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalBanco,  totalsToAdd: $totals);
 
                                                     $retorno = [
                                                         'items' => $items,
@@ -255,9 +254,9 @@ class OrdenPagoReporte extends Component implements Htmlable
 
         Log::info('PDF generado');
 
-        return response()->streamDownload(function() use($pdfss){
+        return response()->streamDownload(function () use ($pdfss) {
             echo $pdfss->stream();
-        },'users.pdf');
+        }, 'users.pdf');
     }
 
 
@@ -282,6 +281,5 @@ class OrdenPagoReporte extends Component implements Htmlable
             'totalesPorFormaPago' => $this->totalesPorFormaPago,
             'totalGeneral' => $this->totalGeneral,
         ]);
-
     }
 }

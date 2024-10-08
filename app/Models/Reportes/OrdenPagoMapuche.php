@@ -2,12 +2,10 @@
 
 namespace App\Models\Reportes;
 
-use App\Models\Dh21;
-use App\Repositories\Interfaces\RepOrdenPagoRepositoryInterface;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheDesaConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\MapucheDesaConnectionTrait;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class OrdenPagoMapuche extends Model
 {

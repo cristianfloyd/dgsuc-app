@@ -2,7 +2,9 @@
 
 namespace App\Models\Reportes;
 
+use App\Models\Mapuche\Catalogo\Dh30;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepOrdenPagoModel extends Model
 {
@@ -64,4 +66,10 @@ class RepOrdenPagoModel extends Model
         'hs_extras' => 'decimal:2',
         'total' => 'decimal:2',
     ];
+
+    public function unidadAcademica(): BelongsTo
+    {
+        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
+            ->where('nro_tabla', 13);
+    }
 }

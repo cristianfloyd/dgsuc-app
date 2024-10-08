@@ -14,6 +14,8 @@ interface RepOrdenPagoRepositoryInterface
      */
     public function getAll(array|int|null $nroLiquis = null): Collection;
 
+    public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection;
+
     /**
      * Obtener un registro de RepOrdenPago por su número de liquidación.
      *

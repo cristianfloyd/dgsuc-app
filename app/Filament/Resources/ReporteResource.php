@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Filament\Resources\ReporteResource\Pages;
 use App\Filament\Resources\ReporteResource\Pages\ListReportes;
@@ -89,7 +90,6 @@ class ReporteResource extends Resource
                 ->modalWidth('7xl'),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
-                //->action(fn() => $this->generarReporte())
                 ->action(function () {
                     // Aquí se llamaría a un servicio que ejecute la función almacenada
                     if($this->generarReporte())
@@ -127,5 +127,12 @@ class ReporteResource extends Resource
     {
         session(['idsLiquiSelected' => $liquidaciones]);
         Log::debug("isdLiquiSelected", ['state' => $liquidaciones]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with('unidadAcademica')
+            ->orderBy('nro_liqui', 'asc');
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Reportes\RepOrdenPagoModel;
-use App\Contracts\RepOrdenPagoRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
@@ -30,6 +30,24 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         return $query->get();
     }
 
+    public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
+    {
+        $query = RepOrdenPagoModel::with(relations: ['unidadAcademica' => function ($query): void {
+            $query->select('nro_tabla', 'desc_abrev', 'desc_item');
+        }])
+        ->orderBy('banco', 'desc')
+        ->orderBy('codn_funci', 'asc')
+        ->orderBy('codn_fuent', 'asc')
+        ->orderBy('codc_uacad', 'asc');
+
+        if (is_array($nroLiquis)) {
+            $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
+        } elseif (is_int(value: $nroLiquis)) {
+            $query->where(column: 'nro_liqui', operator: $nroLiquis);
+        }
+
+        return $query->get();
+    }
 
     /**
      * Obtiene la primera instancia de RepOrdenPagoModel que coincida con el número de liquidación proporcionado.

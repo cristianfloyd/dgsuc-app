@@ -104,4 +104,12 @@ class ListReportes extends ListRecords
         $this->reporteGenerado = $reporteGenerado;
         return $this;
     }
+
+    public static function getEloquentQuery()
+    {
+        return parent::getEloquentQuery()
+            ->with('unidadAcademica')
+            ->orderBy('nro_liqui', 'asc');
+    }
+
 }
