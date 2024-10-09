@@ -11,6 +11,7 @@ use App\Filament\Resources\Reportes\RepOrdenPagoModelResource\Pages;
 class RepOrdenPagoModelResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
+    protected static ?string $modelLabel = 'Orden de Pago';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -29,7 +30,7 @@ class RepOrdenPagoModelResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('codn_fuent')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('dh30.desc_abrev')->label('uAcad')->searchable(),
+                Tables\Columns\TextColumn::make('codc_uacad')->label('U Acad')->searchable(),
                 Tables\Columns\TextColumn::make('codn_progr')->searchable(),
                 Tables\Columns\TextColumn::make('remunerativo')
                     ->numeric()
@@ -77,11 +78,11 @@ class RepOrdenPagoModelResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
