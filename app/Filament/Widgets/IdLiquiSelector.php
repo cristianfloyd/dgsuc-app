@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Livewire\Attributes\On;
 
 class IdLiquiSelector extends Widget implements HasForms
 {
@@ -23,8 +24,7 @@ class IdLiquiSelector extends Widget implements HasForms
     protected static string $view = 'filament.widgets.id-liqui-selector';
 
     public ?string $selectedIdLiqui = null;
-
-
+    protected $periodoFiscal;
 
 
     public function mount(): void
@@ -44,7 +44,14 @@ class IdLiquiSelector extends Widget implements HasForms
             ->schema([
                 Select::make('selectedIdLiqui')
                     ->label('Seleccionar Liquidaciones')
-                    ->options(Dh22::getLiquidacionesForWidget()->pluck('desc_liqui', 'nro_liqui'))
+                    ->options(
+                        Dh22::getLiquidacionesForWidget()
+                            ->when($this->periodoFiscal, function ($query) {
+                                return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
+                                    $this->periodoFiscal['year'] . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT)
+                                ]);
+                            })
+                            ->pluck('desc_liqui', 'nro_liqui'))
                     ->reactive()
                     ->afterStateUpdated(function ($state) {
                         $this->dispatch('idLiquiSelected', $state);
@@ -53,4 +60,10 @@ class IdLiquiSelector extends Widget implements HasForms
             ]);
     }
 
+    #[On('updated-periodo-fiscal')]
+    public function filtrarPorPeriodoFiscal($periodoFiscal)
+    {
+        $this->periodoFiscal = $periodoFiscal;
+        $this->form->fill();
+    }
 }

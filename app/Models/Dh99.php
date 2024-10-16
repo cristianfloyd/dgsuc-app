@@ -6,6 +6,10 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 // (D) Variable Global: Período Corriente
+
+/**
+ * @method static first()
+ */
 class Dh99 extends Model
 {
     use MapucheConnectionTrait;

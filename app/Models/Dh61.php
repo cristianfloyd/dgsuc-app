@@ -7,6 +7,9 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @method static select(string $string, string $string1)
+ */
 class Dh61 extends Model
 {
     use HasCompositePrimaryKey;

@@ -21,7 +21,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
     use InteractsWithForms;
 
     protected static string $view = 'filament.widgets.fiscal-period-selector';
-    protected $listeners = ['refreshFiscalPeriod' => '$refresh'];
+
     protected PeriodoFiscalService $periodoFiscalService;
     protected array $periodoFiscal;
 
@@ -34,7 +34,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
     {
         $this->periodoFiscalService = $periodoFiscalService;
     }
-    public function mount()
+    public function mount(): void
     {
         $this->periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
         $this->year = $this->periodoFiscal['year'];
@@ -67,7 +67,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
                     Action::make('set')->label('Establecer')
                         ->color('success')
                         ->button()
-                        ->badge("{$this->year}{$this->month}")
+                        ->badge("$this->year - $this->month")
                         ->icon('heroicon-o-cog-6-tooth')
                         ->action(function ($livewire) {
                             $this->submit();

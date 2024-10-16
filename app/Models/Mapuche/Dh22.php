@@ -2,6 +2,8 @@
 
 namespace App\Models\Mapuche;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\EstadoLiquidacionModel;
@@ -12,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
  * Modelo Eloquent para la tabla mapuche.dh22
  *
  * Esta clase representa la tabla de liquidaciones en el sistema.
+ * @method static select(string $string)
+ * @method static orderBy(string $string, string $string1)
+ * @method static where(string $string, int $nroLiqui)
  */
 class Dh22 extends Model
 {
@@ -62,9 +67,11 @@ class Dh22 extends Model
         'sino_reten' => 'boolean',
         'sino_genimp' => 'boolean',
     ];
+    private mixed $per_liano;
+    private mixed $per_limes;
 
 
-    public function getPeriodoFiscalAttribute()
+    public function getPeriodoFiscalAttribute(): string
     {
         return $this->per_liano . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT);
     }
@@ -73,24 +80,24 @@ class Dh22 extends Model
     /**
      * Obtiene el tipo de liquidación asociado.
      */
-    public function tipoLiquidacion()
+    public function tipoLiquidacion(): BelongsTo
     {
         return $this->belongsTo(Dh22Tipo::class, 'id_tipo_liqui', 'id');
     }
 
-    public static function getLiquidacionesForWidget()
+    public static function getLiquidacionesForWidget(): Builder
     {
-        return static::query()
-            ->select('nro_liqui',
-                DB::raw("CONCAT(per_liano,per_limes) as periodo_fiscal"),
+        return self::select('nro_liqui',
+            DB::raw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) as periodo_fiscal"),
             'desc_liqui')
-            ->orderBy('nro_liqui', 'desc');
+            ->orderByDesc('nro_liqui');
     }
+
 
     /**
      * Obtiene el estado de liquidación asociado.
      */
-    public function estadoLiquidacion()
+    public function estadoLiquidacion(): BelongsTo
     {
         return $this->belongsTo(EstadoLiquidacionModel::class, 'sino_cerra', 'cod_estado_liquidacion');
     }
@@ -153,7 +160,7 @@ class Dh22 extends Model
      * @param int $nroLiqui
      * @return bool True si la función se ejecutó correctamente, false en caso contrario.
      */
-    public static function verificarNroLiqui($nroLiqui): bool
+    public static function verificarNroLiqui(int $nroLiqui): bool
     {
         return static::where('nro_liqui', $nroLiqui)->exists();
     }
@@ -165,7 +172,7 @@ class Dh22 extends Model
      */
     public static function getPeriodosFiscales(): array
     {
-        $periodos = self::query()
+        return self::query()
             ->select('per_liano', 'per_limes')
             ->selectRaw("CONCAT(per_liano, LPAD(CAST(per_limes AS VARCHAR), 2, '0')) as periodo_fiscal")
             ->selectRaw("CONCAT(per_liano, LPAD(CAST(per_limes AS VARCHAR), 2, '0')) as periodo")
@@ -173,6 +180,5 @@ class Dh22 extends Model
             ->orderBy('periodo_fiscal', 'desc')
             ->pluck('periodo', 'periodo_fiscal')
             ->toArray();
-        return $periodos;
     }
 }

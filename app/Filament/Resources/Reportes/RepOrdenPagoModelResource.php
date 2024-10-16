@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Reportes;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Columns\TextColumn;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Filament\Resources\Reportes\RepOrdenPagoModelResource\Pages;
 
@@ -20,59 +22,76 @@ class RepOrdenPagoModelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nro_liqui')
+                TextColumn::make('nro_liqui')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('banco')
+                TextColumn::make('banco')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codn_funci')
+                TextColumn::make('codn_funci')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codn_fuent')
+                TextColumn::make('codn_fuent')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codc_uacad')->label('U Acad')->searchable(),
-                Tables\Columns\TextColumn::make('codn_progr')->searchable(),
-                Tables\Columns\TextColumn::make('remunerativo')
+                TextColumn::make('codc_uacad')->label('U Acad')->searchable(),
+                TextColumn::make('codn_progr')->searchable(),
+                TextColumn::make('remunerativo')->numeric()->sortable(),
+                TextColumn::make('no_remunerativo')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('no_remunerativo')
+                TextColumn::make('descuentos')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('descuentos')
+                TextColumn::make('aportes')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('aportes')
+                TextColumn::make('sueldo')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sueldo')
+                TextColumn::make('estipendio')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('estipendio')
+                TextColumn::make('med_resid')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('med_resid')
+                TextColumn::make('productividad')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('productividad')
+                TextColumn::make('sal_fam')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sal_fam')
+                TextColumn::make('hs_extras')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('hs_extras')
+                TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->groups([
+                Group::make('banco')
+                    ->groupQueryUsing(fn($query) => $query->groupBy('banco')),
+                Group::make('codn_funci')
+                    ->groupQueryUsing(fn($query) => $query->groupBy('codn_funci')),
+                Group::make('codn_fuent')
+                    ->groupQueryUsing(fn($query) => $query->groupBy('codn_fuent')),
+                Group::make('codc_uacad')
+                    ->groupQueryUsing(fn($query) => $query->groupBy('codc_uacad')),
+            ])
+            ->defaultGroup('banco')
+            ->groupRecordsTriggerAction(
+                fn(Tables\Actions\Action $action) => $action
+                    ->button()
+                    ->label('Agrupar registros')
+            )
+            ->groupedBulkActions([
+                Tables\Actions\ExportBulkAction::make('exportar'),
             ])
             ->filters([
                 //
@@ -98,6 +117,7 @@ class RepOrdenPagoModelResource extends Resource
     {
         return [
             'index' => Pages\ListRepOrdenPagoModels::route('/'),
+            'reporte' => Pages\ReporteOrdenPago::route('/reporte'),
             //            'create' => Pages\CreateRepOrdenPagoModel::route('/create'),
             //            'edit' => Pages\EditRepOrdenPagoModel::route('/{record}/edit'),
         ];
