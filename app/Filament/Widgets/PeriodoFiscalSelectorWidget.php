@@ -7,10 +7,11 @@ use Filament\Widgets\Widget;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Contracts\HasForms;
+use App\Events\PeriodoFiscalActualizado;
 use Filament\Forms\Components\Actions\Action;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
-use App\Events\PeriodoFiscalActualizado;
+use Illuminate\Support\Carbon;
 
 /**
  * Widget que permite seleccionar el período fiscal actual.
@@ -21,11 +22,11 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
 
     protected static string $view = 'filament.widgets.fiscal-period-selector';
     protected $listeners = ['refreshFiscalPeriod' => '$refresh'];
-    protected $periodoFiscalService;
-    protected $periodoFiscal;
+    protected PeriodoFiscalService $periodoFiscalService;
+    protected array $periodoFiscal;
 
-    public $year;
-    public $month;
+    public int $year;
+    public int $month;
 
 
 
@@ -52,17 +53,17 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
     {
         return $form
             ->schema([
-            Select::make('year')
-                ->label('Año Fiscal')
-                ->default($this->year)
-                ->options($this->getYearOptions())
-                ->required(),
-            Select::make('month')
-                ->label('Mes Fiscal')
-                ->default($this->month)
-                ->options($this->getMonthOptions())
-                ->required(),
-            Actions::make([
+                Select::make('year')
+                    ->label('Año Fiscal')
+                    ->default($this->year)
+                    ->options($this->getYearOptions())
+                    ->required(),
+                Select::make('month')
+                    ->label('Mes Fiscal')
+                    ->default($this->month)
+                    ->options($this->getMonthOptions())
+                    ->required(),
+                Actions::make([
                     Action::make('set')->label('Establecer')
                         ->color('success')
                         ->button()
@@ -81,16 +82,25 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
 
     private function getYearOptions(): array
     {
-        $currentYear = date('Y');
-        return array_combine(range($currentYear - 5, $currentYear + 1), range($currentYear - 5, $currentYear + 1));
+        $currentYear = Carbon::now()->year;
+        return array_combine(keys: range($currentYear - 5, $currentYear + 1), values: range($currentYear - 5, $currentYear + 1));
     }
 
     private function getMonthOptions(): array
     {
         return [
-            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+            1 => 'Enero',
+            2 => 'Febrero',
+            3 => 'Marzo',
+            4 => 'Abril',
+            5 => 'Mayo',
+            6 => 'Junio',
+            7 => 'Julio',
+            8 => 'Agosto',
+            9 => 'Septiembre',
+            10 => 'Octubre',
+            11 => 'Noviembre',
+            12 => 'Diciembre'
         ];
     }
 
