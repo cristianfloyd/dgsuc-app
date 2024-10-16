@@ -11,21 +11,22 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 
+/**
+ * Representa un widget de Filament que permite seleccionar una liquidación de un modelo Dh22.
+ * El widget muestra un campo de selección que se llena con las opciones de liquidaciones disponibles.
+ * Cuando se selecciona una liquidación, se dispara un evento 'idLiquiSelected' con el valor seleccionado.
+ */
 class IdLiquiSelector extends Widget implements HasForms
 {
     use InteractsWithForms;
     protected static ?int $sort = 2;
-
-    protected $casts = [
+    protected static string $view = 'filament.widgets.id-liqui-selector';
+    protected static ?string $heading = 'Selector de Liquidación';
+    
+    public ?string $selectedIdLiqui = null;
+    protected array $casts = [
         'form' => 'array',
     ];
-
-    protected static string $view = 'filament.widgets.id-liqui-selector';
-
-    public ?string $selectedIdLiqui = null;
-
-
-
 
     public function mount(): void
     {
