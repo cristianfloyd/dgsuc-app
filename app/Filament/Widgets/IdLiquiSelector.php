@@ -24,6 +24,7 @@ class IdLiquiSelector extends Widget implements HasForms
     protected static string $view = 'filament.widgets.id-liqui-selector';
     protected static ?string $heading = 'Selector de Liquidación';
 
+    protected array $periodoFiscal;
     public ?string $selectedIdLiqui = null;
     protected array $casts = [
         'form' => 'array',
@@ -64,6 +65,7 @@ class IdLiquiSelector extends Widget implements HasForms
     }
 
     #[On('updated-periodo-fiscal')]
+
     public function filtrarPorPeriodoFiscal($periodoFiscal)
     {
         $this->periodoFiscal = $periodoFiscal;
