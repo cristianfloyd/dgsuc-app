@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions;
 use Filament\Tables\Table;
 use AllowDynamicProperties;
 use App\Tables\EmbargoTable;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use App\Models\EmbargoProcesoResult;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\EmbargoResource\Pages;
@@ -42,7 +42,10 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
                 //
             ])
             ->actions([
-                //
+                Action::make('Procesar')
+                ->label('Actualizar Datos')
+                ->action(fn() => self::actualizarDatos())
+                ->button(),
             ])
             ->bulkActions([
                 //
@@ -83,7 +86,7 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
     public static function getActions(): array
     {
         return [
-            Actions\Action::make('actualizar')
+            Action::make('actualizar')
                 ->label('Actualizar Datos')
                 ->action(fn() => self::actualizarDatos())
                 ->button(),

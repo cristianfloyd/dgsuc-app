@@ -3,10 +3,7 @@
 namespace App\Models;
 
 use Sushi\Sushi;
-use App\Traits\MapucheSchemaSuc;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
