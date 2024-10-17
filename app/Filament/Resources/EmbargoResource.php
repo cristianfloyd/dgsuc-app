@@ -17,6 +17,8 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 {
     protected static ?string $model = EmbargoProcesoResult::class;
     protected static ?string $modelLabel = 'Embargo';
+    protected static ?string $slug = 'embargos';
+
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected EmbargoTable $embargoTable;
@@ -43,9 +45,9 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
             ])
             ->actions([
                 Action::make('Procesar')
-                ->label('Actualizar Datos')
-                ->action(fn() => self::actualizarDatos())
-                ->button(),
+                    ->label('Actualizar Datos')
+                    ->action(fn() => self::actualizarDatos())
+                    ->button(),
             ])
             ->bulkActions([
                 //
@@ -70,6 +72,7 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
     {
         return [
             'index' => Pages\ListEmbargos::route('/'),
+            'dashboard' => Pages\DashboardEmbargo::route('/admin'),
         ];
     }
 
