@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Actions;
+use Filament\Tables\Table;
 use AllowDynamicProperties;
-use App\Filament\Resources\EmbargoResource\Pages;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use App\Models\EmbargoProcesoResult;
 use App\Tables\EmbargoTable;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use App\Models\EmbargoProcesoResult;
+use Filament\Tables\Columns\TextColumn;
+use App\Filament\Resources\EmbargoResource\Pages;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 
 #[AllowDynamicProperties] class EmbargoResource extends Resource
 {
     protected static ?string $model = EmbargoProcesoResult::class;
+    protected static ?string $modelLabel = 'Embargo';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected EmbargoTable $embargoTable;
@@ -24,7 +27,26 @@ use Filament\Tables\Table;
 
     public static function table(Table $table): Table
     {
-        return (new EmbargoTable())->table($table);
+        return $table
+            ->columns([
+                TextColumn::make('nro_liqui')->label('Nro. Liquidación'),
+                TextColumn::make('tipo_embargo')->label('Tipo Embargo'),
+                TextColumn::make('nro_legaj')->label('Nro. Legajo'),
+                TextColumn::make('remunerativo')->money('ARS'),
+                TextColumn::make('no_remunerativo')->money('ARS'),
+                TextColumn::make('total')->money('ARS'),
+                TextColumn::make('codn_conce')->label('Código Concepto'),
+            ])
+            ->defaultSort('nro_legaj')
+            ->filters([
+                //
+            ])
+            ->actions([
+                //
+            ])
+            ->bulkActions([
+                //
+            ]);
     }
 
     public static function getRelations(): array
@@ -51,5 +73,26 @@ use Filament\Tables\Table;
     public function boot(EmbargoTable $embargoTable): void
     {
         $this->embargoTable = $embargoTable;
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return EmbargoProcesoResult::getEmptyQuery();
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            Actions\Action::make('actualizar')
+                ->label('Actualizar Datos')
+                ->action(fn() => self::actualizarDatos())
+                ->button(),
+        ];
+    }
+
+    public static function actualizarDatos()
+    {
+        // Aquí implementaremos la lógica para obtener los parámetros
+        // y actualizar los datos usando EmbargoProcesoResult::updateData()
     }
 }

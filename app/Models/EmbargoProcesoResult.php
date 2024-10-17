@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Sushi\Sushi;
+use App\Traits\MapucheSchemaSuc;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static hydrate(array $results)
@@ -13,6 +16,9 @@ use Illuminate\Support\Facades\DB;
  */
 class EmbargoProcesoResult extends Model
 {
+    use Sushi;
+
+    protected $connection = 'pgsql-mapuche';
 
     // Deshabilitar timestamps ya que no son parte del resultado de la consulta
     public $timestamps = false;
@@ -52,23 +58,63 @@ class EmbargoProcesoResult extends Model
      * @param int $nroLiquiDefinitiva
      * @param int $nroLiquiProxima
      * @param bool $insertIntoDh25
-     * @return mixed
+     * @return Builder
      */
     public static function executeEmbargoProcesoQuery(
         array $nroComplementarias,
         int   $nroLiquiDefinitiva,
         int   $nroLiquiProxima,
         bool  $insertIntoDh25 = false
-    ): Builder
-    {
-        $results = DB::select('SELECT * FROM suc.emb_proceso(?, ?, ?, ?)', [
-            $nroComplementarias,
+    ): Builder {
+        $arrayString = 'ARRAY[' . implode(',', array_map('intval', $nroComplementarias)) . ']';
+
+        $results = DB::connection('pgsql-suc')->select("SELECT * FROM suc.emb_proceso( $arrayString, ?, ?, ?)", [
+            // $arrayString,
             $nroLiquiDefinitiva,
             $nroLiquiProxima,
             $insertIntoDh25
         ]);
 
+
         return self::hydrate($results)->toQuery();
+    }
+
+    /**
+     * Obtiene una instancia de Builder vacía para la consulta del proceso de embargo.
+     *
+     * @return Builder
+     */
+    public static function getEmptyQuery(): Builder
+    {
+        return self::query()->whereRaw('1=0');
+    }
+
+    public function getRows(): array
+    {
+        // return $this->getEmptyQuery()->toArray();
+        return [];
+    }
+
+    /**
+     * Actualiza los datos del proceso de embargo y limpia el caché de Sushi.
+     *
+     * @param array $nroComplementarias Números de complementarias a procesar.
+     * @param int $nroLiquiDefinitiva Número de liquidación definitiva.
+     * @param int $nroLiquiProxima Número de próxima liquidación.
+     * @param bool $insertIntoDh25 Indica si se debe insertar en la tabla DH25.
+     * @return mixed Resultados del proceso de embargo.
+     */
+    public static function updateData(array $nroComplementarias, int $nroLiquiDefinitiva, int $nroLiquiProxima, bool $insertIntoDh25 = false)
+    {
+        $results = self::executeEmbargoProcesoQuery($nroComplementarias, $nroLiquiDefinitiva, $nroLiquiProxima, $insertIntoDh25);
+        self::resetSushiCache();
+        return $results;
+    }
+
+    //Metodo para obtener los datos para filamentPHP
+    public function getDataForFilament()
+    {
+        return self::all();
     }
 
     /**
