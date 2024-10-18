@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Tables\Table;
 use AllowDynamicProperties;
-use App\Tables\EmbargoTable;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use App\Models\EmbargoProcesoResult;
-use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\EmbargoResource\Pages;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use App\Models\EmbargoProcesoResult;
+use App\Tables\EmbargoTable;
+use Filament\Navigation\NavigationItem;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 
 #[AllowDynamicProperties] class EmbargoResource extends Resource
@@ -26,6 +27,31 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
     protected array $nroComplementarias;
     protected int $nroLiquiDefinitiva;
     protected bool $insertIntoDh25;
+
+    public static function boot(EmbargoTable $embargoTable): void
+    {
+        parent::boot();
+
+        static::$embargoTable = $embargoTable;
+
+        static::$nroLiquiProxima = // Lógica para determinar este valor
+        static::$nroComplementarias = // Lógica para determinar este array
+        static::$nroLiquiDefinitiva = // Lógica para determinar este valor
+        static::$insertIntoDh25 = // Lógica para determinar este booleano
+
+        // Usar estas variables para actualizar los datos
+        EmbargoProcesoResult::updateData(
+            static::$nroComplementarias,
+            static::$nroLiquiDefinitiva,
+            static::$nroLiquiProxima,
+            static::$insertIntoDh25
+        );
+    }
+
+    // public function boot(EmbargoTable $embargoTable): void
+    // {
+    //     $this->embargoTable = $embargoTable;
+    // }
 
     public static function table(Table $table): Table
     {
@@ -48,10 +74,20 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
                     ->label('Actualizar Datos')
                     ->action(fn() => self::actualizarDatos())
                     ->button(),
+                Action::make('configure')
+                    ->label('Configure Parameters')
+                    ->url(fn (): string => static::getUrl('configure'))
+                    ->icon('heroicon-o-cog'),
             ])
             ->bulkActions([
                 //
             ]);
+    }
+
+    public static function actualizarDatos()
+    {
+        // Aquí implementaremos la lógica para obtener los parámetros
+        // y actualizar los datos usando EmbargoProcesoResult::updateData()
     }
 
     public static function getRelations(): array
@@ -73,12 +109,8 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
         return [
             'index' => Pages\ListEmbargos::route('/'),
             'dashboard' => Pages\DashboardEmbargo::route('/admin'),
+            'configure' => Pages\ConfigureEmbargoParameters::route('/configure'),
         ];
-    }
-
-    public function boot(EmbargoTable $embargoTable): void
-    {
-        $this->embargoTable = $embargoTable;
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
@@ -96,9 +128,13 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
         ];
     }
 
-    public static function actualizarDatos()
+    public static function getNavigationItems(): array
     {
-        // Aquí implementaremos la lógica para obtener los parámetros
-        // y actualizar los datos usando EmbargoProcesoResult::updateData()
+        return [
+            ...parent::getNavigationItems(),
+            NavigationItem::make('Configure')
+                ->icon('heroicon-o-cog')
+                ->url(static::getUrl('configure')),
+        ];
     }
 }

@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\EmbargoResource;
+use App\Filament\Widgets\IdLiquiSelector;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ListRecords;
 
 class ListEmbargos extends ListRecords
 {
@@ -16,6 +17,16 @@ class ListEmbargos extends ListRecords
         return [
             PeriodoFiscalSelectorWidget::class,
             IdLiquiSelector::class,
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('configure')
+                ->label('Configure Parameters')
+                ->url(static::getResource()::getUrl('configure'))
+                ->icon('heroicon-o-cog'),
         ];
     }
 }
