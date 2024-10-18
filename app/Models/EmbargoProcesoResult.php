@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Sushi\Sushi;
 
+
 /**
  * @method static hydrate(array $results)
  * @method static collection(array $array)
- * @method static resetSushiCache()
  */
 class EmbargoProcesoResult extends Model
 {
@@ -56,11 +56,11 @@ class EmbargoProcesoResult extends Model
      * @param int $nroLiquiDefinitiva Número de liquidación definitiva.
      * @param int $nroLiquiProxima Número de próxima liquidación.
      * @param bool $insertIntoDh25 Indica si se debe insertar en la tabla DH25.
-     * @return Builder Resultados del proceso de embargo.
      */
-    public static function updateData(array $nroComplementarias, int $nroLiquiDefinitiva, int $nroLiquiProxima, bool $insertIntoDh25 = false)
+    public static function updateData(array $nroComplementarias, int $nroLiquiDefinitiva, int $nroLiquiProxima, bool $insertIntoDh25 = false): Builder
     {
         $results = self::executeEmbargoProcesoQuery($nroComplementarias, $nroLiquiDefinitiva, $nroLiquiProxima, $insertIntoDh25);
+
         self::resetSushiCache();
         return $results;
     }
@@ -79,7 +79,8 @@ class EmbargoProcesoResult extends Model
         int   $nroLiquiDefinitiva,
         int   $nroLiquiProxima,
         bool  $insertIntoDh25 = false
-    ): Builder {
+    ): Builder
+    {
         $arrayString = empty($nroComplementarias)
             ? 'ARRAY[]::integer[]'
             : 'ARRAY[' . implode(',', array_map('intval', $nroComplementarias)) . ']';
@@ -106,6 +107,18 @@ class EmbargoProcesoResult extends Model
     public static function getEmptyQuery(): Builder
     {
         return self::query()->whereRaw('1=0');
+    }
+
+    public static function resetSushiCache(): void
+    {
+        $instance = new static;
+        $cacheKey = $instance->getSushiCacheKey();
+        cache()->forget($cacheKey);
+    }
+
+    protected function getSushiCacheKey(): string
+    {
+        return 'sushi.' . $this->getTable() . '.rows';
     }
 
     public function getRows(): array

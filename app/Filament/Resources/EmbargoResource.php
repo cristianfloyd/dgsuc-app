@@ -7,6 +7,7 @@ use App\Filament\Resources\EmbargoResource\Pages;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Models\EmbargoProcesoResult;
 use App\Tables\EmbargoTable;
+use App\Traits\DisplayResourceProperties;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 #[AllowDynamicProperties] class EmbargoResource extends Resource
 {
+    use DisplayResourceProperties;
+
     protected static ?string $model = EmbargoProcesoResult::class;
     protected static ?string $modelLabel = 'Embargo';
     protected static ?string $slug = 'embargos';
@@ -34,10 +37,10 @@ use Filament\Tables\Table;
 
         static::$embargoTable = $embargoTable;
 
-        static::$nroLiquiProxima = // Lógica para determinar este valor
-        static::$nroComplementarias = // Lógica para determinar este array
-        static::$nroLiquiDefinitiva = // Lógica para determinar este valor
-        static::$insertIntoDh25 = // Lógica para determinar este booleano
+        static::$nroLiquiProxima = 4; // Lógica para determinar este valor
+        static::$nroComplementarias = []; // Lógica para determinar este array
+        static::$nroLiquiDefinitiva = null; // Lógica para determinar este valor
+        static::$insertIntoDh25 = false; // Lógica para determinar este booleano
 
         // Usar estas variables para actualizar los datos
         EmbargoProcesoResult::updateData(
@@ -72,8 +75,8 @@ use Filament\Tables\Table;
                     ->button(),
                 Action::make('configure')
                     ->label('Configure Parameters')
-                    ->url(fn (): string => static::getUrl('configure'))
-                    ->icon('heroicon-o-cog'),
+                    ->url(fn(): string => static::getUrl('configure'))
+                    ->icon('heroicon-o-cog')
             ])
             ->bulkActions([
                 //
@@ -131,6 +134,16 @@ use Filament\Tables\Table;
             NavigationItem::make('Configure')
                 ->icon('heroicon-o-cog')
                 ->url(static::getUrl('configure')),
+        ];
+    }
+
+    public static function getPropertiesToDisplay(): array
+    {
+        return [
+            'nroLiquiProxima',
+            'nroComplementarias',
+            'nroLiquiDefinitiva',
+            'insertIntoDh25',
         ];
     }
 }

@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use App\Filament\Resources\EmbargoResource;
-use App\Filament\Widgets\IdLiquiSelector;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use Filament\Actions\Action;
+use App\Filament\Widgets\IdLiquiSelector;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\EmbargoResource;
+use App\Filament\Widgets\DisplayPropertiesWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 class ListEmbargos extends ListRecords
 {
@@ -17,6 +18,7 @@ class ListEmbargos extends ListRecords
         return [
             PeriodoFiscalSelectorWidget::class,
             IdLiquiSelector::class,
+            DisplayPropertiesWidget::make()->setResource(static::$resource),
         ];
     }
 
