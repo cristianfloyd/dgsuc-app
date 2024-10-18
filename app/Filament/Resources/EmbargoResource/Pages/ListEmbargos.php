@@ -15,10 +15,16 @@ class ListEmbargos extends ListRecords
 
     protected function getHeaderWidgets(): array
     {
+        // Crear la instancia del widget
+        // $displayPropertiesWidget = new DisplayPropertiesWidget();
+
+        // Inicializar el widget con la clase de recurso
+        // $displayPropertiesWidget->initialize(EmbargoResource::class);
+
         return [
             PeriodoFiscalSelectorWidget::class,
             IdLiquiSelector::class,
-            DisplayPropertiesWidget::make()->setResource(static::$resource),
+            DisplayPropertiesWidget::createWithResource(EmbargoResource::class),
         ];
     }
 
@@ -31,4 +37,6 @@ class ListEmbargos extends ListRecords
                 ->icon('heroicon-o-cog'),
         ];
     }
+
+    
 }
