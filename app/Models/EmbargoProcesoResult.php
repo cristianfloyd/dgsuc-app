@@ -50,16 +50,6 @@ class EmbargoProcesoResult extends Model
     protected mixed $no_remunerativo;
 
     /**
-     * Obtiene una instancia de Builder vacía para la consulta del proceso de embargo.
-     *
-     * @return Builder
-     */
-    public static function getEmptyQuery(): Builder
-    {
-        return self::query()->whereRaw('1=0');
-    }
-
-    /**
      * Actualiza los datos del proceso de embargo y limpia el caché de Sushi.
      *
      * @param array $nroComplementarias Números de complementarias a procesar.
@@ -101,8 +91,21 @@ class EmbargoProcesoResult extends Model
             $insertIntoDh25
         ]);
 
+        if (empty($results)) {
+            return self::getEmptyQuery();
+        }
 
         return self::hydrate($results)->toQuery();
+    }
+
+    /**
+     * Obtiene una instancia de Builder vacía para la consulta del proceso de embargo.
+     *
+     * @return Builder
+     */
+    public static function getEmptyQuery(): Builder
+    {
+        return self::query()->whereRaw('1=0');
     }
 
     public function getRows(): array

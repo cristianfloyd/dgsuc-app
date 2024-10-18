@@ -48,10 +48,6 @@ use Filament\Tables\Table;
         );
     }
 
-    // public function boot(EmbargoTable $embargoTable): void
-    // {
-    //     $this->embargoTable = $embargoTable;
-    // }
 
     public static function table(Table $table): Table
     {
