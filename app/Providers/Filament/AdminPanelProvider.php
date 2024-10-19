@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use Filament\Panel;
 use Filament\PanelProvider;
+use App\Filament\Pages\Dashboard;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationItem;
 use Filament\Navigation\NavigationGroup;
@@ -20,7 +21,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\Dh03Resource\Widgets\CargosOverTime;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
-use App\Filament\Pages\Dashboard;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -45,8 +45,6 @@ class AdminPanelProvider extends PanelProvider
                 CargosOverTime::class,
                 ActualizarImppBasicWidget::class,
                 PeriodoFiscalSelectorWidget::class,
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

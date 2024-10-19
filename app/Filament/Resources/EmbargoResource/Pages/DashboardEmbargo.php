@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use App\Filament\Resources\EmbargoResource;
-use App\Models\EmbargoProcesoResult;
 use Filament\Resources\Pages\Page;
+use App\Models\EmbargoProcesoResult;
+use App\Filament\Resources\EmbargoResource;
 
 class DashboardEmbargo extends Page
 {
@@ -32,4 +32,5 @@ class DashboardEmbargo extends Page
 
         // Puedes agregar lógica adicional aquí, como mostrar un mensaje de éxito
     }
+
 }

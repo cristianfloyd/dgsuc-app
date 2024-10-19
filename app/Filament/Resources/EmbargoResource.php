@@ -2,18 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use Livewire\Livewire;
+use Filament\Tables\Table;
 use AllowDynamicProperties;
-use App\Filament\Resources\EmbargoResource\Pages;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use App\Models\EmbargoProcesoResult;
 use App\Tables\EmbargoTable;
-use App\Traits\DisplayResourceProperties;
-use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use App\Models\EmbargoProcesoResult;
+use Filament\Navigation\NavigationItem;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-
+use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
+use App\Traits\DisplayResourceProperties;
+use App\Filament\Resources\EmbargoResource\Pages;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 #[AllowDynamicProperties] class EmbargoResource extends Resource
 {
@@ -26,10 +28,12 @@ use Filament\Tables\Table;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected EmbargoTable $embargoTable;
-    protected int $nroLiquiProxima;
-    protected array $nroComplementarias;
-    protected int $nroLiquiDefinitiva;
-    protected bool $insertIntoDh25;
+    
+
+     protected static int $nroLiquiProxima = 0;
+     protected static array $nroComplementarias = [];
+     protected static int $nroLiquiDefinitiva = 1;
+     protected static bool $insertIntoDh25 = false;
 
     public static function boot(EmbargoTable $embargoTable): void
     {
@@ -39,7 +43,7 @@ use Filament\Tables\Table;
 
         static::$nroLiquiProxima = 4; // Lógica para determinar este valor
         static::$nroComplementarias = []; // Lógica para determinar este array
-        static::$nroLiquiDefinitiva = null; // Lógica para determinar este valor
+        static::$nroLiquiDefinitiva = 0; // Lógica para determinar este valor
         static::$insertIntoDh25 = false; // Lógica para determinar este booleano
 
         // Usar estas variables para actualizar los datos
@@ -83,25 +87,46 @@ use Filament\Tables\Table;
             ]);
     }
 
+
     public static function actualizarDatos()
     {
-        // Aquí implementaremos la lógica para obtener los parámetros
-        // y actualizar los datos usando EmbargoProcesoResult::updateData()
+        // Obtener los parámetros necesarios
+        $parametros = static::obtenerParametros();
+
+        // Actualizar las variables estáticas
+        static::$nroLiquiProxima = $parametros['nroLiquiProxima'];
+        static::$nroComplementarias = $parametros['nroComplementarias'];
+        static::$nroLiquiDefinitiva = $parametros['nroLiquiDefinitiva'];
+        static::$insertIntoDh25 = $parametros['insertIntoDh25'];
+
+        // Llamar a EmbargoProcesoResult::updateData con los parámetros actualizados
+        EmbargoProcesoResult::updateData(
+            static::$nroComplementarias,
+            static::$nroLiquiDefinitiva,
+            static::$nroLiquiProxima,
+            static::$insertIntoDh25
+        );
+
+        // Opcional: Mostrar un mensaje de éxito
+        Notification::make()
+            ->title('Datos actualizados correctamente')
+            ->success()
+            ->send();
     }
 
-    public static function getRelations(): array
+    private static function obtenerParametros(): array
     {
+        // Aquí deberías implementar la lógica para obtener los parámetros
+        // Por ejemplo, podrías obtenerlos de la base de datos o de alguna configuración
+
         return [
-            //
+            'nroLiquiProxima' => 5, // Ejemplo: incrementar en 1
+            'nroComplementarias' => [1, 2, 3], // Ejemplo: array con valores
+            'nroLiquiDefinitiva' => 1, // Ejemplo: incrementar en 1
+            'insertIntoDh25' => true, // Ejemplo: alternar el valor
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            PeriodoFiscalSelectorWidget::class,
-        ];
-    }
 
     public static function getPages(): array
     {
@@ -127,23 +152,33 @@ use Filament\Tables\Table;
         ];
     }
 
-    public static function getNavigationItems(): array
-    {
-        return [
-            ...parent::getNavigationItems(),
-            NavigationItem::make('Configure')
-                ->icon('heroicon-o-cog')
-                ->url(static::getUrl('configure')),
-        ];
-    }
 
     public static function getPropertiesToDisplay(): array
     {
         return [
-            'nroLiquiProxima',
-            'nroComplementarias',
-            'nroLiquiDefinitiva',
-            'insertIntoDh25',
+            'nroLiquiProxima' => static::$nroLiquiProxima,
+            'nroComplementarias' => static::$nroComplementarias,
+            'nroLiquiDefinitiva' => static::$nroLiquiDefinitiva,
+            'insertIntoDh25' => static::$insertIntoDh25,
         ];
+    }
+
+    public static function getPropertiesForLivewire(): array
+    {
+        return [
+            'nroLiquiProxima' => static::$nroLiquiProxima,
+            'nroComplementarias' => static::$nroComplementarias,
+            'nroLiquiDefinitiva' => static::$nroLiquiDefinitiva,
+            'insertIntoDh25' => static::$insertIntoDh25,
+        ];
+    }
+
+    public static function updateProperties(array $newValues)
+    {
+        $component = Livewire::test('dynamic-properties-component');
+
+        foreach ($newValues as $key => $value) {
+            $component->call('updateProperty', $key, $value);
+        }
     }
 }

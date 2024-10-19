@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
+use Livewire\Livewire;
 use Filament\Actions\Action;
 use App\Filament\Widgets\IdLiquiSelector;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\EmbargoResource;
-use App\Filament\Widgets\DisplayPropertiesWidget;
+use App\Livewire\DynamicPropertiesComponent;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use App\Filament\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
 
 class ListEmbargos extends ListRecords
 {
@@ -15,16 +17,12 @@ class ListEmbargos extends ListRecords
 
     protected function getHeaderWidgets(): array
     {
-        // Crear la instancia del widget
-        // $displayPropertiesWidget = new DisplayPropertiesWidget();
-
-        // Inicializar el widget con la clase de recurso
-        // $displayPropertiesWidget->initialize(EmbargoResource::class);
+        $data = EmbargoResource::getPropertiesForLivewire();
 
         return [
             PeriodoFiscalSelectorWidget::class,
             IdLiquiSelector::class,
-            DisplayPropertiesWidget::createWithResource(EmbargoResource::class),
+            DisplayPropertiesWidget::make(properties: [$data]),
         ];
     }
 
@@ -37,6 +35,4 @@ class ListEmbargos extends ListRecords
                 ->icon('heroicon-o-cog'),
         ];
     }
-
-    
 }

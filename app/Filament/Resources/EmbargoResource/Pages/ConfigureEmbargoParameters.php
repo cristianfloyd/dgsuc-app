@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use App\Filament\Resources\EmbargoResource;
-use App\Models\EmbargoProcesoResult;
-use App\Models\Mapuche\Dh22;
-use App\Traits\DisplayResourceProperties;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
+use App\Models\Mapuche\Dh22;
 use Filament\Resources\Pages\Page;
+use App\Models\EmbargoProcesoResult;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Http\RedirectResponse;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use App\Traits\DisplayResourceProperties;
+use App\Filament\Resources\EmbargoResource;
 use Livewire\Features\SupportRedirects\Redirector;
 
 
@@ -27,6 +27,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     protected static string $resource = EmbargoResource::class;
     protected static ?string $title = 'Configurar Parametros de Embargo';
     protected static string $view = 'filament.resources.embargo-resource.pages.configure-embargo-parameters';
+
     public int $nroLiquiProxima = 0;
     public ?array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 0;
@@ -85,12 +86,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
             ]))->statePath('data');
     }
 
-    public function getViewData(): array
-    {
-        return [
-            'properties' => EmbargoResource::getPropertyValues(),
-        ];
-    }
+    
 
     public function submit(): RedirectResponse|Redirector
     {
@@ -113,4 +109,5 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         // Redirigir a la página de listado
         return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuration saved successfully');
     }
+
 }
