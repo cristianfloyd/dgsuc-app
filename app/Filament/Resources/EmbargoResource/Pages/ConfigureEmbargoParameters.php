@@ -47,7 +47,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
 
     public function mount(): void
     {
-        $this->form->fill();
+        // $this->form->fill();
     }
 
     public function form(Form $form): Form
@@ -83,22 +83,28 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH25'),
-            ]))->statePath('data');
+            ]));
+        // ->statePath('data'); // Esta línea establece la ruta del estado del formulario a 'data'
     }
 
-    
+
 
     public function submit(): RedirectResponse|Redirector
     {
         $data = $this->form->getState();
 
         // Lógica para guardar los parámetros y actualizar los datos
-        EmbargoProcesoResult::updateData(
-            $data['nroComplementarias'] ?? [],
-            $data['nroLiquiDefinitiva'] ?? 0,
-            $data['nroLiquiProxima'] ?? 0,
-            $data['insertIntoDh25'] ?? false
-        );
+        EmbargoResource::actualizarDatos($data);
+
+
+
+        // Actualizar los datos usando el método updateData
+        // EmbargoProcesoResult::updateData(
+        //     EmbargoResource::$nroComplementarias,
+        //     EmbargoResource::$nroLiquiDefinitiva,
+        //     EmbargoResource::$nroLiquiProxima,
+        //     EmbargoResource::$insertIntoDh25
+        // );
 
         // Redirigir o mostrar un mensaje de éxito
         Notification::make()
@@ -109,5 +115,4 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         // Redirigir a la página de listado
         return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuration saved successfully');
     }
-
 }

@@ -2,14 +2,16 @@
 
 namespace App\Traits;
 
-use App\Filament\Actions\ViewResourcePropertiesAction;
+use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\View;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\View as ComponentsView;
+use App\Filament\Actions\ViewResourcePropertiesAction;
 
 trait DisplayResourceProperties
 {
     /**
-     * Get the current values of the properties.
+     * Obtener los valores actuales de las propiedades.
      *
      * @return array
      */
@@ -23,7 +25,7 @@ trait DisplayResourceProperties
     }
 
     /**
-     * Get the properties to be displayed.
+     * Obtener las propiedades que se mostrarán.
      *
      * @return array
      */
@@ -54,10 +56,7 @@ trait DisplayResourceProperties
     {
         return Section::make()
             ->schema([
-                View::make('filament.components.properties-display')
-                    ->data([
-                        'properties' => $this->getPropertiesToDisplay(),
-                    ]),
+                //
             ])
             ->columnSpan(2);
     }

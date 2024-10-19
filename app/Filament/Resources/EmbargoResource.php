@@ -28,12 +28,12 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected EmbargoTable $embargoTable;
-    
 
-     protected static int $nroLiquiProxima = 0;
-     protected static array $nroComplementarias = [];
-     protected static int $nroLiquiDefinitiva = 1;
-     protected static bool $insertIntoDh25 = false;
+
+    public static int $nroLiquiProxima = 0;
+    public static array $nroComplementarias = [];
+    public static int $nroLiquiDefinitiva = 1;
+    public static bool $insertIntoDh25 = false;
 
     public static function boot(EmbargoTable $embargoTable): void
     {
@@ -88,17 +88,17 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
     }
 
 
-    public static function actualizarDatos()
+    public static function actualizarDatos(array $data = []): void
     {
         // Obtener los parámetros necesarios
         $parametros = static::obtenerParametros();
 
         // Actualizar las variables estáticas
-        static::$nroLiquiProxima = $parametros['nroLiquiProxima'];
-        static::$nroComplementarias = $parametros['nroComplementarias'];
-        static::$nroLiquiDefinitiva = $parametros['nroLiquiDefinitiva'];
-        static::$insertIntoDh25 = $parametros['insertIntoDh25'];
-
+        static::$nroLiquiProxima = $data['nroLiquiProxima'] ?? $parametros['nroLiquiProxima'];
+        static::$nroComplementarias = $data['nroComplementarias'] ?? $parametros['nroComplementarias'];
+        static::$nroLiquiDefinitiva = $data['nroLiquiDefinitiva'] ?? $parametros['nroLiquiDefinitiva'];
+        static::$insertIntoDh25 = $data['insertIntoDh25'] ?? $parametros['insertIntoDh25'];
+        
         // Llamar a EmbargoProcesoResult::updateData con los parámetros actualizados
         EmbargoProcesoResult::updateData(
             static::$nroComplementarias,
@@ -173,12 +173,16 @@ use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
         ];
     }
 
+    /**
+     * Actualiza las propiedades de un componente Livewire.
+     *
+     *
+     *
+     */
     public static function updateProperties(array $newValues)
     {
-        $component = Livewire::test('dynamic-properties-component');
 
-        foreach ($newValues as $key => $value) {
-            $component->call('updateProperty', $key, $value);
-        }
+
+
     }
 }
