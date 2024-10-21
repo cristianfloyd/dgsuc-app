@@ -17,11 +17,11 @@ class ListEmbargos extends ListRecords
 
     protected function getHeaderWidgets(): array
     {
-        $data = EmbargoResource::getPropertiesForLivewire();
+        $embargoResource = new EmbargoResource();
+        $data = $embargoResource->getPropertiesToDisplay();
 
         return [
             PeriodoFiscalSelectorWidget::class,
-            IdLiquiSelector::class,
             DisplayPropertiesWidget::make(properties: [$data]),
         ];
     }

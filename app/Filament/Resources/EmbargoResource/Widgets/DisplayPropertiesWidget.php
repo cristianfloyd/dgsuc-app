@@ -2,23 +2,18 @@
 
 namespace App\Filament\Resources\EmbargoResource\Widgets;
 
-use View;
-use Livewire\Livewire;
-use App\Tables\EmbargoTable;
+use Livewire\Attributes\On;
 use Filament\Widgets\Widget;
-use Filament\Resources\Resource;
-use function PHPUnit\Framework\isNull;
-use Filament\Widgets\WidgetConfiguration;
+use Illuminate\Support\Facades\Log;
 
-use App\Filament\Resources\EmbargoResource;
-use App\Livewire\DynamicPropertiesComponent;
+
 
 class DisplayPropertiesWidget extends Widget
 {
     protected static string $view = 'filament.widgets.display-properties-widget';
 
     protected array $properties =  [];
-    protected int $nroLiquiDefinitiva;
+
 
     public function mount($properties): void
     {
@@ -42,5 +37,10 @@ class DisplayPropertiesWidget extends Widget
         return [];
     }
 
-
+    #[On('propertiesUpdated')]
+    public function updatedProperties(array $properties): void
+    {
+        $this->properties = $properties;
+        Log::info('evento escuchado en el widget', $this->properties);
+    }
 }

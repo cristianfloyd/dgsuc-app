@@ -5,49 +5,48 @@ namespace App\Filament\Resources\EmbargoResource\Pages;
 use Filament\Forms\Form;
 use App\Models\Mapuche\Dh22;
 use Filament\Resources\Pages\Page;
-use App\Models\EmbargoProcesoResult;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Http\RedirectResponse;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use App\Traits\DisplayResourceProperties;
 use App\Filament\Resources\EmbargoResource;
 use Livewire\Features\SupportRedirects\Redirector;
 
 
-/**
- * @property mixed $form
- */
+
 class ConfigureEmbargoParameters extends Page implements HasForms
 {
     use DisplayResourceProperties;
 
     protected static string $resource = EmbargoResource::class;
     protected static ?string $title = 'Configurar Parametros de Embargo';
+    protected static ?string $slug = 'Parametros';
     protected static string $view = 'filament.resources.embargo-resource.pages.configure-embargo-parameters';
 
     public int $nroLiquiProxima = 0;
     public ?array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 0;
     public bool $insertIntoDh25 = false;
-    public mixed $data;
+    public array $data;
     protected mixed $periodoFiscal = [];
 
-    public static function getPropertiesToDisplay(): array
-    {
-        return [
-            'nroLiquiProxima',
-            'nroComplementarias',
-            'nroLiquiDefinitiva',
-            'insertIntoDh25',
-        ];
-    }
+
 
     public function mount(): void
     {
-        // $this->form->fill();
+        $embargoResource = new EmbargoResource();
+
+        $this->data = $embargoResource->getPropertiesToDisplay();
+        foreach ($this->data as $key => $value) {
+            $this->$key = $value;
+        }
+        Log::info('ConfigureEmbargoParameters booted', $this->data);
+        dump($this->data);
+        dump($this->data['nroLiquiDefinitiva']);
+        dump($this->nroLiquiDefinitiva);
     }
 
     public function form(Form $form): Form
@@ -83,7 +82,8 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH25'),
-            ]));
+            ]))
+            ->columns(2);
         // ->statePath('data'); // Esta línea establece la ruta del estado del formulario a 'data'
     }
 
@@ -97,22 +97,19 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         EmbargoResource::actualizarDatos($data);
 
 
-
-        // Actualizar los datos usando el método updateData
-        // EmbargoProcesoResult::updateData(
-        //     EmbargoResource::$nroComplementarias,
-        //     EmbargoResource::$nroLiquiDefinitiva,
-        //     EmbargoResource::$nroLiquiProxima,
-        //     EmbargoResource::$insertIntoDh25
-        // );
-
-        // Redirigir o mostrar un mensaje de éxito
-        Notification::make()
-            ->title('Configuration saved successfully')
-            ->success()
-            ->send();
-
         // Redirigir a la página de listado
-        return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuration saved successfully');
+        return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuración guardada exitosamente');
+    }
+
+
+
+    protected function getDefaultProperties(): array
+    {
+        return [
+            'nroLiquiProxima' => 0,
+            'nroComplementarias' => [],
+            'nroLiquiDefinitiva' => 1,
+            'insertIntoDh25' => false,
+        ];
     }
 }
