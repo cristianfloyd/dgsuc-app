@@ -2,12 +2,9 @@
 
 namespace App\Traits;
 
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\View as ComponentsView;
 use App\Filament\Actions\ViewResourcePropertiesAction;
 
 
@@ -65,9 +62,16 @@ trait DisplayResourceProperties
      */
     public function setPropertyValues(array $properties): void
     {
+        // Obtiene las propiedades actuales que se mostrarán.
         $currentProperties = $this->getPropertiesToDisplay();
+
+        // Combina las propiedades actuales con las nuevas propiedades proporcionadas.
         $updatedProperties = array_merge($currentProperties, $properties);
+
+        // Actualiza la caché con las propiedades actualizadas y establece un tiempo de expiración de 30 minutos.
         Cache::put($this->getCacheKey(), $updatedProperties, now()->addMinutes(30));
+
+        // Despacha un evento indicando que las propiedades han sido actualizadas.
         Event::dispatch('propertiesUpdated', $updatedProperties);
     }
 
@@ -102,9 +106,24 @@ trait DisplayResourceProperties
     }
 
     /**
+     * Agrega una nueva propiedad al array de propiedades.
+     *
+     * @param string $key La clave de la nueva propiedad
+     * @param mixed $value El valor de la nueva propiedad
+     * @return void
+     */
+    public function addProperty(string $key, mixed $value): void
+    {
+        $properties = $this->getPropertiesToDisplay();
+        $properties[$key] = $value;
+        $this->setPropertyValues($properties);
+    }
+
+
+    /**
      * Crea un componente de tarjeta para mostrar las propiedades.
      *
-     * @return \Filament\Forms\Components\Section
+     * @return Section
      */
     public function getPropertiesCard(): Section
     {

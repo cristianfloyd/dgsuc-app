@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Log;
  * @package App\Services\Mapuche
  *
  * @method void setPeriodoFiscal(int $year, int $month) Establece el período fiscal actual en la sesión.
- * @method array getPeriodoFiscal() Obtiene el período fiscal actual almacenado en la sesión.
- * @method array getPeriodoFiscalFromDatabase() Obtiene el período fiscal actual almacenado en la base de datos.
+ * @method array getPeriodoFiscal Obtiene el período fiscal actual almacenado en la sesión.
+ * @method array getPeriodoFiscalFromDatabase Obtiene el período fiscal actual almacenado en la base de datos.
  *
  */
 class PeriodoFiscalService

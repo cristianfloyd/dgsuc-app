@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * Widget que permite seleccionar el período fiscal actual.
+ * @property mixed $form
  */
 class PeriodoFiscalSelectorWidget extends Widget implements HasForms
 {

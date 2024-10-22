@@ -12,6 +12,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 
 class EmbargoResource extends Resource
@@ -24,7 +25,7 @@ class EmbargoResource extends Resource
 
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    public string $periodoFiscal = '202312';
+    public array $periodoFiscal = [];
 
     // Propiedades públicas del recurso
     public int $nroLiquiProxima = 9;
@@ -137,28 +138,17 @@ class EmbargoResource extends Resource
      */
     public function getPropertiesToDisplay(): array
     {
-        // Llamamos al método del trait que maneja el caché
+        // método del trait que maneja el caché
         return $this->getCachedProperties();
     }
-
-
-
-
-    public function updatedNroLiquiProxima(): void
+    #[On('updated-periodo-fiscal')]
+    public function updatedPeriodoFiscal(int $periodoFiscal): void
     {
-        $this->dispatch('propertiesUpdated', $this->nroLiquiProxima);
-        Log::info('NroLiquiProxima updated', ['nroLiquiProxima' => $this->nroLiquiProxima]);
-    }
-    public function updatedNroComplementarias(): void
-    {
-        $this->dispatch('propertiesUpdated', $this->nroComplementarias);
-    }
-    public function updatedNroLiquiDefinitiva(): void
-    {
-        $this->dispatch('propertiesUpdated', $this->nroLiquiDefinitiva);
-    }
+        $this->periodoFiscal = $periodoFiscal;
+        Notification::make('Periodo Fiscal Actualizado');
 
-    public function handlePropertiesUpdated($properties)
+    }
+    public function handlePropertiesUpdated($properties): void
     {
         foreach ($properties as $property => $value) {
             if (property_exists($this, $property)) {
@@ -171,7 +161,7 @@ class EmbargoResource extends Resource
         }
     }
 
-    protected function getListeners()
+    protected function getListeners(): array
     {
         return [
             'propertiesUpdated' => 'handlePropertiesUpdated',

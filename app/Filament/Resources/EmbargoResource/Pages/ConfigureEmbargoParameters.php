@@ -17,6 +17,9 @@ use Livewire\Features\SupportRedirects\Redirector;
 
 
 
+/**
+ * @property mixed $form
+ */
 class ConfigureEmbargoParameters extends Page implements HasForms
 {
     use DisplayResourceProperties;
@@ -26,9 +29,9 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     protected static ?string $slug = 'Parametros';
     protected static string $view = 'filament.resources.embargo-resource.pages.configure-embargo-parameters';
 
-    public int $nroLiquiProxima = 0;
-    public ?array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 0;
+    public int $nroLiquiProxima = 0;
+    public array $nroComplementarias = [];
     public bool $insertIntoDh25 = false;
     public array $data;
     protected mixed $periodoFiscal = [];
@@ -44,7 +47,6 @@ class ConfigureEmbargoParameters extends Page implements HasForms
             $this->$key = $value;
         }
         Log::info('ConfigureEmbargoParameters booted', $this->data);
-        dump($this->data);
         dump($this->data['nroLiquiDefinitiva']);
         dump($this->nroLiquiDefinitiva);
     }
@@ -84,7 +86,6 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ->label('Insertar en DH25'),
             ]))
             ->columns(2);
-        // ->statePath('data'); // Esta línea establece la ruta del estado del formulario a 'data'
     }
 
 
@@ -111,5 +112,10 @@ class ConfigureEmbargoParameters extends Page implements HasForms
             'nroLiquiDefinitiva' => 1,
             'insertIntoDh25' => false,
         ];
+    }
+
+    public function updatedPeriodoFiscal($value): void
+    {
+        $this->periodoFiscal = $value;
     }
 }
