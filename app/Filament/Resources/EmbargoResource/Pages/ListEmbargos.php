@@ -2,18 +2,26 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use Livewire\Livewire;
-use Filament\Actions\Action;
-use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\EmbargoResource;
-use App\Livewire\DynamicPropertiesComponent;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Filament\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\MaxWidth;
 
 class ListEmbargos extends ListRecords
 {
     protected static string $resource = EmbargoResource::class;
+
+    public function getHeaderWidgetsColumns(): int | array
+    {
+        return 3;
+    }
+
+    public function getMaxContentWidth(): MaxWidth
+    {
+        return MaxWidth::ScreenExtraLarge;
+    }
 
     protected function getHeaderWidgets(): array
     {

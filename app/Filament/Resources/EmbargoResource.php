@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Tables\Table;
+use App\Filament\Resources\EmbargoResource\Pages;
+use App\Models\EmbargoProcesoResult;
 use App\Tables\EmbargoTable;
+use App\Traits\DisplayResourceProperties;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Log;
-use App\Models\EmbargoProcesoResult;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use App\Traits\DisplayResourceProperties;
-use App\Filament\Resources\EmbargoResource\Pages;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
 
 
 class EmbargoResource extends Resource
@@ -24,32 +24,14 @@ class EmbargoResource extends Resource
 
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected EmbargoTable $embargoTable;
+    public string $periodoFiscal = '202312';
 
     // Propiedades públicas del recurso
-    public string $periodoFiscal = '202312';
     public int $nroLiquiProxima = 9;
     public array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 1;
     public bool $insertIntoDh25 = false;
-
-    public function mount(EmbargoTable $embargoTable)
-    {
-        $this->embargoTable = $embargoTable;
-        $this->nroLiquiProxima = 4; // Lógica para determinar este valor
-        $this->nroComplementarias = []; // Lógica para determinar este array
-        $this->nroLiquiDefinitiva = 0; // Lógica para determinar este valor
-        $this->insertIntoDh25 = false; // Lógica para determinar este booleano
-        Log::info('EmbargoResource booted');
-        // Usar estas variables para actualizar los datos
-        EmbargoProcesoResult::updateData(
-            $this->nroComplementarias,
-            $this->nroLiquiDefinitiva,
-            $this->nroLiquiProxima,
-            $this->insertIntoDh25
-        );
-    }
-
+    protected EmbargoTable $embargoTable;
 
     public static function table(Table $table): Table
     {
@@ -82,7 +64,6 @@ class EmbargoResource extends Resource
             ]);
     }
 
-
     public static function actualizarDatos(array $data = []): void
     {
 
@@ -106,9 +87,6 @@ class EmbargoResource extends Resource
             ->success()
             ->send();
     }
-
-
-
 
     public static function getPages(): array
     {
@@ -134,6 +112,22 @@ class EmbargoResource extends Resource
         ];
     }
 
+    public function mount(EmbargoTable $embargoTable): void
+    {
+        $this->embargoTable = $embargoTable;
+        $this->nroLiquiProxima = 4; // Lógica para determinar este valor
+        $this->nroComplementarias = []; // Lógica para determinar este array
+        $this->nroLiquiDefinitiva = 0; // Lógica para determinar este valor
+        $this->insertIntoDh25 = false; // Lógica para determinar este booleano
+
+        // Usar estas variables para actualizar los datos
+        EmbargoProcesoResult::updateData(
+            $this->nroComplementarias,
+            $this->nroLiquiDefinitiva,
+            $this->nroLiquiProxima,
+            $this->insertIntoDh25
+        );
+    }
 
     /**
      * Obtiene las propiedades a mostrar y sus valores actuales.
@@ -164,13 +158,6 @@ class EmbargoResource extends Resource
         $this->dispatch('propertiesUpdated', $this->nroLiquiDefinitiva);
     }
 
-    protected function getListeners()
-    {
-        return [
-            'propertiesUpdated' => 'handlePropertiesUpdated',
-        ];
-    }
-
     public function handlePropertiesUpdated($properties)
     {
         foreach ($properties as $property => $value) {
@@ -184,6 +171,12 @@ class EmbargoResource extends Resource
         }
     }
 
+    protected function getListeners()
+    {
+        return [
+            'propertiesUpdated' => 'handlePropertiesUpdated',
+        ];
+    }
 
     /**
      * Define las propiedades por defecto del recurso.
