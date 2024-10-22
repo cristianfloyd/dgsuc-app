@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
 use Filament\Forms\Form;
+use Livewire\Attributes\On;
 use App\Models\Mapuche\Dh22;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,7 @@ use Filament\Forms\Components\TextInput;
 use App\Traits\DisplayResourceProperties;
 use App\Filament\Resources\EmbargoResource;
 use Livewire\Features\SupportRedirects\Redirector;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 
 
@@ -34,7 +36,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     public array $nroComplementarias = [];
     public bool $insertIntoDh25 = false;
     public array $data;
-    protected mixed $periodoFiscal = [];
+    protected array $periodoFiscal = [];
 
 
 
@@ -44,11 +46,16 @@ class ConfigureEmbargoParameters extends Page implements HasForms
 
         $this->data = $embargoResource->getPropertiesToDisplay();
         foreach ($this->data as $key => $value) {
-            $this->$key = $value;
+            if ($key === 'periodoFiscal') {
+                $this->periodoFiscal = [
+                    'periodoFiscal' => $value
+                ];
+            } else {
+                $this->$key = $value;
+            }
         }
         Log::info('ConfigureEmbargoParameters booted', $this->data);
-        dump($this->data['nroLiquiDefinitiva']);
-        dump($this->nroLiquiDefinitiva);
+        dump($this->periodoFiscal);
     }
 
     public function form(Form $form): Form
@@ -61,7 +68,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                         Dh22::getLiquidacionesForWidget()
                             ->when($this->periodoFiscal, function ($query) {
                                 return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                                    $this->periodoFiscal['year'] . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT)
+                                    $this->periodoFiscal['periodoFiscal']['year'] . str_pad($this->periodoFiscal['periodoFiscal']['month'], 2, '0', STR_PAD_LEFT)
                                 ]);
                             })
                             ->pluck('desc_liqui', 'nro_liqui')
@@ -77,7 +84,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                         Dh22::getLiquidacionesForWidget()
                             ->when($this->periodoFiscal, function ($query) {
                                 return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                                    $this->periodoFiscal['year'] . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT)
+                                    $this->periodoFiscal['periodoFiscal']['year'] . str_pad($this->periodoFiscal['periodoFiscal']['month'], 2, '0', STR_PAD_LEFT)
                                 ]);
                             })
                             ->pluck('desc_liqui', 'nro_liqui')
@@ -102,6 +109,12 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuración guardada exitosamente');
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            PeriodoFiscalSelectorWidget::class,
+        ];
+    }
 
 
     protected function getDefaultProperties(): array
@@ -114,8 +127,17 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         ];
     }
 
-    public function updatedPeriodoFiscal($value): void
+    #[On('updated-periodo-fiscal')]
+    public function updatedPeriodoFiscal(array $periodoFiscal): void
     {
-        $this->periodoFiscal = $value;
+        $instance = new EmbargoResource();
+        $currentProperties = $instance->getPropertiesToDisplay();
+        $this->periodoFiscal = [
+            'periodoFiscal' => $periodoFiscal,
+        ];
+        // dd($this->periodoFiscal);
+        $updatedProperties = array_merge($currentProperties, $this->periodoFiscal);
+        $instance->setPropertyValues($updatedProperties);
+        $this->dispatch('propertiesUpdated', $updatedProperties);
     }
 }

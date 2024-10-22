@@ -65,7 +65,9 @@ class ListEmbargos extends ListRecords
     {
         $instance = new EmbargoResource();
         $currentProperties = $instance->getPropertiesToDisplay();
-        $this->periodoFiscal = $periodoFiscal;
+        $this->periodoFiscal = [
+            'periodoFiscal' => $periodoFiscal,
+        ];
         $updatedProperties = array_merge($currentProperties, $this->periodoFiscal);
         $instance->setPropertyValues($updatedProperties);
         $this->dispatch('propertiesUpdated', $updatedProperties);
