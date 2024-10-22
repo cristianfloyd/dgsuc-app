@@ -2,8 +2,9 @@
 
 namespace App\Livewire;
 
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
 
 class DynamicPropertiesComponent extends Component
 {
@@ -22,6 +23,13 @@ class DynamicPropertiesComponent extends Component
         if (array_key_exists($key, $this->properties)) {
             $this->properties[$key] = $value;
         }
+    }
+
+    #[On('propertiesUpdated')]
+    public function handlePropertiesUpdated($newProperties): void
+    {
+        $this->properties = $newProperties;
+        Log::debug('Nuevas Propiedades recibidas:', $this->properties);
     }
 
     public function updateAllProperties($newProperties): void

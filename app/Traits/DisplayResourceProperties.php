@@ -2,11 +2,12 @@
 
 namespace App\Traits;
 
+use Livewire\Livewire;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Filament\Forms\Components\Section;
 use App\Filament\Actions\ViewResourcePropertiesAction;
-
 
 trait DisplayResourceProperties
 {
@@ -53,6 +54,22 @@ trait DisplayResourceProperties
         });
     }
 
+    public function resetPropertiesToDefault(): void
+    {
+            try {
+                $defaultProperties = $this->getDefaultProperties();
+                Cache::put($this->getCacheKey(), $defaultProperties, now()->addMinutes(30));
+
+                Log::debug('Propiedades restablecidas a los valores por defecto.', [
+                    'defaultProperties' => $defaultProperties,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Error al restablecer las propiedades a los valores por defecto.', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+    }
 
     /**
      * Establece los valores de las propiedades y actualiza el caché.

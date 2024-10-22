@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EmbargoResource\Pages;
-use App\Models\EmbargoProcesoResult;
+use Filament\Tables\Table;
+use Livewire\Attributes\On;
 use App\Tables\EmbargoTable;
-use App\Traits\DisplayResourceProperties;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use App\Models\EmbargoProcesoResult;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
+use App\Traits\DisplayResourceProperties;
+use App\Filament\Resources\EmbargoResource\Pages;
 
 
 class EmbargoResource extends Resource
@@ -141,25 +141,17 @@ class EmbargoResource extends Resource
         // método del trait que maneja el caché
         return $this->getCachedProperties();
     }
+
+
     #[On('updated-periodo-fiscal')]
-    public function updatedPeriodoFiscal(int $periodoFiscal): void
+    public function updatedPeriodoFiscal(array $periodoFiscal): void
     {
         $this->periodoFiscal = $periodoFiscal;
         Notification::make('Periodo Fiscal Actualizado');
 
     }
-    public function handlePropertiesUpdated($properties): void
-    {
-        foreach ($properties as $property => $value) {
-            if (property_exists($this, $property)) {
-                $this->$property = $value;
-                $methodName = 'updated' . ucfirst($property);
-                if (method_exists($this, $methodName)) {
-                    $this->$methodName();
-                }
-            }
-        }
-    }
+
+
 
     protected function getListeners(): array
     {

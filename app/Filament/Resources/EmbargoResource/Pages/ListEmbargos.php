@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\EmbargoResource\Pages;
 
-use App\Filament\Resources\EmbargoResource;
-use App\Filament\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use App\Traits\DisplayResourceProperties;
-use Filament\Actions\Action;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Enums\MaxWidth;
 use Livewire\Attributes\On;
+use Filament\Actions\Action;
+use Filament\Support\Enums\MaxWidth;
+use App\Traits\DisplayResourceProperties;
+use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\EmbargoResource;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use App\Filament\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
 
 class ListEmbargos extends ListRecords
 {
@@ -47,19 +47,28 @@ class ListEmbargos extends ListRecords
     {
         return [
             Action::make('configure')
-                ->label('Configure Parameters')
+                ->label('Configurar Parametros')
                 ->url(static::getResource()::getUrl('configure'))
                 ->icon('heroicon-o-cog'),
+            Action::make('reset')
+                ->label('Reset')
+                ->action(function () {
+                    $instance = new EmbargoResource();
+                    $instance->resetPropertiesToDefault();
+                    $this->dispatch('propertiesUpdated', $instance->getPropertiesToDisplay());
+                })
         ];
     }
 
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal($periodoFiscal): void
     {
-        $currentProperties = new EmbargoResource();
+        $instance = new EmbargoResource();
+        $currentProperties = $instance->getPropertiesToDisplay();
         $this->periodoFiscal = $periodoFiscal;
         $updatedProperties = array_merge($currentProperties, $this->periodoFiscal);
-        dump($updatedProperties);
+        $instance->setPropertyValues($updatedProperties);
+        $this->dispatch('propertiesUpdated', $updatedProperties);
     }
 
     protected function getDefaultProperties(): array
