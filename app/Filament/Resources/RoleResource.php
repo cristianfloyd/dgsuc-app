@@ -35,7 +35,10 @@ class RoleResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('guard_name'),
+                Tables\Columns\TextColumn::make('created_at')->label(__('Created'))
+                    ->dateTime(),
             ])
             ->filters([
                 //

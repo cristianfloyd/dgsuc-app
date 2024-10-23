@@ -22,6 +22,7 @@ class PanelSelectorController extends Controller
     private function getAvailablePanels()
     {
         $user = Auth::user();
+        $user = auth()->user();
         $panels = collect([
             [
                 'id' => 'admin',
