@@ -15,6 +15,7 @@ return [
     App\Providers\EmployeeRepositoryProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\Filament\EmbargosPanelProvider::class,
+    App\Providers\Filament\MapuchePanelProvider::class,
     App\Providers\FileProcessingServiceProvider::class,
     App\Providers\FileProcessorServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,

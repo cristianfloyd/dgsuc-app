@@ -20,19 +20,20 @@ class EmbargoResource extends Resource
     use DisplayResourceProperties;
 
     protected static ?string $model = EmbargoProcesoResult::class;
+    protected static ?string $navigationGroup = 'Liquidacion';
     protected static ?string $modelLabel = 'Embargo';
     protected static ?string $slug = 'embargos';
-
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    public array $periodoFiscal = [];
+    protected EmbargoTable $embargoTable;
+
+
 
     // Propiedades públicas del recurso
+    public array $periodoFiscal = [];
     public int $nroLiquiProxima = 9;
     public array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 1;
     public bool $insertIntoDh25 = false;
-    protected EmbargoTable $embargoTable;
 
     public static function table(Table $table): Table
     {

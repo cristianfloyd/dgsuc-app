@@ -28,11 +28,25 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Livewire\AfipMapucheMiSimplificacion;
+use App\Http\Controllers\PanelAccessController;
+use App\Http\Controllers\PanelSelectorController;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
+
+
+
+Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])
+    ->group(function () {
+        // Rutas protegidas que requieren autenticación y gestión de conexión BD
+    });
+
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+    Route::get('/panel-selector', [PanelSelectorController::class, 'index'])
+    ->name('panel-selector');
+Route::post('/access-panel', [PanelAccessController::class, 'redirectToPanel'])
+    ->name('access-panel');
     Route::get('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () { return view('dashboard'); })->name('dashboard');
     Route::get('/todos', TodoList::class )->name('todos');

@@ -8,8 +8,8 @@ use App\DataTables\UsersDataTable;
 
 class UsersController extends Controller
 {
-    public function index(UsersDataTable $dataTable)
+    public function index()
     {
-        return $dataTable->render('users.index');
+        return 'users.index';
     }
 }
