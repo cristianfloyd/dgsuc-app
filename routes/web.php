@@ -13,6 +13,7 @@ use App\Livewire\CompareCuils;
 use App\Livewire\FileEncoding;
 use App\Livewire\RegisterForm;
 use App\Livewire\BuscarColumna;
+use App\Livewire\PanelSelector;
 use App\Livewire\ConvertirTabla;
 use App\Livewire\SicossImporter;
 use App\services\ColumnMetadata;
@@ -44,9 +45,9 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddle
         // Rutas protegidas que requieren autenticación y gestión de conexión BD
     });
 Route::get('/panel-selector', [PanelSelectorController::class, 'index'])->name('panel-selector');
+Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
-    Route::post('/access-panel', [PanelAccessController::class, 'redirectToPanel'])->name('access-panel');
     Route::get('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () { return view('dashboard'); })->name('dashboard');
     Route::get('/todos', TodoList::class )->name('todos');

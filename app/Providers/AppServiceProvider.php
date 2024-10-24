@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Livewire\Livewire;
 use App\Services\WorkflowService;
 use App\Listeners\JobFailedListener;
 use Illuminate\Support\Facades\Event;
@@ -11,6 +12,7 @@ use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
 use App\Contracts\WorkflowServiceInterface;
+use App\Filament\Components\PanelSwitcherModal;
 use App\Jobs\Middleware\InspectJobDependencies;
 
 class AppServiceProvider extends ServiceProvider
@@ -46,5 +48,10 @@ class AppServiceProvider extends ServiceProvider
                 return $job;
             });
         });
+        // Registramos el componente Filament
+        // $this->loadViewComponentsAs('filament', [
+        //     PanelSwitcherModal::class,
+        // ]);
+        // Livewire::component('panel-switcher-modal', PanelSwitcherModal::class);
     }
 }

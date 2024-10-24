@@ -5,7 +5,9 @@ namespace App\Providers\Filament;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
+use Livewire\Livewire;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\DatabaseSettings;
 use Filament\Http\Middleware\Authenticate;
@@ -20,7 +22,6 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
 class MapuchePanelProvider extends PanelProvider
 {
@@ -29,6 +30,13 @@ class MapuchePanelProvider extends PanelProvider
         return $panel
             ->id('mapuche')
             ->path('mapuche')
+            ->profile()
+            ->userMenuItems([
+                'panel-selector' => MenuItem::make()
+                ->label('Cambiar Panel')
+                ->icon('heroicon-o-arrows-right-left')
+                ->url(fn (): string => '/selector-panel'),
+            ])
             ->colors([
                 'primary' => Color::Blue,
             ])
@@ -57,7 +65,6 @@ class MapuchePanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('S.U.C. Mapuche Tools')
-            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->navigationGroups([
                 'Configuración',
                 'Monitoreo'
@@ -70,6 +77,11 @@ class MapuchePanelProvider extends PanelProvider
                 // Recursos específicos
                 EmbargoResource::class,
             ])
+            // ->renderHook(
+            //     'panels::body.end',
+            //     fn () => view('livewire.panel-switcher-modal')
+            // )
             ;
+
     }
 }

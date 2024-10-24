@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\NroLiqui;
 use App\Models\Mapuche\Dh22;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,6 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use App\Contracts\Dh21RepositoryInterface;
-use App\NroLiqui;
 use Illuminate\Database\Eloquent\Collection;
 use App\Services\Mapuche\ConceptosTotalesService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -20,7 +20,7 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\Dh03Resource\Widgets\CargosOverTime;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 
-class sucPanelProvider extends PanelProvider
+class SucPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
@@ -59,16 +59,16 @@ class sucPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Afip'),
-                NavigationGroup::make()
-                    ->label('Reportes')
-                    ->icon('heroicon-o-pencil'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('navigation.settings'))
-                    ->icon('heroicon-o-cog-6-tooth')
-                    ->collapsed(),
-                NavigationGroup::make('Usuarios')
+                // NavigationGroup::make()
+                //     ->label('Afip'),
+                // NavigationGroup::make()
+                //     ->label('Reportes')
+                //     ->icon('heroicon-o-pencil'),
+                // NavigationGroup::make()
+                //     ->label(fn (): string => __('navigation.settings'))
+                //     ->icon('heroicon-o-cog-6-tooth')
+                //     ->collapsed(),
+                // NavigationGroup::make('Usuarios')
             ])
             ->topNavigation()
             ->breadcrumbs(true)

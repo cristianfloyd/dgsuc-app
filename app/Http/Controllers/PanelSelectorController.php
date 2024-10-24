@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 
 class PanelSelectorController extends Controller
@@ -22,7 +20,6 @@ class PanelSelectorController extends Controller
     private function getAvailablePanels()
     {
         $user = Auth::user();
-        $user = auth()->user();
         $panels = collect([
             [
                 'id' => 'admin',
@@ -42,7 +39,8 @@ class PanelSelectorController extends Controller
 
          // filtrar según permisos del usuario
         return $panels->filter(function ($panel) use ($user) {
-            return $user->hasPermissionToAccessPanel($panel['id']);
+            // $data = $user->hasPermissionToAccessPanel($panel['id']);
+            return  true;
         });
     }
 }

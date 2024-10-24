@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
-use App\Traits\HasPanelPermissions;
 use Laravel\Jetstream\HasProfilePhoto;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -20,9 +19,8 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use HasPanelPermissions;
-    use HasRoles;
-    use HasSuperAdmin;
+    // use HasRoles;
+    // use HasSuperAdmin;
 
     /**
      * The attributes that are mass assignable.
