@@ -37,6 +37,8 @@ Route::get('/user/register', RegisterForm::class)->name('registerform');
 
 
 
+
+
 Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])
     ->group(function () {
         // Rutas protegidas que requieren autenticación y gestión de conexión BD
