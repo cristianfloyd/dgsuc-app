@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
@@ -29,6 +30,13 @@ class SucPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->login()
+            ->profile()
+            ->userMenuItems([
+                'panel-selector' => MenuItem::make()
+                ->label('Cambiar Panel')
+                ->icon('heroicon-o-arrows-right-left')
+                ->url(fn (): string => '/selector-panel'),
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -59,16 +67,16 @@ class SucPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->navigationGroups([
-                // NavigationGroup::make()
-                //     ->label('Afip'),
-                // NavigationGroup::make()
-                //     ->label('Reportes')
-                //     ->icon('heroicon-o-pencil'),
-                // NavigationGroup::make()
-                //     ->label(fn (): string => __('navigation.settings'))
-                //     ->icon('heroicon-o-cog-6-tooth')
-                //     ->collapsed(),
-                // NavigationGroup::make('Usuarios')
+                NavigationGroup::make()
+                    ->label('Afip'),
+                NavigationGroup::make()
+                    ->label('Reportes')
+                    ->icon('heroicon-o-pencil'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('navigation.settings'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(),
+                NavigationGroup::make('Usuarios')
             ])
             ->topNavigation()
             ->breadcrumbs(true)

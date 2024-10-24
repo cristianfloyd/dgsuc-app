@@ -20,7 +20,7 @@ class EmbargoResource extends Resource
     use DisplayResourceProperties;
 
     protected static ?string $model = EmbargoProcesoResult::class;
-    protected static ?string $navigationGroup = 'Liquidacion';
+    protected static ?string $navigationGroup = 'Liquidaciones';
     protected static ?string $modelLabel = 'Embargo';
     protected static ?string $slug = 'embargos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

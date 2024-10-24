@@ -10,7 +10,7 @@
             @foreach ($panels as $panel)
                 <button
                     wire:click="switchPanel('{{ $panel['id'] }}')"
-                    class="flex items-center p-4 transition bg-white border rounded-lg shadow-sm hover:bg-gray-50 border-gray-200"
+                    class="flex items-center p-4 transition bg-white dark:bg-gray-900 border rounded-lg shadow-sm hover:bg-gray-50 border-gray-200"
                 >
                     <x-dynamic-component
                         :component="$panel['icon']"
