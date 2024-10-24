@@ -20,6 +20,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
 class MapuchePanelProvider extends PanelProvider
 {
@@ -56,6 +57,7 @@ class MapuchePanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('S.U.C. Mapuche Tools')
+            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->navigationGroups([
                 'Configuración',
                 'Monitoreo'

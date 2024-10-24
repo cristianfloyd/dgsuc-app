@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -19,7 +19,7 @@ class LoginController extends Controller
         $credentials = $request->only('username', 'password');
 
         if ($this->attemptLogin($request)) {
-            return $this->sendLoginSuccessResponse($request);
+            $this->sendLoginSuccessResponse($request);
         }
 
         return $this->sendFailedLoginResponse($request);
@@ -41,6 +41,7 @@ class LoginController extends Controller
             $this->credentials($request), $request->filled('remember')
         );
     }
+
     protected function credentials(Request $request)
     {
         return $request->only('username', 'password');

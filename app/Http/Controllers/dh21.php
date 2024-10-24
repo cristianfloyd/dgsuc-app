@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class dh21 extends Controller
+class Dh21 extends Controller
 {
     public function index(){
         try {

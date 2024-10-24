@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\UserResource\RelationManagers;
 
 class UserResource extends Resource
 {
@@ -23,31 +27,30 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Livewire::make('SelectLiquidacionDefinitva')
-                    ->label('Select Liquidacion')
-                    ->extraAttributes(['wire:key' => 'select-liquidacion'])
-                    ->extraAttributes(['year' => 2023, 'month' => 6]),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
-                Forms\Components\TextInput::make('password')
+                DateTimePicker::make('email_verified_at'),
+                TextInput::make('password')
                     ->password()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('current_team_id')
+                Select::make('roles')
+                    ->preload()
+                    ->multiple()->relationship('roles', 'name'),
+                TextInput::make('current_team_id')
                     ->numeric(),
-                Forms\Components\TextInput::make('profile_photo_path')
+                TextInput::make('profile_photo_path')
                     ->maxLength(2048),
-                Forms\Components\Textarea::make('two_factor_secret')
+                Textarea::make('two_factor_secret')
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('two_factor_recovery_codes')
+                Textarea::make('two_factor_recovery_codes')
                     ->columnSpanFull(),
-                Forms\Components\DateTimePicker::make('two_factor_confirmed_at'),
+                DateTimePicker::make('two_factor_confirmed_at'),
             ]);
     }
 

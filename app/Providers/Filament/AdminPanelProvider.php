@@ -2,16 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages;
 use Filament\Panel;
+use Filament\Widgets;
 use Filament\PanelProvider;
-use App\Filament\Pages\Dashboard;
 use Filament\Support\Colors\Color;
-use Filament\Navigation\NavigationItem;
-use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -19,33 +17,29 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\Resources\Dh03Resource\Widgets\CargosOverTime;
-use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
+use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('dashboard')
-            ->path('dashboard')
-            ->login()
+            ->id('admin')
+            ->path('admin')
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
+            ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
-                // Pages\Dashboard::class,
+                Pages\Dashboard::class,
             ])
-            ->profile()
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
-                CargosOverTime::class,
-                ActualizarImppBasicWidget::class,
-                PeriodoFiscalSelectorWidget::class,
+                Widgets\AccountWidget::class,
+                Widgets\FilamentInfoWidget::class,
             ])
+            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -59,23 +53,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                
-            ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Afip')
-                    ,
-                NavigationGroup::make()
-                    ->label('Reportes')
-                    ->icon('heroicon-o-pencil'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('navigation.settings'))
-                    ->icon('heroicon-o-cog-6-tooth')
-                    ->collapsed(),
-            ])
-            ->topNavigation()
-            ->breadcrumbs(true)
-            ->maxContentWidth('full')
-            ->sidebarFullyCollapsibleOnDesktop();
+            ]);
     }
 }
