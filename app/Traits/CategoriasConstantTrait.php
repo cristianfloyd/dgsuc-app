@@ -8,7 +8,7 @@ trait CategoriasConstantTrait
      * Constantes agrupadas para las categorías de cargos.
      * Estos valores corresponden a la columna codc_categ del modelo Dh11.
      */
-    public const array CATEGORIAS = [
+    public const  CATEGORIAS = [
         'DOCS' => [
             'HOME',
             'PEO6',

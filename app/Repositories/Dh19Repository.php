@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Dh19RepositoryInterface;
 use App\Models\Dh19;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -51,4 +52,3 @@ class Dh19Repository implements Dh19RepositoryInterface
         return $dh19->delete();
     }
 }
-

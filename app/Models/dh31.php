@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dh31 extends Model
 {
     use MapucheConnectionTrait;
-    // protected $connection = 'pgsql-mapuchito';
+
     protected $table = 'dh31';
     public $timestamps = false;
     protected $primaryKey = 'codc_dedic';
@@ -26,3 +26,4 @@ class Dh31 extends Model
         'cant_horas' => 'integer'
     ];
 }
+

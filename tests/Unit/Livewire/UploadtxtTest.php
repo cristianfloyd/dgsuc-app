@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Livewire;
 
+use App\Contracts\FileUploadRepository;
 use App\Contracts\FileUploadRepositoryInterface;
-use Exception;
-use Tests\TestCase;
-use Livewire\Livewire;
+use App\Contracts\OrigenRepositoryInterface;
 use App\Livewire\Uploadtxt;
 use App\Models\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
-use App\Repositories\FileUploadRepository;
-use App\Contracts\OrigenRepositoryInterface;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
+use Tests\TestCase;
 
 class UploadtxtTest extends TestCase
 {
@@ -19,13 +19,6 @@ class UploadtxtTest extends TestCase
 
     private $fileUploadRepository;
     private $uploadtxt;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
-        $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
-    }
 
     public function testDeleteFileSuccess()
     {
@@ -171,5 +164,12 @@ class UploadtxtTest extends TestCase
             ->with($this->isInstanceOf(Exception::class));
 
         $component->save();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
+        $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
     }
 }

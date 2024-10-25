@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Dh11RepositoryInterface;
+use App\Contracts\Dh11RepositoryInterface;
 
 class Dh11Service
 {

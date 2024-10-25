@@ -2,14 +2,10 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use App\Models\Dh03;
-use App\Models\Dh19;
-use App\Models\Mapuche\Dhe2;
-use App\Models\Mapuche\Catalogo\Dh08;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh30' en la base de datos.
@@ -30,11 +26,10 @@ class Dh30 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'dh30';
     public $timestamps = false;
-    protected $primaryKey = ['nro_tabla', 'desc_abrev'];
     public $incrementing = false;
-
+    protected $table = 'dh30';
+    protected $primaryKey = ['nro_tabla', 'desc_abrev'];
     protected $fillable = [
         'nro_tabla',
         'desc_abrev',
@@ -47,20 +42,14 @@ class Dh30 extends Model
         'desc_item' => 'string',
     ];
 
-    public function getKeyName()
+    public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
     }
 
-    public function getIncrementing()
+    public function getIncrementing(): false
     {
         return false;
-    }
-
-    protected function setKeysForSaveQuery($query)
-    {
-        return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
-            ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
     public function dh08(): HasMany
@@ -95,5 +84,11 @@ class Dh30 extends Model
     {
         return $this->belongsToMany(related: Dhe4::class, table: 'dhe2', foreignPivotKey: 'nro_tabla', relatedPivotKey: 'cod_organismo')
             ->withPivot('desc_abrev');
+    }
+
+    protected function setKeysForSaveQuery($query)
+    {
+        return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
+            ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 }

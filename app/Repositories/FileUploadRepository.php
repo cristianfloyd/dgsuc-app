@@ -25,7 +25,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Create a new uploaded file record.
      *
      * @param array $data
-     * @return \App\Models\UploadedFile
+     * @return \App\Models\Mapuche\UploadedFile
      */
     public function create(array $data): UploadedFile
     {

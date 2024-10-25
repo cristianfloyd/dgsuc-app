@@ -6,7 +6,6 @@ use App\services\ColumnMetadata;
 use App\Services\DatabaseService;
 use App\Contracts\DataMapperInterface;
 use App\Services\FileProcessorService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\FileProcessorInterface;
 

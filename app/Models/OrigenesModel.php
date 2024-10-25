@@ -22,7 +22,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
      * Encuentra un registro de origen por su ID.
      *
      * @param int $id El ID del registro de origen a buscar.
-     * @return \App\Models\OrigenesModel|null El registro de origen encontrado, o null si no se encuentra.
+     * @return \App\Models\Mapuche\OrigenesModel|null El registro de origen encontrado, o null si no se encuentra.
      */
     public function findById(int $id): ?OrigenesModel
     {

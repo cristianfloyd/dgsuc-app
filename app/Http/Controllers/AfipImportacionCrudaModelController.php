@@ -25,7 +25,7 @@ class AfipImportacionCrudaModelController extends Controller
     }
 
 
-    
+
     public function store(Request $request)
     {
         if ($this->VerificarArchivo($request))
@@ -80,4 +80,3 @@ class AfipImportacionCrudaModelController extends Controller
         return true;
     }
 }
-

@@ -3,23 +3,22 @@
 namespace App\Models;
 
 use App\Contracts\CategoryUpdateServiceInterface;
-use App\Models\Dh61;
 use App\Traits\CategoriasConstantTrait;
-use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
-use App\Traits\MapucheLiquiConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class Dh11 extends Model
 {
-    use MapucheLiquiConnectionTrait, CategoriasConstantTrait;
+    use MapucheConnectionTrait, CategoriasConstantTrait;
 
-    protected $table = 'dh11';
     public $timestamps = false;
-    protected $primaryKey = 'codc_categ';
     public $incrementing = false;
+    protected $table = 'dh11';
+    protected $primaryKey = 'codc_categ';
     protected $keyType = 'string';
 
 
@@ -85,27 +84,16 @@ class Dh11 extends Model
         'factor_hs_catedra' => 'double',
     ];
 
-    // Relación con el modelo Dh61
-    public function dh61(): HasMany
-    {
-        return $this->hasMany(Dh61::class,'codc_categ','codc_categ')
-            ->where('dh61.vig_caano', '=', $this->vig_caano)
-            ->where('dh61.vig_cames', '=', $this->vig_cames);
-    }
 
-    public function dh31()
-    {
-        return $this->belongsTo(dh31::class, 'codc_dedic', 'codc_dedic');
-    }
-    public function dh89()
-    {
-        return $this->belongsTo(dh89::class, 'codigoescalafon', 'codigoescalafon');
-    }
-    public function dh03()
-    {
-        return $this->hasMany(dh03::class, 'codc_categ', 'codc_categ');
-    }
-
+    /**
+     * Obtiene el recuento de cargos docentes de educación secundaria.
+     *
+     * Este método recupera el recuento de cargos docentes de educación secundaria desde la caché. Si la caché
+     * no contiene el valor, se calcula consultando la tabla `dh11` para registros donde el campo `codc_categ`
+     * está en la categoría `DOCS`, uniéndose con la tabla `dh03`, y devolviendo el recuento.
+     *
+     * @return int El recuento de cargos docentes de educación secundaria.
+     */
     public static function getCargosDoceSecundario(): int
     {
         return Cache::remember('cargos_doce_secundario', 3600, function () {
@@ -115,6 +103,15 @@ class Dh11 extends Model
         });
     }
 
+    /**
+     * Obtiene el recuento de cargos docentes de educación universitaria.
+     *
+     * Este método recupera el recuento de cargos docentes de educación universitaria desde la caché. Si la caché
+     * no contiene el valor, se calcula consultando la tabla `dh11` para registros donde el campo `codc_categ`
+     * está en la categoría `DOCU`, uniéndose con la tabla `dh03`, y devolviendo el recuento.
+     *
+     * @return int El recuento de cargos docentes de educación universitaria.
+     */
     public static function getCargosDoceUniversitario(): int
     {
         return Cache::remember('cargos_doce_universitario', 3600, function () {
@@ -123,6 +120,16 @@ class Dh11 extends Model
                 ->count();
         });
     }
+
+    /**
+     * Obtiene el recuento de cargos de personal administrativo universitario.
+     *
+     * Este método recupera el recuento de cargos de personal administrativo universitario desde la caché. Si la caché
+     * no contiene el valor, se calcula consultando la tabla `dh11` para registros donde el campo `codc_categ`
+     * está en la categoría `AUTU`, uniéndose con la tabla `dh03`, y devolviendo el recuento.
+     *
+     * @return int El recuento de cargos de personal administrativo universitario.
+     */
     public static function getCargosAutoUniversitario(): int
     {
         return Cache::remember('cargos_auto_universitario', 3600, function () {
@@ -132,6 +139,15 @@ class Dh11 extends Model
         });
     }
 
+    /**
+     * Obtiene el recuento de cargos de personal administrativo de educación secundaria.
+     *
+     * Este método recupera el recuento de cargos de personal administrativo de educación secundaria desde la caché. Si la caché
+     * no contiene el valor, se calcula consultando la tabla `dh11` para registros donde el campo `codc_categ`
+     * está en la categoría `AUTS`, uniéndose con la tabla `dh03`, y devolviendo el recuento.
+     *
+     * @return int El recuento de cargos de personal administrativo de educación secundaria.
+     */
     public static function getCargosAutoSecundario(): int
     {
         return Cache::remember('cargos_auto_secundario', 3600, function () {
@@ -141,6 +157,15 @@ class Dh11 extends Model
         });
     }
 
+    /**
+     * Obtiene el recuento de cargos de personal no docente.
+     *
+     * Este método recupera el recuento de cargos de personal no docente desde la caché. Si la caché
+     * no contiene el valor, se calcula consultando la tabla `dh11` para registros donde el campo `codc_categ`
+     * está en la categoría `NODO`, uniéndose con la tabla `dh03`, y devolviendo el recuento.
+     *
+     * @return int El recuento de cargos de personal no docente.
+     */
     public static function getCargosNoDocente(): int
     {
         return Cache::remember('cargos_no_docente', 3600, function () {
@@ -148,6 +173,12 @@ class Dh11 extends Model
                 ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
                 ->count();
         });
+    }
+
+    public static function scopeOfTipo(Builder $query, string $tipo): Builder
+    {
+        $categorias = self::getCategoriasPorTipo($tipo);
+        return $query->whereIn('codc_categ', $categorias);
     }
 
     /**
@@ -166,6 +197,28 @@ class Dh11 extends Model
         };
     }
 
+    public function dh61(): HasMany
+    {
+        return $this->hasMany(Dh61::class,'codc_categ','codc_categ')
+            ->where('dh61.vig_caano', '=', $this->vig_caano)
+            ->where('dh61.vig_cames', '=', $this->vig_cames);
+    }
+
+    public function dh31(): BelongsTo
+    {
+        return $this->belongsTo(dh31::class, 'codc_dedic', 'codc_dedic');
+    }
+
+    public function dh89(): BelongsTo
+    {
+        return $this->belongsTo(dh89::class, 'codigoescalafon', 'codigoescalafon');
+    }
+
+    public function dh03(): HasMany
+    {
+        return $this->hasMany(dh03::class, 'codc_categ', 'codc_categ');
+    }
+
     /**
      * Actualiza el campo impp_basic del modelo actual aplicando un porcentaje de incremento.
      *
@@ -176,11 +229,5 @@ class Dh11 extends Model
     {
         $service = app(CategoryUpdateServiceInterface::class);
         return $service->updateCategoryWithHistory($this, $porcentaje);
-    }
-
-    public static function scopeOfTipo(Builder $query, string $tipo): Builder
-    {
-        $categorias = self::getCategoriasPorTipo($tipo);
-        return $query->whereIn('codc_categ', $categorias);
     }
 }

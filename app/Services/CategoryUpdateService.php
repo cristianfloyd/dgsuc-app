@@ -7,6 +7,7 @@ use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Contracts\CategoryUpdateServiceInterface;
 
+
 class CategoryUpdateService implements CategoryUpdateServiceInterface
 {
     private $dh11Repository;

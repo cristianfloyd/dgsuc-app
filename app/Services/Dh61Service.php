@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Contracts\Dh61RepositoryInterface;
 use App\Models\Dh11;
-use App\Repositories\Dh61RepositoryInterface;
 
 class Dh61Service
 {

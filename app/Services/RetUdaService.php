@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Contracts\RetUdaRepository;
 use App\DTOs\RetUdaDTO;
-use App\Repositories\RetUdaRepository;
 use App\Models\Suc\RetUda;
 
 class RetUdaService

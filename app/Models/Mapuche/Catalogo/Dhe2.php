@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Models\Mapuche;
+namespace App\Models\Mapuche\Catalogo;
 
-use App\Models\Mapuche\Catalogo\Dh30;
-use App\Models\Mapuche\Catalogo\Dhe4;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Dhe2 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'dhe2';
     public $timestamps = false;
-    protected $primaryKey = ['nro_tabla', 'desc_abrev'];
     public $incrementing = false;
-
+    protected $table = 'dhe2';
+    protected $primaryKey = ['nro_tabla', 'desc_abrev'];
     protected $fillable = [
         'nro_tabla',
         'desc_abrev',
@@ -30,20 +26,14 @@ class Dhe2 extends Model
         'cod_organismo' => 'integer',
     ];
 
-    public function getKeyName()
+    public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
     }
 
-    public function getIncrementing()
+    public function getIncrementing(): false
     {
         return false;
-    }
-
-    protected function setKeysForSaveQuery($query)
-    {
-        return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
-                    ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
     /**
@@ -65,6 +55,12 @@ class Dhe2 extends Model
     public function dhe4(): BelongsTo
     {
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
+    }
+
+    protected function setKeysForSaveQuery($query)
+    {
+        return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
+                    ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
 }

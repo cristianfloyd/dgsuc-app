@@ -4,10 +4,6 @@ namespace App\Models;
 
 use App\NroLiqui;
 use App\Models\Mapuche\Dh22;
-use InvalidArgumentException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,9 +54,12 @@ class Dh21 extends Model
         'codn_subsubar'
     ];
 
-    public function __construct(Dh21RepositoryInterface $repository)
+    public function __construct(Dh21RepositoryInterface $repository = null)
     {
-        $this->repository = $repository;
+        if($repository){
+            $this->repository = $repository;
+        }
+
         parent::__construct();
     }
 

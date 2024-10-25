@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Services;
 
-use Mockery;
-use Tests\TestCase;
+use App\Contracts\AfipArtRepository;
 use App\Models\AfipArt;
-use Mockery\MockInterface;
 use App\Services\AfipArtService;
-use App\Repositories\AfipArtRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
+use Mockery\MockInterface;
+use Tests\TestCase;
 
 class AfipArtServiceTest extends TestCase
 {
@@ -16,17 +16,6 @@ class AfipArtServiceTest extends TestCase
 
     protected $afipArtService;
     protected AfipArtRepository|MockInterface $afipArtRepository;
-
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->afipArtRepository = Mockery::mock(AfipArtRepository::class);
-        $this->afipArtRepository->shouldReceive('getAll')->andReturn(collect([]));
-
-        $this->afipArtService = new AfipArtService($this->afipArtRepository);
-    }
 
     /** @test */
     public function it_can_get_all_afip_art()
@@ -95,5 +84,15 @@ class AfipArtServiceTest extends TestCase
         $deleted = $this->afipArtService->delete('20123456789');
 
         $this->assertTrue($deleted);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->afipArtRepository = Mockery::mock(AfipArtRepository::class);
+        $this->afipArtRepository->shouldReceive('getAll')->andReturn(collect([]));
+
+        $this->afipArtService = new AfipArtService($this->afipArtRepository);
     }
 }

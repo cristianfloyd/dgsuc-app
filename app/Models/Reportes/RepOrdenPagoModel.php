@@ -2,7 +2,7 @@
 
 namespace App\Models\Reportes;
 
-use App\Models\Mapuche\Catalogo\Dh30;
+use App\Models\Catalogo\Dh30;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

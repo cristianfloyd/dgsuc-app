@@ -66,15 +66,15 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],  
+            'model' => env('AUTH_MODEL', App\Models\Mapuche\User::class),
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
         'toba' => [
             'driver' => 'toba',
-            'model' => App\Models\User::class,
+            'model' => App\Models\Mapuche\User::class,
         ],
     ],
 

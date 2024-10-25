@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\AfipMapucheSicossRepository;
-use App\Repositories\Interfaces\AfipMapucheSicossRepositoryInterface;
+use App\Contracts\AfipMapucheSicossRepositoryInterface;
 
 class AfipMapucheSicossProvider extends ServiceProvider
 {

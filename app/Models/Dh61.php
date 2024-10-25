@@ -2,30 +2,17 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompositePrimaryKey;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @method static select(string $string, string $string1)
- */
 class Dh61 extends Model
 {
-    use HasCompositePrimaryKey;
-
     protected $connection = 'pgsql-mapuche';
-
-    // Definimos la tabla asociada al modelo
     protected $table = 'mapuche.dh61';
     public $timestamps = false;
-
-    // Definimos la clave primaria compuesta
-    protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
+    //protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
+    //protected $primaryKey = 'codc_categ';
     public $incrementing = false;
-    protected $keyType = 'string';
 
-    // Definir los atributos que se pueden asignar en masa
     protected $fillable = [
         'codc_categ',
         'equivalencia',
@@ -65,35 +52,13 @@ class Dh61 extends Model
         'noinformasipuver',
         'noinformasirhu',
         'imppnooblig',
-        'aportalao',
-        'factor_hs_catedra',
+        'aportalao'
     ];
 
-    // Definimos los tipos de datos de las columnas
     protected $casts = [
-        'codc_categ' => 'string',
-        'equivalencia' => 'string',
-        'tipo_escal' => 'string',
-        'nro_escal' => 'integer',
         'impp_basic' => 'decimal:2',
-        'codc_dedic' => 'string',
-        'sino_mensu' => 'string',
-        'sino_djpat' => 'string',
-        'vig_caano' => 'integer',
-        'vig_cames' => 'integer',
-        'desc_categ' => 'string',
-        'sino_jefat' => 'string',
         'impp_asign' => 'decimal:2',
-        'computaantig' => 'integer',
         'controlcargos' => 'boolean',
-        'controlhoras' => 'integer',
-        'controlpuntos' => 'integer',
-        'controlpresup' => 'integer',
-        'horasmenanual' => 'string',
-        'cantpuntos' => 'integer',
-        'estadolaboral' => 'string',
-        'nivel' => 'string',
-        'tipocargo' => 'string',
         'remunbonif' => 'float',
         'noremunbonif' => 'float',
         'remunnobonif' => 'float',
@@ -105,36 +70,68 @@ class Dh61 extends Model
         'critico' => 'float',
         'jefatura' => 'float',
         'gastosrepre' => 'float',
-        'codigoescalafon' => 'string',
+        'computaantig' => 'integer',
+        'controlhoras' => 'integer',
+        'controlpuntos' => 'integer',
+        'controlpresup' => 'integer',
+        'cantpuntos' => 'integer',
         'noinformasipuver' => 'integer',
         'noinformasirhu' => 'integer',
         'imppnooblig' => 'integer',
-        'aportalao' => 'integer',
-        'factor_hs_catedra' => 'float',
+        'aportalao' => 'integer'
     ];
 
-     // Relación con el modelo Dh11 utilizando la clave primaria compuesta
-    public function dh11(): BelongsTo
+    // Scope para filtrar por categoría
+    public function scopeCategoria($query, $categoria)
     {
-        return $this->compositeBelongsTo(
-            Dh11::class,
-            ['codc_categ', 'vig_caano', 'vig_cames'],
-            ['codc_categ', 'vig_caano', 'vig_cames']
-        );
+        return $query->where('codc_categ', $categoria);
     }
 
-    /**
-     * Restaura los valores de la categoría desde un registro histórico.
-     *
-     * @param Dh11 $category La categoría a la que se le restaurarán los valores.
-     * @return bool Verdadero si la restauración fue exitosa, falso en caso contrario.
-     */
-    public function restoreCategory(Dh11 $category): bool
+    // Scope para filtrar por vigencia
+    public function scopeVigencia($query, $ano, $mes)
     {
-        // Llenar la categoría con los valores del registro histórico.
-        $category->fill($this->toArray());
+        return $query->where('vig_caano', $ano)
+                    ->where('vig_cames', $mes);
+    }
 
-        // Guardar los cambios en la categoría.
-        return $category->save();
+    // Método para obtener categorías activas
+    public function scopeActivas($query)
+    {
+        return $query->where('estadolaboral', 'A');
+    }
+
+    // Método para verificar si es jefatura
+    public function esJefatura(): bool
+    {
+        return $this->sino_jefat === 'S';
+    }
+
+    // Método para verificar si está mensualizado
+    public function esMensualizado(): bool
+    {
+        return $this->sino_mensu === 'S';
+    }
+
+    // Método para obtener el total de remuneraciones
+    public function getTotalRemuneraciones(): float
+    {
+        return (float)$this->impp_basic +
+               (float)$this->remunbonif +
+               (float)$this->noremunbonif +
+               (float)$this->remunnobonif +
+               (float)$this->noremunnobonif +
+               (float)$this->otrasrem;
+    }
+
+    // Método para verificar si requiere declaración jurada patrimonial
+    public function requiereDeclaracionJurada(): bool
+    {
+        return $this->sino_djpat === 'S';
+    }
+
+    // Método para obtener categorías por escalafón
+    public function scopePorEscalafon($query, $codigoEscalafon)
+    {
+        return $query->where('codigoescalafon', $codigoEscalafon);
     }
 }

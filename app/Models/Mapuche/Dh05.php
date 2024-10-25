@@ -3,9 +3,7 @@
 namespace App\Models\Mapuche;
 
 use App\Models\Dh01;
-use App\Models\Dh03;
-use App\Models\Dl09;
-use App\Models\Mapuche\Catalogo\Dl10;
+use App\Models\Catalogo\Dl10;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,19 +13,19 @@ class Dh05 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'dh05';
-
-    // Especificar la clave primaria
-    protected $primaryKey = 'nro_licencia';
-
-    // Indicar que la clave primaria no es auto-incremental
     public $incrementing = false;
 
+    // Especificar la clave primaria
+    public $timestamps = false;
+
+    // Indicar que la clave primaria no es auto-incremental
+    protected $table = 'dh05';
+
     // Indicar que la clave primaria es de tipo entero
-    protected $keyType = 'int';
+    protected $primaryKey = 'nro_licencia';
 
     // Deshabilitar timestamps si no existen en la tabla
-    public $timestamps = false;
+    protected $keyType = 'int';
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [

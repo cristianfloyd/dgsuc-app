@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Contracts;
 
 use App\Models\Dh19;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,7 +10,7 @@ interface Dh19RepositoryInterface
     /**
      * Obtiene todos los registros de Dh19.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAll(): Collection;
 

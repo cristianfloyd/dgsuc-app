@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Repositories\Dhe7Repository;
-use Illuminate\Support\Facades\Validator;
+use App\Contracts\Dhe7Repository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Validator;
 
 class Dhe7Service
 {
@@ -37,21 +37,7 @@ class Dhe7Service
     }
 
     // Actualiza un registro existente
-    public function update(string $codigo, array $data)
-    {
-        // Validación de datos
-        $this->validate($data);
 
-        return $this->dhe7Repository->update($codigo, $data);
-    }
-
-    // Elimina un registro
-    public function delete(string $codigo)
-    {
-        return $this->dhe7Repository->delete($codigo);
-    }
-
-    // Método de validación
     protected function validate(array $data)
     {
         $rules = [
@@ -60,5 +46,22 @@ class Dhe7Service
         ];
 
         Validator::make($data, $rules)->validate();
+    }
+
+    // Elimina un registro
+
+    public function update(string $codigo, array $data)
+    {
+        // Validación de datos
+        $this->validate($data);
+
+        return $this->dhe7Repository->update($codigo, $data);
+    }
+
+    // Método de validación
+
+    public function delete(string $codigo)
+    {
+        return $this->dhe7Repository->delete($codigo);
     }
 }

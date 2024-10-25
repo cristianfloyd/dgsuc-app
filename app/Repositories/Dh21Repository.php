@@ -1,24 +1,14 @@
 <?php
 
-namespace App\repositories;
+namespace App\Repositories;
 
-use App\NroLiqui;
-use App\Models\Dh21;
-use Illuminate\Database\Eloquent\Builder;
 use App\Contracts\Dh21RepositoryInterface;
+use App\Models\Dh21;
+use App\NroLiqui;
+use Illuminate\Database\Eloquent\Builder;
 
 class Dh21Repository implements Dh21RepositoryInterface
 {
-    /**
-     * Devuelve una instancia de Illuminate\Database\Eloquent\Builder que se puede usar para consultar el modelo Dh21.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function query(): Builder
-    {
-        return Dh21::query();
-    }
-
     /**
      * Devuelve la cantidad de legajos distintos en el modelo Dh21.
      *
@@ -27,6 +17,16 @@ class Dh21Repository implements Dh21RepositoryInterface
     public function getDistinctLegajos(): int
     {
         return Dh21::query()->distinct('nro_legaj')->count();
+    }
+
+    /**
+     * Devuelve una instancia de Illuminate\Database\Eloquent\Builder que se puede usar para consultar el modelo Dh21.
+     *
+     * @return Builder
+     */
+    public function query(): Builder
+    {
+        return Dh21::query();
     }
 
     /**

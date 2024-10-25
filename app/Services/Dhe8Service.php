@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Contracts\Dhe8Repository;
 use App\Models\Dhe8;
-use App\Repositories\Dhe8Repository;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class Dhe8Service
@@ -62,6 +62,22 @@ class Dhe8Service
     }
 
     /**
+     * Valida los datos proporcionados para crear o actualizar un registro Dhe8.
+     *
+     * @param array $data Los datos a validar.
+     * @return void
+     */
+    protected function validate(array $data): void
+    {
+        $rules = [
+            'codigogradooa' => 'required|string|size:4',
+            'descgradooa' => 'nullable|string|max:255',
+        ];
+
+        Validator::make($data, $rules)->validate();
+    }
+
+    /**
      * Actualiza un registro existente
      *
      * @param string $codigo
@@ -85,22 +101,5 @@ class Dhe8Service
     public function delete(string $codigo): bool
     {
         return $this->dhe8Repository->delete($codigo);
-    }
-
-
-    /**
-     * Valida los datos proporcionados para crear o actualizar un registro Dhe8.
-     *
-     * @param array $data Los datos a validar.
-     * @return void
-     */
-    protected function validate(array $data): void
-    {
-        $rules = [
-            'codigogradooa' => 'required|string|size:4',
-            'descgradooa' => 'nullable|string|max:255',
-        ];
-
-        Validator::make($data, $rules)->validate();
     }
 }

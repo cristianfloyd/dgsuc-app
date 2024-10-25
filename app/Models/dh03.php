@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Models\SpuDisc;
-use App\Models\Mapuche\Dh05;
-use App\Models\Mapuche\Catalogo\Dh30;
-use App\Models\Mapuche\Catalogo\Dh36;
+use App\Models\Dh05;
+use App\Models\Catalogo\Dh30;
+use App\Models\Catalogo\Dh36;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

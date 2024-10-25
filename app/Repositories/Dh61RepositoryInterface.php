@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @method Collection create(array $attributes)
  * @method Collection getUniqueCategoriesByPeriod(int $year, int $month)
  * @method Collection getCategoryRecordsByPeriod(string $codc_categ, int $year, int $month)
- * @see \App\Models\Dh61
+ * @see \App\Models\Mapuche\Dh61
  */
 interface Dh61RepositoryInterface
 {

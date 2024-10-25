@@ -6,6 +6,8 @@ use App\Models\AfipMapucheSicoss;
 use App\DTOs\AfipMapucheSicossDTO;
 use App\Contracts\AfipMapucheSicossRepositoryInterface;
 
+
+
 class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterface
 {
     public function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss

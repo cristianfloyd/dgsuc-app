@@ -4,6 +4,7 @@ namespace App\Contracts;
 
 use App\Models\ProcessLog;
 
+
 /**
  * Interfce WorkflowInterface que define los métodos para el servicio de flujo de trabajo.
  * Metodos para iniciar, restablecer, obtener y actualizar el flujo de trabajo,
@@ -133,4 +134,3 @@ interface WorkflowServiceInterface
      */
     public function isProcessCompleted(ProcessLog $processLog): bool;
 }
-

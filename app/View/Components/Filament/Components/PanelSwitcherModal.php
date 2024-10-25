@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Filament\Components;
+namespace App\View\Components\Filament\Components;
 
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Filament\Support\Components\ViewComponent;
 use Filament\Support\Concerns\HasExtraAttributes;
+use Illuminate\Contracts\View\View;
 
 class PanelSwitcherModal extends ViewComponent
 {
@@ -16,6 +15,14 @@ class PanelSwitcherModal extends ViewComponent
     public bool $isOpen = false;
 
     // Método para obtener los paneles disponibles
+
+    public function render(): View
+    {
+        return view('filament.components.panel-switcher-modal', [
+            'panels' => $this->getPanels(),
+        ]);
+    }
+
     protected function getPanels(): array
     {
         return collect([
@@ -35,12 +42,5 @@ class PanelSwitcherModal extends ViewComponent
             ],
         ])//->filter(fn ($panel) => Auth::user()->hasPermissionToAccessPanel($panel['id']))
         ->toArray();
-    }
-
-    public function render(): View
-    {
-        return view('filament.components.panel-switcher-modal', [
-            'panels' => $this->getPanels(),
-        ]);
     }
 }

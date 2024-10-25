@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\AfipArt;
+use App\Contracts\AfipArtRepository;
 use App\Http\Requests\AfipArtRequest;
-use App\Repositories\AfipArtRepository;
+use App\Models\AfipArt;
 use Illuminate\Database\Eloquent\Collection;
 
 /**

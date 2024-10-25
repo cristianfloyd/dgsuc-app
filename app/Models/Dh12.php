@@ -41,7 +41,7 @@ class Dh12 extends Model
      * @var array
      */
     protected $fillable = [
-        'codn_conce', 
+        'codn_conce',
         'vig_coano', 'vig_comes', 'desc_conce', 'desc_corta', 'tipo_conce',
         'codc_vige1', 'desc_nove1', 'tipo_nove1', 'cant_ente1', 'cant_deci1',
         'codc_vige2', 'desc_nove2', 'tipo_nove2', 'cant_ente2', 'cant_deci2',

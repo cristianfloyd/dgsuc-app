@@ -12,19 +12,19 @@ class Dl10 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'dl10';
-
-    // Especificar la clave primaria
-    protected $primaryKey = 'quien_emite_norma';
-
-    // Indicar que la clave primaria no es auto-incremental
     public $incrementing = false;
 
+    // Especificar la clave primaria
+    public $timestamps = false;
+
+    // Indicar que la clave primaria no es auto-incremental
+    protected $table = 'dl10';
+
     // Indicar que la clave primaria es de tipo string
-    protected $keyType = 'string';
+    protected $primaryKey = 'quien_emite_norma';
 
     // Deshabilitar timestamps si no existen en la tabla
-    public $timestamps = false;
+    protected $keyType = 'string';
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [
