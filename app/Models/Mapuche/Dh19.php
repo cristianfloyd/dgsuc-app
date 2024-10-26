@@ -3,7 +3,7 @@
 namespace App\Models\Mapuche;
 
 use App\Models\Dh12;
-use App\Models\Catalogo\Dh30;
+use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

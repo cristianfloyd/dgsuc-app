@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Team;
+
 return [
 
     'resources' => [
@@ -13,7 +15,7 @@ return [
 
     'navigation_section_group' => 'filament-spatie-roles-permissions::filament-spatie.section.roles_and_permissions', // Default uses language constant
 
-    'team_model' => \App\Models\Mapuche\Team::class,
+    'team_model' => Team::class,
 
     'scope_to_tenant' => true,
 
@@ -190,7 +192,7 @@ return [
         ],
 
         'excluded_policy_models' => [
-            \App\Models\Mapuche\User::class,
+            \App\Models\User::class,
         ],
 
         /*
@@ -200,7 +202,7 @@ return [
             //'view-log'
         ],
 
-        'user_model' => \App\Models\Mapuche\User::class,
+        'user_model' => \App\Models\User::class,
 
         'policies_namespace' => 'App\Policies',
     ],

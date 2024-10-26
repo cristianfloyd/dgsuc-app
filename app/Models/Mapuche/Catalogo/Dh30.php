@@ -2,10 +2,12 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use App\Models\Dh03;
+use App\Models\Mapuche\Dh19;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh30' en la base de datos.

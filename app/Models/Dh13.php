@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Modelo para la tabla mapuche.dh13
+ *
+ * @property int $codn_conce
+ * @property string|null $desc_calcu
+ * @property int $nro_orden_formula
+ * @property string|null $desc_condi
+ *
+ * @property-read Dh12 $conceptoBase
+ */
 class Dh13 extends Model
 {
     use MapucheConnectionTrait;

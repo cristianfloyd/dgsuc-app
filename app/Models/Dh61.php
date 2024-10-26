@@ -9,7 +9,7 @@ class Dh61 extends Model
     protected $connection = 'pgsql-mapuche';
     protected $table = 'mapuche.dh61';
     public $timestamps = false;
-    //protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
+    protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
     //protected $primaryKey = 'codc_categ';
     public $incrementing = false;
 

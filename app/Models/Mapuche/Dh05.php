@@ -3,7 +3,9 @@
 namespace App\Models\Mapuche;
 
 use App\Models\Dh01;
-use App\Models\Catalogo\Dl10;
+use App\Models\Dh03;
+use App\Models\Mapuche\Catalogo\Dl09;
+use App\Models\Mapuche\Catalogo\Dl10;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
