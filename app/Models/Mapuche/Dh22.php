@@ -2,13 +2,13 @@
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\EstadoLiquidacionModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh22
@@ -87,10 +87,12 @@ class Dh22 extends Model
 
     public static function getLiquidacionesForWidget(): Builder
     {
-        return self::select('nro_liqui',
+
+        return self::select(
+            'nro_liqui',
             DB::raw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) as periodo_fiscal"),
-            'desc_liqui')
-            ->orderByDesc('nro_liqui');
+            'desc_liqui'
+            )->orderByDesc('nro_liqui');
     }
 
 

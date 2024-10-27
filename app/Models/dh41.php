@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Dh22;
+use App\Models\Mapuche\Dh22;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

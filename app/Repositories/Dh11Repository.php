@@ -71,7 +71,7 @@ class Dh11Repository implements Dh11RepositoryInterface
      *
      * @param array $attributes Atributos para buscar o crear el registro.
      * @param array $values Valores para actualizar el registro.
-     * @return \App\Models\Mapuche\Dh11 El registro Dh11 actualizado o creado.
+     * @return Dh11 El registro Dh11 actualizado o creado.
      */
     public function updateOrCreate(array $attributes, array $values = []): Dh11
     {
