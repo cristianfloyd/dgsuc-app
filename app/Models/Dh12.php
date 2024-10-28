@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dh12 extends Model
 {
-    // use MapucheConnectionTrait;
-    use MapucheLiquiConnectionTrait;
+    use MapucheConnectionTrait;
+    // use MapucheLiquiConnectionTrait;
     use CharacterEncodingTrait;
 
     /**
@@ -83,7 +83,7 @@ class Dh12 extends Model
         parent::boot();
 
         // Configuramos la sesión para manejar correctamente los caracteres
-        DB::connection('pgsql-mapuchito')->statement("SET client_encoding TO 'SQL_ASCII'");
+        DB::connection('pgsql-mapuche')->statement("SET client_encoding TO 'SQL_ASCII'");
 
         static::retrieved(function ($model) {
             // Al recuperar datos, convertimos de ISO-8859-1 a UTF-8

@@ -12,4 +12,8 @@ interface Dh11RepositoryInterface
     public function getAllCurrentRecords(): Collection;
     public function update(array $attributes, Dh61 $values): bool;
     public function getAllCodcCateg(): array;
+    public function all();
+    public function find(string $codcCateg);
+    public function create(array $data);
+    public function delete(string $codcCateg);
 }

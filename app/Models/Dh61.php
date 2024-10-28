@@ -6,54 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Dh61 extends Model
 {
+    public $timestamps = false;
+    public $incrementing = false;
     protected $connection = 'pgsql-mapuche';
     protected $table = 'mapuche.dh61';
-    public $timestamps = false;
-    protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
     //protected $primaryKey = 'codc_categ';
-    public $incrementing = false;
-
-    protected $fillable = [
-        'codc_categ',
-        'equivalencia',
-        'tipo_escal',
-        'nro_escal',
-        'impp_basic',
-        'codc_dedic',
-        'sino_mensu',
-        'sino_djpat',
-        'vig_caano',
-        'vig_cames',
-        'desc_categ',
-        'sino_jefat',
-        'impp_asign',
-        'computaantig',
-        'controlcargos',
-        'controlhoras',
-        'controlpuntos',
-        'controlpresup',
-        'horasmenanual',
-        'cantpuntos',
-        'estadolaboral',
-        'nivel',
-        'tipocargo',
-        'remunbonif',
-        'noremunbonif',
-        'remunnobonif',
-        'noremunnobonif',
-        'otrasrem',
-        'dto1610',
-        'reflaboral',
-        'refadm95',
-        'critico',
-        'jefatura',
-        'gastosrepre',
-        'codigoescalafon',
-        'noinformasipuver',
-        'noinformasirhu',
-        'imppnooblig',
-        'aportalao'
-    ];
+    protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
+    protected $fillable = ['codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano', 'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos', 'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif', 'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon', 'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao'];
 
     protected $casts = [
         'impp_basic' => 'decimal:2',

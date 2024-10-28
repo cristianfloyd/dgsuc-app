@@ -3,18 +3,16 @@ namespace App\Repositories;
 
 use App\Models\Dh11;
 use App\Models\Dh61;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException;
-use Illuminate\Database\Eloquent\Collection;
 use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
-    private $periodoFiscalService;
 
-    public function __construct(PeriodoFiscalService $periodoFiscalService)
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model)
     {
-        $this->periodoFiscalService = $periodoFiscalService;
     }
 
 
@@ -113,11 +111,16 @@ class Dh11Repository implements Dh11RepositoryInterface
     /**
      * Obtiene todos los registros actuales con un valor de impp_basic mayor a 0.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAllCurrentRecords(): Collection
     {
         return Dh11::all()->where('impp_basic', '>', 0);
+    }
+
+    public function all(): Collection
+    {
+        return $this->model->all();
     }
 
     /**
@@ -128,5 +131,22 @@ class Dh11Repository implements Dh11RepositoryInterface
     public function getAllCodcCateg(): array
     {
         return Dh11::pluck('codc_categ')->toArray();
+    }
+
+    public function find(string $codcCateg): Dh11
+    {
+        // TODO: Implement find() method.
+        return $this->model->findOrFail($codcCateg);
+    }
+
+    public function create(array $data)
+    {
+        // TODO: Implement create() method.
+        return $this->model->create($data);
+    }
+
+    public function delete(string $codcCateg)
+    {
+        // TODO: trow Exception "metodo no implementado"
     }
 }

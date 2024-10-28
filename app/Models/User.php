@@ -6,6 +6,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -55,7 +56,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Obtener los atributos que deben ser convertidos.
      *
      * @return array<string, string>
      */
@@ -71,5 +72,20 @@ class User extends Authenticatable
     {
         return $query->where('name', 'like', '%'.$val.'%')
             ->orWhere('email', 'like', '%'.$val.'%');
+    }
+
+    protected function username(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => strtolower($value),
+            set: fn($value) => strtolower($value),
+        );
+    }
+
+    protected function completeName(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => "{$this->name} {$this->username}",
+        );
     }
 }

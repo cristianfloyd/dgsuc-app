@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Contracts\Dh21RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use App\Services\Mapuche\ConceptosTotalesService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dh21 extends Model
