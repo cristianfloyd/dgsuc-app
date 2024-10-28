@@ -150,6 +150,8 @@ class Dh13 extends Model
         return "{$this->codn_conce}-{$this->nro_orden_formula}";
     }
 
+
+
     /**
      * Establece la clave única para el modelo.
      *
@@ -160,9 +162,6 @@ class Dh13 extends Model
     {
         $this->primaryKey = $key;
     }
-
-
-
     /**
      * Obtiene el valor de la clave única para rutas.
      *
@@ -172,7 +171,6 @@ class Dh13 extends Model
     {
         return 'id';
     }
-
     /**
      * Recupera el modelo por su clave única.
      *
@@ -190,7 +188,6 @@ class Dh13 extends Model
         }
         return parent::resolveRouteBinding($key, $field);
     }
-
     /**
      * Obtiene una nueva instancia de query para el modelo.
      *

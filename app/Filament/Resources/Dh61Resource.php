@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\Dh61Resource\Pages;
-use App\Models\Dh61;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Dh61;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use App\Filament\Resources\Dh61Resource\Pages;
 
 class Dh61Resource extends Resource
 {
@@ -113,7 +113,7 @@ class Dh61Resource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id_compuesto'),
+                // TextColumn::make('id'),
                 TextColumn::make('codc_categ')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('equivalencia')

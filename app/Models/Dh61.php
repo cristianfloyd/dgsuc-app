@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Dh61 extends Model
 {
@@ -10,7 +13,11 @@ class Dh61 extends Model
     public $incrementing = false;
     protected $connection = 'pgsql-mapuche';
     protected $table = 'mapuche.dh61';
-    //protected $primaryKey = 'codc_categ';
+
+    /**
+     * primaryKey compuesta en formato array
+     * @var array
+     */
     protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
     protected $fillable = ['codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano', 'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos', 'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif', 'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon', 'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao'];
 
@@ -40,6 +47,13 @@ class Dh61 extends Model
         'aportalao' => 'integer'
     ];
 
+    protected function codcCateg(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => preg_replace('/\s+/', '', $value),
+            set: fn ($value) => preg_replace('/\s+/', '', $value)
+        );
+    }
     // Scope para filtrar por categoría
     public function scopeCategoria($query, $categoria)
     {
@@ -92,5 +106,71 @@ class Dh61 extends Model
     public function scopePorEscalafon($query, $codigoEscalafon)
     {
         return $query->where('codigoescalafon', $codigoEscalafon);
+    }
+
+
+
+
+    /**
+     * Devuelve el nombre de la clave principal del modelo.
+     *
+     * @return string
+     */
+    public function getKeyName()
+    {
+        return 'id';
+    }
+
+	/**
+	 * @return mixed
+	 */
+	public function getKey()
+    {
+		return implode('-', $this->primaryKey);
+    }
+    /**
+     * Obtiene el valor de la clave única para rutas.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+    /**
+     * Recupera el modelo por su clave única.
+     *
+     * @param  mixed  $key
+     * @param  string|null  $field
+     * @return Model|Collection|static[]|static|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if($field === 'id'){
+            [$codc_categ, $vig_caano, $vig_cames] = explode('-', $value);
+            return $this->where('codc_categ', $codc_categ)
+                ->where('vig_caano', $vig_caano)
+                ->where('vig_cames', $vig_cames)
+                ->first();
+        }
+        return parent::resolveRouteBinding($value, $field);
+    }
+
+    public function newQuery()
+    {
+        return parent::newQuery()->addSelect(
+            '*',
+            DB::connection($this->getConnectionName())->raw("CONCAT(codc_categ, '-', vig_caano, '-', vig_cames) as id")
+        )->orderByRaw('codc_categ, vig_caano, vig_cames');
+    }
+    public static function diagnosticarConexion()
+    {
+        $query = static::query();
+        dd([
+            'conexión' => $query->getConnection()->getName(),
+            'sql' => $query->toSql(),
+            'registros' => $query->count(),
+            'primer_registro' => $query->first()
+        ]);
     }
 }
