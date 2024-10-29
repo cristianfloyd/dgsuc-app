@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Filament\Components;
+namespace App\View\Filament\Components;
 
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Filament\Support\Components\ViewComponent;
 use Filament\Support\Concerns\HasExtraAttributes;
 
