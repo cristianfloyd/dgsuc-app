@@ -18,6 +18,7 @@
         "maatwebsite/excel": "^3.1",
         "reedware/laravel-composite-relations": "^4.0",
         "robsontenorio/mary": "^1.32",
+        "spatie/data-transfer-object": "^3.9",
         "spatie/laravel-data": "^4.11"
     },
     "require-dev": {
