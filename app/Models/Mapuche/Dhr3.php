@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Mapuche;
 
 use App\Models\Dh12;
+use App\Traits\HasCompositePrimaryKey;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,7 +76,8 @@ class Dhr3 extends Model
      */
     public function liquidacionLegajo(): BelongsTo
     {
-        return $this->belongsTo(Dhr2::class, ['nro_liqui', 'nro_legaj', 'nro_cargo'],
-            ['nro_liqui', 'nro_legaj', 'nro_cargo']);
+        return $this->belongsTo(Dhr2::class, 'nro_liqui', 'nro_liqui')
+            ->where('nro_leagj', $this->nro_legaj)
+            ->where('nro_cargo', $this->nro_cargo);
     }
 }

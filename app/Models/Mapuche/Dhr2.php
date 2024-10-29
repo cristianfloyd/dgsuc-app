@@ -76,17 +76,4 @@ class Dhr2 extends Model
     {
         return $query->where('nro_legaj', $legajo);
     }
-
-    /**
-     * Convierte el modelo a un DTO
-     */
-    public function toDTO(): Dhr2Data
-    {
-        return new Dhr2Data(
-            nro_liqui: $this->nro_liqui,
-            nro_legaj: $this->nro_legaj,
-            nro_cargo: $this->nro_cargo,
-            nro_docum: $this->nro_docum,
-        );
-    }
 }
