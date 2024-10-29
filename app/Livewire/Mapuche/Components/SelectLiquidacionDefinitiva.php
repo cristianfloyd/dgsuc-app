@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Mapuche\Components;
+namespace App\Livewire\Mapuche\Components;
 
 use Livewire\Component;
 use App\Services\Mapuche\Dh22Service;

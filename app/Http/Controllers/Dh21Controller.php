@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\dh21;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class dh21Controller extends Controller
+class Dh21Controller extends Controller
 {
     public function index()
     {
