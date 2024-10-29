@@ -132,9 +132,9 @@ class Dh13 extends Model
         return parent::newQuery()->addSelect(
             '*',
             DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
-        );
-        // ->orderBy('nro_orden_formula')
-        // ->orderBy('codn_conce');
+        )
+        ->orderBy('nro_orden_formula')
+        ->orderBy('codn_conce');
     }
 
     /**
@@ -146,7 +146,7 @@ class Dh13 extends Model
      */
     public function find($id, $columns = ['*'])
     {
-        list($codn_conce, $nro_orden_formula) = explode('-', $id);
+        [$codn_conce, $nro_orden_formula] = explode('-', $id);
         return $this->where('codn_conce', $codn_conce)
             ->where('nro_orden_formula', $nro_orden_formula)
             ->first($columns);
