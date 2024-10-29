@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Filament\Components;
+namespace App\View\Components\Filament;
 
 use Illuminate\Contracts\View\View;
 use Filament\Support\Components\ViewComponent;

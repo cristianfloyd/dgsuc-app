@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Mapuche;
+namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dhe4;

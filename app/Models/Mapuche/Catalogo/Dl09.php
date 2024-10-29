@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Mapuche\Dh05;
 use App\Traits\MapucheConnectionTrait;
