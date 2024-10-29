@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Contractsgi;
 
 use App\Models\Dh19;
 use Illuminate\Database\Eloquent\Collection;
