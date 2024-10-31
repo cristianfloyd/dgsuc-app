@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Livewire\Livewire;
+use App\Models\Mapuche\Dhr2;
 use App\Services\WorkflowService;
 use App\Listeners\JobFailedListener;
 use App\Repositories\Dhr2Repository;
@@ -38,7 +39,9 @@ class AppServiceProvider extends ServiceProvider
             JobProcessedListener::class
         );
 
-        $this->app->bind(Dhr2RepositoryInterface::class, Dhr2Repository::class);
+        $this->app->bind(Dhr2RepositoryInterface::class, function ($app) {
+            return new Dhr2Repository($app->make(Dhr2::class));
+        });
     }
 
     /**

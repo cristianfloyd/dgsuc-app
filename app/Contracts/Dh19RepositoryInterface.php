@@ -2,7 +2,7 @@
 
 namespace App\Contracts;
 
-use App\Models\Dh19;
+use App\Models\Mapuche\Dh19;
 use Illuminate\Database\Eloquent\Collection;
 
 interface Dh19RepositoryInterface

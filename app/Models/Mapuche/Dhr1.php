@@ -6,6 +6,9 @@ namespace App\Models\Mapuche;
 
 use App\Models\Mapuche\Dh22;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -22,17 +25,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int|null $per_anoap Año del período de aporte
  * @property int|null $per_mesap Mes del período de aporte
  * @property string|null $desc_lugap Descripción lugar de aporte
- * @property resource|null $plantilla Plantilla en formato binario
+ * @property string|null $plantilla UUID de la plantilla
  */
 class Dhr1 extends Model
 {
     /** @use HasFactory<\Database\Factories\Mapuche\Dhr1Factory> */
     use HasFactory;
+    use HasUuids;
 
     /**
      * Conexión a la base de datos
      */
-    protected $connection = 'pgsql';
+    protected $connection = 'pgsql-mapuche';
 
     /**
      * Esquema y tabla específicos
@@ -77,7 +81,7 @@ class Dhr1 extends Model
         'per_anoap' => 'integer',
         'per_mesap' => 'integer',
         'desc_lugap' => 'string',
-        'plantilla' => 'binary'
+        'plantilla' => AsStringable::class,
     ];
 
     /**
@@ -86,5 +90,18 @@ class Dhr1 extends Model
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
+    }
+
+    protected function plantilla(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? (string) $value : null,
+            set: fn ($value) => $value ? (string) $value : null
+        );
+    }
+
+    public function uniqueIds(): array
+    {
+        return ['plantilla'];
     }
 }

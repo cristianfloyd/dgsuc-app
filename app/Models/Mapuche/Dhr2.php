@@ -2,8 +2,8 @@
 
 namespace App\Models\Mapuche;
 
-use App\Data\DataObjects\Dhr2Data;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -49,6 +49,7 @@ class Dhr2 extends Model
         'nro_liqui' => 'integer',
         'nro_legaj' => 'integer',
         'nro_cargo' => 'integer',
+        'desc_apyno' => 'string',
         'nro_docum' => 'integer',
         'nro_cuil1' => 'integer',
         'nro_cuil' => 'integer',
@@ -64,7 +65,7 @@ class Dhr2 extends Model
     /**
      * Relación con la liquidación principal
      */
-    public function liquidacion()
+    public function liquidacion(): BelongsTo
     {
         return $this->belongsTo(Dhr1::class, 'nro_liqui', 'nro_liqui');
     }
@@ -72,8 +73,16 @@ class Dhr2 extends Model
     /**
      * Scope para filtrar por legajo
      */
-    public function scopePorLegajo($query, $legajo)
+    public function scopePorLegajo($query, $legajo): mixed
     {
         return $query->where('nro_legaj', $legajo);
+    }
+
+    /**
+     * Mutados para desc_apyno en mayusculas
+     */
+    public function getDescApynoAttribute($value)
+    {
+        return mb_strtoupper($value);
     }
 }
