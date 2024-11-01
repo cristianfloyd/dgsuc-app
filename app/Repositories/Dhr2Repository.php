@@ -2,19 +2,19 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\Dhr2RepositoryInterface;
+use App\Data\DataObjects\Dhr2Data;
 use App\Models\Mapuche\Dhr1;
 use App\Models\Mapuche\Dhr2;
-use App\Data\DataObjects\Dhr2Data;
-use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Contracts\Repositories\Dhr2RepositoryInterface;
+use Illuminate\Support\Collection;
 
 class Dhr2Repository implements Dhr2RepositoryInterface
 {
     /**
      * Create a new class instance.
      */
-    public function __construct(private Dhr2 $model ){}
+    public function __construct(protected Dhr2 $model ){}
 
     public function findByPrimaryKey(int $nro_liqui, int $nro_legaj, int $nro_cargo): ?Dhr2Data
     {
@@ -34,11 +34,6 @@ class Dhr2Repository implements Dhr2RepositoryInterface
             ->map(fn($record) => Dhr2Data::from($record));
     }
 
-    public function validateLiquidacionExists(int $nro_liqui): bool
-    {
-        return Dhr1::where('nro_liqui', $nro_liqui)->exists();
-    }
-
     /**
      * @inheritDoc
      */
@@ -50,6 +45,11 @@ class Dhr2Repository implements Dhr2RepositoryInterface
 
         $record = $this->model->create($data->toArray());
         return Dhr2Data::from($record);
+    }
+
+    public function validateLiquidacionExists(int $nro_liqui): bool
+    {
+        return Dhr1::where('nro_liqui', $nro_liqui)->exists();
     }
 
     /**
