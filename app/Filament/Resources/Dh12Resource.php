@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\Dh12Resource\Pages;
-use App\Filament\Resources\Dh12Resource\RelationManagers;
-use App\Models\Dh12;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Dh12;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Dh12Resource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\Dh12Resource\RelationManagers;
 
 class Dh12Resource extends Resource
 {
@@ -98,78 +98,63 @@ class Dh12Resource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('codn_conce')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('vig_coano')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('vig_coano')->label('Vig. año')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('vig_comes')
+                Tables\Columns\TextColumn::make('vig_comes')->label('Vig. mes')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('desc_conce')
+                Tables\Columns\TextColumn::make('desc_conce')->label('Descripción')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('desc_corta')
+                Tables\Columns\TextColumn::make('desc_corta')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('tipo_conce')
+                Tables\Columns\TextColumn::make('tipo_conce')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('codc_vige1')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('codc_vige1')->toggleable()->toggledHiddenByDefault(),
                 Tables\Columns\TextColumn::make('desc_nove1')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('tipo_nove1')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('cant_ente1')
+                Tables\Columns\TextColumn::make('tipo_nove1')->toggleable()->toggledHiddenByDefault(),
+                Tables\Columns\TextColumn::make('cant_ente1')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('cant_deci1')->toggleable()->toggledHiddenByDefault()
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cant_deci1')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('codc_vige2')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('desc_nove2')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tipo_nove2')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('cant_ente2')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('cant_deci2')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('flag_acumu')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('flag_grupo')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nro_orcal')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('nro_orimp')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('sino_legaj')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('tipo_distr')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('codc_vige2')->toggleable()->toggledHiddenByDefault(),
+                Tables\Columns\TextColumn::make('desc_nove2')->toggleable(),
+                Tables\Columns\TextColumn::make('tipo_nove2')->toggleable()->toggledHiddenByDefault(),
+                Tables\Columns\TextColumn::make('cant_ente2')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('cant_deci2')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('flag_acumu')->toggleable()->toggledHiddenByDefault(),
+                Tables\Columns\TextColumn::make('flag_grupo')->toggleable()->toggledHiddenByDefault(),
+                Tables\Columns\TextColumn::make('nro_orcal')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('nro_orimp')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('sino_legaj'),
+                Tables\Columns\TextColumn::make('tipo_distr')->toggleable()->toggledHiddenByDefault(),
                 Tables\Columns\TextColumn::make('tipo_ganan')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('chk_acumsac')
+                    ->numeric(),
+                Tables\Columns\IconColumn::make('chk_acumsac')->label('SAC')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('chk_acumproy')
+                Tables\Columns\IconColumn::make('chk_acumproy')->toggleable()->toggledHiddenByDefault()
                     ->boolean(),
-                Tables\Columns\IconColumn::make('chk_dcto3')
+                Tables\Columns\IconColumn::make('chk_dcto3')->toggleable()->toggledHiddenByDefault()
                     ->boolean(),
                 Tables\Columns\IconColumn::make('chkacumprhbrprom')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('subcicloliquida')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('subcicloliquida')->toggleable()->toggledHiddenByDefault()
+                    ->numeric(),
                 Tables\Columns\IconColumn::make('chkdifhbrcargoasoc')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('chkptesubconcep')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('chkinfcuotasnovper')
+                Tables\Columns\IconColumn::make('chkinfcuotasnovper')->toggleable()->toggledHiddenByDefault()
                     ->boolean(),
-                Tables\Columns\IconColumn::make('genconimp0')
+                Tables\Columns\IconColumn::make('genconimp0')->toggleable()->toggledHiddenByDefault()
                     ->boolean(),
                 Tables\Columns\TextColumn::make('sino_visible')
                     ->numeric()
