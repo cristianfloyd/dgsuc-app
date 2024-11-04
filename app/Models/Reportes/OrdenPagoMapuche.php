@@ -5,11 +5,12 @@ namespace App\Models\Reportes;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\MapucheDesaConnectionTrait;
+use App\Traits\MapucheLiquiConnectionTrait;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class OrdenPagoMapuche extends Model
 {
-    use MapucheDesaConnectionTrait;
+    use MapucheLiquiConnectionTrait;
 
     protected $repOrdenPagoRepository;
 

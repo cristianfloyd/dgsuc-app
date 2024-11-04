@@ -46,7 +46,7 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'pgsql-mapuche' => [
+        'pgsql-liqui' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
             'host' => env('DB2_HOST', '127.0.0.1'),
@@ -91,7 +91,7 @@ return [
             'search_path' => 'suc',
             'sslmode' => 'prefer',
         ],
-        'pgsql-mapuchito' => [
+        'pgsql-mapuche' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
             'host' => env('DB3_HOST', '127.0.0.1'),
