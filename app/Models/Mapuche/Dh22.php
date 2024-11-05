@@ -97,12 +97,11 @@ class Dh22 extends Model
 
     public static function getLiquidacionesForWidget(): Builder
     {
-
-        return self::select(
-            'nro_liqui',
-            DB::raw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) as periodo_fiscal"),
-            'desc_liqui'
-            )->orderByDesc('nro_liqui');
+        return self::query()
+            ->select('nro_liqui')
+            ->selectRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) as periodo_fiscal")
+            ->addSelect('desc_liqui')
+            ->orderByDesc('nro_liqui');
     }
 
 
