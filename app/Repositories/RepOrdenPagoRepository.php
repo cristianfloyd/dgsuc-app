@@ -53,7 +53,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Obtiene la primera instancia de RepOrdenPagoModel que coincida con el número de liquidación proporcionado.
      *
      * @param int $nroLiqui El número de liquidación a buscar.
-     * @return \App\Models\Mapuche\Reportes\RepOrdenPagoModel|null La primera instancia de RepOrdenPagoModel que coincida con el número de liquidación, o null si no se encuentra ninguna.
+     * @return RepOrdenPagoModel|null La primera instancia de RepOrdenPagoModel que coincida con el número de liquidación, o null si no se encuentra ninguna.
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
     {
@@ -65,7 +65,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Crea una nueva instancia de RepOrdenPagoModel con los datos proporcionados.
      *
      * @param array $data Los datos para crear la nueva instancia.
-     * @return \App\Models\Mapuche\Reportes\RepOrdenPagoModel La nueva instancia creada.
+     * @return RepOrdenPagoModel La nueva instancia creada.
      */
     public function create(array $data): RepOrdenPagoModel
     {

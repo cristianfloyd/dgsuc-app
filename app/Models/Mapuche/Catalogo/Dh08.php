@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models\Mapuche;
+namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
