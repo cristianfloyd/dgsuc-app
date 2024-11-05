@@ -20,13 +20,20 @@ trait MapucheConnectionTrait
     }
 
     /**
-     * Obtiene el nombre de la tabla calificado con el esquema.
+     * Obtiene el nombre de la tabla calificado con el esquema correspondiente.
      *
      * @return string
      */
     public function getTable(): string
     {
         $table = parent::getTable();
+        // Si ya tiene en esquema definido, retornamos tal cual
+        if (str_contains($table, '.')) {
+            return $table;
+        }
+
+        $schema = $this->schema ?? 'mapuche';
+        
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
 }

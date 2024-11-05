@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources\ReporteResource\Pages;
 
-use App\Filament\Resources\ReporteResource;
-use App\Filament\Widgets\MultipleIdLiquiSelector;
-use App\Services\RepOrdenPagoService;
+use Livewire\Attributes\On;
 use Filament\Actions\Action;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Services\RepOrdenPagoService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use App\Filament\Resources\ReporteResource;
+use App\Filament\Widgets\MultipleIdLiquiSelector;
 
 class ListReportes extends ListRecords
 {
@@ -96,8 +96,8 @@ class ListReportes extends ListRecords
         }
 
         try {
-            DB::connection('pgsql-mapuche')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
-            Notification::make()->title('Reporte generado')->success()->send();
+            DB::connection('pgsql-mapuchito')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
+            // Notification::make()->title('Reporte generado')->success()->send();
             $this->reporteGenerado = true;
             return true;
         } catch (\Exception $e) {

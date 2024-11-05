@@ -10,11 +10,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RepOrdenPagoModel extends Model
 {
     use MapucheConnectionTrait;
-    
+
     /**
      * Indica que el modelo RepOrdenPago tiene campos de fecha de creación y actualización.
      */
     public $timestamps = true;
+
+    protected $schema = 'suc';
+
     /**
      * Tabla de la base de datos utilizada por el modelo RepOrdenPago.
      */
