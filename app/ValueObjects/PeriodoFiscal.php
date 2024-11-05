@@ -2,15 +2,17 @@
 
 namespace App\ValueObjects;
 
-class PeriodoFiscal
+readonly class PeriodoFiscal
 {
     /**
      * Create a new class instance.
      */
     public function __construct(
-        private readonly int $anio,
-        private readonly int $mes,
-    ){}
+        private int $anio,
+        private int $mes,
+    )
+    {
+    }
 
     public function anio(): int
     {
