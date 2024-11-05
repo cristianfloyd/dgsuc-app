@@ -3,17 +3,18 @@
 namespace App\Models\Reportes;
 
 use App\Models\Mapuche\Catalogo\Dh30;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepOrdenPagoModel extends Model
 {
-
+    use MapucheConnectionTrait;
+    
     /**
      * Indica que el modelo RepOrdenPago tiene campos de fecha de creación y actualización.
      */
     public $timestamps = true;
-    protected $connection = 'pgsql-mapuche';
     /**
      * Tabla de la base de datos utilizada por el modelo RepOrdenPago.
      */

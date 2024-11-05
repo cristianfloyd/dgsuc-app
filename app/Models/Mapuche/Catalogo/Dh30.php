@@ -3,9 +3,8 @@
 namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh03;
-use App\Models\Dh19;
-use App\Models\Mapuche\Dhe2;
-use App\Models\Mapuche\Catalogo\Dh08;
+use App\Models\Mapuche\Dh08;
+use App\Models\Mapuche\Dh19;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
