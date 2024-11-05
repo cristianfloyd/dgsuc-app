@@ -50,7 +50,6 @@ class OrdenPagoReporte extends Component implements Htmlable
         // Asegurar que $data sea una colección
         if (!$data instanceof \Illuminate\Support\Collection) {
             $data = collect($data);
-            dd($data);
         }
 
         $this->reportData = $this->convertToBaseCollection(
