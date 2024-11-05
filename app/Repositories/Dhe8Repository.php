@@ -69,4 +69,3 @@ class Dhe8Repository
         return $dhe8 ? $dhe8->delete() : false;
     }
 }
-

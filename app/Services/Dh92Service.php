@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Repositories\Dh92Repository;
-use Illuminate\Support\Facades\DB;
+use App\Contracts\Dh92Repository;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class Dh92Service
 {
@@ -64,4 +64,3 @@ class Dh92Service
         }
     }
 }
-

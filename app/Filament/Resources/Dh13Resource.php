@@ -2,20 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
+use App\Models\Dh12;
 use App\Models\Dh13;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use App\Services\EncodingService;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Resources\Dh13Resource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\Dh13Resource\RelationManagers;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class Dh13Resource extends Resource
 {
@@ -33,28 +36,28 @@ class Dh13Resource extends Resource
         return $form
             ->schema([
                 Section::make('Detalles del Concepto')
-                ->schema([
-                    Grid::make(3)
-                        ->schema([
-                            TextInput::make('codn_conce')
-                                ->label('Código de Concepto')
-                                ->required(),
-                            TextInput::make('nro_orden_formula')
-                                ->label('Número de Orden Fórmula')
-                                ->required(),
-                            TextInput::make('desc_calcu')
-                                ->label('Descripción de Cálculo')
-                                ->required(),
-                        ]),
-                ]),
-            Section::make('Descripción de la Condición')
-                ->schema([
-                    Textarea::make('desc_condi')
-                        ->label('Descripción de la Condición')
-                        ->rows(5)
-                        ->maxLength(1000)
-                        ->columnSpanFull(),
-                ]),
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('codn_conce')
+                                    ->label('Código de Concepto')
+                                    ->required(),
+                                TextInput::make('nro_orden_formula')
+                                    ->label('Número de Orden Fórmula')
+                                    ->required(),
+                                TextInput::make('desc_calcu')
+                                    ->label('Descripción de Cálculo')
+                                    ->required(),
+                            ]),
+                    ]),
+                Section::make('Descripción de la Condición')
+                    ->schema([
+                        Textarea::make('desc_condi')
+                            ->label('Descripción de la Condición')
+                            ->rows(5)
+                            ->maxLength(1000)
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -62,10 +65,25 @@ class Dh13Resource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('codn_conce')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('nro_orden_formula')->sortable(),
-                Tables\Columns\TextColumn::make('desc_calcu')->searchable(),
-                Tables\Columns\TextColumn::make('desc_condi')->searchable(),
+                TextColumn::make('codn_conce')->sortable()->searchable(),
+                TextColumn::make('dh12.desc_conce')
+                    ->label('Concepto')
+                    ->formatStateUsing(fn($state) => EncodingService::toUtf8($state))
+                    ->searchable()
+                    ->wrap(),
+                TextColumn::make('nro_orden_formula')->label('Orden')->sortable(),
+                TextColumn::make('desc_calcu')
+                    ->label('Cálculo')
+                    ->searchable()
+                    ->limit(30)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = mb_convert_encoding($column->getState(), 'ISO-8859-1', 'UTF-8');
+                        if (strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+                        return $state;
+                    }),
+                TextColumn::make('desc_condi')->searchable(),
             ])
             ->filters([
                 //

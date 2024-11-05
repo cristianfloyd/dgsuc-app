@@ -2,22 +2,21 @@
 
 namespace App\Services;
 
+use App\Contracts\Dh19RepositoryInterface;
 use App\Models\Dh19;
-use App\Repositories\Dh19RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh19Service
 {
-    protected $repository;
+
 
     /**
      * Constructor del servicio Dh19.
      *
      * @param Dh19RepositoryInterface $repository
      */
-    public function __construct(Dh19RepositoryInterface $repository)
+    public function __construct(protected Dh19RepositoryInterface $repository)
     {
-        $this->repository = $repository;
     }
 
     /**
@@ -81,4 +80,3 @@ class Dh19Service
         return $this->repository->delete($dh19);
     }
 }
-

@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\Dh61Repository;
 use App\Repositories\Dh11RepositoryInterface;
+use App\Repositories\Dh61Repository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class Dh11RestoreService
 {
-    protected $dh61Repository;
-    protected $dh11Repository;
 
     /**
      * Constructor del servicio.
@@ -18,10 +16,9 @@ class Dh11RestoreService
      * @param Dh61Repository $dh61Repository
      * @param Dh11RepositoryInterface $dh11Repository
      */
-    public function __construct(Dh61Repository $dh61Repository, Dh11RepositoryInterface $dh11Repository)
+    public function __construct(protected Dh61Repository          $dh61Repository,
+                                protected Dh11RepositoryInterface $dh11Repository)
     {
-        $this->dh61Repository = $dh61Repository;
-        $this->dh11Repository = $dh11Repository;
     }
 
 

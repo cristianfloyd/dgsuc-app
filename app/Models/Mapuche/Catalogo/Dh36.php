@@ -25,12 +25,11 @@ class Dh36 extends Model
 {
     use MapucheConnectionTrait;
 
+    public $incrementing = false;
+    public $timestamps = false;
     protected $table = 'dh36';
     protected $primaryKey = 'coddependesemp';
-    public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false;
-
     protected $fillable = [
         'coddependesemp',
         'cordinadorcontrato',

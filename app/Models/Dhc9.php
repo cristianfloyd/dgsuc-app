@@ -41,4 +41,3 @@ class Dhc9 extends Model
         return $this->hasMany(Dh03::class, 'codc_agrup', 'codagrup');
     }
 }
-

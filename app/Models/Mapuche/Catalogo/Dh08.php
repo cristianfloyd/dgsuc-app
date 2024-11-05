@@ -3,10 +3,10 @@
 namespace App\Models\Mapuche;
 
 use App\Models\Dh01;
-use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
 /**
@@ -20,18 +20,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $codc_nacio
  * @property bool $nacio_principal
  *
- * @property-read \App\Models\Mapuche\Catalogo\Dh30 $dh30
- * @property-read \App\Models\Dh01 $dh01
+ * @property-read Dh30 $dh30
+ * @property-read Dh01 $dh01
  */
 class Dh08 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'dh08';
     public $timestamps = false;
-    protected $primaryKey = ['nro_legaj', 'codc_nacio'];
     public $incrementing = false;
-
+    protected $table = 'dh08';
+    protected $primaryKey = ['nro_legaj', 'codc_nacio'];
     protected $fillable = [
         'nro_legaj',
         'nro_tab03',
@@ -46,32 +45,31 @@ class Dh08 extends Model
         'nacio_principal' => 'boolean',
     ];
 
-    public function getKeyName()
+    public function getKeyName(): array
     {
         return ['nro_legaj', 'codc_nacio'];
     }
 
-    public function getIncrementing()
+    public function getIncrementing(): false
     {
         return false;
     }
-
-    protected function setKeysForSaveQuery($query)
-    {
-        return $query->where('nro_legaj', $this->getAttribute('nro_legaj'))
-                     ->where('codc_nacio', $this->getAttribute('codc_nacio'));
-    }
-
 
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
-    public function dh30()
+    public function dh30(): HasOne
     {
         // return $this->belongsTo(Dh30::class, ['nro_tab03', 'codc_nacio'], ['nro_tabla', 'desc_abrev']);
         return $this->hasOne(Dh30::class, 'nro_tabla', 'nro_tab03')
                     ->where('desc_abrev', $this->codc_nacio);
+    }
+
+    protected function setKeysForSaveQuery($query)
+    {
+        return $query->where('nro_legaj', $this->getAttribute('nro_legaj'))
+                     ->where('codc_nacio', $this->getAttribute('codc_nacio'));
     }
 }

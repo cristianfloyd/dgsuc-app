@@ -22,7 +22,7 @@ class RelacionesActivasTable extends Component
     public $sortDir = 'DESC';
     #[Url(history: true)]
 
-    
+
     #[On('datos-importados')]
     public function updateTable()
     {

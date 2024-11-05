@@ -3,10 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\AfipMapucheSicoss;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Contracts\CuilRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 class CuilRepository implements CuilRepositoryInterface
 {
@@ -15,7 +15,7 @@ class CuilRepository implements CuilRepositoryInterface
      *
      * @param int $perPage Número de resultados por página (opcional, por defecto 10)
      *  Paginador de los CUIL que no se encuentran en la tabla afip_mapuche_mi_simplificacion
-     * 
+     *
      */
     public function getCuilsNotInAfip($perPage = 10): Collection
     {

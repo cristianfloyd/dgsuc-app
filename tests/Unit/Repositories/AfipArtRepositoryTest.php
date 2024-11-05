@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Contracts\AfipArtRepository;
 use App\Models\AfipArt;
-use App\Repositories\AfipArtRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,12 +12,6 @@ class AfipArtRepositoryTest extends TestCase
     use RefreshDatabase;
 
     protected $afipArtRepository;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->afipArtRepository = new AfipArtRepository();
-    }
 
     /** @test */
     public function it_can_get_all_afip_art()
@@ -84,5 +78,11 @@ class AfipArtRepositoryTest extends TestCase
 
         $this->assertTrue($deleted);
         $this->assertDatabaseMissing('suc.afip_art', ['cuil_original' => $afipArt->cuil_original]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->afipArtRepository = new AfipArtRepository();
     }
 }

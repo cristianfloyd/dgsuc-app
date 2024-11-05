@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Contracts\RetTablaBasicosConcespRepository;
 use App\Exceptions\RegistroNoEncontradoException;
-use App\Repositories\RetTablaBasicosConcespRepository;
 
 class RetTablaBasicosConcespService
 {

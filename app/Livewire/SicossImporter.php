@@ -2,18 +2,19 @@
 
 namespace App\Livewire;
 
+use App\Contracts\FileProcessorInterface;
+use App\Contracts\TableManagementServiceInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\ImportService;
-use Livewire\Component;
-use Illuminate\View\View;
 use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use app\Services\DatabaseService;
-use Illuminate\Support\Facades\Log;
 use App\Services\SicossImportService;
-use App\Contracts\FileProcessorInterface;
-use App\Contracts\WorkflowServiceInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use App\Contracts\TableManagementServiceInterface;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Livewire\Component;
 
 /**
  * Componente Livewire que maneja la importación de archivos AFIP SICOSS y el flujo de trabajo correspondiente.
@@ -21,8 +22,8 @@ use App\Contracts\TableManagementServiceInterface;
 class SicossImporter extends Component
 {
     // Constantes de clase
-    private const string STEP_IMPORT_ARCHIVO = 'import_archivo_mapuche';
-    private const string TABLE_NAME = 'suc.afip_mapuche_sicoss';
+    private const  STEP_IMPORT_ARCHIVO = 'import_archivo_mapuche';
+    private const  TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
 
 
@@ -40,13 +41,12 @@ class SicossImporter extends Component
     protected ?int $periodoFiscal = null;
 
     // Servicios inyectados
-    private readonly ImportService $importService;
+    protected readonly ImportService $importService;
+    protected SicossImportService $sicossImporterService;
     private readonly WorkflowServiceInterface $workflowService;
     private readonly FileProcessorInterface $fileProcessor;
     private readonly TableManagementServiceInterface $tableManagementService;
     private readonly DatabaseService $databaseService;
-    private SicossImportService $sicossImporterService;
-
 
     public function boot(
         ImportService $importService,
@@ -55,7 +55,8 @@ class SicossImporter extends Component
         TableManagementServiceInterface $tableManagementService,
         DatabaseService $databaseService,
         SicossImportService $sicossImporterService,
-    ) {
+    ): void
+    {
         $this->importService = $importService;
         $this->workflowService = $workflowService;
         $this->fileProcessor = $fileProcessor;
@@ -65,13 +66,6 @@ class SicossImporter extends Component
         $this->checkCurrentStep();
     }
 
-
-    public function mount()
-    {
-        $this->listadoArchivos = UploadedFile::all();
-    }
-
-
     /**
      * Verifica el paso actual del flujo de trabajo y actualiza las propiedades correspondientes.
      */
@@ -79,8 +73,13 @@ class SicossImporter extends Component
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->showUploadForm = in_array($currentStep, [self::STEP_IMPORT_ARCHIVO]);
+        $this->showUploadForm = $currentStep == self::STEP_IMPORT_ARCHIVO;
         $this->nextstepUrl = $this->workflowService->getStepUrl($currentStep);
+    }
+
+    public function mount(): void
+    {
+        $this->listadoArchivos = UploadedFile::all();
     }
 
     public function importar(int $archivoId = null): void
@@ -134,25 +133,9 @@ class SicossImporter extends Component
             } else {
                 $this->dispatch('error', 'Hubo un problema durante la importación.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->dispatch('error', 'Error al procesar el archivo: ' . $e->getMessage());
         }
-    }
-
-
-
-    public function seleccionarArchivo()
-    {
-        $this->selectedArchivo = $this->getArchivoById($this->selectedArchivoID);
-        $this->filename = $this->selectedArchivo->filename;
-        $this->periodoFiscal = $this->selectedArchivo->periodo_fiscal;
-        $this->filepath = $this->selectedArchivo->filepath;
-        $this->absolutePath = $this->selectedArchivo->absolute_path;
-    }
-
-    private function getArchivoById(int $archivoId): UploadedFile
-    {
-        return UploadedFile::find($archivoId);
     }
 
     private function verifyAndPrepareTable($tableName): void
@@ -166,12 +149,19 @@ class SicossImporter extends Component
 
     }
 
-    private function getColumnWidths(): array
+    public function seleccionarArchivo(): void
     {
-        $data = new ColumnMetadata;
-        return $data->getWidths();
+        $this->selectedArchivo = $this->getArchivoById($this->selectedArchivoID);
+        $this->filename = $this->selectedArchivo->filename;
+        $this->periodoFiscal = $this->selectedArchivo->periodo_fiscal;
+        $this->filepath = $this->selectedArchivo->filepath;
+        $this->absolutePath = $this->selectedArchivo->absolute_path;
     }
 
+    private function getArchivoById(int $archivoId): UploadedFile
+    {
+        return UploadedFile::find($archivoId);
+    }
 
     public function render(): View
     {
@@ -187,11 +177,18 @@ class SicossImporter extends Component
     /**
      * Set the value of selectedArchivo
      *
+     * @param $selectedArchivo
      * @return  self
      */
-    public function setSelectedArchivo($selectedArchivo)
+    public function setSelectedArchivo($selectedArchivo): static
     {
         $this->selectedArchivo = $selectedArchivo;
         return $this;
+    }
+
+    private function getColumnWidths(): array
+    {
+        $data = new ColumnMetadata;
+        return $data->getWidths();
     }
 }

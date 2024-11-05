@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\TableVerificationService;
 use Illuminate\Support\ServiceProvider;
+use App\Services\TableVerificationService;
 
 class TableVerificationServiceProvider extends ServiceProvider
 {

@@ -2,13 +2,11 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use App\Models\Mapuche\Dhe2;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Modelo Eloquent para la tabla 'mapuche.dhe4' que representa un organismo dentro del sistema Mapuche.
@@ -20,11 +18,10 @@ class Dhe4 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'dhe4';
-    protected $primaryKey = 'cod_organismo';
     public $incrementing = false;
     public $timestamps = false;
-
+    protected $table = 'dhe4';
+    protected $primaryKey = 'cod_organismo';
     protected $fillable = [
         'cod_organismo',
         'descripcion',
@@ -71,7 +68,7 @@ class Dhe4 extends Model
     /**
      * Relación de uno a muchos entre el modelo Dhe4 y el modelo Dhe2, donde cada Dhe4 puede tener múltiples Dhe2.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function dhe2(): HasMany
     {
@@ -81,7 +78,7 @@ class Dhe4 extends Model
     /**
      * Relación de muchos a muchos entre el modelo Dhe4 y el modelo Dh30 a través de la tabla pivote dhe2.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function dh30Items(): BelongsToMany
     {

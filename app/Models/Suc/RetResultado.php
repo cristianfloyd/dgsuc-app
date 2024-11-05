@@ -2,7 +2,7 @@
 
 namespace App\Models\Suc;
 
-use App\ValueObjects\Periodo;
+use App\ValueObjetcs\Periodo;
 use App\ValueObjects\TipoRetro;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -73,7 +73,7 @@ class RetResultado extends Model
     }
 
     /**
-     * Get the periodo as a Periodo value object.
+     * Obtiene el periodo como un ValueObject Periodo.
      *
      * @return Periodo
      */
@@ -83,7 +83,7 @@ class RetResultado extends Model
     }
 
     /**
-     * Set the periodo from a Periodo value object.
+     * Establece el periodo desde un ValueObject Periodo.
      *
      * @param Periodo $periodo
      */
@@ -93,7 +93,7 @@ class RetResultado extends Model
     }
 
     /**
-     * Get the tipo_retro as a TipoRetro value object.
+     * Obtiene el tipo_retro como un ValueObject TipoRetro.
      *
      * @return TipoRetro
      */
@@ -103,7 +103,7 @@ class RetResultado extends Model
     }
 
     /**
-     * Set the tipo_retro from a TipoRetro value object.
+     * Establece el tipo_retro desde un ValueObject TipoRetro.
      *
      * @param TipoRetro $tipoRetro
      */

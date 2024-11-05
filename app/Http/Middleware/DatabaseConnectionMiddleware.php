@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
 class DatabaseConnectionMiddleware
@@ -15,6 +17,10 @@ class DatabaseConnectionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($connection = Session::get('database_connection')) {
+            Config::set('database.default', $connection);
+        }
+
         return $next($request);
     }
 }

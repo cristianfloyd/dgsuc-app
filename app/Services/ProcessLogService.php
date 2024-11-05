@@ -117,7 +117,7 @@ class ProcessLogService
     /**
      * Devuelve el último registro de ProcessLog.
      *
-     * @return \App\Models\ProcessLog|null El último registro de ProcessLog, o nulo si no existe ninguno.
+     * @return \App\Models\Mapuche\ProcessLog|null El último registro de ProcessLog, o nulo si no existe ninguno.
      */
     public function getLatestProcess(): ?ProcessLog
     {

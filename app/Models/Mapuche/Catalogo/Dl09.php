@@ -12,19 +12,19 @@ class Dl09 extends Model
     use MapucheConnectionTrait;
 
     // Especificar la tabla asociada al modelo
-    protected $table = 'dl09';
-
-    // Especificar la clave primaria
-    protected $primaryKey = 'nombre_tipo_norma';
-
-    // Indicar que la clave primaria no es auto-incremental
     public $incrementing = false;
 
+    // Especificar la clave primaria
+    public $timestamps = false;
+
+    // Indicar que la clave primaria no es auto-incremental
+    protected $table = 'dl09';
+
     // Indicar que la clave primaria es de tipo string
-    protected $keyType = 'string';
+    protected $primaryKey = 'nombre_tipo_norma';
 
     // Deshabilitar timestamps si no existen en la tabla
-    public $timestamps = false;
+    protected $keyType = 'string';
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [

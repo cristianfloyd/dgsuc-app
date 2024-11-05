@@ -2,13 +2,15 @@
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
 use App\Models\EstadoLiquidacionModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh22
@@ -66,15 +68,23 @@ class Dh22 extends Model
         'sino_aguin' => 'boolean',
         'sino_reten' => 'boolean',
         'sino_genimp' => 'boolean',
+        'per_liano' => 'integer',
+        'per_limes' => 'integer',
     ];
-    private mixed $per_liano;
-    private mixed $per_limes;
 
 
-    public function getPeriodoFiscalAttribute(): string
-    {
-        return $this->per_liano . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT);
-    }
+
+    /** Obtiene el período fiscal como una cadena de texto en el formato "AAAAMM".
+    *
+    * Este método de acceso (accessor) se utiliza para generar una representación
+    * de cadena del período fiscal a partir de los atributos `per_liano` y `per_limes`
+    * del modelo. El formato resultante es "AAAAMM", donde "AAAA" representa el año
+    * y "MM" representa el mes con un relleno de cero a la izquierda si es necesario.
+    */
+    // public function getPeriodoFiscalAttribute(): string
+    // {
+    //     return $this->per_liano . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT);
+    // }
 
 
     /**
@@ -87,10 +97,12 @@ class Dh22 extends Model
 
     public static function getLiquidacionesForWidget(): Builder
     {
-        return self::select('nro_liqui',
+
+        return self::select(
+            'nro_liqui',
             DB::raw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) as periodo_fiscal"),
-            'desc_liqui')
-            ->orderByDesc('nro_liqui');
+            'desc_liqui'
+            )->orderByDesc('nro_liqui');
     }
 
 
@@ -180,5 +192,29 @@ class Dh22 extends Model
             ->orderBy('periodo_fiscal', 'desc')
             ->pluck('periodo', 'periodo_fiscal')
             ->toArray();
+    }
+
+    /**
+    * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
+    **/
+    protected function periodoFiscal(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => new PeriodoFiscal(
+                año: $attributes['per_liano'],
+                mes: $attributes['per_limes']
+            )
+        );
+    }
+
+    protected function periodo(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
+            set: fn(string $value) => [
+                'per_liano' => substr($value, 0, 4),
+                'per_limes' => substr($value, 4, 2),
+            ]
+        );
     }
 }

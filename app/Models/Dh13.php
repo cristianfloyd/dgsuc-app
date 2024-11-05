@@ -3,15 +3,33 @@
 namespace App\Models;
 
 use App\Models\Dh12;
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\MapucheLiquiConnectionTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Modelo para la tabla mapuche.dh13
+ *
+ * @property int $codn_conce
+ * @property string|null $desc_calcu
+ * @property int $nro_orden_formula
+ * @property string|null $desc_condi
+ *
+ * @property-read Dh12 $conceptoBase
+ */
 class Dh13 extends Model
 {
     use MapucheConnectionTrait;
+    // use MapucheLiquiConnectionTrait;
+
+    // protected $connection = 'pgsql-mapuchito';
+
     /**
      * La tabla asociada con el modelo.
      *
@@ -53,6 +71,57 @@ class Dh13 extends Model
     ];
 
     /**
+     * Casting de atributos
+     */
+    protected $casts = [
+        'codn_conce' => 'integer',
+        'nro_orden_formula' => 'integer',
+        'desc_calcu' => 'string',
+        'desc_condi' => 'string'
+    ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        DB::statement("SET client_encoding TO 'SQL_ASCII'");
+
+        static::retrieved(function ($model) {
+            if (isset($model->attributes['desc_calcu'])) {
+                $model->attributes['desc_calcu'] = EncodingService::toUtf8($model->attributes['desc_calcu']);
+            }
+            if (isset($model->attributes['desc_condi'])) {
+                $model->attributes['desc_condi'] = EncodingService::toUtf8($model->attributes['desc_condi']);
+            }
+        });
+
+        static::saving(function ($model) {
+            if (isset($model->attributes['desc_calcu'])) {
+                $model->attributes['desc_calcu'] = EncodingService::toLatin1($model->attributes['desc_calcu']);
+            }
+            if (isset($model->attributes['desc_condi'])) {
+                $model->attributes['desc_condi'] = EncodingService::toLatin1($model->attributes['desc_condi']);
+            }
+        });
+    }
+
+    protected function descCalcu(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    protected function descCondi(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    /**
      * Obtiene el Dh12 asociado con este Dh13.
      */
     public function dh12(): BelongsTo
@@ -63,7 +132,7 @@ class Dh13 extends Model
     /**
      * Obtiene la clave única para el modelo.
      * Este método devuelve 'id' como nombre de la clave primaria.
-     * Esto es necesario para que Filament pueda trabajar con el modelo.
+     * Esto es necesario para que FilamentPHP pueda trabajar con el modelo.
      * @return string
      */
     public function getKeyName()
@@ -81,6 +150,8 @@ class Dh13 extends Model
         return "{$this->codn_conce}-{$this->nro_orden_formula}";
     }
 
+
+
     /**
      * Establece la clave única para el modelo.
      *
@@ -91,9 +162,6 @@ class Dh13 extends Model
     {
         $this->primaryKey = $key;
     }
-
-
-
     /**
      * Obtiene el valor de la clave única para rutas.
      *
@@ -103,25 +171,23 @@ class Dh13 extends Model
     {
         return 'id';
     }
-
     /**
      * Recupera el modelo por su clave única.
      *
      * @param  mixed  $key
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
+     * @return Model|Collection|static[]|static|null
      */
     public function resolveRouteBinding($key, $field = null)
     {
         if ($field === 'id') {
-            list($codn_conce, $nro_orden_formula) = explode('-', $key);
+            [$codn_conce, $nro_orden_formula] = explode('-', $key);
             return $this->where('codn_conce', $codn_conce)
                 ->where('nro_orden_formula', $nro_orden_formula)
                 ->first();
         }
         return parent::resolveRouteBinding($key, $field);
     }
-
     /**
      * Obtiene una nueva instancia de query para el modelo.
      *
@@ -131,10 +197,10 @@ class Dh13 extends Model
     {
         return parent::newQuery()->addSelect(
             '*',
-            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
+            DB::connection($this->getConnectionName())->raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
         )
-        ->orderBy('nro_orden_formula')
-        ->orderBy('codn_conce');
+        ->orderBy('codn_conce')
+        ->orderBy('nro_orden_formula');
     }
 
     /**
@@ -142,7 +208,7 @@ class Dh13 extends Model
      *
      * @param string $id La clave única compuesta en el formato "codn_conce-nro_orden_formula".
      * @param array $columns Los campos a recuperar (por defecto, todos los campos).
-     * @return \Illuminate\Database\Eloquent\Model|null El modelo encontrado, o null si no se encuentra.
+     * @return Model|null El modelo encontrado, o null si no se encuentra.
      */
     public function find($id, $columns = ['*'])
     {
@@ -150,5 +216,50 @@ class Dh13 extends Model
         return $this->where('codn_conce', $codn_conce)
             ->where('nro_orden_formula', $nro_orden_formula)
             ->first($columns);
+    }
+
+    public function scopeDefaultOrder($query)
+    {
+        return $query->orderBy('codn_conce')->orderBy('nro_orden_formula');
+    }
+
+
+    public static function diagnosticarCodificacionConConcepto($codn_conce = 520)
+    {
+        $connection = DB::connection('pgsql-mapuche');
+        $connection->statement("SET client_encoding TO 'SQL_ASCII'");
+
+        $registro = self::with('dh12')
+            ->where('codn_conce', $codn_conce)
+            ->first();
+
+        dd([
+            'dh13' => [
+                'codn_conce' => $registro->codn_conce,
+                'desc_calcu_raw' => $registro->getAttributes()['desc_calcu'],
+                'desc_calcu_hex' => bin2hex($registro->getAttributes()['desc_calcu']),
+                'desc_condi_raw' => $registro->getAttributes()['desc_condi'],
+                'desc_condi_hex' => bin2hex($registro->getAttributes()['desc_condi'])
+            ],
+            'dh12' => [
+                'desc_conce_raw' => $registro->dh12->getAttributes()['desc_conce'],
+                'desc_conce_utf8' => EncodingService::toUtf8($registro->dh12->getAttributes()['desc_conce']),
+                'desc_conce_hex' => bin2hex($registro->dh12->getAttributes()['desc_conce'])
+            ],
+            'configuracion_db' => [
+                'connection_name' => $connection->getConfig('name'),
+                'client_encoding' => $connection->selectOne("SHOW client_encoding")->client_encoding,
+                'server_encoding' => $connection->selectOne("SHOW server_encoding")->server_encoding,
+                'server_collation' => $connection->selectOne("SHOW lc_collate")->lc_collate,
+                'server_ctype' => $connection->selectOne("SHOW lc_ctype")->lc_ctype,
+            ],
+            'encoding_info' => [
+                'php_internal_encoding' => mb_internal_encoding(),
+                'default_charset' => ini_get('default_charset'),
+                'detected_encodings' => mb_detect_order(),
+                'mbstring_encoding_translation' => ini_get('mbstring.encoding_translation'),
+                'filesystem_encoding' => PHP_OS_FAMILY === 'Windows' ? 'UTF-16LE' : 'UTF-8'
+            ]
+        ]);
     }
 }

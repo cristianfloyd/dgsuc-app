@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use App\Contracts\FileUploadRepositoryInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @method static findOrFail(int|null $param)
+ * @method where(string $string, $id)
+ * @method static find(int $archivoId)
+ */
 class UploadedFile extends Model
 {
     protected $connection = 'pgsql-mapuche';
@@ -19,7 +21,7 @@ class UploadedFile extends Model
         'file_path',
         'user_id',
         'user_name',
-        'process_id', // Nuevo  campo para el ID del proceso
+        'process_id', // Nuevo campo para el ID del proceso
     ];
 
 
@@ -30,9 +32,9 @@ class UploadedFile extends Model
      * and saves it to the database.
      *
      * @param array $data An associative array containing the attributes for the new UploadedFile
-     * @return \App\Models\UploadedFile The newly created UploadedFile instance
+     * @return UploadedFile The newly created UploadedFile instance
      */
-    public static function create(array $data)
+    public static function create(array $data): UploadedFile
     {
         $uploadedFile = new static();
         $uploadedFile->fill($data);
@@ -45,7 +47,8 @@ class UploadedFile extends Model
 	/**
 	 * @return mixed
 	 */
-	public function get() {
+	public function get(): mixed
+    {
 		return $this->table;
 	}
     public function getById($id) {

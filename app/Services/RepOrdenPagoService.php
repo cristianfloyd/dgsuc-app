@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Reportes\RepOrdenPagoModel;
 use App\Repositories\RepOrdenPagoRepository;
 use Illuminate\Database\Eloquent\Collection;
+use App\Models\Reportes\RepOrdenPagoModel;
 
 /**
  * Proporciona una capa de servicio para administrar registros de RepOrdenPago.

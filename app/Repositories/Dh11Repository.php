@@ -3,25 +3,23 @@ namespace App\Repositories;
 
 use App\Models\Dh11;
 use App\Models\Dh61;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException;
-use Illuminate\Database\Eloquent\Collection;
 use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
-    private $periodoFiscalService;
 
-    public function __construct(PeriodoFiscalService $periodoFiscalService)
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model)
     {
-        $this->periodoFiscalService = $periodoFiscalService;
     }
 
 
     /**
      * Actualiza el campo impp_basic de un registro Dh11 con un nuevo valor, y actualiza los campos vig_caano y vig_cames con los valores proporcionados.
      *
-     * @param \App\Models\Dh11 $category El registro Dh11 a actualizar.
+     * @param Dh11 $category El registro Dh11 a actualizar.
      * @param float $percentage El porcentaje de incremento a aplicar al campo impp_basic.
      * @param array|null $periodoFiscal Un array opcional con los valores de año y mes para actualizar los campos vig_caano y vig_cames.
      * @return bool Verdadero si se guardaron los cambios correctamente, falso en caso contrario.
@@ -48,7 +46,7 @@ class Dh11Repository implements Dh11RepositoryInterface
     /**
      * Actualiza el campo impp_basic de un registro Dh11 con un nuevo valor, y actualiza los campos vig_caano y vig_cames con los valores proporcionados.
      *
-     * @param \App\Models\Dh11 $category El registro Dh11 a actualizar.
+     * @param Dh11 $category El registro Dh11 a actualizar.
      * @param array $newImppBasic Un array con el nuevo valor de impp_basic.
      * @param array|null $periodoFiscal Un array opcional con los valores de año y mes para actualizar los campos vig_caano y vig_cames.
      * @return bool Verdadero si se guardaron los cambios correctamente, falso en caso contrario.
@@ -71,7 +69,7 @@ class Dh11Repository implements Dh11RepositoryInterface
      *
      * @param array $attributes Atributos para buscar o crear el registro.
      * @param array $values Valores para actualizar el registro.
-     * @return \App\Models\Dh11 El registro Dh11 actualizado o creado.
+     * @return Dh11 El registro Dh11 actualizado o creado.
      */
     public function updateOrCreate(array $attributes, array $values = []): Dh11
     {
@@ -113,11 +111,16 @@ class Dh11Repository implements Dh11RepositoryInterface
     /**
      * Obtiene todos los registros actuales con un valor de impp_basic mayor a 0.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAllCurrentRecords(): Collection
     {
         return Dh11::all()->where('impp_basic', '>', 0);
+    }
+
+    public function all(): Collection
+    {
+        return $this->model->all();
     }
 
     /**
@@ -128,5 +131,22 @@ class Dh11Repository implements Dh11RepositoryInterface
     public function getAllCodcCateg(): array
     {
         return Dh11::pluck('codc_categ')->toArray();
+    }
+
+    public function find(string $codcCateg): Dh11
+    {
+        // TODO: Implement find() method.
+        return $this->model->findOrFail($codcCateg);
+    }
+
+    public function create(array $data)
+    {
+        // TODO: Implement create() method.
+        return $this->model->create($data);
+    }
+
+    public function delete(string $codcCateg)
+    {
+        // TODO: trow Exception "metodo no implementado"
     }
 }

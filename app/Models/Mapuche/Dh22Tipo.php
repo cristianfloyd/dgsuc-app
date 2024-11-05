@@ -15,33 +15,29 @@ class Dh22Tipo extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Indica el nombre de la tabla asociada al modelo.
-     *
-     * @var string
-     */
-    protected $table = 'dh22_tipos';
-
-    /**
-     * La clave primaria asociada con la tabla.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
      * Indica si el modelo debe ser timestamped.
      *
      * @var bool
      */
     public $timestamps = false;
-
     /**
      * Indica si el ID es auto-incrementable.
      *
      * @var bool
      */
     public $incrementing = false;
-
+    /**
+     * Indica el nombre de la tabla asociada al modelo.
+     *
+     * @var string
+     */
+    protected $table = 'dh22_tipos';
+    /**
+     * La clave primaria asociada con la tabla.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
     /**
      * Los atributos que son asignables en masa.
      *
@@ -61,4 +57,3 @@ class Dh22Tipo extends Model
         return $this->hasMany(Dh22::class, 'id_tipo_liqui', 'id');
     }
 }
-
