@@ -8,13 +8,13 @@ class PeriodoFiscal
      * Create a new class instance.
      */
     public function __construct(
-        private readonly int $año,
+        private readonly int $anio,
         private readonly int $mes,
     ){}
 
-    public function año(): int
+    public function anio(): int
     {
-        return $this->año;
+        return $this->anio;
     }
 
     public function mes(): int
@@ -24,6 +24,6 @@ class PeriodoFiscal
 
     public function toString(): string
     {
-        return $this->año . str_pad($this->mes, 2, '0', STR_PAD_LEFT);
+        return $this->anio . str_pad($this->mes, 2, '0', STR_PAD_LEFT);
     }
 }

@@ -74,19 +74,6 @@ class Dh22 extends Model
 
 
 
-    /** Obtiene el período fiscal como una cadena de texto en el formato "AAAAMM".
-    *
-    * Este método de acceso (accessor) se utiliza para generar una representación
-    * de cadena del período fiscal a partir de los atributos `per_liano` y `per_limes`
-    * del modelo. El formato resultante es "AAAAMM", donde "AAAA" representa el año
-    * y "MM" representa el mes con un relleno de cero a la izquierda si es necesario.
-    */
-    // public function getPeriodoFiscalAttribute(): string
-    // {
-    //     return $this->per_liano . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT);
-    // }
-
-
     /**
      * Obtiene el tipo de liquidación asociado.
      */
@@ -200,7 +187,7 @@ class Dh22 extends Model
     {
         return Attribute::make(
             get: fn (mixed $value, array $attributes) => new PeriodoFiscal(
-                año: $attributes['per_liano'],
+                anio: $attributes['per_liano'],
                 mes: $attributes['per_limes']
             )
         );
