@@ -28,7 +28,6 @@ class Dh13 extends Model
     use MapucheConnectionTrait;
     // use MapucheLiquiConnectionTrait;
 
-    // protected $connection = 'pgsql-mapuchito';
 
     /**
      * La tabla asociada con el modelo.

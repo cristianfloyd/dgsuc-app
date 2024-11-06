@@ -4,8 +4,11 @@ namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh19;
+use App\Services\EncodingService;
+use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -44,6 +47,39 @@ class Dh30 extends Model
         'desc_item' => 'string',
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        // Establecer codificación SQL_ASCII para la conexión
+        DB::statement("SET client_encoding TO 'SQL_ASCII'");
+
+
+        static::retrieved(function ($model) {
+            if(isset($model->desc_abrev)) {
+                $model->desc_abrev = EncodingService::toUtf8($model->desc_abrev);
+            }
+            if(isset($model->desc_item)) {
+                $model->desc_item = EncodingService::toUtf8($model->desc_item);
+            }
+        });
+
+        static::saving(function ($model) {
+            if (isset($model->attributes['desc_abrev'])) {
+                $model->attributes['desc_abrev'] = EncodingService::toLatin1($model->attributes['desc_abrev']);
+            }
+            if (isset($model->attributes['desc_item'])) {
+                $model->attributes['desc_item'] = EncodingService::toLatin1($model->attributes['desc_item']);
+            }
+        });
+    }
+
+    public function scopeWithoutEncoding($query)
+    {
+        return $query->whereRaw("encode(desc_abrev::bytea, 'escape') IS NOT NULL");
+    }
+
+
     public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
@@ -53,6 +89,22 @@ class Dh30 extends Model
     {
         return false;
     }
+
+    public function descAvrev(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    // public function descItem(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn($value) => EncodingService::toUtf8($value),
+    //         set: fn($value) => EncodingService::toLatin1($value)
+    //     );
+    // }
 
     public function dh08(): HasMany
     {

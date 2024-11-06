@@ -34,7 +34,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Obtiene todas las instancias de RepOrdenPagoModel junto con su unidad académica.
      *
      * @param array|int|null $nroLiquis Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
-     * @return \Illuminate\Database\Eloquent\Collection La colección de instancias de RepOrdenPagoModel con su unidad académica.
+     * @return Collection La colección de instancias de RepOrdenPagoModel con su unidad académica.
      */
     public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
     {

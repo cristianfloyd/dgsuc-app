@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ReporteResource\Pages;
-use App\Models\Reportes\RepOrdenPagoModel;
-use Filament\Actions\Action;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
+use Filament\Actions\Action;
+use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Reportes\RepOrdenPagoModel;
+use App\Filament\Resources\ReporteResource\Pages;
+use App\Filament\Resources\ReporteResource\Pages\ListReportes;
 
 class ReporteResource extends Resource
 {
@@ -105,6 +106,7 @@ class ReporteResource extends Resource
     {
         $data = session('idsLiquiSelected', []);
         Log::debug("idsLiquiSelected", ['data' => $data]);
+        
         return $data;
     }
 

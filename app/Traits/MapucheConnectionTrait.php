@@ -16,7 +16,7 @@ trait MapucheConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-mapuchito'; // Esto se refiere al nombre de la conexión en config/database.php
+        return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
     }
 
     /**
@@ -33,7 +33,7 @@ trait MapucheConnectionTrait
         }
 
         $schema = $this->schema ?? 'mapuche';
-        
+
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
 }

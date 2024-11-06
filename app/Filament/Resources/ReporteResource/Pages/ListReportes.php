@@ -96,7 +96,7 @@ class ListReportes extends ListRecords
         }
 
         try {
-            DB::connection('pgsql-mapuchito')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
+            DB::connection('pgsql-mapuche')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
             // Notification::make()->title('Reporte generado')->success()->send();
             $this->reporteGenerado = true;
             return true;

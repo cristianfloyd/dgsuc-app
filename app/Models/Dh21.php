@@ -67,23 +67,14 @@ class Dh21 extends Model
     /**
      * Relación de pertenencia con el modelo Dh22.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
-    public function scopeSearch($query, $search)
-    {
-        $columns = ['nro_legaj', 'nro_liqui', 'nro_cargo', 'codn_conce', 'impp_conce', 'tipo_conce',];
 
-        return $query->where(function ($q) use ($columns, $search) {
-            foreach ($columns as $column) {
-                $q->orWhere($column, 'like', "%{$search}%");
-            }
-        });
-    }
 
     public static function conceptosTotales(NroLiqui $nro_liqui = null, int $codn_fuent = null): Builder
     {
@@ -133,11 +124,21 @@ class Dh21 extends Model
     /**
      * Obtiene la relación de liquidaciones asociadas a este registro.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     private function getLiquidaciones()
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
+    public function scopeSearch($query, $search)
+    {
+        $columns = ['nro_legaj', 'nro_liqui', 'nro_cargo', 'codn_conce', 'impp_conce', 'tipo_conce',];
+
+        return $query->where(function ($q) use ($columns, $search) {
+            foreach ($columns as $column) {
+                $q->orWhere($column, 'like', "%{$search}%");
+            }
+        });
+    }
 }

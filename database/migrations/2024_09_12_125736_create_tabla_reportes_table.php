@@ -1,15 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuchito';
-
+    protected $connection = 'pgsql-mapuche';
 
     public function up(): void
     {
@@ -37,7 +35,7 @@ return new class extends Migration
         });
 
         DB::unprepared("
-            CREATE OR REPLACE FUNCTION suc.rep_orden_pago(p_nro_liqui INTEGER[])
+CREATE OR REPLACE FUNCTION suc.rep_orden_pago(p_nro_liqui INTEGER[])
 RETURNS void AS $$
 BEGIN
     -- Limpiamos los datos existentes para las liquidaciones específicas
@@ -59,12 +57,12 @@ BEGIN
 	h21.codn_progr::VARCHAR,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'C' AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS remunerativo,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'S' AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS no_remunerativo,
-    ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS descuentos,
+    ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' AND h21.codn_conce/100 = 2 THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS descuentos,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'A' THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS aportes,
 	ROUND((
 		ROUND(SUM(CASE WHEN h21.tipo_conce= 'C' AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
 		+ ROUND(SUM(CASE WHEN h21.tipo_conce= 'S' AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
-		- ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' THEN impp_conce ELSE 0 END)::NUMERIC, 2)
+		- ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' AND h21.codn_conce/100 = 2 THEN impp_conce ELSE 0 END)::NUMERIC, 2)
 	)::NUMERIC, 2) AS sueldo,
     ROUND(SUM(CASE WHEN h21.codn_conce IN (173) THEN impp_conce ELSE 0 END)::NUMERIC, 2) as estipendio,
 	ROUND(SUM(CASE WHEN h21.codn_conce IN (186) THEN impp_conce ELSE 0 END)::NUMERIC, 2) as med_resid,
@@ -74,7 +72,7 @@ BEGIN
     ROUND((
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'C' AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
         + ROUND(SUM(CASE WHEN h21.tipo_conce= 'S' AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
-	    - ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' THEN impp_conce ELSE 0 END)::NUMERIC, 2)
+	    - ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' AND h21.codn_conce/100 = 2 THEN impp_conce ELSE 0 END)::NUMERIC, 2)
 	    + ROUND(SUM(CASE WHEN h21.codn_conce IN (173) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
 	    + ROUND(SUM(CASE WHEN h21.codn_conce IN (186) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
         + 0
@@ -84,12 +82,12 @@ BEGIN
 FROM
 	mapuche.dh21 h21
 	JOIN mapuche.dh22 h22 ON h21.nro_liqui=h22.nro_liqui
-	AND h22.nro_liqui=1
 	JOIN mapuche.dh03 h03 ON h21.nro_cargo=h03.nro_cargo
 	JOIN mapuche.dh12 h12 ON h21.codn_conce=h12.codn_conce
 	LEFT JOIN mapuche.dh92 h92 ON h21.nro_legaj=h92.nrolegajo
+WHERE h21.nro_liqui = ANY(p_nro_liqui)
 GROUP BY
-  h22.nro_liqui,
+    h22.nro_liqui,
 	banco,
 	h21.codn_funci,
 	h21.codn_fuent,
@@ -97,8 +95,8 @@ GROUP BY
 	caracter,
 	h21.codn_progr
 ORDER BY
-  h22.nro_liqui,
-  banco desc,
+    h22.nro_liqui,
+    banco desc,
 	h21.codn_funci,
 	h21.codn_fuent,
 	h21.codc_uacad,
