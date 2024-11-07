@@ -34,45 +34,22 @@ class RepOrdenPagoModelResource extends Resource
                     ->searchable(),
                 TextColumn::make('codc_uacad')->label('U Acad')->searchable(),
                 TextColumn::make('codn_progr')->searchable(),
-                TextColumn::make('remunerativo')->numeric()->sortable(),
-                TextColumn::make('no_remunerativo')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('remunerativo')->money('ARS')->label('Remunerativo')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('no_remunerativo')->money('ARS')->label('No Remunerativo')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('bruto')->money('ARS')->label('bruto'),
                 TextColumn::make('descuentos')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('aportes')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('sueldo')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('estipendio')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('med_resid')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('productividad')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('sal_fam')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('hs_extras')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('estipendio')->numeric()->sortable(),
+                TextColumn::make('aportes')->numeric()->sortable(),
+                TextColumn::make('sueldo')->numeric()->sortable(),
+                TextColumn::make('med_resid')->numeric()->sortable(),
+                TextColumn::make('productividad')->numeric()->sortable(),
+                TextColumn::make('sal_fam')->numeric()->sortable(),
+                TextColumn::make('hs_extras')->numeric()->sortable(),
+                TextColumn::make('total')->numeric()->sortable(),
+                TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
                 Group::make('banco')

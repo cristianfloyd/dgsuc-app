@@ -38,8 +38,9 @@ class ReporteResource extends Resource
                 TextColumn::make('codc_uacad')->label('Unidad Académica'),
                 TextColumn::make('caracter')->label('Carácter'),
                 TextColumn::make('codn_progr')->label('Programa'),
-                TextColumn::make('remunerativo')->money('ARS')->label('Remunerativo'),
-                TextColumn::make('no_remunerativo')->money('ARS')->label('No Remunerativo'),
+                TextColumn::make('remunerativo')->money('ARS')->label('Remunerativo')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('no_remunerativo')->money('ARS')->label('No Remunerativo')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('bruto')->money('ARS')->label('bruto'),
                 TextColumn::make('descuentos')->money('ARS'),
                 TextColumn::make('aportes')->money('ARS'),
                 TextColumn::make('estipendio')->money('ARS'),
@@ -106,7 +107,7 @@ class ReporteResource extends Resource
     {
         $data = session('idsLiquiSelected', []);
         Log::debug("idsLiquiSelected", ['data' => $data]);
-        
+
         return $data;
     }
 

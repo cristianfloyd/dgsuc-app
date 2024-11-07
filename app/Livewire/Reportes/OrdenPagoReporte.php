@@ -137,7 +137,7 @@ class OrdenPagoReporte extends Component implements Htmlable
     private function calculateTotals($items)
     {
         return [
-            'remunerativo' => $items->sum('remunerativo'),
+            'remunerativo' => $items->sum('bruto'),
             'estipendio' => $items->sum('estipendio'),
             'productividad' => $items->sum('productividad'),
             'med_resid' => $items->sum('med_resid'),

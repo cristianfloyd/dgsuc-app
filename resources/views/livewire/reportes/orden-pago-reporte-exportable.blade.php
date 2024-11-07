@@ -53,7 +53,7 @@
                                                         {{ $item->codn_progr }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->remunerativo) }}</td>
+                                                        {{ money($item->bruto) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
                                                         {{ money($item->estipendio) }}</td>
