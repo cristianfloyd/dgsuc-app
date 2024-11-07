@@ -32,6 +32,7 @@ use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Http\Controllers\PanelAccessController;
 use App\Http\Controllers\PanelSelectorController;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
+use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
@@ -57,6 +58,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/modal', Modal::class)->name('modal');
     Route::get('/userstable', UsersTable::class)->name('datatable');
     Route::get('/', function () { return view('index'); })->name('index');
+    Route::get('/imputacion', AsignacionForm::class)->name('imputacion');
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
     Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas'); // 2.- paso relaciones activas
@@ -88,4 +90,5 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/prueba', ParaMiSimplificacion::class)->name('prueba');
 
     Route::get('/afip/misim', AfipMapucheMiSimplificacionTable::class)->name('misim');
+
 });

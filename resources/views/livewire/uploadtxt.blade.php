@@ -27,6 +27,7 @@
         </div>
         <div>
             <form wire:submit.prevent="saveAfip">
+                
                 <x-mary-file wire:model="archivotxtAfip" hint="Solo TXT" accept="application/txt" />
                 <div>
                     @error('archivotxtAfip')
