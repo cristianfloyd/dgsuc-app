@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Forms\Get;
 use Barryvdh\DomPDF\PDF;
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
-use Carbon\Carbon;
 
 class ReporteConceptoListadoResource extends Resource
 {
@@ -46,6 +46,7 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->label('id'),
                 TextColumn::make('codc_uacad')->label('dep'),
                 // TextColumn::make('periodo_fiscal')->label('Periodo'),
                 TextColumn::make('periodo_fiscal')
@@ -53,16 +54,16 @@ class ReporteConceptoListadoResource extends Resource
                     ->sortable()
                     ->getStateUsing(fn($record) => $record->periodo_fiscal)
                     ->searchable(),
-                TextColumn::make('nro_liqui')->label('Nro. Liq.')
+                TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
                     ->sortable(),
                 TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
-                TextColumn::make('nro_legaj'),
+                TextColumn::make('nro_legaj')->sortable(),
                 TextColumn::make('cuil')->label('CUIL')->searchable(),
                 TextColumn::make('desc_appat')->label('Apellido'),
                 TextColumn::make('desc_nombr')->label('Nombre'),
-                TextColumn::make('coddependesemp')->label('Oficina de Pago'),
+                TextColumn::make('oficina_pago')->label('Oficina de Pago')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('codigoescalafon'),
-                TextColumn::make('nro_cargo')->label('Secuencia'),
+                TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('cargo')->label('Cargo')
                     ,
                 TextColumn::make('codn_conce')->label('Concepto'),
@@ -72,6 +73,7 @@ class ReporteConceptoListadoResource extends Resource
             ->filters([
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
+                    ->multiple()
                     ->options(Dh12Service::getConceptosParaSelect())
                     ->searchable(),
                 SelectFilter::make('periodo_fiscal')

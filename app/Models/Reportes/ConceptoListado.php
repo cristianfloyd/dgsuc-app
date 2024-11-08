@@ -3,11 +3,14 @@
 namespace App\Models\Reportes;
 
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ConceptoListado extends Model
 {
+    use MapucheConnectionTrait;
     protected $table = 'concepto_listado';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     public $timestamps = false;
 
@@ -50,17 +53,17 @@ class ConceptoListado extends Model
                 d3.coddependesemp AS oficina_pago,
                 d11.codc_categ,
                 d11.codigoescalafon,
-                'secuencia' AS secuencia,
+                d3.nro_cargo AS secuencia,
                 CONCAT(d11.desc_categ, d3.codc_agrup, ' ', d3.codc_carac) AS categoria_completa,
                 d21.codn_conce,
                 d21.tipo_conce,
                 d21.impp_conce
-            FROM mapuche.dh01 d
-            JOIN mapuche.dh03 d3 ON d.nro_legaj = d3.nro_legaj
+            FROM mapuche.dh21 d21
+            JOIN mapuche.dh03 d3 ON d21.nro_legaj = d3.nro_legaj AND d3.chkstopliq = 0
             JOIN mapuche.dh11 d11 ON d3.codc_categ = d11.codc_categ
-            JOIN mapuche.dh21 d21 ON d.nro_legaj = d21.nro_legaj
+            JOIN mapuche.dh01 d ON d.nro_legaj = d21.nro_legaj
             JOIN mapuche.dh22 d22 ON d21.nro_liqui = d22.nro_liqui
-            WHERE d21.codn_conce = :codn_conce
+            WHERE d21.codn_conce = :codn_conce;
         ";
     }
 }

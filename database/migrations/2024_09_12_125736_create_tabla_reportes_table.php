@@ -90,7 +90,7 @@ FROM
 	JOIN mapuche.dh03 h03 ON h21.nro_cargo=h03.nro_cargo
 	JOIN mapuche.dh12 h12 ON h21.codn_conce=h12.codn_conce
 	LEFT JOIN mapuche.dh92 h92 ON h21.nro_legaj=h92.nrolegajo
-WHERE h21.nro_liqui = ANY(p_nro_liqui) AND h21.nro_legaj = 249616
+WHERE h21.nro_liqui = ANY(p_nro_liqui)
 GROUP BY
   h22.nro_liqui,
 	banco,
