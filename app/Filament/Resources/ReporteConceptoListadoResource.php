@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Carbon\Carbon;
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Forms\Get;
 use Barryvdh\DomPDF\PDF;
@@ -46,6 +47,7 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->label('id'),
                 TextColumn::make('codc_uacad')->label('dep'),
                 // TextColumn::make('periodo_fiscal')->label('Periodo'),
                 TextColumn::make('periodo_fiscal')
@@ -53,10 +55,10 @@ class ReporteConceptoListadoResource extends Resource
                     ->sortable()
                     ->getStateUsing(fn($record) => $record->periodo_fiscal)
                     ->searchable(),
-                TextColumn::make('nro_liqui')->label('Nro. Liq.')
+                TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
                     ->sortable(),
                 TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
-                TextColumn::make('nro_legaj'),
+                TextColumn::make('nro_legaj')->sortable(),
                 TextColumn::make('cuil')->label('CUIL')->searchable(),
                 TextColumn::make('desc_appat')->label('Apellido'),
                 TextColumn::make('desc_nombr')->label('Nombre'),
@@ -70,6 +72,7 @@ class ReporteConceptoListadoResource extends Resource
             ->filters([
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
+                    ->multiple()
                     ->options(Dh12Service::getConceptosParaSelect())
                     ->searchable(),
                 SelectFilter::make('periodo_fiscal')

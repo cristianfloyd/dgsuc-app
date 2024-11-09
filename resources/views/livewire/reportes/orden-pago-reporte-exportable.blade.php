@@ -37,7 +37,7 @@
                                 <div class="w-full table-auto print:text-xs"">
                                     <x-reportes.table-component :headers="[
                                         'Programa',
-                                        'Sueldo',
+                                        'Bruto',
                                         'Estipendio',
                                         'Productividad',
                                         'Méd. Resid.',
@@ -53,7 +53,7 @@
                                                         {{ $item->codn_progr }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->remunerativo) }}</td>
+                                                        {{ money($item->bruto) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
                                                         {{ money($item->estipendio) }}</td>
@@ -168,7 +168,7 @@
                                 <tr>
                                     <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ $funcion }}</td>
                                     <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ $financiamiento }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['remunerativo']) }}</td>
+                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['bruto']) }}</td>
                                     <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['estipendio']) }}</td>
                                     <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['productividad']) }}</td>
                                     <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['med_resid']) }}</td>

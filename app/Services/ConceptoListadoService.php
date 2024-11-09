@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Dh01;
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
@@ -16,6 +15,7 @@ class ConceptoListadoService
      * Obtiene una consulta de Eloquent para el concepto especificado.
      * Asegura un registro único por legajo considerando su cargo activo.
      *
+     * @param int|array $codn_conce El código del concepto a buscar.
      * @param int|array $codn_conce El código del concepto a buscar.
      * @return \Illuminate\Database\Eloquent\Builder La consulta de Eloquent.
      */

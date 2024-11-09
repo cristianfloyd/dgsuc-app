@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use App\Models\Dh12;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Dh12Resource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\Dh12Resource\RelationManagers;
+use App\Models\Dh12;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class Dh12Resource extends Resource
 {
@@ -110,8 +108,7 @@ class Dh12Resource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('desc_corta')->toggleable()->toggledHiddenByDefault()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('tipo_conce')->toggleable()->toggledHiddenByDefault()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('tipo_conce')->toggleable()->toggledHiddenByDefault(),
                 Tables\Columns\TextColumn::make('codc_vige1')->toggleable()->toggledHiddenByDefault(),
                 Tables\Columns\TextColumn::make('desc_nove1')
                     ->searchable(),
@@ -161,7 +158,16 @@ class Dh12Resource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                // aqui filtrar por tipo_conce
+                Tables\Filters\SelectFilter::make('tipo_conce')
+                    ->options([
+                        'C' => 'Tipo C',
+                        'S' => 'Tipo S',
+                        'O' => 'Tipo O',
+                        'F' => 'Tipo F',
+                        'A' => 'Tipo A',
+                    ])
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

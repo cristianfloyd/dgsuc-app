@@ -4,12 +4,15 @@ namespace App\Models\Reportes;
 
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
+    use MapucheConnectionTrait;
     protected $table = 'concepto_listado';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     public $timestamps = false;
 

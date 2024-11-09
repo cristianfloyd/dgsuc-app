@@ -82,7 +82,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Actualiza los datos de una instancia de RepOrdenPagoModel.
      *
-     * @param \App\Models\Mapuche\Reportes\RepOrdenPagoModel $repOrdenPago La instancia de RepOrdenPagoModel a actualizar.
+     * @param RepOrdenPagoModel $repOrdenPago La instancia de RepOrdenPagoModel a actualizar.
      * @param array $data Los nuevos datos para actualizar la instancia.
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */

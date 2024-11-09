@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('codn_progr')->nullable();
             $table->decimal('remunerativo', 15, 2)->nullable();
             $table->decimal('no_remunerativo', 15, 2)->nullable();
+            $table->decimal('bruto', 15, 2)->nullable();
             $table->decimal('descuentos', 15, 2)->nullable();
             $table->decimal('aportes', 15, 2)->nullable();
             $table->decimal('sueldo', 15, 2)->nullable();
@@ -44,7 +45,7 @@ BEGIN
     -- Insertamos los nuevos datos
     INSERT INTO suc.rep_orden_pago(
 		nro_liqui, banco, codn_funci, codn_fuent, codc_uacad, caracter, codn_progr,
-        remunerativo, no_remunerativo, descuentos, aportes,sueldo, estipendio, med_resid,
+        remunerativo, no_remunerativo, bruto, descuentos, aportes,sueldo, estipendio, med_resid,
         productividad, sal_fam, hs_extras, total
 	)
     SELECT
@@ -57,6 +58,10 @@ BEGIN
 	h21.codn_progr::VARCHAR,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'C' AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS remunerativo,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'S' AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS no_remunerativo,
+    ROUND((
+        ROUND(SUM(CASE WHEN h21.tipo_conce= 'C' AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END)::NUMERIC, 2) +
+        ROUND(SUM(CASE WHEN h21.tipo_conce= 'S' AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END)::NUMERIC, 2)
+    )::NUMERIC,2) AS bruto,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'D' AND h21.codn_conce/100 = 2 THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS descuentos,
     ROUND(SUM(CASE WHEN h21.tipo_conce= 'A' THEN impp_conce ELSE 0 END)::NUMERIC, 2) AS aportes,
 	ROUND((
@@ -87,7 +92,7 @@ FROM
 	LEFT JOIN mapuche.dh92 h92 ON h21.nro_legaj=h92.nrolegajo
 WHERE h21.nro_liqui = ANY(p_nro_liqui)
 GROUP BY
-    h22.nro_liqui,
+  h22.nro_liqui,
 	banco,
 	h21.codn_funci,
 	h21.codn_fuent,
@@ -95,8 +100,8 @@ GROUP BY
 	caracter,
 	h21.codn_progr
 ORDER BY
-    h22.nro_liqui,
-    banco desc,
+  h22.nro_liqui,
+  banco desc,
 	h21.codn_funci,
 	h21.codn_fuent,
 	h21.codc_uacad,
