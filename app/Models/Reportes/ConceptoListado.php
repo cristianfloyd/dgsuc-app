@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
-    use MapucheConnectionTrait;
+
     protected $table = 'concepto_listado';
     protected $primaryKey = 'id';
     public $incrementing = false;
@@ -36,11 +36,23 @@ class ConceptoListado extends Model
 
     public function newQuery()
     {
+        $connection = $this->getConnectionName();
+        // Obtenemos el concepto del filtro actual
+        $conceptoFiltrado = request()->input('tableFilters.codn_conce');
+
+        // Si no hay concepto seleccionado, retornamos una consulta vacía
+        if (empty($conceptoFiltrado)) {
+            // Creamos una subconsulta válida que siempre retorna vacío
+            return parent::newQuery()
+            ->from(DB::raw('(' . $this->getSqlQuery(999) . ') as concepto_listado'));
+        }
+
+        // Si hay concepto, construimos la consulta con el SQL
         return parent::newQuery()
-            ->from(DB::raw('(' . $this->getSqlQuery() . ') as concepto_listado'));
+            ->from(DB::raw('(' . $this->getSqlQuery($conceptoFiltrado) . ') as concepto_listado'));
     }
 
-    private function getSqlQuery()
+    private function getSqlQuery(int $concepto)
     {
         return "
             WITH legajo_cargo AS (
@@ -51,7 +63,7 @@ class ConceptoListado extends Model
                     dh03.nro_cargo
                 FROM mapuche.dh21
                 INNER JOIN mapuche.dh03 ON dh21.nro_legaj = dh03.nro_legaj AND dh03.chkstopliq = 0
-                WHERE dh21.codn_conce = 225 AND dh21.nro_liqui = 2
+                WHERE dh21.codn_conce = :codn_conce
             )
             SELECT
                 dh21.nro_legaj,

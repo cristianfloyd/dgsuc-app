@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,6 +11,11 @@ use Illuminate\Database\Eloquent\Builder;
 class ConceptoListadoService
 {
     use MapucheConnectionTrait;
+
+    public function getBaseQuery(): Builder
+    {
+        return ConceptoListado::query();
+    }
 
     /**
      * Obtiene una consulta de Eloquent para el concepto especificado.
@@ -19,9 +25,10 @@ class ConceptoListadoService
      * @param int|array $codn_conce El código del concepto a buscar.
      * @return \Illuminate\Database\Eloquent\Builder La consulta de Eloquent.
      */
-    public function getQueryForConcepto(int|array $codn_conce = null): Builder
+    public function getQueryForConcepto(int|array|null $codn_conce): Builder
     {
         $connection = $this->getConnectionName();
+        Log::info('codn_conce', [$codn_conce]);
 
         // Subconsulta para obtener un único cargo por legajo
         $legajoCargo = DB::connection($connection)
@@ -77,31 +84,6 @@ class ConceptoListadoService
         return ConceptoListado::query();
     }
 
-    public function getEmptyQuery(): Builder
-    {
-        // Creamos una subconsulta que mantenga la estructura de columnas
-        $subquery = "
-            SELECT
-                NULL::varchar as codc_uacad,
-                NULL::varchar as periodo_fiscal,
-                NULL::integer as nro_liqui,
-                NULL::varchar as desc_liqui,
-                NULL::integer as nro_legaj,
-                NULL::varchar as cuil,
-                NULL::varchar as desc_appat,
-                NULL::varchar as desc_nombr,
-                NULL::varchar as coddependesemp,
-                NULL::integer as secuencia,
-                NULL::varchar as codn_conce,
-                NULL::varchar as tipo_conce,
-                NULL::decimal as impp_conce
-            WHERE 1=0
-        ";
-
-        // Retornamos un Builder usando newFromBuilder
-        return ConceptoListado::query()
-        ->fromSub($subquery, 'conceptos_empty');
-    }
 
 
     public function getQueryForConceptoRaw(int $codn_conce): Builder
