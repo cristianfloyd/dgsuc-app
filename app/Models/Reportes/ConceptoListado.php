@@ -4,7 +4,6 @@ namespace App\Models\Reportes;
 
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ConceptoListado extends Model
