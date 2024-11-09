@@ -4,6 +4,7 @@ namespace App\Services\Mapuche;
 
 use App\Models\Dh61;
 use App\Models\Dh99;
+use App\Models\Mapuche\Dh22;
 use Illuminate\Support\Facades\Log;
 
 /**

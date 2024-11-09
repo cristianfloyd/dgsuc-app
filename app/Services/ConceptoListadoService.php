@@ -18,17 +18,17 @@ class ConceptoListadoService
     }
 
     /**
-     * Obtiene una consulta de Eloquent para el concepto especificado.
-     * Asegura un registro único por legajo considerando su cargo activo.
-     *
-     * @param int|array $codn_conce El código del concepto a buscar.
-     * @param int|array $codn_conce El código del concepto a buscar.
-     * @return \Illuminate\Database\Eloquent\Builder La consulta de Eloquent.
-     */
-    public function getQueryForConcepto(int|array|null $codn_conce): Builder
+    * Obtiene una consulta de Eloquent para uno o varios conceptos.
+    * Asegura un registro único por legajo considerando su cargo activo.
+    *
+    * @param array|int|null $codn_conce Código(s) del concepto a buscar
+    * @param int|null $nro_liqui Número de liquidación
+    * @return \Illuminate\Database\Eloquent\Builder
+    */
+    public function getQueryForConcepto(array|int|null $codn_conce, ?int $nro_liqui = null): Builder
     {
         $connection = $this->getConnectionName();
-        Log::info('codn_conce', [$codn_conce]);
+        $defaultNroLiqui = 2;
 
         // Subconsulta para obtener un único cargo por legajo
         $legajoCargo = DB::connection($connection)
@@ -44,9 +44,11 @@ class ConceptoListadoService
                     ->where('dh03.chkstopliq', '=', 0);
             })
             ->when(!is_null($codn_conce), function ($query) use ($codn_conce) {
-                $query->where('dh21.codn_conce', $codn_conce);
+                return is_array($codn_conce)
+                    ? $query->whereIn('dh21.codn_conce', $codn_conce)
+                    : $query->where('dh21.codn_conce', $codn_conce);
             })
-            ->where('dh21.nro_liqui', 2)
+            ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui)
             ->groupBy(['dh21.nro_legaj', 'dh03.coddependesemp', 'dh03.codc_uacad', 'dh03.nro_cargo']);
 
         // Consulta principal
@@ -73,8 +75,12 @@ class ConceptoListadoService
                 'dh21.tipo_conce',
                 'dh21.impp_conce'
             ])
-            //->where('dh21.codn_conce', $codn_conce)
-            ->where('dh21.nro_liqui', '=', 2)
+            ->when(!is_null($codn_conce), function ($query) use ($codn_conce) {
+                return is_array($codn_conce)
+                    ? $query->whereIn('dh21.codn_conce', $codn_conce)
+                    : $query->where('dh21.codn_conce', $codn_conce);
+            })
+            ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui)
             ->orderBy('lc.codc_uacad')
             ->orderBy('lc.coddependesemp');
     }

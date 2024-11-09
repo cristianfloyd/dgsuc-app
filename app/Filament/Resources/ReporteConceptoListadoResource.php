@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Tables;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
@@ -72,19 +73,38 @@ class ReporteConceptoListadoResource extends Resource
                     ->multiple()
                     ->options(Dh12Service::getConceptosParaSelect())
                     ->searchable(),
-                // SelectFilter::make('periodo_fiscal')
-                //     ->label('Periodo')
-                //     ->options(Dh22::getPeriodosFiscales())
-                //     ->searchable()
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         if (!isset($data['value'])) {
-                //             return $query;
-                //         }
-                //         $year = substr($data['value'], 0, 4);
-                //         $month = substr($data['value'], 4, 2);
-                //         return $query->where('per_liano', $year)
-                //             ->where('per_limes', $month);
-                //     }),
+                SelectFilter::make('periodo_fiscal')
+                    ->label('Periodo')
+                    ->options(Dh22::getPeriodosFiscales())
+                    ->searchable()
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        $year = substr($data['value'], 0, 4);
+                        $month = substr($data['value'], 4, 2);
+                        return $query->where('per_liano', $year)
+                            ->where('per_limes', $month);
+                    }),
+                SelectFilter::make('Nro Liqui')
+                ->label('Liquidación')
+                ->options(function (Get $get) {
+                    $periodo = $get('periodo_fiscal');
+                    if (!$periodo) return [];
+
+                    return Dh22::query()->where('per_liano', substr($periodo, 0, 4))
+                        ->where('per_limes', substr($periodo, 4, 2))
+                        ->pluck('desc_liqui', 'nro_liqui')
+                        ->toArray();
+                })
+                ->searchable()
+                ->name('nro_liqui')
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query->when(
+                        $data['value'],
+                        fn ($query) => $query->where('nro_liqui', $data['value'])
+                    );
+                })
             ])
             ->filtersTriggerAction(
                 fn (Action $action) => $action
@@ -124,8 +144,6 @@ class ReporteConceptoListadoResource extends Resource
     {
         $service = app(ConceptoListadoService::class);
         $concepto = request()->input('tableFilters.codn_conce');
-        dump($concepto);
-        // Si no hay concepto seleccionado, retornar query vacío
 
         $query = $service->getQueryForConcepto($concepto);
         return $query;

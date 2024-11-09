@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
+    
 
     protected $table = 'concepto_listado';
     protected $primaryKey = 'id';

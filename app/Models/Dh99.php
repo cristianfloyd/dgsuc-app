@@ -4,12 +4,12 @@ namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 // (D) Variable Global: Período Corriente
 
-/**
- * @method static first()
- */
+
 class Dh99 extends Model
 {
     use MapucheConnectionTrait;
@@ -65,4 +65,18 @@ class Dh99 extends Model
         'per_mesct' => 'integer',
         'codc_uacad' => 'string',
     ];
+
+    /**
+     * Obtiene el periodo fiscal formateado como YYYYMM
+     */
+    protected function periodoFiscal(): Attribute
+    {
+        return Attribute::make(
+            get: function() {
+                $periodoFiscalService = app(PeriodoFiscalService::class);
+                $periodo = $periodoFiscalService->getPeriodoFiscalFromDatabase();
+                return $periodo['year'] . $periodo['month'];
+            }
+        );
+    }
 }
