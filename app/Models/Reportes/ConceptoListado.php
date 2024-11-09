@@ -3,10 +3,12 @@
 namespace App\Models\Reportes;
 
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ConceptoListado extends Model
 {
+    use MapucheConnectionTrait;
     protected $table = 'concepto_listado';
     public $incrementing = false;
     public $timestamps = false;
@@ -39,28 +41,34 @@ class ConceptoListado extends Model
     private function getSqlQuery()
     {
         return "
+            WITH legajo_cargo AS (
+                SELECT DISTINCT ON (dh21.nro_legaj)
+                    dh21.nro_legaj,
+                    dh03.coddependesemp,
+                    dh03.codc_uacad,
+                    dh03.nro_cargo
+                FROM mapuche.dh21
+                INNER JOIN mapuche.dh03 ON dh21.nro_legaj = dh03.nro_legaj AND dh03.chkstopliq = 0
+                WHERE dh21.codn_conce = 225 AND dh21.nro_liqui = 2
+            )
             SELECT
-                d3.codc_uacad,
-                CONCAT(d22.per_liano, d22.per_limes) AS periodo_fiscal,
-                d22.desc_liqui,
-                d.nro_legaj,
-                CONCAT(d.nro_cuil1, d.nro_cuil, d.nro_cuil2) AS cuil,
-                d.desc_appat AS apellido,
-                d.desc_nombr AS nombre,
-                d3.coddependesemp AS oficina_pago,
-                d11.codc_categ,
-                d11.codigoescalafon,
-                'secuencia' AS secuencia,
-                CONCAT(d11.desc_categ, d3.codc_agrup, ' ', d3.codc_carac) AS categoria_completa,
-                d21.codn_conce,
-                d21.tipo_conce,
-                d21.impp_conce
-            FROM mapuche.dh01 d
-            JOIN mapuche.dh03 d3 ON d.nro_legaj = d3.nro_legaj
-            JOIN mapuche.dh11 d11 ON d3.codc_categ = d11.codc_categ
-            JOIN mapuche.dh21 d21 ON d.nro_legaj = d21.nro_legaj
-            JOIN mapuche.dh22 d22 ON d21.nro_liqui = d22.nro_liqui
-            WHERE d21.codn_conce = :codn_conce
+                dh21.nro_legaj,
+                CONCAT(dh21.nro_legaj, '-', lc.coddependesemp, '-', dh21.nro_liqui, '-', dh21.codn_conce) AS id,
+                lc.codc_uacad,
+                CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) AS periodo_fiscal,
+                dh22.nro_liqui,
+                dh22.desc_liqui,
+                CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil,
+                lc.coddependesemp,
+                lc.nro_cargo AS secuencia,
+                dh21.codn_conce,
+                dh21.tipo_conce,
+                dh21.impp_conce
+            FROM mapuche.dh21
+            INNER JOIN legajo_cargo lc ON dh21.nro_legaj = lc.nro_legaj
+            INNER JOIN mapuche.dh01 ON dh21.nro_legaj = dh01.nro_legaj
+            INNER JOIN mapuche.dh22 ON dh21.nro_liqui = dh22.nro_liqui
+            WHERE dh21.codn_conce = :codn_conce;
         ";
     }
 }

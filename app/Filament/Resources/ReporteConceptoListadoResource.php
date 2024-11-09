@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Forms\Get;
 use Barryvdh\DomPDF\PDF;
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
-use Carbon\Carbon;
 
 class ReporteConceptoListadoResource extends Resource
 {
@@ -61,10 +61,8 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('desc_appat')->label('Apellido'),
                 TextColumn::make('desc_nombr')->label('Nombre'),
                 TextColumn::make('coddependesemp')->label('Oficina de Pago'),
-                TextColumn::make('codigoescalafon'),
-                TextColumn::make('nro_cargo')->label('Secuencia'),
-                TextColumn::make('cargo')->label('Cargo')
-                    ,
+                // TextColumn::make('codigoescalafon'),
+                TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('tipo_conce')->label('Tipo'),
                 TextColumn::make('impp_conce')->label('Importe'),
@@ -96,6 +94,9 @@ class ReporteConceptoListadoResource extends Resource
                     //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
+            ->emptyStateHeading('Seleccione un concepto')
+            ->emptyStateDescription('Para visualizar los datos, primero debe seleccionar un concepto del filtro superior.')
+            ->emptyStateIcon('heroicon-o-funnel')
             ;
     }
 
@@ -119,7 +120,11 @@ class ReporteConceptoListadoResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $service = app(ConceptoListadoService::class);
-        $concepto = request()->input('tableFilters.codn_conce', 225);
+        $concepto = request()->input('tableFilters.codn_conce', default: null);
+        // Si no hay concepto seleccionado, retornar query vacío
+        // if (!$concepto) {
+        //     return $service->getEmptyQuery();
+        // }
         $query = $service->getQueryForConcepto($concepto);
 
         return $query;

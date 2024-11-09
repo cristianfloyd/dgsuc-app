@@ -49,8 +49,8 @@ class ListReporteConceptoListados extends ListRecords
                 ->modalHeading('¿Desea descargar el reporte?')
                 ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                 ->modalSubmitActionLabel('Descargar'),
-            Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
-                ->options(Dh22::getPeriodosFiscales()),
+            // Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
+            //     ->options(Dh22::getPeriodosFiscales()),
             Actions\SelectAction::make('codn_conce')
                 ->label('concepto')
                 ->options(function () {
@@ -61,16 +61,5 @@ class ListReporteConceptoListados extends ListRecords
                     $this->refreshTable();
                 })
         ];
-    }
-
-    /**
-     * Obtiene la consulta de Eloquent para el listado de conceptos.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public static function getEloquentQuery(): Builder
-    {
-        $service = app(ConceptoListadoService::class);
-        return $service->getQueryForConcepto(request()->input('tableFilters.codn_conce', 225));
     }
 }
