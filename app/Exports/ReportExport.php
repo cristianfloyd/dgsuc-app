@@ -23,15 +23,15 @@ class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
     public function headings(): array
     {
         return [
+            'legajo',
             'Dependencia',
             'Periodo Fiscal',
             'Nro Liquidacion',
-            'legajo',
-            'cuil',
-            'apellido',
-            'nombre',
-            'oficina_pago',
-            'secuencia',
+            'CUIL',
+            'Apellido',
+            'Nombre',
+            'Oficina_pago',
+            'Secuencia',
             'Concepto',
             'Importe'
         ];

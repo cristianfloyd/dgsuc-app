@@ -69,17 +69,17 @@ class ConceptoListado extends Model
                 WHERE dh21.codn_conce = :codn_conce
             )
             SELECT
+                --CONCAT(dh21.nro_legaj, '-', lc.coddependesemp, '-', dh21.nro_liqui, '-', dh21.codn_conce) AS id,
                 dh21.nro_legaj,
-                CONCAT(dh21.nro_legaj, '-', lc.coddependesemp, '-', dh21.nro_liqui, '-', dh21.codn_conce) AS id,
                 lc.codc_uacad,
                 CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) AS periodo_fiscal,
-                dh22.nro_liqui,
+                --dh22.nro_liqui,
                 dh22.desc_liqui,
                 CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil,
                 lc.coddependesemp,
                 lc.nro_cargo AS secuencia,
                 dh21.codn_conce,
-                dh21.tipo_conce,
+                --dh21.tipo_conce,
                 dh21.impp_conce
             FROM mapuche.dh21
             INNER JOIN legajo_cargo lc ON dh21.nro_legaj = lc.nro_legaj

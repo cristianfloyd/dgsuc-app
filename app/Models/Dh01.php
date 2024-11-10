@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Dh01 extends Model
 {
     use MapucheConnectionTrait;
+    
 
     protected $table = 'dh01';
     public $timestamps = false;

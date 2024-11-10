@@ -47,24 +47,23 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
-                // TextColumn::make('id')->label('id'),
+                TextColumn::make('id')->label('id')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
-                    ->getStateUsing(fn($record) => $record->periodo_fiscal)
-                    ->searchable(),
-                // TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
-                //     ->sortable(),
+                    ->getStateUsing(fn($record) => $record->periodo_fiscal),
+                TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
+                    ->sortable(),
                 TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('nro_legaj')->sortable(),
-                TextColumn::make('cuil')->label('CUIL')->searchable(),
+                TextColumn::make('cuil')->label('CUIL'),
                 TextColumn::make('desc_appat')->label('Apellido'),
                 TextColumn::make('desc_nombr')->label('Nombre'),
                 TextColumn::make('coddependesemp')->label('Oficina de Pago'),
                 TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('codn_conce')->label('Concepto'),
-                TextColumn::make('tipo_conce')->label('Tipo'),
+                // TextColumn::make('tipo_conce')->label('Tipo'),
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
             ->filters([

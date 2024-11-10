@@ -60,8 +60,8 @@ class ConceptoListadoService
             ->join('mapuche.dh01', 'dh21.nro_legaj', '=', 'dh01.nro_legaj')
             ->join('mapuche.dh22', 'dh21.nro_liqui', '=', 'dh22.nro_liqui')
             ->select([
-                'dh21.nro_legaj',
                 DB::raw("CONCAT(dh21.nro_legaj,'-',lc.coddependesemp,'-',dh21.nro_liqui,'-',dh21.codn_conce) as id"),
+                'dh21.nro_legaj',
                 'lc.codc_uacad',
                 DB::raw("CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) as periodo_fiscal"),
                 'dh22.nro_liqui',
