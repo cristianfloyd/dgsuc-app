@@ -186,13 +186,20 @@ class Dh22 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => new PeriodoFiscal(
-                anio: $attributes['per_liano'],
-                mes: $attributes['per_limes']
-            )
+            get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
+            // get: fn (mixed $value, array $attributes) => new PeriodoFiscal(
+            //     anio: $attributes['per_liano'],
+            //     mes: $attributes['per_limes']
+            // )
         );
     }
 
+    /**
+     * Atributo que obtiene y establece el período fiscal en formato YYYYMM a partir de las propiedades `per_liano` y `per_limes` del modelo.
+     *
+     * El método `get` devuelve el período fiscal en formato YYYYMM concatenando los valores de `per_liano` y `per_limes` con el formato adecuado.
+     * El método `set` establece los valores de `per_liano` y `per_limes` a partir de un valor de período fiscal en formato YYYYMM.
+     */
     protected function periodo(): Attribute
     {
         return Attribute::make(
@@ -202,5 +209,19 @@ class Dh22 extends Model
                 'per_limes' => substr($value, 4, 2),
             ]
         );
+    }
+
+    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    {
+        return $query->where('dh21.nro_liqui', $nroLiqui);
+    }
+
+    public function scopeWithPeriodoFiscal(Builder $query, string $periodoFiscal): Builder
+    {
+        $year = substr($periodoFiscal, 0, 4);
+        $month = substr($periodoFiscal, 4, 2);
+
+        return $query->where('per_liano', $year)
+                    ->where('per_limes', $month);
     }
 }

@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Tables;
-use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh12Service;
 use Filament\Resources\Resource;
+use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\ConceptoListadoService;
 use Filament\Tables\Filters\SelectFilter;
@@ -47,16 +47,16 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->label('id'),
-                TextColumn::make('codc_uacad')->label('dep'),
+                // TextColumn::make('id')->label('id'),
+                TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
                     ->getStateUsing(fn($record) => $record->periodo_fiscal)
                     ->searchable(),
-                TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
-                    ->sortable(),
-                TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
+                // TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
+                //     ->sortable(),
+                TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('nro_legaj')->sortable(),
                 TextColumn::make('cuil')->label('CUIL')->searchable(),
                 TextColumn::make('desc_appat')->label('Apellido'),
@@ -68,43 +68,43 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
             ->filters([
+                    Filter::make('periodo_liquidacion')
+                        ->form([
+                            Select::make('periodo_fiscal')
+                                ->label('Periodo')
+                                ->options( Dh22::getPeriodosFiscales())
+                                ->searchable()
+                                ->live()
+                                ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+
+                            Select::make('nro_liqui')
+                                ->label('Liquidación')
+                                ->options(function (callable $get): array {
+                                    $periodo = $get('periodo_fiscal');
+                                    if (!$periodo) return [];
+
+                                    return Dh22::query()
+                                        ->WithPeriodoFiscal($periodo)
+                                        ->definitiva()
+                                        ->pluck('desc_liqui', 'nro_liqui')
+                                        ->toArray();
+                                })
+                                ->searchable()
+                                ->live()
+                                ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                        ])
+                        ->query(function (Builder $query, array $data): Builder {
+                            return $query
+                            ->when(
+                                $data['nro_liqui'],
+                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                            );
+                        }),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
                     ->multiple()
                     ->options(Dh12Service::getConceptosParaSelect())
                     ->searchable(),
-                SelectFilter::make('periodo_fiscal')
-                    ->label('Periodo')
-                    ->options(Dh22::getPeriodosFiscales())
-                    ->searchable()
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
-                        $year = substr($data['value'], 0, 4);
-                        $month = substr($data['value'], 4, 2);
-                        return $query->where('per_liano', $year)
-                            ->where('per_limes', $month);
-                    }),
-                SelectFilter::make('Nro Liqui')
-                ->label('Liquidación')
-                ->options(function (Get $get) {
-                    $periodo = $get('periodo_fiscal');
-                    if (!$periodo) return [];
-
-                    return Dh22::query()->where('per_liano', substr($periodo, 0, 4))
-                        ->where('per_limes', substr($periodo, 4, 2))
-                        ->pluck('desc_liqui', 'nro_liqui')
-                        ->toArray();
-                })
-                ->searchable()
-                ->name('nro_liqui')
-                ->query(function (Builder $query, array $data): Builder {
-                    return $query->when(
-                        $data['value'],
-                        fn ($query) => $query->where('nro_liqui', $data['value'])
-                    );
-                })
             ])
             ->filtersTriggerAction(
                 fn (Action $action) => $action

@@ -24,7 +24,7 @@ class Dh22Service
                 ->select([
                     'nro_liqui',
                     'desc_liqui',
-                    DB::raw("CONCAT(per_liano, LPAD(per_limes, 2, '0')) as fiscal_period")
+                    DB::raw("CONCAT(per_liano, LPAD(per_limes, 2, '0')) as periodo_fiscal")
                 ])
                 ->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
 

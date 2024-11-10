@@ -5,11 +5,12 @@ namespace App\Models\Reportes;
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
-    
+
 
     protected $table = 'concepto_listado';
     protected $primaryKey = 'id';
@@ -53,7 +54,7 @@ class ConceptoListado extends Model
             ->from(DB::raw('(' . $this->getSqlQuery($conceptoFiltrado) . ') as concepto_listado'));
     }
 
-    private function getSqlQuery(int $concepto)
+    private function getSqlQuery(array|int|null $concepto)
     {
         return "
             WITH legajo_cargo AS (
@@ -64,6 +65,7 @@ class ConceptoListado extends Model
                     dh03.nro_cargo
                 FROM mapuche.dh21
                 INNER JOIN mapuche.dh03 ON dh21.nro_legaj = dh03.nro_legaj AND dh03.chkstopliq = 0
+                when :codn_conce IS NULL THEN 999
                 WHERE dh21.codn_conce = :codn_conce
             )
             SELECT
@@ -83,7 +85,14 @@ class ConceptoListado extends Model
             INNER JOIN legajo_cargo lc ON dh21.nro_legaj = lc.nro_legaj
             INNER JOIN mapuche.dh01 ON dh21.nro_legaj = dh01.nro_legaj
             INNER JOIN mapuche.dh22 ON dh21.nro_liqui = dh22.nro_liqui
+            when :codn_conce IS NULL THEN 999
             WHERE dh21.codn_conce = :codn_conce;
         ";
+    }
+
+
+    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    {
+        return $query->where('dh21.nro_liqui', $nroLiqui);
     }
 }

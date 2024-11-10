@@ -28,7 +28,7 @@ class ListReporteConceptoListados extends ListRecords
                 ->action(function ($data) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
                     $query = $this->getFilteredTableQuery();
-                    // comprobar que el query no este vacion
+                    // comprobar que el query no este vacio
                     if ($query->count() == 0) {
                         return redirect()->route('filament.resources.reporte-concepto-listado.index')
                             ->with('error', 'No se encontraron registros con los filtros seleccionados.');

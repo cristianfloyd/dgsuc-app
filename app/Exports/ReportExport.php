@@ -3,8 +3,8 @@
 namespace App\Exports;
 
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
@@ -23,20 +23,16 @@ class ReportExport implements FromQuery, WithHeadings, WithStrictNullComparison
     public function headings(): array
     {
         return [
-            'Dep',
-            'periodo fiscal',
+            'Dependencia',
+            'Periodo Fiscal',
             'Nro Liquidacion',
-            'liquidaion',
             'legajo',
             'cuil',
             'apellido',
             'nombre',
             'oficina_pago',
-            'codigoescalafon',
             'secuencia',
-            'Categoria',
             'Concepto',
-            'tipo_conce',
             'Importe'
         ];
     }
