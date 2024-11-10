@@ -44,4 +44,17 @@ class Dh22Service
             return collect();
         }
     }
+
+    public static function getLiquidacionesParaSelect(): array
+    {
+        return Dh22::query()
+        ->definitiva()
+        ->get()
+        ->mapWithKeys(function ($liquidacion) {
+            return [
+                $liquidacion->nro_liqui => $liquidacion->desc_liqui
+            ];
+        })
+        ->toArray();
+    }
 }

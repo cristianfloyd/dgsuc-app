@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Dh01 extends Model
 {
     use MapucheConnectionTrait;
-    
+
 
     protected $table = 'dh01';
     public $timestamps = false;
@@ -36,17 +37,30 @@ class Dh01 extends Model
 
     public function scopeSearch($query, $val)
     {
-        return $query->where('nro_legaj', 'like', '%'.$val.'%')
-            ->orWhere('nro_cuil', 'like', '%'.$val.'%')
-            ->orWhere('desc_appat', 'like', '%'.strtoupper($val).'%')
-            ->orWhere('desc_apmat', 'like', '%'.strtoupper($val).'%')
-            ->orWhere('desc_apcas', 'like', '%'.strtoupper($val).'%')
-            ->orWhere('desc_nombr', 'like', '%'.strtoupper($val).'%');
+        $searchTerm = EncodingService::toLatin1(strtoupper($val));
+
+        return $query->where('nro_legaj', 'like', "%$val%")
+            ->orWhere('nro_cuil', 'like', "%$val%")
+            ->orWhere('desc_appat', 'like', '%'.strtoupper($searchTerm).'%')
+            ->orWhere('desc_apmat', 'like', '%'.strtoupper($searchTerm).'%')
+            ->orWhere('desc_apcas', 'like', '%'.strtoupper($searchTerm).'%')
+            ->orWhere('desc_nombr', 'like', '%'.strtoupper($searchTerm).'%');
     }
 
     public function getCuilCompletoAttribute()
     {
         return "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}";
+    }
+
+    // Mutador para convertir desc_nombr a UTF-8 al obtener el valor
+    public function getDescNombrAttribute($value)
+    {
+        return EncodingService::toUtf8($value);
+    }
+    // Mutador para convertir desc_nombr a Latin1 antes de guardar
+    public function setDescNombrAttribute($value)
+    {
+        $this->attributes['desc_nombr'] = EncodingService::toLatin1($value);
     }
 }
 

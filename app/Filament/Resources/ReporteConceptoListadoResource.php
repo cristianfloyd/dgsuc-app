@@ -11,12 +11,14 @@ use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Log;
+use App\Services\Mapuche\Dh22Service;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\ConceptoListadoService;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\ConceptoListadoResourceService;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
@@ -47,7 +49,6 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->label('id')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
@@ -63,7 +64,6 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('coddependesemp')->label('Oficina de Pago'),
                 TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('codn_conce')->label('Concepto'),
-                // TextColumn::make('tipo_conce')->label('Tipo'),
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
             ->filters([
@@ -99,6 +99,10 @@ class ReporteConceptoListadoResource extends Resource
                                 fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             );
                         }),
+                // SelectFilter::make('nro_liqui')
+                //     ->label('Período')
+                //     ->options(fn() => Dh22Service::getLiquidacionesParaSelect())
+                //     ->searchable(),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
                     ->multiple()
@@ -116,6 +120,11 @@ class ReporteConceptoListadoResource extends Resource
             ->bulkActions([
                 //
             ])
+            ->deferLoading()
+            ->persistFiltersInSession()
+            ->defaultPaginationPageOption(5)
+            ->reorderable(false)
+            ->paginationPageOptions([5, 10, 25, 50, 100])
             ->emptyStateHeading('Seleccione un concepto')
             ->emptyStateDescription('Para visualizar los datos, primero debe seleccionar un concepto del filtro superior.')
             ->emptyStateIcon('heroicon-o-funnel')
@@ -141,12 +150,8 @@ class ReporteConceptoListadoResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $service = app(ConceptoListadoService::class);
-        $concepto = request()->input('tableFilters.codn_conce');
-
-        $query = $service->getQueryForConcepto($concepto);
-        return $query;
-
+        return app(ConceptoListadoResourceService::class)
+            ->getFilteredQuery(request()->get('tableFilters', []));
     }
 
 

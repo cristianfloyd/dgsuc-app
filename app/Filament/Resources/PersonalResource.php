@@ -34,10 +34,10 @@ class PersonalResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('nro_legaj')->searchable(),
-                TextColumn::make('desc_appat')->toggleable(true)->toggledHiddenByDefault(),
-                TextColumn::make('desc_apmat')->toggleable(true),
-                TextColumn::make('desc_apcas')->toggleable(true),
-                TextColumn::make('desc_nombr')->toggleable(true),
+                TextColumn::make('desc_appat')->toggleable(true)->searchable(),
+                TextColumn::make('desc_apmat')->toggleable(true)->searchable(),
+                TextColumn::make('desc_apcas')->toggleable(true)->searchable(),
+                TextColumn::make('desc_nombr')->toggleable(true)->searchable(),
                 TextColumn::make('nro_tabla')->toggleable(true),
                 TextColumn::make('tipo_docum')->toggleable(true),
                 TextColumn::make('nro_docum')->toggleable(true),

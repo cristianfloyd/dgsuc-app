@@ -27,6 +27,7 @@ class ConceptoListadoService
     */
     public function getQueryForConcepto(array|int|null $codn_conce, ?int $nro_liqui = null): Builder
     {
+
         $connection = $this->getConnectionName();
         $defaultNroLiqui = 2;
 
@@ -43,16 +44,11 @@ class ConceptoListadoService
                 $join->on('dh21.nro_legaj', '=', 'dh03.nro_legaj')
                     ->where('dh03.chkstopliq', '=', 0);
             })
-            ->when(!is_null($codn_conce), function ($query) use ($codn_conce) {
-                return is_array($codn_conce)
-                    ? $query->whereIn('dh21.codn_conce', $codn_conce)
-                    : $query->where('dh21.codn_conce', $codn_conce);
-            })
             ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui)
             ->groupBy(['dh21.nro_legaj', 'dh03.coddependesemp', 'dh03.codc_uacad', 'dh03.nro_cargo']);
 
         // Consulta principal
-        return ConceptoListado::on($connection)
+        $query = ConceptoListado::on($connection)
             ->from('mapuche.dh21')
             ->joinSub($legajoCargo, 'lc', function($join) {
                 $join->on('dh21.nro_legaj', '=', 'lc.nro_legaj');
@@ -75,13 +71,19 @@ class ConceptoListadoService
                 'dh21.tipo_conce',
                 'dh21.impp_conce'
             ])
-            ->when(!is_null($codn_conce), function ($query) use ($codn_conce) {
+            ->when($codn_conce !== null, function ($query) use ($codn_conce) {
                 return is_array($codn_conce)
                     ? $query->whereIn('dh21.codn_conce', $codn_conce)
                     : $query->where('dh21.codn_conce', $codn_conce);
             })
-            ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui)
-            ->orderBy('lc.codc_uacad')
+            ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui);
+
+            
+            if ($codn_conce === null) {
+                $query->limit(100); // Límite razonable por defecto
+            }
+
+            return $query->orderBy('lc.codc_uacad')
             ->orderBy('lc.coddependesemp');
     }
 

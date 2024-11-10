@@ -187,10 +187,6 @@ class Dh22 extends Model
     {
         return Attribute::make(
             get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
-            // get: fn (mixed $value, array $attributes) => new PeriodoFiscal(
-            //     anio: $attributes['per_liano'],
-            //     mes: $attributes['per_limes']
-            // )
         );
     }
 
