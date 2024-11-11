@@ -2,26 +2,27 @@
 
 namespace App\Livewire\Reportes;
 
-use Livewire\Component;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
-use App\Services\ReportHeaderService;
-use Illuminate\Contracts\Support\Htmlable;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
+use App\Services\ReportHeaderService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
     public $reportData;
     public $liquidacionId = null;
     public $totalGeneral;
-    public $totalesPorFormaPago = [];
+    public array $totalesPorFormaPago = [];
     public $totalesPorFuncion; // propiedad para almacenar los totales por función
-    public $totalesPorFinanciamiento = [];
+    public array $totalesPorFinanciamiento = [];
     public array $reportHeader;
 
-    protected $repOrdenPagoRepository;
+    protected RepOrdenPagoRepositoryInterface $repOrdenPagoRepository;
 
-    public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository, ReportHeaderService $reportHeaderService)
+    public function boot(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository, ReportHeaderService $reportHeaderService): void
     {
         $this->repOrdenPagoRepository = $repOrdenPagoRepository;
         $dto = $reportHeaderService->getReportHeader($this->getLiquidationNumber());
@@ -34,31 +35,49 @@ class OrdenPagoReporte extends Component implements Htmlable
         ];
     }
 
+    /**
+     * Obtiene el número de liquidación.
+     *
+     * Este método privado devuelve el número de liquidación, que se obtiene a partir de la propiedad `$liquidacionId`. Si `$liquidacionId` es nulo, se devuelve el valor predeterminado de 1.
+     *
+     * @return int El número de liquidación.
+     */
+    private function getLiquidationNumber(): int
+    {
+        return $this->liquidacionId ?? 1;
+    }
 
-
-    public function mount(int $liquidacionId = null)
+    public function mount(int $liquidacionId = null): void
     {
         $this->liquidacionId = $liquidacionId;
         $this->loadReportData($this->liquidacionId);
         $this->calculateTotalesGenerales();
     }
 
-
-    public function loadReportData(array|int|null $liquidacionId = null)
+    /**
+     * Carga los datos del reporte de Orden de Pago.
+     *
+     * Este método publico se encarga de cargar los datos del reporte de Orden de Pago,
+     * agrupándolos por banco, función, fuente de financiamiento y unidad académica.
+     * También calcula los totales acumulados para cada nivel de agrupación.
+     *
+     * @param array|int|null $liquidacionId El ID de la liquidación para la que se generará el reporte.
+     * @return void
+     */
+    public function loadReportData(array|int|null $liquidacionId = null): void
     {
         $data = $this->repOrdenPagoRepository->getAllWithUnidadAcademica($liquidacionId);
         // Asegurar que $data sea una colección
-        if (!$data instanceof \Illuminate\Support\Collection) {
+        if (!$data instanceof Collection) {
             $data = collect($data);
         }
 
         $this->reportData = $this->convertToBaseCollection(
             collection: $data->groupBy('banco')
-
                 ->map(function ($porBanco) {
 
                     $totalBanco = $this->initializeTotals();
-                    $funciones =  $porBanco->groupBy('codn_funci')
+                    $funciones = $porBanco->groupBy('codn_funci')
                         ->map(function ($porFunci, $funcion) use (&$totalBanco) {
 
                             $totalFuncion = $this->initializeTotals();
@@ -71,14 +90,13 @@ class OrdenPagoReporte extends Component implements Htmlable
 
                                             $totalUacad = $this->initializeTotals();
                                             $caracteres = $porUacad->groupBy('caracter')
-
                                                 ->map(function ($items) use (&$totalUacad, &$totalFuente, &$totalFuncion, &$totalBanco) {
 
                                                     $totals = $this->calculateTotals($items);
-                                                    $this->addTotals(totalAcumulado: $totalUacad,  totalsToAdd: $totals);
-                                                    $this->addTotals(totalAcumulado: $totalFuente,  totalsToAdd: $totals);
-                                                    $this->addTotals(totalAcumulado: $totalFuncion,  totalsToAdd: $totals);
-                                                    $this->addTotals(totalAcumulado: $totalBanco,  totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalUacad, totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalFuente, totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalFuncion, totalsToAdd: $totals);
+                                                    $this->addTotals(totalAcumulado: $totalBanco, totalsToAdd: $totals);
 
                                                     $retorno = [
                                                         'items' => $items,
@@ -108,43 +126,29 @@ class OrdenPagoReporte extends Component implements Htmlable
                     ];
                 })
         );
-        // dd($this->reportData);
     }
 
-    private function convertToBaseCollection($collection)
+    /**
+     * Convierte una colección a una colección base.
+     *
+     * Este método privado toma una colección y convierte cada elemento a una colección base.
+     * Si el elemento es una instancia de \Illuminate\Database\Eloquent\Collection, se convierte a una colección base.
+     * Si el elemento es una instancia de \Illuminate\Support\Collection, se llama recursivamente a este método para convertir la colección.
+     *
+     * @param Collection $collection La colección a convertir.
+     * @return Collection La colección convertida a una colección base.
+     */
+    private function convertToBaseCollection(Collection $collection): Collection
     {
         return $collection->map(function ($item) {
-            if ($item instanceof \Illuminate\Database\Eloquent\Collection) {
+            if ($item instanceof Collection) {
                 $item = $item->toBase();
             }
-            if ($item instanceof \Illuminate\Support\Collection) {
+            if ($item instanceof Collection) {
                 return $this->convertToBaseCollection($item);
             }
             return $item;
         });
-    }
-
-    /**
-     * Calcula los totales acumulados para un conjunto de elementos.
-     *
-     * Este método privado toma un conjunto de elementos y calcula los totales
-     * acumulados para los siguientes campos: remunerativo, estipendio, productividad,
-     * med_resid, sal_fam, hs_extras y el total.
-     *
-     * @param \Illuminate\Support\Collection $items Conjunto de elementos para los que se calcularán los totales.
-     * @return array Un array asociativo con los totales calculados para cada campo.
-     */
-    private function calculateTotals($items)
-    {
-        return [
-            'bruto' => $items->sum('bruto'),
-            'estipendio' => $items->sum('estipendio'),
-            'productividad' => $items->sum('productividad'),
-            'med_resid' => $items->sum('med_resid'),
-            'sal_fam' => $items->sum('sal_fam'),
-            'hs_extras' => $items->sum('hs_extras'),
-            'total' => $items->sum('total')
-        ];
     }
 
     /**
@@ -157,7 +161,7 @@ class OrdenPagoReporte extends Component implements Htmlable
      *
      * @return array Un array con los campos de totales inicializados a cero.
      */
-    private function initializeTotals()
+    private function initializeTotals(): array
     {
         return [
             'bruto' => 0,
@@ -171,15 +175,26 @@ class OrdenPagoReporte extends Component implements Htmlable
     }
 
     /**
-     * Obtiene el número de liquidación.
+     * Calcula los totales acumulados para un conjunto de elementos.
      *
-     * Este método privado devuelve el número de liquidación, que se obtiene a partir de la propiedad `$liquidacionId`. Si `$liquidacionId` es nulo, se devuelve el valor predeterminado de 1.
+     * Este método privado toma un conjunto de elementos y calcula los totales
+     * acumulados para los siguientes campos: remunerativo, estipendio, productividad,
+     * med_resid, sal_fam, hs_extras y el total.
      *
-     * @return int El número de liquidación.
+     * @param Collection $items Conjunto de elementos para los que se calcularán los totales.
+     * @return array Un array asociativo con los totales calculados para cada campo.
      */
-    private function getLiquidationNumber(): int
+    private function calculateTotals(Collection $items): array
     {
-        return $this->liquidacionId ?? 1;
+        return [
+            'bruto' => $items->sum('bruto'),
+            'estipendio' => $items->sum('estipendio'),
+            'productividad' => $items->sum('productividad'),
+            'med_resid' => $items->sum('med_resid'),
+            'sal_fam' => $items->sum('sal_fam'),
+            'hs_extras' => $items->sum('hs_extras'),
+            'total' => $items->sum('total')
+        ];
     }
 
     /**
@@ -188,14 +203,14 @@ class OrdenPagoReporte extends Component implements Htmlable
      * @param array &$totalAcumulado Array donde se acumularán los totales
      * @param array $totalsToAdd Array con los totales a sumar
      */
-    private function addTotals(&$totalAcumulado, $totalsToAdd)
+    private function addTotals(array &$totalAcumulado, array $totalsToAdd): void
     {
         foreach ($totalAcumulado as $key => $value) {
             $totalAcumulado[$key] += $totalsToAdd[$key];
         }
     }
 
-    public function calculateTotalesGenerales()
+    public function calculateTotalesGenerales(): void
     {
         // Inicializar la estructura de datos
         $this->totalesPorFinanciamiento = ['banco' => [], 'efectivo' => []];
@@ -228,11 +243,7 @@ class OrdenPagoReporte extends Component implements Htmlable
     }
 
 
-
-
-
-
-    public function descargarReportePDF()
+    public function descargarReportePDF(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $data = [
             'reportData' => $this->reportData,
@@ -258,27 +269,23 @@ class OrdenPagoReporte extends Component implements Htmlable
         }, 'users.pdf');
     }
 
-
-    public function toHtml()
+    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application
     {
-        return $this->render()->with($this->getPublicProperties());
-    }
-
-    public function render()
-    {
-        // return view(view: 'livewire.reportes.orden-pago-reporte', data: [
-        //     'reportData' => $this->reportData,
-        //     'reportHeader' => $this->reportHeader,
-        //     'totalesPorFormaPago' => $this->totalesPorFormaPago,
-        //     'totalGeneral' => $this->totalGeneral,
-        // ]);
-
-
         return view(view: 'livewire.reportes.orden-pago-reporte-exportable', data: [
             'reportData' => $this->reportData,
             'reportHeader' => $this->reportHeader,
             'totalesPorFormaPago' => $this->totalesPorFormaPago,
             'totalGeneral' => $this->totalGeneral,
         ]);
+    }
+
+    public function toHtml()
+    {
+        return $this->render()->with($this->getPublicProperties());
+    }
+
+    private function getPublicProperties(): array
+    {
+        return [];
     }
 }

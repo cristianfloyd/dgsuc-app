@@ -1,17 +1,17 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 namespace App\Filament\Resources\ReporteResource\Pages;
 
-use Livewire\Attributes\On;
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Services\RepOrdenPagoService;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ReporteResource;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
+use App\Services\RepOrdenPagoService;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class ListReportes extends ListRecords
 {
@@ -21,20 +21,12 @@ class ListReportes extends ListRecords
     public bool $reporteGenerado = false;
     protected RepOrdenPagoService $ordenPagoService;
 
-    public static function getEloquentQuery(): Builder
+    public static function getEloquentQuery()
     {
-//        return parent::getEloquentQuery()
-//            ->with('unidadAcademica')
-//            ->orderBy('nro_liqui', 'asc');
-        // Usar el servicio RepOrdenPagoService para obtener los datos
         $repOrdenPagoService = app(RepOrdenPagoService::class);
         $repOrdenPagoRecords = $repOrdenPagoService->getAllRepOrdenPago();
 
-        /**
-         * Devuelve una instancia de generador de consultas para los registros RepOrdenPago.
-         *
-         * @return Builder
-         */
+
         return $repOrdenPagoRecords->toQuery();
     }
 
@@ -64,8 +56,6 @@ class ListReportes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Actions\CreateAction::make(),
-            //ReporteResource::getActions(),
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
@@ -100,7 +90,7 @@ class ListReportes extends ListRecords
             // Notification::make()->title('Reporte generado')->success()->send();
             $this->reporteGenerado = true;
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al generar el reporte: ' . $e->getMessage());
             Notification::make()->title('Error al generar el reporte')->danger()->send();
             $this->reporteGenerado = false;
@@ -108,7 +98,7 @@ class ListReportes extends ListRecords
         }
     }
 
-    public function getLiquidacionesSeleccionadas()
+    public function getLiquidacionesSeleccionadas(): array
     {
         $data = session('idsLiquiSelected', []);
         Log::debug("getLiquidacionesSeleccionadas", ['data' => $data]);
