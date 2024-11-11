@@ -98,7 +98,7 @@ class ConceptoListadoResourceService
      */
     public function refreshMaterializedView(): void
     {
-        DB::connection($this->getConnectionName())->statement('REFRESH MATERIALIZED VIEW concepto_listado');
+        DB::connection($this->getConnectionName())->statement('REFRESH MATERIALIZED VIEW suc.concepto_listado');
         Cache::tags(['concepto_listado'])->flush();
     }
 

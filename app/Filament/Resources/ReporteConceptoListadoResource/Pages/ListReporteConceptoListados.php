@@ -37,13 +37,10 @@ class ListReporteConceptoListados extends ListRecords
                             ->with('error', 'No se encontraron registros con los filtros seleccionados.');
                     }
                     $query = $query->select([
-                        'codc_uacad',
-                        'periodo_fiscal',
                         'desc_liqui',
-                        'nro_legaj',
-                        'cuil',
                         'desc_appat',
                         'desc_nombr',
+                        'nro_legaj',
                         'coddependesemp',
                         'secuencia',
                         'codn_conce',

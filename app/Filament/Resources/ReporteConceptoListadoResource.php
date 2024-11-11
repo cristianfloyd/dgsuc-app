@@ -40,10 +40,7 @@ class ReporteConceptoListadoResource extends Resource
             ]);
     }
 
-    public function boot(): void
-    {
-        Log::info('Mounting ReporteConceptoListadoResource');
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -61,7 +58,6 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('cuil')->label('CUIL'),
                 TextColumn::make('desc_appat')->label('Apellido'),
                 TextColumn::make('desc_nombr')->label('Nombre'),
-                TextColumn::make('coddependesemp')->label('Oficina de Pago'),
                 TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('impp_conce')->label('Importe'),
