@@ -99,10 +99,6 @@ class ReporteConceptoListadoResource extends Resource
                                 fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             );
                         }),
-                // SelectFilter::make('nro_liqui')
-                //     ->label('Período')
-                //     ->options(fn() => Dh22Service::getLiquidacionesParaSelect())
-                //     ->searchable(),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
                     ->multiple()

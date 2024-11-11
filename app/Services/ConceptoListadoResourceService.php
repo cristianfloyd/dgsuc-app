@@ -4,11 +4,19 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
+use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use Illuminate\Database\Eloquent\Builder;
 
 class ConceptoListadoResourceService
 {
+    use MapucheConnectionTrait;
+
+    public function getCacheKey(array $filters): string
+    {
+        return 'concepto_listado:' . md5(serialize($filters));
+    }
 
     /**
      * Obtiene la consulta de ConceptoListado filtrada según los parámetros especificados.
@@ -23,13 +31,22 @@ class ConceptoListadoResourceService
     {
         // Si no hay filtros, retornamos query vacía
         if (empty($filters)) {
-            return ConceptoListado::query();
+            return ConceptoListado::query()
+                ->orderBy('codc_uacad')
+                ->orderBy('nro_legaj');
         }
+
+        $cacheKey = $this->getCacheKey($filters);
+
 
         // Solo construimos la query si hay filtros
         $query = ConceptoListado::query();
-        // dd($query->toSql());
-        return $this->applyFilters($query, $filters);
+
+        // Aplicamos los filtros
+        $query = $this->applyFilters($query, $filters);
+
+        // Retornamos el Builder directamente
+        return $query;
     }
 
 
@@ -64,6 +81,16 @@ class ConceptoListadoResourceService
         return $query;
     }
 
+    // Método separado para obtener resultados cacheados
+    private function getCachedResults(Builder $query, string $cacheKey)
+    {
+        return Cache::store('file')->remember(
+            $cacheKey,
+            now()->addHours(24),
+            fn() => $query->get()
+        );
+    }
+
     /**
      * Actualiza la vista materializada 'concepto_listado' y limpia la caché asociada.
      * Esta función se utiliza para refrescar los datos de la vista materializada que almacena
@@ -71,7 +98,12 @@ class ConceptoListadoResourceService
      */
     public function refreshMaterializedView(): void
     {
-        DB::statement('REFRESH MATERIALIZED VIEW concepto_listado');
+        DB::connection($this->getConnectionName())->statement('REFRESH MATERIALIZED VIEW concepto_listado');
         Cache::tags(['concepto_listado'])->flush();
+    }
+
+    public function refreshCache(): void
+    {
+        Redis::connection()->flushdb();
     }
 }

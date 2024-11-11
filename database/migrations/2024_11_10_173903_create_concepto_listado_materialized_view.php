@@ -28,11 +28,11 @@ return new class extends Migration
             )
             SELECT
                 CONCAT(dh21.nro_legaj,'-',lc.coddependesemp,'-',dh21.nro_liqui,'-',dh21.codn_conce) as id,
-                dh21.nro_legaj,
-                lc.codc_uacad,
+                lc.codc_uacad as codc_uacad,
                 CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) as periodo_fiscal,
                 dh22.nro_liqui,
                 dh22.desc_liqui,
+                dh21.nro_legaj,
                 dh01.desc_appat,
                 dh01.desc_nombr,
                 CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil,
@@ -45,6 +45,7 @@ return new class extends Migration
             INNER JOIN legajo_cargo lc ON dh21.nro_legaj = lc.nro_legaj
             INNER JOIN mapuche.dh01 ON dh21.nro_legaj = dh01.nro_legaj
             INNER JOIN mapuche.dh22 ON dh21.nro_liqui = dh22.nro_liqui
+            ORDER BY lc.codc_uacad, dh21.nro_legaj
         ");
 
         // Creamos índices para optimizar las búsquedas

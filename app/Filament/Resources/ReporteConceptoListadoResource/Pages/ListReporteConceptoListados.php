@@ -30,25 +30,29 @@ class ListReporteConceptoListados extends ListRecords
                 ->action(function ($data) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
                     $query = $this->getFilteredSortedTableQuery();
+                    // dd($query->toSql());
                     // comprobar que el query no este vacio
-                    // if ($query->count() == 0) {
-                    //     return redirect()->route('filament.resources.reporte-concepto-listado.index')
-                    //         ->with('error', 'No se encontraron registros con los filtros seleccionados.');
-                    // }
+                    if ($query->count() == 0) {
+                        return redirect()->route('filament.resources.reporte-concepto-listado.index')
+                            ->with('error', 'No se encontraron registros con los filtros seleccionados.');
+                    }
                     $query = $query->select([
-                        'dh21.nro_legaj',
-                        'lc.codc_uacad',
-                        DB::raw("CONCAT(dh22.per_liano, LPAD(CAST(dh22.per_limes AS TEXT), 2, '0')) as periodo_fiscal"),
-                        'dh22.desc_liqui',
-                        DB::raw("concat(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil"),
-                        'dh01.desc_appat',
-                        'dh01.desc_nombr',
+                        'codc_uacad',
+                        'periodo_fiscal',
+                        'desc_liqui',
+                        'nro_legaj',
+                        'cuil',
+                        'desc_appat',
+                        'desc_nombr',
                         'coddependesemp',
-                        'lc.nro_cargo as secuencia',
-                        'dh21.codn_conce',
-                        'dh21.impp_conce'
-                    ]);
-                    // dd($query->get()->toArray());
+                        'secuencia',
+                        'codn_conce',
+                        'impp_conce'
+                    ])
+                    // ->orderBy('codc_uacad')
+                    // ->orderBy('nro_legaj')
+                    ;
+                    // dd($query->toSql());
                     return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                 })
                 ->requiresConfirmation()
