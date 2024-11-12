@@ -9,7 +9,7 @@ class MaintenanceLogsWidget extends Widget
 {
     protected static string $view = 'filament.widgets.maintenance-logs-widget';
     protected static bool $isLazy = true;
-    protected int $sortOrder = 4;
+    protected static ?int $sort = 5;
 
     public function getMaintenanceLogs(): array
     {

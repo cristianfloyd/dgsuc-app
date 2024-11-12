@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 class DatabaseHealthWidget extends Widget
 {
     protected static string $view = 'filament.widgets.database-health-widget';
-    protected int $sortOrder = 2;
+    protected static ?int $sort = 2;
     protected static bool $isLazy = true;
     protected string $connection = 'pgsql-mapuche';
 
@@ -45,7 +45,7 @@ class DatabaseHealthWidget extends Widget
             WHERE schema_name = 'mapuche'
             GROUP BY schema_name
             ");
-        
+
         return [
             'value' => $size[0]->size_in_mb ?? 0,
             'unit' => 'MB',

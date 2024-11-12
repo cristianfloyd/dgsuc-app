@@ -9,7 +9,7 @@ class ActivityLogWidget extends Widget
 {
     protected static string $view = 'filament.widgets.activity-log-widget';
     protected static bool $isLazy = true;
-    protected int $sortOrder = 5;
+    protected static ?int $sort = 4;
 
     public function getActivityData(): array
     {

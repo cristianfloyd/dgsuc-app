@@ -9,7 +9,7 @@ class SystemStatusWidget extends Widget
 {
     protected static string $view = 'filament.widgets.system-status-widget';
     protected static bool $isLazy = true;
-    protected int $sortOrder = 3;
+    protected static ?int $sort = 3;
 
     public function getSystemMetrics(): array
     {

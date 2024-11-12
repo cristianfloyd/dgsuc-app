@@ -1,7 +1,4 @@
     <x-filament::widget>
-        <x-filament::section>
-            <h4>Database</h4>
-        </x-filament::section>
         <x-filament::card>
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
