@@ -2,7 +2,7 @@
 
 /** @noinspection SqlResolve */
 
-namespace App\Mapuche;
+namespace App\Mapuche\Gerencial;
 
 class Gerencial
 {
