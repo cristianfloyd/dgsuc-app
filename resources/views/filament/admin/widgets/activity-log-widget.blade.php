@@ -1,5 +1,5 @@
 <x-filament-widgets::widget>
     <x-filament::section>
-        <h4>SUC</h4>
+        {{-- Widget content --}}
     </x-filament::section>
 </x-filament-widgets::widget>
