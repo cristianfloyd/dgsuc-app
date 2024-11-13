@@ -36,6 +36,13 @@ class DatosGerencial_old
 						 LPAD(db.codn_fuent::varchar,2, '0')||'-'||
 					     LPAD(db.codn_progr::varchar,2, '0')||'.'||LPAD(db.codn_subpr::varchar,2, '0')||'.'||LPAD(db.codn_proye::varchar,2, '0')||'.'||LPAD(db.codn_activ::varchar,2, '0')||'.'||LPAD(db.codn_obra::varchar,2, '0')||'-'||
 					     LPAD(db.codn_final::varchar,2, '0')||'.'||LPAD(db.codn_funci::varchar,2, '0')) AS imputacion,
+                        suc.geren_generar_imput_code(
+                                dh21.tipo_ejercicio, dh21.codn_grupo_presup,
+                                dh21.codn_area, dh21.codn_subar, dh21.codn_subsubar,
+                                dh21.codn_progr, dh21.codn_subpr, dh21.codn_proye,
+                                dh21.codn_activ, dh21.codn_obra, dh21.codn_final,
+                                dh21.codn_funci
+                        ) AS codn_imput,
 						db.nro_inciso,
 						db.nro_legaj,
 						dh01.desc_appat || ', ' || dh01.desc_nombr AS desc_apyno,

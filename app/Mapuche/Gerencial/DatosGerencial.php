@@ -16,13 +16,13 @@ class DatosGerencial
 
         if ($ok) {
             return DB::table('datos_base_dh21 as db')
-                ->join($map_esquema . '.dh01 as dh01', 'dh01.nro_legaj', '=', 'db.nro_legaj')
-                ->join($map_esquema . '.dh03 as dh03', function ($join) {
+                ->join("$map_esquema.dh01 as dh01", 'dh01.nro_legaj', '=', 'db.nro_legaj')
+                ->join("$map_esquema.dh03 as dh03", function ($join) {
                     $join->on('dh03.nro_legaj', '=', 'db.nro_legaj')
                         ->on('dh03.nro_cargo', '=', 'db.nro_cargo');
                 })
-                ->leftJoin($map_esquema . '.dh11', 'dh11.codc_categ', '=', 'db.codc_categ')
-                ->leftJoin($map_esquema . '.dh31', 'dh31.codc_dedic', '=', 'dh11.codc_dedic')
+                ->leftJoin("$map_esquema.dh11", 'dh11.codc_categ', '=', 'db.codc_categ')
+                ->leftJoin("$map_esquema.dh31", 'dh31.codc_dedic', '=', 'dh11.codc_dedic')
                 ->leftJoin('importes_netos as netos', function ($join) {
                     $join->on('netos.nro_legaj', '=', 'db.nro_legaj')
                         ->on('netos.nro_cargo', '=', 'db.nro_cargo')
@@ -43,7 +43,7 @@ class DatosGerencial
                         ->on('dt.nro_cargo', '=', 'db.nro_cargo')
                         ->on('dt.nro_liqui', '=', 'db.nro_liqui');
                 })
-                ->leftJoin($map_esquema . '.dh01_nomelegido', 'dh01.nro_legaj', '=', 'dh01_nomelegido.nro_legaj')
+                ->leftJoin("$map_esquema.dh01_nomelegido", 'dh01.nro_legaj', '=', 'dh01_nomelegido.nro_legaj')
                 ->select([
                     'db.codn_fuent',
                     'db.codn_depen',
