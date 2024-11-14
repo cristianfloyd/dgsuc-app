@@ -14,19 +14,14 @@ class Dh05 extends Model
 {
     use MapucheConnectionTrait;
 
-    // Especificar la tabla asociada al modelo
     public $incrementing = false;
 
-    // Especificar la clave primaria
     public $timestamps = false;
 
-    // Indicar que la clave primaria no es auto-incremental
     protected $table = 'dh05';
 
-    // Indicar que la clave primaria es de tipo entero
     protected $primaryKey = 'nro_licencia';
 
-    // Deshabilitar timestamps si no existen en la tabla
     protected $keyType = 'int';
 
     // Especificar los campos que se pueden asignar masivamente

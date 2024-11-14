@@ -20,13 +20,13 @@ class ConceptoListado extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'desc_liqui',
+        'apellido',
+        'nombre',
         'nro_legaj',
         'codc_uacad',
         'periodo_fiscal',
         'nro_liqui',
-        'desc_liqui',
-        'apellido',
-        'nombre',
         'cuil',
         'secuencia',
         'codn_conce',

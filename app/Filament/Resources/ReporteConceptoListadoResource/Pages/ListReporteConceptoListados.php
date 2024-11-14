@@ -41,8 +41,8 @@ class ListReporteConceptoListados extends ListRecords
                         'desc_appat',
                         'desc_nombr',
                         'nro_legaj',
-                        'coddependesemp',
                         'secuencia',
+                        'codc_uacad',
                         'codn_conce',
                         'impp_conce'
                     ])

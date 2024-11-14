@@ -82,6 +82,16 @@ class Dh22 extends Model
         return $this->belongsTo(Dh22Tipo::class, 'id_tipo_liqui', 'id');
     }
 
+    /**
+     * Obtiene el estado de liquidación asociado.
+     */
+    public function estadoLiquidacion(): BelongsTo
+    {
+        return $this->belongsTo(EstadoLiquidacionModel::class, 'sino_cerra', 'cod_estado_liquidacion');
+    }
+
+
+
     public static function getLiquidacionesForWidget(): Builder
     {
         return self::query()
@@ -92,23 +102,11 @@ class Dh22 extends Model
     }
 
 
-    /**
-     * Obtiene el estado de liquidación asociado.
-     */
-    public function estadoLiquidacion(): BelongsTo
-    {
-        return $this->belongsTo(EstadoLiquidacionModel::class, 'sino_cerra', 'cod_estado_liquidacion');
-    }
 
-    public function scopeAbierta($query)
-    {
-        return $query->where('sino_cerra', '!=', 'C'); // Asumiendo que 'C' significa cerrada
-    }
 
-    public function scopeDefinitiva($query)
-    {
-        return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
-    }
+
+
+
 
     public static function getDescripcionLiquidacion($nro_liqui): string
     {
@@ -219,5 +217,15 @@ class Dh22 extends Model
 
         return $query->where('per_liano', $year)
                     ->where('per_limes', $month);
+    }
+
+    public function scopeAbierta($query)
+    {
+        return $query->where('sino_cerra', '!=', 'C'); // Asumiendo que 'C' significa cerrada
+    }
+
+    public function scopeDefinitiva($query)
+    {
+        return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
     }
 }

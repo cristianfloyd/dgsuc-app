@@ -65,10 +65,8 @@ class ConceptoListadoService
                 'dh01.desc_appat',
                 'dh01.desc_nombr',
                 DB::raw("concat(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil"),
-                'lc.coddependesemp',
                 'lc.nro_cargo as secuencia',
                 'dh21.codn_conce',
-                'dh21.tipo_conce',
                 'dh21.impp_conce'
             ])
             ->when($codn_conce !== null, function ($query) use ($codn_conce) {
@@ -78,7 +76,7 @@ class ConceptoListadoService
             })
             ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui);
 
-            
+
             if ($codn_conce === null) {
                 $query->limit(100); // Límite razonable por defecto
             }
