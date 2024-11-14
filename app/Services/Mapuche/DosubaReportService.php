@@ -4,10 +4,12 @@ namespace App\Services\Mapuche;
 
 use Carbon\Carbon;
 use App\Models\Dh03;
+use App\Models\Dh21;
 use App\Models\Mapuche\Dh05;
 use App\Models\Mapuche\Dh22;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use App\ValueObjects\PeriodoLiquidacion;
 
 class DosubaReportService
 {
@@ -19,25 +21,25 @@ class DosubaReportService
      */
     public function getDosubaReport(string $year, string $month): Collection
     {
+        $periodo = new PeriodoLiquidacion($year, $month);
+
         // Calculamos las fechas de referencia
-        $fechaReferencia = Carbon::createFromFormat('Y-m', "$year-$month")->startOfMonth();
-        $fechaInicio = $fechaReferencia->copy()->subMonths(2);
-        $fechaCuartoMes = $fechaReferencia->copy()->subMonths(3);
+        $fechaReferencia = $periodo->getFechaReferencia();
+        $fechaInicio = $periodo->getFechaInicio();
+        $fechaCuartoMes = $periodo->getFechaCuartoMes();
 
         try {
             // Obtenemos empleados del cuarto mes
-            $empleadosCuartoMes = Dh22::query()
+            $empleadosCuartoMes = Dh21::query()
                 ->whereYear('per_liano', $fechaCuartoMes->year)
                 ->whereMonth('per_limes', $fechaCuartoMes->month)
-                ->where('tipo_liquidacion', 'D')
-                ->whereNull('bloqueo_completo')
-                ->where('id_dependencia', '!=', '')
+                ->conLiquidacionDefinitiva()
                 ->select('cuil')
                 ->distinct()
                 ->get();
 
             // Obtenemos empleados de los últimos 3 meses
-            $empleadosTresMeses = Dh05::query()
+            $empleadosTresMeses = Dh21::query()
                 ->whereBetween('fecha_liquidacion', [$fechaInicio, $fechaReferencia])
                 ->where('tipo_liquidacion', 'D')
                 ->whereNull('bloqueo_completo')

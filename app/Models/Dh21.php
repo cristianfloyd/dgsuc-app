@@ -141,4 +141,18 @@ class Dh21 extends Model
             }
         });
     }
+
+    public function scopeConLiquidacionDefinitiva($query)
+    {
+        return $query->whereHas('dh22', function($q) {
+            $q->definitiva();
+        });
+    }
+
+    public function scopeConFechaDeLiquidacion($query, $fecha)
+    {
+        return $query->whereHas('dh22', function ($q) use ($fecha) {
+            $q->where('fecha_liquidacion', $fecha);
+        });
+    }
 }

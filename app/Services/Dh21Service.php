@@ -12,7 +12,7 @@ class Dh21Service
 {
     protected $dh21;
     /**
-     * Create a new class instance.
+     * Crea una nueva instancia de la clase Dh21Service.
      */
     public function __construct(Dh21 $dh21)
     {
@@ -39,6 +39,13 @@ class Dh21Service
         return $query->sum('impp_conce');
     }
 
+    /**
+     * Obtiene una consulta para calcular los totales de los conceptos de una liquidación.
+     *
+     * @param int|null $nro_liqui Número de liquidación (opcional)
+     * @param int|null $codn_fuent Código de fuente (opcional)
+     * @return \Illuminate\Database\Eloquent\Builder Consulta para calcular los totales de los conceptos
+     */
     public function conceptosTotales(int $nro_liqui = null, int $codn_fuent = null): Builder
     {
         try {

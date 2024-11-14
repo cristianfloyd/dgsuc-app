@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class EstadoLiquidacionModel extends Model
 {
-    protected $connection = 'pgsql-mapuche';
-    protected $table = 'mapuche.estado_liquidacion';
+    use MapucheConnectionTrait;
+
+    protected $table = 'estado_liquidacion';
     public $timestamps = false;
 
     protected $fillable = [

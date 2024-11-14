@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
@@ -102,12 +103,6 @@ class Dh22 extends Model
     }
 
 
-
-
-
-
-
-
     public static function getDescripcionLiquidacion($nro_liqui): string
     {
         return static::select('desc_liqui')
@@ -205,6 +200,7 @@ class Dh22 extends Model
         );
     }
 
+// ########################################################################################
     public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('dh21.nro_liqui', $nroLiqui);
@@ -227,5 +223,40 @@ class Dh22 extends Model
     public function scopeDefinitiva($query)
     {
         return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
+    }
+
+    /**
+     * Scope para filtrar liquidaciones por rango de fechas
+     *
+     * @param Builder $query
+     * @param Carbon $fechaInicio
+     * @param Carbon $fechaFin
+     * @return Builder
+     */
+    public function scopeBetweenPeriodoLiquidacion($query, $fechaInicio, $fechaFin)
+    {
+        $añoInicio = $fechaInicio->year;
+        $mesInicio = $fechaInicio->month;
+        $añoFin = $fechaFin->year;
+        $mesFin = $fechaFin->month;
+
+        return $query->where(function ($q) use ($añoInicio, $mesInicio, $añoFin, $mesFin) {
+            if ($añoInicio === $añoFin) {
+                $q->where('per_liano', $añoInicio)
+                  ->whereBetween('per_limes', [$mesInicio, $mesFin]);
+            } else {
+                $q->where(function ($subQ) use ($añoInicio, $mesInicio, $añoFin, $mesFin) {
+                    $subQ->where(function ($innerQ) use ($añoInicio, $mesInicio) {
+                        $innerQ->where('per_liano', $añoInicio)
+                               ->where('per_limes', '>=', $mesInicio);
+                    })->orWhere(function ($innerQ) use ($añoFin, $mesFin) {
+                        $innerQ->where('per_liano', $añoFin)
+                               ->where('per_limes', '<=', $mesFin);
+                    })->orWhere(function ($innerQ) use ($añoInicio, $añoFin) {
+                        $innerQ->whereBetween('per_liano', [$añoInicio + 1, $añoFin - 1]);
+                    });
+                });
+            }
+        });
     }
 }
