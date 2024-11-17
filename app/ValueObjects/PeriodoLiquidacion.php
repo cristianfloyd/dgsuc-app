@@ -40,6 +40,16 @@ class PeriodoLiquidacion
      */
     public function getFechaCuartoMes(): Carbon
     {
+        return $this->fecha->copy()->subMonths(4);
+    }
+
+    /**
+     * Devuelve la fecha correspondiente al tercer mes anterior a la fecha de referencia del periodo de liquidación.
+     *
+     * @return Carbon La fecha correspondiente al tercer mes anterior a la fecha de referencia.
+     */
+    public function getFechaTercerMes(): Carbon
+    {
         return $this->fecha->copy()->subMonths(3);
     }
 

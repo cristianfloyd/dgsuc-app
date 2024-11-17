@@ -29,7 +29,7 @@ class DosubaReportService
         $fechaCuartoMes = $periodo->getFechaCuartoMes();
 
         try {
-            // Obtenemos empleados del cuarto mes
+            // Obtener empleados del cuarto mes
             $empleadosCuartoMes = Dh21::query()
                 ->whereYear('per_liano', $fechaCuartoMes->year)
                 ->whereMonth('per_limes', $fechaCuartoMes->month)
@@ -40,10 +40,8 @@ class DosubaReportService
 
             // Obtenemos empleados de los últimos 3 meses
             $empleadosTresMeses = Dh21::query()
-                ->whereBetween('fecha_liquidacion', [$fechaInicio, $fechaReferencia])
-                ->where('tipo_liquidacion', 'D')
-                ->whereNull('bloqueo_completo')
-                ->where('id_dependencia', '!=', '')
+                ->entreFechas($fechaInicio, $fechaReferencia)
+                ->empleadosActivos()
                 ->select('cuil')
                 ->distinct()
                 ->get();

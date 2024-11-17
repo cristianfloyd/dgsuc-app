@@ -155,4 +155,20 @@ class Dh21 extends Model
             $q->where('fecha_liquidacion', $fecha);
         });
     }
+
+    public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
+    {
+        return $query->whereHas('dh22', function($query) use ($fechaInicio, $fechaFin) {
+            $query->scopeBetweenPeriodoLiquidacion($fechaInicio, $fechaFin);
+        });
+    }
+
+    public function scopeEmpleadosActivos($query)
+    {
+        return $query->whereHas('dh22', function($q) {
+                $q->definitiva();
+            })
+            ->whereNull('bloqueo_completo')
+            ->where('id_dependencia', '!=', '');
+    }
 }
