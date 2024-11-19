@@ -1,0 +1,75 @@
+<?php
+
+namespace App\ValueObjects;
+
+use Carbon\Carbon;
+
+class PeriodoLiquidacion
+{
+    private Carbon $fecha;
+
+    public function __construct(string $year, string $month)
+    {
+        $this->fecha = Carbon::createFromFormat('Y-m', "$year-$month")->startOfMonth();
+    }
+
+    /**
+     * Devuelve la fecha de referencia del periodo de liquidación.
+     *
+     * @return Carbon La fecha de referencia del periodo de liquidación.
+     */
+    public function getFechaReferencia(): Carbon
+    {
+        return $this->fecha;
+    }
+
+    /**
+     * Devuelve la fecha de inicio del periodo de liquidación, que es 2 meses antes de la fecha de referencia.
+     *
+     * @return Carbon La fecha de inicio del periodo de liquidación.
+     */
+    public function getFechaInicio(): Carbon
+    {
+        return $this->fecha->copy()->subMonths(2);
+    }
+
+    /**
+     * Devuelve la fecha correspondiente al cuarto mes anterior a la fecha de referencia del periodo de liquidación.
+     *
+     * @return Carbon La fecha correspondiente al cuarto mes anterior a la fecha de referencia.
+     */
+    public function getFechaCuartoMes(): Carbon
+    {
+        return $this->fecha->copy()->subMonths(4);
+    }
+
+    /**
+     * Devuelve la fecha correspondiente al tercer mes anterior a la fecha de referencia del periodo de liquidación.
+     *
+     * @return Carbon La fecha correspondiente al tercer mes anterior a la fecha de referencia.
+     */
+    public function getFechaTercerMes(): Carbon
+    {
+        return $this->fecha->copy()->subMonths(3);
+    }
+
+    /**
+     * Devuelve el año correspondiente a la fecha de referencia del periodo de liquidación.
+     *
+     * @return string El año correspondiente a la fecha de referencia del periodo de liquidación.
+     */
+    public function getYear(): string
+    {
+        return $this->fecha->format('Y');
+    }
+
+    /**
+     * Devuelve el mes correspondiente a la fecha de referencia del periodo de liquidación.
+     *
+     * @return string El mes correspondiente a la fecha de referencia del periodo de liquidación.
+     */
+    public function getMonth(): string
+    {
+        return $this->fecha->format('m');
+    }
+}

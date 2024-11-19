@@ -2,10 +2,12 @@
 
 namespace App\Repositories;
 
-use App\Contracts\Dh21RepositoryInterface;
-use App\Models\Dh21;
 use App\NroLiqui;
+use App\Models\Dh21;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use App\Contracts\Dh21RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dh21Repository implements Dh21RepositoryInterface
 {
@@ -43,4 +45,48 @@ class Dh21Repository implements Dh21RepositoryInterface
         }
         return $query->sum('impp_conce');
     }
+
+    /**
+     * Obtiene las horas y días trabajados para un legajo y cargo específico
+     *
+     * @param int $legajo
+     * @param int $cargo
+     * @return array{dias: int, horas: int}
+     */
+    public function getHorasYDias(int $legajo, int $cargo): array
+    {
+        return Dh21::query()
+            ->where('nro_legaj', $legajo)
+            ->where('nro_cargo', $cargo)
+            ->where('codn_conce', -51)
+            ->select([
+                DB::raw('MAX(nov1_conce) as dias'),
+                DB::raw('MAX(nov2_conce) as horas')
+            ])
+            ->first()
+            ->toArray();
+    }
+
+    /**
+     * Obtiene las liquidaciones con sus importes y descripciones
+     *
+     * @param array $conditions Condiciones adicionales para filtrar
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getLiquidaciones(array $conditions = []): Collection
+    {
+        return Dh21::query()
+            ->select('dh22.desc_liqui', 'dh21.codn_conce', 'dh21.impp_conce', 'dh21.desc_conce')
+            ->with('dh22')
+            ->when(!empty($conditions), function ($query) use ($conditions) {
+                foreach ($conditions as $column => $value) {
+                    $query->where($column, $value);
+                }
+            })
+            ->when(empty($conditions), function ($query) {
+                $query->where('nro_legaj', '=', 1);
+            })
+            ->get();
+    }
+
 }

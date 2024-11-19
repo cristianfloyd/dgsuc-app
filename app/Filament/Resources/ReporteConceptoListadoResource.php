@@ -46,14 +46,12 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('codc_uacad')->label('dependencia'),
+                TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
                     ->getStateUsing(fn($record) => $record->periodo_fiscal),
-                TextColumn::make('nro_liqui')->label('Nro. Liq.')->toggleable()->toggledHiddenByDefault()
-                    ->sortable(),
-                TextColumn::make('desc_liqui')->toggleable(),
+                TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('nro_legaj')->sortable(),
                 TextColumn::make('cuil')->label('CUIL'),
                 TextColumn::make('desc_appat')->label('Apellido'),
