@@ -4,6 +4,8 @@
 
 namespace App\Mapuche\Gerencial;
 
+use toba;
+
 class Gerencial
 {
 
@@ -387,6 +389,11 @@ class Gerencial
 					dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui;";
 
         //-- Obtengo las horas catedra y los días trabajados
+        /**
+         * Modifica la cláusula WHERE de la consulta SQL para filtrar los registros de la tabla de liquidación (dh21)
+         * donde el código de concepto (codn_conce) sea igual a -51,
+         * y elimina la condición que filtra los registros donde el número de origen de imputación (nro_orimp) sea mayor a 0.
+         */
         $where = str_replace('dh21.codn_conce > 0', 'dh21.codn_conce = -51 ', $where);
         $where = str_replace('AND dh21.nro_orimp > 0', ' ', $where);
         $sql .= "SELECT DISTINCT
@@ -402,30 +409,30 @@ class Gerencial
 					MAX (dh21.nov2_conce) AS hs_catedra
 					INTO TEMP TABLE datos_trabajados
 				FROM
-					" . $map_esquema . ".$tabla_liqui dh21
-					JOIN " . $map_esquema . ".dh22 ON (dh22.nro_liqui = dh21.nro_liqui)
-					LEFT OUTER JOIN " . $map_esquema . ".dh01 ON (dh01.nro_legaj = dh21.nro_legaj)
-					LEFT OUTER JOIN " . $map_esquema . ".dh17 ON (dh17.codn_conce = dh21.codn_conce)
-					LEFT OUTER JOIN " . $map_esquema . ".dh03 ON (dh03.nro_legaj = dh21.nro_legaj AND dh03.nro_cargo = dh21.nro_cargo)
-					LEFT OUTER JOIN " . $map_esquema . ".dh11 ON (dh03.codc_categ = dh11.codc_categ)
-					LEFT OUTER JOIN " . $map_esquema . ".dh31 ON (dh11.codc_dedic = dh31.codc_dedic)
-					LEFT OUTER JOIN " . $map_esquema . ".dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
+					mapuche.dh21 dh21
+					JOIN mapuche.dh22 ON (dh22.nro_liqui = dh21.nro_liqui)
+					LEFT OUTER JOIN mapuche.dh01 ON (dh01.nro_legaj = dh21.nro_legaj)
+					LEFT OUTER JOIN mapuche.dh17 ON (dh17.codn_conce = dh21.codn_conce)
+					LEFT OUTER JOIN mapuche.dh03 ON (dh03.nro_legaj = dh21.nro_legaj AND dh03.nro_cargo = dh21.nro_cargo)
+					LEFT OUTER JOIN mapuche.dh11 ON (dh03.codc_categ = dh11.codc_categ)
+					LEFT OUTER JOIN mapuche.dh31 ON (dh11.codc_dedic = dh31.codc_dedic)
+					LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
 				WHERE
-					$where
+					TRUE
 				GROUP BY
 					dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui
 				ORDER BY
 					dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui;";
 
-//        try {
-//            toba::db()->ejecutar($sql);
-//        } catch (toba_error_db $e) {
-//            toba::logger()->error($e);
-//            $mensaje = $e->getMessage();
-//            toba::notificacion()->agregar($mensaje);
-//            return false;
-//        }
-        return $sql;
+       try {
+           toba::db()->ejecutar($sql);
+       } catch (toba_error_db $e) {
+           toba::logger()->error($e);
+           $mensaje = $e->getMessage();
+           toba::notificacion()->agregar($mensaje);
+           return false;
+       }
+        return true;
     }
 
 }
