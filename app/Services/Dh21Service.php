@@ -6,19 +6,17 @@ use App\Models\Dh21;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\Dh21Repository;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dh21Service
 {
-    protected $dh21;
+
     /**
      * Crea una nueva instancia de la clase Dh21Service.
      */
-    public function __construct(Dh21 $dh21)
-    {
-        //
-        $this->dh21 = $dh21;
-    }
+    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository){}
 
     /**
      * Obtiene la suma total del concepto 101 en la tabla.
@@ -79,5 +77,28 @@ class Dh21Service
             Log::error('Error en conceptosTotales: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Obtiene las horas y días laborados por un empleado en un cargo específico.
+     *
+     * @param int $legajo Número de legajo del empleado
+     * @param int $cargo Código del cargo
+     * @return array Arreglo con las horas y días laborados
+     */
+    public function obtenerHorasYDias(int $legajo, int $cargo): array
+    {
+        return $this->dh21Repository->getHorasYDias($legajo, $cargo);
+    }
+
+    /**
+     * Obtiene las liquidaciones aplicando filtros opcionales
+     *
+     * @param array $conditions
+     * @return Collection
+     */
+    public function obtenerLiquidaciones(array $conditions = []): Collection
+    {
+        return $this->dh21Repository->getLiquidaciones($conditions);
     }
 }
