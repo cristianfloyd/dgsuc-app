@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Reportes;
 
-use App\Contracts\RepOrdenPagoRepositoryInterface;
-use App\Services\ReportHeaderService;
+use Livewire\Component;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Livewire\Component;
+use App\Services\ReportHeaderService;
+use Illuminate\Contracts\Support\Htmlable;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
@@ -164,13 +164,13 @@ class OrdenPagoReporte extends Component implements Htmlable
     private function initializeTotals(): array
     {
         return [
-            'bruto' => 0,
+            'remunerativo' => 0,
             'estipendio' => 0,
             'productividad' => 0,
             'med_resid' => 0,
             'sal_fam' => 0,
             'hs_extras' => 0,
-            'total' => 0
+            'gasto_total' => 0
         ];
     }
 

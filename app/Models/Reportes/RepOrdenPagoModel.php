@@ -33,16 +33,16 @@ class RepOrdenPagoModel extends Model
         'caracter',
         'codn_progr',
         'remunerativo',
+        'hs_extras',
         'no_remunerativo',
-        'descuentos',
-        'aportes',
-        'sueldo',
         'estipendio',
         'med_resid',
+        'otros_no_remunerativo',
+        'aportes',
+        'descuentos',
+        'neto',
         'productividad',
-        'sal_fam',
-        'hs_extras',
-        'total',
+        'gasto_total',
     ];
 
     /**

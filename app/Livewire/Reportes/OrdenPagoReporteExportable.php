@@ -38,7 +38,7 @@ class OrdenPagoReporteExportable extends Component
             'med_resid' => 0,
             'sal_fam' => 0,
             'hs_extras' => 0,
-            'total' => 0
+            'gasto_total' => 0
         ];
     }
 
