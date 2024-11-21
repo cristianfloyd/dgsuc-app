@@ -37,13 +37,15 @@
                                 <div class="w-full table-auto print:text-xs"">
                                     <x-reportes.table-component :headers="[
                                         'Programa',
-                                        'Bruto',
+                                        'Remunerativo',
+                                        'Hs. Extras',
+                                        'No remunerativo',
                                         'Estipendio',
                                         'Productividad',
                                         'Méd. Resid.',
-                                        'Sal. Fam.',
-                                        'Hs. Extras',
-                                        'Total',
+                                        'Descuentos',
+                                        'Neto',
+                                        'Imp. Gasto',
                                     ]">
                                         <div class="w-full table-auto print:text-xs">
                                             @foreach ($data['items'] as $item)
@@ -53,7 +55,13 @@
                                                         {{ $item->codn_progr }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->bruto) }}</td>
+                                                        {{ money($item->remunerativo) }}</td>
+                                                    <td
+                                                        class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
+                                                        {{ money($item->hs_extras) }}</td>
+                                                    <td
+                                                        class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
+                                                        {{ money($item->no_remunerativo) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
                                                         {{ money($item->estipendio) }}</td>
@@ -65,13 +73,13 @@
                                                         {{ money($item->med_resid) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->sal_fam) }}</td>
+                                                        {{ money($item->descuentos) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->hs_extras) }}</td>
+                                                        {{ money($item->neto) }}</td>
                                                     <td
                                                         class="bg-gray-200 font-bold text-gray-900 border border-gray-600 text-right pr-1">
-                                                        {{ money($item->total) }}</td>
+                                                        {{ money($item->imp_gasto) }}</td>
                                                 </tr>
                                             @endforeach
                                         </div>
@@ -81,13 +89,15 @@
                             @endforeach
                             <x-reportes.table-component class="b-slate-500" :headers="[
                                 'Total: ' . $uacad . '',
-                                'Sueldo',
+                                'Remunerativo',
+                                'Hs. Extras',
+                                'No remunerativo',
                                 'Estipendio',
                                 'Productividad',
                                 'Med. Resid.',
-                                'Sal. Fam.',
-                                'Hs. Extras',
-                                'Total',
+                                'Descuentos',
+                                'Neto',
+                                'Imp. Gasto',
                             ]" type="uacad">
                                 <x-reportes.totals-row :totals="$porUacad['totalUacad']" type="uacad" />
                             </x-reportes.table-component>
@@ -98,12 +108,14 @@
                         <x-reportes.table-component :headers="[
                             '',
                             'Remunerativo',
+                            'Hs. Extras',
+                            'No Remunerativo',
                             'Estipendio',
                             'Productividad',
                             'Med. Resid.',
-                            'Sal. Fam.',
-                            'Hs. Extras',
-                            'Total',
+                            'Descuentos',
+                            'Neto',
+                            'Imp. Gasto',
                         ]" type="fuente">
                             <x-reportes.totals-row :totals="$porFuente['totalFuente']" type="fuente" />
                         </x-reportes.table-component>
@@ -114,12 +126,14 @@
                     <x-reportes.table-component :headers="[
                         '',
                         'Remunerativo',
+                        'Hs. Extras',
+                        'No Remunerativo',
                         'Estipendio',
                         'Productividad',
                         'Med. Resid.',
-                        'Sal. Fam.',
-                        'Hs. Extras',
-                        'Total',
+                        'Descuentos',
+                        'Neto',
+                        'Imp. Gasto',
                     ]">
                         <x-reportes.totals-row :totals="$porFunci['totalFuncion']" type="funcion" />
                     </x-reportes.table-component>
@@ -130,12 +144,14 @@
                 <x-reportes.table-component :headers="[
                     '',
                     'Remunerativo',
+                    'Hs. Extras',
+                    'No Remunerativo',
                     'Estipendio',
                     'Productividad',
                     'Med. Resid.',
-                    'Sal. Fam.',
-                    'Hs. Extras',
-                    'Total',
+                    'Descuentos',
+                    'Neto',
+                    'Imp. Gasto',
                 ]">
                     <x-reportes.totals-row :totals="$porBanco['totalBanco']" type="banco" />
                 </x-reportes.table-component>
@@ -155,26 +171,52 @@
                     <x-reportes.table-component :headers="[
                         'Func.',
                         'Finan. e Inciso',
-                        'Sueldo',
+                        'Remunerativo',
+                        'Hs. Extras',
+                        'No Remunerativo',
                         'Estipendio',
                         'Productividad',
                         'Méd. Resid.',
-                        'Sal. Fam.',
-                        'Hs. Extras',
-                        'Total',
+                        'Descuentos',
+                        'Neto',
+                        'Imp. Gasto',
                     ]" type="generales">
                         @foreach ($totalesPorFinanciamiento[$formaPago] as $funcion => $porFuncion)
                             @foreach ($porFuncion as $financiamiento => $datos)
                                 <tr>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ $funcion }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ $financiamiento }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['bruto']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['estipendio']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['productividad']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['med_resid']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['sal_fam']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['hs_extras']) }}</td>
-                                    <td class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">{{ money($datos['total']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ $funcion }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ $financiamiento }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['remunerativo']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['hs_extras']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['no_remunerativo']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['productividad']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['med_resid']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['estipendio']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['descuentos']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['neto']) }}</td>
+                                    <td
+                                        class="text-right text-gray-950 font-bold print:font-normal print:text-sm print:text-black border-2 border-gray-900 pr-2">
+                                        {{ money($datos['imp_gasto']) }}</td>
                                 </tr>
                             @endforeach
                             <x-reportes.totals-row :totals="$totalesPorFuncion[$formaPago][$funcion]" type="subtotal-funcion" />
@@ -186,7 +228,8 @@
             <x-reportes.section-header :level="2">
                 TOTAL GENERAL
             </x-reportes.section-header>
-            <x-reportes.table-component :headers="['Sueldo', 'Estipendio', 'Productividad', 'Méd. Resid.', 'Sal. Fam.', 'Hs. Extras', 'Total']">
+            <x-reportes.table-component :headers="[
+                'Remunerativo', 'Hs. Extras','No Remunerativo','Estipendio', 'Productividad', 'Méd. Resid.', 'Descuentos', 'Neto', 'Total']">
                 <x-reportes.totals-row :totals="$totalGeneral" type="total-general" />
             </x-reportes.table-component>
         </div>

@@ -165,12 +165,14 @@ class OrdenPagoReporte extends Component implements Htmlable
     {
         return [
             'remunerativo' => 0,
+            'hs_extras' => 0,
+            'no_remunerativo' => 0,
             'estipendio' => 0,
             'productividad' => 0,
             'med_resid' => 0,
-            'sal_fam' => 0,
-            'hs_extras' => 0,
-            'gasto_total' => 0
+            'descuentos' => 0,
+            'neto' => 0,
+            'imp_gasto' => 0
         ];
     }
 
@@ -187,13 +189,15 @@ class OrdenPagoReporte extends Component implements Htmlable
     private function calculateTotals(Collection $items): array
     {
         return [
-            'bruto' => $items->sum('bruto'),
+            'remunerativo' => $items->sum('remunerativo'),
+            'hs_extras' => $items->sum('hs_extras'),
+            'no_remunerativo' => $items->sum('no_remunerativo'),
             'estipendio' => $items->sum('estipendio'),
             'productividad' => $items->sum('productividad'),
             'med_resid' => $items->sum('med_resid'),
-            'sal_fam' => $items->sum('sal_fam'),
-            'hs_extras' => $items->sum('hs_extras'),
-            'total' => $items->sum('total')
+            'descuentos' => $items->sum('descuentos'),
+            'neto' => $items->sum('neto'),
+            'imp_gasto' => $items->sum('imp_gasto'),
         ];
     }
 

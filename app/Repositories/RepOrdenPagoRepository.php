@@ -51,7 +51,6 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         } elseif (is_int(value: $nroLiquis)) {
             $query->where(column: 'nro_liqui', operator: $nroLiquis);
         }
-
         return $query->get();
     }
 

@@ -31,7 +31,7 @@ class RepOrdenPagoModel extends Model
         'codn_fuent',
         'codc_uacad',
         'caracter',
-        'codn_progr',
+        'codn_prog',
         'remunerativo',
         'hs_extras',
         'no_remunerativo',
@@ -42,7 +42,8 @@ class RepOrdenPagoModel extends Model
         'descuentos',
         'neto',
         'productividad',
-        'gasto_total',
+        'sal_fam',
+        'imp_gasto'
     ];
 
     /**
@@ -56,13 +57,12 @@ class RepOrdenPagoModel extends Model
         'no_remunerativo' => 'decimal:2',
         'descuentos' => 'decimal:2',
         'aportes' => 'decimal:2',
-        'sueldo' => 'decimal:2',
         'estipendio' => 'decimal:2',
         'med_resid' => 'decimal:2',
         'productividad' => 'decimal:2',
         'sal_fam' => 'decimal:2',
         'hs_extras' => 'decimal:2',
-        'total' => 'decimal:2',
+        'imp_gasto' => 'decimal:2',
     ];
 
     public function unidadAcademica(): BelongsTo
