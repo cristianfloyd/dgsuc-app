@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dh21h extends Model
 {
-    use MapucheConnectionTrait, Dh21hQueries, WithData;
+    use MapucheConnectionTrait, Dh21hQueries, WithData, HasFactory;
 
 
 

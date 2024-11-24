@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh22
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Dh22 extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, HasFactory;
 
     /**
      * Indica el nombre de la tabla asociada al modelo.
