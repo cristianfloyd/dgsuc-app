@@ -7,6 +7,7 @@ use App\Traits\Mapuche\Dh21hQueries;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -116,6 +117,12 @@ class Dh21h extends Model
             get: fn () => $this->impp_conce,
             set: fn ($value) => round($value, 2)
         );
+    }
+
+    // ############################### Relaciones #######################################
+    public function dh22(): BelongsTo
+    {
+        return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 }
 

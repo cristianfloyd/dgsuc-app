@@ -3,9 +3,9 @@
 namespace App\Services\Mapuche;
 
 use App\Models\Mapuche\Dh22;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Collection;
 
 class Dh22Service
 {
@@ -35,7 +35,7 @@ class Dh22Service
             if ($month) {
                 $query->where('per_limes', $month);
             }
-
+            dd($query->toSql());
             return $query->orderBy('per_liano', 'desc')
                          ->orderBy('per_limes', 'desc')
                          ->get();

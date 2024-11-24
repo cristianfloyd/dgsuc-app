@@ -123,6 +123,16 @@ class Dh22 extends Model
                 ->first();
     }
 
+    public static function getUltimasTresLiquidacionesDefinitivas()
+    {
+        return static::query()
+            ->definitiva()
+            ->orderBy('nro_liqui', 'desc')
+            ->limit(3)
+            ->get();
+    }
+
+
     /**
      * Obtiene el último nro_liqui de la tabla dh22.
      *
@@ -146,17 +156,6 @@ class Dh22 extends Model
     }
 
     /**
-     *  Metodo estatico para verificar si existe un nro_liqui en la tabla dh22.
-     *
-     * @param int $nroLiqui
-     * @return bool True si la función se ejecutó correctamente, false en caso contrario.
-     */
-    public static function verificarNroLiqui(int $nroLiqui): bool
-    {
-        return static::where('nro_liqui', $nroLiqui)->exists();
-    }
-
-    /**
      * Obtiene los distintos períodos fiscales formateados como YYYYMM.
      *
      * @return array
@@ -172,6 +171,19 @@ class Dh22 extends Model
             ->pluck('periodo', 'periodo_fiscal')
             ->toArray();
     }
+
+    /**
+     *  Metodo estatico para verificar si existe un nro_liqui en la tabla dh22.
+     *
+     * @param int $nroLiqui
+     * @return bool True si la función se ejecutó correctamente, false en caso contrario.
+     */
+    public static function verificarNroLiqui(int $nroLiqui): bool
+    {
+        return static::where('nro_liqui', $nroLiqui)->exists();
+    }
+
+
 
     /**
     * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
