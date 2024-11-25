@@ -73,6 +73,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                                     ->pluck('dh89.descesc', 'dh11.codigoescalafon')
                             )
                             ->merge([
+                                'DOC2' => 'Preuniversitario',
                                 'DOCS' => 'Docente Secundario',
                                 'DOCU' => 'Docente Universitario',
                                 'AUTU' => 'Autoridad Universitario',
@@ -85,6 +86,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                     $codc_categs = match ($state) {
                         'DOCE' => array_merge(self::CATEGORIAS['DOCS'],self::CATEGORIAS['DOCU']), // es la suma de DOCS + DOCU
                         'DOCS' => self::CATEGORIAS['DOCS'],
+                        'DOC2' => self::CATEGORIAS['DOC2'],
                         'DOCU' => self::CATEGORIAS['DOCU'],
                         'AUTU' => self::CATEGORIAS['AUTU'],
                         'AUTS' => self::CATEGORIAS['AUTS'],

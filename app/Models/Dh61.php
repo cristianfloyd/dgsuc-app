@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Dh61 extends Model
 {
+    use MapucheConnectionTrait;
     public $timestamps = false;
     public $incrementing = false;
-    protected $connection = 'pgsql-mapuche';
-    protected $table = 'mapuche.dh61';
+    protected $table = 'dh61';
 
     /**
      * primaryKey compuesta en formato array

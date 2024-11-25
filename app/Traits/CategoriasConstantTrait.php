@@ -10,14 +10,26 @@ trait CategoriasConstantTrait
      */
     public const array CATEGORIAS = [
         'DOCS' => [
-            'HOME','PEO6','ACPN','AYCP','AYEO','ATTP','JTPM','PR15','JTEP','JGEP','MEPS','MEPR','MC20','MENI',
-            'MEPI','MJMA','PREO','ASPE','BIPH','BIBL','JBIB','JEPR','MCOR','PR25','REG1','BI30','HOLU',
+                    'HOME', 'PEO6', 'ACPN', 'AYCP', 'AYEO', 'ATTP', 'JTPM', 'PR15', 'JTEP', 'JGEP',
+                    'MEPS', 'MEPR', 'MC20', 'MENI', 'MEPI', 'MJMA', 'PREO', 'ASPE', 'BIPH', 'BIBL',
+                    'JBIB', 'JEPR', 'MCOR', 'PR25','REG1','BI30','HOLU',
+        ],
+        'DOC2' => [ 'AYCP', 'SRG3', 'REG1', 'HOME', 'PR15', 'PR25', 'SRE1', 'SREG', 'BIBL', 'AYEO' ,
+                    'PREO', 'HOLU', 'RESE', 'VRSE', 'MEPR', 'MEPS', 'JGEP' ,
+                    'DI40', 'VD30', 'PEO6', 'MC20', 'ATTP', 'BI30', 'MCOR', 'ASPE', 'SECR', 'MENI' ,
+                    'ACPN', 'JTEP', 'MEPI', 'JEPR', 'PRSE', 'MJMA', 'JTPM', 'JBIB',
+                    'VD35', 'VD20',
+                    'HODI', 'HOJE', 'HOCO',
         ],
         'DOCU' => [
-            'A1EH','AY1E','JTEH','JTPE','ADEH','ASEH','TIEH','ADJE','ASOE','TITE','TIAE','A1PH','A2PH','AY1P','AY2P','JTPH','JTPP','ADPH','ASPH','TIPH','ADJP','ASOP','TITP','TIAP','A1SH','AY1S','JTSH','JTPS','ADSH','ASSH','TISH','ADJS','ASOS','TITS','TIAS','HOCO','HODI','HOJE','HOSU',
+                    'A1EH', 'AY1E', 'JTEH', 'JTPE', 'ADEH', 'ASEH', 'TIEH', 'ADJE', 'ASOE', 'TITE',
+                    'TIAE', 'A1PH', 'A2PH', 'AY1P', 'AY2P', 'JTPH', 'JTPP', 'ADPH', 'ASPH', 'TIPH',
+                    'ADJP', 'ASOP', 'TITP', 'TIAP', 'A1SH', 'AY1S', 'JTSH', 'JTPS', 'ADSH', 'ASSH',
+                    'TISH', 'ADJS', 'ASOS', 'TITS', 'TIAS', 'HOSU',
+                    //'HODI', 'HOJE', 'HOCO',
         ],
         'AUTS' => [
-            'VD20','PRSE','RESE','SECR','SREH','SREG','SRE1','SRG3','VRSE','VD30','VD35','DI40',
+            'VD20','PRSE','RESE','SECR','SREG','SRE1','VRSE','VD30','VD35','DI40',
         ],
         'AUTU' => [
             'DECC','SEFC','SEUC','VICC','VIDC','VIRC','DECE','RECT','SUHE','SEFE','SEUE',
@@ -29,3 +41,4 @@ trait CategoriasConstantTrait
         ],
     ];
 }
+

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Dh11Resource\Pages;
 
-use App\Filament\Resources\Dh11Resource;
 use Filament\Actions;
+use App\Filament\Resources\Dh11Resource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDh11 extends EditRecord
@@ -15,5 +15,10 @@ class EditDh11 extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->previousUrl ?? $this->getResource()::getUrl('index');
     }
 }
