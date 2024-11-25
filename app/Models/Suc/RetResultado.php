@@ -2,7 +2,7 @@
 
 namespace App\Models\Suc;
 
-use App\ValueObjetcs\Periodo;
+use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
