@@ -289,4 +289,15 @@ class Dh11 extends Model
         $service = app(CategoryUpdateServiceInterface::class);
         return $service->updateCategoryWithHistory($this, $porcentaje);
     }
+
+    /**
+     * Establece los valores de los atributos 'impp_basic' e 'impp_asign' con el valor proporcionado.
+     *
+     * @param float $value El valor a establecer en los atributos 'impp_basic' e 'impp_asign'.
+     */
+    protected function setImppBasicAttribute($value)
+    {
+        $this->attributes['impp_basic'] = $value;
+        $this->attributes['impp_asign'] = $value;
+    }
 }
