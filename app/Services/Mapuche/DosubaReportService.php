@@ -4,9 +4,7 @@ namespace App\Services\Mapuche;
 
 use Carbon\Carbon;
 use App\Models\Dh03;
-use App\Models\Dh21;
-use App\Models\Mapuche\Dh05;
-use App\Models\Mapuche\Dh22;
+use App\Models\Mapuche\Dh21h;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\ValueObjects\PeriodoLiquidacion;
@@ -19,7 +17,7 @@ class DosubaReportService
      * @param string $month
      * @return Collection
      */
-    public function getDosubaReport(string $year, string $month): Collection
+    public function getDosubaReport(string $year = '2024', string $month = '11'): Collection
     {
         $periodo = new PeriodoLiquidacion($year, $month);
 
@@ -30,16 +28,10 @@ class DosubaReportService
 
         try {
             // Obtener empleados del cuarto mes
-            $empleadosCuartoMes = Dh21::query()
-                ->whereYear('per_liano', $fechaCuartoMes->year)
-                ->whereMonth('per_limes', $fechaCuartoMes->month)
-                ->conLiquidacionDefinitiva()
-                ->select('cuil')
-                ->distinct()
-                ->get();
+            $empleadosCuartoMes = $this->legajosCuartoMes($fechaCuartoMes);
 
             // Obtenemos empleados de los últimos 3 meses
-            $empleadosTresMeses = Dh21::query()
+            $empleadosTresMeses = Dh21h::query()
                 ->entreFechas($fechaInicio, $fechaReferencia)
                 ->empleadosActivos()
                 ->select('cuil')
@@ -50,7 +42,7 @@ class DosubaReportService
             return Dh03::query()
                 ->whereIn('cuil', $empleadosCuartoMes->pluck('cuil'))
                 ->whereNotIn('cuil', $empleadosTresMeses->pluck('cuil'))
-                ->with(['persona' => function($query) {
+                ->with(['persona' => function ($query) {
                     $query->select('cuil', 'apellido', 'nombre');
                 }])
                 ->select('id_legajo', 'cuil')
@@ -68,5 +60,20 @@ class DosubaReportService
             Log::error('Error en DosubaReportService: ' . $e->getMessage());
             throw new \Exception('Error al generar el reporte DOSUBA');
         }
+    }
+
+    /**
+     * @param Carbon $fechaCuartoMes
+     * @return mixed
+     */
+    public function legajosCuartoMes(Carbon $fechaCuartoMes): mixed
+    {
+        return Dh21h::query()
+            ->whereYear('dh22.per_liano', $fechaCuartoMes->year)
+            ->whereMonth('dh22.per_limes', $fechaCuartoMes->month)
+            ->definitiva()
+            ->select('nro_legaj')
+            ->distinct()
+            ->get();
     }
 }
