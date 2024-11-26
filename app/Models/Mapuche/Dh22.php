@@ -10,6 +10,7 @@ use App\Models\EstadoLiquidacionModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -124,7 +125,12 @@ class Dh22 extends Model
                 ->first();
     }
 
-    public static function getUltimasTresLiquidacionesDefinitivas()
+    /**
+     * Obtiene las últimas tres liquidaciones definitivas.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getUltimasTresLiquidacionesDefinitivas(): Collection
     {
         return static::query()
             ->definitiva()

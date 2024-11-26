@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $tipo_conce
  * @property float|null $nov1_conce
  * @property float|null $nov2_conce
- * ...
+ *
  */
 class Dh21h extends Model
 {
@@ -106,6 +106,11 @@ class Dh21h extends Model
     {
         return $query->where('ano_retro', $año)
                     ->where('mes_retro', $mes);
+    }
+
+    public function scopeLegajosActivos($query)
+    {
+        return $query->where('nro_cargo', '>', 0);
     }
 
     /**

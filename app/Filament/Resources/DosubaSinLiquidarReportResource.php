@@ -2,17 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use Carbon\Carbon;
+use Exception;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use App\Models\Mapuche\Dh21h;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\DB;
 use App\Services\Mapuche\Dh22Service;
-use App\Models\DosubaSinLiquidarReport;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\DosubaSinLiquidarReportResource\Pages;
 
@@ -67,7 +64,7 @@ class DosubaSinLiquidarReportResource extends Resource
                             return in_array($state, $periodosLiquidacion)
                                 ? $state
                                 : 'Sin Liquidación';
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             return 'Error al procesar período';
                         }
                     })
