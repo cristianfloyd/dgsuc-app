@@ -193,7 +193,8 @@ class Dh22 extends Model
 
 
     /**
-    * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
+     * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
+     * Accesor para el atributo 'periodo_fiscal'.
     **/
     protected function periodoFiscal(): Attribute
     {
@@ -205,8 +206,8 @@ class Dh22 extends Model
     /**
      * Atributo que obtiene y establece el período fiscal en formato YYYYMM a partir de las propiedades `per_liano` y `per_limes` del modelo.
      *
-     * El método `get` devuelve el período fiscal en formato YYYYMM concatenando los valores de `per_liano` y `per_limes` con el formato adecuado.
-     * El método `set` establece los valores de `per_liano` y `per_limes` a partir de un valor de período fiscal en formato YYYYMM.
+     * El método `get` (Accessor) devuelve el período fiscal en formato YYYYMM concatenando los valores de `per_liano` y `per_limes` con el formato adecuado.
+     * El método `set` (Mutator) establece los valores de `per_liano` y `per_limes` a partir de un valor de período fiscal en formato YYYYMM.
      */
     protected function periodo(): Attribute
     {
@@ -239,9 +240,22 @@ class Dh22 extends Model
         return $query->where('sino_cerra', '!=', 'C'); // Asumiendo que 'C' significa cerrada
     }
 
+    /**
+     * Scope que filtra las liquidaciones por aquellas que tienen la descripción 'definitiva'.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
     public function scopeDefinitiva($query)
     {
         return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
+    }
+
+    public function scopeDefinitivaCerrada($query)
+    {
+        return $query
+            ->definitiva()
+            ->where('sino_cerra', 'C');
     }
 
     /**

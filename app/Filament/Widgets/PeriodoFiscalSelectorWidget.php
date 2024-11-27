@@ -4,14 +4,13 @@ namespace App\Filament\Widgets;
 
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Carbon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Contracts\HasForms;
-use App\Events\PeriodoFiscalActualizado;
 use Filament\Forms\Components\Actions\Action;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Illuminate\Support\Carbon;
 
 /**
  * Widget que permite seleccionar el período fiscal actual.
