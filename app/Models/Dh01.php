@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 
 class Dh01 extends Model
@@ -61,6 +62,13 @@ class Dh01 extends Model
     public function setDescNombrAttribute($value)
     {
         $this->attributes['desc_nombr'] = EncodingService::toLatin1($value);
+    }
+
+    public function getCuil(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
+        );
     }
 }
 

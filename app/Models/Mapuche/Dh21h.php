@@ -3,6 +3,7 @@
 namespace App\Models\Mapuche;
 
 use Spatie\LaravelData\WithData;
+use Illuminate\Support\Facades\DB;
 use App\Traits\Mapuche\Dh21hQueries;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -111,6 +112,17 @@ class Dh21h extends Model
     public function scopeLegajosActivos($query)
     {
         return $query->where('nro_cargo', '>', 0);
+    }
+
+    public function scopeConDatosPersonales($query)
+    {
+        return $query->join('dh01', 'dh21h.nro_legaj', '=', 'dh01.nro_legaj')
+            ->select(
+                'dh21h.*',
+                'dh01.desc_appat',
+                'dh01.desc_nombr',
+                DB::raw("CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) as cuil")
+            );
     }
 
     /**

@@ -89,4 +89,16 @@ class PeriodoFiscalService
             'periodosFiscales' => $periodosFiscales,
         ];
     }
+
+    public function getYear()
+    {
+        $periodoFiscal = $this->getPeriodoFiscal();
+        return $periodoFiscal['year'];
+    }
+
+    public function getMonth()
+    {
+        $periodoFiscal = $this->getPeriodoFiscal();
+        return $periodoFiscal['month'];
+    }
 }

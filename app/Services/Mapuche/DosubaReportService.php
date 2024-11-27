@@ -11,15 +11,25 @@ use App\ValueObjects\PeriodoLiquidacion;
 
 class DosubaReportService
 {
+    public function __construct(
+        private readonly PeriodoFiscalService $periodoFiscalService,
+    ){}
+
     /**
      * Obtiene el reporte DOSUBA para un período específico
      * @param string $year
      * @param string $month
      * @return Collection
      */
-    public function getDosubaReport(string $year = '2024', string $month = '11'): Collection
+    public function getDosubaReport(string $year = null, string $month = null): Collection
     {
+        if ($year === null || $month === null) {
+            $year = $this->periodoFiscalService->getYear();
+            $month = $this->periodoFiscalService->getMonth();
+        }
+
         $periodo = new PeriodoLiquidacion($year, $month);
+
 
         // Calculamos las fechas de referencia
         $fechaReferencia = $periodo->getFechaReferencia();
