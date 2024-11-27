@@ -91,7 +91,7 @@ return [
             'search_path' => 'suc',
             'sslmode' => 'prefer',
         ],
-        'pgsql-mapuchito' => [
+        'pgsql-liqui' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
             'host' => env('DB3_HOST', '127.0.0.1'),

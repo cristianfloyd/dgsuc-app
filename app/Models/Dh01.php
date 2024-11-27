@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\EncodingService;
+use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -10,12 +11,23 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Dh01 extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, EncodingTrait;
 
 
     protected $table = 'dh01';
     public $timestamps = false;
     protected $primaryKey = 'nro_legaj';
+
+    /**
+     * Campos que requieren conversión de codificación
+     */
+    protected $encodedFields = [
+        'desc_appat',
+        'desc_apmat',
+        'desc_apcas',
+        'desc_nombr'
+    ];
+
 
     protected $fillable = [
         'nro_legaj', 'desc_appat', 'desc_apmat', 'desc_apcas', 'desc_nombr', 'nro_tabla',
@@ -53,6 +65,8 @@ class Dh01 extends Model
         return "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}";
     }
 
+
+
     // Mutador para convertir desc_nombr a UTF-8 al obtener el valor
     public function getDescNombrAttribute($value)
     {
@@ -68,6 +82,13 @@ class Dh01 extends Model
     {
         return Attribute::make(
             get: fn() => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
+        );
+    }
+
+    public function NombreCompleto(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => "{$this->desc_appat} {$this->desc_apmat} {$this->desc_apcas} {$this->desc_nombr}",
         );
     }
 }

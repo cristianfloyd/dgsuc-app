@@ -2,18 +2,20 @@
 
 namespace App\Services\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh21h;
+use App\ValueObjects\PeriodoLiquidacion;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\ValueObjects\PeriodoLiquidacion;
 
 class DosubaReportService
 {
     public function __construct(
         private readonly PeriodoFiscalService $periodoFiscalService,
-    ){}
+    )
+    {
+    }
 
     /**
      * Obtiene el reporte DOSUBA para un período específico
@@ -41,31 +43,10 @@ class DosubaReportService
             $empleadosCuartoMes = $this->legajosCuartoMes($fechaCuartoMes);
 
             // Obtenemos empleados de los últimos 3 meses
-            $empleadosTresMeses = Dh21h::query()
-                ->entreFechas($fechaInicio, $fechaReferencia)
-                ->empleadosActivos()
-                ->select('cuil')
-                ->distinct()
-                ->get();
+            $empleadosTresMeses = $this->legajosTercerMes($fechaInicio, $fechaReferencia);
 
             // Realizamos el cruce de información
-            return Dh03::query()
-                ->whereIn('cuil', $empleadosCuartoMes->pluck('cuil'))
-                ->whereNotIn('cuil', $empleadosTresMeses->pluck('cuil'))
-                ->with(['persona' => function ($query) {
-                    $query->select('cuil', 'apellido', 'nombre');
-                }])
-                ->select('id_legajo', 'cuil')
-                ->orderBy('id_legajo')
-                ->get()
-                ->map(function ($empleado) {
-                    return [
-                        'IdLegajo' => $empleado->id_legajo,
-                        'CUIL' => $empleado->cuil,
-                        'Apellido' => $empleado->persona->apellido,
-                        'Nombre' => $empleado->persona->nombre
-                    ];
-                });
+            return $this->cruzarLegajos($empleadosCuartoMes, $empleadosTresMeses);
         } catch (\Exception $e) {
             Log::error('Error en DosubaReportService: ' . $e->getMessage());
             throw new \Exception('Error al generar el reporte DOSUBA');
@@ -85,5 +66,46 @@ class DosubaReportService
             ->select('nro_legaj')
             ->distinct()
             ->get();
+    }
+
+    /**
+     * @param Carbon $fechaInicio
+     * @param Carbon $fechaReferencia
+     * @return mixed
+     */
+    public function legajosTercerMes(Carbon $fechaInicio, Carbon $fechaReferencia)
+    {
+        return Dh21h::query()
+            ->entreFechas($fechaInicio, $fechaReferencia)
+            ->empleadosActivos()
+            ->select('cuil')
+            ->distinct()
+            ->get();
+    }
+
+    /**
+     * @param mixed $empleadosCuartoMes
+     * @param mixed $empleadosTresMeses
+     * @return \Illuminate\Database\Eloquent\Collection|Collection
+     */
+    public function cruzarLegajos(mixed $empleadosCuartoMes, mixed $empleadosTresMeses): Collection|\Illuminate\Database\Eloquent\Collection
+    {
+        return Dh03::query()
+            ->whereIn('cuil', $empleadosCuartoMes->pluck('cuil'))
+            ->whereNotIn('cuil', $empleadosTresMeses->pluck('cuil'))
+            ->with(['persona' => function ($query) {
+                $query->select('cuil', 'apellido', 'nombre');
+            }])
+            ->select('id_legajo', 'cuil')
+            ->orderBy('id_legajo')
+            ->get()
+            ->map(function ($empleado) {
+                return [
+                    'IdLegajo' => $empleado->id_legajo,
+                    'CUIL' => $empleado->cuil,
+                    'Apellido' => $empleado->persona->apellido,
+                    'Nombre' => $empleado->persona->nombre
+                ];
+            });
     }
 }

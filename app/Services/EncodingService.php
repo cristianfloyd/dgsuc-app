@@ -15,9 +15,10 @@ class EncodingService
         if (empty($value)) return $value;
 
         // Detectamos si el valor ya está en UTF-8
-        if (mb_detect_encoding($value, 'UTF-8', true)) {
+        if (mb_detect_encoding($value, ['UTF-8'], true)) {
             return $value;
         }
+
 
         // Convertimos desde ISO-8859-1 a UTF-8
         return iconv('ISO-8859-1', 'UTF-8//TRANSLIT', $value);
