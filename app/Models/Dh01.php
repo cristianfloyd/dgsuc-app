@@ -43,6 +43,16 @@ class Dh01 extends Model
         return $this->hasMany(dh03::class, 'nro_legaj', 'nro_legaj');
     }
 
+    /**
+     * Obtiene los cargos asociados a este registro de Dh01.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cargos()
+    {
+        return $this->hasMany(Dh03::class, 'nro_legaj', 'nro_legaj');
+    }
+
     public function dh21()
     {
         return $this->hasMany(Dh21::class, 'nro_legaj', 'nro_legaj');

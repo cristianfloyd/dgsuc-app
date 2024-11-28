@@ -52,18 +52,25 @@ class EmbargoResource extends Resource
                     ->money('ARS')
                     ->label('Importe Descontado')
                     ->state(function (Embargo $record): float {
-                        return $record->getImporteDescontado(3);
+                        $importes = $record->getImporteDescontado(3);
+                        return $importes->sum('impp_conce');
                     })
-                ->sortable(),
+                    ->tooltip(function (Embargo $record): string {
+                        $importes = $record->getImporteDescontado(3);
+                        return $importes->map(function ($importe) {
+                            return "Cargo {$importe->nro_cargo}: $ " . number_format($importe->impp_conce, 2);
+                        })->join("\n");
+                    })
+                    ->sortable(),
                 TextColumn::make('tipoEmbargo.codn_conce')->label('concepto')->sortable(),
                 TextColumn::make('saldo_pendiente')
                     ->money('ARS')
                     ->label('Saldo Pendiente')
                     ->state(function (Embargo $record): float {
-                        return $record->imp_embargo - $record->getImporteDescontado(
-                            3
-                        );
-                    }),
+                        $importes = $record->getImporteDescontado(3);
+                        return $record->imp_embargo - $importes->sum('impp_conce');
+                    })
+                    ,
                 TextColumn::make('estado.desc_estado_embargo')->label('estado')->sortable(),
                 TextColumn::make('beneficiario.nom_beneficiario')->label('beneficiario')->sortable(),
                 TextColumn::make('juzgado.nom_juzgado')->sortable()

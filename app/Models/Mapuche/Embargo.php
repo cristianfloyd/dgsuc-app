@@ -6,6 +6,7 @@ namespace App\Models\Mapuche;
 
 use Carbon\Carbon;
 use App\Models\Dh01;
+use App\Models\Dh03;
 use App\Models\Dh21;
 use App\Traits\EmbargoQueries;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +16,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Mapuche\Embargos\Juzgado;
 use App\Models\Mapuche\Embargos\TipoJuicio;
 use App\Models\Mapuche\Embargos\TipoEmbargo;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Mapuche\Embargos\Beneficiario;
 use App\Models\Mapuche\Embargos\EstadoEmbargo;
 use App\Models\Mapuche\Embargos\CuentaJudicial;
 use App\Models\Mapuche\Embargos\TipoExpediente;
 use App\Models\Mapuche\Emgargos\TipoRemuneracion;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -132,13 +135,18 @@ class Embargo extends Model
         'nro_cuenta_judicial' => 'string'
     ];
 
-    public function getImporteDescontado(int $nro_liqui): float
+    public function getImporteDescontado(int $nro_liqui): Collection
     {
-        $importe = Dh21::where('nro_liqui', $nro_liqui)
+        $importe = Dh21::query()
+            ->where('nro_liqui', $nro_liqui)
             ->where('nro_legaj', $this->nro_legaj)
             ->where('codn_conce', $this->tipoEmbargo->codn_conce)
-            ->sum('impp_conce');
-        return (float) $importe ?? 0.0;
+            ->where('impp_conce', '>', 0)
+            ->orderBy('nro_legaj', 'desc')
+            ->get(['nro_cargo', 'impp_conce']);
+
+        
+        return  $importe;
     }
 
 
@@ -216,6 +224,26 @@ class Embargo extends Model
     public function datosPersonales(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
+
+    /**
+     * Obtiene la relación de liquidaciones asociadas al embargo.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function liquidaciones(): HasMany
+    {
+        return $this->hasMany(Dh21::class, 'nro_legaj', 'nro_legaj');
+    }
+
+    /**
+     * Obtiene la relación de cargos asociados al embargo.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cargo(): HasMany
+    {
+        return $this->hasMany(Dh03::class, 'nro_legaj', 'nro_legaj');
     }
 
     /**
