@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\UploadedFileResource\Pages;
+namespace App\Filament\Admin\Resources\UploadedFileResource\Pages;
 
-use App\Filament\Resources\UploadedFileResource;
+use App\Filament\Admin\Resources\UploadedFileResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

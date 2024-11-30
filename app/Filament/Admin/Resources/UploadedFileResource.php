@@ -1,17 +1,14 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Resources\UploadedFileResource\Pages;
-use App\Filament\Resources\UploadedFileResource\RelationManagers;
+use App\Filament\Admin\Resources\UploadedFileResource\Pages;
 use App\Models\UploadedFile;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UploadedFileResource extends Resource
 {

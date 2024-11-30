@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Dh11Resource\Widgets;
+namespace App\Filament\Admin\Resources\Dh11Resource\Widgets;
 
 use App\Models\Dh11;
 use App\Models\Dh89;
@@ -18,6 +18,7 @@ use App\Traits\CategoriasConstantTrait;
 use App\Events\PeriodoFiscalActualizado;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use App\Services\Mapuche\EscalafonService;
 use Filament\Forms\Components\Actions\Action;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -40,17 +41,20 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     private $periodoFiscal;
     private $dh11RestoreService;
     private $dh11Service;
+    private $escalafonService;
 
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
         CategoryUpdateServiceInterface $categoryUpdateService,
         Dh11RestoreService $dh11RestoreService,
-        Dh11Service $dh11Service): void
+        Dh11Service $dh11Service,
+        EscalafonService $escalafonService): void
     {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->categoryUpdateService = $categoryUpdateService;
         $this->dh11RestoreService = $dh11RestoreService;
         $this->dh11Service = $dh11Service;
+        $this->escalafonService = $escalafonService;
     }
     public function mount(): void
     {
@@ -67,10 +71,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                     ->options(function () {
                         $codc_categs = collect(['TODO' => 'Todos'])
                             ->merge(
-                                Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
-                                    ->select('dh89.descesc', 'dh11.codigoescalafon')
-                                    ->distinct()
-                                    ->pluck('dh89.descesc', 'dh11.codigoescalafon')
+                                $this->escalafonService->getEscalafones()
                             )
                             ->merge([
                                 'DOC2' => 'Preuniversitario',

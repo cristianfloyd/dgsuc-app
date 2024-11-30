@@ -7,16 +7,22 @@ use App\Models\Dh89;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\DatePicker;
+use App\Services\Mapuche\EscalafonService;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    use HasFiltersForm;
+    use HasFiltersForm, CategoriasConstantTrait;
 
     protected ?string $heading = '';
+    protected EscalafonService $escalafonService;
 
-
+    public function boot(EscalafonService $escalafonService)
+    {
+        $this->escalafonService = $escalafonService;
+    }
 
     public function filtersForm(Form $form): Form
     {
@@ -24,27 +30,17 @@ class Dashboard extends \Filament\Pages\Dashboard
             Section::make('')->schema([
                 DatePicker::make('startDate')->label('Inicio'),
                 DatePicker::make('endDate')->label('Fin'),
-                Select::make('codigoescalafon')->label('Escalafon')
-                    ->options(function () {
-                        $codc_categs = collect(['TODO' => 'Todos'])
-                        ->merge(
-                            /**
-                             * La colección se construye combinando los códigos de escalafón distintos obtenidos de la tabla 'dh11' con las descripciones de escalafón de la tabla 'dh89', y luego se agrega la opción 'Todos' y las opciones para los diferentes tipos de escalafón.
-                             *
-                             * @return \Illuminate\Support\Collection Una colección de opciones de escalafón.
-                             */
-                            Dh89::join('dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
-                                ->select('dh89.descesc', 'dh11.codigoescalafon')
-                                ->distinct()
-                                ->pluck('dh89.descesc', 'dh11.codigoescalafon')
-                                ->merge([
-                                'DOCS' => 'Docente Secundario',
-                                'DOCU' => 'Docente Universitario',
-                                'AUTU' => 'Autoridad Universitario',
-                                'AUTS' => 'Autoridad Secundario',
-                            ])
-                        );
-                        return $codc_categs;
+                Select::make('codigoescalafon')
+                    ->label('Escalafon')
+                    ->options(function(){
+                        return collect(['TODO' => 'Todos'])
+                        ->merge($this->escalafonService->getEscalafones())
+                        ->merge([
+                            'DOCU' => 'Docente Universitario',
+                            'AUTU' => 'Autoridad Universitario',
+                            'AUTS' => 'Autoridad Secundario',
+                            'DOC2' => 'Preuniversitario',
+                        ]);
                     })
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {

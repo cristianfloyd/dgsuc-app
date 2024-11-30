@@ -26,14 +26,15 @@ trait CategoriasConstantTrait
                     'TIAE', 'A1PH', 'A2PH', 'AY1P', 'AY2P', 'JTPH', 'JTPP', 'ADPH', 'ASPH', 'TIPH',
                     'ADJP', 'ASOP', 'TITP', 'TIAP', 'A1SH', 'AY1S', 'JTSH', 'JTPS', 'ADSH', 'ASSH',
                     'TISH', 'ADJS', 'ASOS', 'TITS', 'TIAS', 'HOSU',
-                    //'HODI', 'HOJE', 'HOCO',
         ],
         'AUTS' => [
             'VD20','PRSE','RESE','SECR','SREG','SRE1','VRSE','VD30','VD35','DI40',
         ],
         'AUTU' => [
-            'DECC','SEFC','SEUC','VICC','VIDC','VIRC','DECE','RECT','SUHE','SEFE','SEUE',
-            'SSUN','VIDE','VIRE','DECP','SFHP','SEFP','SEUP','VDPH','VIPH','VIDP','VIRP',
+            'DECC', 'DECE', 'DECP', 'RECT', 'SEFC', 'SEFE', 'SEFP', 'SEUC', 'SEUE',
+            'SEUP', 'SFHP', 'SSUN', 'SUHE', 'VDPH', 'VICC', 'VIDC', 'VIDE', 'VIDP',
+            'VIPH', 'VIRC', 'VIRE', 'VIRP',
+
         ],
         'NODO' => [
             '1','2','3','4','5','6','7','DOCA','DOCC','DOCE',
