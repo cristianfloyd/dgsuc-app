@@ -13,9 +13,8 @@ use Filament\Tables\Table;
 class UploadedFileResource extends Resource
 {
     protected static ?string $model = UploadedFile::class;
-
+    protected static ?string $label = 'Archivos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Suc';
 
     public static function form(Form $form): Form
     {

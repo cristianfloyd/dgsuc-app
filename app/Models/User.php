@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Jetstream\HasProfilePhoto;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -17,11 +17,9 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    // use HasRoles;
-    // use HasSuperAdmin;
 
     /**
-     * The attributes that are mass assignable.
+     * Los atributos que son asignables masivamente.
      *
      * @var array<int, string>
      */
@@ -35,7 +33,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Los atributos que deben ocultarse para la serialización.
      *
      * @var array<int, string>
      */
@@ -47,13 +45,19 @@ class User extends Authenticatable
     ];
 
     /**
-     * The accessors to append to the model's array form.
+     * Los accesores que se agregarán al formulario de array del modelo.
      *
      * @var array<int, string>
      */
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function scopeSearch($query, $val)
+    {
+        return $query->where('name', 'like', '%'.$val.'%')
+            ->orWhere('email', 'like', '%'.$val.'%');
+    }
 
     /**
      * Obtener los atributos que deben ser convertidos.
@@ -66,12 +70,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function scopeSearch($query, $val)
-    {
-        return $query->where('name', 'like', '%'.$val.'%')
-            ->orWhere('email', 'like', '%'.$val.'%');
     }
 
     protected function username(): Attribute

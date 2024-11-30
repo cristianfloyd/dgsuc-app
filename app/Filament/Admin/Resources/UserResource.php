@@ -5,8 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,7 +15,8 @@ use Filament\Tables\Table;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
+    protected static ?string $label = 'Usuarios';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
@@ -29,23 +29,9 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                DateTimePicker::make('email_verified_at'),
-                TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
-                Select::make('roles')
-                    ->preload()
-                    ->multiple()->relationship('roles', 'name'),
-                TextInput::make('current_team_id')
-                    ->numeric(),
-                TextInput::make('profile_photo_path')
-                    ->maxLength(2048),
-                Textarea::make('two_factor_secret')
-                    ->columnSpanFull(),
-                Textarea::make('two_factor_recovery_codes')
-                    ->columnSpanFull(),
-                DateTimePicker::make('two_factor_confirmed_at'),
+                DateTimePicker::make('email_verified_at')->label('Verificado en'),
+                FileUpload::make('profile_photo_path')
+                    ->label('Foto de perfil')
             ]);
     }
 
@@ -63,7 +49,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('current_team_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('profile_photo_path')
+                Tables\Columns\ImageColumn::make('profile_photo_path')
+                    ->label('Foto de perfil')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
