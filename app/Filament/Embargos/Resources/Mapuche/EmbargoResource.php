@@ -96,9 +96,9 @@ class EmbargoResource extends Resource
                         $report = $reportService->generateReport('3');
 
                         // Aquí podemos exportar a Excel/CSV
-                        return response()->download(
-                            $report->exportToExcel('reporte_embargos.xlsx')
-                        );
+                        // return response()->download(
+                        //     $report->exportToExcel('reporte_embargos.xlsx')
+                        // );
                     })
             ])
             ->filters([
@@ -108,12 +108,10 @@ class EmbargoResource extends Resource
                     ->default(2),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                //
             ])
             ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
+                //
             ]);
     }
 
@@ -128,17 +126,13 @@ class EmbargoResource extends Resource
     {
         return [
             'index' => Pages\ListEmbargos::route('/'),
-            'report' => Pages\EmbargoReport::route('/report'),
         ];
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('report')
-                ->label('Ver Reporte')
-                ->url(static::getUrl('report'))
-                ->icon('heroicon-o-document-report')
+            //
         ];
     }
 }

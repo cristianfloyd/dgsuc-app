@@ -13,8 +13,10 @@ class ListEmbargos extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
-            
+            // Actions\Action::make('report')
+            //     ->label('Reporte')
+            //     ->url(fn (): string => $this->getResource()::getUrl('reporte-embargos'))
+            //     ->icon('heroicon-o-document-check')
         ];
     }
 }

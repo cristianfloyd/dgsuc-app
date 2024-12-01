@@ -17,11 +17,13 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages\EmbargoReport;
 
 class EmbargosPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+
         return $panel
             ->id('embargos')
             ->path('embargos')
@@ -32,6 +34,7 @@ class EmbargosPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Embargos/Pages'), for: 'App\\Filament\\Embargos\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                EmbargoReport::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Embargos/Widgets'), for: 'App\\Filament\\Embargos\\Widgets')
             ->widgets([
