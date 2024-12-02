@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\EmbargoReportModel;
 use App\Services\Reportes\EmbargoReportService;
@@ -38,7 +39,10 @@ class EmbargoReport extends Page implements HasTable, HasForms
 
     public function mount(): void
     {
-        $this->form->fill();
+        $this->nro_liqui = session()->get('selected_nro_liqui');
+        $this->form->fill([
+            'nro_liqui' => $this->nro_liqui
+        ]);
         $this->table = $this->makeTable();
     }
 
@@ -48,52 +52,23 @@ class EmbargoReport extends Page implements HasTable, HasForms
             Select::make('nro_liqui')
                 ->label('Liquidación')
                 ->options(function() {
-                    return Dh22::query()->select('nro_liqui')
+                    return Dh22::query()->select('nro_liqui', 'desc_liqui')
                         ->distinct()
                         ->orderByDesc('nro_liqui')
-                        ->pluck('nro_liqui', 'nro_liqui');
+                        ->pluck('desc_liqui', 'nro_liqui');
                 })
                 ->required()
         ];
     }
 
-    // protected function getTableQuery(): Builder
-    // {
-    //     // Validamos que se haya seleccionado una liquidación
-    //     if (!$this->nro_liqui) {
-    //         // Retornamos un query vacío para evitar cargar datos
-    //         Log::info('No se ha seleccionado una liquidación');
+    protected function getTableQuery(): Builder
+    {
+        // Obtenemos el ID de la sesión actual
+        $sessionId = session()->getId();
 
-    //         return EmbargoReportModel::query()->whereRaw('1 = 0');
-    //     }
-
-
-    //     try{
-    //         // Generamos y establecemos los datos del reporte
-    //         $reportData = $this->generateReport();
-    //         Log::info('reportData ',$reportData->toArray());
-
-
-    //         // Utilizamos el nuevo método setReportData
-    //         EmbargoReportModel::setReportData($reportData->toArray());
-    //         Log::info('EmbargoReportModel ',EmbargoReportModel::$reportData);
-
-    //         // Retornamos el query builder del modelo
-    //         $query = EmbargoReportModel::query();
-    //         Log::debug('Contenido de $query->get():', ['data' => $query->get()]);
-    //         return $query;
-
-    //     } catch (\Exception $e) {
-    //         // Manejo de excepciones y registro de errores
-    //         Log::error('Error al generar el reporte de embargos', [
-    //             'error' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         // Retornamos un query vacío en caso de error
-    //         return EmbargoReportModel::query()->whereRaw('1 = 0');
-    //     }
-    // }
-
+        // Retornamos el query del modelo filtrado por sesión
+        return EmbargoReportModel::query()->where('session_id', $sessionId);
+    }
 
 
     /**
@@ -102,16 +77,18 @@ class EmbargoReport extends Page implements HasTable, HasForms
     protected function table(Table $table): Table
     {
         return $table
-            ->query(EmbargoReportModel::query())
+            ->query($this->getTableQuery())
             ->columns([
                 TextColumn::make('nro_legaj')->label('Legajo')->sortable(),
                 TextColumn::make('nro_cargo')->label('Cargo')->sortable(),
                 TextColumn::make('nombre_completo')->label('Nombre')->searchable(),
                 TextColumn::make('codc_uacad')->label('Unidad Acad'),
-                TextColumn::make('caratula')->label('Caratula')->limit(30),
+                TextColumn::make('caratula')->label('Caratula')->limit(15)
+                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
                 TextColumn::make('nro_embargo')->label('Nro. Embargo'),
                 TextColumn::make('codn_conce')->label('Concepto'),
-                TextColumn::make('importe_descontado')->label('Importe')->money('ARS')
+                TextColumn::make('importe_descontado')->label('Importe')->money('ARS'),
+                TextColumn::make('session_id')->label('Session ID'),
             ])
             ->defaultSort('nro_legaj', 'asc');
     }
@@ -119,6 +96,16 @@ class EmbargoReport extends Page implements HasTable, HasForms
     public function updatedNroLiqui()
     {
         Log::info("nro_lqui actualizado: ",[$this->nro_liqui]);
+
+
+        // Guardamos el nro_liqui en la sesión
+        session()->put('selected_nro_liqui', $this->nro_liqui);
+
+        // Verificamos si ya existen datos para esta liquidación
+        if (!$this->hasReportData()) {
+            // Solo generamos el reporte si no existe
+            $this->generateReport();
+        }
     }
 
     public function updatedReportData()
@@ -132,21 +119,41 @@ class EmbargoReport extends Page implements HasTable, HasForms
             return;
         }
 
+        // Verificamos si ya hay datos para la sesión actual
+        if ($this->hasReportData()) {
+            Notification::make('info')
+                ->title('Ya hay datos para esta sesión.')
+                ->send();
+            return;
+        }
+
         try {
 
             $reportService = app(EmbargoReportService::class);
             $reportData = $reportService->generateReport($this->nro_liqui);
             EmbargoReportModel::setReportData($reportData->toArray());
             $this->refreshTable();
-
+            Notification::make('success')
+                ->title( 'Reporte generado correctamente.')
+                ->send();
         } catch (\Exception $e) {
             Log::error('Error al generar reporte', ['error' => $e->getMessage()]);
-            $this->notify('error', 'Error al generar el reporte');
+            Notification::make('error')
+                ->title('Error al generar reporte')
+                ->send();
         }
     }
 
     public function refreshTable()
     {
         $this->dispatch('refresh');
+    }
+
+    protected function hasReportData(): bool
+    {
+        $sessionId = session()->getId();
+        return EmbargoReportModel::where('session_id', $sessionId)
+            ->where('nro_liqui', $this->nro_liqui)
+            ->exists();
     }
 }

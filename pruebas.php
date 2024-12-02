@@ -1,21 +1,55 @@
 <?php
+$testData = [
+    [
+        'nro_legaj' => 12345,
+        'nombre_completo' => 'Juan Pérez',
+        'codn_conce' => 269,
+        'importe_descontado' => 1500.50,
+        'nro_embargo' => 1,
+        'nro_cargo' => 100,
+        'caratula' => 'Caso Prueba',
+        'codc_uacad' => 'FAC'
+    ]
+];
 
-use Illuminate\Support\Facades\DB;
-// Primero instanciamos el repositorio
-$repo = app(App\Repositories\Dhr3Repository::class);
+$testData2 = [
+    [
+      "nro_legaj" => 149639,
+      "nombre_completo" => "FIGOLI                                     FABIAN GUSTAVO      ",
+      "codn_conce" => 269,
+      "importe_descontado" => 2000.0,
+      "nro_embargo" => 39,
+      "nro_cargo" => 355462,
+      "caratula" => "PARTESANO ALEJANDRA JAQUELINE C/ FIGOLI FABIAN GUSTAVO S/ INCIDENTE DE AUMENTO DE CUOTA ALIMENTARIA.",
+      "codc_uacad" => "RCX ",
+    ],
+    [
+      "nro_legaj" => 159300,
+      "nombre_completo" => "CAJUSO               PAIS BARBAZAN         PABLO JOSE          ",
+      "codn_conce" => 269,
+      "importe_descontado" => 750.0,
+      "nro_embargo" => 77,
+      "nro_cargo" => 111787,
+      "caratula" => "CHOVANCEK SILVIA Y OTRO C/ CAJUSO PABLO JOSE S/ EJECUCION DE ALIMENTOS.-",
+      "codc_uacad" => "VTX ",
+    ]
+];
+// Importamos las clases necesarias
+// Creamos una instancia del servicio
+use App\Models\Reportes\EmbargoReportModel;
+use App\Services\Reportes\EmbargoReportService;
+$service = app(EmbargoReportService::class);
 
-// Probemos buscar un registro con datos reales
-$registro1 = $repo->find(1,	160317,	112831,'H',	1);
-$registro2 = $repo->findByPrimaryKey(1,	160317,	112831,'H',	1);
+$reportData = $service->generateReport(3);
+EmbargoReportModel::setReportData($reportData->toArray());
 
-// Veamos el resultado
-dump($registro);
+// 1. Primero limpiamos la caché
+Cache::forget(EmbargoReportModel::class . ':sushi');
 
-// También podemos probar con datos que no existan
-$noExiste = $repo->find(999999, 999999, 999, 'X', 999);
-dump($noExiste); // Debería retornar null
+// Verificamos los resultados
+$results = EmbargoReportModel::all();
 
-// Podemos ver la consulta SQL generada
-DB::enableQueryLog();
-$registro = $repo->findByPrimaryKey(1,	160317,	112831,'H',	1);
-DB::getQueryLog();
+// Inspeccionamos la estructura
+$results->first();
+
+sr1gmlMJpT5vunRXeOERMQ0Sa754ZMtnKo5aVtIN

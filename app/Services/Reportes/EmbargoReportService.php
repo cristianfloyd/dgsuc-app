@@ -20,7 +20,7 @@ class EmbargoReportService
             $processedData = $this->processEmbargos($embargos, $nro_liqui);
 
             // Actualizamos el modelo Sushi con los datos procesados
-            EmbargoReportModel::setReportData($processedData->toArray());
+            //EmbargoReportModel::setReportData($processedData->toArray());
 
             return $processedData;
         } catch (\Exception $e) {
@@ -48,7 +48,7 @@ class EmbargoReportService
             ->whereHas('estado', fn($query) =>
                 $query->where('id_estado_embargo', 2)
             )
-            ->whereIn('nro_legaj', [149639,159300,164859])
+            // ->whereIn('nro_legaj', [149639,159300,164859])
             ->get();
     }
 
