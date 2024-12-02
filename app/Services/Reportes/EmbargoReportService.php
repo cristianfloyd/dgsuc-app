@@ -13,14 +13,18 @@ class EmbargoReportService
     public function generateReport(?int $nro_liqui = 2): Collection
     {
         try {
+            // Aseguramos que la tabla existe
+            EmbargoReportModel::createTableIfNotExists();
+
+            // Limpiamos registros antiguos
+            EmbargoReportModel::cleanOldRecords();
+
             // Primero obtenemos los embargos activos
             $embargos = $this->getActiveEmbargos();
 
             // Agrupamos por legajo y calculamos importes
             $processedData = $this->processEmbargos($embargos, $nro_liqui);
 
-            // Actualizamos el modelo Sushi con los datos procesados
-            //EmbargoReportModel::setReportData($processedData->toArray());
 
             return $processedData;
         } catch (\Exception $e) {

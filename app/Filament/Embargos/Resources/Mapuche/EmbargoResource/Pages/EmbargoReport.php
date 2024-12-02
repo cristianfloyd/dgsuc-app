@@ -5,8 +5,8 @@ namespace App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
-use App\Models\Mapuche\Embargo;
-use Livewire\Attributes\Reactive;
+use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
@@ -15,10 +15,12 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\EmbargoReportModel;
+use Filament\Tables\Actions\ExportBulkAction;
 use App\Services\Reportes\EmbargoReportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use App\Filament\Embargos\Resources\Mapuche\EmbargoResource;
+use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 
 class EmbargoReport extends Page implements HasTable, HasForms
 {
@@ -39,6 +41,8 @@ class EmbargoReport extends Page implements HasTable, HasForms
 
     public function mount(): void
     {
+        EmbargoReportModel::createTableIfNotExists();
+
         $this->nro_liqui = session()->get('selected_nro_liqui');
         $this->form->fill([
             'nro_liqui' => $this->nro_liqui
@@ -70,6 +74,27 @@ class EmbargoReport extends Page implements HasTable, HasForms
         return EmbargoReportModel::query()->where('session_id', $sessionId);
     }
 
+    public function getHeaderActions(): array
+    {
+        return [
+            ExportAction::make('export')
+                ->label('Exportar')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->exporter(EmbargoReportModelExporter::class)
+        ];
+    }
+
+    private function getExportAction()
+    {
+        return \Filament\Tables\Actions\Action::make('export')
+            ->label('Exportar')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->color('success')
+            ->action(function () {
+                $this->exportToExcel();
+            });
+    }
 
     /**
      * Define la configuración de la tabla.
@@ -88,9 +113,16 @@ class EmbargoReport extends Page implements HasTable, HasForms
                 TextColumn::make('nro_embargo')->label('Nro. Embargo'),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('importe_descontado')->label('Importe')->money('ARS'),
-                TextColumn::make('session_id')->label('Session ID'),
+                TextColumn::make('nro_liqui')->label('nro_lqui')->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('nro_legaj', 'asc');
+            ->defaultSort('nro_legaj', 'asc')
+            ->bulkActions([
+                ExportBulkAction::make('export')
+                ->label('Exportar')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->exporter(EmbargoReportModelExporter::class),
+            ]);
     }
 
     public function updatedNroLiqui()

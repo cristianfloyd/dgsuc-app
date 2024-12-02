@@ -5,14 +5,17 @@ namespace App\Models\Reportes;
 use App\NroLiqui;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 
 class EmbargoReportModel extends Model
 {
+    use MapucheConnectionTrait;
+
     // Definimos la tabla asociada al modelo
-    protected $table = 'embargo_reports';
+    protected $table = 'suc.embargo_reports';
 
     // Definimos la clave primaria y el tipo de incremento
     protected $primaryKey = 'id';
@@ -53,20 +56,29 @@ class EmbargoReportModel extends Model
      */
     public static function createTableIfNotExists(): void
     {
-        if (!Schema::hasTable('embargo_reports')) {
-            Schema::create('embargo_reports', function (Blueprint $table) {
-                $table->increments('id');
-                $table->integer('nro_legaj')->nullable();
-                $table->string('nombre_completo')->nullable();
-                $table->integer('codn_conce')->nullable();
-                $table->float('importe_descontado')->nullable();
-                $table->integer('nro_embargo')->nullable();
-                $table->integer('nro_cargo')->nullable();
-                $table->string('caratula')->nullable();
-                $table->string('codc_uacad')->nullable();
-                $table->string('session_id')->nullable();
-                $table->integer('nro_liqui')->nullable();
-            });
+        $connection = (new static)->getConnection();
+
+        if (!$connection->getSchemaBuilder()->hasTable('suc.embargo_reports')) {
+            $connection->statement('
+                CREATE TABLE suc.embargo_reports (
+                    id SERIAL PRIMARY KEY,
+                    nro_legaj INTEGER,
+                    nombre_completo VARCHAR(255),
+                    codn_conce INTEGER,
+                    importe_descontado DECIMAL(10,2),
+                    nro_embargo INTEGER,
+                    nro_cargo INTEGER,
+                    caratula VARCHAR(255),
+                    codc_uacad VARCHAR(50),
+                    session_id VARCHAR(255),
+                    nro_liqui INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ');
+
+            // Crear índices para optimizar consultas
+            $connection->statement('CREATE INDEX idx_embargo_session ON suc.embargo_reports(session_id)');
+            $connection->statement('CREATE INDEX idx_embargo_liqui ON suc.embargo_reports(nro_liqui)');
         }
     }
 
@@ -78,9 +90,28 @@ class EmbargoReportModel extends Model
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
+        $connection = (new static)->getConnection();
 
-        DB::table('embargo_reports')->where('session_id', $sessionId)->delete();
+        $connection->table('suc.embargo_reports')->where('session_id', $sessionId)->delete();
     }
+
+
+
+    /**
+     * Elimina los registros antiguos de la tabla 'embargo_reports' que tienen una antigüedad mayor al tiempo de vida de la sesión.
+     * Esta función se utiliza para mantener la tabla limpia y evitar el crecimiento excesivo de los datos.
+     */
+    public static function cleanOldRecords(): void
+    {
+        $sessionLifetime = config('session.lifetime') * 60; // Convertir minutos a segundos
+        $connection = (new static)->getConnection();
+
+        $connection->statement("
+            DELETE FROM suc.embargo_reports
+            WHERE created_at < NOW() - INTERVAL '{$sessionLifetime} seconds'
+        ");
+    }
+
 
     /**
      * Establece los datos del reporte para la sesión actual
