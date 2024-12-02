@@ -6,6 +6,7 @@ use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use App\Models\Mapuche\Embargo;
+use Livewire\Attributes\Reactive;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
@@ -28,6 +29,7 @@ class EmbargoReport extends Page implements HasTable, HasForms
     protected static ?string $slug = 'reporte-embargos';
 
 
+    // #[Reactive]
     public $nro_liqui = null;
     public $reportData;
     public $perPage = 5;
@@ -55,42 +57,42 @@ class EmbargoReport extends Page implements HasTable, HasForms
         ];
     }
 
-    protected function getTableQuery(): Builder
-    {
-        // Validamos que se haya seleccionado una liquidación
-        if (!$this->nro_liqui) {
-            // Retornamos un query vacío para evitar cargar datos
-            Log::info('No se ha seleccionado una liquidación');
+    // protected function getTableQuery(): Builder
+    // {
+    //     // Validamos que se haya seleccionado una liquidación
+    //     if (!$this->nro_liqui) {
+    //         // Retornamos un query vacío para evitar cargar datos
+    //         Log::info('No se ha seleccionado una liquidación');
 
-            return EmbargoReportModel::query()->whereRaw('1 = 0');
-        }
-
-
-        try{
-            // Generamos y establecemos los datos del reporte
-            $reportData = $this->generateReport();
-            Log::info('reportData ',$reportData->toArray());
+    //         return EmbargoReportModel::query()->whereRaw('1 = 0');
+    //     }
 
 
-            // Utilizamos el nuevo método setReportData
-            EmbargoReportModel::setReportData($reportData->toArray());
-            Log::info('EmbargoReportModel ',EmbargoReportModel::$reportData);
+    //     try{
+    //         // Generamos y establecemos los datos del reporte
+    //         $reportData = $this->generateReport();
+    //         Log::info('reportData ',$reportData->toArray());
 
-            // Retornamos el query builder del modelo
-            $query = EmbargoReportModel::query();
-            Log::debug('Contenido de $query->get():', ['data' => $query->get()]);
-            return $query;
 
-        } catch (\Exception $e) {
-            // Manejo de excepciones y registro de errores
-            Log::error('Error al generar el reporte de embargos', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            // Retornamos un query vacío en caso de error
-            return EmbargoReportModel::query()->whereRaw('1 = 0');
-        }
-    }
+    //         // Utilizamos el nuevo método setReportData
+    //         EmbargoReportModel::setReportData($reportData->toArray());
+    //         Log::info('EmbargoReportModel ',EmbargoReportModel::$reportData);
+
+    //         // Retornamos el query builder del modelo
+    //         $query = EmbargoReportModel::query();
+    //         Log::debug('Contenido de $query->get():', ['data' => $query->get()]);
+    //         return $query;
+
+    //     } catch (\Exception $e) {
+    //         // Manejo de excepciones y registro de errores
+    //         Log::error('Error al generar el reporte de embargos', [
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         // Retornamos un query vacío en caso de error
+    //         return EmbargoReportModel::query()->whereRaw('1 = 0');
+    //     }
+    // }
 
 
 
@@ -131,12 +133,20 @@ class EmbargoReport extends Page implements HasTable, HasForms
         }
 
         try {
+
             $reportService = app(EmbargoReportService::class);
             $reportData = $reportService->generateReport($this->nro_liqui);
             EmbargoReportModel::setReportData($reportData->toArray());
+            $this->refreshTable();
+
         } catch (\Exception $e) {
             Log::error('Error al generar reporte', ['error' => $e->getMessage()]);
             $this->notify('error', 'Error al generar el reporte');
         }
+    }
+
+    public function refreshTable()
+    {
+        $this->dispatch('refresh');
     }
 }

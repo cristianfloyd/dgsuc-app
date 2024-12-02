@@ -5,14 +5,13 @@ namespace App\Models\Reportes;
 use Sushi\Sushi;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Blueprint;
 
 class EmbargoReportModel extends Model
 {
     use Sushi;
 
-    protected static $booted = false;
-    protected static $instance = null;
+    // protected static $booted = false;
+    // protected static $instance = null;
     protected $primaryKey = 'id';
     protected $keyType = 'integer';
     public $incrementing = true;
@@ -89,13 +88,5 @@ class EmbargoReportModel extends Model
 
         // Forzamos la recreación del esquema SQLite
         (new static)->getSchema();
-    }
-
-    /**
-     * Obtiene la clave única para el caché de Sushi
-     */
-    private function getSushiKey(): string
-    {
-        return static::class . ':sushi';
     }
 }

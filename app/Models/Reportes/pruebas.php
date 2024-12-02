@@ -39,13 +39,12 @@ $testData2 = [
 use App\Models\Reportes\EmbargoReportModel;
 use App\Services\Reportes\EmbargoReportService;
 $service = app(EmbargoReportService::class);
+
 $reportData = $service->generateReport(3);
 EmbargoReportModel::setReportData($reportData->toArray());
 
-
-// Generamos el reporte para la liquidación 3
-
-// Establecemos los datos en el modelo
+// 1. Primero limpiamos la caché
+Cache::forget(EmbargoReportModel::class . ':sushi');
 
 // Verificamos los resultados
 $results = EmbargoReportModel::all();
