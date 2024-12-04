@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
@@ -49,6 +50,25 @@ class EmbargoReportModel extends Model
         'nro_cargo' => 'integer',
     ];
 
+    // ##### mutadores y accesores
+    public function getCaratulaAttribute($value)
+    {
+        return EncodingService::toUtf8($value);
+    }
+    public function setCaratulaAttribute($value)
+    {
+        $this->attributes['caratula'] = EncodingService::toLatin1($value);
+    }
+    public function getNombreCompletoAttribute($value)
+    {
+        return EncodingService::toUtf8($value);
+    }
+    public function setNombreCompletoAttribute($value)
+    {
+        $this->attributes['nombre_completo'] = EncodingService::toLatin1($value);
+    }
+
+// ######################################################################
     /**
      * Crea la tabla temporal en la base de datos si no existe
      *

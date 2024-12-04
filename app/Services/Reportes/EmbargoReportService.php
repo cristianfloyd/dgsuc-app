@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Reportes;
 
 use App\Models\Mapuche\Embargo;
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
@@ -14,9 +15,10 @@ class EmbargoReportService
 {
     use MapucheConnectionTrait;
 
-    public function generateReport(?int $nro_liqui = 1): Collection
+    public function generateReport(?int $nro_liqui): Collection
     {
-        $connection = $this->getConnectionName();
+        $connection = DB::connection($this->getConnectionName());
+        Log::info("Generating report for nro_liqui: $nro_liqui");
         try {
             // Aseguramos que la tabla existe
             EmbargoReportModel::createTableIfNotExists();
@@ -24,7 +26,7 @@ class EmbargoReportService
             // Limpiamos registros antiguos
             EmbargoReportModel::cleanOldRecords();
 
-            return DB::query()
+            $results = $connection->query()
             ->fromSub(function ($query) {
                 $query->from('mapuche.emb_embargo as e')
                     ->select([
@@ -32,7 +34,7 @@ class EmbargoReportService
                         'e.nom_demandado',
                         'e.codn_conce',
                         'e.nro_embargo',
-                        DB::raw("CONCAT(e.nro_embargo, '-', e.nro_oficio) as detallenovedad"),
+                        DB::connection($this->getConnectionName())->raw("CONCAT(e.nro_embargo, '-', e.nro_oficio) as detallenovedad"),
                         'e.caratula'
                     ]);
             }, 'embargos')
@@ -41,7 +43,7 @@ class EmbargoReportService
                     ->where('d.chkstopliq', '=', 0)
                     ->whereNotNull('d.nro_legaj');
             })
-            ->leftJoin('mapuche.dh21 as d2', function ($join) use ($nro_liqui) {
+            ->Join('mapuche.dh21 as d2', function ($join) use ($nro_liqui) {
                 $join->on('d2.nro_legaj', '=', 'embargos.nro_legaj')
                     ->on('d2.nro_cargo', '=', 'd.nro_cargo')
                     ->on('d2.codn_conce', '=', 'embargos.codn_conce')
@@ -61,11 +63,21 @@ class EmbargoReportService
                 'embargos.detallenovedad',
                 'd2.nro_liqui'
             ])
+            ->where('d2.nro_liqui', '=', $nro_liqui)
             ->distinct()
             ->orderBy('embargos.nro_legaj')
             ->orderBy('d.nro_cargo')
             ->orderBy('embargos.codn_conce')
             ->get();
+
+            $embargos = $results->map(function ($item) {
+                $item->caratula = EncodingService::toUtf8($item->caratula);
+                $item->nom_demandado = EncodingService::toUtf8($item->nom_demandado);
+                return $item;
+            });
+
+            // convertir a eloquent collection
+            return new Collection($embargos);
         } catch (\Exception $e) {
             Log::error('Error generando reporte de embargos', [
                 'error' => $e->getMessage(),
@@ -90,47 +102,9 @@ class EmbargoReportService
             ->get();
     }
 
-    /**
-     * Procesa los embargos y genera los registros del reporte
-     */
-    public function processEmbargos(Collection $embargos, int $nro_liqui): Collection
-    {
-        $processedData = $embargos
-            ->groupBy('nro_legaj')
-            ->map(function ($embargosLegajo) use ($nro_liqui) {
-                return $embargosLegajo->map(function ($embargo) use ($nro_liqui) {
-                    return $this->processEmbargoImportes($embargo, $nro_liqui);
-                })->flatten(1);
-            })->flatten(1);
 
-        return new Collection($processedData);
-    }
 
-    /**
-     * Procesa los importes de un embargo específico
-     */
-    private function processEmbargoImportes($embargo, int $nro_liqui): Collection
-    {
-        $importes = $embargo->getImporteDescontado($nro_liqui);
 
-        $data = $importes->map(function ($importe) use ($embargo) {
-            // Creamos un array asociativo en lugar de una instancia del modelo
-            return [
-                'nro_legaj' => $embargo->nro_legaj,
-                'nombre_completo' => $embargo->datosPersonales->nombre_completo,
-                'codn_conce' => $embargo->tipoEmbargo->codn_conce,
-                'importe_descontado' => $importe->impp_conce,
-                'nro_embargo' => $embargo->nro_embargo,
-                'nro_cargo' => $importe->nro_cargo,
-                'caratula' => $embargo->caratula,
-                'codc_uacad' => $embargo->datosPersonales->dh03()
-                    ->where('nro_cargo', $importe->nro_cargo)
-                    ->value('codc_uacad')
-            ];
-        });
-
-        return new Collection($data);
-    }
 
     /**
      * @param Collection $embargos

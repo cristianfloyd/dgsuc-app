@@ -9,6 +9,7 @@ use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Dh21;
 use App\Traits\EmbargoQueries;
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
@@ -136,6 +137,7 @@ class Embargo extends Model
         'nro_cuenta_judicial' => 'string'
     ];
 
+
     public function detallenovedad(): Attribute
     {
         return new Attribute(
@@ -160,8 +162,18 @@ class Embargo extends Model
         return  $importe;
     }
 
+    // ############### ACCESORES Y MUTADORES ####################
+    public function getCaratulaAttribute($value)
+    {
+        return EncodingService::toUtf8($value);
+    }
 
-    // ########################################## RELACIONES ##########################################
+    public function getNomDemandadoAttribute()
+    {
+        return EncodingService::toUtf8($this->nom_demandado);
+    }
+
+    // ############### RELACIONES ####################
     /**
      * Relación con el beneficiario
      */
@@ -169,6 +181,7 @@ class Embargo extends Model
     {
         return $this->belongsTo(Beneficiario::class, 'cuit', 'cuit');
     }
+
 
     /**
      * Relación con el estado del embargo
