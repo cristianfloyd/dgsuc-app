@@ -30,6 +30,7 @@ class EmbargosPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Embargos/Resources'), for: 'App\\Filament\\Embargos\\Resources')
             ->discoverPages(in: app_path('Filament/Embargos/Pages'), for: 'App\\Filament\\Embargos\\Pages')
             ->pages([

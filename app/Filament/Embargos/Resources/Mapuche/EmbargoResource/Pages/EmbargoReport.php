@@ -104,7 +104,8 @@ class EmbargoReport extends Page implements HasTable, HasForms
         return $table
             ->query($this->getTableQuery())
             ->columns([
-                TextColumn::make('nro_legaj')->label('Legajo')->sortable(),
+                TextColumn::make('id'),
+                TextColumn::make('nro_legaj')->label('Legajo')->sortable()->searchable(),
                 TextColumn::make('nro_cargo')->label('Cargo')->sortable(),
                 TextColumn::make('nombre_completo')->label('Nombre')->searchable(),
                 TextColumn::make('codc_uacad')->label('Unidad Acad'),
@@ -163,7 +164,7 @@ class EmbargoReport extends Page implements HasTable, HasForms
 
             $reportService = app(EmbargoReportService::class);
             $reportData = $reportService->generateReport($this->nro_liqui);
-            EmbargoReportModel::setReportData($reportData->toArray());
+            EmbargoReportModel::setReportData($reportData);
             $this->refreshTable();
             Notification::make('success')
                 ->title( 'Reporte generado correctamente.')

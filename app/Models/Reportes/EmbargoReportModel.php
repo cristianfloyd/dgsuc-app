@@ -2,13 +2,13 @@
 
 namespace App\Models\Reportes;
 
-use App\NroLiqui;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Eloquent\Collection;
 
 class EmbargoReportModel extends Model
 {
@@ -113,13 +113,8 @@ class EmbargoReportModel extends Model
     }
 
 
-    /**
-     * Establece los datos del reporte para la sesión actual
-     *
-     * @param array $data
-     * @return void
-     */
-    public static function setReportData(array $data, ?int $nro_liqui = 2): void
+
+    public static function setReportData(Collection $data, ?int $nro_liqui = 2): void
     {
         try {
             // Iniciamos una transacción para asegurar la integridad de los datos
@@ -135,11 +130,19 @@ class EmbargoReportModel extends Model
             self::clearSessionData();
 
             // Preparamos los datos para inserción
-            $dataToInsert = collect($data)->map(function ($item) use ($sessionId, $nro_liqui) {
-                $item['session_id'] = $sessionId;
-                $item['nro_liqui'] = $nro_liqui;
-
-                return $item;
+            $dataToInsert = $data->map(function ($item) use ($sessionId, $nro_liqui) {
+                return [
+                    'nro_legaj' => $item->nro_legaj,
+                    'nombre_completo' => $item->nom_demandado,
+                    'codn_conce' => $item->codn_conce,
+                    'importe_descontado' => $item->impp_conce,
+                    'nro_embargo' => $item->nro_embargo,
+                    'nro_cargo' => $item->nro_cargo,
+                    'caratula' => $item->caratula,
+                    'codc_uacad' => $item->codc_uacad,
+                    'session_id' => $sessionId,
+                    'nro_liqui' => $nro_liqui
+                ];
             })->toArray();
 
             // Insertamos los datos en la tabla

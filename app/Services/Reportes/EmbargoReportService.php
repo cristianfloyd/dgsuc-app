@@ -4,14 +4,19 @@ declare(strict_types=1);
 namespace App\Services\Reportes;
 
 use App\Models\Mapuche\Embargo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\EmbargoReportModel;
 use Illuminate\Database\Eloquent\Collection;
 
 class EmbargoReportService
 {
-    public function generateReport(?int $nro_liqui = 2): Collection
+    use MapucheConnectionTrait;
+
+    public function generateReport(?int $nro_liqui = 1): Collection
     {
+        $connection = $this->getConnectionName();
         try {
             // Aseguramos que la tabla existe
             EmbargoReportModel::createTableIfNotExists();
@@ -19,14 +24,48 @@ class EmbargoReportService
             // Limpiamos registros antiguos
             EmbargoReportModel::cleanOldRecords();
 
-            // Primero obtenemos los embargos activos
-            $embargos = $this->getActiveEmbargos();
-
-            // Agrupamos por legajo y calculamos importes
-            $processedData = $this->processEmbargos($embargos, $nro_liqui);
-
-
-            return $processedData;
+            return DB::query()
+            ->fromSub(function ($query) {
+                $query->from('mapuche.emb_embargo as e')
+                    ->select([
+                        'e.nro_legaj',
+                        'e.nom_demandado',
+                        'e.codn_conce',
+                        'e.nro_embargo',
+                        DB::raw("CONCAT(e.nro_embargo, '-', e.nro_oficio) as detallenovedad"),
+                        'e.caratula'
+                    ]);
+            }, 'embargos')
+            ->join('mapuche.dh03 as d', function ($join) {
+                $join->on('d.nro_legaj', '=', 'embargos.nro_legaj')
+                    ->where('d.chkstopliq', '=', 0)
+                    ->whereNotNull('d.nro_legaj');
+            })
+            ->leftJoin('mapuche.dh21 as d2', function ($join) use ($nro_liqui) {
+                $join->on('d2.nro_legaj', '=', 'embargos.nro_legaj')
+                    ->on('d2.nro_cargo', '=', 'd.nro_cargo')
+                    ->on('d2.codn_conce', '=', 'embargos.codn_conce')
+                    ->on('d2.detallenovedad', '=', 'embargos.detallenovedad')
+                    ->where('d2.nro_liqui', '=', $nro_liqui)
+                    ->whereNotNull('d2.impp_conce');
+            })
+            ->select([
+                'embargos.nro_legaj',
+                'd.nro_cargo',
+                'embargos.nom_demandado',
+                'd.codc_uacad',
+                'embargos.caratula',
+                'embargos.codn_conce',
+                'd2.impp_conce',
+                'embargos.nro_embargo',
+                'embargos.detallenovedad',
+                'd2.nro_liqui'
+            ])
+            ->distinct()
+            ->orderBy('embargos.nro_legaj')
+            ->orderBy('d.nro_cargo')
+            ->orderBy('embargos.codn_conce')
+            ->get();
         } catch (\Exception $e) {
             Log::error('Error generando reporte de embargos', [
                 'error' => $e->getMessage(),
@@ -34,14 +73,12 @@ class EmbargoReportService
             ]);
             throw $e;
         }
-
-
     }
 
     /**
      * Obtiene los embargos activos con sus relaciones
      */
-    private function getActiveEmbargos(): Collection
+    public function getActiveEmbargos(): Collection
     {
         return Embargo::query()
             ->with([
@@ -49,9 +86,6 @@ class EmbargoReportService
                 'tipoEmbargo',
                 'datosPersonales.dh03'
             ])
-            ->whereHas('estado', fn($query) =>
-                $query->where('id_estado_embargo', 2)
-            )
             // ->whereIn('nro_legaj', [149639,159300,164859])
             ->get();
     }
@@ -59,7 +93,7 @@ class EmbargoReportService
     /**
      * Procesa los embargos y genera los registros del reporte
      */
-    private function processEmbargos(Collection $embargos, int $nro_liqui): Collection
+    public function processEmbargos(Collection $embargos, int $nro_liqui): Collection
     {
         $processedData = $embargos
             ->groupBy('nro_legaj')

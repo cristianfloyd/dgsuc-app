@@ -52,4 +52,3 @@ $results = EmbargoReportModel::all();
 // Inspeccionamos la estructura
 $results->first();
 
-sr1gmlMJpT5vunRXeOERMQ0Sa754ZMtnKo5aVtIN

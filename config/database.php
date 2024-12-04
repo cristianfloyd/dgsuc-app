@@ -70,7 +70,7 @@ return [
             'username' => env('DB4_USERNAME', 'postgres'),
             'password' => env('DB4_PASSWORD', '1234'),
             'charset' => env('DB4_CHARSET', 'SQL_ASCII'),
-            'collate' => env('DB4_COLLATION', 'utf8mb4_unicode_ci'),
+            'collate' => env('DB4_COLLATION', 'UTF8'),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'mapuche',

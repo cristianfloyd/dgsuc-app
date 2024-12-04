@@ -103,4 +103,10 @@ class Dh03 extends Model
     {
         return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
+
+    // ########### Mutadores ###########
+    public function getCodcUacadAttribute($value)
+    {
+        return trim($value);
+    }
 }

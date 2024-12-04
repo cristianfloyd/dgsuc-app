@@ -22,6 +22,7 @@ use App\Models\Mapuche\Embargos\EstadoEmbargo;
 use App\Models\Mapuche\Embargos\CuentaJudicial;
 use App\Models\Mapuche\Embargos\TipoExpediente;
 use App\Models\Mapuche\Emgargos\TipoRemuneracion;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -135,17 +136,27 @@ class Embargo extends Model
         'nro_cuenta_judicial' => 'string'
     ];
 
+    public function detallenovedad(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                return "{$this->codn_conce}-{$this->nro_oficio}";
+            }
+        );
+    }
+
     public function getImporteDescontado(int $nro_liqui): Collection
     {
         $importe = Dh21::query()
             ->where('nro_liqui', $nro_liqui)
             ->where('nro_legaj', $this->nro_legaj)
-            ->where('codn_conce', $this->tipoEmbargo->codn_conce)
+            ->where('codn_conce', $this->codn_conce)
+            ->where('detallenovedad', $this->detallenovedad)
             ->where('impp_conce', '>', 0)
             ->orderBy('nro_legaj', 'desc')
             ->get(['nro_cargo', 'impp_conce']);
 
-        
+
         return  $importe;
     }
 

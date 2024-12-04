@@ -80,7 +80,7 @@ class Dh01 extends Model
     // Mutador para convertir desc_nombr a UTF-8 al obtener el valor
     public function getDescNombrAttribute($value)
     {
-        return EncodingService::toUtf8($value);
+        return EncodingService::toUtf8(trim($value));
     }
     // Mutador para convertir desc_nombr a Latin1 antes de guardar
     public function setDescNombrAttribute($value)
@@ -95,10 +95,16 @@ class Dh01 extends Model
         );
     }
 
+    public function getDescAppatAttribute($value)
+    {
+        return EncodingService::toUtf8(trim($value));
+    }
+
+
     public function NombreCompleto(): Attribute
     {
         return Attribute::make(
-            get: fn() => "{$this->desc_appat} {$this->desc_apmat} {$this->desc_apcas} {$this->desc_nombr}",
+            get: fn() => "{$this->desc_appat}, {$this->desc_nombr}",
         );
     }
 }

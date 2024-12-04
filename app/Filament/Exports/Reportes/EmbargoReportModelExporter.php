@@ -15,13 +15,13 @@ class EmbargoReportModelExporter extends Exporter
     {
         return [
             ExportColumn::make('nro_legaj')->label('Legajo'),
+            ExportColumn::make('nro_cargo')->label('Cargo'),
+            ExportColumn::make('nro_embargo')->label('Nro. Embargo'),
+            ExportColumn::make('codc_uacad')->label('Unidad Acad'),
             ExportColumn::make('nombre_completo')->label('Nombre Completo'),
             ExportColumn::make('codn_conce')->label('Concepto'),
             ExportColumn::make('importe_descontado')->label('Importe'),
-            ExportColumn::make('nro_embargo')->label('Nro. Embargo'),
-            ExportColumn::make('nro_cargo')->label('Cargo'),
             ExportColumn::make('caratula')->label('Caratula'),
-            ExportColumn::make('codc_uacad')->label('Unidad Acad'),
         ];
     }
 
