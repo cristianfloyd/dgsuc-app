@@ -9,9 +9,12 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, WithStyles
+class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
 
     public function __construct(protected Builder $query)
@@ -21,7 +24,9 @@ class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, Wi
     */
     public function collection()
     {
-        return $this->query
+        return $this->query->getModel()
+            ->newQuery()
+            ->where('session_id', session()->getId())
             ->select('codc_uacad', DB::raw('SUM(importe_descontado) as total'))
             ->groupBy('codc_uacad')
             ->orderBy('codc_uacad')
@@ -36,6 +41,13 @@ class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, Wi
         ];
     }
 
+    public function columnFormats(): array
+    {
+        return [
+            'B' => '"$"#,##0.00',
+        ];
+    }
+
     public function title(): string
     {
         return 'Totales por Uacad';
@@ -43,8 +55,9 @@ class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, Wi
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('B')->getNumberFormat()->setFormatCode('#,##0.00');
-        $sheet->getStyle('A:B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
 
         return [
             1 => ['font' => ['bold' => true], 'background' => ['argb' => 'FFE5E5E5']],

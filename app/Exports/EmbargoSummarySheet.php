@@ -43,8 +43,9 @@ class EmbargoSummarySheet implements FromCollection, WithHeadings, WithTitle, Wi
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('B')->getNumberFormat()->setFormatCode('#,##0.00');
-        $sheet->getStyle('A:B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B')->getNumberFormat()->setFormatCode('"$"###,##0.00');
+        $sheet->getStyle('A')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         return [
             1 => ['font' => ['bold' => true], 'background' => ['argb' => 'FFE5E5E5']],
