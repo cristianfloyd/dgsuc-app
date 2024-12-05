@@ -8,6 +8,8 @@ use App\Models\Mapuche\Dh22;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Log;
+use App\Exports\EmbargoReportExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
@@ -77,8 +79,31 @@ class EmbargoReport extends Page implements HasTable, HasForms
     public function getHeaderActions(): array
     {
         return [
+            Action::make('exportExcel')
+                ->label('Exportar Excel')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
+                ->action(function () {
+                    $query = EmbargoReportModel::query()
+                    ->select([
+                        'nro_legaj',
+                        'nro_cargo',
+                        'nombre_completo',
+                        'codc_uacad',
+                        'caratula',
+                        'nro_embargo',
+                        'codn_conce',
+                        'importe_descontado'
+                    ])
+                    ->where('session_id', session()->getId());
+
+                    return Excel::download(
+                        new EmbargoReportExport($query),
+                        'embargos-' . now()->format('Y-m-d') . '.xlsx'
+                    );
+                }),
             ExportAction::make('export')
-                ->label('Exportar')
+                ->label('Exportar CSV')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
                 ->exporter(EmbargoReportModelExporter::class)
@@ -104,15 +129,15 @@ class EmbargoReport extends Page implements HasTable, HasForms
         return $table
             ->query($this->getTableQuery())
             ->columns([
-                TextColumn::make('id'),
-                TextColumn::make('nro_legaj')->label('Legajo')->sortable()->searchable(),
-                TextColumn::make('nro_cargo')->label('Cargo')->sortable(),
+                TextColumn::make('id')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nro_legaj')->label('Legajo')->sortable()->searchable()->numeric(),
+                TextColumn::make('nro_cargo')->label('Cargo')->sortable()->numeric(),
                 TextColumn::make('nombre_completo')->label('Nombre')->searchable(),
                 TextColumn::make('codc_uacad')->label('Unidad Acad'),
                 TextColumn::make('caratula')->label('Caratula')->limit(15)
                     ->tooltip(fn(TextColumn $column): string => $column->getState()),
-                TextColumn::make('nro_embargo')->label('Nro. Embargo'),
-                TextColumn::make('codn_conce')->label('Concepto'),
+                TextColumn::make('nro_embargo')->label('Nro. Embargo')->numeric(),
+                TextColumn::make('codn_conce')->label('Concepto')->numeric(),
                 TextColumn::make('importe_descontado')->label('Importe')->money('ARS'),
                 TextColumn::make('nro_liqui')->label('nro_lqui')->toggleable(isToggledHiddenByDefault: true),
             ])

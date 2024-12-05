@@ -50,7 +50,16 @@ class EmbargoReportModel extends Model
         'nro_cargo' => 'integer',
     ];
 
-    // ##### mutadores y accesores
+    // ##### mutadores y accesores ##################################
+
+    public function getCodcUacadAttribute($value)
+    {
+        return trim($value);
+    }
+    public function geImporteDescontadoAttribute($value)
+    {
+        return number_format($value, 2, ',', '.');
+    }
     public function getCaratulaAttribute($value)
     {
         return EncodingService::toUtf8($value);

@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Exports;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+
+class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, WithStyles
+{
+
+    public function __construct(protected Builder $query)
+    {}
+    /**
+    * @return \Illuminate\Support\Collection
+    */
+    public function collection()
+    {
+        return $this->query
+            ->select('codc_uacad', DB::raw('SUM(importe_descontado) as total'))
+            ->groupBy('codc_uacad')
+            ->orderBy('codc_uacad')
+            ->get();
+    }
+
+    public function headings(): array
+    {
+        return [
+            'U. Acad.',
+            'Total'
+        ];
+    }
+
+    public function title(): string
+    {
+        return 'Totales por Uacad';
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        $sheet->getStyle('B')->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle('A:B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        return [
+            1 => ['font' => ['bold' => true], 'background' => ['argb' => 'FFE5E5E5']],
+        ];
+    }
+}

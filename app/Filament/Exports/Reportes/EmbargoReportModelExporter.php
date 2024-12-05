@@ -20,7 +20,10 @@ class EmbargoReportModelExporter extends Exporter
             ExportColumn::make('codc_uacad')->label('Unidad Acad'),
             ExportColumn::make('nombre_completo')->label('Nombre Completo'),
             ExportColumn::make('codn_conce')->label('Concepto'),
-            ExportColumn::make('importe_descontado')->label('Importe'),
+            // ExportColumn::make('importe_descontado')->label('Importe'),
+            ExportColumn::make('importe_descontado')
+                ->label('Importe')
+                ->formatStateUsing(fn ($state) => str_replace('.', ',', $state)),
             ExportColumn::make('caratula')->label('Caratula'),
         ];
     }
