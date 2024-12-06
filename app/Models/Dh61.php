@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+/*
+ * (D) HISTORICO-Tabla de Categorias de Empleados
+ * */
 class Dh61 extends Model
 {
     use MapucheConnectionTrait;

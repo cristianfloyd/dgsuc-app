@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use App\Services\Mapuche\Dh22Service;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
-use App\Services\Reportes\DosubaIntegradorService;
 use App\Filament\Resources\DosubaSinLiquidarReportResource\Pages;
 
 class DosubaSinLiquidarReportResource extends Resource
@@ -119,11 +118,5 @@ class DosubaSinLiquidarReportResource extends Resource
             ->with('dh22')
             ->select(['dh21h.*'])
             ->orderBy('nro_liqui', 'desc');
-        // $dosubaIntegradorService = app(DosubaIntegradorService::class);
-
-        // return $dosubaIntegradorService->getLegajosSinLiquidarConDosuba()
-        //     ->with('dh22')
-        //     ->select(['dh21h.*'])
-        //     ->orderBy('nro_liqui', 'desc');
     }
 }

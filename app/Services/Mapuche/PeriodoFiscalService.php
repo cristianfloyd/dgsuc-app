@@ -76,13 +76,13 @@ class PeriodoFiscalService
     }
 
     /**
-     * Obtiene los distintos periodos fiscales almacenados en dh61 y los devuelve en un array.
+     * Obtiene los distintos periodos fiscales almacenados en Dh22 y los devuelve en un array.
      *
      * @return array Devuelve un array con los periodos fiscales almacenados en dh61.
      */
     public function getPeriodosFiscales(): array
     {
-        $periodosFiscales = Dh61::select('per_anoct', 'per_mesct')
+        $periodosFiscales = Dh22::query()->select('per_liano', 'per_limes')
             ->distinct()
             ->get();
         return [
@@ -100,5 +100,14 @@ class PeriodoFiscalService
     {
         $periodoFiscal = $this->getPeriodoFiscal();
         return $periodoFiscal['month'];
+    }
+
+    public function getPeriodoFiscalFromId(int $id): array
+    {
+        $periodoFiscal = Dh22::find($id);
+        return [
+            'year' => $periodoFiscal->per_liano,
+            'month' => $periodoFiscal->per_limes
+            ];
     }
 }
