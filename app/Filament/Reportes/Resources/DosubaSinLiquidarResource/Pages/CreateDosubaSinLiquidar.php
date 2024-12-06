@@ -12,6 +12,9 @@ use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
 
 class CreateDosubaSinLiquidar extends CreateRecord
 {
+    public ?array $data = [
+        'liquidacion_base' => null,
+    ];
     protected static string $resource = DosubaSinLiquidarResource::class;
 
     public function mount(): void
@@ -25,7 +28,6 @@ class CreateDosubaSinLiquidar extends CreateRecord
         // Lógica para generar el reporte basado en la liquidación seleccionada
         $formData = $this->form->getState();
         $liquidacionBase = $formData['liquidacion_base'];
-        dd($liquidacionBase);
 
         // Obtenemos el periodo fiscal de la liquidación base
         $periodoFiscalService = app(PeriodoFiscalService::class);

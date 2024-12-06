@@ -2,12 +2,12 @@
 
 namespace App\Services\Mapuche;
 
+use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh21h;
-use App\ValueObjects\PeriodoLiquidacion;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use App\ValueObjects\PeriodoLiquidacion;
 
 class DosubaReportService
 {
@@ -60,10 +60,11 @@ class DosubaReportService
     public function legajosCuartoMes(Carbon $fechaCuartoMes): mixed
     {
         return Dh21h::query()
-            ->whereYear('dh22.per_liano', $fechaCuartoMes->year)
-            ->whereMonth('dh22.per_limes', $fechaCuartoMes->month)
-            ->definitiva()
-            ->select('nro_legaj')
+            ->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
+            ->where('dh22.per_liano', $fechaCuartoMes->year)
+            ->where('dh22.per_limes', $fechaCuartoMes->month)
+            ->whereRaw("LOWER(dh21h.des_liqui) LIKE '%definitiva%'")
+            ->select('dh21h.nro_legaj')
             ->distinct()
             ->get();
     }

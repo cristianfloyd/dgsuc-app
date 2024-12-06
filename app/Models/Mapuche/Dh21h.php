@@ -125,6 +125,11 @@ class Dh21h extends Model
             );
     }
 
+    public function scopeDefinitiva($query)
+    {
+        return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
+    }
+
     /**
      * Accesors & Mutators
      */
