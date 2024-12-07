@@ -20,7 +20,10 @@ class DosubaSinLiquidarModel extends Model
 
     protected $fillable = [
         'nro_legaj',
+        'apellido',
+        'nombre',
         'nombre_copmpleto',
+        'cuil',
         'codc_uacad',
         'ultima_liquidacion',
         'periodo_fiscal',

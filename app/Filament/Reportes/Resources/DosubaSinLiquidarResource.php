@@ -7,11 +7,15 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
+use App\Exports\DosubaSinLiquidarExport;
+use Filament\Notifications\Notification;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
@@ -92,7 +96,40 @@ class DosubaSinLiquidarResource extends Resource
             ->bulkActions([
                 BulkAction::make('export')
                     ->label('Exportar a Excel')
-                    ->action(fn ($records) => static::exportToExcel($records))
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function ($records) {
+                        try {
+                            return Excel::download(
+                                new DosubaSinLiquidarExport($records),
+                                'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx'
+                            );
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error al exportar')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+            ])
+            ->headerActions([
+                Action::make('exportAll')
+                    ->label('Exportar Todo')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->visible(fn() => $hasData)
+                    ->action(function () {
+                        try {
+                            $records = DosubaSinLiquidarModel::where('session_id', session()->getId())->get();
+                            return Excel::download(
+                                new DosubaSinLiquidarExport($records),
+                                'dosuba-sin-liquidar-completo-' . now()->format('Y-m-d') . '.xlsx'
+                            );
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error al exportar')
+                                ->danger()
+                                ->send();
+                        }
+                    })
             ])
             ->emptyStateHeading('No hay datos disponibles')
             ->emptyStateDescription('Genera un nuevo reporte para ver los resultados.')
