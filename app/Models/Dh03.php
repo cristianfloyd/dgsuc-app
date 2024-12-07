@@ -43,7 +43,16 @@ class Dh03 extends Model
         return Dh03::count();
     }
 
+    /** ############################## SCOPES ############################## */
 
+    public function scopeEmpleadosActivos($query)
+    {
+        return $query->where('chkstopliq', '=', 0)
+                     ->where('codc_uacad', '!=', '')
+                     ->whereNull('fec_baja');
+    }
+
+    /* ############################## RELACIONES ############################## */
 
     public function dh21()
     {

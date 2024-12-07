@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh21h;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\ValueObjects\PeriodoLiquidacion;
 
@@ -59,14 +60,26 @@ class DosubaReportService
      */
     public function legajosCuartoMes(Carbon $fechaCuartoMes): mixed
     {
-        return Dh21h::query()
+        $query = Dh21h::query()
             ->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
             ->where('dh22.per_liano', $fechaCuartoMes->year)
             ->where('dh22.per_limes', $fechaCuartoMes->month)
-            ->whereRaw("LOWER(dh21h.des_liqui) LIKE '%definitiva%'")
-            ->select('dh21h.nro_legaj')
-            ->distinct()
-            ->get();
+            ->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'")
+            ->select([
+                'dh21h.nro_legaj',
+                'dh21h.nro_liqui',
+                'dh21h.codc_uacad',
+                'dh22.per_liano as anio',
+                'dh22.per_limes as mes',
+                ])
+            ->distinct();
+
+        Log::info('SQL Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        return $query->get();
     }
 
     /**
@@ -76,12 +89,18 @@ class DosubaReportService
      */
     public function legajosTercerMes(Carbon $fechaInicio, Carbon $fechaReferencia)
     {
-        return Dh21h::query()
+        $query = Dh21h::query()
             ->entreFechas($fechaInicio, $fechaReferencia)
-            ->empleadosActivos()
-            ->select('cuil')
+            ->select('nro_legaj')
             ->distinct()
-            ->get();
+            ;
+
+        Log::info('SQL Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        return $query->get();
     }
 
     /**
@@ -91,22 +110,45 @@ class DosubaReportService
      */
     public function cruzarLegajos(mixed $empleadosCuartoMes, mixed $empleadosTresMeses): Collection|\Illuminate\Database\Eloquent\Collection
     {
-        return Dh03::query()
-            ->whereIn('cuil', $empleadosCuartoMes->pluck('cuil'))
-            ->whereNotIn('cuil', $empleadosTresMeses->pluck('cuil'))
-            ->with(['persona' => function ($query) {
-                $query->select('cuil', 'apellido', 'nombre');
-            }])
-            ->select('id_legajo', 'cuil')
-            ->orderBy('id_legajo')
-            ->get()
-            ->map(function ($empleado) {
-                return [
-                    'IdLegajo' => $empleado->id_legajo,
-                    'CUIL' => $empleado->cuil,
-                    'Apellido' => $empleado->persona->apellido,
-                    'Nombre' => $empleado->persona->nombre
-                ];
-            });
+        $query = Dh03::query()
+        ->select([
+            'dh03.nro_legaj',
+            'dh01.nro_cuil1',
+            'dh01.nro_cuil',
+            'dh01.nro_cuil2',
+            'dh01.desc_appat as apellido',
+            'dh01.desc_nombr as nombre',
+            'dh21h.nro_liqui',
+            'dh21h.codc_uacad',
+            'dh22.per_liano as anio',
+            'dh22.per_limes as mes'
+        ])
+        ->distinct()
+        ->join('dh01', 'dh03.nro_legaj', '=', 'dh01.nro_legaj')
+        ->join('dh21h', 'dh03.nro_legaj', '=', 'dh21h.nro_legaj')
+        ->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
+        ->whereIn('dh03.nro_legaj', $empleadosCuartoMes->pluck('nro_legaj'))
+        ->whereNotIn('dh03.nro_legaj', $empleadosTresMeses->pluck('nro_legaj'))
+        ->orderBy('dh03.nro_legaj');
+
+        // Debug de la consulta
+        Log::info('Query cruzarLegajos:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        return $query->get()->map(function($item) {
+            return [
+                'nro_legaj' => $item->nro_legaj,
+                'cuil' => $item->nro_cuil1 . $item->nro_cuil . $item->nro_cuil2,
+                'apellido' => $item->apellido,
+                'nombre' => $item->nombre,
+                'ultima_liquidacion' => $item->nro_liqui,
+                'codc_uacad' => $item->codc_uacad,
+                'periodo_fiscal' => $item->anio . $item->mes,
+                'anio' => $item->anio,
+                'mes' => $item->mes
+            ];
+        });
     }
 }

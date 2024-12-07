@@ -163,12 +163,17 @@ class Dh21 extends Model
         });
     }
 
-    public function scopeEmpleadosActivos($query)
+
+    /**
+     * Obtiene una consulta de registros de Dh21 que tienen una liquidación definitiva asociada.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeConDefinitiva($query)
     {
         return $query->whereHas('dh22', function($q) {
                 $q->definitiva();
-            })
-            ->whereNull('bloqueo_completo')
-            ->where('id_dependencia', '!=', '');
+            });
     }
 }

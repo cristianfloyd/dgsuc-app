@@ -40,7 +40,7 @@ class PeriodoLiquidacion
      */
     public function getFechaCuartoMes(): Carbon
     {
-        return $this->fecha->copy()->subMonths(4);
+        return $this->fecha->copy()->subMonths(3);
     }
 
     /**

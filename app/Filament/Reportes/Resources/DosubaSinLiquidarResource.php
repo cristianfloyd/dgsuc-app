@@ -18,6 +18,10 @@ use App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 class DosubaSinLiquidarResource extends Resource
 {
     protected static ?string $model = DosubaSinLiquidarModel::class;
+    protected static ?string $label = 'Dosuba Sin Liquidar - Reporte';
+    protected static ?string $navigationLabel = 'Dosuba Sin Liquidar';
+    protected static ?string $slug = 'reportes/dosuba-sin-liquidar';
+    protected static ?string $navigationGroup = 'Reportes';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -58,10 +62,17 @@ class DosubaSinLiquidarResource extends Resource
                     ->label('Legajo')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('nombre_completo')
-                    ->label('Nombre Completo')
+                TextColumn::make('apellido')
+                    ->label('Apellido')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('nombre')
+                    ->label('Nombre')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('cuil')
+                    ->label('CUIL')
+                    ->sortable(),
                 TextColumn::make('codc_uacad')
                     ->label('Unidad Académica')
                     ->sortable(),
@@ -76,7 +87,7 @@ class DosubaSinLiquidarResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 BulkAction::make('export')

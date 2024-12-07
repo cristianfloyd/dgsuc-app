@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Facades\DB;
+
 /**
  * Trait MapucheConnectionTrait
  *
@@ -18,6 +20,16 @@ trait MapucheConnectionTrait
     {
         return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
     }
+
+    /**
+     * Obtiene la conexión desde el trait
+     * @return \Illuminate\Database\Connection
+     */
+    public function getConnectionFromTrait()
+    {
+        return DB::connection($this->getConnectionName());
+    }
+
 
     /**
      * Obtiene el nombre de la tabla calificado con el esquema correspondiente.
@@ -37,3 +49,4 @@ trait MapucheConnectionTrait
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
 }
+

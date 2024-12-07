@@ -37,24 +37,36 @@ class DosubaSinLiquidarModel extends Model
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = (new static)->getConnection();
+        $connection = (new static)->getConnectionFromTrait();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
             $connection->statement('
                 CREATE TABLE suc.rep_dosuba_sin_liquidar (
                     id SERIAL PRIMARY KEY,
                     nro_legaj INTEGER,
-                    nombre_completo VARCHAR(255),
+                    apellido VARCHAR(255),
+                    nombre VARCHAR(255),
+                    cuil VARCHAR(11),
                     codc_uacad VARCHAR(10),
                     ultima_liquidacion INTEGER,
                     periodo_fiscal VARCHAR(6),
                     session_id VARCHAR(255),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ');
 
             $connection->statement('CREATE INDEX idx_dosuba_session ON suc.rep_dosuba_sin_liquidar(session_id)');
             $connection->statement('CREATE INDEX idx_dosuba_legajo ON suc.rep_dosuba_sin_liquidar(nro_legaj)');
+        }
+    }
+
+    public static function dropTableIfExists(): void
+    {
+        $connection = (new static)->getConnectionFromTrait();
+        dump($connection);
+        if ($connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
+            $connection->statement('DROP TABLE IF EXISTS suc.rep_dosuba_sin_liquidar');
         }
     }
 
@@ -100,12 +112,15 @@ class DosubaSinLiquidarModel extends Model
             $sessionId = session()->getId();
 
             $dataToInsert = $data->map(function ($item) use ($sessionId) {
+
                 return [
-                    'nro_legaj' => $item->nro_legaj,
-                    'nombre_completo' => $item->nombre_completo,
-                    'codc_uacad' => $item->codc_uacad,
-                    'ultima_liquidacion' => $item->ultima_liquidacion,
-                    'periodo_fiscal' => $item->periodo_fiscal,
+                    'nro_legaj' => $item['nro_legaj'],
+                    'apellido' => $item['apellido'],
+                    'nombre' => $item['nombre'],
+                    'cuil' => $item['cuil'],
+                    'codc_uacad' => $item['codc_uacad'],
+                    'ultima_liquidacion' => $item['ultima_liquidacion'],
+                    'periodo_fiscal' => $item['periodo_fiscal'],
                     'session_id' => $sessionId,
                 ];
             })->toArray();
