@@ -38,7 +38,9 @@ Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerfo
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
 
-
+Route::middleware(['check.materialized.view'])->group(function () {
+    Route::get('/suc/reporte-liquidacion', ReporteLiquidacion::class)->name('reporte-liquidacion');
+});
 
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])

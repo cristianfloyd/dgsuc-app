@@ -27,6 +27,7 @@ return [
     App\Providers\MapucheMiSimplificacionProvider::class,
     App\Providers\MessageManagerProvider::class,
     App\Providers\RepositoryServiceProvider::class,
+    App\Providers\ScheduleServiceProvider::class,
     App\Providers\TableVerificationServiceProvider::class,
     App\Providers\TransactionServiceProvider::class,
     App\Providers\ValidationServiceProvider::class,

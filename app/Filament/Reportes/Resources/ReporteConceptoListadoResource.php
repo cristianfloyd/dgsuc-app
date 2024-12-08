@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Reportes\Resources;
 
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh12Service;
@@ -24,7 +23,7 @@ class ReporteConceptoListadoResource extends Resource
     protected static ?string $model = ConceptoListado::class;
     protected static ?string $modelLabel = 'Listado de Concepto';
 
-    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reportes';
 
 

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Jobs\RefreshMaterializedViewJob;
 use App\Services\ConceptoListadoResourceService;
 
 class RefreshConceptoListadoView extends Command
@@ -24,10 +25,10 @@ class RefreshConceptoListadoView extends Command
     /**
      * Execute the console command.
      */
-    public function handle(ConceptoListadoResourceService $service)
+    public function handle(): void
     {
-        $this->info('Refrescando vista materializada...');
-        $service->refreshMaterializedView();
+        $this->info('Programando actualizacion...');
+        RefreshMaterializedViewJob::dispatch();
         $this->info('Vista materializada actualizada exitosamente!');
     }
 }
