@@ -86,7 +86,7 @@ class ConceptoListadoResourceService
     {
         return Cache::store('file')->remember(
             $cacheKey,
-            now()->addHours(24),
+            now()->addHours(2),
             fn() => $query->get()
         );
     }

@@ -3,18 +3,10 @@
 namespace App\Filament\Resources\ReporteConceptoListadoResource\Pages;
 
 use Filament\Actions;
-use App\Models\Mapuche\Dh22;
-use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
-use App\Services\Dh12Service;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Services\ConceptoListadoService;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Table\Concerns\HasRecords;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
-use App\Filament\Resources\ReporteConceptoListadoResource;
+use App\Filament\Reportes\Resources\ReporteConceptoListadoResource;
 
 class ListReporteConceptoListados extends ListRecords
 {
@@ -37,11 +29,12 @@ class ListReporteConceptoListados extends ListRecords
                             ->with('error', 'No se encontraron registros con los filtros seleccionados.');
                     }
                     $query = $query->select([
+                        'nro_liqui',
                         'desc_liqui',
-                        'desc_appat',
-                        'desc_nombr',
+                        'apellido',
+                        'nombre',
                         'nro_legaj',
-                        'secuencia',
+                        'nro_cargo',
                         'codc_uacad',
                         'codn_conce',
                         'impp_conce'
@@ -56,17 +49,6 @@ class ListReporteConceptoListados extends ListRecords
                 ->modalHeading('¿Desea descargar el reporte?')
                 ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                 ->modalSubmitActionLabel('Descargar'),
-        // Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
-        //     ->options(Dh22::getPeriodosFiscales()),
-        // Actions\SelectAction::make('codn_conce')
-        //     ->label('concepto')
-        //     ->options(function () {
-        //         return Dh12Service::getConceptosParaSelect();
-        //     })
-        //     ->action(function ($record, $data) {
-        //         $this->tableFilters['codn_conce'] = $data;
-        //         $this->refreshTable();
-        //     })
         ];
     }
 }

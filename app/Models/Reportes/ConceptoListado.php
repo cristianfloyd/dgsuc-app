@@ -23,15 +23,15 @@ class ConceptoListado extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'nro_liqui',
         'desc_liqui',
+        'periodo_fiscal',
+        'nro_legaj',
+        'nro_cargo',
         'apellido',
         'nombre',
-        'nro_legaj',
-        'codc_uacad',
-        'periodo_fiscal',
-        'nro_liqui',
         'cuil',
-        'secuencia',
+        'codc_uacad',
         'codn_conce',
         'impp_conce'
     ];
@@ -60,17 +60,17 @@ class ConceptoListado extends Model
             if (!Schema::connection('pgsql-mapuche')->hasTable('suc.rep_concepto_listado')) {
                 Schema::connection('pgsql-mapuche')->create('suc.rep_concepto_listado', function (Blueprint $table) {
                     $table->id();
+                    $table->string('nro_liqui')->nullable();
                     $table->string('desc_liqui')->nullable();
+                    $table->string('periodo_fiscal')->nullable();
+                    $table->integer('nro_legaj')->nullable();
+                    $table->integer('nro_cargo')->nullable();
                     $table->string('apellido')->nullable();
                     $table->string('nombre')->nullable();
-                    $table->integer('nro_legaj')->nullable();
-                    $table->string('codc_uacad')->nullable();
-                    $table->string('periodo_fiscal')->nullable();
-                    $table->integer('nro_liqui')->nullable();
                     $table->string('cuil')->nullable();
-                    $table->integer('secuencia')->nullable();
+                    $table->string('codc_uacad')->nullable();
                     $table->integer('codn_conce')->nullable();
-                    $table->decimal('impp_conce', 12, 2)->nullable();
+                    $table->decimal('impp_conce', 15, 2)->nullable();
 
                     // Índices para optimizar consultas
                     $table->index(['periodo_fiscal', 'nro_liqui']);

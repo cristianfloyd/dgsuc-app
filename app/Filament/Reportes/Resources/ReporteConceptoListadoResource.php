@@ -9,8 +9,10 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Reportes\ConceptoListado;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\ConceptoListadoResourceService;
@@ -21,8 +23,8 @@ use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteCon
 class ReporteConceptoListadoResource extends Resource
 {
     protected static ?string $model = ConceptoListado::class;
-    protected static ?string $modelLabel = 'Listado de Concepto';
-
+    protected static ?string $modelLabel = 'List. de Concepto';
+    protected static ?string $slug = 'listado-concepto';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reportes';
 
@@ -31,17 +33,18 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('desc_liqui')->toggleable(),
+                TextColumn::make('nro_legaj')->sortable()->searchable(),
+                TextColumn::make('nro_cargo')->label('Secuencia'),
+                TextColumn::make('codc_uacad')->label('dependencia'),
+                TextColumn::make('apellido')->label('Apellido'),
+                TextColumn::make('nombre')->label('Nombre'),
+                TextColumn::make('cuil')->label('CUIL'),
+                TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->getStateUsing(fn($record) => $record->periodo_fiscal),
-                TextColumn::make('codc_uacad')->label('dependencia'),
-                TextColumn::make('nro_legaj')->sortable(),
-                TextColumn::make('cuil')->label('CUIL'),
-                TextColumn::make('desc_appat')->label('Apellido'),
-                TextColumn::make('desc_nombr')->label('Nombre'),
-                TextColumn::make('secuencia')->label('Secuencia'),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('impp_conce')->label('Importe'),
             ])
@@ -95,6 +98,34 @@ class ReporteConceptoListadoResource extends Resource
             ->bulkActions([
                 //
             ])
+            ->headerActions([
+                Action::make('limpiar_cache')
+                    ->label('Limpiar Caché')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function () {
+                        try {
+                            if (config('cache.default') === 'redis') {
+                                Cache::tags(['concepto_listado'])->flush();
+                            } else {
+                                Cache::flush(); // Fallback para otros drivers
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title('Caché Limpiada')
+                                ->body('La caché ha sido limpiada exitosamente.')
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body('Error al limpiar la caché: ' . $e->getMessage())
+                                ->send();
+                        }
+                    })
+            ])
             ->deferLoading()
             ->persistFiltersInSession()
             ->defaultPaginationPageOption(5)
@@ -117,7 +148,7 @@ class ReporteConceptoListadoResource extends Resource
     {
         return [
             'index' => ListReporteConceptoListados::route('/'),
-            'create' => CreateReporteConceptoListado::route('/create'),
+            // 'create' => CreateReporteConceptoListado::route('/create'),
             'edit' => EditReporteConceptoListado::route('/{record}/edit'),
         ];
     }

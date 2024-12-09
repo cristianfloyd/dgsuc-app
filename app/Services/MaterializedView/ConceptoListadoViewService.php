@@ -34,35 +34,27 @@ class ConceptoListadoViewService
     {
         try {
             //code...
-            DB::connection($this->getConnectionName())->transaction(function (){
+
                 // sql de la migracion original
                 DB::connection($this->getConnectionName())->statement("
                 CREATE MATERIALIZED VIEW IF NOT EXISTS suc.concepto_listado AS
-                WITH legajo_cargo AS (
-                    SELECT DISTINCT
-                        dh21_1.nro_legaj,
-                        dh03.codc_uacad,
-                        dh03.nro_cargo
-                    FROM mapuche.dh21 dh21_1
-                    JOIN mapuche.dh03 ON dh21_1.nro_legaj = dh03.nro_legaj
-                )
-                SELECT
-                    uuid_generate_v4() AS id,
-                    dh21.nro_legaj,
-                    lc.codc_uacad,
-                    CONCAT(dh22.per_liano, LPAD(dh22.per_limes::TEXT, 2, '0'::TEXT)) AS periodo_fiscal,
-                    dh22.nro_liqui,
+                SELECT DISTINCT
+                    ROW_NUMBER() OVER () AS id,
+                    d.nro_liqui,
                     dh22.desc_liqui,
-                    dh01.desc_appat,
-                    dh01.desc_nombr,
-                    CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) AS cuil,
-                    lc.nro_cargo AS secuencia,
-                    dh21.codn_conce,
-                    dh21.impp_conce
-                FROM mapuche.dh21
-                JOIN legajo_cargo lc ON dh21.nro_legaj = lc.nro_legaj
-                JOIN mapuche.dh01 ON dh21.nro_legaj = dh01.nro_legaj
-                JOIN mapuche.dh22 ON dh21.nro_liqui = dh22.nro_liqui
+                    CONCAT(dh22.per_liano, LPAD(dh22.per_limes::TEXT, 2, '0'::TEXT)) AS periodo_fiscal,
+                    d.nro_legaj,
+                    d.nro_cargo,
+                    dh01.desc_appat AS apellido,
+                    dh01.desc_nombr AS nombre,
+                    CONCAT(dh01.nro_cuil1, lpad(dh01.nro_cuil::text, '8','0'), dh01.nro_cuil2)AS cuil,
+                    d.codc_uacad,
+                    d.codn_conce,
+                    d.impp_conce
+                FROM mapuche.dh21 d
+                LEFT JOIN mapuche.dh01 ON d.nro_legaj = dh01.nro_legaj
+                JOIN mapuche.dh22 ON d.nro_liqui = dh22.nro_liqui
+                WHERE d.codn_conce/100 IN (1,2,3);
             ");
 
                 // Indices para optimizar las búsquedas
@@ -72,7 +64,7 @@ class ConceptoListadoViewService
                 DB::connection($this->getConnectionName())->statement(
                     'CREATE INDEX IF NOT EXISTS idx_concepto_listado_periodo_fiscal ON suc.concepto_listado(periodo_fiscal)'
                 );
-            });
+            ;
 
             Log::info('Vista materializada concepto_listado creada exitosamente');
         } catch (\Throwable $e) {
@@ -103,6 +95,21 @@ class ConceptoListadoViewService
                 'trace' => $th->getTraceAsString()
             ]);
             throw $th;
+        }
+    }
+
+    public function drop(): void
+    {
+        try {
+            DB::connection($this->getConnectionName())->statement(
+                'DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado CASCADE'
+            );
+            Log::info('Vista materializada concepto_listado eliminada exitosamente');
+        } catch (\Exception $e) {
+            Log::error('Error eliminando vista materializada', [
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
     }
 }
