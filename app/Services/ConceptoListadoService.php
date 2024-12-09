@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use Illuminate\Database\Eloquent\Builder;
