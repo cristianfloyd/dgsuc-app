@@ -38,8 +38,8 @@ class OrdenesDescuento extends Model
         'anio',
         'periodo_fiscal', // dh22 -> periodo_fiscal
         'id_tipo_orden_pago',
-        'codn_conce',
-        'concepto_descripcion',
+        'codn_conce',   // dh21
+        'desc_conce',  // dh12
         'impp_conce',
         'total_imp_nd',
     ];
