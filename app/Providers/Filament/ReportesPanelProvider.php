@@ -6,6 +6,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
@@ -36,6 +37,12 @@ class ReportesPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Configuración')
                     ->icon('heroicon-o-cog-6-tooth'),
+            ])
+            ->userMenuItems([
+                'panel-selector' => MenuItem::make()
+                ->label('Cambiar Panel')
+                ->icon('heroicon-o-arrows-right-left')
+                ->url(fn (): string => '/selector-panel'),
             ])
             ->brandName('Panel de Reportes')
             ->discoverResources(in: app_path('Filament/Reportes/Resources'), for: 'App\\Filament\\Reportes\\Resources')

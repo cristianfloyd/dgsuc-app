@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages;
+namespace App\Filament\Reportes\Resources\EmbargoResource\Pages;
 
-use App\Filament\Embargos\Resources\Mapuche\EmbargoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Reportes\Resources\EmbargoResource;
 
 class EditEmbargo extends EditRecord
 {

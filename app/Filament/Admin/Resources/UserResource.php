@@ -2,15 +2,15 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Admin\Resources\UserResource\Pages;
 
 class UserResource extends Resource
 {
@@ -23,8 +23,22 @@ class UserResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->label('Nombre')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('username')
+                    ->label('Nombre de usuario')
+                    ->required(),
+                TextInput::make('password')
+                    ->label('Contraseña')
+                    ->password()
+                    ->revealable()
+                    ->required(),
+                TextInput::make('confirmation_password')
+                    ->label('Confirmar contraseña')
+                    ->password()
+                    ->revealable()
+                    ->required(),
                 TextInput::make('email')
                     ->email()
                     ->required()

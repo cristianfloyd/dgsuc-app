@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages;
+namespace App\Filament\Reportes\Resources\EmbargoResource\Pages;
 
 use Filament\Pages\Page;
 use Filament\Tables\Table;
@@ -21,20 +21,19 @@ use Filament\Tables\Actions\ExportBulkAction;
 use App\Services\Reportes\EmbargoReportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
-use App\Filament\Embargos\Resources\Mapuche\EmbargoResource;
+use App\Filament\Reportes\Resources\EmbargoResource;
 use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 
-class EmbargoReport extends Page implements HasTable, HasForms
+class ReporteEmbargo extends Page implements HasTable, HasForms
 {
     use InteractsWithTable;
     use InteractsWithForms;
     protected static string $resource = EmbargoResource::class;
     protected static ?string $title = 'Reporte de Embargos';
     protected static string $view = 'filament.resources.embargo.pages.report';
-    protected static ?string $slug = 'reporte-embargos';
+    // protected static ?string $slug = 'reporte-embargos';
 
 
-    // #[Reactive]
     public $nro_liqui = null;
     public $reportData;
     public $perPage = 5;

@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Jetstream\HasProfilePhoto;
+use Filament\Models\Contracts\HasAvatar;
+use Illuminate\Notifications\Notifiable;
+use Filament\Models\Contracts\FilamentUser;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use HasApiTokens;
     use HasFactory;
@@ -85,5 +87,20 @@ class User extends Authenticatable
         return Attribute::make(
             get: fn() => "{$this->name} {$this->username}",
         );
+    }
+    /**
+     * @inheritDoc
+     */
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getFilamentAvatarUrl(): string|null
+    {
+        return $this->profile_photo_path;
     }
 }

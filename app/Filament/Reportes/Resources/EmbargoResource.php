@@ -1,26 +1,25 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\Mapuche;
+namespace App\Filament\Reportes\Resources;
 
 use Filament\Tables;
-use Pages\EmbargoReport;
 use Filament\Tables\Table;
-use App\Models\Mapuche\Dh22;
 use App\Models\Mapuche\Embargo;
-use Dompdf\FrameDecorator\Text;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\Reportes\EmbargoReportService;
-use App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages;
+use App\Filament\Reportes\Resources\EmbargoResource\Pages\ListEmbargos;
+use App\Filament\Reportes\Resources\EmbargoResource\Pages\EmbargoReport;
 
 class EmbargoResource extends Resource
 {
     protected static ?string $model = Embargo::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Reportes';
 
 
 
@@ -89,17 +88,7 @@ class EmbargoResource extends Resource
                 TextColumn::make('caratula')->sortable(),
             ])
             ->headerActions([
-                Action::make('generateReport')
-                    ->label('Generar Reporte')
-                    ->action(function () {
-                        $reportService = app(EmbargoReportService::class);
-                        $report = $reportService->generateReport('3');
-
-                        // Aquí podemos exportar a Excel/CSV
-                        // return response()->download(
-                        //     $report->exportToExcel('reporte_embargos.xlsx')
-                        // );
-                    })
+                //
             ])
             ->filters([
                 SelectFilter::make('id_estado_embargo')
@@ -125,7 +114,7 @@ class EmbargoResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEmbargos::route('/'),
+            'index' => ListEmbargos::route('/'),
         ];
     }
 

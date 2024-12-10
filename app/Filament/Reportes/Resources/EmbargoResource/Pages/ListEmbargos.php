@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages;
+namespace App\Filament\Reportes\Resources\EmbargoResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Embargos\Resources\Mapuche\EmbargoResource;
+use App\Filament\Reportes\Resources\EmbargoResource;
 
 class ListEmbargos extends ListRecords
 {

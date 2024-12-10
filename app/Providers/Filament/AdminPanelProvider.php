@@ -2,11 +2,11 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages;
 use Filament\Panel;
-use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use App\Filament\Admin\Pages\Profile;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -33,6 +33,13 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
                 // Pages\Dashboard::class,
+                Profile::class,
+            ])
+            ->userMenuItems([
+                'panel-selector' => MenuItem::make()
+                ->label('Cambiar Panel')
+                ->icon('heroicon-o-arrows-right-left')
+                ->url(fn (): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([

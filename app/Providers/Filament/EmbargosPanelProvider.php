@@ -6,6 +6,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
@@ -35,7 +36,12 @@ class EmbargosPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Embargos/Pages'), for: 'App\\Filament\\Embargos\\Pages')
             ->pages([
                 Pages\Dashboard::class,
-                EmbargoReport::class,
+            ])
+            ->userMenuItems([
+                'panel-selector' => MenuItem::make()
+                ->label('Cambiar Panel')
+                ->icon('heroicon-o-arrows-right-left')
+                ->url(fn (): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Embargos/Widgets'), for: 'App\\Filament\\Embargos\\Widgets')
             ->widgets([
