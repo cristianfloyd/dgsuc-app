@@ -62,10 +62,6 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
         );
     }
 
-    public static function getSlug(): string
-    {
-        return 'embargos/reporte';
-    }
 
     protected function getFormSchema(): array
     {

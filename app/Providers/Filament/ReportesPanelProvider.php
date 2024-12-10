@@ -4,7 +4,6 @@ namespace App\Providers\Filament;
 
 use Filament\Pages;
 use Filament\Panel;
-use Filament\Widgets;
 use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
@@ -19,6 +18,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
 
 class ReportesPanelProvider extends PanelProvider
 {
@@ -49,6 +49,7 @@ class ReportesPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Reportes/Pages'), for: 'App\\Filament\\Reportes\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                ReporteEmbargos::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Reportes/Widgets'), for: 'App\\Filament\\Reportes\\Widgets')
             ->widgets([

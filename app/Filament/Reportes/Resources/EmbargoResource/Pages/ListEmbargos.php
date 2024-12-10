@@ -17,6 +17,11 @@ class ListEmbargos extends ListRecords
             //     ->label('Reporte')
             //     ->url(fn (): string => $this->getResource()::getUrl('reporte-embargos'))
             //     ->icon('heroicon-o-document-check')
+            Actions\Action::make('generarReporte')
+            ->label('Generar Reporte')
+            ->icon('heroicon-o-document-currency-dollar')
+            ->url('/reportes/embargos/reporte')
+            ->color('success')
         ];
     }
 }
