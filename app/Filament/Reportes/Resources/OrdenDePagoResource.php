@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Reportes\Resources;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -13,13 +13,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\RepOrdenPagoModel;
-use App\Filament\Resources\ReporteResource\Pages;
-use App\Filament\Resources\ReporteResource\Pages\ListReportes;
+use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
+use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages\ListReportes;
 
-class ReporteResource extends Resource
+class OrdenDePagoResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
-    protected static ?string $modelLabel = 'OPs';
+    protected static ?string $modelLabel = 'Ordenes de Pago';
+    protected static ?string $navigationLabel = 'Ordenes de Pago';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reportes';
 
     public static function form(Form $form): Form

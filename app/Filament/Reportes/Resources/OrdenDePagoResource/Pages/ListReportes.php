@@ -1,21 +1,21 @@
 <?php /** @noinspection PhpUnused */
 
-namespace App\Filament\Resources\ReporteResource\Pages;
+namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 
-use App\Filament\Resources\ReporteResource;
-use App\Filament\Widgets\MultipleIdLiquiSelector;
-use App\Services\RepOrdenPagoService;
 use Exception;
+use Livewire\Attributes\On;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use App\Services\RepOrdenPagoService;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use App\Filament\Widgets\MultipleIdLiquiSelector;
+use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class ListReportes extends ListRecords
 {
-    protected static string $resource = ReporteResource::class;
+    protected static string $resource = OrdenDePagoResource::class;
     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
     public bool $reporteGenerado = false;

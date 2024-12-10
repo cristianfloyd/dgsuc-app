@@ -29,75 +29,7 @@ class Dh21Resource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Liquidaciones';
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('nro_liqui')
-                    ->numeric(),
-                TextInput::make('nro_legaj')
-                    ->numeric(),
-                TextInput::make('nro_cargo')
-                    ->numeric(),
-                TextInput::make('codn_conce')
-                    ->numeric(),
-                TextInput::make('impp_conce')
-                    ->numeric(),
-                TextInput::make('tipo_conce')
-                    ->maxLength(1),
-                TextInput::make('nov1_conce')
-                    ->numeric(),
-                TextInput::make('nov2_conce')
-                    ->numeric(),
-                TextInput::make('nro_orimp')
-                    ->numeric(),
-                TextInput::make('tipoescalafon')
-                    ->maxLength(1),
-                TextInput::make('nrogrupoesc')
-                    ->numeric(),
-                TextInput::make('codigoescalafon')
-                    ->maxLength(4),
-                TextInput::make('codc_regio')
-                    ->maxLength(4),
-                TextInput::make('codc_uacad')
-                    ->maxLength(4),
-                TextInput::make('codn_area')
-                    ->numeric(),
-                TextInput::make('codn_subar')
-                    ->numeric(),
-                TextInput::make('codn_fuent')
-                    ->numeric(),
-                TextInput::make('codn_progr')
-                    ->numeric(),
-                TextInput::make('codn_subpr')
-                    ->numeric(),
-                TextInput::make('codn_proye')
-                    ->numeric(),
-                TextInput::make('codn_activ')
-                    ->numeric(),
-                TextInput::make('codn_obra')
-                    ->numeric(),
-                TextInput::make('codn_final')
-                    ->numeric(),
-                TextInput::make('codn_funci')
-                    ->numeric(),
-                TextInput::make('ano_retro')
-                    ->numeric(),
-                TextInput::make('mes_retro')
-                    ->numeric(),
-                TextInput::make('detallenovedad')
-                    ->maxLength(10),
-                TextInput::make('codn_grupo_presup')
-                    ->numeric()
-                    ->default(1),
-                TextInput::make('tipo_ejercicio')
-                    ->maxLength(1)
-                    ->default('A'),
-                TextInput::make('codn_subsubar')
-                    ->numeric()
-                    ->default(0),
-            ]);
-    }
+
 
     public static function table(Table $table): Table
     {

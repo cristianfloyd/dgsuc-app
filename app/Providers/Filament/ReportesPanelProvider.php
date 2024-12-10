@@ -49,7 +49,7 @@ class ReportesPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Reportes/Pages'), for: 'App\\Filament\\Reportes\\Pages')
             ->pages([
                 Pages\Dashboard::class,
-                ReporteEmbargos::class,
+                // ReporteEmbargos::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Reportes/Widgets'), for: 'App\\Filament\\Reportes\\Widgets')
             ->widgets([
@@ -68,6 +68,9 @@ class ReportesPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->breadcrumbs(true)
+            ->maxContentWidth('full')
+            ->sidebarFullyCollapsibleOnDesktop();
     }
 }

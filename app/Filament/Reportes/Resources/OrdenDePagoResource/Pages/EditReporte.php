@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\ReporteResource\Pages;
 
-use App\Filament\Resources\ReporteResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class EditReporte extends EditRecord
 {
-    protected static string $resource = ReporteResource::class;
+    protected static string $resource = OrdenDePagoResource::class;
 
     protected function getHeaderActions(): array
     {

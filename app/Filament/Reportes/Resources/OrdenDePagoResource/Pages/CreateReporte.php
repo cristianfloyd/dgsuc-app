@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\ReporteResource\Pages;
 
-use App\Filament\Resources\ReporteResource;
-use Filament\Actions;
+
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class CreateReporte extends CreateRecord
 {
-    protected static string $resource = ReporteResource::class;
+    protected static string $resource = OrdenDePagoResource::class;
 }
