@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\ConceptoListadoResourceService;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
-use App\Filament\Resources\ReporteConceptoListadoResource\Pages\CreateReporteConceptoListado;
 
 class ReporteConceptoListadoResource extends Resource
 {

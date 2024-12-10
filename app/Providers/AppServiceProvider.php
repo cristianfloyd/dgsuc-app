@@ -11,6 +11,7 @@ use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
 use App\Contracts\WorkflowServiceInterface;
+use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 
 class AppServiceProvider extends ServiceProvider
@@ -46,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 return $job;
             });
         });
+
         // Registramos el componente Filament
         // $this->loadViewComponentsAs('filament', [
         //     PanelSwitcherModal::class,

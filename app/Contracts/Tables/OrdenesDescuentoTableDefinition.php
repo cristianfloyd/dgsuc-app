@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Contracts\Tables;
+
+interface OrdenesDescuentoTableDefinition
+{
+    public const string TABLE_NAME = 'suc.rep_ordenes_descuento';
+    public const string SCHEMA = 'suc';
+
+    // Definición de columnas
+    public const array COLUMNS = [
+        'id' => [
+            'type' => 'bigIncrements', // Cambiamos a bigIncrements para ID de Laravel
+            'primary' => true,
+            'unsigned' => true
+        ],
+        'nro_liqui' => ['type' => 'integer'],
+        'desc_liqui' => ['type' => 'string'],
+        'codc_uacad' => ['type' => 'string'],
+        'desc_item' => ['type' => 'string'],
+        'codn_funci' => ['type' => 'integer'],
+        'caracter' => ['type' => 'string'],
+        'tipoescalafon' => ['type' => 'string'],
+        'codn_fuent' => ['type' => 'string'],
+        'nro_inciso' => ['type' => 'string'],
+        'codn_progr' => ['type' => 'string'],
+        'codn_conce' => ['type' => 'integer'],
+        'desc_conce' => ['type' => 'string'],
+        'impp_conce' => ['type' => 'decimal', 'precision' => 15, 'scale' => 2],
+        'last_sync' => ['type' => 'timestamp']
+    ];
+
+    
+    public const array INDEXES = [
+        'codc_uacad' => ['codc_uacad'],
+        'codn_conce' => ['codn_conce']
+    ];
+}
