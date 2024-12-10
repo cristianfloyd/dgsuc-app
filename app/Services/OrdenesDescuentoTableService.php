@@ -170,8 +170,7 @@ FROM mapuche.dh21 dh21
 	     LEFT OUTER JOIN mapuche.dh35 ON (
 	(dh35.tipo_escal = dh21.tipoescalafon OR (dh21.tipoescalafon = 'C' AND dh35.tipo_escal = 'S')) AND
 	dh35.codc_carac = dh03.codc_carac)
-WHERE dh21.nro_liqui = 1
-  AND dh21.codn_conce / 100 = 2 OR dh21.codn_conce / 100 = 3
+WHERE dh21.codn_conce / 100 IN (2,3)
 GROUP BY dh21.nro_liqui,
          dh22.desc_liqui,
          dh21.codc_uacad,
