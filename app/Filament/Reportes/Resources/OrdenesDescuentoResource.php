@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use App\Exports\OrdenesDescuentoSheet200;
 use App\Exports\OrdenesDescuentoSheet300;
 use App\Models\Reportes\OrdenesDescuento;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\OrdenesDescuentoTableService;
 use App\Exports\OrdenesDescuentoMultipleExport;
@@ -21,6 +22,8 @@ class OrdenesDescuentoResource extends Resource
 {
     protected static ?string $model = OrdenesDescuento::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?int $navigationSort = 2;
 
 
 
@@ -28,10 +31,11 @@ class OrdenesDescuentoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nro_liqui'),
                 TextColumn::make('desc_liqui')->sortable(),
-                TextColumn::make('codc_uacad')->sortable()->searchable(),
-                TextColumn::make('desc_item')->sortable()->searchable(),
+                TextColumn::make('codc_uacad')->label('UA')->sortable()->searchable(),
+                TextColumn::make('desc_item')->label('Dependencia')->sortable()->searchable(),
                 TextColumn::make('codn_funci')->sortable(),
                 TextColumn::make('caracter')->sortable(),
                 TextColumn::make('tipoescalafon')->sortable(),
@@ -39,14 +43,37 @@ class OrdenesDescuentoResource extends Resource
                 TextColumn::make('nro_inciso')->sortable(),
                 TextColumn::make('codn_progr')->sortable(),
                 TextColumn::make('codn_conce')->sortable(),
-                TextColumn::make('desc_conce')->sortable(),
-                TextColumn::make('impp_conce')->sortable()
+                TextColumn::make('desc_conce')->label('Descripción Concepto')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('impp_conce')->label('Importe')->sortable()
                     ->money('ARS')
+                    ->alignEnd()
                     ->sortable(),
-                TextColumn::make('last_sync')->sortable(),
+                TextColumn::make('last_sync')
+                    ->label('Última Actualización')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('codc_uacad')
+                    ->label('Unidad Académica')
+                    ->options(fn () => OrdenesDescuento::distinct()
+                        ->orderBy('codc_uacad')
+                        ->pluck('desc_item', 'codc_uacad')
+                        ->toArray())
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('codn_conce')
+                    ->label('Concepto')
+                    ->options(fn () => OrdenesDescuento::distinct()
+                        ->orderBy('codn_conce')
+                        ->pluck('desc_conce', 'codn_conce')
+                        ->toArray())
+                    ->searchable()
+                    ->multiple()
+                    ->preload(),
             ])
             ->actions([
                 //
@@ -58,7 +85,7 @@ class OrdenesDescuentoResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($livewire) {
                         return (new OrdenesDescuentoMultipleExport($livewire->getFilteredTableQuery()))
-                            ->download('descuentos-y-aportes.xlsx');
+                            ->download('descuentos-y-aportes-' . now()->format('d-m-Y') . '.xlsx');
                     }),
                 Action::make('export200')
                     ->label('Ordenes Descuento')
@@ -66,7 +93,7 @@ class OrdenesDescuentoResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($livewire) {
                         return (new OrdenesDescuentoSheet200($livewire->getFilteredTableQuery()->whereBetween('codn_conce', [200, 299])))
-                            ->download('ordenes-descuento.xlsx');
+                            ->download('ordenes-descuento-' . now()->format('d-m-Y') . '.xlsx');
                     }),
                 Action::make('export300')
                     ->label('Aportes y Contrib.')
@@ -74,7 +101,7 @@ class OrdenesDescuentoResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($livewire) {
                         return (new OrdenesDescuentoSheet300($livewire->getFilteredTableQuery()->whereBetween('codn_conce', [300, 399])))
-                            ->download('aportes-y-contribuciones.xlsx');
+                            ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx');
                     })
             ])
             ->bulkActions([
@@ -84,12 +111,15 @@ class OrdenesDescuentoResource extends Resource
             ])
             ->deferLoading()
             ->persistFiltersInSession()
+            ->striped()
             ->defaultPaginationPageOption(5)
-            ->reorderable(true)
+            ->reorderable('id')
+            ->paginatedWhileReordering()
             ->paginationPageOptions([5, 10, 25, 50, 100])
             ->emptyStateHeading('Seleccione un concepto')
             ->emptyStateDescription('Para visualizar los datos, primero debe seleccionar un concepto del filtro superior.')
-            ->emptyStateIcon('heroicon-o-funnel');
+            ->emptyStateIcon('heroicon-o-funnel')
+            ->poll('60s');
     }
 
     public static function getRelations(): array
