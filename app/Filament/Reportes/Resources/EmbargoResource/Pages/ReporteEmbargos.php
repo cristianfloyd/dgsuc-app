@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\EmbargoReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Route;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
@@ -18,20 +19,21 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\EmbargoReportModel;
 use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Resources\Pages\PageRegistration;
 use App\Services\Reportes\EmbargoReportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use App\Filament\Reportes\Resources\EmbargoResource;
 use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 
-class ReporteEmbargo extends Page implements HasTable, HasForms
+class ReporteEmbargos extends Page implements HasTable, HasForms
 {
     use InteractsWithTable;
     use InteractsWithForms;
     protected static string $resource = EmbargoResource::class;
     protected static ?string $title = 'Reporte de Embargos';
     protected static string $view = 'filament.resources.embargo.pages.report';
-    // protected static ?string $slug = 'reporte-embargos';
+    protected static ?string $slug = 'reporte';
 
 
     public $nro_liqui = null;
@@ -49,6 +51,20 @@ class ReporteEmbargo extends Page implements HasTable, HasForms
             'nro_liqui' => $this->nro_liqui
         ]);
         $this->table = $this->makeTable();
+    }
+
+    public static function route(string $path): PageRegistration
+    {
+        return new PageRegistration(
+            static::class,
+            fn() => Route::get($path, static::class)
+                ->name(static::getSlug())
+        );
+    }
+
+    public static function getSlug(): string
+    {
+        return 'embargos/reporte';
     }
 
     protected function getFormSchema(): array

@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\Reportes\EmbargoReportService;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\ListEmbargos;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\EmbargoReport;
+use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargo;
+use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
 
 class EmbargoResource extends Resource
 {
@@ -115,6 +117,7 @@ class EmbargoResource extends Resource
     {
         return [
             'index' => ListEmbargos::route('/'),
+            'reporte' => ReporteEmbargos::route('/reporte'),
         ];
     }
 
