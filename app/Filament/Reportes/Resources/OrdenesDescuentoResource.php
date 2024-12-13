@@ -5,15 +5,16 @@ namespace App\Filament\Reportes\Resources;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\ConceptoGrupo;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use App\Exports\OrdenesDescuentoExport;
 use Filament\Tables\Columns\TextColumn;
 use App\Exports\OrdenesDescuentoSheet200;
-use App\Exports\OrdenesDescuentoSheet300;
 use App\Models\Reportes\OrdenesDescuento;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Exports\OrdenAportesyContribuciones;
 use App\Services\OrdenesDescuentoTableService;
 use App\Exports\OrdenesDescuentoMultipleExport;
 use App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
@@ -100,7 +101,9 @@ class OrdenesDescuentoResource extends Resource
                     ->tooltip('Exportar Aportes y Contribuciones a un archivo Excel')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($livewire) {
-                        return (new OrdenesDescuentoSheet300($livewire->getFilteredTableQuery()->whereBetween('codn_conce', [300, 399])))
+                        return (new OrdenAportesyContribuciones(
+                            $livewire->getFilteredTableQuery()
+                            ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos())))
                             ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx');
                     })
             ])
@@ -113,7 +116,6 @@ class OrdenesDescuentoResource extends Resource
             ->persistFiltersInSession()
             ->striped()
             ->defaultPaginationPageOption(5)
-            ->reorderable('id')
             ->paginatedWhileReordering()
             ->paginationPageOptions([5, 10, 25, 50, 100])
             ->emptyStateHeading('Seleccione un concepto')

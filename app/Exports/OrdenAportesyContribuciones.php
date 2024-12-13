@@ -4,9 +4,11 @@ namespace App\Exports;
 
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use App\Exports\Sheets\AportesyContribucionesSummary;
 
 
-class OrdenesDescuentoSheet300 extends OrdenesDescuentoExport
+class OrdenAportesyContribuciones extends OrdenesDescuentoExport implements WithMultipleSheets
 {
     public function styles(Worksheet $sheet)
     {
@@ -15,7 +17,7 @@ class OrdenesDescuentoSheet300 extends OrdenesDescuentoExport
 
         $sheet->setCellValue('A1', 'APORTES Y CONTRIBUCIONES - ' . now()->format('d/m/Y'));
 
-        
+
         $sheet->getStyle('A1')->getFont()->setSize(16);
         $sheet->getStyle('M:N')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
@@ -25,8 +27,16 @@ class OrdenesDescuentoSheet300 extends OrdenesDescuentoExport
         ];
     }
 
+    public function sheets(): array
+    {
+        return [
+            new AportesyContribucionesSummary($this->query),
+            $this,
+        ];
+    }
+
     public function title(): string
     {
-        return 'Conceptos 300-399';
+        return 'Aportes y Contribuciones';
     }
 }

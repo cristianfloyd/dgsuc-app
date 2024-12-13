@@ -6,6 +6,7 @@ use App\Models\Dh13;
 use App\Enums\TipoNove;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
+use App\Enums\ConceptoGrupo;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CharacterEncodingTrait;
@@ -104,6 +105,13 @@ class Dh12 extends Model
         });
     }
 
+    public function perteneceAGrupo(ConceptoGrupo $grupo): bool
+    {
+        return $grupo->containsConcepto($this->codn_conce);
+    }
+
+
+    // ######################## RELACIONES ########################
     /**
      * Obtiene los Dh13 asociados con este Dh12.
      */
@@ -112,6 +120,8 @@ class Dh12 extends Model
         return $this->hasMany(Dh13::class, 'codn_conce', 'codn_conce');
     }
 
+
+    // ######################## ACCESORES ########################
     /**
      * Accessor para asegurar la codificación UTF-8 del campo desc_conce
      */
@@ -140,6 +150,8 @@ class Dh12 extends Model
         }
     }
 
+
+    // ############################# DIAGNOSTICOS #############################
     /**
      * Método de diagnóstico mejorado
      */
