@@ -137,6 +137,7 @@ class OrdenesDescuento extends Model implements HasLabel
         return 'Órdenes de Descuento';
     }
 
+    // #######################  Scopes útiles para Filament  ######################
     // Scopes globales útiles para Filament
     public function scopeSearch(Builder $query, string $search): Builder
     {
@@ -151,5 +152,10 @@ class OrdenesDescuento extends Model implements HasLabel
     public function scopeOrdenadoPorUacad($query)
     {
         return $query->orderBy('codc_uacad')->orderBy('codn_conce');
+    }
+
+    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    {
+        return $query->where('nro_liqui', $nroLiqui);
     }
 }

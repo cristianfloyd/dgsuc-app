@@ -6,8 +6,11 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Enums\ConceptoGrupo;
+use App\Models\Mapuche\Dh22;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Select;
 use App\Exports\OrdenesDescuentoExport;
 use Filament\Tables\Columns\TextColumn;
 use App\Exports\OrdenesDescuentoSheet200;
@@ -58,6 +61,38 @@ class OrdenesDescuentoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filter::make('periodo_liquidacion')
+                        ->form([
+                            Select::make('periodo_fiscal')
+                                ->label('Periodo')
+                                ->options( Dh22::getPeriodosFiscales())
+                                ->searchable()
+                                ->live()
+                                ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+
+                            Select::make('nro_liqui')
+                                ->label('Liquidación')
+                                ->options(function (callable $get): array {
+                                    $periodo = $get('periodo_fiscal');
+                                    if (!$periodo) return [];
+
+                                    return Dh22::query()
+                                        ->WithPeriodoFiscal($periodo)
+                                        ->definitiva()
+                                        ->pluck('desc_liqui', 'nro_liqui')
+                                        ->toArray();
+                                })
+                                ->searchable()
+                                ->live()
+                                ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                        ])
+                        ->query(function (Builder $query, array $data): Builder {
+                            return $query
+                            ->when(
+                                $data['nro_liqui'],
+                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                            );
+                        }),
                 SelectFilter::make('codc_uacad')
                     ->label('Unidad Académica')
                     ->options(fn () => OrdenesDescuento::distinct()
