@@ -15,6 +15,7 @@ return [
     App\Providers\EmployeeRepositoryProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\Filament\EmbargosPanelProvider::class,
+    App\Providers\Filament\LiquidacionesPanelProvider::class,
     App\Providers\Filament\MapuchePanelProvider::class,
     App\Providers\Filament\ReportesPanelProvider::class,
     App\Providers\Filament\sucPanelProvider::class,

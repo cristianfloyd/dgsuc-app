@@ -87,8 +87,8 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
         $drawing = new Drawing();
         $drawing->setName('Logo');
         $drawing->setDescription('Logo UBA');
-        $drawing->setPath(public_path('images/logo-uba-mapuche.png'));
-        $drawing->setHeight(220);
+        $drawing->setPath(public_path('images/encabezado.png'));
+        $drawing->setHeight(200);
         $drawing->setCoordinates('A1');
         $drawing->setOffsetY(11);
 
