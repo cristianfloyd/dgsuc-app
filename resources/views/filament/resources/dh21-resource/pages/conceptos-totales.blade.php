@@ -9,6 +9,6 @@
         <x-filament::tabs.item wire:click="filterByCodigoEscalafon('NODO')" :active="$this->codigoEscalafon === 'NODO'">
             NODO
         </x-filament::tabs.item>
-    </x-filament::tabs>>
+    </x-filament::tabs>
     {{ $this->table }}
 </x-filament-panels::page>

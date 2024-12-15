@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Dh61Resource\Pages;
+namespace App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
 
-use App\Filament\Resources\Dh61Resource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Liquidaciones\Resources\Dh61Resource;
 
 class ListDh61s extends ListRecords
 {
@@ -13,7 +13,7 @@ class ListDh61s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            //
         ];
     }
 }

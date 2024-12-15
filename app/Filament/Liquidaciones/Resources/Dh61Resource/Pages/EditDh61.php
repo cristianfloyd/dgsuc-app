@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Dh61Resource\Pages;
+namespace App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
 
-use App\Filament\Resources\Dh61Resource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Liquidaciones\Resources\Dh61Resource;
 
 class EditDh61 extends EditRecord
 {
