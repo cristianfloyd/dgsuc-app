@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * Trait MapucheConnectionTrait
@@ -48,5 +49,6 @@ trait MapucheConnectionTrait
 
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
+
 }
 

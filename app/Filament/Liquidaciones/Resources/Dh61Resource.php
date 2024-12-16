@@ -158,4 +158,8 @@ class Dh61Resource extends Resource
             'edit' => Pages\EditDh61::route('/{record}/edit'),
         ];
     }
+    protected static function getTableRecordKey(): string
+    {
+        return 'id';
+    }
 }

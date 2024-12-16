@@ -3,20 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /*
  * (D) HISTORICO-Tabla de Categorias de Empleados
  * */
 class Dh61 extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, HasCompositePrimaryKey;
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'dh61';
+    private ?string $virtualId = null;
 
     /**
      * primaryKey compuesta en formato array
@@ -51,13 +55,7 @@ class Dh61 extends Model
         'aportalao' => 'integer'
     ];
 
-    protected function codcCateg(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => preg_replace('/\s+/', '', $value),
-            set: fn ($value) => preg_replace('/\s+/', '', $value)
-        );
-    }
+
     // Scope para filtrar por categoría
     public function scopeCategoria($query, $categoria)
     {
@@ -114,52 +112,6 @@ class Dh61 extends Model
 
 
 
-
-    /**
-     * Devuelve el nombre de la clave principal del modelo.
-     *
-     * @return string
-     */
-    public function getKeyName()
-    {
-        return 'id';
-    }
-
-	/**
-	 * @return mixed
-	 */
-	public function getKey()
-    {
-		return implode('-', $this->primaryKey);
-    }
-    /**
-     * Obtiene el valor de la clave única para rutas.
-     *
-     * @return string
-     */
-    public function getRouteKeyName()
-    {
-        return 'id';
-    }
-    /**
-     * Recupera el modelo por su clave única.
-     *
-     * @param  mixed  $key
-     * @param  string|null  $field
-     * @return Model|Collection|static[]|static|null
-     */
-    public function resolveRouteBinding($value, $field = null)
-    {
-        if($field === 'id'){
-            [$codc_categ, $vig_caano, $vig_cames] = explode('-', $value);
-            return $this->where('codc_categ', $codc_categ)
-                ->where('vig_caano', $vig_caano)
-                ->where('vig_cames', $vig_cames)
-                ->first();
-        }
-        return parent::resolveRouteBinding($value, $field);
-    }
-
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
@@ -176,5 +128,147 @@ class Dh61 extends Model
             'registros' => $query->count(),
             'primer_registro' => $query->first()
         ]);
+    }
+
+
+
+
+    // ######################## Accesores y mutadores ########################
+    /* ###################################################################### */
+
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->virtualId) {
+                    return $this->virtualId;
+                }
+
+                if (isset($this->attributes['codc_categ'],
+                         $this->attributes['vig_caano'],
+                         $this->attributes['vig_cames'])) {
+                    return "{$this->attributes['codc_categ']}-{$this->attributes['vig_caano']}-{$this->attributes['vig_cames']}";
+                }
+
+                return null;
+            },
+            set: function ($value) {
+                $this->virtualId = $value;
+
+                if ($value) {
+                    $parts = explode('-', $value);
+                    Log::info("Parts: ", $parts);
+                    if (count($parts) === 3) {
+                        $this->codc_categ = $parts[0];
+                        $this->vig_caano = (int)$parts[1];
+                        $this->vig_cames = (int)$parts[2];
+                    }
+                }
+                return $value;
+            }
+        );
+    }
+
+    protected function performInsert(Builder $query): bool
+    {
+        if (isset($this->attributes['id'])) {
+            unset($this->attributes['id']);
+        }
+        return parent::performInsert($query);
+    }
+
+    protected function codcCateg(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? trim($value) : '',
+            set: fn ($value) => $value ? trim($value) : ''
+        );
+    }
+
+    // ########################## Métodos para Filamentphp ##################################
+    /**
+     * Método para buscar por ID virtual
+     */
+    public static function findByVirtualId(string $virtualId): ?self
+    {
+        $parts = explode('-', $virtualId);
+
+        return static::where('codc_categ', $parts[0])
+            ->where('vig_caano', $parts[1])
+            ->where('vig_cames', $parts[2])
+            ->first();
+    }
+
+    /**
+     * Método para búsqueda por ID virtual
+     */
+    public static function find($id): Dh61|null
+    {
+        if (!$id) return null;
+
+        $parts = explode('-', $id);
+        if (count($parts) !== 3) return null;
+
+        return static::query()
+            ->where('codc_categ', trim($parts[0]))
+            ->where('vig_caano', (int)$parts[1])
+            ->where('vig_cames', (int)$parts[2])
+            ->first();
+    }
+
+    /**
+     * Obtiene la clave del registro para la tabla de FilamentPHP
+     */
+    public function getTableRecordKey(): string
+    {
+        return implode('-', [
+            $this->codc_categ,
+            $this->vig_caano,
+            $this->vig_cames
+        ]);
+    }
+
+    /**
+     * Obtiene la clave del registro para la tabla de FilamentPHP
+     * Debe retornar un string, no un array
+     */
+    public function getKey(): string
+    {
+        return implode('-', [
+            $this->codc_categ,
+            $this->vig_caano,
+            $this->vig_cames
+        ]);
+    }
+
+    public function getCompositeKey(): string
+    {
+        return implode('-', [
+            trim($this->codc_categ ?? ''),
+            $this->vig_caano ?? '',
+            $this->vig_cames ?? ''
+        ]);
+    }
+
+    public function getRouteKey(): string
+    {
+        return $this->getCompositeKey();
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if ($field === null) {
+            [$codc_categ, $vig_caano, $vig_cames] = explode('-', $value);
+            return $this->where('codc_categ', $codc_categ)
+                       ->where('vig_caano', $vig_caano)
+                       ->where('vig_cames', $vig_cames)
+                       ->firstOrFail();
+        }
+        return parent::resolveRouteBinding($value, $field);
     }
 }
