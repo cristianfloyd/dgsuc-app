@@ -120,19 +120,14 @@ class Dh61 extends Model
             DB::connection($this->getConnectionName())->raw("CONCAT(codc_categ, '-', vig_caano, '-', vig_cames) as id")
         )->orderByRaw('codc_categ, vig_caano, vig_cames');
     }
-    public static function diagnosticarConexion()
-    {
-        $query = static::query();
-        dd([
-            'conexión' => $query->getConnection()->getName(),
-            'sql' => $query->toSql(),
-            'registros' => $query->count(),
-            'primer_registro' => $query->first()
-        ]);
-    }
 
-
-
+    // public function newQuery()
+    // {
+    //     $query = parent::newQuery();
+    //     $query->addSelect('*');
+    //     $query->addSelect(DB::raw("CONCAT(TRIM(codc_categ), '-', vig_caano, '-', vig_cames) as id"));
+    //     return $query;
+    // }
 
     // ######################## Accesores y mutadores ########################
     /* ###################################################################### */
@@ -181,37 +176,44 @@ class Dh61 extends Model
             ->first();
     }
 
-    /**
-     * Método para búsqueda por ID virtual
-     */
-    public static function find($id): Dh61|null
+    public static function find($id): ?self
     {
         if (!$id) return null;
 
-        $identifier = CategoryIdentifier::fromString($id);
+        $parts = explode('-', $id);
+        if (count($parts) !== 3) return null;
 
         return static::query()
-            ->where('codc_categ', trim($identifier->getCategory()))
-            ->where('vig_caano', (int)$identifier->getYear())
-            ->where('vig_cames', (int)$identifier->getMonth())
+            ->where('codc_categ', str_pad(trim($parts[0]), 4))
+            ->where('vig_caano', (int)$parts[1])
+            ->where('vig_cames', (int)$parts[2])
             ->first();
     }
-
     /**
-     * Obtiene la clave del registro para la tabla de FilamentPHP
+     * Método para búsqueda por ID virtual
      */
-    public function getTableRecordKey(): string
+    // public static function find($id): Dh61|null
+    // {
+    //     if (!$id) return null;
+
+    //     $identifier = CategoryIdentifier::fromString($id);
+
+    //     return static::query()
+    //         ->where('codc_categ', $identifier->getCategory())
+    //         ->where('vig_caano', (int)$identifier->getYear())
+    //         ->where('vig_cames', (int)$identifier->getMonth())
+    //         ->first();
+    // }
+
+    public function getKeyName(): string
     {
-        return implode('-', [
-            $this->codc_categ,
-            $this->vig_caano,
-            $this->vig_cames
-        ]);
+        return 'id';
     }
 
     /**
-     * Obtiene la clave del registro para la tabla de FilamentPHP
-     * Debe retornar un string, no un array
+     * Obtiene el valor de la clave única para el modelo.
+     * devuelve una representación de cadena única de la clave primaria compuesta.
+     * @return mixed
      */
     public function getKey(): string
     {
@@ -219,15 +221,26 @@ class Dh61 extends Model
     }
 
 
-    public function getRouteKey(): string
+
+    /**
+     * Establece el nombre de la clave para el modelo.
+     * @param string $key El valor de la clave a establecer.
+     */
+    public function setKeyName($key)
     {
-        return $this->id;
+        $this->id = $key;
     }
 
     public function getRouteKeyName(): string
     {
         return 'id';
     }
+
+    public function getRouteKey(): string
+    {
+        return $this->id;
+    }
+
 
     public function resolveRouteBinding($value, $field = null)
     {
@@ -239,5 +252,10 @@ class Dh61 extends Model
                        ->firstOrFail();
         }
         return parent::resolveRouteBinding($value, $field);
+    }
+
+    public static function resolveRecordRouteBinding(string $key): ?Model
+    {
+        return static::getModel()::find($key);
     }
 }
