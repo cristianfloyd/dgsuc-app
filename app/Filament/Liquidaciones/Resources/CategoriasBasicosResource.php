@@ -58,32 +58,35 @@ class CategoriasBasicosResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultGroup('codigoescalafon')
             ->groups([
+                Group::make('dh31.desc_dedic')
+                    ->label('Dedicación')
+                    ->collapsible(),
                 Group::make('codigoescalafon')
                     ->label('Escalafón')
-                    ->collapsible()
+                    ->collapsible(),
             ])
             ->filtersLayout(FiltersLayout::Modal)
             ->columns([
-                TextColumn::make('codc_categ')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('codc_dedic')->label('Código')->toggleable()->sortable(),
                 TextColumn::make('dh31.desc_dedic')->label('Dedicación')->toggleable(),
                 TextColumn::make('desc_categ')->label('Descripción Categoría')->searchable()->sortable(),
                 TextColumn::make('dh89.descesc')->label('Escalafón')->toggleable(),
                 TextColumn::make('nro_escal')->label('Número Escalafón')->toggleable()->toggledHiddenByDefault(),
-                // TextColumn::make('impp_basic')->label('Importe Básico')->sortable(),
+                TextColumn::make('codc_categ')->searchable()->sortable(),
                 TextInputColumn::make('impp_basic')->label('Importe Básico')->sortable()
                     ->rules([
                         'numeric',
                         'min:0',
                         'max:1000000000',
                     ]),
-                TextColumn::make('impp_asign')->label('Importe Asignación')->numeric()->disabled(),
+                TextColumn::make('impp_asign')->label('Importe Asignación')
+                    ->numeric(
+                        decimalPlaces:2,
+                        decimalSeparator: ',',
+                        thousandsSeparator: '.'
+                    )->disabled(),
                 TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault:true),
-                //llamar a la tabla dh31
                 ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault:true),
                 TextColumn::make('vig_caano')->label('Vigencia Año')->toggleable(),
                 TextColumn::make('vig_cames')->label('Vigencia Mes')->toggleable(),
@@ -107,11 +110,9 @@ class CategoriasBasicosResource extends Resource
                         }
 
                         $categorias = match ($data['value']) {
-                            'DOCU' => self::CATEGORIAS['DOCU'],
-                            'DOCS' => self::CATEGORIAS['DOCS'],
                             'DOC2' => self::CATEGORIAS['DOC2'],
+                            'DOCU' => self::CATEGORIAS['DOCU'],
                             'AUTU' => self::CATEGORIAS['AUTU'],
-                            'AUTS' => self::CATEGORIAS['AUTS'],
                             'NODO' => self::CATEGORIAS['NODO'],
                             default => [],
                         };
@@ -132,7 +133,8 @@ class CategoriasBasicosResource extends Resource
             ->bulkActions([
                 //
             ])
-            ->defaultSort('codc_categ', 'asc');
+            ->defaultSort('codc_categ', 'asc')
+            ->defaultPaginationPageOption(5);
     }
 
 

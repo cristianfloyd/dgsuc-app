@@ -67,27 +67,20 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                 Select::make('codigoescalafon')->label('Escalafon')
                     ->options(function () {
                         $codc_categs = collect(['TODO' => 'Todos'])
-                            ->merge(
-                                $this->escalafonService->getEscalafones()
-                            )
                             ->merge([
                                 'DOC2' => 'Preuniversitario',
-                                'DOCS' => 'Docente Secundario',
                                 'DOCU' => 'Docente Universitario',
-                                'AUTU' => 'Autoridad Universitario',
-                                'AUTS' => 'Autoridad Secundario',
+                                'AUTU' => 'Autoridad Universitaria',
+                                'NODO' => 'Nodocente'
                             ]);
                         return $codc_categs;
                 })
                 ->reactive()
                 ->afterStateUpdated(function ($state, callable $set) {
                     $codc_categs = match ($state) {
-                        'DOCE' => array_merge(self::CATEGORIAS['DOCS'],self::CATEGORIAS['DOCU']), // es la suma de DOCS + DOCU
-                        'DOCS' => self::CATEGORIAS['DOCS'],
                         'DOC2' => self::CATEGORIAS['DOC2'],
                         'DOCU' => self::CATEGORIAS['DOCU'],
                         'AUTU' => self::CATEGORIAS['AUTU'],
-                        'AUTS' => self::CATEGORIAS['AUTS'],
                         'NODO' => self::CATEGORIAS['NODO'],
                         'TODO' => $this->dh11Service->getAllCodcCateg(),
                         default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
