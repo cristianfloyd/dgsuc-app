@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use App\ValueObjects\CategoryIdentifier;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -59,7 +60,7 @@ class Dh61 extends Model
     // Scope para filtrar por categoría
     public function scopeCategoria($query, $categoria)
     {
-        return $query->where('codc_categ', $categoria);
+        return $query->where('codc_categ', str_pad(trim($categoria), 4));
     }
 
     // Scope para filtrar por vigencia
@@ -140,50 +141,31 @@ class Dh61 extends Model
     {
         return Attribute::make(
             get: function () {
-                if ($this->virtualId) {
-                    return $this->virtualId;
-                }
-
-                if (isset($this->attributes['codc_categ'],
-                         $this->attributes['vig_caano'],
-                         $this->attributes['vig_cames'])) {
-                    return "{$this->attributes['codc_categ']}-{$this->attributes['vig_caano']}-{$this->attributes['vig_cames']}";
-                }
-
-                return null;
+                return (string) new CategoryIdentifier(
+                    $this->codc_categ,
+                    $this->vig_caano,
+                    $this->vig_cames
+                );
             },
             set: function ($value) {
-                $this->virtualId = $value;
-
-                if ($value) {
-                    $parts = explode('-', $value);
-                    Log::info("Parts: ", $parts);
-                    if (count($parts) === 3) {
-                        $this->codc_categ = $parts[0];
-                        $this->vig_caano = (int)$parts[1];
-                        $this->vig_cames = (int)$parts[2];
-                    }
-                }
+                $identifier = CategoryIdentifier::fromString($value);
+                $this->codc_categ = $identifier->getCategory();
+                $this->vig_caano = $identifier->getYear();
+                $this->vig_cames = $identifier->getMonth();
                 return $value;
             }
         );
     }
 
-    protected function performInsert(Builder $query): bool
-    {
-        if (isset($this->attributes['id'])) {
-            unset($this->attributes['id']);
-        }
-        return parent::performInsert($query);
-    }
 
     protected function codcCateg(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? trim($value) : '',
-            set: fn ($value) => $value ? trim($value) : ''
+            get: fn (string $value) => str_pad(trim($value), 4),
+            set: fn (string $value) => str_pad(trim($value), 4)
         );
     }
+
 
     // ########################## Métodos para Filamentphp ##################################
     /**
@@ -206,13 +188,12 @@ class Dh61 extends Model
     {
         if (!$id) return null;
 
-        $parts = explode('-', $id);
-        if (count($parts) !== 3) return null;
+        $identifier = CategoryIdentifier::fromString($id);
 
         return static::query()
-            ->where('codc_categ', trim($parts[0]))
-            ->where('vig_caano', (int)$parts[1])
-            ->where('vig_cames', (int)$parts[2])
+            ->where('codc_categ', trim($identifier->getCategory()))
+            ->where('vig_caano', (int)$identifier->getYear())
+            ->where('vig_cames', (int)$identifier->getMonth())
             ->first();
     }
 
@@ -234,25 +215,13 @@ class Dh61 extends Model
      */
     public function getKey(): string
     {
-        return implode('-', [
-            $this->codc_categ,
-            $this->vig_caano,
-            $this->vig_cames
-        ]);
+        return $this->id;
     }
 
-    public function getCompositeKey(): string
-    {
-        return implode('-', [
-            trim($this->codc_categ ?? ''),
-            $this->vig_caano ?? '',
-            $this->vig_cames ?? ''
-        ]);
-    }
 
     public function getRouteKey(): string
     {
-        return $this->getCompositeKey();
+        return $this->id;
     }
 
     public function getRouteKeyName(): string
@@ -263,10 +232,10 @@ class Dh61 extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         if ($field === null) {
-            [$codc_categ, $vig_caano, $vig_cames] = explode('-', $value);
-            return $this->where('codc_categ', $codc_categ)
-                       ->where('vig_caano', $vig_caano)
-                       ->where('vig_cames', $vig_cames)
+            $identifier = CategoryIdentifier::fromString($value);
+            return $this->where('codc_categ', $identifier->getCategory())
+                       ->where('vig_caano', $identifier->getYear())
+                       ->where('vig_cames', $identifier->getMonth())
                        ->firstOrFail();
         }
         return parent::resolveRouteBinding($value, $field);

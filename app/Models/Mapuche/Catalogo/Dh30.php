@@ -98,15 +98,7 @@ class Dh30 extends Model
         );
     }
 
-    // public function descItem(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: fn($value) => EncodingService::toUtf8($value),
-    //         set: fn($value) => EncodingService::toLatin1($value)
-    //     );
-    // }
-
-    public function dh08(): HasMany
+        public function dh08(): HasMany
     {
         // return $this->hasMany(Dh08::class, ['nro_tabla', 'desc_abrev'], ['nro_tabla', 'desc_abrev']);
         return $this->hasMany(Dh08::class, 'nro_tabla', 'nro_tabla')

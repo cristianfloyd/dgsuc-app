@@ -26,6 +26,7 @@ class Dh61Resource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id'),
                 TextColumn::make('codc_categ')
                     ->searchable(),
                 TextColumn::make('equivalencia')
@@ -158,8 +159,6 @@ class Dh61Resource extends Resource
             'edit' => Pages\EditDh61::route('/{record}/edit'),
         ];
     }
-    protected static function getTableRecordKey(): string
-    {
-        return 'id';
-    }
+
+
 }
