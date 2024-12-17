@@ -128,6 +128,9 @@ class Dh13 extends Model
         return $this->belongsTo(Dh12::class, 'codn_conce', 'codn_conce');
     }
 
+    /* ############################################################## */
+    /* ################# Metodos para PK compuesta ################## */
+    /* ############################################################## */
     /**
      * Obtiene la clave única para el modelo.
      * Este método devuelve 'id' como nombre de la clave primaria.
@@ -142,14 +145,12 @@ class Dh13 extends Model
     /**
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
-     * @return mixed
+     * @return string
      */
-    public function getKey()
+    public function getKey(): string
     {
         return "{$this->codn_conce}-{$this->nro_orden_formula}";
     }
-
-
 
     /**
      * Establece la clave única para el modelo.
