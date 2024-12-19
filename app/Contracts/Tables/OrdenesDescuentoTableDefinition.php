@@ -30,7 +30,7 @@ interface OrdenesDescuentoTableDefinition
         'last_sync' => ['type' => 'timestamp']
     ];
 
-    
+
     public const array INDEXES = [
         'codc_uacad' => ['codc_uacad'],
         'codn_conce' => ['codn_conce']

@@ -27,7 +27,6 @@ class OrdenesDescuentoTableService
                 $this->createTableIfNotExists();
                 $this->truncateTable();
                 $this->populateTable();
-                $this->createIndexes();
                 $this->updateLastSync();
             });
 
@@ -82,9 +81,20 @@ class OrdenesDescuentoTableService
                     }
                 }
 
-                // Crear índices
-                foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
-                    $table->index($columns, $name);
+                // Verificar y crear índices después de crear la tabla
+                foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns)
+                {
+                    $indexName = "suc_rep_ordenes_descuento_{$name}_index";
+
+                    $indexExists = DB::connection($this->getConnectionName())
+                        ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
+
+                    if (!$indexExists) {
+                        Schema::connection($this->getConnectionName())->table(
+                            self::TABLE_NAME, function ($table) use ($columns, $name) {
+                                $table->index($columns, $name);
+                        });
+                    }
                 }
             });
         }
