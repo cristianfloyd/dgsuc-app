@@ -6,10 +6,13 @@ use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RepOrdenPagoModel extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, HasFactory;
+
+    const int TABLA_UNIDAD_ACADEMICA = 13;
 
     /**
      * Indica que el modelo RepOrdenPago tiene campos de fecha de creación y actualización.
@@ -68,11 +71,6 @@ class RepOrdenPagoModel extends Model
     public function unidadAcademica(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
-            ->where('nro_tabla', 13);
-    }
-    public function dh30(): BelongsTo
-    {
-        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
-            ->where('nro_tabla', 13);
+            ->where('nro_tabla', self::TABLA_UNIDAD_ACADEMICA);
     }
 }

@@ -30,6 +30,7 @@ class ReportesPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->databaseNotifications()
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Informes')
