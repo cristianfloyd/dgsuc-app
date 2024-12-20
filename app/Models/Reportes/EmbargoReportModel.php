@@ -32,6 +32,7 @@ class EmbargoReportModel extends Model
         'nombre_completo',
         'codn_conce',
         'importe_descontado',
+        'nov2_conce',
         'nro_embargo',
         'nro_cargo',
         'caratula',
@@ -79,7 +80,7 @@ class EmbargoReportModel extends Model
 
 // ######################################################################
     /**
-     * Crea la tabla temporal en la base de datos si no existe
+     * Crea la tabla en la base de datos si no existe
      *
      * @return void
      */
@@ -94,7 +95,8 @@ class EmbargoReportModel extends Model
                     nro_legaj INTEGER,
                     nombre_completo VARCHAR(255),
                     codn_conce INTEGER,
-                    importe_descontado DECIMAL(10,2),
+                    importe_descontado DECIMAL(15,2),
+                    nov2_conce DECIMAL(15,2),
                     nro_embargo INTEGER,
                     nro_cargo INTEGER,
                     caratula VARCHAR(255),
@@ -165,6 +167,7 @@ class EmbargoReportModel extends Model
                     'nombre_completo' => $item->nom_demandado,
                     'codn_conce' => $item->codn_conce,
                     'importe_descontado' => $item->impp_conce,
+                    'nov2_conce' => $item->nov2_conce,
                     'nro_embargo' => $item->nro_embargo,
                     'nro_cargo' => $item->nro_cargo,
                     'caratula' => $item->caratula,

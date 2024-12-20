@@ -59,6 +59,7 @@ class EmbargoReportService
                 'embargos.caratula',
                 'embargos.codn_conce',
                 'd2.impp_conce',
+                'd2.nov2_conce',
                 'embargos.nro_embargo',
                 'embargos.detallenovedad',
                 'd2.nro_liqui'

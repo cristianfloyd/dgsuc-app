@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Exports\EmbargoSummarySheet;
 use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,7 +18,7 @@ use Maatwebsite\Excel\Concerns\WithBackgroundColor;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnFormatting, WithStyles, WithHeadings, WithCustomStartCell,  ShouldAutoSize, WithBackgroundColor
+class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnFormatting, WithStyles, WithHeadings, WithCustomStartCell,  ShouldAutoSize, WithBackgroundColor, WithTitle
 {
     public function __construct(protected Builder $query)
     {}
@@ -39,7 +40,8 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
             'Caratula',
             'Nro. Embargo',
             'Concepto',
-            'Importe'
+            'Importe',
+            'Novedad 2',
         ];
     }
 
@@ -68,7 +70,8 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
             $row->caratula,
             $row->nro_embargo,
             $row->codn_conce,
-            $row->importe_descontado
+            $row->importe_descontado,
+            $row->nov2_conce
         ];
     }
 
@@ -84,8 +87,13 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->mergeCells('A1:I1');
+        $sheet->mergeCells('A1:J1');
         $sheet->setCellValue('A1', 'REPORTE DE EMBARGOS - ' . now()->format('d/m/Y'));
+
+        // Aplicar filtros a los encabezados
+        $lastColumn = 'O';
+        $lastRow = $sheet->getHighestRow();
+        $sheet->setAutoFilter("B2:{$lastColumn}{$lastRow}");
 
         $sheet->getStyle('A1')->getFont()->setSize(16);
         $sheet->getStyle('E')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

@@ -104,7 +104,8 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                         'caratula',
                         'nro_embargo',
                         'codn_conce',
-                        'importe_descontado'
+                        'importe_descontado',
+                        'nov2_conce'
                     ])
                     ->where('session_id', session()->getId());
 
@@ -150,6 +151,7 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                 TextColumn::make('nro_embargo')->label('Nro. Embargo')->numeric(),
                 TextColumn::make('codn_conce')->label('Concepto')->numeric(),
                 TextColumn::make('importe_descontado')->label('Importe')->money('ARS'),
+                TextColumn::make('nov2_conce')->label('Nov2')->money('ARS'),
                 TextColumn::make('nro_liqui')->label('nro_lqui')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('nro_legaj', 'asc')
