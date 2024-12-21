@@ -66,9 +66,10 @@ class OrdenDePagoResource extends Resource
     public static function getPages(): array
     {
         return [
-            //'create' => Pages\CreateReporte::route('/create'),
+            // 'create' => Pages\CreateReporte::route('/create'),
             //'edit' => Pages\EditReporte::route('/{record}/edit'),
             'index' => Pages\ListReportes::route('/'),
+            'reporte' => Pages\ReporteOrdenPago::route('/crear'),
         ];
     }
 

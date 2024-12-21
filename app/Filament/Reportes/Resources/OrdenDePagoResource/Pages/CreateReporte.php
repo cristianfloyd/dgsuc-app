@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ReporteResource\Pages;
+namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 
 
-use Filament\Resources\Pages\CreateRecord;
+use Dompdf\FrameDecorator\Page;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Contracts\HasTable;
 use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
-class CreateReporte extends CreateRecord
+class CreateReporte extends Page
 {
     protected static string $resource = OrdenDePagoResource::class;
+
+
 }

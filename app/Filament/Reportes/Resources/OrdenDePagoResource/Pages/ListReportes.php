@@ -68,7 +68,13 @@ class ListReportes extends ListRecords
                     if ($this->generarReporte()) {
                         Notification::make()->title('Reporte generado')->success()->send();
                     }
-                })
+                }),
+            Action::make('generarReporte')
+                ->label('Generar Reporte')
+                ->icon('heroicon-o-document-currency-dollar')
+                ->url('/reportes/orden-de-pagos/crear')
+                ->color('success')
+
         ];
     }
 
@@ -108,7 +114,7 @@ class ListReportes extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            MultipleIdLiquiSelector::class,
+            //MultipleIdLiquiSelector::class,
         ];
     }
 
