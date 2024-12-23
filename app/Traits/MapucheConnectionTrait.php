@@ -50,5 +50,9 @@ trait MapucheConnectionTrait
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
 
+    public function getTableName(): string
+    {
+        return $this->getTable();
+    }
 }
 

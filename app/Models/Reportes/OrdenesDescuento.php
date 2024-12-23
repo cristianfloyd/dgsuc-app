@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Attribute;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -53,8 +54,11 @@ class OrdenesDescuento extends Model implements HasLabel
     {
         parent::boot();
 
-        if (static::createTableIfNotExists()) {
-            Log::info("Tabla suc.rep_ordenes_descuento creada exitosamente");
+        $tableService = new OrdenesDescuentoTableService();
+
+        if (!$tableService->exists()) {
+            $tableService->createAndPopulate();
+            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE_NAME . " creada y poblada exitosamente");
         }
     }
 
@@ -69,8 +73,10 @@ class OrdenesDescuento extends Model implements HasLabel
     public static function createTableIfNotExists(): bool
     {
         try {
-            if (!Schema::connection('pgsql-mapuche')->hasTable('suc.rep_ordenes_descuento')) {
-                Schema::connection('pgsql-mapuche')->create('suc.rep_ordenes_descuento', function (Blueprint $table) {
+            $connection = (new static)->getConnectionName();
+
+            if (!Schema::connection($connection)->hasTable('suc.rep_ordenes_descuento')) {
+                Schema::connection($connection)->create('suc.rep_ordenes_descuento', function (Blueprint $table) {
                     $table->id();
                     $table->integer('nro_liqui');
                     $table->string('desc_liqui');
@@ -115,6 +121,9 @@ class OrdenesDescuento extends Model implements HasLabel
         return false;
     }
 
+    /* ###################### Accesors y mutators ###################### */
+    
+
     // ######################  Scopes útiles para el reporte  ######################
     public function scopePeriodo($query, $periodo)
     {
@@ -158,4 +167,6 @@ class OrdenesDescuento extends Model implements HasLabel
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
+
+
 }

@@ -124,17 +124,6 @@ class OrdenDePagoResource extends Resource
             ->orderBy('nro_liqui', 'asc');
     }
 
-    public function mount(): void
-    {
-        // Elimina la variable de sesión 'idsLiquiSelected'
-        session()->forget('idsLiquiSelected');
-        // Registra información de depuración sobre el montaje del componente
-        Log::info('ReporteResource::mount', ['session' => session()->all()]);
-        // Crea una nueva instancia de ListReportes
-        $listReportes = new ListReportes();
-        // Establece el estado de 'reporteGenerado' a falso
-        $listReportes->setReporteGenerado(false);
-    }
 
 
     /**
