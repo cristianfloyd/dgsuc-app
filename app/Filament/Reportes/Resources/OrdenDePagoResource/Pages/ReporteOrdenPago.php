@@ -29,7 +29,7 @@ class ReporteOrdenPago extends Page implements HasTable
     protected Table $table;
 
     public bool $reporteGenerado = false;
-    protected ?RepOrdenPagoService $ordenPagoService = null;
+    protected RepOrdenPagoService $ordenPagoService;
 
     public function mount(RepOrdenPagoService $ordenPagoService)
     {
