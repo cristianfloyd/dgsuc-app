@@ -19,8 +19,8 @@ use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages\ListReportes;
 class OrdenDePagoResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
-    protected static ?string $modelLabel = 'Ordenes de Pago';
-    protected static ?string $navigationLabel = 'Ordenes de Pago';
+    protected static ?string $modelLabel = 'Orden de Pago';
+    protected static ?string $navigationLabel = 'Orden de Pago';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reportes';
 

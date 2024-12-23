@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\RepOrdenPagoService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Notifications\Notification;
@@ -28,6 +29,19 @@ class ReporteOrdenPago extends Page implements HasTable
     protected Table $table;
 
     public bool $reporteGenerado = false;
+    protected ?RepOrdenPagoService $ordenPagoService = null;
+
+    public function mount(RepOrdenPagoService $ordenPagoService)
+    {
+        $this->ordenPagoService = $ordenPagoService;
+        $this->ordenPagoService->ensureTableAndFunction();
+        // Limpiar la session anterior
+        session()->forget('idsLiquiSelected');
+        // Inicializar estado
+        $this->reporteGenerado = false;
+
+        Log::info('ReporteOrdenPago: Se ha inicializado la página');
+    }
 
     public function table(Table $table): Table
     {
@@ -93,10 +107,8 @@ class ReporteOrdenPago extends Page implements HasTable
         }
 
         try {
-            DB::connection('pgsql-mapuche')->select(
-                'SELECT suc.rep_orden_pago(?)',
-                ['{' . implode(',', $selectedLiquidaciones) . '}']
-            );
+            app(RepOrdenPagoService::class)->generateReport($selectedLiquidaciones);
+            // $this->ordenPagoService->generateReport($selectedLiquidaciones);
             $this->reporteGenerado = true;
             return true;
         } catch (Exception $e) {
