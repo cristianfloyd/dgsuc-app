@@ -56,19 +56,6 @@ class ListReportes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Action::make('verOP')
-            //     ->label('Ver OP')
-            //     ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-            //     ->visible(fn() => $this->reporteGenerado),
-            // Action::make('generarReporte')
-            //     ->label('Generar OP')
-            //     //->action(fn() => $this->generarReporte())
-            //     ->action(function () {
-            //         // metodo que ejecute la función almacenada
-            //         if ($this->generarReporte()) {
-            //             Notification::make()->title('Reporte generado')->success()->send();
-            //         }
-            //     }),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-document-currency-dollar')

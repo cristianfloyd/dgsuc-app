@@ -36,15 +36,19 @@ class RepOrdenPagoModel extends Model implements HasLabel
         'codn_progr',
         'remunerativo',
         'no_remunerativo',
+        'otros_no_remunerativo', // Nuevo campo
+        'bruto',                 // Nuevo campo
         'descuentos',
         'aportes',
         'sueldo',
+        'neto',                 // Nuevo campo
         'estipendio',
         'med_resid',
         'productividad',
         'sal_fam',
         'hs_extras',
         'total',
+        'imp_gasto',
     ];
 
     /**
@@ -56,15 +60,19 @@ class RepOrdenPagoModel extends Model implements HasLabel
         'banco' => 'integer',
         'remunerativo' => 'decimal:2',
         'no_remunerativo' => 'decimal:2',
+        'otros_no_remunerativo' => 'decimal:2',
+        'bruto' => 'decimal:2',
         'descuentos' => 'decimal:2',
         'aportes' => 'decimal:2',
         'sueldo' => 'decimal:2',
+        'neto' => 'decimal:2',
         'estipendio' => 'decimal:2',
         'med_resid' => 'decimal:2',
         'productividad' => 'decimal:2',
         'sal_fam' => 'decimal:2',
         'hs_extras' => 'decimal:2',
         'total' => 'decimal:2',
+        'imp_gasto' => 'decimal:2',
     ];
 
 
@@ -110,7 +118,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
                     $table->index('banco');
                 });
 
-                Log::info("Tabla suc.rep_orden_pago creada exitosamente");
+                Log::info("Tabla suc.rep_orden_pago creada exitosamente desde el modelo RepOrdenPagoModel.");
                 return true;
             }
         } catch (\Exception $e) {

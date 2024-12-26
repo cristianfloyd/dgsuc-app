@@ -57,10 +57,16 @@ class ReporteOrdenPago extends Page implements HasTable
                 TextColumn::make('codn_progr')->label('Programa'),
                 TextColumn::make('remunerativo')->money('ARS')->label('Remunerativo')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('no_remunerativo')->money('ARS')->label('No Remunerativo')->toggleable()->toggledHiddenByDefault(),
-                TextColumn::make('bruto')->money('ARS')->label('bruto'),
-                TextColumn::make('descuentos')->money('ARS'),
-                TextColumn::make('aportes')->money('ARS'),
+                TextColumn::make('hs_extras')->money('ARS')->label('Hs. Extras')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('estipendio')->money('ARS'),
+                TextColumn::make('med_resid')->money('ARS')->label('Med. Resid.'),
+                TextColumn::make('otros_no_remunerativo')->money('ARS')->label('Otros No Remunerativos')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('aportes')->money('ARS'),
+                TextColumn::make('descuentos')->money('ARS'),
+                // TextColumn::make('neto')->money('ARS')->label('Neto'),
+                TextColumn::make('productividad')->money('ARS'),
+                TextColumn::make('sal_fam')->money('ARS')->label('Sal. Fam.'),
+                TextColumn::make('imp_gasto')->money('ARS')->label('Imp. Gasto'),
             ])
             ->defaultPaginationPageOption(5)
             ->striped()
@@ -108,7 +114,6 @@ class ReporteOrdenPago extends Page implements HasTable
 
         try {
             app(RepOrdenPagoService::class)->generateReport($selectedLiquidaciones);
-            // $this->ordenPagoService->generateReport($selectedLiquidaciones);
             $this->reporteGenerado = true;
             return true;
         } catch (Exception $e) {
