@@ -82,52 +82,6 @@ class RepOrdenPagoModel extends Model implements HasLabel
     }
 
 
-    public static function createTableIfNotExists(): bool
-    {
-        try {
-            if (!Schema::connection('pgsql-mapuche')->hasTable('suc.rep_orden_pago')) {
-                Schema::connection('pgsql-mapuche')->create('suc.rep_orden_pago', function (Blueprint $table) {
-                    $table->id();
-                    $table->integer('nro_liqui');
-                    $table->string('desc_liqui');
-                    $table->integer('banco');
-                    $table->integer('codn_funci');
-                    $table->integer('codn_fuent');
-                    $table->string('codc_uacad');
-                    $table->string('caracter');
-                    $table->integer('codn_progr');
-                    $table->string('desc_progr');
-                    $table->decimal('remunerativo', 15, 2);
-                    $table->decimal('no_remunerativo', 15, 2);
-                    $table->decimal('descuentos', 15, 2);
-                    $table->decimal('aportes', 15, 2);
-                    $table->decimal('sueldo', 15, 2);
-                    $table->decimal('estipendio', 15, 2);
-                    $table->decimal('med_resid', 15, 2);
-                    $table->decimal('productividad', 15, 2);
-                    $table->decimal('sal_fam', 15, 2);
-                    $table->decimal('hs_extras', 15, 2);
-                    $table->decimal('total', 15, 2);
-                    $table->string('periodo_fiscal', 6);
-                    $table->timestamps();
-                    $table->timestamp('last_sync')->useCurrent();
-
-                    // Índices para optimizar consultas
-                    $table->index(['periodo_fiscal', 'nro_liqui']);
-                    $table->index('codc_uacad');
-                    $table->index('banco');
-                });
-
-                Log::info("Tabla suc.rep_orden_pago creada exitosamente desde el modelo RepOrdenPagoModel.");
-                return true;
-            }
-        } catch (\Exception $e) {
-            Log::error("Error al crear tabla suc.rep_orden_pago: " . $e->getMessage());
-            throw $e;
-        }
-        return false;
-    }
-
     /* ####################################################################### */
     /* ########################## RELACIONES ################################# */
     public function unidadAcademica(): BelongsTo
