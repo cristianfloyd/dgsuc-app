@@ -3,7 +3,7 @@
         {{ $this->form }}
 
         <x-filament::button type="submit" class="mt-4">
-            Generar Reporte
+            Generar Reporte Embargos
         </x-filament::button>
     </form>
 

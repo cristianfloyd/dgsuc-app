@@ -111,6 +111,7 @@ class EmbargoReportModel extends Model
             $connection->statement('CREATE INDEX idx_embargo_session ON suc.embargo_reports(session_id)');
             $connection->statement('CREATE INDEX idx_embargo_liqui ON suc.embargo_reports(nro_liqui)');
         }
+        Log::info('Tabla "embargo_reports" creada o ya existente.');
     }
 
     /**

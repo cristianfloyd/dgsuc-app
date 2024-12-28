@@ -190,7 +190,7 @@ BEGIN
 
     -- Insertamos los nuevos datos
 INSERT INTO suc.rep_orden_pago(
-	nro_liqui, banco, codn_funci, codn_fuent, codc_uacad, caracter, codn_progr,
+	nro_liqui, banco, codn_funci, codn_fuent, codc_uacad, caracter, codn_progr, sueldo,
    remunerativo, no_remunerativo, otros_no_remunerativo, hs_extras, estipendio, med_resid,
    aportes, descuentos, neto, productividad, sal_fam, imp_gasto
 )
@@ -201,6 +201,9 @@ SELECT h22.nro_liqui,
        h21.codc_uacad,
        CASE WHEN h03.codc_carac IN ( 'PERM', 'PLEN', 'REGU' ) THEN 'PERM' ELSE 'CONT' END                                                    AS caracter, -- personal contratado o permamente
        h21.codn_progr,
+		(SUM(CASE WHEN h21.tipo_conce= 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END) +
+		 SUM(CASE WHEN h21.tipo_conce= 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END) -
+		 SUM(CASE WHEN h21.tipo_conce= 'D' AND h21.nro_orimp != 0 AND h21.codn_conce/100 = 2 THEN impp_conce ELSE 0 END))::NUMERIC(15, 2)     AS sueldo,
         SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )::NUMERIC(15,2)      AS remunerativo,
         SUM( CASE WHEN h21.tipo_conce = 'S' AND NOT h21.codn_conce IN ( 173, 186 ) THEN impp_conce ELSE 0 END )::NUMERIC(15,2)                AS no_remunerativo,
         SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2)                                AS otros_no_remunerativo,

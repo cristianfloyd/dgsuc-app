@@ -6,7 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ImportData extends Model
+class ImportDataModel extends Model
 {
     use MapucheConnectionTrait, HasFactory;
     protected $table = 'suc.rep_import_data';

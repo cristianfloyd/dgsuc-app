@@ -5,17 +5,15 @@ namespace App\Filament\Reportes\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
-use App\Models\ImportData;
 use Filament\Tables\Table;
+use App\Models\ImportDataModel;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
 use App\Filament\Reportes\Resources\ImportDataResource\Pages;
-use App\Filament\Reportes\Resources\ImportDataResource\RelationManagers;
 
 class ImportDataResource extends Resource
 {
-    protected static ?string $model = ImportData::class;
+    protected static ?string $model = ImportDataModel::class;
     protected static ?string $label = 'Importar Datos';
     protected static ?string $navigationGroup = 'Reportes';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -40,9 +38,9 @@ class ImportDataResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('column1'),
-                Tables\Columns\TextColumn::make('column2'),
-                Tables\Columns\TextColumn::make('column3'),
+                TextColumn::make('column1'),
+                TextColumn::make('column2'),
+                TextColumn::make('column3'),
             ]);
     }
 

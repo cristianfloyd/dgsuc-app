@@ -4,6 +4,7 @@ namespace App\Filament\Reportes\Resources\EmbargoResource\Pages;
 
 use Filament\Pages\Page;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use App\Models\Mapuche\Dh22;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
@@ -186,14 +187,18 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
 
     public function generateReport()
     {
+
+
         if (!$this->nro_liqui) {
             return;
         }
 
         // Verificamos si ya hay datos para la sesión actual
         if ($this->hasReportData()) {
-            Notification::make('info')
+            Notification::make(Str::uuid()->toString())
+                ->info()
                 ->title('Ya hay datos para esta sesión.')
+                ->persistent()
                 ->send();
             return;
         }
@@ -204,13 +209,18 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
             $reportData = $reportService->generateReport($this->nro_liqui);
             EmbargoReportModel::setReportData($reportData);
             $this->refreshTable();
-            Notification::make('success')
+            Notification::make(Str::uuid()->toString())
+                ->success()
                 ->title( 'Reporte generado correctamente.')
+                ->persistent()
                 ->send();
         } catch (\Exception $e) {
             Log::error('Error al generar reporte', ['error' => $e->getMessage()]);
-            Notification::make('error')
+            Notification::make(Str::uuid()->toString())
+                ->danger()
                 ->title('Error al generar reporte')
+                ->body('No se pudo generar el reporte. Por favor, intente nuevamente.')
+                ->persistent()
                 ->send();
         }
     }
