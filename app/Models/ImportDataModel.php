@@ -14,6 +14,7 @@ class ImportDataModel extends Model
 
     protected $fillable = [
         'id',
+        'nro_liqui',
         'fecha_registro',
         'email',
         'nombre',
@@ -24,5 +25,12 @@ class ImportDataModel extends Model
         'fecha_baja',
         'tipo',
         'observaciones',
+        'chkstopliq'
+    ];
+
+    protected $casts = [
+        'fecha_registro' => 'datetime',
+        'fecha_baja' => 'datetime',
+        'chkstopliq' => 'boolean',
     ];
 }

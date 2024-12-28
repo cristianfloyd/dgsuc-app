@@ -19,6 +19,7 @@ class ImportDataTableService
         if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_import_data')) {
             Schema::connection($this->getConnectionName())->create('suc.rep_import_data', function (Blueprint $table) {
                 $table->id();
+                $table->integer('nro_liqui');
                 $table->timestamp('fecha_registro');
                 $table->string('email');
                 $table->string('nombre');
@@ -29,6 +30,7 @@ class ImportDataTableService
                 $table->date('fecha_baja')->nullable();
                 $table->string('tipo');
                 $table->text('observaciones')->nullable();
+                $table->boolean('chkstopliq')->default(false);
                 $table->timestamps();
 
                 // Índices para mejorar el rendimiento

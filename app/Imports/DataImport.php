@@ -4,38 +4,61 @@ namespace App\Imports;
 
 use Carbon\Carbon;
 use App\Models\ImportDataModel;
+use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class DataImport implements ToModel, WithHeadingRow, WithValidation
 {
+    use MapucheConnectionTrait;
+    use Importable;
+
+    private $connection;
+    private $nroLiqui;
+
+    public function __construct($nroLiqui)
+    {
+        $this->connection = $this->getConnectionName();
+        $this->nroLiqui = $nroLiqui;
+    }
+
     public function model(array $row)
     {
         $fechaBaja = null;
+        $chkstopliq = false;
 
-        // Procesamiento de fecha de baja según el tipo
-        if (in_array(strtolower($row['tipo']), ['fallecimiento', 'renuncia']) && isset($row['fecha_baja'])) {
-            $fechaBaja = Carbon::parse($row['fecha_baja']);
+        $tipoMovimiento = strtolower($row['tipo_de_movimiento']);
 
-            // Si el día es 1, retrocedemos al último día del mes anterior
+        if ($tipoMovimiento === 'licencia') {
+            $chkstopliq = true;
+        } elseif (in_array($tipoMovimiento, ['fallecido', 'renuncia']) && !empty($row['fecha_de_baja'])) {
+            $fechaBaja = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']));
             if ($fechaBaja->day === 1) {
                 $fechaBaja = $fechaBaja->subMonth()->endOfMonth();
             }
         }
 
 
+
+        // Convertir hora de finalización de Excel a Carbon
+        $fechaRegistro = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion']));
+
+
         return new ImportDataModel([
-            'fecha_registro' => Carbon::now(),
-            'email' => $row['email'],
+            'fecha_registro' => $fechaRegistro,
+            'email' => $row['correo_electronico'],
             'nombre' => $row['nombre'],
-            'usuario_mapuche' => $row['usuario_mapuche'],
+            'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
             'dependencia' => $row['dependencia'],
-            'nro_legaj' => $row['nro_legaj'],
-            'nro_cargo' => $row['nro_cargo'],
+            'nro_legaj' => $row['legajo'],
+            'nro_cargo' => $row['n_de_cargo'],
             'fecha_baja' => $fechaBaja,
-            'tipo' => $row['tipo'],
+            'tipo' => $row['tipo_de_movimiento'],
             'observaciones' => $row['observaciones'] ?? null,
+            'nro_liqui' => $this->nroLiqui,
         ]);
     }
 
@@ -55,14 +78,13 @@ class DataImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'correo_electronico' => ['required', 'email'],
             'nombre' => ['required', 'string'],
-            'usuario_mapuche' => ['required', 'string'],
+            'usuario_mapuche_solicitante' => ['required', 'string'],
             'dependencia' => ['required', 'string'],
-            'nro_legaj' => ['required', 'numeric'],
-            'nro_cargo' => ['required', 'numeric'],
-            'tipo' => ['required', 'string', 'in:licencia,fallecimiento,renuncia'],
-            'fecha_baja' => ['required_if:tipo,fallecimiento,renuncia', 'date'],
+            'legajo' => ['required', 'numeric'],
+            'n_de_cargo' => ['required', 'numeric'],
+            'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
         ];
     }
 
@@ -73,19 +95,17 @@ class DataImport implements ToModel, WithHeadingRow, WithValidation
     public function customValidationMessages(): array
     {
         return [
-            'email.required' => 'El campo email es obligatorio',
-            'email.email' => 'El email debe tener un formato válido',
+            'correo_electronico.required' => 'El campo email es obligatorio',
+            'correo_electronico.email' => 'El email debe tener un formato válido',
             'nombre.required' => 'El campo nombre es obligatorio',
-            'usuario_mapuche.required' => 'El usuario Mapuche es obligatorio',
+            'usuario_mapuche_solicitante.required' => 'El usuario Mapuche es obligatorio',
             'dependencia.required' => 'La dependencia es obligatoria',
-            'nro_legaj.required' => 'El número de legajo es obligatorio',
-            'nro_legaj.numeric' => 'El número de legajo debe ser numérico',
-            'nro_cargo.required' => 'El número de cargo es obligatorio',
-            'nro_cargo.numeric' => 'El número de cargo debe ser numérico',
-            'tipo.required' => 'El tipo es obligatorio',
-            'tipo.in' => 'El tipo debe ser: licencia, fallecimiento o renuncia',
-            'fecha_baja.required_if' => 'La fecha de baja es obligatoria para fallecimiento o renuncia',
-            'fecha_baja.date' => 'La fecha de baja debe ser una fecha válida'
+            'legajo.required' => 'El número de legajo es obligatorio',
+            'legajo.numeric' => 'El número de legajo debe ser numérico',
+            'n_de_cargo.required' => 'El número de cargo es obligatorio',
+            'n_de_cargo.numeric' => 'El número de cargo debe ser numérico',
+            'tipo_de_movimiento.required' => 'El tipo es obligatorio',
+            'tipo_de_movimiento.in' => 'El tipo debe ser: Licencia, Fallecido o Renuncia',
         ];
     }
 }
