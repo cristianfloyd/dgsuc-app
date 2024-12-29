@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Models\SpuDisc;
+use App\Enums\LegajoCargo;
 use App\Models\Mapuche\Dh05;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
@@ -117,5 +119,13 @@ class Dh03 extends Model
     public function getCodcUacadAttribute($value)
     {
         return trim($value);
+    }
+
+    /* ##################### Atributos ##################### */
+    protected function legajoCargo(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+        );
     }
 }

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ImportDataResource\Pages;
+namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
 
-use App\Filament\Reportes\Resources\ImportDataResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Reportes\Resources\BloqueosResource;
 
 class EditImportData extends EditRecord
 {
-    protected static string $resource = ImportDataResource::class;
+    protected static string $resource = BloqueosResource::class;
 
     protected function getHeaderActions(): array
     {

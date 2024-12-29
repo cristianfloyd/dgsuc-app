@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection($this->getConnectionName())->create('suc.rep_import_data', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.rep_bloqueos_import', function (Blueprint $table) {
             $table->id();
             $table->timestamp('fecha_registro')->useCurrent();
             $table->string('email')->index();
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection($this->getConnectionName())->dropIfExists('suc.rep_import_data');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.rep_bloqueos_import');
     }
 };

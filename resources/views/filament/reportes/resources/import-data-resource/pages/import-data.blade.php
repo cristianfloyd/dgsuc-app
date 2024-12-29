@@ -6,7 +6,7 @@
             <form wire:submit="import">
                 {{ $this->form }}
 
-                <div class="mt-4">
+                <div class="mt-6 flex justify-end">
                     <x-filament::button type="submit">
                         Importar archivo
                     </x-filament::button>

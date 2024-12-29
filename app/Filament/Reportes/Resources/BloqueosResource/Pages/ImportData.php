@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ImportDataResource\Pages;
+namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
 
 use Filament\Forms\Form;
 use App\Imports\DataImport;
@@ -17,7 +17,7 @@ use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
-use App\Filament\Reportes\Resources\ImportDataResource;
+use App\Filament\Reportes\Resources\BloqueosResource;
 
 class ImportData extends Page
 {
@@ -25,8 +25,9 @@ class ImportData extends Page
     use InteractsWithForms;
     use WithFileUploads;
 
-    protected static string $resource = ImportDataResource::class;
+    protected static string $resource = BloqueosResource::class;
     protected static string $view = 'filament.reportes.resources.import-data-resource.pages.import-data';
+    protected static ?string $title = 'Importar Datos';
 
     public array $data = [];
 
@@ -34,6 +35,12 @@ class ImportData extends Page
     {
         $tableService = new ImportDataTableService();
         $tableService->ensureTableExists();
+    }
+
+    public function getSubheading(): string
+    {
+        return 'Este formulario permite importar bloqueos masivos desde un archivo Excel.
+                Seleccione la liquidación correspondiente y cargue el archivo con el formato establecido.';
     }
 
     public function form(Form $form): Form
@@ -97,13 +104,13 @@ class ImportData extends Page
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('import')
-                ->label('Importar Excel')
-                ->action('import')
-                ->requiresConfirmation()
-                ->modalHeading('¿Confirmar importación?')
-                ->modalDescription('¿Estás seguro de que deseas importar este archivo?')
-                ->modalSubmitActionLabel('Sí, importar')
+            // Action::make('import')
+            //     ->label('Importar Excel')
+            //     ->action('import')
+            //     ->requiresConfirmation()
+            //     ->modalHeading('¿Confirmar importación?')
+            //     ->modalDescription('¿Estás seguro de que deseas importar este archivo?')
+            //     ->modalSubmitActionLabel('Sí, importar')
         ];
     }
 }

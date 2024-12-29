@@ -16,8 +16,8 @@ class ImportDataTableService
     public function ensureTableExists(): void
     {
 
-        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_import_data')) {
-            Schema::connection($this->getConnectionName())->create('suc.rep_import_data', function (Blueprint $table) {
+        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_bloqueos_import')) {
+            Schema::connection($this->getConnectionName())->create('suc.rep_bloqueos_import', function (Blueprint $table) {
                 $table->id();
                 $table->integer('nro_liqui');
                 $table->timestamp('fecha_registro');
