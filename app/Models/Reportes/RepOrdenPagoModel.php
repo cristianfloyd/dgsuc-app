@@ -18,7 +18,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
 {
     use MapucheConnectionTrait, HasFactory;
 
-    const int TABLA_UNIDAD_ACADEMICA = 13;
+    public const int TABLA_UNIDAD_ACADEMICA = 13;
     protected static ?string $label = 'Orden de Pago';
     protected $primaryKey = 'id';
     public $timestamps = true;
@@ -75,6 +75,37 @@ class RepOrdenPagoModel extends Model implements HasLabel
         'imp_gasto' => 'decimal:2',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            // Validacion de campos no negativos
+            $camposMonetarios = [
+                'remunerativo',
+                'no_remunerativo',
+                'otros_no_remunerativo',
+                'bruto',
+                'descuentos',
+                'aportes',
+                'sueldo',
+                'neto',
+                'estipendio',
+                'med_resid',
+                'productividad',
+                'sal_fam',
+                'hs_extras',
+                'total',
+                'imp_gasto'
+            ];
+
+            foreach ($camposMonetarios as $campo) {
+                if ($model->$campo < 0) {
+                    throw new \InvalidArgumentException("El campo {$campo} no puede ser negativo");
+                }
+            }
+        });
+    }
 
     public static function generarReporte(array $nro_liqui): void
     {

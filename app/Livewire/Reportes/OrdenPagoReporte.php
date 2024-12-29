@@ -193,7 +193,7 @@ class OrdenPagoReporte extends Component implements Htmlable
             'med_resid' => $items->sum('med_resid'),
             'sal_fam' => $items->sum('sal_fam'),
             'hs_extras' => $items->sum('hs_extras'),
-            'total' => $items->sum('imp_gasto')
+            'total' => $items->sum('total')
         ];
     }
 

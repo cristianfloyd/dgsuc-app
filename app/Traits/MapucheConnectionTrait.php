@@ -22,6 +22,7 @@ trait MapucheConnectionTrait
         return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
     }
 
+    
     /**
      * Obtiene la conexión desde el trait
      * @return \Illuminate\Database\Connection

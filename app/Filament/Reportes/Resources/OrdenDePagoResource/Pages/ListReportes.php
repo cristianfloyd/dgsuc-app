@@ -8,6 +8,8 @@ use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\RepOrdenPagoService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
@@ -15,11 +17,55 @@ use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class ListReportes extends ListRecords
 {
+    protected $connection = 'pgsql-mapuche';
     protected static string $resource = OrdenDePagoResource::class;
     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
     public bool $reporteGenerado = false;
     protected RepOrdenPagoService $ordenPagoService;
+
+    public function getHeader(): \Illuminate\Contracts\View\View|null
+    {
+        if (!$this->tieneTablaYDatos()) {
+            Log::info('No hay tabla ni datos para mostrar.');
+            return null;
+        }
+
+        $totales = $this->calcularTotales();
+
+        return view('filament.pages.reportes.orden-pago-header', [
+            'totalBruto' => money($totales->total_bruto),
+            'totalSueldo' => money($totales->total_sueldo),
+            'totalAportes' => money($totales->total_aportes),
+            'totalDescuentos' => money($totales->total_descuentos),
+            'totalImpGasto' => money($totales->total_imp_gasto),
+            'cantidadRegistros' => $totales->cantidad_registros
+        ]);
+    }
+
+    private function tieneTablaYDatos(): bool
+    {
+        if (!Schema::connection($this->connection)->hasTable('suc.rep_orden_pago')) {
+            Log::info('No hay tabla para mostrar.');
+            return false;
+        }
+
+        return DB::connection($this->connection)->table('suc.rep_orden_pago')->count() > 0;
+    }
+
+    private function calcularTotales(): object
+    {
+        return DB::connection($this->connection)->table('suc.rep_orden_pago')
+            ->selectRaw('
+                COUNT(*) as cantidad_registros,
+                SUM(bruto) as total_bruto,
+                SUM(sueldo) as total_sueldo,
+                SUM(aportes) as total_aportes,
+                SUM(descuentos) as total_descuentos,
+                SUM(imp_gasto) as total_imp_gasto
+            ')
+            ->first();
+    }
 
     public static function getEloquentQuery()
     {
@@ -79,7 +125,7 @@ class ListReportes extends ListRecords
         }
 
         try {
-            DB::connection('pgsql-mapuche')->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
+            DB::connection($this->connection)->select('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $selectedLiquidaciones) . '}']);
             // Notification::make()->title('Reporte generado')->success()->send();
             $this->reporteGenerado = true;
             return true;
