@@ -3,15 +3,15 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
-use App\Models\ImportDataModel;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Maatwebsite\Excel\Concerns\ToModel;
+use App\Models\Reportes\BloqueosDataModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class DataImport implements ToModel, WithHeadingRow, WithValidation
+class BloqueosImport implements ToModel, WithHeadingRow, WithValidation
 {
     use MapucheConnectionTrait;
     use Importable;
@@ -35,9 +35,13 @@ class DataImport implements ToModel, WithHeadingRow, WithValidation
         if ($tipoMovimiento === 'licencia') {
             $chkstopliq = true;
         } elseif (in_array($tipoMovimiento, ['fallecido', 'renuncia']) && !empty($row['fecha_de_baja'])) {
-            $fechaBaja = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']));
-            if ($fechaBaja->day === 1) {
-                $fechaBaja = $fechaBaja->subMonth()->endOfMonth();
+            $fechaBaja = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']))
+                ->format('Y-m-d');
+            if (Carbon::parse($fechaBaja)->day === 1) {
+                $fechaBaja = Carbon::parse($fechaBaja)
+                    ->subMonth()
+                    ->endOfMonth()
+                    ->format('Y-m-d');
             }
         }
 
@@ -47,7 +51,7 @@ class DataImport implements ToModel, WithHeadingRow, WithValidation
         $fechaRegistro = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion']));
 
 
-        return new ImportDataModel([
+        return new BloqueosDataModel([
             'fecha_registro' => $fechaRegistro,
             'email' => $row['correo_electronico'],
             'nombre' => $row['nombre'],
@@ -58,6 +62,7 @@ class DataImport implements ToModel, WithHeadingRow, WithValidation
             'fecha_baja' => $fechaBaja,
             'tipo' => $row['tipo_de_movimiento'],
             'observaciones' => $row['observaciones'] ?? null,
+            'chkstopliq' => $chkstopliq,
             'nro_liqui' => $this->nroLiqui,
         ]);
     }

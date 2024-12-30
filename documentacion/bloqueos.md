@@ -32,7 +32,7 @@ Gestiona las columnas permitidas para importación
 
 ### 2.2 Clase de Importación
 
-Ubicación: app/Imports/DataImport.php
+Ubicación: app/Imports/BloqueosImport.php
 
 Maneja la lógica de importación
 Mapea las columnas del Excel a la base de datos
@@ -64,7 +64,7 @@ Definir los campos fillable
 Establecer las relaciones necesarias
 Implementar la Importación
 
-Crear la clase DataImport
+Crear la clase BloqueosImport
 Configurar el mapeo de columnas
 Implementar la lógica de importación
 Configurar FilamentPHP

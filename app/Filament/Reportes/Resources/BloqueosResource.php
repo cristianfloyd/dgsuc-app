@@ -5,18 +5,18 @@ namespace App\Filament\Reportes\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use App\Models\ImportDataModel;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\FileUpload;
+use App\Models\Reportes\BloqueosDataModel;
 use App\Filament\Reportes\Resources\Bloqueos\Pages;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 
 class BloqueosResource extends Resource
 {
-    protected static ?string $model = ImportDataModel::class;
+    protected static ?string $model = BloqueosDataModel::class;
     protected static ?string $label = 'Bloqueos';
     protected static ?string $pluralLabel = 'Bloqueos';
     protected static ?string $navigationGroup = 'Reportes';
@@ -58,8 +58,8 @@ class BloqueosResource extends Resource
                 TextColumn::make('dependencia'),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
-                TextColumn::make('fecha_baja')->date(),
-                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->date(),
+                TextColumn::make('fecha_baja'),
+                TextColumn::make('cargo.fec_baja')->label('Fecha dh03'),
                 TextColumn::make('tipo'),
                 TextColumn::make('observaciones')
                     ->limit(20)
@@ -67,7 +67,12 @@ class BloqueosResource extends Resource
                         return $column->getState();
                     }),
                 IconColumn::make('chkstopliq')->boolean(),
-            ]);
+            ])
+            ->recordClasses(fn (BloqueosDataModel $record): string =>
+            $record->fecha_baja === $record->cargo?->fec_baja
+                ? 'bg-green-50 dark:bg-green-900/50'
+                : ''
+            );
     }
 
     public static function getRelations(): array

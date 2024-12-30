@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Reportes;
 
+use App\Models\Dh03;
 use App\Enums\LegajoCargo;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ImportDataModel extends Model
+class BloqueosDataModel extends Model
 {
     use MapucheConnectionTrait, HasFactory;
     protected $table = 'suc.rep_bloqueos_import';

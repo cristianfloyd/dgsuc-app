@@ -3,9 +3,9 @@
 namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
 
 use Filament\Forms\Form;
-use App\Imports\DataImport;
 use Filament\Actions\Action;
 use Livewire\WithFileUploads;
+use App\Imports\BloqueosImport;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +16,7 @@ use App\Traits\MapucheConnectionTrait;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
+use App\Services\Reportes\BloqueosDataService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Filament\Reportes\Resources\BloqueosResource;
 
@@ -79,7 +80,7 @@ class ImportData extends Page
             $connection->beginTransaction();
             Log::info('Importando archivo: ' . $filePath);
 
-            $importer = new DataImport($this->data['nro_liqui']);
+            $importer = new BloqueosImport($this->data['nro_liqui']);
             Excel::import($importer, $filePath);
 
             $connection->commit();
@@ -104,13 +105,7 @@ class ImportData extends Page
     protected function getHeaderActions(): array
     {
         return [
-            // Action::make('import')
-            //     ->label('Importar Excel')
-            //     ->action('import')
-            //     ->requiresConfirmation()
-            //     ->modalHeading('¿Confirmar importación?')
-            //     ->modalDescription('¿Estás seguro de que deseas importar este archivo?')
-            //     ->modalSubmitActionLabel('Sí, importar')
+            //
         ];
     }
 }

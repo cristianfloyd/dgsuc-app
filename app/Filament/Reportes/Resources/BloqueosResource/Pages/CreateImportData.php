@@ -3,7 +3,7 @@
 namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
 
 use Filament\Actions;
-use App\Imports\DataImport;
+use App\Imports\BloqueosImport;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
