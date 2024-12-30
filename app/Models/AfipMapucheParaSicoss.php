@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AfipMapucheParaSicoss extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
+
     protected $table = 'suc.afip_mapuche_para_sicoss';
     protected $primaryKey = 'nro_legaj';
     public $timestamps = false;

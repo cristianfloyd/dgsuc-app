@@ -48,4 +48,12 @@ interface RepOrdenPagoRepositoryInterface
      * @return bool
      */
     public function delete(RepOrdenPagoModel $repOrdenPago): bool;
+
+    /**
+     * Trunca la tabla rep_orden_pago
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function truncate(): bool;
 }

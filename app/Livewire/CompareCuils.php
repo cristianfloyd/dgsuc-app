@@ -2,27 +2,28 @@
 
 namespace App\Livewire;
 
-use App\Contracts\MapucheMiSimplificacionServiceInterface;
-use App\Contracts\MessageManagerInterface;
-use App\Contracts\WorkflowServiceInterface;
-use App\Enums\WorkflowStatus;
-use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\Dh01;
 use App\Models\Dh03;
-use App\Services\CuilCompareService;
+use Livewire\Component;
+use Livewire\Attributes\On;
+use Livewire\WithPagination;
+use App\Enums\WorkflowStatus;
+use Livewire\Attributes\Computed;
 use App\Services\TempTableService;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Services\CuilCompareService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\QueryException;
+use App\Contracts\MessageManagerInterface;
+use App\Contracts\WorkflowServiceInterface;
+use App\Models\AfipMapucheMiSimplificacion;
+use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class CompareCuils extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
 
     // Constantes
     private const int PER_PAGE = 10;
@@ -126,7 +127,7 @@ class CompareCuils extends Component
      */
     public function cuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
 
         return $cuilsNoEncontrados;
     }

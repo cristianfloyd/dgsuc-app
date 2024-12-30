@@ -17,17 +17,28 @@ use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class ListReportes extends ListRecords
 {
-    protected $connection = 'pgsql-mapuche';
+    protected $connection = 'pgsql-liqui';
     protected static string $resource = OrdenDePagoResource::class;
     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
     public bool $reporteGenerado = false;
     protected RepOrdenPagoService $ordenPagoService;
 
+    public function boot(RepOrdenPagoService $ordenPagoService): void
+    {
+        $this->ordenPagoService = $ordenPagoService;
+    }
+
+
+    public function mount(): void
+    {
+        $this->ordenPagoService->ensureTableAndFunction();
+    }
+
     public function getHeader(): \Illuminate\Contracts\View\View|null
     {
         if (!$this->tieneTablaYDatos()) {
-            Log::info('No hay tabla ni datos para mostrar.');
+            Log::info('No hay tabla ni datos para mostrar.', ['connection' => $this->ordenPagoService->getConnectionName()]);
             return null;
         }
 
@@ -45,17 +56,17 @@ class ListReportes extends ListRecords
 
     private function tieneTablaYDatos(): bool
     {
-        if (!Schema::connection($this->connection)->hasTable('suc.rep_orden_pago')) {
-            Log::info('No hay tabla para mostrar.');
+        if (!Schema::connection($this->ordenPagoService->getConnectionName())->hasTable('suc.rep_orden_pago')) {
+            Log::info('No hay tabla para mostrar.', ['connection' => $this->ordenPagoService->getConnectionName()]);
             return false;
         }
 
-        return DB::connection($this->connection)->table('suc.rep_orden_pago')->count() > 0;
+        return DB::connection($this->ordenPagoService->getConnectionName())->table('suc.rep_orden_pago')->count() > 0;
     }
 
     private function calcularTotales(): object
     {
-        return DB::connection($this->connection)->table('suc.rep_orden_pago')
+        return DB::connection($this->ordenPagoService->getConnectionName())->table('suc.rep_orden_pago')
             ->selectRaw('
                 COUNT(*) as cantidad_registros,
                 SUM(bruto) as total_bruto,
@@ -76,10 +87,7 @@ class ListReportes extends ListRecords
         return $repOrdenPagoRecords->toQuery();
     }
 
-    public function boot(RepOrdenPagoService $ordenPagoService): void
-    {
-        $this->ordenPagoService = $ordenPagoService;
-    }
+
 
     #[On('idsLiquiSelected')]
     public function actualizarLiquidacionesSeleccionadas($liquidaciones): void
@@ -106,7 +114,34 @@ class ListReportes extends ListRecords
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-document-currency-dollar')
                 ->url('/reportes/orden-de-pagos/crear')
-                ->color('success')
+                ->color('success'),
+            Action::make('truncateTable')
+                ->label('Limpiar Tabla')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('¿Está seguro de limpiar la tabla?')
+                ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
+                ->modalSubmitActionLabel('Sí, limpiar tabla')
+                ->modalCancelActionLabel('No, cancelar')
+                ->action(function() {
+                    try {
+                        $this->ordenPagoService->truncateTable();
+
+                        Notification::make()
+                            ->title('Tabla limpiada exitosamente')
+                            ->success()
+                            ->send();
+
+                        $this->refresh();
+                    } catch (Exception $e) {
+                        Notification::make()
+                            ->title('Error al limpiar la tabla')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
 
         ];
     }

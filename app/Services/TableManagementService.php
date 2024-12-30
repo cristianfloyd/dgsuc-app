@@ -5,6 +5,7 @@ namespace App\Services;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,8 +13,18 @@ use App\Contracts\TableManagementServiceInterface;
 
 class TableManagementService implements TableManagementServiceInterface
 {
+    use MapucheConnectionTrait;
+    private static $connectionInstance = null;
     private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
 
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
+    }
 
     /**
      * Verifica y prepara una tabla de base de datos.
@@ -26,8 +37,9 @@ class TableManagementService implements TableManagementServiceInterface
      */
     public static function verifyAndPrepareTable(string $tableName, string $connection = null): array
     {
+        $dbconnection = static::getMapucheConnection();
         try {
-            $connection = $connection ?: self::DEFAULT_CONNECTION;
+            $connection = $connection ?: $dbconnection;
             $schema = self::getSchemaConnection($connection);
             $db = self::getDbConnection($connection);
 

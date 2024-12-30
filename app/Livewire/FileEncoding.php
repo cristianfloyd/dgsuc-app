@@ -5,10 +5,13 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Storage;
 
 class FileEncoding extends Component
 {
+    use MapucheConnectionTrait;
+
     public $files;
     public $selectedFile;
     public $fileEncoding;
@@ -27,7 +30,7 @@ class FileEncoding extends Component
      */
     public function updatedSelectedFile($value): void
     {
-        $file = UploadedFile::findOrFail($value);
+        $file = UploadedFile::query()->findOrFail($value);
         $this->fileEncoding = $this->detectEncoding(Storage::path("/public/{$file->file_path}"));
     }
     /**
@@ -45,7 +48,7 @@ class FileEncoding extends Component
 
     public function getDataBaseEncoding(): void
     {
-        $result = DB::connection('pgsql-mapuche')
+        $result = DB::connection($this->getConnectionName())
                     ->select("SHOW server_encoding");
         $this->databaseEncoding = $result[0]->server_encoding;
     }

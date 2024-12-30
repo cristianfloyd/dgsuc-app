@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Personal extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
+
     protected $table = 'mapuche.dh01';
     protected $primaryKey = 'nro_legaj';
     public $incrementing = false;
@@ -38,22 +40,4 @@ class Personal extends Model
         'pcia_nacim',
         'pais_nacim'
     ];
-
-    /**
-     * Defina la relacion con la tabla pais (dha3).
-     */
-    // public function country()
-    // {
-    //     return $this->belongsTo(Dha3::class, 'pais_nacim', 'codigo_pais');
-    // }
-
-    /**
-     * Define la relacion con la tabla (dha5).
-     */
-    // public function province()
-    // {
-    //     return $this->belongsTo(Dha5::class, 'pcia_nacim', 'codigo_pcia');
-    // }
-
-
 }

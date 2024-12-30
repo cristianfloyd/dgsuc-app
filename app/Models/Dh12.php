@@ -19,8 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Dh12 extends Model
 {
     use MapucheConnectionTrait;
-    // use MapucheLiquiConnectionTrait;
     use CharacterEncodingTrait;
+
+    private static $connectionInstance = null;
 
     /**
      * La tabla asociada con el modelo.
@@ -82,9 +83,10 @@ class Dh12 extends Model
     protected static function boot()
     {
         parent::boot();
+        $connection = static::getMapucheConnection();
 
         // Configuramos la sesión para manejar correctamente los caracteres
-        DB::connection('pgsql-mapuche')->statement("SET client_encoding TO 'SQL_ASCII'");
+        $connection->statement("SET client_encoding TO 'SQL_ASCII'");
 
         static::retrieved(function ($model) {
             // Al recuperar datos, convertimos de ISO-8859-1 a UTF-8
@@ -103,6 +105,15 @@ class Dh12 extends Model
                 );
             }
         });
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 
     public function perteneceAGrupo(ConceptoGrupo $grupo): bool
@@ -161,7 +172,8 @@ class Dh12 extends Model
     public static function diagnosticarCodificacion($codn_conce)
     {
         // Usamos la conexión específica
-        $connection = DB::connection('pgsql-mapuche');
+        $connection = static::getMapucheConnection();
+        
         $connection->statement("SET client_encoding TO 'SQL_ASCII'");
 
         $resultado = $connection->select("

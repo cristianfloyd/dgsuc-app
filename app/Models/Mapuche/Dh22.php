@@ -3,6 +3,7 @@
 namespace App\Models\Mapuche;
 
 use Illuminate\Support\Carbon;
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
@@ -75,6 +76,12 @@ class Dh22 extends Model
         'per_limes' => 'integer',
     ];
 
+    /**
+     * Campos que requieren conversión de codificación
+     */
+    protected $encodedFields = [
+        'desc_liqui',
+    ];
 
 
     /**
@@ -190,7 +197,22 @@ class Dh22 extends Model
         return static::where('nro_liqui', $nroLiqui)->exists();
     }
 
+    /* ################################ ACCESORES Y MUTADORES ################################ */
+    /**
+     * Mutador para convertir desc_liqui a UTF-8 al obtener el valor
+     */
+    public function getDescLiquiAttribute($value)
+    {
+        return EncodingService::toUtf8(trim($value));
+    }
 
+    /**
+     * Mutador para convertir desc_liqui a Latin1 antes de guardar
+     */
+    public function setDescLiquiAttribute($value)
+    {
+        $this->attributes['desc_liqui'] = EncodingService::toLatin1($value);
+    }
 
     /**
      * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
@@ -220,7 +242,7 @@ class Dh22 extends Model
         );
     }
 
-// ########################################################################################
+// ########################## SCOPES ###############################################
     public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('dh21.nro_liqui', $nroLiqui);

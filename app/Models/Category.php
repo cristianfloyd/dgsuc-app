@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Category extends Model
 {
-    use HasFactory;
-    protected $connection ='pgsql-mapuche';
+    use HasFactory, MapucheConnectionTrait;
+
     protected $table = 'categories';
 
     protected $fillable = [

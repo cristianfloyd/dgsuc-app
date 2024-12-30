@@ -4,13 +4,14 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShowCuilDetails extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
 
     public $cuilsNotInAfip;
     public $failedCuils = [];
@@ -36,7 +37,7 @@ class ShowCuilDetails extends Component
             try {
                 $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?)';
                 $params = [$this->nroLiqui, $this->periodoFiscal, $cuil];
-                $result = DB::connection('pgsql-mapuche')->select($query, $params);
+                $result = DB::connection($this->getConnectionName())->select($query, $params);
 
                 if (empty($result)) {
                     $this->failedCuils[] = $cuil;

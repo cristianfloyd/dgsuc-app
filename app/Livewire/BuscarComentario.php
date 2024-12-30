@@ -3,15 +3,17 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 
 use function PHPUnit\Framework\isEmpty;
 
 class BuscarComentario extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
+
     #[Url('descripcion')]
     public $description='';
     // public $filter=['columns', 'tables', 'both'];
@@ -30,7 +32,7 @@ class BuscarComentario extends Component
         $tableComments = [];
         if(!empty($this->description)) {
 
-            $columnComments = DB::connection('pgsql-mapuche')
+            $columnComments = DB::connection($this->getConnectionName())
             ->table('information_schema.columns as cols')
             ->join('pg_catalog.pg_class as c', 'c.relname', '=', 'cols.table_name')
             ->join('pg_catalog.pg_namespace as name', function ($join) {
@@ -55,7 +57,7 @@ class BuscarComentario extends Component
                 ])
                 ;
 
-            $tableComments = DB::connection('pgsql-mapuche')
+            $tableComments = DB::connection($this->getConnectionName())
                 ->table('pg_catalog.pg_class as c')
                 ->join('pg_catalog.pg_namespace as n', 'n.oid', '=', 'c.relnamespace')
                 ->select(

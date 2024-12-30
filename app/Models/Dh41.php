@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Models\Mapuche\Dh22;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dh41 extends Model
 {
-	use HasFactory;
-	protected $connection = 'pgsql-mapuche';
+	use HasFactory, MapucheConnectionTrait;
 	protected $table = 'dh41';
 	protected $keyType = 'integer';
 	protected $primaryKey = 'nro_legaj';

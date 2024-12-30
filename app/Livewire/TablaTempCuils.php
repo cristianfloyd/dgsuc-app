@@ -4,16 +4,20 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Services\WorkflowService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
-use App\Services\WorkflowService;
 
 class TablaTempCuils extends Component
 {
+    use MapucheConnectionTrait;
+
+
     public $cuils = [];
     public $selectedCuil = null;
     public $cuilsNotInAfipLoaded;
@@ -193,7 +197,7 @@ class TablaTempCuils extends Component
     public function verificarExistenciaTabla(): bool
     {
         $tableName = 'suc.tabla_temp_cuils';
-        $exists = Schema::connection('pgsql-mapuche')->hasTable($tableName);
+        $exists = Schema::connection($this->getConnectionName())->hasTable($tableName);
         Log::info("Verificación de existencia de tabla $tableName: " . ($exists ? 'Existe' : 'No existe'));
         return $exists;
     }
@@ -207,7 +211,7 @@ class TablaTempCuils extends Component
     public function crearTablaSiNoExiste(): bool
     {
         if (!$this->verificarExistenciaTabla()) {
-            Schema::connection('pgsql-mapuche')->create('suc.tabla_temp_cuils', function (Blueprint $table) {
+            Schema::connection($this->getConnectionName())->create('suc.tabla_temp_cuils', function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->string('cuil', 11);
             });
@@ -226,9 +230,9 @@ class TablaTempCuils extends Component
     public function borrarDatosSiExisten(): bool
     {
         if ($this->verificarExistenciaTabla()) {
-            $count = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils')->count();
+            $count = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils')->count();
             if ($count > 0) {
-                DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils')->truncate();
+                DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils')->truncate();
                 Log::info("Se borraron $count registros de la tabla suc.tabla_temp_cuils");
                 return true;
             }

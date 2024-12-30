@@ -8,8 +8,8 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\Reportes\RepOrdenPagoModel;
-use App\Repositories\RepOrdenPagoRepository;
 use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 /**
  * Proporciona una capa de servicio para administrar registros de RepOrdenPago.
@@ -29,7 +29,7 @@ class RepOrdenPagoService
     /**
      * Crear una nueva instancia
      */
-    public function __construct(protected RepOrdenPagoRepository $repository)
+    public function __construct(protected RepOrdenPagoRepositoryInterface $repository)
     {
     }
 
@@ -248,5 +248,23 @@ GROUP BY h22.nro_liqui, banco, h21.codn_funci, h21.codn_fuent, h21.codc_uacad, c
 ORDER BY h22.nro_liqui, banco DESC, h21.codn_funci, h21.codn_fuent, h21.codc_uacad, caracter, h21.codn_progr;
 END;
 $$ LANGUAGE plpgsql;";
+    }
+
+    /**
+     * Trunca la tabla rep_orden_pago
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function truncateTable(): bool
+    {
+        try {
+            $result = $this->repository->truncate();
+            Log::info('Tabla suc.rep_orden_pago truncada exitosamente');
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Error al truncar tabla suc.rep_orden_pago: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

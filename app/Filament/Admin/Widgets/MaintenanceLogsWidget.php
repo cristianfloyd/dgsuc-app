@@ -4,9 +4,11 @@ namespace App\Filament\Admin\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 
 class MaintenanceLogsWidget extends Widget
 {
+    use MapucheConnectionTrait;
     protected static string $view = 'filament.widgets.maintenance-logs-widget';
     protected static bool $isLazy = true;
     protected static ?int $sort = 5;
@@ -23,7 +25,7 @@ class MaintenanceLogsWidget extends Widget
 
     private function getProcesosPendientes(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT pid,
                        query,
@@ -38,7 +40,7 @@ class MaintenanceLogsWidget extends Widget
 
     private function getEstadoBackups(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     1 as ultimo_backup,
@@ -52,7 +54,7 @@ class MaintenanceLogsWidget extends Widget
 
     private function getEstadoIndices(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     schemaname,
@@ -67,7 +69,7 @@ class MaintenanceLogsWidget extends Widget
 
     private function getVacuumStatus(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     relname,

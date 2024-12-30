@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\CuilCompareService;
 use Illuminate\Support\Facades\Event;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\QueryException;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -17,6 +18,9 @@ use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class WorkflowExecutionService implements WorkflowExecutionInterface
 {
+    use MapucheConnectionTrait;
+
+
     //constantes
     private const int PER_PAGE = 10;
     private const string IN_PROGRESS = 'in_progress';
@@ -235,7 +239,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
      */
     public function cuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
 
         return $cuilsNoEncontrados;
     }

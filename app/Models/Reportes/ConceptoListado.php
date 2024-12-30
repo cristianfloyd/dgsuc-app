@@ -15,7 +15,7 @@ use Illuminate\Database\Schema\Blueprint;
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
-
+    private static $connectionInstance = null;
 
     protected $table = 'suc.rep_concepto_listado';
     protected $primaryKey = 'id';
@@ -50,15 +50,26 @@ class ConceptoListado extends Model
         };
     }
 
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
+    }
+
+
     /**
      * Crea la tabla si no existe
      * @return bool
      */
     public static function createTableIfNotExists(): bool
     {
+        $connection = static::getMapucheConnection();
         try {
-            if (!Schema::connection('pgsql-mapuche')->hasTable('suc.rep_concepto_listado')) {
-                Schema::connection('pgsql-mapuche')->create('suc.rep_concepto_listado', function (Blueprint $table) {
+            if (!Schema::connection($connection->getName())->hasTable('suc.rep_concepto_listado')) {
+                Schema::connection($connection->getName())->create('suc.rep_concepto_listado', function (Blueprint $table) {
                     $table->id();
                     $table->string('nro_liqui')->nullable();
                     $table->string('desc_liqui')->nullable();
@@ -94,7 +105,7 @@ class ConceptoListado extends Model
     public static function truncateTable(): void
     {
         try {
-            DB::connection('pgsql-mapuche')
+            static::getMapucheConnection()
                 ->statement('TRUNCATE TABLE suc.rep_concepto_listado RESTART IDENTITY CASCADE');
             Cache::tags(['rep_concepto_listado'])->flush();
         } catch (\Exception $e) {

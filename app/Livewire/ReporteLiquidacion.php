@@ -3,13 +3,14 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
-use Livewire\WithPagination;
+use App\Traits\MapucheConnectionTrait;
 
 class ReporteLiquidacion extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
 
     public $legajo;
     public $perPage=5;
@@ -27,7 +28,7 @@ class ReporteLiquidacion extends Component
     #[Computed(persist: true)]
     public function generarReporte()
     {
-        $query = DB::connection('pgsql-mapuche')->table('mapuche.dh01 as d')
+        $query = DB::connection($this->getConnectionName())->table('mapuche.dh01 as d')
             ->join('mapuche.dh03 as d2', 'd.nro_legaj', '=', 'd2.nro_legaj')
             ->join('mapuche.dhc9 as d8', 'd2.codc_agrup', '=', 'd8.codagrup')
             ->join('mapuche.dh11 as d4', 'd2.codc_categ', '=', 'd4.codc_categ')

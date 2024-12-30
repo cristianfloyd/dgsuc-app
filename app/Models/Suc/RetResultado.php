@@ -4,14 +4,15 @@ namespace App\Models\Suc;
 
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RetResultado extends Model
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
 
-    protected $connection = 'pgsql-mapuche';
+    protected $connection = $this->getConnectionName();
 
     /**
      * La tabla asociada con el modelo.

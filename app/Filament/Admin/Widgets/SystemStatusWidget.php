@@ -4,9 +4,11 @@ namespace App\Filament\Admin\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 
 class SystemStatusWidget extends Widget
 {
+    use MapucheConnectionTrait;
     protected static string $view = 'filament.widgets.system-status-widget';
     protected static bool $isLazy = true;
     protected static ?int $sort = 3;
@@ -25,7 +27,7 @@ class SystemStatusWidget extends Widget
 
     private function getDatabaseConnections(): array
     {
-        $connections = DB::connection('pgsql-mapuche')
+        $connections = DB::connection($this->getConnectionName())
             ->select("
                 SELECT count(*) as total_connections
                 FROM pg_stat_activity
@@ -40,7 +42,7 @@ class SystemStatusWidget extends Widget
 
     private function getPerformanceMetrics(): array
     {
-        $data = DB::connection('pgsql-mapuche')
+        $data = DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     blks_hit::float/(blks_hit+blks_read) as cache_hit_ratio,
@@ -61,7 +63,7 @@ class SystemStatusWidget extends Widget
 
     private function getDatabaseSpace(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     pg_database_size(current_database()) as db_size,
@@ -76,7 +78,7 @@ class SystemStatusWidget extends Widget
 
     private function getActivityMetrics(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     state,
@@ -90,7 +92,7 @@ class SystemStatusWidget extends Widget
 
     private function getMaxConnections(): int
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("SHOW max_connections")[0]->max_connections;
     }
 }

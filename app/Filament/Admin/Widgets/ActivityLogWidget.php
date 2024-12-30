@@ -4,9 +4,11 @@ namespace App\Filament\Admin\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 
 class ActivityLogWidget extends Widget
 {
+    use MapucheConnectionTrait;
     protected static string $view = 'filament.widgets.activity-log-widget';
     protected static bool $isLazy = true;
     protected static ?int $sort = 4;
@@ -22,7 +24,7 @@ class ActivityLogWidget extends Widget
 
     private function getActiveUsers(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     usename as usuario,
@@ -38,7 +40,7 @@ class ActivityLogWidget extends Widget
 
     private function getLastActions(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     schemaname,
@@ -55,7 +57,7 @@ class ActivityLogWidget extends Widget
 
     private function getStatistics(): array
     {
-        return DB::connection('pgsql-mapuche')
+        return DB::connection($this->getConnectionName())
             ->select("
                 SELECT
                     relname as tabla,

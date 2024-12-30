@@ -2,12 +2,16 @@
 
 namespace App\Repositories;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Reportes\RepOrdenPagoModel;
 use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
+
+    public function __construct(protected RepOrdenPagoModel $model)
+    {}
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.
      *
@@ -97,5 +101,28 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     public function delete(RepOrdenPagoModel $repOrdenPago): bool
     {
         return $repOrdenPago->delete();
+    }
+
+    /**
+     * Trunca la tabla rep_orden_pago
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function truncate(): bool
+    {
+        try {
+            DB::connection($this->model->getConnectionName())->beginTransaction();
+
+            $result = DB::connection($this->model->getConnectionName())
+                ->statement('TRUNCATE TABLE suc.rep_orden_pago RESTART IDENTITY CASCADE');
+
+            DB::connection($this->model->getConnectionName())->commit();
+
+            return $result;
+        } catch (\Exception $e) {
+            DB::connection($this->model->getConnectionName())->rollBack();
+            throw $e;
+        }
     }
 }

@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
 
 
 class AfipImportacionCrudaModel extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
     protected $table = 'suc.afip_importacion_cruda';
     public $timestamps = false;
     protected $fillable = ['linea_completa'];

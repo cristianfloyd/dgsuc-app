@@ -3,14 +3,15 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use Livewire\Attributes\Url;
 
 class MapucheSicossTable extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
 
     #[Url(as: 's')]
     public $search = '';
@@ -38,7 +39,7 @@ class MapucheSicossTable extends Component
         $data = $query->paginate($this->perPage);
 
         // Obtener los nombres de las columnas
-        $columns = Schema::connection('pgsql-mapuche')->getColumnListing('suc.afip_mapuche_sicoss');
+        $columns = Schema::connection($this->getConnectionName())->getColumnListing('suc.afip_mapuche_sicoss');
 
         // Convertir los datos a un array de manera segura
         $dataArray = $data->map(function ($item) use ($columns) {

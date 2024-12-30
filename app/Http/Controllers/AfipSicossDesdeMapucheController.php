@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\afipImportacionCrudaModel;
 use Illuminate\Http\Request;
-use App\Models\AfipSicossDesdeMapuche;
 use Illuminate\Support\Facades\DB;
+use App\Models\AfipSicossDesdeMapuche;
+use App\Traits\MapucheConnectionTrait;
+use App\Models\afipImportacionCrudaModel;
 
 class AfipSicossDesdeMapucheController extends Controller
 {
+    use MapucheConnectionTrait;
+
     public function index()
     {
-        $registros = DB::connection('pgsql-mapuche')->table('afip_sicoss_desde_mapuche')->get();
+        $registros = DB::connection($this->getConnectionName())->table('afip_sicoss_desde_mapuche')->get();
         return view('afip-sicoss-mapuche.index', compact('registros'));
     }
 

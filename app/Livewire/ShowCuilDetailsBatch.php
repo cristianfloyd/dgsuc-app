@@ -7,11 +7,12 @@ use Livewire\WithPagination;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShowCuilDetailsBatch extends Component
 {
-    use WithPagination;
+    use WithPagination, MapucheConnectionTrait;
 
     public $cuilsNotInAfip;
     public $failedCuils = [];
@@ -44,7 +45,7 @@ class ShowCuilDetailsBatch extends Component
     $params = [$this->nroLiqui, $this->periodoFiscal, implode(',', $remainingCuils)];
 
     try {
-        $results = DB::connection('pgsql-mapuche')->select($query, $params);
+        $results = DB::connection($this->getConnectionName())->select($query, $params);
 
         foreach ($results as $result) {
             $this->allResults->push($result);

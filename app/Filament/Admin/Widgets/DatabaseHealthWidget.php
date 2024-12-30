@@ -5,13 +5,14 @@ namespace App\Filament\Admin\Widgets;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Traits\MapucheConnectionTrait;
 
 class DatabaseHealthWidget extends Widget
 {
+    use MapucheConnectionTrait;
     protected static string $view = 'filament.widgets.database-health-widget';
     protected static ?int $sort = 2;
     protected static bool $isLazy = true;
-    protected string $connection = 'pgsql-mapuche';
 
 
     // Actualizamos cada 5 minutos
@@ -32,7 +33,7 @@ class DatabaseHealthWidget extends Widget
     private function getDatabaseSize(): array
     {
         $dbName = 'desa';
-        $size = DB::connection($this->connection)->select("
+        $size = DB::connection($this->getConnectionName())->select("
             SELECT schema_name,
                 pg_size_pretty(sum(table_size)::bigint) as formatted_size,
                 round(sum(table_size)/1024/1024,2) as size_in_mb
@@ -55,7 +56,7 @@ class DatabaseHealthWidget extends Widget
 
     private function getMainTablesInfo(): array
     {
-        return DB::connection($this->connection)->select("
+        return DB::connection($this->getConnectionName())->select("
             SELECT relname                                                                 AS nombre,
                 PG_SIZE_PRETTY(PG_TOTAL_RELATION_SIZE(schemaname || '.' || relname::TEXT)) AS total_size,
                 PG_SIZE_PRETTY(PG_RELATION_SIZE(schemaname || '.' || relname::TEXT))       AS table_size,
@@ -73,7 +74,7 @@ class DatabaseHealthWidget extends Widget
     {
         try {
             $start = microtime(true);
-            DB::connection($this->connection)->getPdo();
+            DB::connection($this->getConnectionName)->getPdo();
             $time = round((microtime(true) - $start) * 1000, 2);
 
             return [
@@ -93,7 +94,7 @@ class DatabaseHealthWidget extends Widget
     private function getSlowQueries(): array
     {
         // Implementar según la configuración de slow_query_log de MySQL
-        return DB::connection($this->connection)->select("
+        return DB::connection($this->getConnectionName())->select("
             SELECT
                 pid,
                 usename as usuario,

@@ -26,8 +26,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Dh13 extends Model
 {
     use MapucheConnectionTrait;
-    // use MapucheLiquiConnectionTrait;
+    private static $connectionInstance = null;
 
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
+    }
 
     /**
      * La tabla asociada con el modelo.
@@ -226,7 +234,7 @@ class Dh13 extends Model
 
     public static function diagnosticarCodificacionConConcepto($codn_conce = 520)
     {
-        $connection = DB::connection('pgsql-mapuche');
+        $connection = static::getConnectionFromTrait();
         $connection->statement("SET client_encoding TO 'SQL_ASCII'");
 
         $registro = self::with('dh12')

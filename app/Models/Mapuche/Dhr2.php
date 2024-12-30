@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,12 +18,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dhr2 extends Model
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
 
     /**
      * Conexión y configuración de tabla
      */
-    protected $connection = 'pgsql-mapuche';
+    protected $connection = $this->getConnectionName();
     protected $table = 'mapuche.dhr2';
     public $timestamps = false;
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];

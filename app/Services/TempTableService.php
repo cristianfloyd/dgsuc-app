@@ -5,10 +5,14 @@ namespace App\Services;
 use App\Models\TablaTempCuils;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 
 class TempTableService extends DatabaseService
 {
+    use MapucheConnectionTrait;
+
+
     protected $tempTableName = 'tabla_temp_cuils';
 
     /**
@@ -23,10 +27,10 @@ class TempTableService extends DatabaseService
     public function populateTempTable(array $cuils): bool
     {
         try {
-            DB::connection('pgsql-mapuche')->beginTransaction();
+            DB::connection($this->getConnectionName())->beginTransaction();
 
             // Verificar si la tabla existe
-            if (!Schema::connection('pgsql-mapuche')->hasTable($this->tempTableName)) {
+            if (!Schema::connection($this->getConnectionName())->hasTable($this->tempTableName)) {
                 // Si no existe, crearla
                 TablaTempCuils::class()->createTable();
             } else {
@@ -36,18 +40,18 @@ class TempTableService extends DatabaseService
 
             // Insertar los nuevos datos
             foreach (array_chunk($cuils, 1000) as $chunk) {
-                DB::connection('pgsql-mapuche')->table($this->tempTableName)->insert(
+                DB::connection($this->getConnectionName())->table($this->tempTableName)->insert(
                     array_map(function ($cuil) {
                         return ['cuil' => $cuil];
                     }, $chunk)
                 );
             }
 
-            DB::connection('pgsql-mapuche')->commit();
+            DB::connection($this->getConnectionName())->commit();
             Log::info('Datos insertados correctamente en la tabla temporal.');
             return true;
         } catch (\Exception $e) {
-            DB::connection('pgsql-mapuche')->rollBack();
+            DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error al insertar datos en la tabla temporal: ' . $e->getMessage());
             return false;
         }
@@ -64,7 +68,7 @@ class TempTableService extends DatabaseService
     {
         try {
 
-            DB::connection('pgsql-mapuche')->table($this->tempTableName)->truncate();
+            DB::connection($this->getConnectionName())->table($this->tempTableName)->truncate();
             Log::info('Tabla temporal limpiada correctamente.');
             return true;
 
@@ -84,6 +88,6 @@ class TempTableService extends DatabaseService
      */
     public function getTempTableCount(): int
     {
-        return DB::connection('pgsql-mapuche')->table($this->tempTableName)->count();
+        return DB::connection($this->getConnectionName())->table($this->tempTableName)->count();
     }
 }

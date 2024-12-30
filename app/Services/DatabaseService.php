@@ -14,15 +14,25 @@ use Illuminate\Database\Eloquent\Collection;
 class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
+    private static $connectionInstance = null;
     private const int DEFAULT_CHUNK_SIZE = 1000;
-    private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
 
+    
     /**
      * Create a new class instance.
      */
     public function __construct()
     {
         //
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 
     /** Inserta datos de manera masiva en la base de datos.
@@ -70,7 +80,7 @@ class DatabaseService implements DatabaseServiceInterface
     public function insertarDatosMasivos2(array $datosMapeados): bool
     {
         $tamanoLote = 1000; // Ajusta este valor según tus necesidades
-        $connection = DB::connection('pgsql-mapuche'); // Conexión a la base de datos específica
+        $connection = static::getConnectionFromTrait(); // Conexión a la base de datos específica
 
         try {
             $connection->beginTransaction(); // Inicia la transacción
