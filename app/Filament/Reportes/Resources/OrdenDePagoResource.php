@@ -60,38 +60,27 @@ class OrdenDePagoResource extends Resource
             ])
             ->bulkActions([
                 //
-            ]);
+            ])
+            ->emptyStateIcon('heroicon-o-document-text')
+            ->emptyStateHeading('No hay reportes generados')
+            ->emptyStateDescription('Para generar un reporte de órdenes de pago sigue estos pasos:
+                1. Haz clic en "Generar Reporte"
+                2. Selecciona las liquidaciones que deseas incluir
+                3. Presiona "Generar OP" para crear el reporte')
+            ->emptyStateActions([
+                //
+            ])
+            ;
     }
 
     public static function getPages(): array
     {
         return [
-            // 'create' => Pages\CreateReporte::route('/create'),
-            //'edit' => Pages\EditReporte::route('/{record}/edit'),
             'index' => Pages\ListReportes::route('/'),
             'reporte' => Pages\ReporteOrdenPago::route('/crear'),
         ];
     }
 
-    public static function getActions(): array
-    {
-        return [
-            Action::make('ordenPagoReporte')
-                ->label('Orden de Pago')
-                ->modalContent(fn() => view('modals.orden-pago-reporte', ['liquidacionId' => 1]))
-                ->modalWidth('7xl'),
-            Action::make('generarReporte')
-                ->label('Generar Reporte')
-                ->action(function () {
-                    // Aquí se llamaría a un servicio que ejecute la función almacenada
-                    if ($this->generarReporte()) {
-                        Notification::make()->title('Reporte generado')->success()->send();
-                    }
-                })
-
-            // Aca agregar otros reportes
-        ];
-    }
 
     public function generarReporte(): bool
     {

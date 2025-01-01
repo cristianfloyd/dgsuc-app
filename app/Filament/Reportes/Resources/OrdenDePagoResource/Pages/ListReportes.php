@@ -6,14 +6,18 @@ use Exception;
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use App\Services\RepOrdenPagoService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use App\Models\Reportes\RepOrdenPagoModel;
+use Filament\Tables\Concerns\HasEmptyState;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
 use App\Filament\Reportes\Resources\OrdenDePagoResource;
+use App\Filament\Reportes\Resources\OrdenDePagoResource\Widgets\OrdenPagoStatsWidget;
 
 class ListReportes extends ListRecords
 {
@@ -33,50 +37,11 @@ class ListReportes extends ListRecords
     public function mount(): void
     {
         $this->ordenPagoService->ensureTableAndFunction();
+        // Verificar si existen registros en la tabla
+        $this->reporteGenerado = RepOrdenPagoModel::whereNotNull('nro_liqui')->exists();
+        parent::mount();
     }
 
-    public function getHeader(): \Illuminate\Contracts\View\View|null
-    {
-        if (!$this->tieneTablaYDatos()) {
-            Log::info('No hay tabla ni datos para mostrar.', ['connection' => $this->ordenPagoService->getConnectionName()]);
-            return null;
-        }
-
-        $totales = $this->calcularTotales();
-
-        return view('filament.pages.reportes.orden-pago-header', [
-            'totalBruto' => money($totales->total_bruto),
-            'totalSueldo' => money($totales->total_sueldo),
-            'totalAportes' => money($totales->total_aportes),
-            'totalDescuentos' => money($totales->total_descuentos),
-            'totalImpGasto' => money($totales->total_imp_gasto),
-            'cantidadRegistros' => $totales->cantidad_registros
-        ]);
-    }
-
-    private function tieneTablaYDatos(): bool
-    {
-        if (!Schema::connection($this->ordenPagoService->getConnectionName())->hasTable('suc.rep_orden_pago')) {
-            Log::info('No hay tabla para mostrar.', ['connection' => $this->ordenPagoService->getConnectionName()]);
-            return false;
-        }
-
-        return DB::connection($this->ordenPagoService->getConnectionName())->table('suc.rep_orden_pago')->count() > 0;
-    }
-
-    private function calcularTotales(): object
-    {
-        return DB::connection($this->ordenPagoService->getConnectionName())->table('suc.rep_orden_pago')
-            ->selectRaw('
-                COUNT(*) as cantidad_registros,
-                SUM(bruto) as total_bruto,
-                SUM(sueldo) as total_sueldo,
-                SUM(aportes) as total_aportes,
-                SUM(descuentos) as total_descuentos,
-                SUM(imp_gasto) as total_imp_gasto
-            ')
-            ->first();
-    }
 
     public static function getEloquentQuery()
     {
@@ -110,20 +75,24 @@ class ListReportes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('verOP')
+                ->label('Ver OP')
+                ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
+                ->visible(fn() => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-document-currency-dollar')
                 ->url('/reportes/orden-de-pagos/crear')
                 ->color('success'),
-            Action::make('truncateTable')
+            Action::make('truncate')
                 ->label('Limpiar Tabla')
-                ->icon('heroicon-o-trash')
                 ->color('danger')
+                ->icon('heroicon-o-trash')
                 ->requiresConfirmation()
                 ->modalHeading('¿Está seguro de limpiar la tabla?')
                 ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
                 ->modalSubmitActionLabel('Sí, limpiar tabla')
-                ->modalCancelActionLabel('No, cancelar')
+                // ->modalCancelActionLabel('No, cancelar')
                 ->action(function() {
                     try {
                         $this->ordenPagoService->truncateTable();
@@ -179,11 +148,10 @@ class ListReportes extends ListRecords
         return $data;
     }
 
-    protected function getHeaderWidgets(): array
+    public function getHeaderWidgets(): array
     {
         return [
-            //MultipleIdLiquiSelector::class,
+            OrdenPagoStatsWidget::class,
         ];
     }
-
 }

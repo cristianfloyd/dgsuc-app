@@ -10,6 +10,7 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\RepOrdenPagoService;
+use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Notifications\Notification;
@@ -29,18 +30,31 @@ class ReporteOrdenPago extends Page implements HasTable
     protected Table $table;
 
     public bool $reporteGenerado = false;
+    public ?array $idLiquiSelected = null;
     protected RepOrdenPagoService $ordenPagoService;
 
-    public function mount(RepOrdenPagoService $ordenPagoService)
+    public function boot(RepOrdenPagoService $ordenPagoService)
     {
         $this->ordenPagoService = $ordenPagoService;
         $this->ordenPagoService->ensureTableAndFunction();
-        // Limpiar la session anterior
-        session()->forget('idsLiquiSelected');
-        // Inicializar estado
-        $this->reporteGenerado = false;
+
 
         Log::info('ReporteOrdenPago: Se ha inicializado la página');
+    }
+
+    public function mount()
+    {
+        Log::info('ReporteOrdenPago: Se ha montado la página');
+        // Limpiar la session anterior
+        session()->forget('idsLiquiSelected');
+
+        // Verificar si existen registros en la tabla
+        $this->reporteGenerado = RepOrdenPagoModel::whereNotNull('nro_liqui')->exists();
+
+        Log::debug('Estado inicial del reporte', [
+            'reporteGenerado' => $this->reporteGenerado
+    ]);
+
     }
 
     public function table(Table $table): Table
@@ -89,14 +103,33 @@ class ReporteOrdenPago extends Page implements HasTable
                     if ($this->generarReporte()) {
                         Notification::make()->title('Reporte generado')->success()->send();
                     }
-                })
+                }),
+            Action::make('limpiar')
+                ->label('Limpiar')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('¿Está seguro de limpiar la tabla?')
+                ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
+                ->modalSubmitActionLabel('Sí, limpiar tabla')
+                ->action(function () {
+                    $this->limpiar();
+                }),
         ];
+    }
+
+    public function limpiar()
+    {
+        $this->reporteGenerado = false;
+        session()->forget('idsLiquiSelected');
+        $this->ordenPagoService->truncateTable();
     }
 
     #[On('idsLiquiSelected')]
     public function actualizarLiquidacionesSeleccionadas($liquidaciones): void
     {
         session(['idsLiquiSelected' => $liquidaciones]);
+        $this->idLiquiSelected = $liquidaciones;
         Log::debug("Liquidaciones seleccionadas guardadas en sesión", ['liquidaciones' => $liquidaciones]);
     }
 
