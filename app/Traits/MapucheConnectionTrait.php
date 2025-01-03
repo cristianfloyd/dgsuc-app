@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
@@ -19,7 +20,7 @@ trait MapucheConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
+        return 'pgsql-desa'; // Esto se refiere al nombre de la conexión en config/database.php
     }
 
 
@@ -38,7 +39,7 @@ trait MapucheConnectionTrait
      *
      * @return string
      */
-    public function getTable(): string
+    public function getTable(Model|string $table = null): string
     {
         $table = parent::getTable();
         // Si ya tiene en esquema definido, retornamos tal cual

@@ -3,8 +3,12 @@
 namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Dh03;
+use App\Services\EncodingService;
+use Illuminate\Support\Facades\DB;
+use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -39,6 +43,35 @@ class Dh36 extends Model
         'cod_ubic_geografica_sirhu',
     ];
 
+    protected $casts = [
+        'descdependesemp' => 'string'
+    ];
+
+    protected array $encodedFields = [
+        'descdependesemp'
+    ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Establecer codificación SQL_ASCII para la conexión
+        DB::statement("SET client_encoding TO 'SQL_ASCII'");
+
+        static::retrieved(function ($model) {
+            if(isset($model->descdependesemp)) {
+                $model->descdependesemp = EncodingService::toUtf8($model->descdependesemp);
+            }
+        });
+    }
+
+    public function scopeWithoutEncoding($query)
+    {
+        return $query->whereRaw("encode(descdependesemp::bytea, 'escape') IS NOT NULL");
+    }
+
+
+
     /**
      * Relación con el modelo Dhe4 (organismo).
      */
@@ -63,5 +96,14 @@ class Dh36 extends Model
     public function dhe4(): BelongsTo
     {
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
+    }
+
+    /* ################### ACCESSORS Y MUTATORS ################### */
+    protected function descdependesemp(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => EncodingService::toUtf8($value),
+            set: fn (string $value) => EncodingService::toLatin1($value)
+        );
     }
 }

@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets;
+
+use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+
+class RepGerencialFinalStats extends BaseWidget
+{
+    use MapucheConnectionTrait;
+
+    protected static ?string $pollingInterval = null;
+    protected int | string | array $columnSpan = 'full';
+
+    protected function getStats(): array
+    {
+        $connection = $this->getConnectionName();
+        $liquidaciones = session('idsLiquiSelected', []);
+
+        if (empty($liquidaciones)) {
+            return $this->getEmptyStats();
+        }
+
+        $totales = DB::connection($connection)
+            ->table('suc.rep_ger_importes_netos')
+            ->whereIn('nro_liqui', $liquidaciones)
+            ->selectRaw('
+                COUNT(DISTINCT nro_legaj) as total_agentes,
+                SUM(imp_bruto) as total_bruto,
+                SUM(imp_neto) as total_neto,
+                SUM(imp_dctos) as total_descuentos,
+                SUM(imp_aport) as total_aportes
+            ')
+            ->first();
+
+        return [
+            Stat::make('Total Agentes', number_format($totales->total_agentes))
+                ->description('Cantidad de agentes en la liquidación')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('primary'),
+
+            Stat::make('Total Bruto', '$ ' . number_format($totales->total_bruto, 2, ',', '.'))
+                ->description('Importe bruto total')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->color('success'),
+
+            Stat::make('Total Neto', '$ ' . number_format($totales->total_neto, 2, ',', '.'))
+                ->description('Importe neto total')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->color('success'),
+
+            Stat::make('Total Descuentos', '$ ' . number_format($totales->total_descuentos, 2, ',', '.'))
+                ->description('Total de descuentos')
+                ->descriptionIcon('heroicon-m-minus-circle')
+                ->color('danger'),
+
+            Stat::make('Total Aportes', '$ ' . number_format($totales->total_aportes, 2, ',', '.'))
+                ->description('Total de aportes patronales')
+                ->descriptionIcon('heroicon-m-building-library')
+                ->color('warning'),
+        ];
+    }
+
+    private function getEmptyStats(): array
+    {
+        return [
+            Stat::make('Total Agentes', '0')
+                ->description('Seleccione liquidaciones para ver estadísticas')
+                ->descriptionIcon('heroicon-m-information-circle')
+                ->color('gray'),
+        ];
+    }
+}
