@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Liquidaciones\Resources\Dh21Resource\Pages;
 
 use Filament\Forms\Get;

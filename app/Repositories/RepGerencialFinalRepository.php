@@ -5,7 +5,7 @@ namespace App\Repositories;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Reportes\RepGerencialFinal;
-use App\Contracts\Repositories\RepGerencialFinalRepositoryInterface;
+use App\Contracts\Mapuche\Repositories\RepGerencialFinalRepositoryInterface;
 
 class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterface
 {

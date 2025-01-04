@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Data;
+namespace App\Data\Mapuche;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Numeric;

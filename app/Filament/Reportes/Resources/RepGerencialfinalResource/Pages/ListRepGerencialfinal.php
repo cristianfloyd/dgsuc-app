@@ -5,6 +5,7 @@ namespace App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
 use Exception;
 use Filament\Actions;
 use Livewire\Attributes\On;
+use App\Models\Mapuche\Dh22;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\Catalogo\Dh30;
@@ -13,16 +14,18 @@ use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use App\Filament\Widgets\IdLiquiSelector;
 use Filament\Resources\Pages\ListRecords;
 use App\Models\Reportes\RepGerencialFinal;
 use App\Services\RepGerencialFinalService;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
 use App\Filament\Reportes\Resources\RepGerencialfinalResource;
+use App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets\RepGerencialFinalStats;
 
 class ListRepGerencialfinal extends ListRecords
 {
     protected static string $resource = RepGerencialfinalResource::class;
-    public ?array $idLiquiSelected = null;
+    public ?array $idLiquiSelected = [];
     public ?bool $reporteGenerado = false;
     public array $reportFilters = [];
     protected RepGerencialFinalService $repGerencialFinalService;
@@ -67,10 +70,16 @@ class ListRepGerencialfinal extends ListRecords
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-arrow-path')
                 ->form([
-                    // Filtro periodo actual
-                    Toggle::make('periodo_actual')
-                        ->label('Periodo Actual')
-                        ->default(true),
+                    // Selector de Liquidaciones
+                    Select::make('liquidaciones')
+                    ->label('Liquidaciones')
+                    ->multiple()
+                    ->required()
+                    ->options(fn() => Dh22::getLiquidacionesForWidget()
+                        ->pluck('desc_liqui', 'nro_liqui'))
+                    ->searchable()
+                    ->preload()
+                    ->live(),
 
                     // Filtro regional
                     Select::make('codc_regio')
@@ -99,7 +108,7 @@ class ListRepGerencialfinal extends ListRecords
                     Select::make('codc_carac')
                         ->label('Carácter')
                         ->options(fn() => Dh30::where('nro_tabla', 3)
-                            ->pluck('desc_item', 'desc_abrev'))
+                            ->pluck('desc_item',  'desc_abrev'))
                         ->searchable(),
 
                     // Filtro legajo
@@ -116,6 +125,7 @@ class ListRepGerencialfinal extends ListRecords
                 ])
                 ->action(function(array $data) {
                     $this->reportFilters = $data;
+                    $this->idLiquiSelected = $data['liquidaciones'];
                     $this->generateReport();
                 }),
             Action::make('clear')
@@ -147,7 +157,7 @@ class ListRepGerencialfinal extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            MultipleIdLiquiSelector::class
+            RepGerencialFinalStats::class,
         ];
     }
 
@@ -188,7 +198,8 @@ class ListRepGerencialfinal extends ListRecords
     protected function generateReport(): void
     {
         try {
-            $selectedLiquidaciones = session('idsLiquiSelected', []);
+            $selectedLiquidaciones = $this->idLiquiSelected;
+            
 
             if (empty($selectedLiquidaciones)) {
                 Notification::make()
@@ -198,7 +209,7 @@ class ListRepGerencialfinal extends ListRecords
                 return;
             }
 
-            $this->repGerFinalService->processReport(
+            $this->repGerencialFinalService->processReport(
                 $selectedLiquidaciones,
                 $this->reportFilters
             );

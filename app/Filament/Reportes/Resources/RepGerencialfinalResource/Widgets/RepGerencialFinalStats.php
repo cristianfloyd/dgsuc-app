@@ -4,6 +4,7 @@ namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets;
 
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Schema;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 
@@ -24,9 +25,10 @@ class RepGerencialFinalStats extends BaseWidget
         }
 
         $totales = DB::connection($connection)
-            ->table('suc.rep_ger_importes_netos')
+            ->table('suc.rep_ger_final')
             ->whereIn('nro_liqui', $liquidaciones)
             ->selectRaw('
+                COUNT(DISTINCT nro_liqui) as total_liquidaciones,
                 COUNT(DISTINCT nro_legaj) as total_agentes,
                 SUM(imp_bruto) as total_bruto,
                 SUM(imp_neto) as total_neto,
@@ -36,6 +38,11 @@ class RepGerencialFinalStats extends BaseWidget
             ->first();
 
         return [
+            Stat::make('Total Liquidaciones', number_format($totales->total_liquidaciones))
+            ->description('Cantidad de liquidaciones procesadas')
+            ->descriptionIcon('heroicon-m-document-text')
+            ->color('info'),
+            
             Stat::make('Total Agentes', number_format($totales->total_agentes))
                 ->description('Cantidad de agentes en la liquidación')
                 ->descriptionIcon('heroicon-m-users')
@@ -71,5 +78,15 @@ class RepGerencialFinalStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-information-circle')
                 ->color('gray'),
         ];
+    }
+
+    public static function canView(): bool
+    {
+        $connection = (new static)->getConnectionName();
+
+        return Schema::connection($connection)->hasTable('suc.rep_ger_final')
+            && DB::connection($connection)
+                ->table('suc.rep_ger_final')
+                ->exists();
     }
 }

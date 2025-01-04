@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Reportes\RepGerFinal;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class RepGerencialFinalService
 {
@@ -17,7 +19,7 @@ class RepGerencialFinalService
     protected string $schema = 'suc';
     protected string $table = 'rep_ger_final';
 
-    public function __construct()
+    public function __construct(private readonly PeriodoFiscalService $periodoFiscalService)
     {
         $this->connection = $this->getConnectionName();
     }
@@ -93,32 +95,15 @@ class RepGerencialFinalService
         });
     }
 
-    public function truncateTable(): void
+    public function truncateFinalTable(): void
     {
         $fullTableName = "{$this->schema}.{$this->table}";
         DB::connection($this->connection)->statement("TRUNCATE TABLE {$fullTableName}");
+        Log::info('Tabla rep_ger_final truncada exitosamente');
     }
 
-    public function processData(array $liquidaciones): void
-    {
-        try {
-            DB::connection($this->connection)->beginTransaction();
 
-            $this->createTable();
-
-            // Aquí irá la lógica de la consulta SQL para poblar la tabla
-
-            DB::connection($this->connection)->commit();
-
-            Log::info('Tabla rep_ger_final creada y poblada exitosamente');
-        } catch (\Exception $e) {
-            DB::connection($this->connection)->rollBack();
-            Log::error('Error al procesar datos de rep_ger_final', ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
-
-    public function processReport(?array $liquidaciones, array $filters = [], ?int $nro_legaj = null): void
+    public function processReport(?array $liquidaciones, array $filters = []): void
     {
         Log::info('Procesando datos de rep_ger_final', ['liquidaciones' => $liquidaciones]);
 
@@ -131,24 +116,37 @@ class RepGerencialFinalService
         try {
             DB::connection($this->connection)->beginTransaction();
 
-            $whereClause = $this->buildFilters($filters);
 
-            // Limpiamos tablas previas si existen
-            $this->dropPreviousTables();
 
-            // Procesamos cada parte del reporte
-            $this->processBasicData($liquidaciones, $whereClause);
-            $this->processNetAmountsTypeC($liquidaciones, $whereClause);
-            // $this->processExtraHoursAmounts($liquidaciones);
-            $this->processNetAmountsTypeS($liquidaciones, $whereClause);
-            $this->processNetAmountsTypeO($liquidaciones, $whereClause);
-            $this->processNetAmountsTypeF($liquidaciones, $whereClause);
-            $this->processNetAmountsTypeD($liquidaciones, $whereClause);
-            $this->processNetAmountsTypeA($liquidaciones, $whereClause);
-            $this->consolidateNetAmounts();
-            $this->processAntiguedad($liquidaciones, $whereClause);
-            $this->processHorasTrabajadas($liquidaciones, $whereClause);
-            $this->consolidateFinalReport();
+
+            // Limpiamos la tabla final al inicio de un nuevo reporte
+            $this->truncateFinalTable();
+
+
+            // Procesamos cada liquidacion individualmente
+            foreach ($liquidaciones as $liquidacion) {
+                $liquidacionActual = $liquidacion;
+                $whereClause = $this->buildFilters($filters);
+
+                $this->dropPreviousTables();
+
+                // Procesamos cada parte del reporte
+                $this->processBasicData($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeC($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeS($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeO($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeF($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeD($liquidacionActual, $whereClause, $filters);
+                $this->processNetAmountsTypeA($liquidacionActual, $whereClause, $filters);
+                $this->consolidateNetAmounts();
+                $this->processAntiguedad($liquidacionActual, $whereClause, $filters);
+                $this->processHorasTrabajadas($liquidacionActual, $whereClause, $filters);
+
+                $this->appendToFinalReport();
+
+                // Limpiamos tablas previas si existen
+                $this->dropPreviousTables();
+            }
 
             DB::connection($this->connection)->commit();
 
@@ -160,31 +158,31 @@ class RepGerencialFinalService
             Log::error('Error al generar reporte gerencial', [
                 'error' => $e->getMessage(),
                 'liquidaciones' => $liquidaciones,
-                'nro_legaj' => $nro_legaj
+                'nro_legaj' => $filters['nro_legaj']
             ]);
             throw $e;
         }
     }
 
+
     protected function buildFilters(array $filters = []): string
     {
         $conditions = [];
-        $tabla = $filters['periodo_actual'] ?? true ? 'dh21' : 'dh21h';
 
         if (!empty($filters['codc_regio'])) {
-            $conditions[] = "{$tabla}.codc_regio = :codc_regio";
+            $conditions[] = "dh21.codc_regio = :codc_regio";
         }
 
         if (!empty($filters['nro_liqui'])) {
-            $conditions[] = "{$tabla}.nro_liqui = :nro_liqui";
+            $conditions[] = "dh21.nro_liqui = :nro_liqui";
         }
 
         if (!empty($filters['codc_uacad'])) {
-            $conditions[] = "{$tabla}.codc_uacad = :codc_uacad";
+            $conditions[] = "dh21.codc_uacad = :codc_uacad";
         }
 
         if (!empty($filters['codigoescalafon'])) {
-            $conditions[] = "{$tabla}.codigoescalafon = :codigoescalafon";
+            $conditions[] = "dh21.codigoescalafon = :codigoescalafon";
         }
 
         if (!empty($filters['codc_carac'])) {
@@ -196,7 +194,7 @@ class RepGerencialFinalService
         }
 
         if (!empty($filters['codn_fuent'])) {
-            $conditions[] = "{$tabla}.codn_fuent = :codn_fuent";
+            $conditions[] = "dh21.codn_fuent = :codn_fuent";
         }
 
         if (!empty($filters['codn_area'])) {
@@ -205,7 +203,7 @@ class RepGerencialFinalService
 
         if (!empty($filters['conceptos'])) {
             $conceptosConditions = array_map(
-                fn($concepto) => "{$tabla}.codn_conce = :concepto_{$concepto}",
+                fn($concepto) => "dh21.codn_conce = :concepto_{$concepto}",
                 $filters['conceptos']
             );
             $conditions[] = '(' . implode(' OR ', $conceptosConditions) . ')';
@@ -213,25 +211,54 @@ class RepGerencialFinalService
 
         // Conceptos mayores que 0
         if (empty($filters['conceptos'])) {
-            $conditions[] = "{$tabla}.codn_conce > 0";
-            $conditions[] = "{$tabla}.nro_orimp > 0";
+            $conditions[] = "dh21.codn_conce > 0";
+            $conditions[] = "dh21.nro_orimp > 0";
         }
 
         return empty($conditions) ? 'TRUE' : implode(' AND ', $conditions);
     }
 
 
-    protected function addLegajoFilter(string $sql, ?int $nroLegaj): string
+    protected function addFilters(string $sql, ?string $whereClause): string
     {
-        if ($nroLegaj) {
+        if ($whereClause) {
             $sql = str_replace(
                 'WHERE TRUE',
-                "WHERE TRUE AND dh21.nro_legaj = $nroLegaj",
+                "WHERE TRUE AND $whereClause",
                 $sql
             );
         }
+
         return $sql;
     }
+
+    protected function getBindings(array $filters): array
+    {
+        return array_filter([
+            'codc_regio' => $filters['codc_regio'] ?? null,
+            'codc_uacad' => $filters['codc_uacad'] ?? null,
+            'codigoescalafon' => $filters['codigoescalafon'] ?? null,
+            'codc_carac' => $filters['codc_carac'] ?? null,
+            'nro_legaj' => $filters['nro_legaj'] ?? null,
+            'codn_fuent' => $filters['codn_fuent'] ?? null,
+            'codn_area' => $filters['codn_area'] ?? null,
+        ]);
+    }
+
+    protected function buildQuery(string $baseSql, array $filters): array
+    {
+        return [
+            'query' => $this->addFilters($baseSql, $this->buildFilters($filters)),
+            'bindings' => $this->getBindings($filters)
+        ];
+    }
+
+    protected function executeQuery(string $sql, array $filters): void
+    {
+        $query = $this->buildQuery($sql, $filters);
+        DB::connection($this->connection)->statement($query['query'], $query['bindings']);
+    }
+
 
     /* #################### FUNCIONES #################### */
     public function dropPreviousTables(): void
@@ -253,13 +280,40 @@ class RepGerencialFinalService
             $fullTableName = "{$this->schema}.{$table}";
             if (Schema::connection($this->connection)->hasTable($fullTableName)) {
                 Schema::connection($this->connection)->drop($fullTableName);
+                Log::info("Tabla {$fullTableName} eliminada");
             }
         }
     }
 
-
-    protected function processBasicData(array $liquidaciones, ?int $nroLegaj = null): void
+    protected function truncatePreviousTables(): void
     {
+        $tables = [
+            'rep_ger_datos_base_dh21',
+            'rep_ger_importes_netos_c',
+            'rep_ger_importes_netos_s',
+            'rep_ger_importes_netos_o',
+            'rep_ger_importes_netos_f',
+            'rep_ger_importes_netos_d',
+            'rep_ger_importes_netos_a',
+            'rep_ger_importes_netos',
+            'rep_ger_datos_antiguedad',
+            'rep_ger_horas_trabajadas',
+        ];
+
+        foreach ($tables as $table) {
+            $fullTableName = "{$this->schema}.{$table}";
+            if (Schema::connection($this->connection)->hasTable($fullTableName)) {
+                DB::connection($this->connection)->statement("TRUNCATE TABLE {$fullTableName}");
+                Log::info("Tabla {$fullTableName} vaciada");
+            }
+        }
+    }
+
+    protected function processBasicData(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    {
+        $isPeriodoActual = $this->periodoFiscalService->isPeriodoActual($liquidaciones);
+        $tabla = $isPeriodoActual ? 'mapuche.dh21' : 'mapuche.dh21h';
+
         $sql = "
         SELECT DISTINCT
             dh21.codn_fuent,
@@ -324,7 +378,7 @@ class RepGerencialFinalService
             dh03.codc_agrup,
             dh03.hs_dedic
         INTO TABLE {$this->schema}.rep_ger_datos_base_dh21
-        FROM mapuche.dh21 dh21
+        FROM {$tabla} dh21
         JOIN mapuche.dh22 ON (dh22.nro_liqui = dh21.nro_liqui)
         LEFT OUTER JOIN mapuche.dh01 ON (dh01.nro_legaj = dh21.nro_legaj)
         LEFT OUTER JOIN mapuche.dh17 ON (dh17.codn_conce = dh21.codn_conce)
@@ -344,16 +398,19 @@ class RepGerencialFinalService
                                       dh24.codn_grupo_presup = dh21.codn_grupo_presup AND
                                       dh24.codn_fuent = dh21.codn_fuent)
         LEFT JOIN (SELECT DISTINCT nrolegajo FROM mapuche.dh92) cuenta ON (dh03.nro_legaj = cuenta.nrolegajo)
-        WHERE TRUE AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        WHERE TRUE AND dh21.nro_liqui = ". $liquidaciones . "
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh22.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
 
-    protected function processNetAmountsTypeC(?array $liquidaciones, ?int $nroLegaj = null): void
+    protected function processNetAmountsTypeC(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -405,16 +462,18 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE
         AND dh21.tipo_conce = 'C' AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeS(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processNetAmountsTypeS(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -460,16 +519,18 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh31 ON (dh11.codc_dedic = dh31.codc_dedic)
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE AND dh21.tipo_conce = 'S'  AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeO(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processNetAmountsTypeO(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -515,16 +576,18 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh31 ON (dh11.codc_dedic = dh31.codc_dedic)
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE AND dh21.tipo_conce = 'O' AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeF(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processNetAmountsTypeF(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -571,13 +634,15 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE
         AND dh21.tipo_conce = 'F'  AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
     /**
@@ -589,7 +654,7 @@ class RepGerencialFinalService
      * @param array $liquidaciones Array de números de liquidación a procesar
      * @return void
      */
-    protected function processNetAmountsTypeD(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processNetAmountsTypeD(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -636,13 +701,15 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE
         AND dh21.tipo_conce = 'D'  AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
     /**
@@ -656,7 +723,7 @@ class RepGerencialFinalService
      * @param array $liquidaciones Array de números de liquidación a procesar.
      * @return void
      */
-    protected function processNetAmountsTypeA(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processNetAmountsTypeA(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -703,13 +770,15 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE
         AND dh21.tipo_conce = 'A'  AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui, nro_inciso
         ORDER BY dh21.nro_legaj, dh21.nro_cargo, dh21.codn_fuent, codn_imput, dh21.nro_liqui, nro_inciso";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
     /** Consolida los importes netos de los diferentes conceptos de pago en una tabla de resumen.
@@ -793,7 +862,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($sql);
     }
 
-    protected function processAntiguedad(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processAntiguedad(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT
@@ -834,16 +903,18 @@ class RepGerencialFinalService
             OR ((TRUNC(dh21.nov2_conce / 12) - 1) = dh21.nov1_conce)
             OR ((TRUNC(dh21.nov2_conce / 12) + 1) = dh21.nov1_conce))
         AND (TRUNC(dh21.nov1_conce) < 100)
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui
         ORDER BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processHorasTrabajadas(?array $liquidaciones, ?int $nroLegaj): void
+    protected function processHorasTrabajadas(?int $liquidaciones, ?string $whereClause = null, array $filters): void
     {
         $sql = "
         SELECT DISTINCT
@@ -876,20 +947,19 @@ class RepGerencialFinalService
         LEFT OUTER JOIN mapuche.dh35 ON (dh35.tipo_escal = dh21.tipoescalafon AND dh35.codc_carac = dh03.codc_carac)
         WHERE TRUE
         AND dh21.nro_orimp > 0
-        AND dh21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
+        AND dh21.nro_liqui = ". $liquidaciones ."
         GROUP BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui
         ORDER BY dh21.codn_fuent, codn_imput, dh21.nro_legaj, dh21.nro_cargo, dh21.nro_liqui";
 
-        $sql = $this->addLegajoFilter($sql, $nroLegaj);
+        $queryBuilder = new QueryBuilder($sql);
+        $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
+        $bindings = $this->getBindings($filters);
 
-        DB::connection($this->connection)->statement($sql);
+        DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function consolidateFinalReport(): void
+    protected function appendToFinalReport(): void
     {
-        // Primero limpiamos la tabla existente
-        DB::connection($this->connection)->table("{$this->schema}.rep_ger_final")->truncate();
-
         $sql = "
         INSERT INTO {$this->schema}.rep_ger_final (
             codn_fuent, codn_depen, tipo_ejercicio, codn_grupo_presup,

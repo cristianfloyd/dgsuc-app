@@ -22,6 +22,22 @@ use Illuminate\Support\Facades\Log;
 class PeriodoFiscalService
 {
     /**
+    * Determina si una liquidación corresponde al período actual
+     */
+    public function isPeriodoActual(int $nroLiqui): bool
+    {
+        $liquidacion = Dh22::query()->where('nro_liqui', $nroLiqui)->first();
+        $periodoActual = $this->getPeriodoFiscalFromDatabase();
+
+        if (!$liquidacion) {
+            return false;
+        }
+
+        return $liquidacion->per_liano === (int)$periodoActual['year']
+            && $liquidacion->per_limes === (int)$periodoActual['month'];
+    }
+
+    /**
      * Establece el período fiscal actual en la sesión.
      *
      * @param int $year El año del período fiscal.
