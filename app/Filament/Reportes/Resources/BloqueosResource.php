@@ -58,20 +58,22 @@ class BloqueosResource extends Resource
                 TextColumn::make('dependencia'),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
-                TextColumn::make('fecha_baja'),
-                TextColumn::make('cargo.fec_baja')->label('Fecha dh03'),
+                // TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
+                TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
+                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->sortable(),
                 TextColumn::make('tipo'),
                 TextColumn::make('observaciones')
                     ->limit(20)
-                    ->tooltip(function (TextColumn $column): ?string{
+                    ->tooltip(function (TextColumn $column): ?string {
                         return $column->getState();
                     }),
                 IconColumn::make('chkstopliq')->boolean(),
             ])
-            ->recordClasses(fn (BloqueosDataModel $record): string =>
-            $record->fecha_baja === $record->cargo?->fec_baja
-                ? 'bg-green-50 dark:bg-green-900/50'
-                : ''
+            ->recordClasses(
+                fn(BloqueosDataModel $record): string =>
+                $record->fecha_baja === $record->cargo?->fec_baja
+                    ? 'bg-green-50 dark:bg-green-900/50'
+                    : '',
             );
     }
 
@@ -95,6 +97,4 @@ class BloqueosResource extends Resource
     {
         return 'Nuevo';
     }
-
-
 }

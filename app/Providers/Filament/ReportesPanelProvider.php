@@ -30,6 +30,7 @@ class ReportesPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/reportes/theme.css')
             ->databaseNotifications()
             ->navigationGroups([
                 NavigationGroup::make()
