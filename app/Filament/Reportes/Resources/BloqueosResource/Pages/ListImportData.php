@@ -58,11 +58,17 @@ class ListImportData extends ListRecords
         return [
             'Todo' => Tab::make(),
             'Licencia' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('tipo', 'Licencia')->count())
+                ->badgeColor('info')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Licencia')),
             'Fallecido' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('tipo', 'Fallecido')->count())
+                ->badgeColor('danger')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Fallecido')),
             'Renuncia' => Tab::make()
-                    ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Renuncia')),
+                ->badge(fn () => $this->getModel()::where('tipo', 'Renuncia')->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Renuncia')),
         ];
     }
 }

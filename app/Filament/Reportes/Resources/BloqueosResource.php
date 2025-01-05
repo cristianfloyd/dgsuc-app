@@ -2,6 +2,7 @@
 
 namespace App\Filament\Reportes\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -58,7 +59,7 @@ class BloqueosResource extends Resource
                 TextColumn::make('dependencia'),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
-                TextColumn::make('fecha_baja'),
+                TextColumn::make('fecha_baja')->date('Y-m-d'),
                 TextColumn::make('cargo.fec_baja')->label('Fecha dh03'),
                 TextColumn::make('tipo'),
                 TextColumn::make('observaciones')
@@ -69,11 +70,14 @@ class BloqueosResource extends Resource
                 IconColumn::make('chkstopliq')->boolean(),
             ])
             ->recordClasses(fn (BloqueosDataModel $record): string =>
-            $record->fecha_baja === $record->cargo?->fec_baja
-                ? 'bg-green-50 dark:bg-green-900/50'
-                : ''
+                match(true) {
+                    $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
+                    $record->tipo === 'Licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
+                    default => ''
+                }
             );
-    }
+        }
+
 
     public static function getRelations(): array
     {

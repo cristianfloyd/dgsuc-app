@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Enums\LegajoCargo;
 use App\Traits\MapucheConnectionTrait;
@@ -34,8 +35,9 @@ class BloqueosDataModel extends Model
 
     protected $casts = [
         'fecha_registro' => 'datetime',
-        'fecha_baja' => 'datetime',
+        'fecha_baja' => 'date:Y-m-d',
         'chkstopliq' => 'boolean',
+        'fec_baja' => 'date:Y-m-d'
     ];
 
     /* ######## ATTRIBUTES ########################################## */
@@ -46,11 +48,36 @@ class BloqueosDataModel extends Model
         );
     }
 
+    public function fechaBaja(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+        );
+    }
+
+    /* ######## ACCESORS ########################################### */
+    public function getFechasCoincidentesAttribute(): bool
+    {
+        if (!$this->fecha_baja || !$this->cargo?->fec_baja) {
+            return false;
+        }
+
+        return Carbon::parse($this->fecha_baja)->format('Y-m-d') ===
+            Carbon::parse($this->cargo->fec_baja)->format('Y-m-d');
+    }
+
     /* ##############################################################
     ####  RELACIONES ############################################### */
 
     public function cargo(): BelongsTo
     {
         return $this->belongsTo(Dh03::class, 'nro_cargo', 'nro_cargo');
+    }
+
+    /* ################## SCOPES ##################################### */
+    public function scopeFechasCoinciden($query)
+    {
+        return $query->whereRaw('DATE(fecha_baja) = DATE(fec_baja)');
     }
 }
