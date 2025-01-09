@@ -20,7 +20,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     use MapucheConnectionTrait;
     use Importable;
 
-    public string $connection;
+    public $connection;
     private Collection $rows;
     private Collection $processedRows;
     private DuplicateValidationService $duplicateValidator;
@@ -35,7 +35,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
      */
     public function __construct(private readonly int $nroLiqui, DuplicateValidationService $duplicateValidator)
     {
-        $this->connection = $this->getConnectionName();
+        $this->connection = $this->getConnectionFromTrait();
         $this->duplicateValidator = $duplicateValidator;
     }
 
@@ -43,7 +43,8 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     public function collection(Collection $rows): void
     {
         try {
-            DB::connection($this->connection)->beginTransaction();
+            Log::info('Inicio de la importación de bloqueos');
+            $this->connection->beginTransaction();
 
             // Validación de duplicados en el Excel
             $this->duplicateValidator->validateExcelDuplicates($rows);
@@ -65,14 +66,14 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
 
 
 
-            DB::connection($this->connection)->commit();
+            $this->connection->commit();
 
             Log::info('Importación completada', [
                 'total_registros' => $this->processedRows->count()
             ]);
 
         } catch (\Exception $e) {
-            DB::connection($this->connection)->rollBack();
+            $this->connection->rollBack();
             Log::error('Error en importación', [
                 'message' => $e->getMessage(),
                 'processed_rows' => $this->processedRows->count()

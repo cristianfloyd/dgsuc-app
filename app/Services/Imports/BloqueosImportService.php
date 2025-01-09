@@ -2,13 +2,13 @@
 
 namespace App\Services\Imports;
 
+use PDO;
 use App\Imports\BloqueosImport;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\ImportException;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\MapucheConnectionTrait;
 use App\Exceptions\DuplicateCargoException;
+use App\Exceptions\Imports\ImportException;
 
 class BloqueosImportService
 {
@@ -28,16 +28,24 @@ class BloqueosImportService
     public function processImport(string $filePath, int $nroLiqui): void
     {
         $connection = $this->getConnectionFromTrait();
+        $startTime = now();
+        $context = [
+            'file' => $filePath,
+            'liquidacion' => $nroLiqui,
+            'start_time' => $startTime->toDateTimeString(),
+        ];
 
         try {
             // Validar archivo antes de procesar
             $this->validationService->validateFile($filePath);
 
-            DB::connection($this->getConnectionName())->beginTransaction();
+            $connection->beginTransaction();
 
-            Log::info('Iniciando importación', [
-                'file' => $filePath,
-                'liquidacion' => $nroLiqui
+            // Log del estado de la conexión
+            Log::info('Estado de conexión', [
+                ...$context,
+                'connection_status' => $connection->getPdo()->getAttribute(PDO::ATTR_CONNECTION_STATUS),
+                'transaction_active' => $connection->transactionLevel() > 0
             ]);
 
             $importer = new BloqueosImport(
@@ -47,31 +55,59 @@ class BloqueosImportService
 
             Excel::import($importer, $filePath);
 
-            DB::connection($this->getConnectionName())->commit();
+            $processedCount = $importer->getProcessedRowsCount();
 
+            $connection->commit();
+
+            // Log de finalización exitosa
+            Log::info('Importación completada exitosamente', [
+                ...$context,
+                'processed_rows' => $processedCount,
+                'duration_seconds' => now()->diffInSeconds($startTime),
+                'memory_usage' => memory_get_peak_usage(true) / 1024 / 1024 . 'MB'
+            ]);
             $this->notificationService->sendSuccessNotification();
 
-            Log::info('Importación completada exitosamente');
         } catch (DuplicateCargoException $e){
 
-            DB::connection($this->getConnectionName())->rollBack();
+            $connection->rollBack();
+            Log::warning('Duplicados encontrados en importación', [
+                ...$context,
+                'error_type' => 'duplicate_cargo',
+                'error_message' => $e->getMessage(),
+                'duplicate_values' => $e->getDuplicates() ?? [],
+                'duration_seconds' => now()->diffInSeconds($startTime)
+            ]);
+
             $this->notificationService->sendWarningNotification(
                 'Duplicados encontrados',
                 $e->getMessage()
             );
+
             throw $e;
 
         } catch (\Exception $e) {
-            DB::connection($this->getConnectionName())->rollBack();
+            $connection->rollBack();
 
+            // Log detallado del error
             Log::error('Error en importación', [
-                'message' => $e->getMessage(),
-                'file' => $filePath
+                ...$context,
+                'error_type' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'duration_seconds' => now()->diffInSeconds($startTime),
+                'memory_usage' => memory_get_peak_usage(true) / 1024 / 1024 . 'MB',
+                'trace' => $e->getTraceAsString()
             ]);
 
             $this->notificationService->sendErrorNotification($e->getMessage());
 
-            throw new \Exception('Error al procesar la importación: ' . $e->getMessage());
+            throw new ImportException(
+                'Error al procesar la importación: ' . $e->getMessage(),
+                previous: $e
+            );
         }
     }
 }

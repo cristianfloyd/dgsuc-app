@@ -9,16 +9,24 @@ class DuplicateValidationService
 {
     /**
      * Valida duplicados en la colección de datos del Excel
+     *
+     * @param Collection $rows Filas del Excel
+     * @throws DuplicateCargoException Si se encuentran duplicados
      */
     public function validateExcelDuplicates(Collection $rows): void
     {
+        // Contamos ocurrencias de cada nro_cargo
         $cargos = $rows->pluck('n_de_cargo')->toArray();
-        $duplicates = array_filter(array_count_values($cargos), fn($count) => $count > 1);
+        $duplicates = array_filter(
+            array_count_values($cargos),
+            fn($count) => $count > 1
+        );
 
         if (!empty($duplicates)) {
             throw new DuplicateCargoException(
                 'Se encontraron números de cargo duplicados en el archivo: ' .
-                implode(', ', array_keys($duplicates))
+                implode(', ', array_keys($duplicates)),
+                $duplicates
             );
         }
     }
