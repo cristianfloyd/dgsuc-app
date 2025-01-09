@@ -17,6 +17,7 @@ use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use App\Services\Reportes\BloqueosDataService;
+use App\Services\Imports\BloqueosImportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Filament\Reportes\Resources\BloqueosResource;
 
@@ -73,33 +74,48 @@ class ImportData extends Page
 
     public function import(): void
     {
-        $connection = $this->getConnectionFromTrait();
         $filePath = collect($this->data['excel_file'])->first()->getRealPath();
 
         try {
-            $connection->beginTransaction();
-            Log::info('Importando archivo: ' . $filePath);
-
-            $importer = new BloqueosImport($this->data['nro_liqui']);
-            Excel::import($importer, $filePath);
-
-            $connection->commit();
-
-            Notification::make()
-                ->title('Importación exitosa')
-                ->success()
-                ->send();
-
+            app(BloqueosImportService::class)->processImport(
+                $filePath,
+                $this->data['nro_liqui']
+            );
         } catch (\Exception $e) {
-            $connection->rollBack();
-            Log::error('Error en la importación: ' . $e->getMessage());
-            Notification::make()
-                ->title('Error en la importación')
-                ->body('Error: ' . $e->getMessage())
-                ->danger()
-                ->send();
+            // El servicio ya maneja las notificaciones
+            return;
         }
     }
+
+    // public function import(): void
+    // {
+    //     $connection = $this->getConnectionFromTrait();
+    //     $filePath = collect($this->data['excel_file'])->first()->getRealPath();
+
+    //     try {
+    //         $connection->beginTransaction();
+    //         Log::info('Importando archivo: ' . $filePath);
+
+    //         $importer = new BloqueosImport($this->data['nro_liqui']);
+    //         Excel::import($importer, $filePath);
+
+    //         $connection->commit();
+
+    //         Notification::make()
+    //             ->title('Importación exitosa')
+    //             ->success()
+    //             ->send();
+
+    //     } catch (\Exception $e) {
+    //         $connection->rollBack();
+    //         Log::error('Error en la importación: ' . $e->getMessage());
+    //         Notification::make()
+    //             ->title('Error en la importación')
+    //             ->body('Error: ' . $e->getMessage())
+    //             ->danger()
+    //             ->send();
+    //     }
+    // }
 
 
     protected function getHeaderActions(): array
