@@ -31,25 +31,7 @@ class Dh03Resource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nro_cargo')->numeric()->required(),
-                Forms\Components\TextInput::make('nro_legaj')->numeric()->required(),
-                Forms\Components\DatePicker::make('fec_alta')->required(),
-                Forms\Components\DatePicker::make('fec_baja')->required(),
-                Forms\Components\TextInput::make('codc_carac')->maxLength(4)->required(),
-                Forms\Components\TextInput::make('codc_categ')->maxLength(4)->required(),
-                Forms\Components\TextInput::make('codc_agrup')->maxLength(4)->required(),
-                Forms\Components\TextInput::make('tipo_norma')->maxLength(20)->required(),
-                Forms\Components\TextInput::make('codc_uacad')->maxLength(4)->required(),
-                Forms\Components\TextInput::make('coddependesemp')->maxLength(4)->required(),
-                Forms\Components\TextInput::make('porc_aplic')->numeric()->required(),
-                Forms\Components\TextInput::make('hs_dedic')->numeric()->required(),
-                Forms\Components\DatePicker::make('fecha_norma_baja')->required(),
-                Forms\Components\DatePicker::make('fechapermanencia')->required(),
-                Forms\Components\DatePicker::make('fecaltadesig')->required(),
-                Forms\Components\DatePicker::make('fecbajadesig')->required(),
-                Forms\Components\TextInput::make('motivobajadesig')->numeric()->required(),
-                Forms\Components\Toggle::make('chkstopliq')->required(),
-                Forms\Components\TextInput::make('cod_clasif_cargo')->numeric()->required(),
+                //
             ]);
     }
 
@@ -59,8 +41,8 @@ class Dh03Resource extends Resource
         ->columns([
             TextColumn::make('nro_cargo')->label('Cargo')->numeric()->sortable(),
             TextColumn::make('nro_legaj')->label('Legajo')->numeric()->sortable()->searchable(),
-            TextColumn::make('fec_alta')->date()->sortable()->toggleable()->toggledHiddenByDefault(),
-            TextColumn::make('fec_baja')->date()->sortable()->toggleable()->toggledHiddenByDefault(),
+            TextColumn::make('fec_alta')->date('Y-m-d')->sortable()->toggleable()->toggledHiddenByDefault(),
+            TextColumn::make('fec_baja')->date('Y-m-d')->sortable()->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('codc_carac')->label('Caracter Escalafon')->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('codc_categ')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('dh11.desc_categ')->label('Categoria')->sortable()->toggleable(),
@@ -72,20 +54,15 @@ class Dh03Resource extends Resource
             TextColumn::make('dh36.descdependesemp')->label('Dep. des.')->sortable()->toggleable(),
             TextColumn::make('porc_aplic')->numeric()->sortable(),
             TextColumn::make('hs_dedic')->numeric()->sortable(),
-            TextColumn::make('fecha_norma_baja')->date()->sortable(),
-            TextColumn::make('fechapermanencia')->date()->sortable(),
-            TextColumn::make('fecaltadesig')->date()->sortable(),
-            TextColumn::make('fecbajadesig')->date()->sortable(),
+            TextColumn::make('fecha_norma_baja')->date('Y-m-d')->sortable(),
+            TextColumn::make('fechapermanencia')->date('Y-m-d')->sortable(),
+            TextColumn::make('fecaltadesig')->date('Y-m-d')->sortable(),
+            TextColumn::make('fecbajadesig')->date('Y-m-d')->sortable(),
             TextColumn::make('motivobajadesig')->numeric()->sortable(),
             IconColumn::make('chkstopliq')->boolean(),
             TextColumn::make('cod_clasif_cargo')->numeric()->sortable(),
         ])
             ->filters([
-                // SelectFilter::make('dh11.de_categ')->label('Categoria')
-                //     ->searchable()
-                //     ->preload()
-                //     ->relationship( 'dh11',  'desc_categ')
-                //     ->options(Dh11::all()->pluck('desc_categ', 'codc_categ')->toArray()),
                 SelectFilter::make('codc_agrup')
                     ->label('Agrupacion')
                     ->relationship('dhc9', 'descagrup')

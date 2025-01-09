@@ -26,7 +26,7 @@ class ImportDataTableService
                 $table->string('usuario_mapuche');
                 $table->string('dependencia');
                 $table->integer('nro_legaj');
-                $table->integer('nro_cargo');
+                $table->integer('nro_cargo')->unique();
                 $table->date('fecha_baja')->nullable();
                 $table->string('tipo');
                 $table->text('observaciones')->nullable();

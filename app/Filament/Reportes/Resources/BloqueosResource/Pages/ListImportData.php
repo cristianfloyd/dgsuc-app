@@ -9,7 +9,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\Reportes\BloqueosDataService;
+use App\Services\Reportes\BloqueosProcessService;
 use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
 
 class ListImportData extends ListRecords
 {
@@ -25,6 +27,54 @@ class ListImportData extends ListRecords
     {
         return [
             Actions\CreateAction::make()->label('Importar datos'),
+            Actions\Action::make('procesar')
+                ->label('Procesar Bloqueos')
+                ->color('success')
+                ->icon('heroicon-o-check-circle')
+                ->requiresConfirmation()
+                ->modalHeading('¿Procesar bloqueos?')
+                ->modalDescription('Esta acción actualizará los registros en la tabla DH03.')
+                ->action(function () {
+                    try {
+                        $service = new BloqueosProcessService();
+                        $service->procesarBloqueos();
+
+                        Notification::make()
+                            ->title('Bloqueos procesados exitosamente')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Error al procesar bloqueos')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+            Actions\Action::make('restaurar')
+                ->label('Restaurar Cambios')
+                ->color('warning')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->requiresConfirmation()
+                ->modalHeading('¿Restaurar cambios en DH03?')
+                ->modalDescription('Esta acción revertirá los últimos cambios realizados en la tabla DH03.')
+                ->action(function () {
+                    try {
+                        $service = new BloqueosProcessService();
+                        $service->restaurarBackup();
+
+                        Notification::make()
+                            ->title('Cambios restaurados exitosamente')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Error al restaurar cambios')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
             Actions\Action::make('truncate')
                 ->label('Vaciar Tabla')
                 ->color('danger')
@@ -58,17 +108,24 @@ class ListImportData extends ListRecords
         return [
             'Todo' => Tab::make(),
             'Licencia' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', 'Licencia')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'Licencia')->count())
                 ->badgeColor('info')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Licencia')),
             'Fallecido' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', 'Fallecido')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'Fallecido')->count())
                 ->badgeColor('danger')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Fallecido')),
             'Renuncia' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', 'Renuncia')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'Renuncia')->count())
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'Renuncia')),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            //
         ];
     }
 }

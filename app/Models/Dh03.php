@@ -40,6 +40,76 @@ class Dh03 extends Model
         'cargo_concursado'
     ];
 
+    protected $casts = [
+        'fec_alta' => 'date:Y-m-d',
+        'fec_baja' => 'date:Y-m-d',
+        'fec_norma' => 'date:Y-m-d',
+        'fec_exped' => 'date:Y-m-d',
+        'fec_exped_baja' => 'date:Y-m-d',
+        'fec_limite' => 'date:Y-m-d',
+        'fecha_norma_baja' => 'date:Y-m-d',
+        'fechanotificacion' => 'date:Y-m-d',
+        'fechagrado' => 'date:Y-m-d',
+        'fechapermanencia' => 'date:Y-m-d',
+        'fecaltadesig' => 'date:Y-m-d',
+        'fecbajadesig' => 'date:Y-m-d',
+        'chk_proye' => 'boolean',
+        'chktrayectoria' => 'boolean',
+        'chkfuncionejec' => 'boolean',
+        'chkretroactivo' => 'boolean',
+        'cargo_concursado' => 'boolean',
+        'chkstopliq' => 'integer',
+        'nro_cargo' => 'integer',
+        'nro_legaj' => 'integer',
+        'porcdedicdocente' => 'double',
+        'porcdedicinvestig' => 'double',
+        'porcdedicagestion' => 'double',
+        'porcdedicaextens' => 'double'
+    ];
+
+    protected $attributes = [
+        'chkstopliq' => 0,
+        'porcdedicdocente' => 0,
+        'porcdedicinvestig' => 0,
+        'porcdedicagestion' => 0,
+        'porcdedicaextens' => 0,
+        'chk_proye' => true,
+        'chktrayectoria' => true,
+        'chkfuncionejec' => false,
+        'chkretroactivo' => false,
+        'cargo_concursado' => false
+    ];
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            // Validar porcentajes
+            if ($model->porcdedicdocente + $model->porcdedicinvestig +
+                $model->porcdedicagestion + $model->porcdedicaextens > 100) {
+                throw new \Exception('La suma de porcentajes de dedicación no puede superar 100%');
+            }
+
+            // Validar fechas coherentes
+            if ($model->fec_baja && $model->fec_alta &&
+                $model->fec_baja < $model->fec_alta) {
+                throw new \Exception('La fecha de baja no puede ser anterior a la fecha de alta');
+            }
+        });
+    }
+
+    protected function setCodigocontratoAttribute($value)
+    {
+        $this->attributes['codigocontrato'] = (int) $value;
+    }
+
+    protected function setChkstopliqAttribute($value)
+    {
+        $this->attributes['chkstopliq'] = (int) $value;
+    }
+
     public static function getCargoCount()
     {
         return Dh03::count();
@@ -115,13 +185,13 @@ class Dh03 extends Model
         return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
 
-    // ########### Mutadores ###########
+    // ######################## MUTADORES ##############################
     public function getCodcUacadAttribute($value)
     {
         return trim($value);
     }
 
-    /* ##################### Atributos ##################### */
+    /* ##################### ATRIBUTOS ##################### */
     protected function legajoCargo(): Attribute
     {
         return Attribute::make(

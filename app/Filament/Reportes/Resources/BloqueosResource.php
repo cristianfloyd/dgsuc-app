@@ -2,18 +2,28 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Carbon\Carbon;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\FileUpload;
-use App\Models\Reportes\BloqueosDataModel;
+use App\Exports\BloqueosResultadosExport;
 use App\Filament\Reportes\Resources\Bloqueos\Pages;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
+use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
+use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Reportes\BloqueosProcessService;
+use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BloqueosResource extends Resource
 {
@@ -23,9 +33,9 @@ class BloqueosResource extends Resource
     protected static ?string $navigationGroup = 'Reportes';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?Collection $resultadosProcesamiento = null;
+
     public $excel_file = null;
-
-
 
     public static function form(Form $form): Form
     {
@@ -49,6 +59,7 @@ class BloqueosResource extends Resource
 
     public static function table(Table $table): Table
     {
+
         return $table
             ->columns([
                 TextColumn::make('nro_liqui')->toggleable(isToggledHiddenByDefault: true),
@@ -56,7 +67,7 @@ class BloqueosResource extends Resource
                 TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('dependencia'),
+                TextColumn::make('dependencia')->sortable(),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
                 TextColumn::make('fecha_baja')->date('Y-m-d'),
@@ -69,15 +80,78 @@ class BloqueosResource extends Resource
                     }),
                 IconColumn::make('chkstopliq')->boolean(),
             ])
+            ->filters([
+                // Filtro por tipo de bloqueo
+                SelectFilter::make('tipo')
+                    ->options([
+                        'Licencia' => 'Licencia',
+                        'Fallecido' => 'Fallecido',
+                        'Renuncia' => 'Renuncia',
+                    ]),
+                // Filtro por estado de procesamiento
+                SelectFilter::make('chkstopliq')
+                    ->label('Estado')
+                    ->options([
+                        '1' => 'Procesado',
+                        '0' => 'Pendiente',
+                    ]),
+            ])
             ->recordClasses(fn (BloqueosDataModel $record): string =>
                 match(true) {
                     $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
                     $record->tipo === 'Licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
                     default => ''
                 }
-            );
+            )
+            ->actions([
+                Action::make('procesarBloqueos')
+                    ->label('Procesar Bloqueo')
+                    ->icon('heroicon-o-arrow-path')
+                    ->modalContent(fn ($records): View => view('filament.resources.bloqueos-resource.process-modal', [
+                        'registro' => $records
+                    ]))
+                    ->modalWidth(MaxWidth::FiveExtraLarge)
+                    ->modalHeading('Procesamiento de Bloqueos')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+
+            ])
+            ->bulkActions([
+                // Acción masiva para múltiples registros
+                BulkAction::make('procesarBloqueos')
+                    ->label('Procesar Seleccionados')
+                    ->icon('heroicon-o-arrow-path')
+                    ->modalContent(fn ($records): View => view('filament.resources.bloqueos-resource.process-modal', [
+                        'registros' => $records
+                    ]))
+                    ->modalWidth(MaxWidth::FiveExtraLarge)
+                    ->modalHeading('Procesamiento de Bloqueos')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false),
+
+                BulkAction::make('exportarResultados')
+                    ->label('Exportar a Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        $processor = new BloqueosProcessor();
+                        return Excel::download(
+                            new BloqueosResultadosExport($processor->getResultados()),
+                            'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx'
+                        );
+                    })
+            ]);
         }
 
+    protected static function getResultados(): Collection
+    {
+        return Cache::remember('bloqueos_resultados_' . auth()->id(), 3600, function () {
+            if (!static::$resultadosProcesamiento) {
+                $service = app(BloqueosProcessService::class);
+                static::$resultadosProcesamiento = $service->procesarBloqueos();
+            }
+            return static::$resultadosProcesamiento;
+        });
+    }
 
     public static function getRelations(): array
     {
@@ -98,6 +172,48 @@ class BloqueosResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return 'Nuevo';
+    }
+
+    /**
+     * Procesa los bloqueos y prepara la vista de resultados
+     *
+     * @return \Illuminate\View\View
+     */
+    protected static function procesarYMostrarResultados()
+    {
+        $service = app(BloqueosProcessService::class);
+        $resultados = $service->procesarBloqueos();
+
+        return view('filament.resources.bloqueos.bulk-results', [
+            'resultados' => $resultados,
+            'exitosos' => $resultados->where('estado', 'Procesado')->count(),
+            'fallidos' => $resultados->where('estado', 'Error')->count(),
+            'resumen' => static::generarResumenProcesamiento($resultados)
+        ]);
+    }
+
+    /**
+     * Genera un resumen estadístico del procesamiento
+     *
+     * @param Collection $resultados
+     * @return array
+     */
+    protected static function generarResumenProcesamiento($resultados): array
+    {
+        return [
+            'total' => $resultados->count(),
+            'por_tipo' => $resultados->groupBy('tipo_bloqueo')
+                ->map(fn ($grupo) => $grupo->count()),
+            'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count()
+        ];
+    }
+
+    protected function exportarResultados(Collection $resultados)
+    {
+        return Excel::download(
+            new BloqueosResultadosExport($resultados),
+            'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx'
+        );
     }
 
 

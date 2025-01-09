@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use Filament\Pages;
 use Filament\Panel;
+use Livewire\Livewire;
 use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
@@ -18,6 +19,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
 
 class ReportesPanelProvider extends PanelProvider
@@ -74,5 +76,10 @@ class ReportesPanelProvider extends PanelProvider
             ->breadcrumbs(true)
             ->maxContentWidth('full')
             ->sidebarFullyCollapsibleOnDesktop();
+    }
+
+    public function boot()
+    {
+        Livewire::component('bloqueos-processor', BloqueosProcessor::class);
     }
 }
