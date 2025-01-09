@@ -22,4 +22,13 @@ class ImportNotificationService
             ->danger()
             ->send();
     }
+
+    public function sendWarningNotification(string $title, string $message): void
+    {
+        Notification::make()
+            ->title($title)
+            ->body($message)
+            ->warning()
+            ->send();
+    }
 }

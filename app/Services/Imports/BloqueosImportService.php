@@ -7,6 +7,7 @@ use App\Exceptions\ImportException;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\MapucheConnectionTrait;
+use App\Exceptions\DuplicateCargoException;
 
 class BloqueosImportService
 {
@@ -38,7 +39,11 @@ class BloqueosImportService
                 'liquidacion' => $nroLiqui
             ]);
 
-            $importer = new BloqueosImport($nroLiqui);
+            $importer = new BloqueosImport(
+                $nroLiqui,
+                app(DuplicateValidationService::class)
+            );
+
             Excel::import($importer, $filePath);
 
             $connection->commit();
@@ -46,6 +51,14 @@ class BloqueosImportService
             $this->notificationService->sendSuccessNotification();
 
             Log::info('Importación completada exitosamente');
+        } catch (DuplicateCargoException $e){
+
+            $connection->rollBack();
+            $this->notificationService->sendWarningNotification(
+                'Duplicados encontrados',
+                $e->getMessage()
+            );
+            throw $e;
 
         } catch (\Exception $e) {
             $connection->rollBack();
