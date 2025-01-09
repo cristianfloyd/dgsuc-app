@@ -4,6 +4,7 @@ namespace App\Data\Reportes;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Data;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
@@ -12,13 +13,19 @@ class BloqueosData extends Data
 {
     public function __construct(
         public readonly Carbon $fecha_registro,
+        #[MapName('email')]
         public readonly string $correo_electronico,
         public readonly string $nombre,
+        #[MapName('usuario_mapuche')]
         public readonly string $usuario_mapuche_solicitante,
         public readonly string $dependencia,
+        #[MapName('nro_legaj')]
         public readonly int $legajo,
+        #[MapName('nro_cargo')]
         public readonly int $n_de_cargo,
-        public readonly ?Carbon $fecha_baja,
+        #[MapName('fecha_baja')]
+        public readonly ?Carbon $fecha_de_baja,
+        #[MapName('tipo')]
         public readonly string $tipo_de_movimiento,
         public readonly ?string $observaciones,
         public readonly bool $chkstopliq,
@@ -33,8 +40,12 @@ class BloqueosData extends Data
             'usuario_mapuche_solicitante' => ['required', 'string'],
             'dependencia' => ['required', 'string'],
             'legajo' => ['required', 'numeric'],
-            'n_de_cargo' => ['required', 'numeric', 'unique:suc.rep_bloqueos_import'],
-            'tipo_de_movimiento' => ['required', 'string', 'in:licencia,fallecido,renuncia'],
+            'n_de_cargo' => [
+                'required',
+                'numeric',
+                Rule::unique('pgsql-mapuche.suc.rep_bloqueos_import', 'nro_cargo')
+            ],
+            'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
         ];
     }
 
@@ -50,22 +61,23 @@ class BloqueosData extends Data
             dependencia: trim($row['dependencia']),
             legajo: (int)$row['legajo'],
             n_de_cargo: (int)$row['n_de_cargo'],
-            fecha_baja: self::processFechaBaja($row, $tipoMovimiento),
+            fecha_de_baja: self::processFechaBaja($row, $tipoMovimiento),
             tipo_de_movimiento: $tipoMovimiento,
             observaciones: trim($row['observaciones'] ?? ''),
-            chkstopliq: $tipoMovimiento === 'licencia',
+            chkstopliq: $tipoMovimiento === 'Licencia',
             nro_liqui: $nroLiqui
         );
     }
 
     private static function processFechaBaja(array $row, string $tipo): ?Carbon
     {
+
         if (!in_array($tipo, ['fallecido', 'renuncia']) || empty($row['fecha_de_baja'])) {
             return null;
         }
 
         $fecha = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']));
-
+        
         return $fecha->day === 1
             ? $fecha->subMonth()->endOfMonth()
             : $fecha;

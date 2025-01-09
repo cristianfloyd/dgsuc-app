@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Data\Reportes\BloqueosData;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
+use Filament\Notifications\Notification;
 use App\Models\Reportes\BloqueosDataModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -33,9 +34,12 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
      * @param int $nroLiqui Número de liquidación.
      * @param DuplicateValidationService $duplicateValidator Servicio de validación de duplicados.
      */
-    public function __construct(private readonly int $nroLiqui, DuplicateValidationService $duplicateValidator)
-    {
+    public function __construct(
+        private readonly int $nroLiqui,
+        DuplicateValidationService $duplicateValidator
+    ){
         $this->connection = $this->getConnectionFromTrait();
+        $this->processedRows = collect();
         $this->duplicateValidator = $duplicateValidator;
     }
 
@@ -46,16 +50,21 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
             Log::info('Inicio de la importación de bloqueos');
             $this->connection->beginTransaction();
 
-            // Validación de duplicados en el Excel
-            $this->duplicateValidator->validateExcelDuplicates($rows);
+            // Procesar y separar registros
+            $this->duplicateValidator->processRecords($rows);
+
+            // Obtener registros validos
+            $validRecords = $this->duplicateValidator->getValidRecords();
 
             // Transformación y validación mediante DTOs
-            $dtos = $rows->map(fn($row) =>
-                BloqueosData::fromExcelRow($row, $this->nroLiqui)
+            $dtos = $validRecords->map(fn($row) =>
+                BloqueosData::fromExcelRow($row->toArray(), $this->nroLiqui)
             );
 
-            // Procesamiento en lotes para mejor rendimiento
+
+            // Insertar registros válidos
             $dtos->chunk(100)->each(function($chunk) {
+
                 $records = $chunk->map(function($dto) {
                     return $dto->toArray();
                 });
@@ -64,12 +73,18 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
                 $this->processedRows = $this->processedRows->merge($chunk);
             });
 
-
+            // Registrar duplicados para revisión
+            $duplicates = $this->duplicateValidator->getDuplicateRecords();
+            Log::warning('Registros duplicados encontrados', [
+                'duplicates' => $duplicates->toArray(),
+                'count' => $duplicates->count()
+            ]);
 
             $this->connection->commit();
 
             Log::info('Importación completada', [
-                'total_registros' => $this->processedRows->count()
+                'total_registros' => $this->processedRows->count(),
+                'duplicados' => $duplicates->count()
             ]);
 
         } catch (\Exception $e) {

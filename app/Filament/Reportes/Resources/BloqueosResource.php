@@ -2,28 +2,28 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use App\Exports\BloqueosResultadosExport;
-use App\Filament\Reportes\Resources\Bloqueos\Pages;
-use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
-use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
-use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
-use App\Models\Reportes\BloqueosDataModel;
-use App\Services\Reportes\BloqueosProcessService;
 use Filament\Forms;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
+use Illuminate\Contracts\View\View;
+use Filament\Support\Enums\MaxWidth;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use App\Exports\BloqueosResultadosExport;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Reportes\BloqueosProcessService;
+use App\Filament\Reportes\Resources\Bloqueos\Pages;
+use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
+use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
+use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 
 class BloqueosResource extends Resource
 {
@@ -70,9 +70,9 @@ class BloqueosResource extends Resource
                 TextColumn::make('dependencia')->sortable(),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
-                TextColumn::make('fecha_baja')->date('Y-m-d'),
+                TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
                 TextColumn::make('cargo.fec_baja')->label('Fecha dh03'),
-                TextColumn::make('tipo'),
+                TextColumn::make('tipo')->searchable(),
                 TextColumn::make('observaciones')
                     ->limit(20)
                     ->tooltip(function (TextColumn $column): ?string{
@@ -84,9 +84,9 @@ class BloqueosResource extends Resource
                 // Filtro por tipo de bloqueo
                 SelectFilter::make('tipo')
                     ->options([
-                        'Licencia' => 'Licencia',
-                        'Fallecido' => 'Fallecido',
-                        'Renuncia' => 'Renuncia',
+                        'Licencia' => 'licencia',
+                        'Fallecido' => 'fallecido',
+                        'Renuncia' => 'renuncia',
                     ]),
                 // Filtro por estado de procesamiento
                 SelectFilter::make('chkstopliq')
@@ -99,7 +99,7 @@ class BloqueosResource extends Resource
             ->recordClasses(fn (BloqueosDataModel $record): string =>
                 match(true) {
                     $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
-                    $record->tipo === 'Licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
+                    $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
                     default => ''
                 }
             )

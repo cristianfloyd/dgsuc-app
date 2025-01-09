@@ -31,4 +31,27 @@ class ImportNotificationService
             ->warning()
             ->send();
     }
+
+    public function notifyImportResults(int $processedCount, int $duplicatesCount): void
+    {
+        $message = $this->buildImportResultMessage($processedCount, $duplicatesCount);
+
+        Notification::make()
+            ->title('Importación Finalizada')
+            ->body($message)
+            ->success()
+            ->send();
+    }
+
+    private function buildImportResultMessage(int $processedCount, int $duplicatesCount): string
+    {
+        $message = "Importación completada.\n";
+        $message .= "Registros procesados: {$processedCount}\n";
+
+        if ($duplicatesCount > 0) {
+            $message .= "Se encontraron {$duplicatesCount} registros duplicados para revisión.";
+        }
+
+        return $message;
+    }
 }

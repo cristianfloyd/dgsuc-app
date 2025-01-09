@@ -7,6 +7,47 @@ use App\Exceptions\DuplicateCargoException;
 
 class DuplicateValidationService
 {
+    private Collection $duplicateRecords;
+    private Collection $validRecords;
+
+    public function __construct()
+    {
+        $this->duplicateRecords = collect();
+        $this->validRecords = collect();
+    }
+
+    public function processRecords(Collection $rows): void
+    {
+        // Agrupamos por nro_cargo para identificar duplicados
+        $groupedByCargo = $rows->groupBy('n_de_cargo');
+
+        foreach ($groupedByCargo as $nroCargo => $records) {
+            if ($records->count() > 1) {
+                // Guardamos los registros duplicados
+                $this->duplicateRecords = $this->duplicateRecords->merge(
+                    $records->map(fn($record) => [
+                        'nro_cargo' => $nroCargo,
+                        'nro_legajo' => $record['legajo']
+                    ])
+                );
+            } else {
+                // Guardamos los registros válidos
+                $this->validRecords = $this->validRecords->merge($records);
+            }
+        }
+    }
+
+    public function getDuplicateRecords(): Collection
+    {
+        return $this->duplicateRecords;
+    }
+
+    public function getValidRecords(): Collection
+    {
+        return $this->validRecords;
+    }
+    
+
     /**
      * Valida duplicados en la colección de datos del Excel
      *

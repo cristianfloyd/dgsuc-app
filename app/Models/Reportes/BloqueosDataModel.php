@@ -80,4 +80,9 @@ class BloqueosDataModel extends Model
     {
         return $query->whereRaw('DATE(fecha_baja) = DATE(fec_baja)');
     }
+
+    public function scopeTipo($query, $tipo)
+    {
+        return $query->where('tipo', strtolower($tipo));
+    }
 }
