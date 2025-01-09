@@ -2,25 +2,25 @@
 
 namespace App\Imports;
 
-use App\Data\Reportes\BloqueosData;
-use App\Models\Reportes\BloqueosDataModel;
-use App\Services\Imports\DuplicateValidationService;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Data\Reportes\BloqueosData;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
+use App\Models\Reportes\BloqueosDataModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use App\Services\Imports\DuplicateValidationService;
 
 class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, WithChunkReading
 {
     use MapucheConnectionTrait;
     use Importable;
 
-    private string $connection;
+    public string $connection;
     private Collection $rows;
     private Collection $processedRows;
     private DuplicateValidationService $duplicateValidator;
@@ -40,10 +40,10 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     }
 
 
-    public function collection(Collection $rows)
+    public function collection(Collection $rows): void
     {
         try {
-            DB::beginTransaction();
+            DB::connection($this->connection)->beginTransaction();
 
             // Validación de duplicados en el Excel
             $this->duplicateValidator->validateExcelDuplicates($rows);
@@ -65,14 +65,14 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
 
 
 
-            DB::commit();
+            DB::connection($this->connection)->commit();
 
             Log::info('Importación completada', [
                 'total_registros' => $this->processedRows->count()
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::connection($this->connection)->rollBack();
             Log::error('Error en importación', [
                 'message' => $e->getMessage(),
                 'processed_rows' => $this->processedRows->count()

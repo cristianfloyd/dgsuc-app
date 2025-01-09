@@ -3,6 +3,7 @@
 namespace App\Services\Imports;
 
 use App\Imports\BloqueosImport;
+use Illuminate\Support\Facades\DB;
 use App\Exceptions\ImportException;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -32,7 +33,7 @@ class BloqueosImportService
             // Validar archivo antes de procesar
             $this->validationService->validateFile($filePath);
 
-            $connection->beginTransaction();
+            DB::connection($this->getConnectionName())->beginTransaction();
 
             Log::info('Iniciando importación', [
                 'file' => $filePath,
@@ -46,14 +47,14 @@ class BloqueosImportService
 
             Excel::import($importer, $filePath);
 
-            $connection->commit();
+            DB::connection($this->getConnectionName())->commit();
 
             $this->notificationService->sendSuccessNotification();
 
             Log::info('Importación completada exitosamente');
         } catch (DuplicateCargoException $e){
 
-            $connection->rollBack();
+            DB::connection($this->getConnectionName())->rollBack();
             $this->notificationService->sendWarningNotification(
                 'Duplicados encontrados',
                 $e->getMessage()
@@ -61,7 +62,7 @@ class BloqueosImportService
             throw $e;
 
         } catch (\Exception $e) {
-            $connection->rollBack();
+            DB::connection($this->getConnectionName())->rollBack();
 
             Log::error('Error en importación', [
                 'message' => $e->getMessage(),

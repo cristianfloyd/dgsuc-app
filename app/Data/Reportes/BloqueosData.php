@@ -12,29 +12,29 @@ class BloqueosData extends Data
 {
     public function __construct(
         public readonly Carbon $fecha_registro,
-        public readonly string $email,
+        public readonly string $correo_electronico,
         public readonly string $nombre,
-        public readonly string $usuario_mapuche,
+        public readonly string $usuario_mapuche_solicitante,
         public readonly string $dependencia,
-        public readonly int $nro_legaj,
-        public readonly int $nro_cargo,
+        public readonly int $legajo,
+        public readonly int $n_de_cargo,
         public readonly ?Carbon $fecha_baja,
-        public readonly string $tipo,
+        public readonly string $tipo_de_movimiento,
         public readonly ?string $observaciones,
         public readonly bool $chkstopliq,
         public readonly int $nro_liqui,
     ) {}
 
-    public static function rules(ValidationContext $context): array
+    public static function rules(ValidationContext $context = null): array
     {
         return [
-            'email' => ['required', 'email'],
+            'correo_electronico' => ['required', 'email'],
             'nombre' => ['required', 'string'],
-            'usuario_mapuche' => ['required', 'string'],
+            'usuario_mapuche_solicitante' => ['required', 'string'],
             'dependencia' => ['required', 'string'],
-            'nro_legaj' => ['required', 'numeric'],
-            'nro_cargo' => ['required', 'numeric', 'unique:suc.rep_bloqueos_import'],
-            'tipo' => ['required', 'string', 'in:licencia,fallecido,renuncia'],
+            'legajo' => ['required', 'numeric'],
+            'n_de_cargo' => ['required', 'numeric', 'unique:suc.rep_bloqueos_import'],
+            'tipo_de_movimiento' => ['required', 'string', 'in:licencia,fallecido,renuncia'],
         ];
     }
 
@@ -44,14 +44,14 @@ class BloqueosData extends Data
 
         return new self(
             fecha_registro: Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
-            email: strtolower(trim($row['correo_electronico'])),
+            correo_electronico: strtolower(trim($row['correo_electronico'])),
             nombre: ucwords(strtolower(trim($row['nombre']))),
-            usuario_mapuche: strtolower(trim($row['usuario_mapuche_solicitante'])),
+            usuario_mapuche_solicitante: strtolower(trim($row['usuario_mapuche_solicitante'])),
             dependencia: trim($row['dependencia']),
-            nro_legaj: (int)$row['legajo'],
-            nro_cargo: (int)$row['n_de_cargo'],
+            legajo: (int)$row['legajo'],
+            n_de_cargo: (int)$row['n_de_cargo'],
             fecha_baja: self::processFechaBaja($row, $tipoMovimiento),
-            tipo: $tipoMovimiento,
+            tipo_de_movimiento: $tipoMovimiento,
             observaciones: trim($row['observaciones'] ?? ''),
             chkstopliq: $tipoMovimiento === 'licencia',
             nro_liqui: $nroLiqui
