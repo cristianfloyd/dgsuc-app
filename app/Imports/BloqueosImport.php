@@ -56,6 +56,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
             // Obtener registros validos
             $validRecords = $this->duplicateValidator->getValidRecords();
 
+
             // Transformación y validación mediante DTOs
             $dtos = $validRecords->map(fn($row) =>
                 BloqueosData::fromExcelRow($row->toArray(), $this->nroLiqui)

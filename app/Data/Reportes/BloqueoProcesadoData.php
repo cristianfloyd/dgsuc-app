@@ -3,9 +3,12 @@
 namespace App\Data\Reportes;
 
 use Carbon\Carbon;
+use App\Models\Dh03;
 use Spatie\LaravelData\Data;
+use App\Rules\LegajoCargoExistsRule;
 use App\Models\Reportes\BloqueosDataModel;
 use Spatie\LaravelData\Attributes\WithCast;
+use Illuminate\Validation\ValidationException;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
@@ -29,30 +32,58 @@ class BloqueoProcesadoData extends Data
         public readonly ?array $metadata = []
     ) {}
 
-    public static function fromError(string $message, BloqueosDataModel $bloqueo): self
+    public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {
         return new self(
             success: false,
             message: $message,
             bloqueo: $bloqueo,
-            processed_at: now()
+            processed_at: now(),
+            metadata: array_merge($metadata, [
+                'validacion' => Dh03::getDetallesValidacion(
+                    $bloqueo->nro_legaj,
+                    $bloqueo->nro_cargo
+                )
+            ])
         );
     }
 
     public static function fromSuccess(BloqueosDataModel $bloqueo): self
     {
+        if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+            throw ValidationException::withMessages([
+                'legajo_cargo' => 'Combinación legajo-cargo inválida'
+            ]);
+        }
+
         return new self(
             success: true,
             message: 'Procesado exitosamente',
             bloqueo: $bloqueo,
-            processed_at: now()
+            processed_at: now(),
+            metadata: [
+                'validacion' => Dh03::getDetallesValidacion(
+                    $bloqueo->nro_legaj,
+                    $bloqueo->nro_cargo
+                )
+            ]
         );
     }
 
     public static function rules(ValidationContext $context): array
     {
         return [
-            'bloqueo.nro_cargo' => ['required', 'integer'],
+            'bloqueo.nro_cargo' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($context) {
+                    $nroLegaj = $context->payload['bloqueo']['nro_legaj'] ?? null;
+                    if ($nroLegaj) {
+                        $rule = new LegajoCargoExistsRule($nroLegaj, $value);
+                        $rule->validate($attribute, $value, $fail);
+                    }
+                }
+            ],
             'bloqueo.nro_legaj' => ['required', 'integer'],
             'bloqueo.fecha_baja' => ['required', 'date'],
             'bloqueo.tipo' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],

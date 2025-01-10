@@ -5,6 +5,7 @@ namespace App\Models\Reportes;
 use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Enums\LegajoCargo;
+use App\Enums\BloqueosEstadoEnum;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -30,15 +31,37 @@ class BloqueosDataModel extends Model
         'fecha_baja',
         'tipo',
         'observaciones',
-        'chkstopliq'
+        'chkstopliq',
+        'estado',
+        'mensaje_error',
     ];
 
     protected $casts = [
         'fecha_registro' => 'datetime',
         'fecha_baja' => 'date:Y-m-d',
         'chkstopliq' => 'boolean',
-        'fec_baja' => 'date:Y-m-d'
+        'fec_baja' => 'date:Y-m-d',
+        'estado' => BloqueosEstadoEnum::class,
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        self::creating(function ($model) {
+            $model->estado = BloqueosEstadoEnum::IMPORTADO;
+        });
+    }
+
+    public function validarEstado(): void
+    {
+        if (Dh03::validarParLegajoCargo($this->nro_legaj, $this->nro_cargo)) {
+            $this->estado = BloqueosEstadoEnum::VALIDADO;
+        } else {
+            $this->estado = BloqueosEstadoEnum::ERROR_VALIDACION;
+            $this->mensaje_error = 'Par legajo-cargo no encontrado';
+        }
+        $this->save();
+    }
 
     /* ######## ATTRIBUTES ########################################## */
     public function legajoCargo(): Attribute

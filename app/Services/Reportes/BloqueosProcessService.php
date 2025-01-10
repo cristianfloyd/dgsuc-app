@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Dh03;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -21,10 +22,13 @@ class BloqueosProcessService
         if (!Schema::connection($this->getConnectionName())->hasTable('suc.dh03_backup_bloqueos')) {
             Schema::connection($this->getConnectionName())->create('suc.dh03_backup_bloqueos', function (Blueprint $table) {
                 $table->id();
+                $table->integer('nro_liqui');
                 $table->integer('nro_cargo')->unique();
+                $table->integer('nro_legaj');
                 $table->date('fec_baja')->nullable();
                 $table->date('fecha_baja_nueva')->nullable();
                 $table->boolean('chkstopliq')->default(false);
+                $table->string('tipo_bloqueo');
                 $table->timestamp('fecha_backup');
                 $table->string('session_id');
 
@@ -37,6 +41,7 @@ class BloqueosProcessService
     public function procesarBloqueos(): Collection
     {
         $resultados = new Collection();
+        $backupLote = new Collection();
 
         try {
             DB::connection($this->getConnectionName())->beginTransaction();
@@ -44,14 +49,25 @@ class BloqueosProcessService
             // Aseguramos que existe la tabla de backup
             $this->crearTablaBackupSiNoExiste();
 
+            // Obtener todos los registros a procesar
+            $registrosAProcesar = BloqueosDataModel::all();
+
+            // Crear backup antes de cualquier modificación
+            $backup = $this->prepararBackupLote($registrosAProcesar);
             // Crear backup antes de procesar
-            $backup = $this->crearBackup();
-            DB::connection($this->getConnectionName())->table('suc.dh03_backup_bloqueos')->insert($backup->toArray());
+            if ($backup->isNotEmpty()) {
+                DB::connection($this->getConnectionName())
+                    ->table('suc.dh03_backup_bloqueos')
+                    ->insert($backup->toArray());
+            }
 
 
             // Procesar registros
             BloqueosDataModel::query()
                 ->chunk(100, function ($bloqueos) use (&$resultados) {
+
+                    // procesar los registros del lote
+                    Log::info('Procesando lote de ' . $bloqueos->count() . ' registros');
                     foreach ($bloqueos as $bloqueo) {
                         $resultado = $this->procesarRegistro($bloqueo);
                         $resultados->push($resultado->toResource());
@@ -59,6 +75,7 @@ class BloqueosProcessService
                         // Si el proceso fue exitoso, eliminar el registro de la tabla import
                         if ($resultado->success) {
                             $bloqueo->delete();
+                            Log::info('Registro eliminado: ' . $bloqueo->id);
                         }
                     }
                 });
@@ -75,38 +92,47 @@ class BloqueosProcessService
     public function procesarRegistro(BloqueosDataModel $bloqueo): BloqueoProcesadoData
     {
         try {
-            $cargo = Dh03::where('nro_cargo', $bloqueo->nro_cargo)
-                        ->where('nro_legaj', $bloqueo->nro_legaj)
-                        ->first();
-
-            if (!$cargo) {
-                return new BloqueoProcesadoData(
-                    success: false,
-                    message: "Cargo no encontrado",
-                    bloqueo: $bloqueo,
-                    processed_at: now(),
-                    metadata: ['error' => 'Cargo inexistente']
+            // Validamos la existencia del par legajo-cargo
+            Log::info('Validando existencia del par legajo-cargo');
+            if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+                return BloqueoProcesadoData::fromError(
+                    'Combinacion de legajo y cargo no encontrada',
+                    $bloqueo,
+                    ['error_tipo0' => 'validacion']
                 );
             }
 
+            $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+
+
+
+            // Procesar según tipo
+            Log::info("Procesando tipo de bloqueo: {$bloqueo->tipo}");
             match ($bloqueo->tipo) {
-                'Licencia' => $this->procesarLicencia($cargo),
-                'Fallecido', 'Renuncia' => $this->procesarBaja($cargo, $bloqueo->fecha_baja),
+                'licencia' => $this->procesarLicencia($cargo),
+                'fallecido', 'renuncia' => $this->procesarBaja($cargo, $bloqueo->fecha_baja),
                 default => throw new \Exception('Tipo de bloqueo no válido')
             };
 
-            return BloqueoProcesadoData::fromModel($bloqueo);
+            // Si llegamos aquí, el proceso fue exitoso
+            $resultado = BloqueoProcesadoData::fromSuccess($bloqueo);
+
+            Log::info('Proceso exitoso:', $resultado->toArray());
+            return $resultado;
 
         } catch (\Exception $e) {
-            return new BloqueoProcesadoData(
-                success: false,
-                message: $e->getMessage(),
-                bloqueo: $bloqueo,
-                processed_at: now(),
-                metadata: ['error_trace' => $e->getTraceAsString()]
+            // En caso de error, el registro permanece en la tabla
+            return BloqueoProcesadoData::fromError(
+                $e->getMessage(),
+                $bloqueo,
+                [
+                    'error_tipo' => 'procesamiento',
+                    'error_trace' => $e->getTraceAsString()
+                ]
             );
         }
     }
+
 
     private function procesarLicencia(Dh03 $cargo): void
     {
@@ -123,7 +149,30 @@ class BloqueosProcessService
         }
     }
 
-    public function crearBackup(): Collection
+    public function prepararBackupLote(Collection $bloqueos): Collection
+    {
+        Log::info('Preparando backup del lote de bloqueos');
+        $backup = $bloqueos->map(function ($bloqueo) {
+            $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+
+            if (!$cargo) return null;
+
+            return [
+                'nro_cargo' => $cargo->nro_cargo,
+                'nro_legaj' => $cargo->nro_legaj,
+                'nro_liqui' => $bloqueo->nro_liqui,
+                'fec_baja' => $cargo->fec_baja,
+                'fecha_baja_nueva' => $bloqueo->fecha_baja,
+                'chkstopliq' => $cargo->chkstopliq,
+                'tipo_bloqueo' => $bloqueo->tipo,
+                'fecha_backup' => now(),
+                'session_id' => session()->getId()
+            ];
+        })->filter();
+        Log::info('Backup preparado', ['backup' => $backup]);
+        return $backup;
+    }
+    private function crearBackup(): Collection
     {
         return DB::connection($this->getConnectionName())->table('dh03')
             ->whereIn('nro_cargo', function($query) {
@@ -132,6 +181,11 @@ class BloqueosProcessService
             })
             ->get()
             ->map(function($item) {
+                // Validamos usando el scope del modelo
+                $cargo = Dh03::validarLegajoCargo($item->nro_legaj, $item->nro_cargo)->first();
+
+                if (!$cargo) return null;
+
                 // Obtenemos la fecha_baja de la tabla de importación
                 $bloqueoImportado = DB::connection($this->getConnectionName())
                     ->table('suc.rep_bloqueos_import')
@@ -141,9 +195,12 @@ class BloqueosProcessService
 
                 return [
                     'nro_cargo' => $item->nro_cargo,
+                    'nro_legaj' => $item->nro_legaj,
+                    'nro_liqui' => $bloqueoImportado->nro_liqui,
                     'fec_baja' => $item->fec_baja,
                     'fecha_baja_nueva' => $bloqueoImportado->fecha_baja,
                     'chkstopliq' => $item->chkstopliq,
+                    'tipo_bloqueo' => $bloqueoImportado->tipo_bloqueo,
                     'fecha_backup' => now(),
                     'session_id' => session()->getId()
                 ];
@@ -189,6 +246,7 @@ class BloqueosProcessService
             throw $e;
         }
     }
+
 
     private function procesarLicencias()
     {

@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
 use Illuminate\Contracts\View\View;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
@@ -79,6 +81,16 @@ class BloqueosResource extends Resource
                         return $column->getState();
                     }),
                 IconColumn::make('chkstopliq')->boolean(),
+                TextColumn::make('estado')
+                    ->badge()
+                    ->enum(BloqueosEstadoEnum::class)
+                    ->colors([
+                        'gray' => BloqueosEstadoEnum::IMPORTADO->value,
+                        'info' => BloqueosEstadoEnum::VALIDADO->value,
+                        'warning' => BloqueosEstadoEnum::ERROR_VALIDACION->value,
+                        'success' => BloqueosEstadoEnum::PROCESADO->value,
+                        'danger' => BloqueosEstadoEnum::ERROR_PROCESO->value,
+                    ])
             ])
             ->filters([
                 // Filtro por tipo de bloqueo
@@ -117,6 +129,15 @@ class BloqueosResource extends Resource
 
             ])
             ->bulkActions([
+                BulkAction::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->action(function (Collection $records): void {
+                        $records->each(function ($record) {
+                            $record->delete();
+                        });
+                    })
+                    ->label('Eliminar'),
                 // Acción masiva para múltiples registros
                 BulkAction::make('procesarBloqueos')
                     ->label('Procesar Seleccionados')

@@ -10,9 +10,11 @@ use Illuminate\Queue\Events\JobFailed;
 use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
+use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
             JobProcessed::class, // Asumiendo que el evento está en App\Events
             JobProcessedListener::class
         );
+
+        $this->app->bind(BloqueosServiceInterface::class, BloqueosService::class);
     }
 
     /**

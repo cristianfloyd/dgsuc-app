@@ -110,9 +110,32 @@ class Dh03 extends Model
         $this->attributes['chkstopliq'] = (int) $value;
     }
 
+    /* ############################### GETTERS ############################## */
     public static function getCargoCount()
     {
         return Dh03::count();
+    }
+
+    /**
+     * Obtiene los detalles completos de la validación
+     *
+     * @param int $nroLegaj
+     * @param int $nroCargo
+     * @return array
+     */
+    public static function getDetallesValidacion(int $nroLegaj, int $nroCargo): array
+    {
+        $cargo = static::validarLegajoCargo($nroLegaj, $nroCargo)->first();
+
+        return [
+            'existe' => (bool) $cargo,
+            'detalles' => $cargo ? [
+                'legajo' => $cargo->nro_legaj,
+                'cargo' => $cargo->nro_cargo,
+                'estado' => $cargo->chkstopliq ? 'Bloqueado' : 'Activo',
+                'fecha_baja' => $cargo->fec_baja,
+            ] : null
+        ];
     }
 
     /** ############################## SCOPES ############################## */
@@ -122,6 +145,20 @@ class Dh03 extends Model
         return $query->where('chkstopliq', '=', 0)
                      ->where('codc_uacad', '!=', '')
                      ->whereNull('fec_baja');
+    }
+
+    /**
+    * Scope para validar la combinación legajo-cargo
+    *
+    * @param \Illuminate\Database\Eloquent\Builder $query
+    * @param int $nroLegaj
+    * @param int $nroCargo
+    * @return \Illuminate\Database\Eloquent\Builder
+    */
+    public function scopeValidarLegajoCargo($query,int $nro_legaj, int $nro_cargo)
+    {
+        return $query->where('nro_legaj', $nro_legaj)
+            ->where('nro_cargo', $nro_cargo);
     }
 
     /* ############################## RELACIONES ############################## */
@@ -198,4 +235,11 @@ class Dh03 extends Model
             get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
+
+    /*  ##################### HELPER ##################### */
+    public static function validarParLegajoCargo(int $nroLegaj, int $nroCargo): bool
+    {
+        return static::validarLegajoCargo($nroLegaj, $nroCargo)->exists();
+    }
+
 }

@@ -36,6 +36,11 @@ class BloqueosDataProcessor extends Component
     public int $registrosProcesados = 0;
     public float $porcentajeCompletado = 0;
     private BloqueosProcessService $service;
+    // El nro_liqui lo obtendremos del primer registro
+    private function getNroLiquidacion(): int
+    {
+        return $this->registros->first()->nro_liqui;
+    }
 
 
     public function boot(BloqueosProcessService $service): void
@@ -47,7 +52,12 @@ class BloqueosDataProcessor extends Component
     {
 
         $this->registros = $registros;
-        Log::info('BloqueosDataProcessor mounted');
+
+
+        Log::info('BloqueosDataProcessor mounted', [
+            'nro_liqui' => $this->getNroLiquidacion(),
+            'registros' => $this->registros?->count(),
+        ]);
 
         if ($this->registros) {
             $this->iniciarProcesamiento();
@@ -65,19 +75,13 @@ class BloqueosDataProcessor extends Component
         try {
             DB::connection($this->service->getConnectionName())->beginTransaction();
 
-            // Aseguramos existencia de tabla backup
-            $this->crearTablaBackupSiNoExiste();
-
-            //Creamos y gaurdamos el backup de seguridad
-            $this->crearBackupSeguridad();
-
             // Procesamos los registros en chunks
             $this->procesarRegistros();
 
             DB::connection($this->service->getConnectionName())->commit();
 
             $this->guardarResultadosEnCache();
-            Log::info('Procesamiento de bloqueos finalizado');
+            Log::info('Procesamiento de bloqueos finalizado en BloqueosDataProcessor');
             $this->notificarResultados();
 
         } catch (\Exception $e) {
@@ -97,33 +101,14 @@ class BloqueosDataProcessor extends Component
         $this->service->crearTablaBackupSiNoExiste();
     }
 
-    private function crearBackupSeguridad(): void
-    {
-        $backup = $this->service->crearBackup();
-        DB::connection($this->service->getConnectionName())
-            ->table('suc.dh03_backup_bloqueos')
-            ->insert($backup->toArray());
-    }
+
 
     private function procesarRegistros(): void
     {
-        $this->resultados = collect();
+        $this->resultados = $this->service->procesarBloqueos();
         $this->totalRegistros = $this->registros->count();
-        $this->registrosProcesados = 0;
-
-        foreach ($this->registros as $bloqueo) {
-            $resultado = $this->service->procesarRegistro($bloqueo);
-            $this->resultados->push($resultado->toResource());
-
-            $this->registrosProcesados++;
-            $this->porcentajeCompletado = ($this->registrosProcesados / $this->totalRegistros) * 100;
-
-            // Si el proceso fue exitoso, eliminamos el registro
-            if ($resultado->success) {
-                $bloqueo->delete();
-            }
-        }
-
+        $this->registrosProcesados = $this->resultados->count();
+        $this->porcentajeCompletado = ($this->registrosProcesados / $this->totalRegistros) * 100;
     }
 
     /**
@@ -198,7 +183,8 @@ class BloqueosDataProcessor extends Component
             'exitosos' => $resultados->where('success', true)->count(),
             'fallidos' => $resultados->where('success', false)->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn($grupo) => $grupo->count())
+                ->map(fn($grupo) => $grupo->count()),
+            'nro_liqui' => $this->getNroLiquidacion()
         ];
     }
 
@@ -207,14 +193,16 @@ class BloqueosDataProcessor extends Component
      */
     private function getCacheKey(): string
     {
-        return 'bloqueos_resultados_' . auth()->id();
+        // Incluimos nro_liqui en la clave de caché
+        return "bloqueos_resultados_{$this->getNroLiquidacion()}_" . auth()->id();
     }
 
     private function notificarResultados(): void
     {
         $stats = $this->getEstadisticas();
+        $nroLiqui = $this->getNroLiquidacion();
         Notification::make()
-            ->title('Proceso completado')
+            ->title("Proceso completado - Liquidación {$nroLiqui}")
             ->body("Total: {$stats['total']}, Exitosos: {$stats['exitosos']}, Fallidos: {$stats['fallidos']}")
             ->success()
             ->send();

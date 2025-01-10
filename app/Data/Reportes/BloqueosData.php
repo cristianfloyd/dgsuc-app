@@ -3,6 +3,7 @@
 namespace App\Data\Reportes;
 
 use Carbon\Carbon;
+use App\Models\Dh03;
 use Spatie\LaravelData\Data;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\MapName;
@@ -42,15 +43,14 @@ class BloqueosData extends Data
             'legajo' => [
                 'required',
                 'numeric',
-                'min:1' // Asegura que sea mayor o igual a 1
             ],
             'n_de_cargo' => [
                 'required',
                 'numeric',
-                'min:1',
                 Rule::unique('pgsql-mapuche.suc.rep_bloqueos_import', 'nro_cargo')
             ],
             'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
+            'fecha_de_baja' => ['required_if:tipo_de_movimiento,Fallecido,Renuncia', 'date'],
         ];
     }
 
@@ -58,6 +58,7 @@ class BloqueosData extends Data
     {
         $tipoMovimiento = strtolower($row['tipo_de_movimiento']);
 
+        
         return new self(
             fecha_registro: Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
             correo_electronico: strtolower(trim($row['correo_electronico'])),
@@ -86,5 +87,21 @@ class BloqueosData extends Data
         return $fecha->day === 1
             ? $fecha->subMonth()->endOfMonth()
             : $fecha;
+    }
+
+    /**
+     * Método helper para validar la combinación legajo-cargo
+     */
+    public function validarCombinacionLegajoCargo(): bool
+    {
+        return Dh03::validarParLegajoCargo($this->legajo, $this->n_de_cargo);
+    }
+
+    /**
+     * Obtiene detalles extendidos de la validación
+     */
+    public function getDetallesValidacion(): array
+    {
+        return Dh03::getDetallesValidacion($this->legajo, $this->n_de_cargo);
     }
 }
