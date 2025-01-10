@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Maatwebsite\Excel\Concerns\ToModel;
 use App\Models\Reportes\BloqueosDataModel;
