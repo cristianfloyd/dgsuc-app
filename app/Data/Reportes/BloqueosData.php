@@ -39,10 +39,15 @@ class BloqueosData extends Data
             'nombre' => ['required', 'string'],
             'usuario_mapuche_solicitante' => ['required', 'string'],
             'dependencia' => ['required', 'string'],
-            'legajo' => ['required', 'numeric'],
+            'legajo' => [
+                'required',
+                'numeric',
+                'min:1' // Asegura que sea mayor o igual a 1
+            ],
             'n_de_cargo' => [
                 'required',
                 'numeric',
+                'min:1',
                 Rule::unique('pgsql-mapuche.suc.rep_bloqueos_import', 'nro_cargo')
             ],
             'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
@@ -77,7 +82,7 @@ class BloqueosData extends Data
         }
 
         $fecha = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']));
-        
+
         return $fecha->day === 1
             ? $fecha->subMonth()->endOfMonth()
             : $fecha;
