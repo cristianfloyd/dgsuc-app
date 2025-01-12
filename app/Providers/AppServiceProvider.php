@@ -14,6 +14,8 @@ use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
+use App\Services\Imports\BloqueosImportService;
+use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,7 +40,13 @@ class AppServiceProvider extends ServiceProvider
             JobProcessedListener::class
         );
 
-        $this->app->bind(BloqueosServiceInterface::class, BloqueosService::class);
+        $this->app->bind(BloqueosServiceInterface::class, function ($app, $parameters) {
+            return new BloqueosService(
+                $app->make(BloqueosImportService::class),
+                $app->make(BloqueosProcessService::class),
+                $parameters['nroLiqui'] ?? throw new \InvalidArgumentException('nroLiqui es requerido')
+            );
+        });
     }
 
     /**

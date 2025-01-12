@@ -83,14 +83,14 @@ class BloqueosResource extends Resource
                 IconColumn::make('chkstopliq')->boolean(),
                 TextColumn::make('estado')
                     ->badge()
-                    ->enum(BloqueosEstadoEnum::class)
                     ->colors([
                         'gray' => BloqueosEstadoEnum::IMPORTADO->value,
                         'info' => BloqueosEstadoEnum::VALIDADO->value,
                         'warning' => BloqueosEstadoEnum::ERROR_VALIDACION->value,
                         'success' => BloqueosEstadoEnum::PROCESADO->value,
                         'danger' => BloqueosEstadoEnum::ERROR_PROCESO->value,
-                    ])
+                    ]),
+                TextColumn::make('mensaje_error')
             ])
             ->filters([
                 // Filtro por tipo de bloqueo

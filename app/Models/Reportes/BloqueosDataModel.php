@@ -19,7 +19,6 @@ class BloqueosDataModel extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id',
         'nro_liqui',
         'fecha_registro',
         'email',
@@ -47,9 +46,6 @@ class BloqueosDataModel extends Model
     protected static function boot()
     {
         parent::boot();
-        self::creating(function ($model) {
-            $model->estado = BloqueosEstadoEnum::IMPORTADO;
-        });
     }
 
     public function validarEstado(): void

@@ -103,11 +103,14 @@ Verificar el formato del archivo
 Validar la estructura del Excel
 Revisar los logs de error
 
-## 7. Mantenimiento
+## 7. Flujo de trabajo
 
-Realizar respaldos periódicos de la base de datos
-Monitorear el rendimiento de las importaciones
-Actualizar las dependencias según sea necesario
+Excel -> DTO -> Servicios -> Modelo -> Base de Datos
+
+- Excel -> Array
+- Array -> BloqueosData (DTO)
+- DTO -> Procesamiento
+- Procesamiento -> Collection
 
 ## 8. Soporte
 

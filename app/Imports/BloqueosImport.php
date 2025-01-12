@@ -2,19 +2,24 @@
 
 namespace App\Imports;
 
+use App\DTOs\ImportResultDTO;
+use App\Enums\BloqueosEstadoEnum;
+use PhpParser\Node\Stmt\TryCatch;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use App\Data\Reportes\BloqueosData;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use Filament\Notifications\Notification;
+use App\Exceptions\ValidationException;
 use App\Models\Reportes\BloqueosDataModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use App\Services\Imports\ImportNotificationService;
 use App\Services\Imports\DuplicateValidationService;
+use App\Services\Validation\ExcelRowValidationService;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, WithChunkReading
 {
@@ -22,9 +27,9 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     use Importable;
 
     public $connection;
-    private Collection $rows;
+
     private Collection $processedRows;
-    private DuplicateValidationService $duplicateValidator;
+    private ImportResultDTO $importResult;
 
     /**
      * Constructor de la clase BloqueosImport.
@@ -36,111 +41,173 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
      */
     public function __construct(
         private readonly int $nroLiqui,
-        DuplicateValidationService $duplicateValidator
-    ){
+        private readonly DuplicateValidationService $duplicateValidator,
+        private readonly BloqueosServiceInterface $bloqueosService,
+        private readonly ImportNotificationService $notificationService,
+        private readonly ExcelRowValidationService $rowValidator
+    ) {
         $this->connection = $this->getConnectionFromTrait();
         $this->processedRows = collect();
-        $this->duplicateValidator = $duplicateValidator;
+        $this->importResult = new ImportResultDTO(
+            message: 'Iniciando importación de bloqueos'
+        );
+
+        Log::debug('BloqueosImport constructor called', [
+            'nroLiqui' => $this->nroLiqui,
+        ]);
     }
+
+
+
 
 
     public function collection(Collection $rows): void
     {
         try {
-            Log::info('Inicio de la importación de bloqueos');
-            $this->connection->beginTransaction();
-
-            // Procesar y separar registros
-            $this->duplicateValidator->processRecords($rows);
-
-            // Obtener registros validos
-            $validRecords = $this->duplicateValidator->getValidRecords();
-
-
-            // Transformación y validación mediante DTOs
-            $dtos = $validRecords->map(fn($row) =>
-                BloqueosData::fromExcelRow($row->toArray(), $this->nroLiqui)
-            );
-
-
-            // Insertar registros válidos
-            $dtos->chunk(100)->each(function($chunk) {
-
-                $records = $chunk->map(function($dto) {
-                    return $dto->toArray();
+            $this->connection->transaction(function () use ($rows) {
+                $rows->chunk($this->chunkSize())->each(function ($chunk) {
+                    $this->processChunk($chunk);
                 });
-
-                BloqueosDataModel::insert($records->all());
-                $this->processedRows = $this->processedRows->merge($chunk);
             });
 
-            // Registrar duplicados para revisión
-            $duplicates = $this->duplicateValidator->getDuplicateRecords();
-            Log::warning('Registros duplicados encontrados', [
-                'duplicates' => $duplicates->toArray(),
-                'count' => $duplicates->count()
-            ]);
-
-            $this->connection->commit();
-
-            Log::info('Importación completada', [
-                'total_registros' => $this->processedRows->count(),
-                'duplicados' => $duplicates->count()
-            ]);
-
+            $this->importResult->success = true;
+            $this->importResult->message = 'Importación completada exitosamente';
         } catch (\Exception $e) {
-            $this->connection->rollBack();
-            Log::error('Error en importación', [
-                'message' => $e->getMessage(),
-                'processed_rows' => $this->processedRows->count()
+            $this->importResult->success = false;
+            $this->importResult->error = $e;
+            $this->importResult->message = 'Error en la importación: ' . $e->getMessage();
+            $this->importResult->addError($e->getMessage(), [
+                'trace' => $e->getTraceAsString()
             ]);
+
             throw $e;
         }
     }
 
+    private function processChunk(Collection $chunk): void
+    {
+        $this->connection->transaction(function () use ($chunk) {
+            // Validación de duplicados
+            $validatedChunk = $this->validateChunk($chunk);
+
+            // Procesamiento de registros válidos
+            $validatedChunk->each(function ($row) {
+                $this->processRow($row->toArray());
+            });
+        });
+    }
+
+    private function validateChunk(Collection $chunk): Collection
+    {
+        $this->duplicateValidator->processRecords($chunk);
+        return $this->duplicateValidator->getValidRecords();
+    }
+
+    private function processRow(array $row): void
+    {
+        try {
+            // Validación completa de la fila
+            $validatedData = $this->rowValidator->validateRow($row);
+
+            // Si hay error de validación, guardamos el registro con el error
+            if ($validatedData['estado'] === BloqueosEstadoEnum::ERROR_VALIDACION) {
+                BloqueosDataModel::create([
+                    'email' => $validatedData['correo_electronico'],
+                    'nombre' => $validatedData['nombre'],
+                    'usuario_mapuche' => $validatedData['usuario_mapuche_solicitante'],
+                    'dependencia' => $validatedData['dependencia'],
+                    'nro_legaj' => $validatedData['legajo'],
+                    'nro_cargo' => $validatedData['n_de_cargo'],
+                    'fecha_baja' => $validatedData['fecha_de_baja'] ?? null,
+                    'tipo' => $validatedData['tipo_de_movimiento'],
+                    'observaciones' => $validatedData['observaciones'] ?? '',
+                    'nro_liqui' => $this->nroLiqui,
+                    'estado' => $validatedData['estado'],
+                    'mensaje_error' => $validatedData['mensaje_error']
+                ]);
+
+                $this->importResult->incrementErrorCount();
+                return;
+            }
+
+            // Transformación a DTO
+            $bloqueosData = BloqueosData::fromValidatedData($validatedData, $this->nroLiqui);
+
+            // Creación del registro en BD con estado inicial
+            $bloqueosModel = BloqueosDataModel::create([
+                $bloqueosData->toArray(),
+                'estado' => BloqueosEstadoEnum::IMPORTADO
+            ]);
+
+            // Procesamiento
+            $result = $this->bloqueosService->processImport($bloqueosData->toArray());
+
+            // Actualización exitosa del registro
+            $bloqueosModel->update([
+                'estado' => BloqueosEstadoEnum::VALIDADO
+            ]);
+
+            $this->processedRows->push($result);
+            $this->importResult->incrementProcessedCount();
+        } catch (ValidationException $e) {
+            // Guardamos el registro con el error de validación
+            BloqueosDataModel::create([
+                'email' => $row['correo_electronico'],
+                'nombre' => $row['nombre'],
+                'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
+                'dependencia' => $row['dependencia'],
+                'nro_legaj' => $row['legajo'],
+                'nro_cargo' => $row['n_de_cargo'],
+                'fecha_baja' => $row['fecha_de_baja'] ?? null,
+                'tipo' => $row['tipo_de_movimiento'],
+                'observaciones' => $row['observaciones'] ?? '',
+                'nro_liqui' => $this->nroLiqui,
+                'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
+                'mensaje_error' => $e->getMessage()
+            ]);
+
+            $this->importResult->incrementErrorCount();
+            Log::warning('Error de validación en fila', [
+                'row' => $row,
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Exception $e) {
+            // Guardamos el registro con error general
+            BloqueosDataModel::create([
+                'email' => $row['correo_electronico'],
+                'nombre' => $row['nombre'],
+                'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
+                'dependencia' => $row['dependencia'],
+                'nro_legaj' => $row['legajo'],
+                'nro_cargo' => $row['n_de_cargo'],
+                'fecha_baja' => $row['fecha_de_baja'] ?? null,
+                'tipo' => $row['tipo_de_movimiento'],
+                'observaciones' => $row['observaciones'] ?? '',
+                'nro_liqui' => $this->nroLiqui,
+                'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
+                'mensaje_error' => $e->getMessage()
+            ]);
+
+            $this->importResult->incrementErrorCount();
+            Log::error('Error procesando fila', [
+                'row' => $row,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function logImportStatistics(): void
+    {
+        Log::info('Importación completada', [
+            'processed' => $this->importResult->getProcessedCount(),
+            'duplicates' => $this->importResult->getDuplicateCount(),
+            'errors' => $this->importResult->getErrorCount()
+        ]);
+    }
 
 
-    // public function model(array $row)
-    // {
-    //     $fechaBaja = null;
-    //     $chkstopliq = false;
-
-    //     $tipoMovimiento = strtolower($row['tipo_de_movimiento']);
-
-    //     if ($tipoMovimiento === 'licencia') {
-    //         $chkstopliq = true;
-    //     } elseif (in_array($tipoMovimiento, ['fallecido', 'renuncia']) && !empty($row['fecha_de_baja'])) {
-    //         $fechaBaja = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']))
-    //             ->format('Y-m-d');
-    //         if (Carbon::parse($fechaBaja)->day === 1) {
-    //             $fechaBaja = Carbon::parse($fechaBaja)
-    //                 ->subMonth()
-    //                 ->endOfMonth()
-    //                 ->format('Y-m-d');
-    //         }
-    //     }
 
 
-
-    //     // Convertir hora de finalización de Excel a Carbon
-    //     $fechaRegistro = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion']));
-
-
-    //     return new BloqueosDataModel([
-    //         'fecha_registro' => $fechaRegistro,
-    //         'email' => $row['correo_electronico'],
-    //         'nombre' => $row['nombre'],
-    //         'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
-    //         'dependencia' => $row['dependencia'],
-    //         'nro_legaj' => $row['legajo'],
-    //         'nro_cargo' => $row['n_de_cargo'],
-    //         'fecha_baja' => $fechaBaja,
-    //         'tipo' => $row['tipo_de_movimiento'],
-    //         'observaciones' => $row['observaciones'] ?? null,
-    //         'chkstopliq' => $chkstopliq,
-    //         'nro_liqui' => $this->nroLiqui,
-    //     ]);
-    // }
 
     /**
      * Define la fila que contiene los encabezados
@@ -166,22 +233,10 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
         return $this->processedRows->count();
     }
 
-    /**
-     * Reglas de validación para los datos importados
-     * @return array
-     */
-    // public function rules(): array
-    // {
-    //     return [
-    //         'correo_electronico' => ['required', 'email'],
-    //         'nombre' => ['required', 'string'],
-    //         'usuario_mapuche_solicitante' => ['required', 'string'],
-    //         'dependencia' => ['required', 'string'],
-    //         'legajo' => ['required', 'numeric'],
-    //         'n_de_cargo' => ['required', 'numeric'],
-    //         'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
-    //     ];
-    // }
+    public function getImportResult(): ImportResultDTO
+    {
+        return $this->importResult;
+    }
 
     /**
      * Mensajes personalizados para las validaciones

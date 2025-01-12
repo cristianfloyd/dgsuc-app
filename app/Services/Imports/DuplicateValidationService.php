@@ -3,6 +3,7 @@
 namespace App\Services\Imports;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Exceptions\DuplicateCargoException;
 
 class DuplicateValidationService
@@ -14,13 +15,14 @@ class DuplicateValidationService
     {
         $this->duplicateRecords = collect();
         $this->validRecords = collect();
+        Log::debug('DuplicateValidationService initialized');
     }
 
     public function processRecords(Collection $rows): void
     {
         // Agrupamos por nro_cargo para identificar duplicados
         $groupedByCargo = $rows->groupBy('n_de_cargo');
-
+        
         foreach ($groupedByCargo as $nroCargo => $records) {
             if ($records->count() > 1) {
                 // Guardamos los registros duplicados
@@ -46,7 +48,7 @@ class DuplicateValidationService
     {
         return $this->validRecords;
     }
-    
+
 
     /**
      * Valida duplicados en la colección de datos del Excel

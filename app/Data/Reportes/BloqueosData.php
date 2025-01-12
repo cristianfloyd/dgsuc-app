@@ -6,19 +6,19 @@ use Carbon\Carbon;
 use App\Models\Dh03;
 use Spatie\LaravelData\Data;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use Spatie\LaravelData\Attributes\MapName;
-use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class BloqueosData extends Data
 {
     public function __construct(
         public readonly Carbon $fecha_registro,
-        #[MapName('email')]
-        public readonly string $correo_electronico,
+        #[MapName('correo_electronico')]
+        public readonly string $email,
         public readonly string $nombre,
-        #[MapName('usuario_mapuche')]
-        public readonly string $usuario_mapuche_solicitante,
+        #[MapName('usuario_mapuche_solicitante')]
+        public readonly string $usuario_mapuche,
         public readonly string $dependencia,
         #[MapName('nro_legaj')]
         public readonly int $legajo,
@@ -26,8 +26,8 @@ class BloqueosData extends Data
         public readonly int $n_de_cargo,
         #[MapName('fecha_baja')]
         public readonly ?Carbon $fecha_de_baja,
-        #[MapName('tipo')]
-        public readonly string $tipo_de_movimiento,
+        #[MapName('tipo_de_movimiento')]
+        public readonly string $tipo,
         public readonly ?string $observaciones,
         public readonly bool $chkstopliq,
         public readonly int $nro_liqui,
@@ -50,7 +50,15 @@ class BloqueosData extends Data
                 Rule::unique('pgsql-mapuche.suc.rep_bloqueos_import', 'nro_cargo')
             ],
             'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
-            'fecha_de_baja' => ['required_if:tipo_de_movimiento,Fallecido,Renuncia', 'date'],
+            'fecha_de_baja' => [
+                'required_if:tipo_de_movimiento,Fallecido,Renuncia',
+                function ($attribute, $value, $fail) {
+                    // Permitir tanto fechas como números (formato Excel)
+                    if (!empty($value) && !is_numeric($value) && !strtotime($value)) {
+                        $fail('El formato de fecha no es válido.');
+                    }
+                }
+            ],
         ];
     }
 
@@ -58,32 +66,71 @@ class BloqueosData extends Data
     {
         $tipoMovimiento = strtolower($row['tipo_de_movimiento']);
 
-        
+
         return new self(
             fecha_registro: Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
-            correo_electronico: strtolower(trim($row['correo_electronico'])),
+            email: strtolower(trim($row['correo_electronico'])),
             nombre: ucwords(strtolower(trim($row['nombre']))),
-            usuario_mapuche_solicitante: strtolower(trim($row['usuario_mapuche_solicitante'])),
+            usuario_mapuche: strtolower(trim($row['usuario_mapuche_solicitante'])),
             dependencia: trim($row['dependencia']),
             legajo: (int)$row['legajo'],
             n_de_cargo: (int)$row['n_de_cargo'],
             fecha_de_baja: self::processFechaBaja($row, $tipoMovimiento),
-            tipo_de_movimiento: $tipoMovimiento,
+            tipo: $tipoMovimiento,
             observaciones: trim($row['observaciones'] ?? ''),
             chkstopliq: $tipoMovimiento === 'Licencia',
             nro_liqui: $nroLiqui
         );
     }
 
+    public static function fromValidatedData(array $validatedData, int $nroLiqui): self
+    {
+        Log::debug('Datos validados recibidos:', [
+            'correo' => $validatedData['correo_electronico'] ?? 'no presente',
+            'estado' => $validatedData['estado'],
+        ]);
+        $instance = new self(
+            fecha_registro: now(),
+            email: strtolower($validatedData['correo_electronico']),
+            nombre: ucwords(strtolower($validatedData['nombre'])),
+            usuario_mapuche: strtolower($validatedData['usuario_mapuche_solicitante']),
+            dependencia: $validatedData['dependencia'],
+            legajo: $validatedData['legajo'],
+            n_de_cargo: $validatedData['n_de_cargo'],
+            fecha_de_baja: $validatedData['fecha_de_baja'],
+            tipo: $validatedData['tipo_de_movimiento'],
+            observaciones: $validatedData['observaciones'] ?? '',
+            chkstopliq: $validatedData['tipo_de_movimiento'] === 'Licencia',
+            nro_liqui: $nroLiqui
+        );
+
+        Log::debug('DTO creado:', [
+            'email' => $instance->email,
+            'estado' => $instance->toArray()['estado'],
+        ]);
+
+        return $instance;
+    }
+
     private static function processFechaBaja(array $row, string $tipo): ?Carbon
     {
 
-        if (!in_array($tipo, ['fallecido', 'renuncia']) || empty($row['fecha_de_baja'])) {
+        // Si no es un tipo que requiera fecha, retornamos null
+        if (!in_array($tipo, ['fallecido', 'renuncia'])) {
             return null;
         }
 
-        $fecha = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']));
+        // Si no hay fecha y el tipo la requiere, esto se manejará en las reglas de validación
+        if (empty($row['fecha_de_baja'])) {
+            return null;
+        }
 
+        // Procesamiento de la fecha según el formato
+        $fecha = is_numeric($row['fecha_de_baja'])
+            ? Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']))
+            : Carbon::parse($row['fecha_de_baja']);
+
+        // Aplicamos la lógica de negocio para ajustar la fecha
         return $fecha->day === 1
             ? $fecha->subMonth()->endOfMonth()
             : $fecha;

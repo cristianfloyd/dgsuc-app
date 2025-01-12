@@ -3,7 +3,6 @@
 namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
 
 use Filament\Forms\Form;
-use Filament\Actions\Action;
 use Livewire\WithFileUploads;
 use App\Imports\BloqueosImport;
 use Filament\Resources\Pages\Page;
@@ -16,10 +15,15 @@ use App\Traits\MapucheConnectionTrait;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
-use App\Services\Reportes\BloqueosDataService;
+use App\Services\Reportes\BloqueosService;
 use App\Services\Imports\BloqueosImportService;
 use Filament\Forms\Concerns\InteractsWithForms;
+use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Imports\ImportNotificationService;
+use App\Services\Imports\DuplicateValidationService;
 use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Services\Validation\ExcelRowValidationService;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class ImportData extends Page
 {
@@ -75,47 +79,73 @@ class ImportData extends Page
     public function import(): void
     {
         $filePath = collect($this->data['excel_file'])->first()->getRealPath();
+        $nroLiqui = (int)$this->data['nro_liqui'];
+        $connection = $this->getConnectionFromTrait();
 
         try {
-            app(BloqueosImportService::class)->processImport(
-                $filePath,
-                $this->data['nro_liqui']
+            // Validación previa del archivo
+            if (!file_exists($filePath)) {
+                throw new \Exception('El archivo no existe o no es accesible');
+            }
+
+
+
+            Log::debug('Iniciando importación', [
+                'liquidacion' => $nroLiqui,
+                'archivo' => $filePath
+            ]);
+
+            // Creamos una instancia del importador con sus dependencias
+            $import = new BloqueosImport(
+                $nroLiqui,
+                app(DuplicateValidationService::class),
+                app(BloqueosServiceInterface::class, [
+                    'importService' => app(BloqueosImportService::class),
+                    'processService' => app(BloqueosProcessService::class),
+                    'nroLiqui' => $nroLiqui
+                ]),
+                app(ImportNotificationService::class),
+                app(ExcelRowValidationService::class),
             );
+
+            // Importamos el archivo
+            Log::debug("Importando archivo: $filePath");
+            Excel::import($import, $filePath);
+
+            // Obtenemos los resultados detallados del import
+            $resultados = $import->getProcessedRowsCount();
+            $importResult = $import->getImportResult();
+
+            if ($importResult->success) {
+                app(ImportNotificationService::class)->notifyImportResults(
+                    $importResult->getProcessedCount(),
+                    $importResult->getDuplicateCount()
+                );
+                Log::info('Importación completada exitosamente', $importResult->toArray());
+            } else {
+                throw new \Exception($importResult->message, 0, $importResult->error);
+            }
+
+            // Limpieza del archivo temporal
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
         } catch (\Exception $e) {
-            // El servicio ya maneja las notificaciones
-            return;
+
+
+            Log::error('Error en importación', [
+                'file' => $filePath,
+                'liquidacion' => $nroLiqui,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            app(ImportNotificationService::class)->sendErrorNotification($e->getMessage());
         }
     }
 
-    // public function import(): void
-    // {
-    //     $connection = $this->getConnectionFromTrait();
-    //     $filePath = collect($this->data['excel_file'])->first()->getRealPath();
 
-    //     try {
-    //         $connection->beginTransaction();
-    //         Log::info('Importando archivo: ' . $filePath);
-
-    //         $importer = new BloqueosImport($this->data['nro_liqui']);
-    //         Excel::import($importer, $filePath);
-
-    //         $connection->commit();
-
-    //         Notification::make()
-    //             ->title('Importación exitosa')
-    //             ->success()
-    //             ->send();
-
-    //     } catch (\Exception $e) {
-    //         $connection->rollBack();
-    //         Log::error('Error en la importación: ' . $e->getMessage());
-    //         Notification::make()
-    //             ->title('Error en la importación')
-    //             ->body('Error: ' . $e->getMessage())
-    //             ->danger()
-    //             ->send();
-    //     }
-    // }
 
 
     protected function getHeaderActions(): array

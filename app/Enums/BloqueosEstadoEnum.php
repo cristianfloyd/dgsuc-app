@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum BloqueosEstadoEnum: string
 {
+    case PENDIENTE = 'pendiente';
     case IMPORTADO = 'importado';
     case VALIDADO = 'validado';
     case ERROR_VALIDACION = 'error_validacion';
@@ -13,6 +14,7 @@ enum BloqueosEstadoEnum: string
     public function getLabel(): string
     {
         return match($this) {
+            self::PENDIENTE => 'Pendiente',
             self::IMPORTADO => 'Recién Importado',
             self::VALIDADO => 'Validado',
             self::ERROR_VALIDACION => 'Error de Validación',
