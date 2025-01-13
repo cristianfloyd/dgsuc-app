@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Dh03;
 use Spatie\LaravelData\Data;
 use Illuminate\Validation\Rule;
+use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Facades\Log;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
