@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
+namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Pages;
 
-use App\Filament\Reportes\Resources\RepGerencialfinalResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Reportes\Resources\RepGerencialfinalResource;
 
 class CreateRepGerencialfinal extends CreateRecord
 {

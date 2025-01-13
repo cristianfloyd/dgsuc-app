@@ -16,15 +16,15 @@ use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosProcessService;
-use App\Filament\Reportes\Resources\Bloqueos\Pages;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
+use App\Filament\Reportes\Resources\BloqueosResource\Pages\ImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
+use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 
 class BloqueosResource extends Resource
@@ -179,8 +179,8 @@ class BloqueosResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListImportData::route('/'),
-            'create' => Pages\ImportData::route('/crear'),
+            'index' => ListImportData::route('/'),
+            'create' => ImportData::route('/crear'),
             'view' => ViewBloqueo::route('/{record}'),
         ];
     }

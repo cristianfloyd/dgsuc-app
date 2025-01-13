@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
+namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
 
 use Filament\Forms\Form;
 use Livewire\WithFileUploads;

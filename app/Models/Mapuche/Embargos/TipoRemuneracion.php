@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Mapuche\Emgargos;
+namespace App\Models\Mapuche\Embargos;
 
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;

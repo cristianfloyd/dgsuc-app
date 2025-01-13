@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
+namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;

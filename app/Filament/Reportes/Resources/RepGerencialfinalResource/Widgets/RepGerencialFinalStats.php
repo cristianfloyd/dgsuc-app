@@ -2,6 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets;
 
+
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -42,7 +43,7 @@ class RepGerencialFinalStats extends BaseWidget
             ->description('Cantidad de liquidaciones procesadas')
             ->descriptionIcon('heroicon-m-document-text')
             ->color('info'),
-            
+
             Stat::make('Total Agentes', number_format($totales->total_agentes))
                 ->description('Cantidad de agentes en la liquidación')
                 ->descriptionIcon('heroicon-m-users')
