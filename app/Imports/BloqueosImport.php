@@ -64,12 +64,14 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     public function collection(Collection $rows): void
     {
         try {
+            // Procesamiento por lotes dentro de una transacción
             $this->connection->transaction(function () use ($rows) {
                 $rows->chunk($this->chunkSize())->each(function ($chunk) {
                     $this->processChunk($chunk);
                 });
             });
 
+            // Actualización del resultado final
             $this->importResult->success = true;
             $this->importResult->message = 'Importación completada exitosamente';
         } catch (\Exception $e) {
@@ -86,7 +88,6 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
 
     private function processChunk(Collection $chunk): void
     {
-        $this->connection->transaction(function () use ($chunk) {
             // Validación de duplicados
             $validatedChunk = $this->validateChunk($chunk);
 
@@ -94,7 +95,6 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
             $validatedChunk->each(function ($row) {
                 $this->processRow($row->toArray());
             });
-        });
     }
 
     private function validateChunk(Collection $chunk): Collection
@@ -105,94 +105,23 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
 
     private function processRow(array $row): void
     {
-        try {
-            // Validación completa de la fila
-            $validatedData = $this->rowValidator->validateRow($row);
+        // Validación completa de la fila
+        $validatedData = $this->rowValidator->validateRow($row);
 
-            // Si hay error de validación, guardamos el registro con el error
-            if ($validatedData['estado'] === BloqueosEstadoEnum::ERROR_VALIDACION) {
-                BloqueosDataModel::create([
-                    'email' => $validatedData['correo_electronico'],
-                    'nombre' => $validatedData['nombre'],
-                    'usuario_mapuche' => $validatedData['usuario_mapuche_solicitante'],
-                    'dependencia' => $validatedData['dependencia'],
-                    'nro_legaj' => $validatedData['legajo'],
-                    'nro_cargo' => $validatedData['n_de_cargo'],
-                    'fecha_baja' => $validatedData['fecha_de_baja'] ?? null,
-                    'tipo' => $validatedData['tipo_de_movimiento'],
-                    'observaciones' => $validatedData['observaciones'] ?? '',
-                    'nro_liqui' => $this->nroLiqui,
-                    'estado' => $validatedData['estado'],
-                    'mensaje_error' => $validatedData['mensaje_error']
-                ]);
 
-                $this->importResult->incrementErrorCount();
-                return;
-            }
+        // Transformación a DTO
+        $bloqueosData = BloqueosData::fromValidatedData($validatedData, $this->nroLiqui);
 
-            // Transformación a DTO
-            $bloqueosData = BloqueosData::fromValidatedData($validatedData, $this->nroLiqui);
+        // Crea un nuevo registro en la base de datos utilizando el modelo BloqueosDataModel con los datos validados convertidos a un array
+        $bloqueosModel = BloqueosDataModel::create($bloqueosData->toArray());
 
-            // Creación del registro en BD con estado inicial
-            $bloqueosModel = BloqueosDataModel::create([
-                $bloqueosData->toArray(),
-                'estado' => BloqueosEstadoEnum::IMPORTADO
-            ]);
-
-            // Procesamiento
-            $result = $this->bloqueosService->processImport($bloqueosData->toArray());
-
-            // Actualización exitosa del registro
-            $bloqueosModel->update([
-                'estado' => BloqueosEstadoEnum::VALIDADO
-            ]);
-
-            $this->processedRows->push($result);
+        // 4. Actualización de contadores
+        if ($bloqueosData->estado === BloqueosEstadoEnum::VALIDADO) {
+            // Agrega el modelo de bloqueos procesado a la colección de filas procesadas
+            $this->processedRows->push($bloqueosModel);
             $this->importResult->incrementProcessedCount();
-        } catch (ValidationException $e) {
-            // Guardamos el registro con el error de validación
-            BloqueosDataModel::create([
-                'email' => $row['correo_electronico'],
-                'nombre' => $row['nombre'],
-                'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
-                'dependencia' => $row['dependencia'],
-                'nro_legaj' => $row['legajo'],
-                'nro_cargo' => $row['n_de_cargo'],
-                'fecha_baja' => $row['fecha_de_baja'] ?? null,
-                'tipo' => $row['tipo_de_movimiento'],
-                'observaciones' => $row['observaciones'] ?? '',
-                'nro_liqui' => $this->nroLiqui,
-                'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => $e->getMessage()
-            ]);
-
+        } else {
             $this->importResult->incrementErrorCount();
-            Log::warning('Error de validación en fila', [
-                'row' => $row,
-                'error' => $e->getMessage()
-            ]);
-        } catch (\Exception $e) {
-            // Guardamos el registro con error general
-            BloqueosDataModel::create([
-                'email' => $row['correo_electronico'],
-                'nombre' => $row['nombre'],
-                'usuario_mapuche' => $row['usuario_mapuche_solicitante'],
-                'dependencia' => $row['dependencia'],
-                'nro_legaj' => $row['legajo'],
-                'nro_cargo' => $row['n_de_cargo'],
-                'fecha_baja' => $row['fecha_de_baja'] ?? null,
-                'tipo' => $row['tipo_de_movimiento'],
-                'observaciones' => $row['observaciones'] ?? '',
-                'nro_liqui' => $this->nroLiqui,
-                'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
-                'mensaje_error' => $e->getMessage()
-            ]);
-
-            $this->importResult->incrementErrorCount();
-            Log::error('Error procesando fila', [
-                'row' => $row,
-                'error' => $e->getMessage()
-            ]);
         }
     }
 

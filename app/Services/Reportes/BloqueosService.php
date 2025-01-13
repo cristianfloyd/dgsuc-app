@@ -32,7 +32,7 @@ class BloqueosService implements BloqueosServiceInterface
      * @param array $row Fila de datos de bloqueos importados desde Excel.
      * @return \Illuminate\Support\Collection<BloqueosData> Colección de datos de bloqueos procesados.
      */
-    public function processImport(array $row): Collection
+    public function processImport(array|BloqueosData $row): Collection
     {
         Log::debug("Procesando fila de bloqueos: " . json_encode($row));
         // transformamos primero a DTO para garantizar la integridad de los datos

@@ -15,10 +15,8 @@ class BloqueosData extends Data
 {
     public function __construct(
         public readonly Carbon $fecha_registro,
-        #[MapName('correo_electronico')]
         public readonly string $email,
         public readonly string $nombre,
-        #[MapName('usuario_mapuche_solicitante')]
         public readonly string $usuario_mapuche,
         public readonly string $dependencia,
         #[MapName('nro_legaj')]
@@ -27,11 +25,11 @@ class BloqueosData extends Data
         public readonly int $n_de_cargo,
         #[MapName('fecha_baja')]
         public readonly ?Carbon $fecha_de_baja,
-        #[MapName('tipo_de_movimiento')]
         public readonly string $tipo,
         public readonly ?string $observaciones,
         public readonly bool $chkstopliq,
         public readonly int $nro_liqui,
+        public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE
     ) {}
 
     public static function rules(ValidationContext $context = null): array
@@ -86,9 +84,8 @@ class BloqueosData extends Data
 
     public static function fromValidatedData(array $validatedData, int $nroLiqui): self
     {
-        Log::debug('Datos validados recibidos:', [
-            'correo' => $validatedData['correo_electronico'] ?? 'no presente',
-            'estado' => $validatedData['estado'],
+        Log::debug('Datos validados recibidos en BloqueosData::fromValidatedData', [
+            $validatedData,
         ]);
         $instance = new self(
             fecha_registro: now(),
@@ -99,15 +96,15 @@ class BloqueosData extends Data
             legajo: $validatedData['legajo'],
             n_de_cargo: $validatedData['n_de_cargo'],
             fecha_de_baja: $validatedData['fecha_de_baja'],
-            tipo: $validatedData['tipo_de_movimiento'],
+            tipo: strtolower($validatedData['tipo_de_movimiento']),
             observaciones: $validatedData['observaciones'] ?? '',
-            chkstopliq: $validatedData['tipo_de_movimiento'] === 'Licencia',
-            nro_liqui: $nroLiqui
+            chkstopliq: strtolower($validatedData['tipo_de_movimiento']) === 'licencia',
+            nro_liqui: $nroLiqui,
+            estado: $validatedData['estado']
         );
 
         Log::debug('DTO creado:', [
-            'email' => $instance->email,
-            'estado' => $instance->toArray()['estado'],
+            'instance' => $instance,
         ]);
 
         return $instance;

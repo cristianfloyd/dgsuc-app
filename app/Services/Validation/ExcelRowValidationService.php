@@ -28,11 +28,12 @@ class ExcelRowValidationService
         $cargoValidation = $this->validateCargo($row['n_de_cargo']);
         $tipoValidation = $this->validateTipoMovimiento($row['tipo_de_movimiento']);
         $fechaValidation = $this->validateFechaBaja($row['fecha_de_baja'] ?? null, $row['tipo_de_movimiento']);
+        $usuarioMapucheValidation = $this->validateUsuarioMapuche($row['usuario_mapuche_solicitante']);
 
         $validatedData = [
             'correo_electronico' => $this->validateEmail($row['correo_electronico']),
             'nombre' => $this->validateNombre($row['nombre']),
-            'usuario_mapuche_solicitante' => $this->validateUsuarioMapuche($row['usuario_mapuche_solicitante']),
+            'usuario_mapuche_solicitante' => $usuarioMapucheValidation['value'],
             'dependencia' => $this->validateDependencia($row['dependencia']),
             'legajo' => $legajoValidation['value'],
             'n_de_cargo' => $cargoValidation['value'],
@@ -43,8 +44,11 @@ class ExcelRowValidationService
         ];
 
         $validations = [
+            $usuarioMapucheValidation,
             $legajoValidation,
             $cargoValidation,
+            $fechaValidation,
+            $tipoValidation
         ];
 
         // Verificamos si alguna validación falló
@@ -103,20 +107,32 @@ class ExcelRowValidationService
     /**
      * Valida y normaliza el usuario Mapuche
      */
-    private function validateUsuarioMapuche(?string $usuario): string
-    {
-        if (empty($usuario)) {
-            throw new ValidationException('El usuario Mapuche es requerido');
-        }
-
-        $usuario = strtolower(trim($usuario));
-
-        if (!preg_match('/^[a-z0-9._-]+$/', $usuario)) {
-            throw new ValidationException("Usuario Mapuche inválido: {$usuario}");
-        }
-
-        return $usuario;
+    private function validateUsuarioMapuche(?string $usuario): array
+{
+    if (empty($usuario)) {
+        return [
+            'value' => null,
+            'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
+            'mensaje_error' => 'El usuario Mapuche es requerido'
+        ];
     }
+
+    $usuario = strtolower(trim($usuario));
+
+    if (!preg_match('/^[a-z0-9._-]+$/', $usuario)) {
+        return [
+            'value' => $usuario,
+            'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
+            'mensaje_error' => "Usuario Mapuche inválido: {$usuario}"
+        ];
+    }
+
+    return [
+        'value' => $usuario,
+        'estado' => BloqueosEstadoEnum::VALIDADO
+    ];
+}
+
 
     /**
      * Valida y normaliza la dependencia
@@ -202,7 +218,7 @@ class ExcelRowValidationService
         }
 
         $tipo = strtolower(trim($tipo));
-        $tiposValidos = ['Licencia', 'Fallecido', 'Renuncia'];
+        $tiposValidos = ['licencia', 'fallecido', 'renuncia'];
 
         if (!in_array($tipo, $tiposValidos)) {
             return [

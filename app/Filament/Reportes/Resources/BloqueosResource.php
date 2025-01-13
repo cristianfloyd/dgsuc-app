@@ -64,12 +64,16 @@ class BloqueosResource extends Resource
 
         return $table
             ->columns([
+                TextColumn::make('estado')
+                    ->badge()
+                    ->color(fn (BloqueosEstadoEnum $state): string => $state->getColor())
+                    ,
                 TextColumn::make('nro_liqui')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_registro')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('dependencia')->sortable(),
+                TextColumn::make('dependencia')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nro_cargo'),
                 TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
@@ -79,17 +83,8 @@ class BloqueosResource extends Resource
                     ->limit(20)
                     ->tooltip(function (TextColumn $column): ?string{
                         return $column->getState();
-                    }),
+                    })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('chkstopliq')->boolean(),
-                TextColumn::make('estado')
-                    ->badge()
-                    ->colors([
-                        'gray' => BloqueosEstadoEnum::IMPORTADO->value,
-                        'info' => BloqueosEstadoEnum::VALIDADO->value,
-                        'warning' => BloqueosEstadoEnum::ERROR_VALIDACION->value,
-                        'success' => BloqueosEstadoEnum::PROCESADO->value,
-                        'danger' => BloqueosEstadoEnum::ERROR_PROCESO->value,
-                    ]),
                 TextColumn::make('mensaje_error')
             ])
             ->filters([
