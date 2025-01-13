@@ -5,6 +5,7 @@ namespace App\Filament\Reportes\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
@@ -24,6 +25,7 @@ use App\Services\Reportes\BloqueosProcessService;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
+use App\Filament\Reportes\Resources\BloqueosResource\Pages\EditImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 
@@ -74,10 +76,10 @@ class BloqueosResource extends Resource
                 TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('dependencia')->sortable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('nro_legaj'),
-                TextColumn::make('nro_cargo'),
+                TextColumn::make('nro_legaj')->searchable(),
+                TextColumn::make('nro_cargo')->searchable(),
                 TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
-                TextColumn::make('cargo.fec_baja')->label('Fecha dh03'),
+                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->sortable(),
                 TextColumn::make('tipo')->searchable(),
                 TextColumn::make('observaciones')
                     ->limit(20)
@@ -111,6 +113,13 @@ class BloqueosResource extends Resource
                 }
             )
             ->actions([
+                // Agregar esta nueva acción de edición
+                Action::make('edit')
+                    ->label('Editar')
+                    ->icon('heroicon-o-pencil-square')
+                    ->url(fn (BloqueosDataModel $record): string =>
+                        static::getUrl('edit', ['record' => $record]))
+                    ->color('warning'),
                 Action::make('procesarBloqueos')
                     ->label('Procesar Bloqueo')
                     ->icon('heroicon-o-arrow-path')
@@ -120,8 +129,7 @@ class BloqueosResource extends Resource
                     ->modalWidth(MaxWidth::FiveExtraLarge)
                     ->modalHeading('Procesamiento de Bloqueos')
                     ->modalSubmitAction(false)
-                    ->modalCancelAction(false)
-
+                    ->modalCancelAction(false),
             ])
             ->bulkActions([
                 BulkAction::make('delete')
@@ -182,6 +190,7 @@ class BloqueosResource extends Resource
             'index' => ListImportData::route('/'),
             'create' => ImportData::route('/crear'),
             'view' => ViewBloqueo::route('/{record}'),
+            'edit' => EditImportData::route('/{record}/editar'),
         ];
     }
 

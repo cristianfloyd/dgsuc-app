@@ -39,7 +39,7 @@ class Dh03Resource extends Resource
     {
         return $table
         ->columns([
-            TextColumn::make('nro_cargo')->label('Cargo')->numeric()->sortable(),
+            TextColumn::make('nro_cargo')->label('Cargo')->numeric()->sortable()->searchable(),
             TextColumn::make('nro_legaj')->label('Legajo')->numeric()->sortable()->searchable(),
             TextColumn::make('fec_alta')->date('Y-m-d')->sortable()->toggleable()->toggledHiddenByDefault(),
             TextColumn::make('fec_baja')->date('Y-m-d')->sortable()->toggleable()->toggledHiddenByDefault(),
@@ -97,7 +97,7 @@ class Dh03Resource extends Resource
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(5)
             ->actions([
-                // Tables\Actions\EditAction::make(),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

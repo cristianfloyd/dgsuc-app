@@ -32,6 +32,7 @@ use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Http\Controllers\PanelAccessController;
 use App\Http\Controllers\PanelSelectorController;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
+use App\Http\Controllers\BloqueosHistorialController;
 use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
@@ -75,6 +76,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/test-column-metadata', function () {
         $columnMetadata = app(ColumnMetadata::class);
     });
+    Route::get('/bloqueos/historial', [BloqueosHistorialController::class, 'index'])
+        ->name('bloqueos.historial.index');
+    Route::get('/bloqueos/historial/{periodo}', [BloqueosHistorialController::class, 'show'])
+        ->name('bloqueos.historial.show');
 
     Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
     Route::get('/afip/convertir',ConvertirTabla::class)->name('convertir');

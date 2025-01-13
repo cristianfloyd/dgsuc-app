@@ -122,6 +122,9 @@ class ImportData extends Page
                     $importResult->getDuplicateCount()
                 );
                 Log::info('Importación completada exitosamente', $importResult->toArray());
+
+                // Redirigir al index después de una importación exitosa
+                $this->redirect(BloqueosResource::getUrl('index'));
             } else {
                 throw new \Exception($importResult->message, 0, $importResult->error);
             }
