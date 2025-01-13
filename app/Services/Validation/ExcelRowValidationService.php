@@ -12,6 +12,9 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ExcelRowValidationService
 {
+    private array $errors = [];
+
+
     public function __construct(
         private readonly DateParserService $dateParserService
     ) {}
@@ -21,6 +24,7 @@ class ExcelRowValidationService
      */
     public function validateRow(array $row): array
     {
+        $this->errors = [];
         Log::debug('Iniciando validación de fila', ['row' => $row]);
 
         // Ejecutamos todas las validaciones
@@ -40,7 +44,8 @@ class ExcelRowValidationService
             'tipo_de_movimiento' => $tipoValidation['value'],
             'fecha_de_baja' => $fechaValidation['value'],
             'observaciones' => $this->validateObservaciones($row['observaciones']),
-            'estado' => BloqueosEstadoEnum::VALIDADO
+            'estado' => BloqueosEstadoEnum::VALIDADO,
+            'mensaje_error' => null,
         ];
 
         $validations = [
@@ -63,6 +68,10 @@ class ExcelRowValidationService
         return $validatedData;
     }
 
+    private function addError(string $field, string $message): void
+    {
+        $this->errors[] = "{$field}: {$message}";
+    }
 
     /**
      * Valida y normaliza el email

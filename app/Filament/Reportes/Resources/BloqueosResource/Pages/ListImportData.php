@@ -106,7 +106,8 @@ class ListImportData extends ListRecords
     public function getTabs(): array
     {
         return [
-            'Todo' => Tab::make(),
+            'Todo' => Tab::make()
+                ->badge(fn() => $this->getModel()::all()->count()),
             'Licencia' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->count())
                 ->badgeColor('info')
@@ -119,6 +120,14 @@ class ListImportData extends ListRecords
                 ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->count())
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')),
+            'valido' => Tab::make()
+                ->badge(fn() => $this->getModel()::where('estado', 'validado')->count())
+                ->badgeColor('success')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'validado')),
+            'error_validacion' => Tab::make()
+                ->badge(fn() => $this->getModel()::where('estado', 'error_validacion')->count())
+                ->badgeColor('danger')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'error_validacion')),
         ];
     }
 

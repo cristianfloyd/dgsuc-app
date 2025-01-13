@@ -29,7 +29,8 @@ class BloqueosData extends Data
         public readonly ?string $observaciones,
         public readonly bool $chkstopliq,
         public readonly int $nro_liqui,
-        public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE
+        public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE,
+        public readonly ?string $mensaje_error = null,
     ) {}
 
     public static function rules(ValidationContext $context = null): array
@@ -100,7 +101,8 @@ class BloqueosData extends Data
             observaciones: $validatedData['observaciones'] ?? '',
             chkstopliq: strtolower($validatedData['tipo_de_movimiento']) === 'licencia',
             nro_liqui: $nroLiqui,
-            estado: $validatedData['estado']
+            estado: $validatedData['estado'],
+            mensaje_error: $validatedData['mensaje_error'] ?? null
         );
 
         Log::debug('DTO creado:', [
