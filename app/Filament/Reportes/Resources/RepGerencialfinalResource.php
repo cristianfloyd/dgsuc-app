@@ -28,6 +28,8 @@ class RepGerencialfinalResource extends Resource
     use MapucheConnectionTrait;
     private static $connectionInstance = null;
     protected static ?string $model = RepGerencialFinal::class;
+    protected static ?string $label = 'Reporte Gerencial';
+    protected static ?string $pluralLabel = 'Reporte Gerencial';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Reportes';
     protected static ?string $navigationLabel = 'Reporte Gerencial';
