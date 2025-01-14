@@ -52,9 +52,10 @@ class BloqueosDataModel extends Model
     {
         if (Dh03::validarParLegajoCargo($this->nro_legaj, $this->nro_cargo)) {
             $this->estado = BloqueosEstadoEnum::VALIDADO;
+            $this->mensaje_error = null;
         } else {
             $this->estado = BloqueosEstadoEnum::ERROR_VALIDACION;
-            $this->mensaje_error = 'Par legajo-cargo no encontrado';
+            $this->mensaje_error = 'Par legajo-cargo no encontrado en Mapuche';
         }
         $this->save();
     }

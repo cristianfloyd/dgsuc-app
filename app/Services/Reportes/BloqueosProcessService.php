@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Data\Reportes\BloqueoProcesadoData;
+use App\Enums\BloqueosEstadoEnum;
 
 class BloqueosProcessService
 {
@@ -39,7 +40,18 @@ class BloqueosProcessService
         }
     }
 
-    public function procesarBloqueos(BloqueosData $bloqueosData = null): Collection
+    /**
+     * Procesa los bloqueos pendientes en el sistema.
+     *
+     * Este método se encarga de procesar los registros de bloqueos (licencias, bajas, etc.)
+     * realizando las actualizaciones correspondientes en la tabla DH03 y manteniendo un
+     * registro de backup para posible restauración.
+     *
+     * @param BloqueosData|null $bloqueosData Datos específicos a procesar. Si es null, procesa todos los registros pendientes.
+     * @return Collection<BloqueoProcesadoData> Colección con los resultados del procesamiento
+     * @throws \Exception Si ocurre un error durante el procesamiento
+     */
+    public function procesarBloqueos(?BloqueosData $bloqueosData = null): Collection
     {
         $resultados = new Collection();
 
@@ -49,61 +61,103 @@ class BloqueosProcessService
             // Aseguramos que existe la tabla de backup
             $this->crearTablaBackupSiNoExiste();
 
-            if ($bloqueosData === null) {
-                $bloqueosData = BloqueosData::from(BloqueosDataModel::all());
+            // Definir el query base con validaciones de estado
+            $query = BloqueosDataModel::query()
+                ->where('estado', BloqueosEstadoEnum::VALIDADO)
+                ->whereNull('mensaje_error');
+
+            if ($bloqueosData !== null) {
+                // Validar que todos los registros estén en estado correcto
+                $registrosInvalidos = $bloqueosData->filter(function ($bloqueo) {
+                    return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
+                           !is_null($bloqueo->mensaje_error);
+                });
+
+                if ($registrosInvalidos->isNotEmpty()) {
+                    throw new \Exception(
+                        'Existen registros no validados o con errores. ' .
+                        'Por favor, valide todos los registros antes de procesar.'
+                    );
+                }
+
+                $query->whereIn('id', $bloqueosData->pluck('id'));
             }
 
-
-
-
-            // Crear backup antes de cualquier modificación
-            $backup = $this->prepararBackupLote(collect([$bloqueosData]));
-            if ($backup->isNotEmpty()) {
-                DB::connection($this->getConnectionName())
-                    ->table('suc.dh03_backup_bloqueos')
-                    ->insert($backup->toArray());
+            // Verificar que existan registros para procesar
+            if ($query->count() === 0) {
+                throw new \Exception('No hay registros válidos para procesar.');
             }
 
+            // Procesar en lotes
+            $query->chunk(100, function ($lote) use (&$resultados) {
+                // Preparar backup del lote actual
+                $backup = $this->prepararBackupLote($lote);
+                if ($backup->isNotEmpty()) {
+                    DB::connection($this->getConnectionName())
+                        ->table('suc.dh03_backup_bloqueos')
+                        ->insert($backup->toArray());
+                }
 
-
-
-            BloqueosDataModel::query()
-                ->chunk(100, function ($bloqueos) use (&$resultados) {
-
-                    // procesar los registros del lote
-                    Log::info('Procesando lote de ' . $bloqueos->count() . ' registros');
-                    foreach ($bloqueos as $bloqueo) {
+                // Procesar registros
+                foreach ($lote as $bloqueo) {
+                    try {
                         $resultado = $this->procesarRegistro($bloqueo);
                         $resultados->push($resultado->toResource());
 
-                        // Si el proceso fue exitoso, eliminar el registro de la tabla import
                         if ($resultado->success) {
+                            // Actualizar estado antes de eliminar
+                            $bloqueo->update([
+                                'estado' => BloqueosEstadoEnum::PROCESADO,
+                                'mensaje_error' => null
+                            ]);
+
                             $bloqueo->delete();
-                            Log::info('Registro eliminado: ', ['id' => $bloqueo->id]);
+
+                            Log::info('Registro procesado y eliminado', [
+                                'id' => $bloqueo->id,
+                                'tipo' => $bloqueo->tipo,
+                                'legajo' => $bloqueo->nro_legaj,
+                                'cargo' => $bloqueo->nro_cargo
+                            ]);
+                        } else {
+                            // Actualizar estado en caso de error
+                            $bloqueo->update([
+                                'estado' => BloqueosEstadoEnum::ERROR_PROCESAMIENTO,
+                                'mensaje_error' => $resultado->error_message
+                            ]);
                         }
+                    } catch (\Exception $e) {
+                        Log::error('Error procesando registro individual', [
+                            'id' => $bloqueo->id,
+                            'error' => $e->getMessage()
+                        ]);
+
+                        $bloqueo->update([
+                            'estado' => BloqueosEstadoEnum::ERROR_PROCESAMIENTO,
+                            'mensaje_error' => $e->getMessage()
+                        ]);
                     }
-                });
+                }
+            });
 
             DB::connection($this->getConnectionName())->commit();
+
+            Log::info('Procesamiento completado', [
+                'total_procesados' => $resultados->count(),
+                'exitosos' => $resultados->where('success', true)->count(),
+                'fallidos' => $resultados->where('success', false)->count()
+            ]);
+
             return $resultados;
 
         } catch (\Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
-            Log::error('Error en procesamiento de bloqueo', [
+            Log::error('Error en procesamiento de bloqueos', [
                 'message' => $e->getMessage(),
-                'data' => $bloqueosData->toArray()
+                'trace' => $e->getTraceAsString()
             ]);
 
-            $resultados->push(BloqueoProcesadoData::fromError(
-                $e->getMessage(),
-                $bloqueosData,
-                [
-                    'error_tipo' => 'procesamiento',
-                    'error_trace' => $e->getTraceAsString()
-                ]
-            )->toResource());
-
-            return $resultados;
+            throw $e;
         }
     }
 
