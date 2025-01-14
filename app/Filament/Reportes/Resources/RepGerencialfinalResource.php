@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
 use App\Filament\Reportes\Resources\RepGerencialfinalResource\RelationManagers;
 
-class RepGerencialfinalResource extends Resource
+class RepGerencialFinalResource extends Resource
 {
     use MapucheConnectionTrait;
     private static $connectionInstance = null;
