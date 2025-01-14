@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ReporteResource\Pages;
+namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;

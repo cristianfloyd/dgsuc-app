@@ -20,6 +20,7 @@ class BloqueosImportService
 
     private ImportValidationService $validationService;
     private ImportNotificationService $notificationService;
+    private $connection;
 
     public function __construct(
         ImportValidationService $validationService,
@@ -27,6 +28,7 @@ class BloqueosImportService
     ) {
         $this->validationService = $validationService;
         $this->notificationService = $notificationService;
+        $this->connection = $this->getConnectionFromTrait();
     }
 
     public function processImport(array $row, int $nroLiqui): array

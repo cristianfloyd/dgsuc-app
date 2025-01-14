@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\Bloqueos\Pages;
+namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
 
 use Filament\Forms\Form;
 use Livewire\WithFileUploads;
@@ -122,6 +122,9 @@ class ImportData extends Page
                     $importResult->getDuplicateCount()
                 );
                 Log::info('Importación completada exitosamente', $importResult->toArray());
+
+                // Redirigir al index después de una importación exitosa
+                $this->redirect(BloqueosResource::getUrl('index'));
             } else {
                 throw new \Exception($importResult->message, 0, $importResult->error);
             }

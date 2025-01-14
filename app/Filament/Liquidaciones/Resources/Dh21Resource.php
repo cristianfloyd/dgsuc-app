@@ -2,22 +2,18 @@
 
 namespace App\Filament\Liquidaciones\Resources;
 
-use Filament\Forms;
 use App\Models\Dh21;
 use Filament\Tables;
 use Livewire\Livewire;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
 use App\Livewire\Reportes\OrdenPagoReporte;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Liquidaciones\Resources\Dh21Resource\Pages;
-use App\Filament\Liquidaciones\Resources\Dh21Resource\RelationManagers;
+use App\Filament\Liquidaciones\Resources\Dh21Resource\Pages\ConceptosTotales;
 
 class Dh21Resource extends Resource
 {
@@ -138,7 +134,7 @@ class Dh21Resource extends Resource
         return [
             'index' => Pages\ListDh21s::route('/'),
             'edit' => Pages\EditDh21::route('/{record}/edit'),
-            'conceptos-totales' => Pages\ConceptosTotales::route('/conceptos-totales'),
+            'conceptos-totales' => ConceptosTotales::route('/conceptos-totales'),
         ];
     }
 

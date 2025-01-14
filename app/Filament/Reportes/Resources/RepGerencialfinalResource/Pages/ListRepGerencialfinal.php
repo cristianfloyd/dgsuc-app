@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
+namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Pages;
 
 use Exception;
 use Filament\Actions;
@@ -199,7 +199,7 @@ class ListRepGerencialfinal extends ListRecords
     {
         try {
             $selectedLiquidaciones = $this->idLiquiSelected;
-            
+
 
             if (empty($selectedLiquidaciones)) {
                 Notification::make()
