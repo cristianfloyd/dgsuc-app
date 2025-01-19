@@ -9,16 +9,17 @@ use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
+    use MapucheConnectionTrait;
     public function up(): void
     {
-        Schema::create('bloqueos_historial', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.bloqueos_historial', function (Blueprint $table) {
             $table->id();
             $table->date('periodo_importacion');
             $table->foreignId('bloqueo_id');
             $table->string('campo_modificado', 50);
             $table->text('valor_anterior')->nullable();
             $table->text('valor_nuevo')->nullable();
-            $table->foreignId('usuario_id')->constrained('users');
+            $table->foreignId('usuario_id');
             $table->enum('estado_procesamiento', ['pendiente', 'procesado', 'error']);
             $table->boolean('resultado_final')->default(false);
             $table->json('metadata')->nullable();
@@ -33,6 +34,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('bloqueos_historial');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.bloqueos_historial');
     }
 };
