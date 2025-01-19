@@ -9,6 +9,7 @@ use App\Models\Mapuche\Dh21h;
 use Illuminate\Database\Seeder;
 use League\Csv\Serializer\CastToString;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\EncodingService;
 
 class Dh21hHistoricoSeeder extends Seeder
 {
@@ -17,13 +18,13 @@ class Dh21hHistoricoSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtenemos 1000 legajos aleatorios únicos de dh01
+        // Obtenemos 10 legajos aleatorios únicos de dh01
         $legajosConCargo = Dh03::select('nro_legaj', 'nro_cargo')
             ->whereIn('nro_legaj', function($query) {
                 $query->select('nro_legaj')
                     ->from('dh01')
                     ->inRandomOrder()
-                    ->limit(100);
+                    ->limit(10);
             })
             ->groupBy('nro_legaj', 'nro_cargo')
             ->get();
@@ -38,14 +39,14 @@ class Dh21hHistoricoSeeder extends Seeder
         ];
 
         // Separamos los legajos: 80% con todos los períodos, 20% solo con el primer período
-        $legajosCompletos = $legajosConCargo->take(80);
-        $legajosIncompletos = $legajosConCargo->skip(80);
+        $legajosCompletos = $legajosConCargo->take(8);
+        $legajosIncompletos = $legajosConCargo->skip(2);
 
         foreach ($periodos as $periodo) {
             // Crear una liquidación definitiva para el período
             $liquidacion = Dh22::create([
                 'nro_liqui' => Dh22::max('nro_liqui') + 1,
-                'desc_liqui' => "Liquidación Definitiva {$periodo['mes']}/{$periodo['ano']}",
+                'desc_liqui' => EncodingService::toLatin1("Liquidacion Definitiva {$periodo['mes']}/{$periodo['ano']}"),
                 'periodo' => $periodo['ano'] . '' . $periodo['mes'],
                 'per_anoap' => $periodo['ano'],
                 'per_mesap' => $periodo['mes'],
@@ -53,6 +54,8 @@ class Dh21hHistoricoSeeder extends Seeder
                 'sino_cerra' => 'N',
                 'id_tipo_liqui' => 1,
             ]);
+
+
 
             // Procesar legajos completos
             if ($legajosCompletos->count() > 0) {

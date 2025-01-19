@@ -130,26 +130,6 @@ class RepGerencialFinalResource extends Resource
                         'N' => 'Nodocente'
                     ]),
 
-                // Filter::make('imp_bruto')
-                //     ->form([
-                //         TextInput::make('desde')
-                //             ->numeric()
-                //             ->label('Importe desde'),
-                //         TextInput::make('hasta')
-                //             ->numeric()
-                //             ->label('Importe hasta'),
-                //     ])
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         return $query
-                //             ->when(
-                //                 isset($data['desde']) && $data['desde'],
-                //                 fn (Builder $query, $value): Builder => $query->where('imp_bruto', '>=', $data['desde']),
-                //             )
-                //             ->when(
-                //                 isset($data['hasta']) && $data['hasta'],
-                //                 fn (Builder $query, $value): Builder => $query->where('imp_bruto', '<=', $data['hasta']),
-                //             );
-                //     }),
 
                 Filter::make('nro_legaj')
                     ->form([

@@ -206,13 +206,13 @@ class Dh22 extends Model
         return EncodingService::toUtf8(trim($value));
     }
 
-    /**
-     * Mutador para convertir desc_liqui a Latin1 antes de guardar
-     */
-    public function setDescLiquiAttribute($value)
-    {
-        $this->attributes['desc_liqui'] = EncodingService::toLatin1($value);
-    }
+   public function descLiqui(): Attribute
+   {
+    return Attribute::make(
+        get: fn($value) => EncodingService::toUtf8($value),
+        set: fn($value) => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
+    );
+   }
 
     /**
      * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
