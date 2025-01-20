@@ -16,8 +16,8 @@ class ComprobanteNominaModel extends Model
     protected $fillable = [
         'anio_periodo',
         'mes_periodo',
-        'numero_liquidacion',
-        'descripcion_liquidacion',
+        'nro_liqui',
+        'desc_liqui',
         'tipo_pago',
         'importe_neto',
         'area_administrativa',

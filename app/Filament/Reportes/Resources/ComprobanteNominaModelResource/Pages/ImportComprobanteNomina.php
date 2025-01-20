@@ -4,6 +4,7 @@ namespace app\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -97,6 +98,7 @@ class ImportComprobanteNomina extends Page
 
             $this->redirect(ComprobanteNominaModelResource::getUrl('index'));
         } catch (\Throwable $e) {
+            Log::error($e->getMessage());
             Notification::make()
                 ->title('Error en la importación')
                 ->body($e->getMessage())
