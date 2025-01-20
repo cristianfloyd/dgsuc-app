@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\Contracts\AfipArtRepository;
-use App\Models\AfipArt;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\AfipArt;
+use App\Contracts\AfipArtRepository;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AfipArtRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected $afipArtRepository;
 

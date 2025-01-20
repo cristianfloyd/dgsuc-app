@@ -7,9 +7,14 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use App\Models\ComprobanteNominaModel;
+use Filament\Forms\Components\Section;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\ComprobanteNominaService;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\RelationManagers;
@@ -25,13 +30,74 @@ class ComprobanteNominaModelResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Section::make()
+                    ->schema([
+                        FileUpload::make('archivo')
+                            ->label('Archivo CHE')
+                            ->helperText('Formato esperado: cheAAMM.NNNN')
+                            // ->rules([
+                            //     fn() => function($attribute, $value, $fail) {
+                            //         if (!preg_match('/^che\d{4}/', basename($value))) {
+                            //             $fail("El archivo debe comenzar con 'che' seguido del año y mes (ejemplo: che2412)");
+                            //         }
+                            //     }
+                            // ])
+                            ->required()
+                            ->maxSize(5120)
+                            ->directory('comprobantes-temp')
+                            ->preserveFilenames()
+                    ])
             ]);
     }
 
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
+            ->headerActions([
+                Action::make('importar')
+                    ->label('Importar Rápido')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->form([
+                        FileUpload::make('archivo')
+                            ->label('Archivo CHE')
+                            ->helperText('Formato esperado: cheAAMM.NNNN')
+                            // ->rules([
+                            //     fn() => function($attribute, $value, $fail) {
+                            //         if (!preg_match('/^che\d{4}/', basename($value))) {
+                            //             $fail("El archivo debe comenzar con 'che' seguido del año y mes (ejemplo: che2412)");
+                            //         }
+                            //     }
+                            // ])
+                            ->required()
+                            ->maxSize(5120)
+                            ->directory('comprobantes-temp')
+                            ->preserveFilenames()
+                            ->helperText('Seleccione el archivo CHE para procesar')
+                    ])
+                    ->action(function (array $data, ComprobanteNominaService $service): void {
+                        try {
+                            if (!$service->checkTableExists()) {
+                                $service->createTable();
+                            }
+
+                            $stats = $service->processFile(
+                                storage_path('app/public/' . $data['archivo'])
+                            );
+
+                            Notification::make()
+                                ->title('Importación completada')
+                                ->body("Procesados: {$stats['procesados']}, Errores: {$stats['errores']}")
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Error en la importación')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('anio_periodo')
                     ->label('Año')
@@ -40,7 +106,7 @@ class ComprobanteNominaModelResource extends Resource
 
                 Tables\Columns\TextColumn::make('mes_periodo')
                     ->label('Mes')
-                    ->formatStateUsing(fn ($state) => nombreMes($state))
+                    ->formatStateUsing(fn($state) => nombreMes($state))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('numero_liquidacion')
@@ -76,19 +142,20 @@ class ComprobanteNominaModelResource extends Resource
             ->filters([
                 SelectFilter::make('anio_periodo')
                     ->label('Año')
-                    ->options(fn () => ComprobanteNominaModel::distinct()
+                    ->options(fn() => ComprobanteNominaModel::distinct()
                         ->pluck('anio_periodo', 'anio_periodo')
                         ->toArray()),
 
                 SelectFilter::make('mes_periodo')
                     ->label('Mes')
-                    ->options(fn () => collect(range(1, 12))->mapWithKeys(fn ($mes) =>
+                    ->options(fn() => collect(range(1, 12))->mapWithKeys(
+                        fn($mes) =>
                         [$mes => nombreMes($mes)]
                     )->toArray()),
 
                 SelectFilter::make('area_administrativa')
                     ->label('Área')
-                    ->options(fn () => ComprobanteNominaModel::distinct()
+                    ->options(fn() => ComprobanteNominaModel::distinct()
                         ->pluck('area_administrativa', 'area_administrativa')
                         ->toArray()),
             ])

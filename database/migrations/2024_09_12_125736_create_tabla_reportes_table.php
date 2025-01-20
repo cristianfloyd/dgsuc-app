@@ -10,11 +10,10 @@ return new class extends Migration
 {
     use MapucheConnectionTrait;
 
-    protected $connection = 'pgsql-liqui';
 
     public function up(): void
     {
-        Schema::create('suc.rep_orden_pago', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table) {
             $table->id();
             $table->integer('nro_liqui')->nullable();
             $table->integer('banco')->nullable();
@@ -38,7 +37,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::unprepared("
+        DB::connection($this->getConnectionName())->unprepared("
 CREATE OR REPLACE FUNCTION suc.rep_orden_pago(p_nro_liqui INTEGER[])
 RETURNS void AS $$
 BEGIN
@@ -120,7 +119,7 @@ $$ LANGUAGE plpgsql;
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.rep_orden_pago');
-        DB::unprepared("DROP FUNCTION suc.rep_orden_pago(p_nro_liqui INTEGER[])");
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.rep_orden_pago');
+        DB::connection($this->getConnectionName())->unprepared("DROP FUNCTION suc.rep_orden_pago(p_nro_liqui INTEGER[])");
     }
 };
