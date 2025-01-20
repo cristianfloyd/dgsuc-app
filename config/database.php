@@ -108,6 +108,23 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'pgsql-prod' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB5_HOST', '127.0.0.1'),
+            'port' => env('DB5_PORT', '5434'),
+            'database' => env('DB5_DATABASE', 'laravel'),
+            'username' => env('DB5_USERNAME', 'postgres'),
+            'password' => env('DB5_PASSWORD', '1234'),
+            'charset' => env('DB5_CHARSET', 'SQL_ASCII'),
+            'collate' => env('DB5_COLLATION', 'UTF8'),
+            'client_encoding' => 'UTF8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'suc',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
