@@ -2,14 +2,15 @@
 
 namespace App\Models\Suc;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RetTablaBasicosConcesp extends Model
 {
     use HasFactory;
+    use MapucheConnectionTrait;
 
-    protected $connection = 'pgsql_suc';
 
     /**
      * El nombre de la tabla asociada con el modelo.

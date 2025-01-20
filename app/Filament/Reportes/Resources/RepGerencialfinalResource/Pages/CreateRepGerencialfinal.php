@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Pages;
+namespace app\Filament\Reportes\Resources\RepGerencialFinalResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;

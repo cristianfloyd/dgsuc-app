@@ -2,14 +2,15 @@
 
 namespace App\Models\Suc;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RetUda extends Model
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
 
-    protected $connection = 'pgsql-suc';
+
 
     /**
      * La tabla asociada con el modelo.

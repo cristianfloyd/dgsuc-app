@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Models;
 
+use Tests\TestCase;
 use App\Models\AfipArt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
 class AfipArtTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     /** @test */
     public function it_can_create_an_afip_art()

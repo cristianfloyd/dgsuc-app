@@ -22,7 +22,7 @@ use App\Filament\Widgets\MultipleIdLiquiSelector;
 use App\Filament\Reportes\Resources\RepGerencialfinalResource;
 use App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets\RepGerencialFinalStats;
 
-class ListRepGerencialfinal extends ListRecords
+class ListRepGerencialFinal extends ListRecords
 {
     protected static string $resource = RepGerencialfinalResource::class;
     public ?array $idLiquiSelected = [];

@@ -12,7 +12,7 @@ class RetResultado extends Model
 {
     use HasFactory, MapucheConnectionTrait;
 
-    protected $connection = $this->getConnectionName();
+
 
     /**
      * La tabla asociada con el modelo.

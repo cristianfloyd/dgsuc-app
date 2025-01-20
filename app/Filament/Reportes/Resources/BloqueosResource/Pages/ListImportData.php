@@ -12,6 +12,9 @@ use App\Services\Reportes\BloqueosDataService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Filament\Reportes\Resources\BloqueosResource;
 use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
+use Filament\Actions\Action;
+use App\Models\Reportes\BloqueosDataModel;
+use App\Enums\BloqueosEstadoEnum;
 
 class ListImportData extends ListRecords
 {
@@ -99,6 +102,34 @@ class ListImportData extends ListRecords
                             ->danger()
                             ->send();
                     }
+                }),
+            Action::make('validar_todos')
+                ->label('Validar Todos')
+                ->icon('heroicon-o-check-circle')
+                ->requiresConfirmation()
+                ->modalHeading('¿Validar todos los registros?')
+                ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
+                ->action(function () {
+                    $registros = BloqueosDataModel::all();
+                    $total = $registros->count();
+                    $validados = 0;
+                    $conError = 0;
+
+                    foreach ($registros as $registro) {
+                        $registro->validarEstado();
+
+                        if ($registro->estado === BloqueosEstadoEnum::VALIDADO) {
+                            $validados++;
+                        } else {
+                            $conError++;
+                        }
+                    }
+
+                    Notification::make()
+                        ->title('Validación masiva completada')
+                        ->body("Total procesados: {$total}\nValidados: {$validados}\nCon error: {$conError}")
+                        ->success()
+                        ->send();
                 })
         ];
     }

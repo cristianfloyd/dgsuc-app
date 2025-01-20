@@ -28,6 +28,7 @@ use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\EditImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
+use Filament\Notifications\Notification;
 
 class BloqueosResource extends Resource
 {
@@ -130,6 +131,24 @@ class BloqueosResource extends Resource
                     ->modalHeading('Procesamiento de Bloqueos')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false),
+                Action::make('validar')
+                    ->label('Validar')
+                    ->icon('heroicon-o-check-circle')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Validar registro?')
+                    ->modalDescription('Se validará el par legajo-cargo contra Mapuche.')
+                    ->action(function ($record) {
+                        $record->validarEstado();
+
+                        $mensaje = $record->estado === BloqueosEstadoEnum::VALIDADO
+                            ? 'Registro validado correctamente'
+                            : 'Error en la validación: ' . $record->mensaje_error;
+
+                        Notification::make()
+                            ->title($mensaje)
+                            ->color($record->estado === BloqueosEstadoEnum::VALIDADO ? 'success' : 'danger')
+                            ->send();
+                    })
             ])
             ->bulkActions([
                 BulkAction::make('delete')
@@ -162,7 +181,36 @@ class BloqueosResource extends Resource
                             new BloqueosResultadosExport($processor->getResultados()),
                             'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx'
                         );
+                    }),
+
+                BulkAction::make('validar_registros')
+                    ->label('Validar Registros')
+                    ->icon('heroicon-o-check-circle')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Validar registros seleccionados?')
+                    ->modalDescription('Se validará el par legajo-cargo de cada registro contra Mapuche.')
+                    ->action(function (Collection $records) {
+                        $totalRegistros = $records->count();
+                        $validados = 0;
+                        $conError = 0;
+
+                        foreach ($records as $record) {
+                            $record->validarEstado();
+
+                            if ($record->estado === BloqueosEstadoEnum::VALIDADO) {
+                                $validados++;
+                            } else {
+                                $conError++;
+                            }
+                        }
+
+                        Notification::make()
+                            ->title('Validación completada')
+                            ->body("Total procesados: {$totalRegistros}\nValidados: {$validados}\nCon error: {$conError}")
+                            ->success()
+                            ->send();
                     })
+                    ->deselectRecordsAfterCompletion()
             ]);
         }
 

@@ -12,9 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BloqueosHistorial extends Model
 {
+    use MapucheConnectionTrait;
     use SoftDeletes;
 
-    protected $table = 'bloqueos_historial';
+    protected $table = 'suc.bloqueos_historial';
 
     protected $fillable = [
         'periodo_importacion',
