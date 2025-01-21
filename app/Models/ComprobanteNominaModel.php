@@ -19,12 +19,11 @@ class ComprobanteNominaModel extends Model
         'nro_liqui',
         'desc_liqui',
         'tipo_pago',
-        'importe_neto',
+        'importe',
         'area_administrativa',
         'subarea_administrativa',
         'numero_retencion',
         'descripcion_retencion',
-        'importe_retencion',
         'requiere_cheque',
         'codigo_grupo'
     ];

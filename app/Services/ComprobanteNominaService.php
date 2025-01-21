@@ -22,6 +22,16 @@ class ComprobanteNominaService
         'CODIGO_GRUPO' => ['start' => 72, 'length' => 7]
     ];
 
+    // Constantes para las posiciones en el header
+    private const array HEADER_FORMAT = [
+        'YEAR_START' => 0,
+        'YEAR_LENGTH' => 2,
+        'MONTH_START' => 2,
+        'MONTH_LENGTH' => 2,
+        'SEPARATOR' => '.',
+        'LIQUI_LENGTH' => 4
+    ];
+
     public function checkTableExists(): bool
     {
         return Schema::connection($this->getConnectionName())
@@ -38,12 +48,11 @@ class ComprobanteNominaService
                 $table->integer('nro_liqui');
                 $table->string('desc_liqui', 60);
                 $table->string('tipo_pago', 30);
-                $table->decimal('importe_neto', 15, 2);
+                $table->decimal('importe', 15, 2);
                 $table->string('area_administrativa', 3);
                 $table->string('subarea_administrativa', 3);
                 $table->integer('numero_retencion')->nullable();
                 $table->string('descripcion_retencion', 50)->nullable();
-                $table->decimal('importe_retencion', 15, 2)->nullable();
                 $table->boolean('requiere_cheque')->default(false);
                 $table->string('codigo_grupo', 7)->nullable();
                 $table->timestamps();
@@ -110,7 +119,6 @@ class ComprobanteNominaService
 
             fclose($fileHandle);
             DB::connection($this->getConnectionName())->commit();
-
         } catch (\Throwable $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error("Error de procesamiento: " . $e->getMessage());
@@ -120,78 +128,87 @@ class ComprobanteNominaService
         return $stats;
     }
 
+    private function sanitizeText(string $text): string
+    {
+        // Detectamos la codificación original
+        $encoding = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1'], true);
+
+        // Convertimos a UTF-8 si es necesario
+        if ($encoding !== 'UTF-8') {
+            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
+        }
+
+        // Limpiamos caracteres especiales y espacios
+        return trim(preg_replace('/[^\p{L}\p{N}\s\-\.]/u', '', $text));
+    }
+
+
 
     // Modificamos el processLine para que no procese encabezados después de la primera línea
     public function processLine(string $line): bool|ComprobanteNominaModel
     {
-        return match(true) {
-            str_contains($line, 'HABERES NETOS LIQUIDADOS') => $this->processNetAmountLine($line),
-            preg_match('/^\d{2}\./', $line) => $this->processRetentionLine($line),
-            default => false
-        };
+        // Ignoramos líneas vacías o la marca de fin
+        if (empty($line) || $line === 'FIN') {
+            return false;
+        }
+        // Convertimos la línea completa a UTF-8
+        $line = $this->sanitizeText($line);
+
+        // Extraemos los campos usando el formato definido
+        $fields = $this->extractFields($line);
+
+        // Procesamos el importe eliminando caracteres no numéricos
+        $importe = (float) preg_replace('/[^0-9.-]/', '', $fields['importe']);
+        $esRetencion = preg_match('/^\d{2}\./', $line);
+
+
+        return ComprobanteNominaModel::create([
+            'anio_periodo' => $this->currentHeader['anio_periodo'],
+            'mes_periodo' => $this->currentHeader['mes_periodo'],
+            'nro_liqui' => $this->currentHeader['nro_liqui'],
+            'desc_liqui' => $this->currentHeader['desc_liqui'],
+            'tipo_pago' => $this->currentHeader['tipo_pago'],
+            'importe' => $importe,
+            'area_administrativa' => $esRetencion ? '000' : '010',
+            'subarea_administrativa' => '000',
+            'numero_retencion' => $esRetencion ? (int)str_replace('.', '', $fields['codigo']) : null,
+            'descripcion_retencion' =>  trim($fields['descripcion']),
+            'requiere_cheque' => $esRetencion && $fields['tipo'] === 'S',
+            'codigo_grupo' => $esRetencion ? trim($fields['codigo_grupo']) : null
+        ]);
     }
 
     public function processHeaderLine(string $line): bool
     {
+        // Extraemos y validamos los componentes
+        $year = '20' . substr($line, self::HEADER_FORMAT['YEAR_START'], self::HEADER_FORMAT['YEAR_LENGTH']);
+        $month = substr($line, self::HEADER_FORMAT['MONTH_START'], self::HEADER_FORMAT['MONTH_LENGTH']);
+
+        // Extraemos el número de liquidación después del punto y convertimos a entero
+        $parts = explode(self::HEADER_FORMAT['SEPARATOR'], $line);
+        $nroLiqui = (int)substr($parts[1], 0, self::HEADER_FORMAT['LIQUI_LENGTH']);
+
+        // Extraemos descripción y tipo de pago
+        $descStart = strpos($line, '.Liq:') + 7;
+        $descEnd = strpos($line, '[') - 1;
+        $descripcion = trim(substr($line, $descStart, $descEnd - $descStart));
+
+        $tipoPago = trim(str_replace(['[', ']'], '', substr($line, $descEnd + 1)));
+
         // Extraemos los campos usando las posiciones correctas
         $this->currentHeader = [
-            'anio_periodo' => 2000 + (int)substr($line, 0, 2),
-            'mes_periodo' => (int)substr($line, 2, 2),
-            'nro_liqui' => (int)substr($line, 8, 1),
-            'desc_liqui' => trim(substr($line, 16, 45)), // Ajustamos la longitud
-            'tipo_pago' => trim(str_replace(['[', ']'], '', substr($line, 71, 30))) // Limpiamos los corchetes
+            'anio_periodo' => (int)$year,
+            'mes_periodo' => (int)$month,
+            'nro_liqui' => $nroLiqui,
+            'desc_liqui' => $descripcion,
+            'tipo_pago' => $tipoPago
         ];
 
         return true;
     }
 
-    public function processNetAmountLine(string $line): ComprobanteNominaModel
-    {
-        // Definimos las posiciones fijas para cada campo
-        $fields = $this->extractFields($line);
-
-        return ComprobanteNominaModel::create([
-            'anio_periodo' => $this->currentHeader['anio_periodo'],
-            'mes_periodo' => $this->currentHeader['mes_periodo'],
-            'nro_liqui' => $this->currentHeader['nro_liqui'],
-            'desc_liqui' => $this->currentHeader['desc_liqui'],
-            'tipo_pago' => $this->currentHeader['tipo_pago'],
-            'importe_neto' => (float)trim($fields['importe']),
-            'area_administrativa' => '010',
-            'subarea_administrativa' => '000',
-            'numero_retencion' => null,
-            'descripcion_retencion' => null,
-            'importe_retencion' => null,
-            'requiere_cheque' => false,
-            'codigo_grupo' => null
-        ]);
-    }
 
 
-    public function processRetentionLine(string $line): ComprobanteNominaModel
-    {
-        Log::info("Procesando línea de retención: $line");
-        $fields = $this->extractFields($line);
-        
-        // Limpiamos el código para quitar el punto
-        $codigo = str_replace('.', '', $fields['codigo']);
-        
-        return ComprobanteNominaModel::create([
-            'anio_periodo' => $this->currentHeader['anio_periodo'],
-            'mes_periodo' => $this->currentHeader['mes_periodo'],
-            'nro_liqui' => $this->currentHeader['nro_liqui'],
-            'desc_liqui' => $this->currentHeader['desc_liqui'],
-            'tipo_pago' => $this->currentHeader['tipo_pago'],
-            'importe_neto' => 0,
-            'area_administrativa' => '000',
-            'subarea_administrativa' => '000',
-            'numero_retencion' => (int)$codigo,
-            'descripcion_retencion' => trim($fields['descripcion']),
-            'importe_retencion' => (float)str_replace(['=', ' '], '', trim($fields['importe'])),
-            'requiere_cheque' => $fields['tipo'] === 'S',
-            'codigo_grupo' => trim($fields['codigo_grupo'])
-        ]);
-    }
 
 
     public function verifyImport(int $year, int $month, int $settlementNumber): array
@@ -206,7 +223,7 @@ class ComprobanteNominaService
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
                 'nro_liqui' => $settlementNumber
-            ])->sum('importe_neto'),
+            ])->sum('importe'),
             'total_retentions' => ComprobanteNominaModel::where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,

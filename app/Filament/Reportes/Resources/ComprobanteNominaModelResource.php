@@ -38,13 +38,6 @@ class ComprobanteNominaModelResource extends Resource
                         FileUpload::make('archivo')
                             ->label('Archivo CHE')
                             ->helperText('Formato esperado: cheAAMM.NNNN')
-                            // ->rules([
-                            //     fn() => function($attribute, $value, $fail) {
-                            //         if (!preg_match('/^che\d{4}/', basename($value))) {
-                            //             $fail("El archivo debe comenzar con 'che' seguido del año y mes (ejemplo: che2412)");
-                            //         }
-                            //     }
-                            // ])
                             ->required()
                             ->maxSize(5120)
                             ->directory('comprobantes-temp')
@@ -92,48 +85,48 @@ class ComprobanteNominaModelResource extends Resource
                                 ->danger()
                                 ->send();
                         }
-                    })
+                    }),
+                Action::make('importar_avanzado')
+                    ->label('Importacion Avanzada')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->color('warning')
+                    ->url(fn() => static::getUrl('import'))
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('anio_periodo')
                     ->label('Año')
-                    ->sortable()
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('mes_periodo')
                     ->label('Mes')
-                    ->formatStateUsing(fn($state) => nombreMes($state))
-                    ->sortable(),
+                    ->formatStateUsing(fn($state) => nombreMes($state)),
 
-                Tables\Columns\TextColumn::make('numero_liquidacion')
-                    ->label('Liquidación')
+                Tables\Columns\TextColumn::make('nro_liqui')
+                    ->label('Nro Liqui')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('descripcion_liquidacion')
-                    ->label('Descripción')
-                    ->limit(30)
+                Tables\Columns\TextColumn::make('desc_liqui')
+                    ->label('Desc. Liquidación')
+                    ->limit(20)
+                    ->tooltip(fn($record) => $record->desc_liqui)
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('importe_neto')
-                    ->label('Importe Neto')
+                Tables\Columns\TextColumn::make('importe')
+                    ->label('Importe')
                     ->money('ARS')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('area_administrativa')
                     ->label('Área')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('descripcion_retencion')
-                    ->label('Retención')
-                    ->limit(30)
+                    ->label('Descripción')
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('importe_retencion')
-                    ->label('Importe Retención')
-                    ->money('ARS')
-                    ->sortable()
-                    ->toggleable(),
+
             ])
             ->filters([
                 SelectFilter::make('anio_periodo')
