@@ -35,19 +35,11 @@ class ImportComprobanteNomina extends Page
                     ->schema([
                         FileUpload::make('archivo')
                             ->label('Archivo CHE')
-                            ->acceptedFileTypes(['*'])
                             ->helperText('Formato esperado: cheAAMM.NNNN')
-                            ->rules([
-                                fn() => function ($attribute, $value, $fail) {
-                                    if (!preg_match('/^che\d{4}\.\d{4}$/', $value)) {
-                                        $fail("El archivo debe tener el formato cheAAMM.NNNN");
-                                    }
-                                }
-                            ])
                             ->required()
                             ->maxSize(5120)
                             ->directory('comprobantes-temp')
-                            ->preserveFilenames(),
+                            ,
 
                         Toggle::make('validar_estructura')
                             ->label('Validar estructura del archivo')

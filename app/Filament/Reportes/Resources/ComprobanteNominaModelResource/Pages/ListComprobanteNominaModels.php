@@ -31,7 +31,6 @@ class ListComprobanteNominaModels extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
             Actions\Action::make('truncateTable')
                 ->label('Limpiar Tabla')
                 ->color('danger')
