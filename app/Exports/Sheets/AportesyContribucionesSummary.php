@@ -31,19 +31,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
     {
         $this->query = $query;
         $this->resumenDosuba = $this->getResumenByConceptoGrupo(ConceptoGrupo::DOSUBA);
-        // $this->resumenAfip = $this->query
-        //     ->clone()
-        //     ->reorder()
-        //     ->whereIn('codn_conce', ConceptoGrupo::AFIP->getConceptos())
-        //     ->groupBy('nro_liqui', 'desc_liqui')
-        //     ->selectRaw('
-        //         nro_liqui,
-        //         desc_liqui,
-        //         SUM(impp_conce) as total_importe
-        //     ')
-        //     ->orderBy('nro_liqui')
-        //     ->get();
-        // Creamos resúmenes para cada subgrupo de AFIP
+        
         $this->resumenContribucionesAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::CONTRIBUCIONES_AFIP);
         $this->resumenSeguroAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::SEGURO_CONTRIBUCION_AFIP);
         $this->resumenArtAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::ART_AFIP);

@@ -2,23 +2,21 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\ComprobanteNominaModel;
 use Filament\Forms\Components\Section;
 use Filament\Notifications\Notification;
+use App\Exports\ComprobantesNominaExport;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use App\Services\ComprobanteNominaService;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\RelationManagers;
-use App\Filament\Resources\ComprobanteNominaModelResource\Pages\ImportComprobanteNomina;
 
 class ComprobanteNominaModelResource extends Resource
 {
@@ -50,6 +48,21 @@ class ComprobanteNominaModelResource extends Resource
     {
         return $table
             ->headerActions([
+                Action::make('exportar')
+                ->label('Exportar Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function (array $data): BinaryFileResponse {
+                    $liquidacion = ComprobanteNominaModel::first();
+
+                    return Excel::download(
+                        new ComprobantesNominaExport(
+                            $liquidacion->nro_liqui,
+                            $liquidacion->desc_liqui
+                        ),
+                            "comprobantes_{$liquidacion->nro_liqui}.xlsx"
+                    );
+                }),
                 Action::make('importar')
                     ->label('Importar Rápido')
                     ->icon('heroicon-o-arrow-up-tray')
