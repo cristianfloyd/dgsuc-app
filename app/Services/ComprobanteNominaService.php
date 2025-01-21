@@ -170,8 +170,12 @@ class ComprobanteNominaService
 
     public function processRetentionLine(string $line): ComprobanteNominaModel
     {
+        Log::info("Procesando línea de retención: $line");
         $fields = $this->extractFields($line);
-
+        
+        // Limpiamos el código para quitar el punto
+        $codigo = str_replace('.', '', $fields['codigo']);
+        
         return ComprobanteNominaModel::create([
             'anio_periodo' => $this->currentHeader['anio_periodo'],
             'mes_periodo' => $this->currentHeader['mes_periodo'],
@@ -181,11 +185,11 @@ class ComprobanteNominaService
             'importe_neto' => 0,
             'area_administrativa' => '000',
             'subarea_administrativa' => '000',
-            'numero_retencion' => (int)$fields['codigo'],
+            'numero_retencion' => (int)$codigo,
             'descripcion_retencion' => trim($fields['descripcion']),
-            'importe_retencion' => (float)trim($fields['importe']),
+            'importe_retencion' => (float)str_replace(['=', ' '], '', trim($fields['importe'])),
             'requiere_cheque' => $fields['tipo'] === 'S',
-            'codigo_grupo' => $fields['codigo_grupo']
+            'codigo_grupo' => trim($fields['codigo_grupo'])
         ]);
     }
 

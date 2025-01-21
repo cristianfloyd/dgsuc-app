@@ -25,6 +25,9 @@ class ComprobanteNominaModelResource extends Resource
     protected static ?string $model = ComprobanteNominaModel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $modelLabel = 'CHE';
+    protected static ?string $pluralModelLabel = 'CHE';
 
     public static function form(Form $form): Form
     {
@@ -61,13 +64,6 @@ class ComprobanteNominaModelResource extends Resource
                         FileUpload::make('archivo')
                             ->label('Archivo CHE')
                             ->helperText('Formato esperado: cheAAMM.NNNN')
-                            // ->rules([
-                            //     fn() => function($attribute, $value, $fail) {
-                            //         if (!preg_match('/^che\d{4}/', basename($value))) {
-                            //             $fail("El archivo debe comenzar con 'che' seguido del año y mes (ejemplo: che2412)");
-                            //         }
-                            //     }
-                            // ])
                             ->required()
                             ->maxSize(5120)
                             ->directory('comprobantes-temp')
@@ -153,11 +149,6 @@ class ComprobanteNominaModelResource extends Resource
                         [$mes => nombreMes($mes)]
                     )->toArray()),
 
-                SelectFilter::make('area_administrativa')
-                    ->label('Área')
-                    ->options(fn() => ComprobanteNominaModel::distinct()
-                        ->pluck('area_administrativa', 'area_administrativa')
-                        ->toArray()),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -180,6 +171,7 @@ class ComprobanteNominaModelResource extends Resource
     {
         return [
             'index' => Pages\ListComprobanteNominaModels::route('/'),
+            'import' => Pages\ImportComprobanteNomina::route('/import'),
 
         ];
     }
