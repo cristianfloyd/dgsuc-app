@@ -115,7 +115,11 @@ class ComprobanteNominaModelResource extends Resource
                     ->label('Importacion Avanzada')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('warning')
-                    ->url(fn() => static::getUrl('import'))
+                    ->url(fn() => static::getUrl('import')),
+                Action::make('generate')
+                    ->label('Generar Comprobantes')
+                    ->icon('heroicon-o-document-check')
+                    ->url(fn(): string => static::getUrl('generate'))
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('anio_periodo')

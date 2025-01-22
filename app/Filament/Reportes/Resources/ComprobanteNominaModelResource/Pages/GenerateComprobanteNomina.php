@@ -13,6 +13,7 @@ use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use App\Traits\MapucheConnectionTrait;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
 
@@ -23,6 +24,7 @@ class GenerateComprobanteNomina extends Page
     protected static string $view = 'filament.resources.comprobante-nomina.pages.generate';
     protected static ?string $title = 'Generar Comprobantes';
     protected $connection;
+    public $descLiqui;
     public ?array $liquidaciones = [];
     public ?int $anio = null;
     public ?int $mes = null;
@@ -58,8 +60,19 @@ class GenerateComprobanteNomina extends Page
                                     $liquidacion = Dh22::query()->where('nro_liqui', $state[0])->first();
                                     $set('anio', $liquidacion->per_liano);
                                     $set('mes', $liquidacion->per_limes);
+
+                                    $this->descLiqui = $liquidacion->desc_liqui;
+
+                                    Log::info('ComprobanteNominaResource.php', [
+                                        'liquidaciones' => $get('liquidaciones'),
+                                        'anio' => $get('anio'),
+                                        'mes' =>  $get('mes'),
+                                        $this->descLiqui,
+                                    ]);
                                 }
                             }),
+
+
 
                         Select::make('anio')
                             ->label('Año')
@@ -99,7 +112,9 @@ class GenerateComprobanteNomina extends Page
             // Correct way to access the first liquidation from the array
             $nroLiqui = (int) $formData['liquidaciones'][0];
 
+
             $generator->setNroLiqui($nroLiqui);
+            $generator->setDescLiqui($this->descLiqui);
 
             $comprobantes = $generator->processAndStore(
                 [$nroLiqui],

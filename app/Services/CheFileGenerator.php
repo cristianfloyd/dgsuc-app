@@ -17,6 +17,8 @@ class CheFileGenerator
     private $netos = 0;
     protected $connection;
     protected int $nroLiqui;
+    public ?string $descLiqui = null;
+    public ?string $desc_liqui = null;
     private $pilagaClient;
     private $tableCreated = false;
 
@@ -52,8 +54,8 @@ class CheFileGenerator
             $comprobante = new ComprobanteNominaModel([
                 'anio_periodo' => $anio,
                 'mes_periodo' => $mes,
-                'nro_liqui' => $liquidaciones[0], // Ajustar según necesidad
-                'desc_liqui' => $liquidaciones[0],
+                'nro_liqui' => $this->nroLiqui, // Ajustar según necesidad
+                'desc_liqui' => $this->descLiqui,
                 'importe' => $aporte->total,
                 'numero_retencion' => $aporte->grupo,
                 'descripcion_retencion' => $aporte->desc_grupo,
@@ -342,5 +344,16 @@ class CheFileGenerator
         if ($this->tableCreated) {
             $this->dropTemporaryTable();
         }
+    }
+
+    /**
+     * Set the value of descLiqui
+     *
+     * @return  self
+     */
+    public function setDescLiqui($descLiqui)
+    {
+        $this->descLiqui = $descLiqui;
+        return $this;
     }
 }
