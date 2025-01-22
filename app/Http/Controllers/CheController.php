@@ -38,4 +38,18 @@ class CheController extends Controller
 
         return response()->json($result);
     }
+
+    public function store(Request $request)
+    {
+        $comprobantes = $this->cheGenerator->processAndStore(
+            $request->liquidaciones,
+            $request->anio,
+            $request->mes
+        );
+
+        return response()->json([
+            'message' => 'Comprobantes generados exitosamente',
+            'data' => $comprobantes
+        ]);
+    }
 }

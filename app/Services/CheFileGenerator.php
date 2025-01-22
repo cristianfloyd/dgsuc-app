@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\ComprobanteNominaModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Http\Client\RequestException;
 
@@ -14,15 +16,77 @@ class CheFileGenerator
 
     private $netos = 0;
     protected $connection;
+    protected int $nroLiqui;
     private $pilagaClient;
     private $tableCreated = false;
 
-    public function __construct($pilagaApiClient)
+
+    public function __construct($pilagaApiClient = null)
     {
         $this->connection = $this->getConnectionFromTrait();
         $this->pilagaClient = $pilagaApiClient;
     }
 
+
+    /**
+     * Procesa y almacena los comprobantes de nómina
+     */
+    public function processAndStore(array $liquidaciones, int $anio, int $mes): Collection
+    {
+        $comprobantes = new Collection();
+
+        // Obtenemos los netos liquidados
+        $netosLiquidados = $this->getNetosLiquidados();
+
+        // Obtenemos los aportes/retenciones
+        $aportes = $this->getAportes();
+
+        if(is_array($aportes)){
+            Log::info('Aportes: ' . json_encode($aportes));
+        }else{
+            Log::info('Aportes: ' . $aportes);
+        }
+
+        // Procesamos cada aporte y creamos los registros
+        foreach ($aportes as $aporte) {
+            $comprobante = new ComprobanteNominaModel([
+                'anio_periodo' => $anio,
+                'mes_periodo' => $mes,
+                'nro_liqui' => $liquidaciones[0], // Ajustar según necesidad
+                'desc_liqui' => $liquidaciones[0],
+                'importe' => $aporte->total,
+                'numero_retencion' => $aporte->grupo,
+                'descripcion_retencion' => $aporte->desc_grupo,
+                'requiere_cheque' => $aporte->sino_cheque === 'S',
+                'codigo_grupo' => $aporte->grupo,
+                'tipo_pago' => 'R' ,
+                'area_administrativa' => $aporte->area,
+                'subarea_administrativa' => $aporte->subarea,
+            ]);
+
+            $comprobante->save();
+            $comprobantes->push($comprobante);
+        }
+
+        // Procesamos los netos liquidados
+        foreach ($netosLiquidados as $neto) {
+            $comprobante = new ComprobanteNominaModel([
+                'anio_periodo' => $anio,
+                'mes_periodo' => $mes,
+                'nro_liqui' => $liquidaciones[0],
+                'desc_liqui' => $liquidaciones[0],
+                'importe' => $neto->netos,
+                'area_administrativa' => $neto->area,
+                'subarea_administrativa' => $neto->subarea,
+                'tipo_pago' => 'N' // Neto
+            ]);
+
+            $comprobante->save();
+            $comprobantes->push($comprobante);
+        }
+
+        return $comprobantes;
+    }
 
     /**
      * Genera el contenido del archivo CHE
@@ -126,21 +190,42 @@ class CheFileGenerator
      */
     private function createTemporaryTable(): void
     {
-        // Crear tabla temporal
-        $this->connection->statement("
+        // 1. Drop existing temporary table if exists
+        $this->connection->unprepared("DROP TABLE IF EXISTS l");
+        $this->connection->unprepared("DROP TABLE IF EXISTS che");
+
+        // 1. Primero creamos la tabla temporal 'l' con los datos de liquidación
+        $this->connection->unprepared("
+            DROP TABLE IF EXISTS l;
+            SELECT
+                dh21.*,
+                dh22.codn_econo,
+                dh22.nrovalorpago
+            INTO TEMP l
+            FROM mapuche.dh21,
+                 mapuche.dh22
+            WHERE dh22.nro_liqui = dh21.nro_liqui
+            AND dh21.nro_liqui = {$this->nroLiqui}
+            AND dh21.nro_orimp > 0
+            AND dh21.codn_conce > 0
+            ORDER BY dh21.codc_uacad
+            ");
+
+        // 2. Crear tabla temporal
+        $this->connection->unprepared("
             CREATE TEMP TABLE che (
                 codn_area varchar,
                 codn_subar varchar,
                 tipo_conce char(1),
-                codn_grupo varchar,
+                codn_grupo integer,
                 desc_grupo varchar(50),
                 sino_cheque char(1),
                 importe numeric
             )
         ");
 
-        // Insertar datos iniciales
-        $this->connection->statement("
+        // 3. Insertar datos iniciales
+        $this->connection->unprepared("
             INSERT INTO che
             SELECT
                 codn_area,
@@ -155,8 +240,8 @@ class CheFileGenerator
             GROUP BY codn_area, codn_subar, tipo_conce, codn_grupo
         ");
 
-        // Actualizar descripciones
-        $this->connection->statement("
+        // 4. Actualizar descripciones
+        $this->connection->unprepared("
             UPDATE che
             SET desc_grupo = dh45.desc_grupo
             FROM dh45
@@ -170,15 +255,17 @@ class CheFileGenerator
     }
 
 
-    public function getAportes()
+    public function getAportes(): array
     {
         // Aseguramos que la tabla temporal exista
         $this->ensureTemporaryTable();
 
         $this->connection->statement("UPDATE che SET importe = -importe WHERE tipo_conce = 'D'");
 
-        return DB::select("
+        return $this->connection->select("
             SELECT
+                lpad((codn_area::int)::varchar,2,'0') AS area,
+                lpad((codn_subar::int)::varchar,2,'0') AS subarea,
                 codn_grupo AS grupo,
                 desc_grupo,
                 sino_cheque,
@@ -186,7 +273,7 @@ class CheFileGenerator
             FROM che
             WHERE codn_grupo is not null
             AND (tipo_conce = 'A' OR tipo_conce = 'D')
-            GROUP BY codn_grupo, desc_grupo, sino_cheque
+            GROUP BY codn_area, codn_subar, codn_grupo, desc_grupo, sino_cheque
             ORDER BY codn_grupo
         ");
     }
@@ -242,6 +329,12 @@ class CheFileGenerator
     public function set_progreso($porcentaje): void
     {
         //
+    }
+
+    public function setNroLiqui(int $nroLiqui): self
+    {
+        $this->nroLiqui = $nroLiqui;
+        return $this;
     }
 
     public function __destruct()

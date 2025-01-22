@@ -189,7 +189,7 @@ class ComprobanteNominaModelResource extends Resource
         return [
             'index' => Pages\ListComprobanteNominaModels::route('/'),
             'import' => Pages\ImportComprobanteNomina::route('/import'),
-
+            'generate' => Pages\GenerateComprobanteNomina::route('/generate'),
         ];
     }
 }
