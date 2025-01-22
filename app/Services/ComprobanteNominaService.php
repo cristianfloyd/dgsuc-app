@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\ComprobanteNominaModel;
@@ -246,5 +247,27 @@ class ComprobanteNominaService
             'tipo' => substr($line, self::LINE_FORMAT['TIPO']['start'], self::LINE_FORMAT['TIPO']['length']),
             'codigo_grupo' => substr($line, self::LINE_FORMAT['CODIGO_GRUPO']['start'], self::LINE_FORMAT['CODIGO_GRUPO']['length'])
         ];
+    }
+
+
+    public static function exportarPdf($liquidacion)
+    {
+        // Convertimos la imagen a base64
+        $logoPath = public_path('images/uba.png');
+        $logoBase64 = base64_encode(file_get_contents($logoPath));
+
+        $data = [
+            'liquidacion' => $liquidacion,
+            'registros' => ComprobanteNominaModel::where('nro_liqui', $liquidacion->nro_liqui)
+                ->select('descripcion_retencion', 'importe')
+                ->get(),
+            'total' => ComprobanteNominaModel::where('nro_liqui', $liquidacion->nro_liqui)
+                ->sum('importe'),
+            'logoBase64' => $logoBase64,
+        ];
+
+        return Pdf::loadView('exports.comprobantes-nomina', $data)
+            ->setPaper('a4')
+            ->output();
     }
 }

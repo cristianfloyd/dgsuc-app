@@ -48,21 +48,33 @@ class ComprobanteNominaModelResource extends Resource
     {
         return $table
             ->headerActions([
-                Action::make('exportar')
-                ->label('Exportar Excel')
+                Action::make('exportar_pdf_barry')
+                ->label('PDF')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
-                ->action(function (array $data): BinaryFileResponse {
+                ->action(function (array $data): StreamedResponse {
                     $liquidacion = ComprobanteNominaModel::first();
 
-                    return Excel::download(
-                        new ComprobantesNominaExport(
-                            $liquidacion->nro_liqui,
-                            $liquidacion->desc_liqui
-                        ),
-                            "comprobantes_{$liquidacion->nro_liqui}.xlsx"
-                    );
+                    return response()->streamDownload(function () use ($liquidacion) {
+                        echo ComprobanteNominaService::exportarPdf($liquidacion);
+                    },
+                    "comprobantes_{$liquidacion->nro_liqui}.pdf");
                 }),
+                Action::make('exportar')
+                    ->label('Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function (array $data): BinaryFileResponse {
+                        $liquidacion = ComprobanteNominaModel::first();
+
+                        return Excel::download(
+                            new ComprobantesNominaExport(
+                                $liquidacion->nro_liqui,
+                                $liquidacion->desc_liqui
+                            ),
+                                "comprobantes_{$liquidacion->nro_liqui}.xlsx"
+                        );
+                    }),
                 Action::make('importar')
                     ->label('Importar Rápido')
                     ->icon('heroicon-o-arrow-up-tray')
