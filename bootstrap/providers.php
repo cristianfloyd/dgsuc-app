@@ -12,6 +12,7 @@ return [
     App\Providers\CuilsRepositoryProvider::class,
     App\Providers\DataMapperProvider::class,
     App\Providers\DatabaseServiceProvider::class,
+    App\Providers\EmbargoServiceProvider::class,
     App\Providers\EmployeeRepositoryProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\Filament\EmbargosPanelProvider::class,

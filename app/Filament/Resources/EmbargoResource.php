@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
 use App\Models\EmbargoProcesoResult;
+use App\Services\EmbargoTableService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use App\Traits\DisplayResourceProperties;
@@ -34,6 +35,33 @@ class EmbargoResource extends Resource
     public array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 1;
     public bool $insertIntoDh25 = false;
+    protected EmbargoTableService $tableService;
+
+
+
+    public function boot(EmbargoTableService $tableService): void
+    {
+        $this->tableService = $tableService;
+        $this->ensureTableExists();
+    }
+
+    public function mount(EmbargoTable $embargoTable): void
+    {
+        $this->embargoTable = $embargoTable;
+        $this->nroLiquiProxima = 4; // Lógica para determinar este valor
+        $this->nroComplementarias = []; // Lógica para determinar este array
+        $this->nroLiquiDefinitiva = 0; // Lógica para determinar este valor
+        $this->insertIntoDh25 = false; // Lógica para determinar este booleano
+
+        // Usar estas variables para actualizar los datos
+        EmbargoProcesoResult::updateData(
+            $this->nroComplementarias,
+            $this->nroLiquiDefinitiva,
+            $this->nroLiquiProxima,
+            $this->insertIntoDh25
+        );
+    }
+
 
     public static function table(Table $table): Table
     {
@@ -99,10 +127,7 @@ class EmbargoResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        return EmbargoProcesoResult::getEmptyQuery();
-    }
+
 
     public static function getActions(): array
     {
@@ -114,22 +139,7 @@ class EmbargoResource extends Resource
         ];
     }
 
-    public function mount(EmbargoTable $embargoTable): void
-    {
-        $this->embargoTable = $embargoTable;
-        $this->nroLiquiProxima = 4; // Lógica para determinar este valor
-        $this->nroComplementarias = []; // Lógica para determinar este array
-        $this->nroLiquiDefinitiva = 0; // Lógica para determinar este valor
-        $this->insertIntoDh25 = false; // Lógica para determinar este booleano
 
-        // Usar estas variables para actualizar los datos
-        EmbargoProcesoResult::updateData(
-            $this->nroComplementarias,
-            $this->nroLiquiDefinitiva,
-            $this->nroLiquiProxima,
-            $this->insertIntoDh25
-        );
-    }
 
     /**
      * Obtiene las propiedades a mostrar y sus valores actuales.

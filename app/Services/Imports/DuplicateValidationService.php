@@ -21,7 +21,7 @@ class DuplicateValidationService
     public function processRecords(Collection $rows): void
     {
         // Agrupamos por nro_cargo para identificar duplicados
-        Log::debug('Grouping records by nro_cargo');
+        Log::debug('Agrupando registros por nro_cargo, en DuplicateValidationService');
         $groupedByCargo = $rows->groupBy('n_de_cargo');
 
         foreach ($groupedByCargo as $nroCargo => $records) {
