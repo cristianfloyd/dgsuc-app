@@ -26,7 +26,7 @@ class NovedadesCargoImportTempService
     // Nombre de la tabla que se usará como temporal. Se aconseja un nombre único
     // para evitar conflictos con otras tablas temporales.
     // -------------------------------------------------------------------------
-    protected string $tempTableName = 'tmp_novedades_cargo_imports';
+    protected string $tempTableName = 'suc.novedades_cargo_imports';
 
     // -------------------------------------------------------------------------
     // Creación de la tabla temporal en PostgreSQL

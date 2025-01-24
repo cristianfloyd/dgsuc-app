@@ -85,11 +85,11 @@ class NovedadesCargoImportResource extends Resource
     public static function getPages(): array
     {
         return [
-            // 'index' => Pages\ListNovedadesCargoImports::route('/'),
+            'index' => Pages\ListNovedadesCargoImports::route('/'),
             // 'create' => Pages\CreateNovedadesCargoImport::route('/create'),
             // 'edit' => Pages\EditNovedadesCargoImport::route('/{record}/edit'),
             'import' => Pages\NovedadesCargoImport::route('/import'),
-            'manage' => Pages\ManageNovedadesCargoImportTemp::route('/'),
+            'manage' => Pages\ManageNovedadesCargoImportTemp::route('/manage'),
         ];
     }
 }
