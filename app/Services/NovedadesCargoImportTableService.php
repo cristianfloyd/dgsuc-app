@@ -17,7 +17,7 @@ use App\Traits\MapucheConnectionTrait;
  *
  * Dependiendo de la necesidad, se puede escoger la instrucción apropiada para el caso.
  */
-class NovedadesCargoImportTempService
+class NovedadesCargoImportTableService
 {
     use MapucheConnectionTrait;
 
@@ -26,12 +26,12 @@ class NovedadesCargoImportTempService
     // Nombre de la tabla que se usará como temporal. Se aconseja un nombre único
     // para evitar conflictos con otras tablas temporales.
     // -------------------------------------------------------------------------
-    protected string $tempTableName = 'suc.novedades_cargo_imports';
+    protected string $TableName = 'suc.novedades_cargo_imports';
 
     // -------------------------------------------------------------------------
     // Creación de la tabla temporal en PostgreSQL
     // -------------------------------------------------------------------------
-    public function createTempTable(): void
+    public function createTable(): void
     {
         try {
             // IMPORTANTE:
@@ -43,7 +43,7 @@ class NovedadesCargoImportTempService
             //   Ajustar según preferencia.
 
             $sql = "
-            CREATE TEMP TABLE {$this->tempTableName} (
+            CREATE TABLE {$this->TableName} (
                 id                        SERIAL PRIMARY KEY,
                 codigoNovedad            VARCHAR(9),
                 numLegajo                VARCHAR(9),
@@ -87,7 +87,6 @@ class NovedadesCargoImportTempService
                 nuevosIdentificadores    BOOLEAN,
                 errors                   JSONB
             )
-            ON COMMIT DROP;
             ";
 
             DB::connection($this->getConnectionName())->statement($sql);
@@ -106,7 +105,7 @@ class NovedadesCargoImportTempService
         try {
             // Al usar ON COMMIT DROP, la tabla se elimina sola al terminar la sesión,
             // pero en caso de querer forzar su eliminación antes, se usa DROP TABLE:
-            $sql = "DROP TABLE IF EXISTS {$this->tempTableName};";
+            $sql = "DROP TABLE IF EXISTS {$this->TableName};";
             DB::connection($this->getConnectionName())->statement($sql);
 
         } catch (\Throwable $th) {
@@ -123,7 +122,7 @@ class NovedadesCargoImportTempService
     public function insertTempData(array $data): void
     {
         try {
-            DB::connection($this->getConnectionName())->table($this->tempTableName)->insert($data);
+            DB::connection($this->getConnectionName())->table($this->TableName)->insert($data);
         } catch (\Throwable $th) {
             Log::error('Error al insertar datos en la tabla temporal: '.$th->getMessage());
             throw $th;
@@ -136,7 +135,7 @@ class NovedadesCargoImportTempService
     public function getTempData(): array
     {
         try {
-            return DB::connection($this->getConnectionName())->table($this->tempTableName)->get()->toArray();
+            return DB::connection($this->getConnectionName())->table($this->TableName)->get()->toArray();
         } catch (\Throwable $th) {
             Log::error('Error al leer datos de la tabla temporal: '.$th->getMessage());
             throw $th;
