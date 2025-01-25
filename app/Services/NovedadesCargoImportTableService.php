@@ -43,7 +43,7 @@ class NovedadesCargoImportTableService
             //   Ajustar según preferencia.
 
             $sql = "
-            CREATE TABLE {$this->TableName} (
+            CREATE TABLE IF NOT EXISTS {$this->TableName} (
                 id                        SERIAL PRIMARY KEY,
                 codigoNovedad            VARCHAR(9),
                 numLegajo                VARCHAR(9),

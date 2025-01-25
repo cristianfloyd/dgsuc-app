@@ -3,6 +3,7 @@
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImportResource\Pages;
 
 use Filament\Actions;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
@@ -14,24 +15,23 @@ class ListNovedadesCargoImports extends ListRecords
 {
     protected static string $resource = NovedadesCargoImportResource::class;
 
-    public $service;
+    public NovedadesCargoImportTableService $service;
     public Collection $importData;
 
-    public function boot()
-    {
-        $this->service = new NovedadesCargoImportTableService();
-        Log::info("ListNovedadesCargoImports::boot()");
-    }
+
 
     public function mount(): void
     {
         parent::mount();
+
+
+
         // inicializamos la colección de datos vacia
         $this->importData = collect();
         try {
             // Creamos la tabla si no existe
-            $tableService = new NovedadesCargoImportTableService();
-            $tableService->createTable();
+
+            $this->getService()->createTable();
 
         } catch (\Throwable $e) {
             Notification::make()
@@ -42,8 +42,12 @@ class ListNovedadesCargoImports extends ListRecords
         };
     }
 
-
-
+    
+    #[Computed]
+    public function getService():  NovedadesCargoImportTableService
+    {
+        return app(NovedadesCargoImportTableService::class);
+    }
     protected function getHeaderActions(): array
     {
         return [

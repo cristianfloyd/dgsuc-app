@@ -2,10 +2,13 @@
 
 namespace App\Contracts\Tables;
 
-interface OrdenesDescuentoTableDefinition
+use App\Contracts\Tables\AbstractTableDefinitionInterface;
+
+class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterface
 {
-    public const string TABLE_NAME = 'suc.rep_ordenes_descuento';
+    public const string TABLE = 'suc.rep_ordenes_descuento';
     public const string SCHEMA = 'suc';
+
 
     // Definición de columnas
     public const array COLUMNS = [
@@ -35,4 +38,19 @@ interface OrdenesDescuentoTableDefinition
         'codc_uacad' => ['codc_uacad'],
         'codn_conce' => ['codn_conce']
     ];
+
+    public function getTableName(): string
+    {
+        return self::SCHEMA . '.' . self::TABLE;
+    }
+
+    public function getColumns(): array
+    {
+        return self::COLUMNS;
+    }
+
+    public function getIndexes(): array
+    {
+        return self::INDEXES;
+    }
 }

@@ -56,17 +56,6 @@ class ListReporteConceptoListados extends ListRecords
                 ->modalHeading('¿Desea descargar el reporte?')
                 ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                 ->modalSubmitActionLabel('Descargar'),
-        // Actions\SelectAction::make('periodo_fiscal')->label('Periodo')
-        //     ->options(Dh22::getPeriodosFiscales()),
-        // Actions\SelectAction::make('codn_conce')
-        //     ->label('concepto')
-        //     ->options(function () {
-        //         return Dh12Service::getConceptosParaSelect();
-        //     })
-        //     ->action(function ($record, $data) {
-        //         $this->tableFilters['codn_conce'] = $data;
-        //         $this->refreshTable();
-        //     })
         ];
     }
 }

@@ -7,127 +7,48 @@ use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use App\Traits\Mapuche\TableServiceTrait;
+use App\Services\Abstract\AbstractTableService;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 
-class OrdenesDescuentoTableService
+class OrdenesDescuentoTableService extends AbstractTableService
 {
     use MapucheConnectionTrait, TableServiceTrait;
 
-    private const string TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE_NAME;
+    private const string TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
+    private OrdenesDescuentoTableDefinition $definition;
 
-    protected function getTableName(): string
+    public function __construct(OrdenesDescuentoTableDefinition $definition)
     {
-        return OrdenesDescuentoTableDefinition::TABLE_NAME;
+        $this->definition = $definition;
     }
 
-    public function createAndPopulate(): void
+    public function getTableName(): string
     {
-        try {
-            DB::connection($this->getConnectionName())->transaction(function () {
-                $this->createTableIfNotExists();
-                $this->truncateTable();
-                $this->populateTable();
-                $this->updateLastSync();
-            });
-
-            Log::info('Tabla rep_ordenes_descuento creada y poblada exitosamente');
-        } catch (\Exception $e) {
-            Log::error('Error en createAndPopulate', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
-        }
+        return $this->definition->getTableName();
     }
 
-    private function updateLastSync(): void
+    /**
+     * @inheritDoc
+     */
+    protected function getTableDefinition(): array
     {
-        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->update(['last_sync' => now()]);
+        return $this->definition->getColumns();
     }
 
-    private function createIndexes(): void
+    /**
+     * @inheritDoc
+     */
+    protected function getIndexes(): array
     {
-        $connection = $this->getConnectionName();
-        $schema = Schema::connection($connection);
-
-        foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
-            $indexName = "suc_rep_ordenes_descuento_{$name}_index";
-
-            // Verificar si el índice ya existe
-            $indexExists = DB::connection($connection)
-                ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
-
-            if (!$indexExists) {
-                $schema->table(self::TABLE_NAME, function ($table) use ($columns) {
-                    $table->index($columns);
-                });
-            }
-        }
+        return $this->definition->getIndexes();
     }
 
-    private function truncateTable(): void
+    /**
+     * @inheritDoc
+     */
+    protected function getTablePopulationQuery(): string
     {
-        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
-    }
-
-    private function createTableIfNotExists(): void
-    {
-        if (!Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME)) {
-            Schema::connection($this->getConnectionName())->create(self::TABLE_NAME, function ($table) {
-                $this->addLaravelPrimaryKey($table);
-                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
-                    if ($column !== 'id') {
-                        $this->addColumn($table, $column, $definition);
-                    }
-                }
-
-                // Verificar y crear índices después de crear la tabla
-                foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns)
-                {
-                    $indexName = "suc_rep_ordenes_descuento_{$name}_index";
-
-                    $indexExists = DB::connection($this->getConnectionName())
-                        ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
-
-                    if (!$indexExists) {
-                        Schema::connection($this->getConnectionName())->table(
-                            self::TABLE_NAME, function ($table) use ($columns, $name) {
-                                $table->index($columns, $name);
-                        });
-                    }
-                }
-            });
-        }
-    }
-
-    private function addColumn($table, $column, $definition): void
-    {
-        switch ($definition['type']) {
-            case 'id':
-                $table->id();
-                break;
-            case 'string':
-                $table->string($column, $definition['length'] ?? null);
-                break;
-            case 'integer':
-                $table->integer($column);
-                break;
-            case 'decimal':
-                $table->decimal($column, $definition['precision'], $definition['scale']);
-                break;
-            case 'date':
-                $table->date($column);
-                break;
-            case 'timestamp':
-                $table->timestamp($column)->useCurrent();
-                break;
-        }
-    }
-
-
-    private function populateTable(): void
-    {
-        DB::connection($this->getConnectionName())->statement("
+        return "
             INSERT INTO " . self::TABLE_NAME . " (
                 id,
                 nro_liqui,
@@ -200,7 +121,117 @@ GROUP BY dh21.nro_liqui,
          dh21.codn_conce,
          dh12.desc_conce
 ORDER BY dh21.codc_uacad, dh21.codn_conce;
-        ");
+        ";
+    }
+
+    public function createAndPopulate(): void
+    {
+        try {
+            DB::connection($this->getConnectionName())->transaction(function () {
+                $this->createTableIfNotExists();
+                $this->truncateTable();
+                $this->populateTable();
+                $this->updateLastSync();
+            });
+
+            Log::info('Tabla rep_ordenes_descuento creada y poblada exitosamente');
+        } catch (\Exception $e) {
+            Log::error('Error en createAndPopulate', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    private function updateLastSync(): void
+    {
+        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->update(['last_sync' => now()]);
+    }
+
+    protected function createIndexes(): void
+    {
+        $connection = $this->getConnectionName();
+        $schema = Schema::connection($connection);
+
+        foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
+            $indexName = "suc_rep_ordenes_descuento_{$name}_index";
+
+            // Verificar si el índice ya existe
+            $indexExists = DB::connection($connection)
+                ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
+
+            if (!$indexExists) {
+                $schema->table(self::TABLE_NAME, function ($table) use ($columns) {
+                    $table->index($columns);
+                });
+            }
+        }
+    }
+
+    private function truncateTable(): void
+    {
+        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
+    }
+
+    private function createTableIfNotExists(): void
+    {
+        if (!Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME)) {
+            Schema::connection($this->getConnectionName())->create(self::TABLE_NAME, function ($table) {
+                $this->addLaravelPrimaryKey($table);
+                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
+                    if ($column !== 'id') {
+                        $this->addColumn($table, $column, $definition);
+                    }
+                }
+
+                // Verificar y crear índices después de crear la tabla
+                foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns)
+                {
+                    $indexName = "suc_rep_ordenes_descuento_{$name}_index";
+
+                    $indexExists = DB::connection($this->getConnectionName())
+                        ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
+
+                    if (!$indexExists) {
+                        Schema::connection($this->getConnectionName())->table(
+                            self::TABLE_NAME, function ($table) use ($columns, $name) {
+                                $table->index($columns, $name);
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    protected function addColumn($table, $column, $definition): void
+    {
+        switch ($definition['type']) {
+            case 'id':
+                $table->id();
+                break;
+            case 'string':
+                $table->string($column, $definition['length'] ?? null);
+                break;
+            case 'integer':
+                $table->integer($column);
+                break;
+            case 'decimal':
+                $table->decimal($column, $definition['precision'], $definition['scale']);
+                break;
+            case 'date':
+                $table->date($column);
+                break;
+            case 'timestamp':
+                $table->timestamp($column)->useCurrent();
+                break;
+        }
+    }
+
+
+    protected function populateTable(): void
+    {
+        DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
     }
 
     public function exists(): bool
