@@ -62,7 +62,7 @@ class ImportAfipRelacionesActivas extends Command
         Log::info('Importando archivo con ID: ' . $uploadedFileId);
         try {
             // 1. Obtener el archivo a procesar desde la base de datos
-            $uploadedFile = UploadedFile::findOrFail($uploadedFileId);
+            $uploadedFile = UploadedFile::query()->findOrFail($uploadedFileId)->first();
 
             // 2. Actualizar el step en el flujo de trabajo
             $processLog = $this->workflowService->getLatestWorkflow();
@@ -80,7 +80,7 @@ class ImportAfipRelacionesActivas extends Command
                 );
 
                 // 5. Guardar las líneas procesadas
-                $this->employeeService->storeProcessedLines($processedLines);
+                $this->employeeService->storeProcessedLines($processedLines->toArray());
             });
 
             // 6. Marcar el step como completado
