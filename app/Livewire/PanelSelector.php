@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Collection;
 use Livewire\Component;
+use Illuminate\Support\Collection;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
 
 class PanelSelector extends Component
 {
@@ -57,7 +57,7 @@ class PanelSelector extends Component
                 'id' => 'afip',
                 'name' => 'Panel AFIP',
                 'icon' => 'heroicon-o-clipboard-document-list',
-                'url' => '/afip',
+                'url' => '/afip-panel',
                 'description' => 'Gestión de datos y relaciones con AFIP'
             ],
             [
@@ -74,7 +74,7 @@ class PanelSelector extends Component
                 'url' => '/liquidaciones',
                 'description' => 'Gestión de liquidaciones y órdenes de pago'
             ]
-        ])//->filter(fn ($panel) => Auth::user()->hasPermissionToAccessPanel($panel['id']))
+        ])
         ;
     }
 }
