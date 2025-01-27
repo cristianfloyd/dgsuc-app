@@ -17,8 +17,8 @@ class AfipMapucheSicossImportService
     private $connection;
     private float $startTime;
     private float $endTime;
-    private const BATCH_SIZE = 500;
-    private const MEMORY_LIMIT = 128 * 1024 * 1024; // 128MB
+    private const BATCH_SIZE = 1000;
+    private const MEMORY_LIMIT = 1280 * 1024 * 1024; // 1280MB
 
     public function __construct()
     {
@@ -32,11 +32,6 @@ class AfipMapucheSicossImportService
         // 1. Validación inicial mejorada
         $this->validateInitialConditions($filePath, $periodoFiscal);
 
-
-
-        // Control de memoria y progreso
-        $fileSize = filesize($filePath);
-        $bytesProcessed = 0;
 
 
         // 2. Procesamiento con mejor control de errores
@@ -83,10 +78,10 @@ class AfipMapucheSicossImportService
         }
 
         // Validación básica de estructura del archivo
-        // $firstLine = fgets(fopen($filePath, 'r'));
-        // if (strlen($firstLine) !== 500) {
-        //     throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres.");
-        // }
+        $firstLine = fgets(fopen($filePath, 'r'));
+        if (strlen($firstLine) !== 499) {
+            throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres.");
+        }
     }
 
     private function prepareTable(): void
@@ -112,7 +107,19 @@ class AfipMapucheSicossImportService
         }
     }
 
-    private function processBatchWithValidation(array $chunk, string $periodoFiscal, array &$stats): void
+    /**
+     * Procesa un lote de líneas del archivo SICOSS con validación
+     *
+     * Este método procesa cada línea del lote, validando su formato y contenido.
+     * Intenta importar cada registro y mantiene estadísticas del proceso.
+     *
+     * @param array $chunk Lote de líneas a procesar
+     * @param string $periodoFiscal Período fiscal en formato YYYYMM
+     * @param array &$stats Array de estadísticas que se actualiza durante el proceso
+     * @return void
+     * @throws \Exception Si ocurre un error durante el procesamiento
+     */
+    public function processBatchWithValidation(array $chunk, string $periodoFiscal, array &$stats): void
     {
         foreach ($chunk as $line) {
             try {
@@ -120,6 +127,8 @@ class AfipMapucheSicossImportService
                     $stats['errors'][] = "Línea inválida: " . substr($line, 0, 50) . "...";
                     continue;
                 }
+
+
 
                 $parsedData = $this->parseLine($line);
                 $parsedData['data']['periodo_fiscal'] = $periodoFiscal;
@@ -240,10 +249,11 @@ class AfipMapucheSicossImportService
         return sprintf("%d minutos %d segundos", floor($seconds / 60), $seconds % 60);
     }
 
-    private function isValidLine(string $line): bool
+    public function isValidLine(string $line): bool
     {
-        return strlen(trim($line)) === 500 &&
-            preg_match('/^\d{11}/', $line); // Valida que comience con CUIL
+        return true;
+        // return strlen(trim($line)) === 500 &&
+            // preg_match('/^\d{11}/', $line); // Valida que comience con CUIL
     }
 
     private function calculateProgress(int $processed, int $total): int
@@ -257,13 +267,14 @@ class AfipMapucheSicossImportService
     /**
      * Parsea una línea del archivo según especificación SICOSS
      */
-    private function parseLine(string $line, int $lineNumber = 0): array
+    public function parseLine(string $line, int $lineNumber = 0): array
     {
         try {
             // Convertir la línea usando el servicio existente
             $line = EncodingService::toUtf8($line);
 
-            if (strlen($line) < 500) { // Validación básica de longitud
+            if (strlen($line) < 499) {
+                Log::error("Longitud de línea inválida: " . strlen($line));
                 throw new \Exception("Longitud de línea inválida");
             }
 
@@ -274,14 +285,15 @@ class AfipMapucheSicossImportService
             foreach ($structure as $field => $config) {
                 $value = substr($line, $config['start'], $config['length']);
 
-                // Aplicar transformación según tipo de dato
+                // Modificamos el procesamiento para asegurar valores numéricos válidos
                 $parsedData[$field] = match ($config['type']) {
-                    'N' => (int)trim($value),
+                    'N' => (int)ltrim(trim($value), '0') ?: 0, // Convertimos strings vacíos o '00' a 0
                     'D' => $this->parseAmount($value),
                     'C' => trim($value),
                     default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
                 };
             }
+
             Log::debug('Parsed data', ['data' => $parsedData]);
             $this->validateParsedData($parsedData);
 

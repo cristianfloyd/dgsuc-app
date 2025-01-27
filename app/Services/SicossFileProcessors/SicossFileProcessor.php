@@ -2,6 +2,8 @@
 
 namespace App\Services\SicossFileProcessors;
 
+use Illuminate\Support\Facades\Log;
+
 class SicossFileProcessor
 {
     private const int CHUNK_SIZE = 1000;
@@ -17,6 +19,8 @@ class SicossFileProcessor
             throw new \RuntimeException("No se pudo abrir el archivo: {$filePath}");
         }
 
+        Log::info("Processing file: $filePath");
+        
         try {
             $buffer = [];
 
