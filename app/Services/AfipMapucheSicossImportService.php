@@ -7,159 +7,257 @@ use App\DTOs\AfipMapucheSicossDTO;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use App\Services\SicossFileProcessors\SicossFileProcessor;
 
 class AfipMapucheSicossImportService
 {
     use MapucheConnectionTrait;
     private $connection;
+    private float $startTime;
+    private float $endTime;
+    private const BATCH_SIZE = 500;
+    private const MEMORY_LIMIT = 128 * 1024 * 1024; // 128MB
 
     public function __construct()
     {
         $this->connection = $this->getConnectionFromTrait();
     }
 
-    /**
-     * Importa datos desde un archivo de texto SICOSS
-     *
-     * @param string $content Contenido del archivo
-     * @return array Resultado de la importación
-     */
-    public function importFromText(string $content, callable $progressCallback = null, string $periodoFiscal = null): array
-    {
-        $lines = explode("\n", trim($content));
-        $imported = 0;
-        $errors = [];
-        $totalLines = count($lines);
-
-        $this->connection->beginTransaction();
-        try {
-            foreach ($lines as $lineNumber => $line) {
-                if (empty(trim($line))) continue;
-
-                $data = $this->parseLine($line, $lineNumber + 1);
-                if (!$data['success']) {
-                    $errors[] = $data['error'];
-                    continue;
-                }
-
-                $data['data']['periodo_fiscal'] = $periodoFiscal;
-
-                $this->createOrUpdateRecord($data['data']);
-                $imported++;
-
-                // Calcular y reportar el progreso
-                if ($progressCallback) {
-                    $progress = (int)(($lineNumber + 1) / $totalLines * 100);
-                    $progressCallback($progress);
-                }
-            }
-
-            $this->connection->commit();
-        } catch (\Exception $e) {
-            $this->connection->rollBack();
-            Log::error("Error en importación SICOSS: " . $e->getMessage());
-            throw $e;
-        }
-
-        return [
-            'imported' => $imported,
-            'errors' => $errors
-        ];
-    }
-
     public function streamImport(string $filePath, string $periodoFiscal, callable $progressCallback = null): array
     {
-        $processor = new SicossFileProcessor();
-        $totalImported = 0;
-        $errors = [];
+        $this->startTimer();
 
+        // 1. Validación inicial mejorada
+        $this->validateInitialConditions($filePath, $periodoFiscal);
+
+
+
+        // Control de memoria y progreso
         $fileSize = filesize($filePath);
         $bytesProcessed = 0;
 
-        foreach ($processor->processFile($filePath) as $chunk) {
-            $result = $this->processBatch($chunk, $periodoFiscal);
-            $totalImported += $result['imported'];
-            $errors = array_merge($errors, $result['errors']);
 
-            // Calcular progreso
-            $bytesProcessed += strlen(implode('', $chunk));
-            $progress = ($bytesProcessed / $fileSize) * 100;
+        // 2. Procesamiento con mejor control de errores
+        DB::connection($this->getConnectionName())->beginTransaction();
+        try {
+            $processor = new SicossFileProcessor();
+            $stats = $this->initializeStats();
 
-            if ($progressCallback) {
-                $progressCallback((int)$progress);
+            foreach ($processor->processFile($filePath, self::BATCH_SIZE) as $chunk) {
+                $this->processBatchWithValidation($chunk, $periodoFiscal, $stats);
+                $this->updateProgress($chunk, $progressCallback);
+                $this->freeMemory();
             }
-        }
 
-        return [
-            'imported' => $totalImported,
-            'errors' => $errors
-        ];
+            DB::connection($this->getConnectionName())->commit();
+            $this->logSuccess($stats);
+
+            $this->stopTimer();
+            $this->logMetrics($stats);
+
+            return $stats;
+        } catch (\Exception $e) {
+            DB::connection($this->getConnectionName())->rollBack();
+            $this->stopTimer();
+            $this->logError($e);
+            throw $e;
+        }
     }
 
 
-    /**
-     * Procesa un lote de líneas del archivo SICOSS
-     *
-     * @param array $lines Arreglo de líneas a procesar
-     * @param string $periodoFiscal Periodo fiscal en formato YYYYMM
-     * @return array Resultado del procesamiento con contadores
-     */
-    private function processBatch(array $lines, string $periodoFiscal): array
+
+    private function validateInitialConditions(string $filePath, string $periodoFiscal): void
     {
-        $imported = 0;
-        $errors = [];
+        if (!file_exists($filePath)) {
+            throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
+        }
 
-        // Iniciamos transacción para el lote completo
-        $this->connection->beginTransaction();
+        if (!is_readable($filePath)) {
+            throw new \InvalidArgumentException("El archivo no tiene permisos de lectura: {$filePath}");
+        }
 
-        try {
-            foreach ($lines as $lineNumber => $line) {
-                // Parsear y validar cada línea
-                $data = $this->parseLine($line, $lineNumber + 1);
+        if (!preg_match('/^\d{6}$/', $periodoFiscal)) {
+            throw new \InvalidArgumentException("Periodo fiscal inválido. Formato requerido: YYYYMM");
+        }
 
-                if (!$data['success']) {
-                    $errors[] = $data['error'];
+        // Validación básica de estructura del archivo
+        // $firstLine = fgets(fopen($filePath, 'r'));
+        // if (strlen($firstLine) !== 500) {
+        //     throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres.");
+        // }
+    }
+
+    private function prepareTable(): void
+    {
+        $tableName = (new AfipMapucheSicoss())->getTable();
+
+        if (!Schema::connection($this->getConnectionName())->hasTable($tableName)) {
+            throw new \RuntimeException("La tabla {$tableName} no existe en la base de datos.");
+        }
+
+        // Verificar índices necesarios
+        $this->ensureTableIndexes($tableName);
+    }
+
+    private function ensureTableIndexes(string $tableName): void
+    {
+        $schemaBuilder = Schema::connection($this->getConnectionName());
+
+        if (!$schemaBuilder->hasIndex($tableName, 'afip_mapuche_sicoss_cuil_periodo_idx')) {
+            $schemaBuilder->table($tableName, function (Blueprint $table) {
+                $table->index(['cuil', 'periodo_fiscal'], 'afip_mapuche_sicoss_cuil_periodo_idx');
+            });
+        }
+    }
+
+    private function processBatchWithValidation(array $chunk, string $periodoFiscal, array &$stats): void
+    {
+        foreach ($chunk as $line) {
+            try {
+                if (!$this->isValidLine($line)) {
+                    $stats['errors'][] = "Línea inválida: " . substr($line, 0, 50) . "...";
                     continue;
                 }
 
-                // Agregar periodo fiscal a los datos
-                $data['data']['periodo_fiscal'] = $periodoFiscal;
+                $parsedData = $this->parseLine($line);
+                $parsedData['data']['periodo_fiscal'] = $periodoFiscal;
 
-                // Crear o actualizar el registro
-                $this->createOrUpdateRecord($data['data']);
-                $imported++;
+                // Verificar duplicados
+                // if ($this->isDuplicate($parsedData['data'])) {
+                //     $stats['duplicates']++;
+                //     continue;
+                // }
 
-                // Liberar memoria
-                unset($data);
+                $this->createOrUpdateRecord($parsedData['data']);
+                $stats['imported']++;
+            } catch (\Exception $e) {
+                $stats['errors'][] = "Error procesando línea: " . $e->getMessage();
+                Log::error('Error en procesamiento de línea SICOSS', [
+                    'error' => $e->getMessage(),
+                    'linea' => substr($line, 0, 50)
+                ]);
             }
-
-            // Si todo salió bien, confirmamos la transacción
-            $this->connection->commit();
-        } catch (\Exception $e) {
-            // En caso de error, revertimos la transacción
-            $this->connection->rollBack();
-
-            Log::error("Error procesando batch SICOSS", [
-                'error' => $e->getMessage(),
-                'periodo_fiscal' => $periodoFiscal,
-                'batch_size' => count($lines)
-            ]);
-
-            throw $e;
         }
+    }
 
+    private function isDuplicate(array $data): bool
+    {
+        return AfipMapucheSicoss::where('cuil', $data['cuil'])
+            ->where('periodo_fiscal', $data['periodo_fiscal'])
+            ->exists();
+    }
+
+    private function updateProgress(array $chunk, ?callable $progressCallback): void
+    {
+        if ($progressCallback) {
+            $progressCallback([
+                'processed' => count($chunk),
+                'memory' => $this->formatMemoryUsage(memory_get_usage(true))
+            ]);
+        }
+    }
+
+    private function formatMemoryUsage(int $bytes): string
+    {
+        return round($bytes / 1024 / 1024, 2) . 'MB';
+    }
+
+    private function freeMemory(): void
+    {
+        if (memory_get_usage(true) > self::MEMORY_LIMIT) {
+            gc_collect_cycles();
+        }
+    }
+
+    private function initializeStats(): array
+    {
         return [
-            'imported' => $imported,
-            'errors' => $errors
+            'imported' => 0,
+            'errors' => [],
+            'warnings' => [],
+            'duplicates' => 0,
+            'start_time' => microtime(true)
         ];
     }
+
+    private function logSuccess(array $stats): void
+    {
+        $executionTime = microtime(true) - $stats['start_time'];
+
+        Log::info('Importación SICOSS completada', [
+            'registros_importados' => $stats['imported'],
+            'duplicados' => $stats['duplicates'],
+            'errores' => count($stats['errors']),
+            'tiempo_ejecucion' => round($executionTime, 2) . 's',
+            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true))
+        ]);
+    }
+
+    private function logError(\Exception $e): void
+    {
+        Log::error('Error fatal en importación SICOSS', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true))
+        ]);
+    }
+
+    private function logMetrics(array $stats): void
+    {
+        Log::info('Métricas de importación SICOSS', [
+            'tiempo_total' => $this->formatExecutionTime(),
+            'registros_procesados' => $stats['imported'],
+            'registros_por_segundo' => round($stats['imported'] / $this->getExecutionTime(), 2),
+            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
+            'errores' => count($stats['errors']),
+            'duplicados' => $stats['duplicates']
+        ]);
+    }
+
+    private function startTimer(): void
+    {
+        $this->startTime = microtime(true);
+    }
+
+    private function stopTimer(): void
+    {
+        $this->endTime = microtime(true);
+    }
+
+    private function getExecutionTime(): float
+    {
+        return $this->endTime - $this->startTime;
+    }
+
+    private function formatExecutionTime(): string
+    {
+        $seconds = $this->getExecutionTime();
+        if ($seconds < 60) {
+            return sprintf("%.2f segundos", $seconds);
+        }
+        return sprintf("%d minutos %d segundos", floor($seconds / 60), $seconds % 60);
+    }
+
+    private function isValidLine(string $line): bool
+    {
+        return strlen(trim($line)) === 500 &&
+            preg_match('/^\d{11}/', $line); // Valida que comience con CUIL
+    }
+
+    private function calculateProgress(int $processed, int $total): int
+    {
+        return (int)(($processed / $total) * 100);
+    }
+
+
 
 
     /**
      * Parsea una línea del archivo según especificación SICOSS
      */
-    private function parseLine(string $line, int $lineNumber): array
+    private function parseLine(string $line, int $lineNumber = 0): array
     {
         try {
             // Convertir la línea usando el servicio existente
@@ -184,7 +282,7 @@ class AfipMapucheSicossImportService
                     default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
                 };
             }
-
+            Log::debug('Parsed data', ['data' => $parsedData]);
             $this->validateParsedData($parsedData);
 
             return [
@@ -214,7 +312,7 @@ class AfipMapucheSicossImportService
                 'periodo_fiscal' => $sanitizedData['periodo_fiscal'],
                 'cuil' => $sanitizedData['cuil']
             ],
-            $sanitizedData
+            $data
         );
     }
 

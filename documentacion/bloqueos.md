@@ -1,5 +1,9 @@
 # Procedimiento de Importación de Excel a PostgreSQL con FilamentPHP
 
+## TODO
+
+    - [ ] Verificar que el cargo no tenga cargos asociados o subrogancias
+
 ## Descripción General
 
 Este documento describe el proceso de implementación para importar archivos Excel a una base de datos PostgreSQL utilizando Laravel 11, PHP 8.3 y FilamentPHP 3.

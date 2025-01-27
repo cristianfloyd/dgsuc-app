@@ -32,6 +32,8 @@ class ImportAfipMapucheSicoss extends Page
     public $file = null;
     public $year = null;
     public $month = null;
+    public $memoryUsage = 0;
+    public $processedRecords = 0;
 
     public function boot(): void
     {
@@ -138,50 +140,6 @@ class ImportAfipMapucheSicoss extends Page
     }
 
 
-    // public function import()
-    // {
-    //     try {
-    //         $data = $this->form->getState();
-
-    //         $this->periodoFiscalService->setPeriodoFiscal(
-    //             (int)$data['year'],
-    //             (int)$data['month']
-    //         );
-
-    //         // Obtener la ruta correcta del archivo usando Storage
-    //         $filePath = Storage::disk('public')->path($data['file']);
-
-    //         // Validación inicial del archivo
-    //         if (!$this->validateFile($filePath)) {
-    //             $this->showErrorNotification('El archivo no cumple con el formato esperado');
-    //             return;
-    //         }
-
-    //         $service = app(AfipMapucheSicossImportService::class);
-    //         // Leer el contenido del archivo
-    //         $content = Storage::disk('public')->get($data['file']);
-
-    //         // Procesar importación
-    //         $result = $service->importFromText(
-    //             $content,
-    //             fn($progress) => $this->updateImportProgress($progress),
-    //             $data['year'] . sprintf('%02d', $data['month'])
-    //         );
-
-    //         $this->handleImportResult($result);
-
-    //         // Limpieza después de la importación
-    //         $this->cleanupAfterImport($filePath);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error en importación SICOSS', [
-    //             'error' => $e->getMessage(),
-    //             'file' => $data['file'] ?? 'No file specified',
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-
-    //         $this->showErrorNotification('Error durante la importación: ' . $e->getMessage());
-    //     }
-    // }
 
     protected function validateFile(string $filePath): bool
     {
@@ -204,10 +162,45 @@ class ImportAfipMapucheSicoss extends Page
         return $line !== false;
     }
 
-    protected function updateImportProgress(int $progress): void
+    protected function updateImportProgress(array $progressData): void
     {
-        $this->importProgress = $progress;
-        $this->dispatch('import-progress-updated', progress: $progress);
+        // Actualizar el progreso general
+        $this->importProgress = $progressData['percentage'] ?? 0;
+
+        // Actualizar estadísticas detalladas
+        $this->totalRecords = $progressData['total_records'] ?? 0;
+        $this->processedRecords = $progressData['processed'] ?? 0;
+        $this->memoryUsage = $progressData['memory'] ?? '0MB';
+
+        // Emitir evento para la UI con información detallada
+        $this->dispatch('import-progress-updated', [
+            'progress' => $this->importProgress,
+            'processed' => $this->processedRecords,
+            'total' => $this->totalRecords,
+            'memory' => $this->memoryUsage,
+            'speed' => $progressData['records_per_second'] ?? 0
+        ]);
+
+        // Actualizar la UI de Filament
+        $this->updateProgressIndicator();
+    }
+
+    private function updateProgressIndicator(): void
+    {
+        if ($this->importProgress >= 100) {
+            Notification::make()
+                ->success()
+                ->title('Procesamiento completado')
+                ->body("Se procesaron {$this->processedRecords} registros")
+                ->persistent()
+                ->send();
+        } elseif ($this->importProgress > 0) {
+            Notification::make()
+                ->info()
+                ->title('Procesando...')
+                ->body("{$this->importProgress}% completado")
+                ->send();
+        }
     }
 
     protected function handleImportResult(array $result): void
