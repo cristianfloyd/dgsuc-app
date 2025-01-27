@@ -6,16 +6,95 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use App\Exceptions\TableStructureException;
 use App\Contracts\TableService\TableServiceInterface;
 
 /**
- * Clase abstracta base para servicios de tabla que requieren conexión a Mapuche
+ * Clase base abstracta para servicios de gestión de tablas
  *
- * @package App\Services\Abstract
+ * Esta clase implementa el patrón Template Method para manejar:
+ * - Creación de estructura de tabla
+ * - Validación de estructura
+ * - Población de datos
+ * - Manejo de transacciones y errores
  */
 abstract class AbstractTableService implements TableServiceInterface
 {
     use MapucheConnectionTrait;
+
+
+    /**
+     * Valida la estructura actual de la tabla contra la definición esperada
+     *
+     * @throws TableStructureException
+     */
+    public function validateStructure(): void
+    {
+        $currentColumns = Schema::connection($this->getConnectionName())
+            ->getColumnListing($this->getTableName());
+
+        $expectedColumns = array_keys($this->getTableDefinition());
+
+        $missingColumns = array_diff($expectedColumns, $currentColumns);
+        $extraColumns = array_diff($currentColumns, $expectedColumns);
+
+        if (!empty($missingColumns) || !empty($extraColumns)) {
+            throw new TableStructureException(
+                $this->getTableName(),
+                $missingColumns,
+                $extraColumns
+            );
+        }
+
+        // Validar tipos de datos y propiedades de columnas
+        foreach ($this->getTableDefinition() as $column => $definition) {
+            $this->validateColumnDefinition($column, $definition);
+        }
+    }
+
+    /**
+     * Valida la definición de una columna específica
+     *
+     * @throws TableStructureException
+     */
+    protected function validateColumnDefinition(string $column, array $definition): void
+    {
+        $columnType = Schema::connection($this->getConnectionName())
+            ->getColumnType($this->getTableName(), $column);
+
+        // Mapeo de tipos de columna Laravel a tipos de base de datos
+        $expectedType = $this->mapColumnType($definition['type']);
+
+        if ($columnType !== $expectedType) {
+            throw new TableStructureException(
+                $this->getTableName(),
+                [],
+                [],
+                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}"
+            );
+        }
+    }
+
+    /**
+     * Mapea tipos de columna de Laravel a tipos de base de datos
+     */
+    protected function mapColumnType(string $laravelType): string
+    {
+        $typeMap = [
+            'string' => 'varchar',
+            'integer' => 'integer',
+            'decimal' => 'numeric',
+            'boolean' => 'boolean',
+            'date' => 'date',
+            'datetime' => 'timestamp',
+            'timestamp' => 'timestamp',
+            'json' => 'json',
+            'jsonb' => 'jsonb'
+        ];
+
+        return $typeMap[$laravelType] ?? $laravelType;
+    }
+
 
     /**
      * Verifica la existencia de la tabla
@@ -54,7 +133,7 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * Crea la estructura de la tabla
      */
-    protected function createTable(): void
+    public function createTable(): void
     {
         if (!$this->exists()) {
             Schema::connection($this->getConnectionName())
@@ -79,36 +158,37 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     protected function addColumn($table, string $column, array $definition): void
     {
+        $columnDefinition = null;
         switch ($definition['type']) {
             case 'bigIncrements':
-                $table->bigIncrements($column);
+                $columnDefinition = $table->bigIncrements($column);
                 break;
             case 'string':
-                $table->string($column, $definition['length'] ?? 255);
+                $columnDefinition = $table->string($column, $definition['length'] ?? 255);
                 break;
             case 'integer':
-                $table->integer($column);
+                $columnDefinition = $table->integer($column);
                 break;
             case 'decimal':
-                $table->decimal($column, $definition['precision'] ?? 8, $definition['scale'] ?? 2);
+                $columnDefinition = $table->decimal($column, $definition['precision'] ?? 8, $definition['scale'] ?? 2);
                 break;
             case 'boolean':
-                $table->boolean($column);
+                $columnDefinition = $table->boolean($column);
                 break;
             case 'date':
-                $table->date($column);
+                $columnDefinition = $table->date($column);
                 break;
             case 'datetime':
-                $table->datetime($column);
+                $columnDefinition = $table->datetime($column);
                 break;
             case 'timestamp':
-                $table->timestamp($column);
+                $columnDefinition = $table->timestamp($column);
                 break;
             case 'json':
-                $table->json($column);
+                $columnDefinition = $table->json($column);
                 break;
             case 'jsonb':
-                $table->jsonb($column);
+                $columnDefinition = $table->jsonb($column);
                 break;
             default:
                 throw new \InvalidArgumentException("Tipo de columna no soportado: {$definition['type']}");
@@ -116,13 +196,13 @@ abstract class AbstractTableService implements TableServiceInterface
 
         // Aplicar modificadores si existen
         if (!empty($definition['nullable'])) {
-            $table->nullable();
+            $columnDefinition->nullable();
         }
         if (!empty($definition['unique'])) {
-            $table->unique();
+            $columnDefinition->unique();
         }
-        if (!empty($definition['default'])) {
-            $table->default($definition['default']);
+        if (isset($definition['default'])) {
+            $columnDefinition->default($definition['default']);
         }
     }
 
@@ -142,7 +222,7 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * Puebla la tabla con datos iniciales
      */
-    protected function populateTable(): void
+    public function populateTable(): void
     {
         $query = $this->getTablePopulationQuery();
 

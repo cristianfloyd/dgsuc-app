@@ -19,12 +19,13 @@ class AfipMapucheSicoss extends Model
 {
     use HasFactory;
     use HasCompositeRelations;
+    use MapucheConnectionTrait;
 
 
-    protected $connection = 'pgsql-suc';
+
 
     // Especificar la tabla
-    protected $table = 'afip_mapuche_sicoss';
+    protected $table = 'suc.afip_mapuche_sicoss';
 
     // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
     //protected $primaryKey = ['periodo_fiscal', 'cuil'];
@@ -102,14 +103,19 @@ class AfipMapucheSicoss extends Model
         'remimp11',
     ];
 
+
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      *
      * @var array
      */
     protected $casts = [
-        'periodo_fiscal' => 'string',
-        'cuil' => 'string',
+        'conyuge' => 'boolean',
+        'cant_hijos' => 'integer',
+        'rem_total' => 'decimal:2',
+        'rem_impo1' => 'decimal:2',
+        'asig_fam_pag' => 'decimal:2',
         // Agrega aquí los demás campos con sus respectivos tipos
     ];
 
@@ -182,7 +188,7 @@ class AfipMapucheSicoss extends Model
     }
 
 
-    // ##################################################################################################################
+    // ####################################### RELACIONES ##############################################################
 
     public function dh01()
     {

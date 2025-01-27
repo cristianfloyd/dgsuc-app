@@ -42,7 +42,7 @@ php artisan make:trait FilamentTableInitializationTrait
 
 ## Visión General
 
-Esta arquitectura proporciona una estructura robusta para manejar la creación, verificación y población de tablas en la base de datos, siguiendo principios SOLID y patrones de diseño.
+Esta arquitectura proporciona una estructura robusta para manejar la creación, verificación y población de tablas en la base de datos, al inicio de la aplicacion dejando de depender de migraciones para tablas que no son permanentes, siguiendo principios SOLID y patrones de diseño.
 
 ### Objetivos
 
@@ -69,7 +69,6 @@ app/
 │   │   └── TableInitializationManager.php
 │   └── {TableName}TableService.php
 └── Traits/
-    ├── FilamentTableInitializationTrait.php
     └── MapucheConnectionTrait.php
 ```
 
@@ -124,12 +123,6 @@ interface AbstractTableDefinitionInterface
 - Maneja errores
 - Registra eventos
 
-### 4. Traits
-
-#### FilamentTableInitializationTrait
-
-- Integra la inicialización de tablas en recursos Filament:
-
 ## Flujo de Trabajo
 
 ### Definición de Tabla
@@ -163,19 +156,57 @@ class MiTablaDefinition implements AbstractTableDefinitionInterface
     }
 ```
 
-### Recurso Filament
+## Integración con Filament 3
+
+### Inicialización de Tablas en Recursos
+
+La inicialización de tablas en Filament 3 se realiza a través del método `booted()` que garantiza la existencia de la estructura antes de cualquier consulta:
 
 ```php
-    class ListMiTabla extends ListRecords
+class ListMiTabla extends ListRecords
+{
+    protected function booted(): void 
     {
-        use FilamentTableInitializationTrait;
+        $manager = app(TableInitializationManager::class);
+        $service = app($this->getTableServiceClass());
 
-        protected function getTableServiceClass(): string
-        {
-            return MiTablaService::class;
+        try {
+            if (!$manager->isTableInitialized($service)) {
+                $manager->initializeTable($service);
+            }
+        } catch (\Exception $e) {
+            report($e);
         }
     }
+
+    protected function getTableServiceClass(): string
+    {
+        return MiTablaService::class;
+    }
+}
 ```
+
+### Ciclo de Vida en Filament
+
+#### Método booted()
+
+- Se ejecuta una sola vez en la inicialización del componente
+- Ideal para crear y verificar estructuras de base de datos
+- Se ejecuta antes que cualquier otro método
+- No tiene acceso a propiedades públicas del componente
+
+#### Método mount()
+
+- Se ejecuta en cada montaje del componente
+- Ideal para cargar datos iniciales
+- Tiene acceso completo a propiedades del componente
+- Se ejecuta después de booted()
+
+#### Secuencia de Ejecución
+
+1. booted() → Creación/verificación de estructura
+2. mount() → Carga de datos
+3. render() → Visualización
 
 ## **Flujo de Trabajo**
 
@@ -227,16 +258,27 @@ app/
 │   ├── Abstract/
 │   └── TableManager/
 └── Traits/
-
 ```
 
-### 2. Patrones Recomendados
+### 3. Inicialización de Tablas
+
+1. Usar booted() para verificación y creación de estructuras
+2. Implementar manejo de errores con try/catch
+3. Mantener la lógica de inicialización separada del componente visual
+
+### 4. Patrones de Diseño
+
+1. Separación clara entre inicialización de estructura y carga de datos
+2. Uso de managers para coordinar la inicialización
+3. Implementación de servicios específicos por tabla
+
+### 5. Patrones Recomendados
 
 1. Repository Pattern para consultas complejas
 2. Factory Pattern para creación de servicios
 3. Strategy Pattern para diferentes tipos de población
 
-### 3. Optimizaciones
+### 6. Optimizaciones
 
 1. Índices estratégicos
 2. Consultas eficientes

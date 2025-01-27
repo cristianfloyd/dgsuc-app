@@ -3,6 +3,7 @@
 return [
     App\Providers\AfipMapucheArtProvider::class,
     App\Providers\AfipMapucheSicossProvider::class,
+    App\Providers\AfipMapucheSicossServiceProvider::class,
     App\Providers\AfipProvider::class,
     App\Providers\AppServiceProvider::class,
     App\Providers\AuthServiceProvider::class,

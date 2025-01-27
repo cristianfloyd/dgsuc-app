@@ -19,12 +19,14 @@ interface TableServiceInterface
     public function exists(): bool;
 
     /**
-     * Crea y puebla la tabla con datos iniciales
-     *
-     * @return void
-     * @throws \Exception Si hay error en la creación o población
+     * Crea la estructura de la tabla si no existe
      */
-    public function createAndPopulate(): void;
+    public function createTable(): void;
+
+    /**
+     * Puebla la tabla con datos iniciales
+     */
+    public function populateTable(): void;
 
     /**
      * Obtiene el nombre de la tabla

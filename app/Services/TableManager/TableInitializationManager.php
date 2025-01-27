@@ -2,8 +2,8 @@
 
 namespace App\Services\TableManager;
 
-use App\Contracts\TableService\TableServiceInterface;
 use Illuminate\Support\Facades\Log;
+use App\Contracts\TableService\TableServiceInterface;
 
 /**
  * Administrador central para la inicialización de tablas
@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Log;
  */
 class TableInitializationManager
 {
+    public function isTableInitialized(TableServiceInterface  $service): bool
+    {
+        return $service->exists();
+    }
     /**
      * Inicializa una tabla si no existe
      *
@@ -22,7 +26,7 @@ class TableInitializationManager
     {
         try {
             if (!$tableService->exists()) {
-                $tableService->createAndPopulate();
+                $tableService->createTable();
                 Log::info("Tabla {$tableService->getTableName()} inicializada correctamente");
                 return true;
             }
