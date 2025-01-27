@@ -14,7 +14,7 @@ En el archivo txt se escriben los datos uno al lado del otro sin delimitarlos. A
 | Nº  | DESDE | LONG. | TIPO | CAMPO                                           | ORIGEN                          |
 |-----|-------|-------|------|-------------------------------------------------|---------------------------------|
 | 1   | 1     | 11    | N    | CUIL                                            | Datos Personales de Empleados   |
-| 2   | 12    | 40    | C    | Apellido y Nombre                              | Datos Personales de Empleados   |
+| 2   | 12    | 30    | C    | Apellido y Nombre                              | Datos Personales de Empleados   |
 | 3   | 42    | 1     | N    | Cónyuge                                        | Datos Familiares de Empleados   |
 | 4   | 43    | 2     | N    | Cantidad de Hijos                              | Datos Familiares de Empleados   |
 | 5   | 45    | 2     | N    | Código de Situación                            | Datos Personales DGI            |

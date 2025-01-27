@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\FileProcessors;
+namespace App\Services\SicossFileProcessors;
 
 class SicossFileProcessor
 {

@@ -116,8 +116,62 @@ class AfipMapucheSicoss extends Model
         'rem_total' => 'decimal:2',
         'rem_impo1' => 'decimal:2',
         'asig_fam_pag' => 'decimal:2',
-        // Agrega aquí los demás campos con sus respectivos tipos
+        'rem_Impo2' => 'decimal:2',
+        'rem_Impo3' => 'decimal:2',
+        'rem_Impo4' => 'decimal:2',
+        'cod_siniestrado' => 'string',
+        'marca_reduccion' => 'string',
+        'recomp_lrt' => 'decimal:2',
+        'tipo_empresa' => 'string',
+        'aporte_adic_os' => 'decimal:2',
+        'regimen' => 'string',
+        'sit_rev1' => 'string',
+        'dia_ini_sit_rev1' => 'date',
+        'sit_rev2' => 'string',
+        'dia_ini_sit_rev2' => 'date',
+        'sit_rev3' => 'string',
+        'dia_ini_sit_rev3' => 'date',
+        'sueldo_adicc' => 'decimal:2',
+        'sac' => 'decimal:2',
+        'horas_extras' => 'decimal:2',
+        'zona_desfav' => 'decimal:2',
+        'vacaciones' => 'decimal:2',
+        'cant_dias_trab' => 'integer',
+        'rem_impo5' => 'decimal:2',
+        'convencionado' => 'boolean',
+        'rem_impo6' => 'decimal:2',
+        'tipo_oper' => 'string',
+        'adicionales' => 'decimal:2',
+        'premios' => 'decimal:2',
+        'rem_dec_788_05' => 'decimal:2',
+        'rem_imp7' => 'decimal:2',
+        'nro_horas_ext' => 'integer',
+        'cpto_no_remun' => 'decimal:2',
+        'maternidad' => 'decimal:2',
+        'rectificacion_remun' => 'decimal:2',
+        'rem_Imp9' => 'decimal:2',
+        'contrib_dif' => 'decimal:2',
+        'hstrab' => 'decimal:2',
+        'seguro' => 'boolean',
+        'ley_27430' => 'decimal:2',
+        'incsalarial' => 'decimal:2',
+        'remimp11' => 'decimal:2',
     ];
+
+
+    /**
+     * Formatea un valor decimal para el archivo SICOSS
+     * Elimina el punto decimal y rellena con ceros a la izquierda
+     */
+    public static function formatearDecimal($valor, $longitud): string
+    {
+        return str_pad(
+            number_format($valor, 2, '', ''),
+            $longitud,
+            '0',
+            STR_PAD_LEFT
+        );
+    }
 
     // ##################################################################################################################
     // Métodos para obtener el ID para FilamentPHP

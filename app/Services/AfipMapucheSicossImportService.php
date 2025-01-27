@@ -7,7 +7,7 @@ use App\DTOs\AfipMapucheSicossDTO;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use App\Services\FileProcessors\SicossFileProcessor;
+use App\Services\SicossFileProcessors\SicossFileProcessor;
 
 class AfipMapucheSicossImportService
 {

@@ -33,6 +33,14 @@ class ListAfipMapucheSicosses extends BaseListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('exportarSicoss')
+                ->label('Exportar SICOSS')
+                ->icon('heroicon-o-document-arrow-down')
+                ->action(function () {
+                    $path = AfipMapucheSicossResource::generarArchivoSicoss();
+                    return response()->download($path)->deleteFileAfterSend();
+                })
+                ->color('success'),
             Actions\Action::make('importar')
                             ->label('Importar')
                             ->url(fn (): string => static::$resource::getUrl('import')),
