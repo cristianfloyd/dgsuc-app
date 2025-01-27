@@ -77,7 +77,7 @@ class EditImportData extends EditRecord
                             ->schema([
                                 DatePicker::make('fecha_baja')
                                     ->label('Fecha de Baja')
-                                    ->required()
+                                    ->required(fn(Get $get): bool => $get('tipo') !== 'Licencia')
                                     ->beforeOrEqual('today'),
 
                                 Select::make('tipo')

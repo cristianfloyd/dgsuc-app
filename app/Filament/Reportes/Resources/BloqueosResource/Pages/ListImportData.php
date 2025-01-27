@@ -110,7 +110,7 @@ class ListImportData extends ListRecords
                 ->modalHeading('¿Validar todos los registros?')
                 ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
                 ->action(function () {
-                    $registros = BloqueosDataModel::all();
+                    $registros = BloqueosDataModel::all()->where('estado', '!=', BloqueosEstadoEnum::DUPLICADO);
                     $total = $registros->count();
                     $validados = 0;
                     $conError = 0;
@@ -139,6 +139,10 @@ class ListImportData extends ListRecords
         return [
             'Todo' => Tab::make()
                 ->badge(fn() => $this->getModel()::all()->count()),
+            'Duplicados' => Tab::make()
+                ->badge(fn() => $this->getModel()::where('estado', 'duplicado')->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'duplicado')),
             'Licencia' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->count())
                 ->badgeColor('info')

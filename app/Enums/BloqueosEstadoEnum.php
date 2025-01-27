@@ -6,6 +6,7 @@ enum BloqueosEstadoEnum: string
 {
     case PENDIENTE = 'pendiente';
     case IMPORTADO = 'importado';
+    case DUPLICADO = 'duplicado';
     case VALIDADO = 'validado';
     case ERROR_VALIDACION = 'error_validacion';
     case PROCESADO = 'procesado';
@@ -16,6 +17,7 @@ enum BloqueosEstadoEnum: string
         return match($this) {
             self::PENDIENTE => 'Pendiente',
             self::IMPORTADO => 'Recién Importado',
+            self::DUPLICADO => 'Duplicado',
             self::VALIDADO => 'validado',
             self::ERROR_VALIDACION => 'Error de Validación',
             self::PROCESADO => 'Procesado',
@@ -27,6 +29,7 @@ enum BloqueosEstadoEnum: string
     {
         return match($this) {
             self::IMPORTADO => 'gray',
+            self::DUPLICADO => 'danger',
             self::VALIDADO => 'success',
             self::ERROR_VALIDACION => 'danger',
             self::PROCESADO => 'info',

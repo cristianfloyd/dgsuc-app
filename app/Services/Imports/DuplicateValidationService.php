@@ -2,6 +2,7 @@
 
 namespace App\Services\Imports;
 
+use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\DuplicateCargoException;
@@ -18,48 +19,66 @@ class DuplicateValidationService
         Log::debug('DuplicateValidationService initialized');
     }
 
+    /**
+     * Procesa los registros para validar duplicados.
+     *
+     * Este método agrupa los registros por nro_cargo y marca los duplicados.
+     * Los registros únicos se marcan como válidos.
+     *
+     * @param Collection $rows Los registros a procesar.
+     * @return void
+     */
     public function processRecords(Collection $rows): void
     {
-        // Agrupamos por nro_cargo para identificar duplicados
         Log::debug('Agrupando registros por nro_cargo, en DuplicateValidationService');
         $groupedByCargo = $rows->groupBy('n_de_cargo');
 
         foreach ($groupedByCargo as $nroCargo => $records) {
             if ($records->count() > 1) {
-                // Guardamos los registros duplicados
-                $this->duplicateRecords = $this->duplicateRecords->merge(
-                    $records->map(fn($record) => [
-                        'nro_cargo' => $nroCargo,
-                        'nro_legajo' => $record['legajo']
-                    ])
-                );
+                // Marcamos todos los registros como duplicados pero los mantenemos
+                $markedRecords = $records->map(function ($record) {
+                    $record['estado'] = BloqueosEstadoEnum::DUPLICADO;
+                    return $record;
+                });
+                $this->duplicateRecords = $this->duplicateRecords->merge($markedRecords);
+                $this->validRecords = $this->validRecords->merge($markedRecords);
             } else {
-                // Guardamos los registros válidos
-                $this->validRecords = $this->validRecords->merge($records);
+                // Los registros únicos se marcan como válidos
+                $record = $records->first();
+                $record['estado'] = BloqueosEstadoEnum::VALIDADO;
+                $this->validRecords = $this->validRecords->merge(collect([$record]));
             }
         }
     }
 
+    /**
+     * Retorna los registros duplicados.
+     *
+     * @return Collection Colección de registros duplicados.
+     */
     public function getDuplicateRecords(): Collection
     {
         return $this->duplicateRecords;
     }
 
+    /**
+     * Retorna los registros válidos.
+     *
+     * @return Collection Colección de registros válidos.
+     */
     public function getValidRecords(): Collection
     {
         return $this->validRecords;
     }
 
-
     /**
      * Valida duplicados en la colección de datos del Excel
+     * Ahora solo registra los duplicados sin lanzar excepción
      *
      * @param Collection $rows Filas del Excel
-     * @throws DuplicateCargoException Si se encuentran duplicados
      */
     public function validateExcelDuplicates(Collection $rows): void
     {
-        // Contamos ocurrencias de cada nro_cargo
         $cargos = $rows->pluck('n_de_cargo')->toArray();
         $duplicates = array_filter(
             array_count_values($cargos),
@@ -67,11 +86,7 @@ class DuplicateValidationService
         );
 
         if (!empty($duplicates)) {
-            throw new DuplicateCargoException(
-                'Se encontraron números de cargo duplicados en el archivo: ' .
-                implode(', ', array_keys($duplicates)),
-                $duplicates
-            );
+            Log::info('Se encontraron números de cargo duplicados: ' . implode(', ', array_keys($duplicates)));
         }
     }
 }

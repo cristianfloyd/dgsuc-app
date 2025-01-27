@@ -6,6 +6,7 @@ use App\Enums\BloqueosEstadoEnum;
 use App\Services\DateParserService;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\ValidationException;
+use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ExcelRowValidationService
@@ -25,12 +26,37 @@ class ExcelRowValidationService
         $this->errors = [];
         Log::debug('Iniciando validación de fila', ['row' => $row]);
 
+        // Parseamos la fecha de la misma manera que en validateFechaBaja
+        $fechaBaja = isset($row['fecha_de_baja'])
+        ? Date::excelToDateTimeObject($row['fecha_de_baja'])
+        : null;
+        $fechaBaja = $this->dateParserService->parseDate($fechaBaja);
+
+        // Si el registro ya fue marcado como duplicado, mantenemos ese estado
+        if (isset($row['estado']) && $row['estado'] === BloqueosEstadoEnum::DUPLICADO) {
+            Log::debug('Registro duplicado, manteniendo estado', ['row' => $row]);
+            return [
+                'correo_electronico' => $row['correo_electronico'],
+                'nombre' => $row['nombre'],
+                'usuario_mapuche_solicitante' => $row['usuario_mapuche_solicitante'],
+                'dependencia' => $row['dependencia'],
+                'legajo' => $row['legajo'],
+                'n_de_cargo' => $row['n_de_cargo'],
+                'tipo_de_movimiento' => $row['tipo_de_movimiento'],
+                'fecha_de_baja' => $fechaBaja ?? null,
+                'observaciones' => $row['observaciones'] ?? '',
+                'estado' => BloqueosEstadoEnum::DUPLICADO,
+                'mensaje_error' => "Cargo duplicado: {$row['n_de_cargo']}"
+            ];
+        }
+
         // Ejecutamos todas las validaciones
         $legajoValidation = $this->validateLegajo($row['legajo']);
         $cargoValidation = $this->validateCargo($row['n_de_cargo']);
         $tipoValidation = $this->validateTipoMovimiento($row['tipo_de_movimiento']);
         $fechaValidation = $this->validateFechaBaja($row['fecha_de_baja'] ?? null, $row['tipo_de_movimiento']);
         $usuarioMapucheValidation = $this->validateUsuarioMapuche($row['usuario_mapuche_solicitante']);
+
 
         $validatedData = [
             'correo_electronico' => $this->validateEmail($row['correo_electronico']),
@@ -51,7 +77,7 @@ class ExcelRowValidationService
             $legajoValidation,
             $cargoValidation,
             $fechaValidation,
-            $tipoValidation
+            $tipoValidation,
         ];
 
         // Verificamos si alguna validación falló
@@ -65,6 +91,8 @@ class ExcelRowValidationService
 
         return $validatedData;
     }
+
+
 
     private function addError(string $field, string $message): void
     {
@@ -115,30 +143,30 @@ class ExcelRowValidationService
      * Valida y normaliza el usuario Mapuche
      */
     private function validateUsuarioMapuche(?string $usuario): array
-{
-    if (empty($usuario)) {
-        return [
-            'value' => null,
-            'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-            'mensaje_error' => 'El usuario Mapuche es requerido'
-        ];
-    }
+    {
+        if (empty($usuario)) {
+            return [
+                'value' => null,
+                'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
+                'mensaje_error' => 'El usuario Mapuche es requerido'
+            ];
+        }
 
-    $usuario = strtolower(trim($usuario));
+        $usuario = strtolower(trim($usuario));
 
-    if (!preg_match('/^[a-z0-9._-]+$/', $usuario)) {
+        if (!preg_match('/^[a-z0-9._-]+$/', $usuario)) {
+            return [
+                'value' => $usuario,
+                'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
+                'mensaje_error' => "Usuario Mapuche inválido: {$usuario}"
+            ];
+        }
+
         return [
             'value' => $usuario,
-            'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-            'mensaje_error' => "Usuario Mapuche inválido: {$usuario}"
+            'estado' => BloqueosEstadoEnum::VALIDADO
         ];
     }
-
-    return [
-        'value' => $usuario,
-        'estado' => BloqueosEstadoEnum::VALIDADO
-    ];
-}
 
 
     /**
@@ -153,8 +181,16 @@ class ExcelRowValidationService
         return trim($dependencia);
     }
 
+
     /**
-     * Valida y normaliza el número de legajo
+     * Valida y normaliza el legajo.
+     *
+     * Verifica si el legajo es numérico y mayor que 0. Si no cumple con estas condiciones,
+     * devuelve un arreglo con el estado de error de validación y un mensaje de error.
+     * Si el legajo es válido, devuelve un arreglo con el estado de validado.
+     *
+     * @param mixed $legajo El legajo a validar.
+     * @return array Un arreglo con el valor del legajo, el estado de validación y un mensaje de error si corresponde.
      */
     private function validateLegajo($legajo): array
     {
@@ -269,6 +305,7 @@ class ExcelRowValidationService
                 $fecha = Date::excelToDateTimeObject($fecha);
             }
 
+            // Parseamos la fecha utilizando el servicio de análisis de fechas
             $fechaBaja = $this->dateParserService->parseDate($fecha);
 
             if ($fechaBaja->isFuture()) {

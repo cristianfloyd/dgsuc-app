@@ -4,12 +4,10 @@ namespace App\Imports;
 
 use App\DTOs\ImportResultDTO;
 use App\Enums\BloqueosEstadoEnum;
-use PhpParser\Node\Stmt\TryCatch;
 use Illuminate\Support\Collection;
 use App\Data\Reportes\BloqueosData;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use App\Exceptions\ValidationException;
 use App\Models\Reportes\BloqueosDataModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;

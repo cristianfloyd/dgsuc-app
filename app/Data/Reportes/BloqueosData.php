@@ -85,9 +85,6 @@ class BloqueosData extends Data
 
     public static function fromValidatedData(array $validatedData, int $nroLiqui): self
     {
-        Log::debug('Datos validados recibidos en BloqueosData::fromValidatedData', [
-            $validatedData,
-        ]);
         $instance = new self(
             fecha_registro: now(),
             email: strtolower($validatedData['correo_electronico']),

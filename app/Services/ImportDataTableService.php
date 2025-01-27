@@ -32,7 +32,7 @@ class ImportDataTableService
 
                 // Datos del cargo
                 $table->integer('nro_legaj');
-                $table->integer('nro_cargo')->unique();
+                $table->integer('nro_cargo');
                 $table->date('fecha_baja')->nullable();
                 $table->string('tipo');
                 $table->text('observaciones')->nullable();
