@@ -6,12 +6,14 @@ use App\Models\Dh21;
 use App\Models\TablaTempCuils;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceInterface
 {
+    use MapucheConnectionTrait;
     private $afipMapucheMiSimplificacion;
     private $tablaTempCuils;
 
@@ -110,7 +112,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     private function verificarYCrearTabla(): bool
     {
         $table = $this->afipMapucheMiSimplificacion->getTable();
-        $connection = $this->afipMapucheMiSimplificacion->getConnectionName();
+        $connection = $this->getConnectionName();
 
         if (!Schema::connection($connection)->hasTable($table)) {
             if (!$this->afipMapucheMiSimplificacion->createTable()) {
@@ -172,10 +174,9 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     public function isNotEmpty(): bool
     {
         $table = $this->afipMapucheMiSimplificacion->getTable();
-        $connection = $this->afipMapucheMiSimplificacion->getConnectionName();
         //Verifica si la tabla existe
-        if (!Schema::connection($connection)->hasTable($table)) {
-            Log::info("La tabla {$table} no existe en la base de datos {$connection}.");
+        if (!Schema::connection($this->getConnectionName())->hasTable($table)) {
+            Log::info("La tabla {$table} no existe en la base de datos {$this->getConnectionName()}.");
             return false;
         }
         //Verifica si la tabla contiene datos

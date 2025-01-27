@@ -8,17 +8,10 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration
 {
     use MapucheConnectionTrait;
-
-
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::connection($this->getConnectionName())->create('suc.origenes_models', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::connection($this->getConnectionName())->table('suc.uploaded_files', function (Blueprint $table) {
+            $table->string('process_id')->nullable()->after('user_name');
         });
     }
 
@@ -27,6 +20,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection($this->getConnectionName())->dropIfExists('suc.origenes_models');
+        Schema::connection($this->getConnectionName())->table('suc.uploaded_files', function (Blueprint $table) {
+            $table->dropColumn('process_id');
+        });
     }
 };

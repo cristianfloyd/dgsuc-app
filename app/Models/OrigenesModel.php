@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use FTP\Connection;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\OrigenRepositoryInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrigenesModel extends Model implements OrigenRepositoryInterface
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
     protected $table = 'suc.origenes_models';
-    protected $connection = 'pgsql-mapuche';
 
     protected $fillable = [
         'id',

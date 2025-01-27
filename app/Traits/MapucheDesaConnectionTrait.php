@@ -27,6 +27,13 @@ trait MapucheDesaConnectionTrait
     public function getTable()
     {
         $table = parent::getTable();
-        return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
+
+        // Si ya tiene un schema (contiene un punto), retornamos tal cual
+        if (str_contains($table, '.')) {
+            return $table;
+        }
+
+        // Si no tiene schema, agregamos mapuche.
+        return "mapuche.$table";
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class UploadedFile extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
     protected $table = 'suc.uploaded_files';
     protected $fillable = [
         'periodo_fiscal',

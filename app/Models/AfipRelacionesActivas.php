@@ -14,7 +14,7 @@ class AfipRelacionesActivas extends Model
 {
     use MapucheConnectionTrait;
 
-    
+
     protected $table = 'suc.afip_relaciones_activas';
 
     protected $fillable = [
@@ -53,9 +53,10 @@ class AfipRelacionesActivas extends Model
      */
     public static function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
     {
-        //
+
+
         // Nombre de la conexión de base de datos a utilizar
-        $conexion = 'pgsql-mapuche';
+        $conexion = 'pgsql-prod';
 
         // Iniciar la transacion en la conexion especificada
         DB::connection($conexion)->beginTransaction();

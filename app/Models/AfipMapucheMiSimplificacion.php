@@ -3,17 +3,17 @@
 namespace App\Models;
 
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheDesaConnectionTrait;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    // Configuración de la conexión y tabla
-    protected $connection = 'pgsql-mapuche';
+    use MapucheDesaConnectionTrait;
     protected $table = 'suc.afip_mapuche_mi_simplificacion';
     public $timestamps = false;
 
@@ -136,7 +136,7 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return parent::newQuery()->addSelect(
             '*',
-            DB::raw("CONCAT(periodo_fiscal, '-', cuil) as id")
+            DB::connection($this->getColumns())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
         )
         ->orderBy('periodo_fiscal')
         ->orderBy('cuil');
@@ -146,34 +146,14 @@ class AfipMapucheMiSimplificacion extends Model
 
 
 
-    // /**
-    //  * Establece el valor de la clave primaria.
-    //  *
-    //  * @param mixed $value
-    //  * @return void
-    //  */
-    // public function setKeysForSaveQuery($query)
-    // {
-    //     foreach ($this->getKeyName() as $key) {
-    //         if (isset($this->attributes[$key])) {
-    //             $query->where($key, '=', $this->attributes[$key]);
-    //         } else {
-    //             throw new \Exception("No value for primary key '$key' provided.");
-    //         }
-    //     }
-    //     return $query;
-    // }
 
 
-    /** Creates the `suc.afip_mapuche_mi_simplificacion` table in the `pgsql-mapuche` database connection if it doesn't already exist.
-     *
-     * If the table already exists, the method does nothing and returns `false`.
-     * If the table is created successfully, the method returns `true`.
-     */
+
+
     public function createTable(): bool
     {
-        if (!Schema::connection($this->connection)->hasTable($this->table)) {
-            Schema::connection($this->connection)->create($this->table, function (Blueprint $table) {
+        if (!Schema::connection($this->getConnectionName())->hasTable($this->table)) {
+            Schema::connection($this->getConnectionName())->create($this->table, function (Blueprint $table) {
                 $table->integer('nro_legaj');
                 $table->char('nro_liqui', 6);
                 $table->char('sino_cerra', 1);
@@ -219,7 +199,7 @@ class AfipMapucheMiSimplificacion extends Model
     public static function truncate()
     {
 
-        DB::connection('pgsql-mapuche')->statement('TRUNCATE TABLE suc.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
+        DB::connection('pgsql-prod')->statement('TRUNCATE TABLE suc.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
     }
 
     /**

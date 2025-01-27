@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TablaTempCuils extends Model
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
     protected $table = 'suc.tabla_temp_cuils';
     protected $primaryKey = 'id';
 
@@ -39,7 +40,7 @@ class TablaTempCuils extends Model
      */
     public function createTable(): void
     {
-        Schema::connection($this->connection)->create($this->table, function ($table) {
+        Schema::connection($this->getConnectionName())->create($this->table, function ($table) {
             $table->id();
             $table->string('cuil', 11)->unique();
         });
@@ -63,14 +64,14 @@ class TablaTempCuils extends Model
     public static function insertTable(array $cuils): bool
     {
         try {
-            DB::transaction(function () use ($cuils) {
+            DB::connection('pgsql-prod')->transaction(function () use ($cuils) {
                 $data = [];
                 foreach ($cuils as $cuil) {
                     $data[] = ['cuil' => $cuil];
+                    $instance = new TablaTempCuils();
+                    $connection = $instance->getConnectionName();
                 }
 
-                $instance = new TablaTempCuils();
-                $connection = $instance->getConnectionName();
                 $table = $instance->getTable();
 
                 DB::connection($connection)->table($table)->insert($data);

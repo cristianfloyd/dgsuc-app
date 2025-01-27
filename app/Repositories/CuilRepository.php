@@ -5,11 +5,14 @@ namespace App\Repositories;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use App\Contracts\CuilRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CuilRepository implements CuilRepositoryInterface
 {
+    use MapucheConnectionTrait;
+
     /**
      * Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
      *
@@ -19,7 +22,7 @@ class CuilRepository implements CuilRepositoryInterface
      */
     public function getCuilsNotInAfip($perPage = 10): Collection
     {
-        $cuils = AfipMapucheSicoss::on('pgsql-mapuche')
+        $cuils = AfipMapucheSicoss::on($this->getConnectionName())
         ->select('cuil')
         ->whereNotExists(function ($query) {
             $query->select(DB::raw(1))
@@ -38,7 +41,7 @@ class CuilRepository implements CuilRepositoryInterface
      */
     public function getCuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection('pgsql-mapuche')
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())
             ->table('suc.tabla_temp_cuils as ttc')
             ->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')
             ->whereNull('amms.cuil')

@@ -3,18 +3,18 @@
 namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
 
 use Filament\Actions;
+use Filament\Actions\Action;
+use App\Enums\BloqueosEstadoEnum;
 use Filament\Resources\Components\Tab;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosDataService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Filament\Reportes\Resources\BloqueosResource;
 use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
-use Filament\Actions\Action;
-use App\Models\Reportes\BloqueosDataModel;
-use App\Enums\BloqueosEstadoEnum;
 
 class ListImportData extends ListRecords
 {
@@ -144,17 +144,17 @@ class ListImportData extends ListRecords
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'duplicado')),
             'Licencia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->where('estado','validado')->count())
                 ->badgeColor('info')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'licencia')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'licencia')->where('estado','validado')),
             'Fallecido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'fallecido')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'fallecido')->where('estado','validado')->count())
                 ->badgeColor('danger')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'fallecido')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'fallecido')->where('estado','validado')),
             'Renuncia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->where('estado','validado')->count())
                 ->badgeColor('warning')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')->where('estado','validado')),
             'valido' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('estado', 'validado')->count())
                 ->badgeColor('success')

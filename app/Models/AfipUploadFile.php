@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AfipUploadFile extends Model
 {
-    protected $connection ='pgsql-mapuche';
+    use MapucheConnectionTrait;
     use HasFactory;
-    protected $table = 'afip_upload_files';
+
+    protected $table = 'suc.afip_upload_files';
     protected $fillable = [
         'id',
-        
+
     ];
 }
