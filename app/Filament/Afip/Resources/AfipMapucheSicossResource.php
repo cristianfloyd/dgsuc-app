@@ -76,18 +76,32 @@ class AfipMapucheSicossResource extends Resource
                     ->money('ARS'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('periodo_fiscal')
+                ->label('Período Fiscal')
+                ->options(function() {
+                    return AfipMapucheSicoss::distinct()
+                        ->pluck('periodo_fiscal', 'periodo_fiscal')
+                        ->toArray();
+                })
+                ->searchable()
             ])
             ->headerActions([
                 Tables\Actions\Action::make('exportarFiltrados')
-                    ->label('Exportar Filtrados')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(function () {
-                        $registros = static::getModel()::query()->get();
-                        $path = static::generarArchivoSicoss($registros);
-                        return response()->download($path)->deleteFileAfterSend();
-                    })
-                    ->color('success'),
+                ->label('Exportar Filtrados')
+                ->icon('heroicon-o-document-arrow-down')
+                ->action(function ($livewire) {
+                    // Obtener el query builder con los filtros aplicados
+                    $query = $livewire->getFilteredTableQuery();
+
+                    // Obtener los registros filtrados
+                    $registrosFiltrados = $query->get();
+
+                    // Generar el archivo con los registros filtrados
+                    $path = static::generarArchivoSicoss($registrosFiltrados);
+
+                    return response()->download($path)->deleteFileAfterSend();
+                })
+                ->color('success')
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
