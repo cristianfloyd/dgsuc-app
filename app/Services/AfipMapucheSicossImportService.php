@@ -80,7 +80,6 @@ class AfipMapucheSicossImportService
                             ]);
                         }
                     }
-
                 } catch (\Exception $e) {
                     $stats['errors'][] = "Error en línea {$lineNumber}: " . $e->getMessage();
                     Log::error('Error procesando línea SICOSS', [
@@ -102,7 +101,6 @@ class AfipMapucheSicossImportService
             $this->logMetrics($stats);
 
             return $stats;
-
         } catch (\Exception $e) {
             if (isset($handle)) {
                 fclose($handle);
@@ -333,7 +331,7 @@ class AfipMapucheSicossImportService
     {
         return true;
         // return strlen(trim($line)) === 500 &&
-            // preg_match('/^\d{11}/', $line); // Valida que comience con CUIL
+        // preg_match('/^\d{11}/', $line); // Valida que comience con CUIL
     }
 
     private function calculateProgress(int $processed, int $total): int
@@ -350,29 +348,44 @@ class AfipMapucheSicossImportService
     public function parseLine(string $line, int $lineNumber = 0): array
     {
         try {
-            // Convertir la línea usando el servicio existente
-            $line = EncodingService::toUtf8($line);
+            // Guardamos la longitud original antes de cualquier transformación
+        $originalLength = strlen($line);
 
-            if (strlen($line) < 499) {
-                Log::error("Longitud de línea inválida: " . strlen($line));
-                throw new \Exception("Longitud de línea inválida");
+        // Convertimos manteniendo la longitud original
+        $line = preg_replace('/[^\x20-\x7E\xA0-\xFF]/', ' ', $line);
+
+        // Si la longitud cambió, rellenamos con espacios
+        if (strlen($line) < $originalLength) {
+            $line = str_pad($line, $originalLength, ' ');
+        }
+
+        if (strlen($line) < 499) {
+            Log::error("Longitud de línea inválida: " . strlen($line), [
+                'linea_original' => $line,
+                'longitud' => strlen($line)
+            ]);
+            throw new \Exception("Longitud de línea inválida {$lineNumber}, longitud: " . strlen($line));
+        }
+
+        $structure = $this->getFileStructure();
+        $parsedData = [];
+
+        // Procesar cada campo según la estructura definida
+        foreach ($structure as $field => $config) {
+            $value = substr($line, $config['start'], $config['length']);
+
+            // Aseguramos que el valor mantiene su longitud original
+            if (strlen($value) !== $config['length']) {
+                $value = str_pad($value, $config['length'], ' ');
             }
 
-            $structure = $this->getFileStructure();
-            $parsedData = [];
-
-            // Procesar cada campo según la estructura definida
-            foreach ($structure as $field => $config) {
-                $value = substr($line, $config['start'], $config['length']);
-
-                // Modificamos el procesamiento para asegurar valores numéricos válidos
-                $parsedData[$field] = match ($config['type']) {
-                    'N' => (int)ltrim(trim($value), '0') ?: 0, // Convertimos strings vacíos o '00' a 0
-                    'D' => $this->parseAmount($value),
-                    'C' => trim($value),
-                    default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-                };
-            }
+            $parsedData[$field] = match ($config['type']) {
+                'N' => (int)ltrim(trim($value), '0') ?: 0,
+                'D' => $this->parseAmount($value),
+                'C' => trim($value),
+                default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
+            };
+        }
 
 
             $this->validateParsedData($parsedData);
@@ -410,7 +423,19 @@ class AfipMapucheSicossImportService
 
     private function parseAmount(string $value): float
     {
-        return (float)trim($value) / 100;
+        // Eliminar espacios en blanco y ceros a la izquierda
+        $value = ltrim($value, ' 0');
+
+        // Si quedó vacío después de eliminar espacios y ceros, retornar 0
+        if (empty($value)) {
+            return 0.0;
+        }
+
+        // Reemplazar el punto por coma
+        $value = str_replace('.', ',', $value);
+
+        // Convertir a float (asegurándose de que PHP use la coma como separador decimal)
+        return (float)str_replace(',', '.', $value);
     }
 
     private function validateParsedData(array $data): void
