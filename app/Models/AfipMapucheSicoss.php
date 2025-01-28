@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Reedware\LaravelCompositeRelations\HasCompositeRelations;
 
@@ -158,6 +160,24 @@ class AfipMapucheSicoss extends Model
         'remimp11' => 'decimal:2',
     ];
 
+    protected $encodedFields = ['apnom', 'prov'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            foreach ($model->encodedFields as $field) {
+                $model->setAttribute($field, EncodingService::toLatin1($model->getAttribute($field)));
+            }
+        });
+
+        static::updating(function ($model) {
+            foreach ($model->encodedFields as $field) {
+                $model->setAttribute($field, EncodingService::toLatin1($model->getAttribute($field)));
+            }
+        });
+    }
 
     /**
      * Formatea un valor decimal para el archivo SICOSS
@@ -277,5 +297,30 @@ class AfipMapucheSicoss extends Model
     {
         $periodo = $this->attributes['periodo_fiscal'];
         return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
+    }
+
+    // ##################################################################################################################
+    // ################################# MUTADORES Y ACCESORES #####################################################
+
+    /**
+     * Mutador y Accesor para el campo apnom
+     */
+    protected function apnom(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    /**
+     * Mutador y Accesor para el campo prov
+     */
+    protected function prov(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value)
+        );
     }
 }

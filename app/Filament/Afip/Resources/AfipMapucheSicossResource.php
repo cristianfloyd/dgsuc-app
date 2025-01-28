@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 class AfipMapucheSicossResource extends Resource
 {
     use FilamentAfipMapucheSicossTableTrait;
+
     protected static ?string $model = AfipMapucheSicoss::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'AFIP';

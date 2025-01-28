@@ -18,7 +18,7 @@ class AfipMapucheSicossImportService
     private float $startTime;
     private float $endTime;
     private const BATCH_SIZE = 1000;
-    private const MEMORY_LIMIT = 1280 * 1024 * 1024; // 1280MB
+    private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 
     public function __construct()
     {
@@ -28,40 +28,116 @@ class AfipMapucheSicossImportService
     public function streamImport(string $filePath, string $periodoFiscal, callable $progressCallback = null): array
     {
         $this->startTimer();
+        $stats = $this->initializeStats();
 
-        // 1. Validación inicial mejorada
-        $this->validateInitialConditions($filePath, $periodoFiscal);
-
-
-
-        // 2. Procesamiento con mejor control de errores
-        DB::connection($this->getConnectionName())->beginTransaction();
         try {
-            $processor = new SicossFileProcessor();
-            $stats = $this->initializeStats();
+            // Validación inicial
+            $this->validateInitialConditions($filePath, $periodoFiscal);
 
-            foreach ($processor->processFile($filePath, self::BATCH_SIZE) as $chunk) {
-                $this->processBatchWithValidation($chunk, $periodoFiscal, $stats);
-                $this->updateProgress($chunk, $progressCallback);
-                $this->freeMemory();
+            // Procesar archivo en chunks usando generator
+            $handle = fopen($filePath, 'r');
+            if ($handle === false) {
+                throw new \RuntimeException("No se pudo abrir el archivo");
             }
 
+            DB::connection($this->getConnectionName())->beginTransaction();
+
+            $batch = [];
+            $lineNumber = 0;
+
+            while (!feof($handle)) {
+                $line = fgets($handle);
+                if ($line === false) continue;
+
+                $lineNumber++;
+                try {
+                    if (!$this->isValidLine($line)) {
+                        $stats['errors'][] = "Línea {$lineNumber} inválida";
+                        continue;
+                    }
+
+                    $parsedData = $this->parseLine($line);
+                    if (!$parsedData['success']) {
+                        $stats['errors'][] = "Error en línea {$lineNumber}: " . ($parsedData['error'] ?? 'Error desconocido');
+                        continue;
+                    }
+
+                    $parsedData['data']['periodo_fiscal'] = $periodoFiscal;
+                    $batch[] = $parsedData['data'];
+                    $stats['processed']++;
+
+                    // Procesar batch cuando alcanza el tamaño definido
+                    if (count($batch) >= self::BATCH_SIZE) {
+                        $this->processBatch($batch, $stats);
+                        $batch = [];
+                        $this->freeMemory();
+
+                        if ($progressCallback) {
+                            $progressCallback([
+                                'processed' => $stats['processed'],
+                                'errors' => count($stats['errors']),
+                                'memory' => $this->formatMemoryUsage(memory_get_usage(true))
+                            ]);
+                        }
+                    }
+
+                } catch (\Exception $e) {
+                    $stats['errors'][] = "Error en línea {$lineNumber}: " . $e->getMessage();
+                    Log::error('Error procesando línea SICOSS', [
+                        'linea' => $lineNumber,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // Procesar el último batch si existe
+            if (!empty($batch)) {
+                $this->processBatch($batch, $stats);
+            }
+
+            fclose($handle);
             DB::connection($this->getConnectionName())->commit();
-            $this->logSuccess($stats);
 
             $this->stopTimer();
             $this->logMetrics($stats);
 
             return $stats;
+
         } catch (\Exception $e) {
+            if (isset($handle)) {
+                fclose($handle);
+            }
             DB::connection($this->getConnectionName())->rollBack();
-            $this->stopTimer();
             $this->logError($e);
             throw $e;
         }
     }
 
+    private function processBatch(array $batch, array &$stats): void
+    {
+        try {
+            // Usar insert en lugar de updateOrCreate para mejor rendimiento
+            DB::connection($this->getConnectionName())
+                ->table((new AfipMapucheSicoss())->getTable())
+                ->insert($batch);
 
+            $stats['imported'] += count($batch);
+        } catch (\Exception $e) {
+            $stats['errors'][] = "Error al procesar lote: " . $e->getMessage();
+            Log::error('Error al procesar lote SICOSS', [
+                'error' => $e->getMessage(),
+                'batch_size' => count($batch)
+            ]);
+        }
+    }
+
+    private function logProgress(array $chunk, array $stats): void
+    {
+        Log::info('Progreso de importación SICOSS', [
+            'registros_procesados' => count($chunk),
+            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true))
+        ]);
+    }
 
     private function validateInitialConditions(string $filePath, string $periodoFiscal): void
     {
@@ -79,8 +155,9 @@ class AfipMapucheSicossImportService
 
         // Validación básica de estructura del archivo
         $firstLine = fgets(fopen($filePath, 'r'));
-        if (strlen($firstLine) !== 499) {
-            throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres.");
+        if (strlen($firstLine) < 500) {
+            Log::error("Formato de archivo inválido. Se esperan registros de 499 caracteres. Pero se recibió: " . strlen($firstLine));
+            throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 499 caracteres.");
         }
     }
 
@@ -177,6 +254,8 @@ class AfipMapucheSicossImportService
     {
         if (memory_get_usage(true) > self::MEMORY_LIMIT) {
             gc_collect_cycles();
+            DB::connection($this->getConnectionName())->disconnect();
+            DB::connection($this->getConnectionName())->reconnect();
         }
     }
 
@@ -184,6 +263,7 @@ class AfipMapucheSicossImportService
     {
         return [
             'imported' => 0,
+            'processed' => 0,
             'errors' => [],
             'warnings' => [],
             'duplicates' => 0,
@@ -294,7 +374,7 @@ class AfipMapucheSicossImportService
                 };
             }
 
-            Log::debug('Parsed data', ['data' => $parsedData]);
+
             $this->validateParsedData($parsedData);
 
             return [

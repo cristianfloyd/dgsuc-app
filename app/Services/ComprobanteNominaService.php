@@ -15,7 +15,7 @@ class ComprobanteNominaService
     use MapucheConnectionTrait;
     protected $table = 'suc.comprobantes_nomina';
     protected $currentHeader = [];
-    private const array LINE_FORMAT = [
+    private const  LINE_FORMAT = [
         'CODIGO' => ['start' => 0, 'length' => 2],
         'DESCRIPCION' => ['start' => 3, 'length' => 50],
         'IMPORTE' => ['start' => 55, 'length' => 16],
@@ -24,7 +24,7 @@ class ComprobanteNominaService
     ];
 
     // Constantes para las posiciones en el header
-    private const array HEADER_FORMAT = [
+    private const  HEADER_FORMAT = [
         'YEAR_START' => 0,
         'YEAR_LENGTH' => 2,
         'MONTH_START' => 2,
