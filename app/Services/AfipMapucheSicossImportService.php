@@ -349,43 +349,49 @@ class AfipMapucheSicossImportService
     {
         try {
             // Guardamos la longitud original antes de cualquier transformación
-        $originalLength = strlen($line);
+            $originalLength = strlen($line);
 
-        // Convertimos manteniendo la longitud original
-        $line = preg_replace('/[^\x20-\x7E\xA0-\xFF]/', ' ', $line);
-
-        // Si la longitud cambió, rellenamos con espacios
-        if (strlen($line) < $originalLength) {
-            $line = str_pad($line, $originalLength, ' ');
-        }
-
-        if (strlen($line) < 499) {
-            Log::error("Longitud de línea inválida: " . strlen($line), [
-                'linea_original' => $line,
-                'longitud' => strlen($line)
-            ]);
-            throw new \Exception("Longitud de línea inválida {$lineNumber}, longitud: " . strlen($line));
-        }
-
-        $structure = $this->getFileStructure();
-        $parsedData = [];
-
-        // Procesar cada campo según la estructura definida
-        foreach ($structure as $field => $config) {
-            $value = substr($line, $config['start'], $config['length']);
-
-            // Aseguramos que el valor mantiene su longitud original
-            if (strlen($value) !== $config['length']) {
-                $value = str_pad($value, $config['length'], ' ');
+            // Detectamos la codificación actual y convertimos a UTF-8
+            $encoding = mb_detect_encoding($line, ['ISO-8859-1', 'UTF-8', 'ASCII'], true);
+            if ($encoding !== 'UTF-8') {
+                $line = mb_convert_encoding($line, 'UTF-8', $encoding ?: 'ISO-8859-1');
             }
 
-            $parsedData[$field] = match ($config['type']) {
-                'N' => (int)ltrim(trim($value), '0') ?: 0,
-                'D' => $this->parseAmount($value),
-                'C' => trim($value),
-                default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-            };
-        }
+            // Limpiamos caracteres no válidos manteniendo la longitud
+            $line = preg_replace('/[^\PC\s]/u', ' ', $line);
+
+            // Aseguramos que la longitud se mantiene
+            if (mb_strlen($line, '8bit') < $originalLength) {
+                $line = str_pad($line, $originalLength, ' ');
+            }
+
+            if (mb_strlen($line, '8bit') < 499) {
+                Log::error("Longitud de línea inválida: " . mb_strlen($line, '8bit'), [
+                    'linea_original' => $line,
+                    'longitud' => mb_strlen($line, '8bit')
+                ]);
+                throw new \Exception("Longitud de línea inválida {$lineNumber}, longitud: " . mb_strlen($line, '8bit'));
+            }
+
+            $structure = $this->getFileStructure();
+            $parsedData = [];
+
+            // Procesar cada campo según la estructura definida
+            foreach ($structure as $field => $config) {
+                $value = mb_substr($line, $config['start'], $config['length'], '8bit');
+
+                // Aseguramos que el valor mantiene su longitud original
+                if (mb_strlen($value, '8bit') !== $config['length']) {
+                    $value = str_pad($value, $config['length'], ' ');
+                }
+
+                $parsedData[$field] = match ($config['type']) {
+                    'N' => (int)ltrim(trim($value), '0') ?: 0,
+                    'D' => $this->parseAmount($value),
+                    'C' => trim($value),
+                    default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
+                };
+            }
 
 
             $this->validateParsedData($parsedData);

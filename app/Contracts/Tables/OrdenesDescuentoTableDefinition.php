@@ -6,12 +6,12 @@ use App\Contracts\Tables\AbstractTableDefinitionInterface;
 
 class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterface
 {
-    public const string TABLE = 'suc.rep_ordenes_descuento';
-    public const string SCHEMA = 'suc';
+    public const TABLE = 'suc.rep_ordenes_descuento';
+    public const SCHEMA = 'suc';
 
 
     // Definición de columnas
-    public const array COLUMNS = [
+    public const  COLUMNS = [
         'id' => [
             'type' => 'bigIncrements', // Cambiamos a bigIncrements para ID de Laravel
             'primary' => true,
@@ -34,7 +34,7 @@ class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterfac
     ];
 
 
-    public const array INDEXES = [
+    public const INDEXES = [
         'codc_uacad' => ['codc_uacad'],
         'codn_conce' => ['codn_conce']
     ];
