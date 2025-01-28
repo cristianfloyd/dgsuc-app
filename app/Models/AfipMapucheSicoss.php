@@ -34,7 +34,7 @@ class AfipMapucheSicoss extends Model
 
     protected $primaryKey = ['id'];
 
-    protected $appends = ['id'];
+    protected $appends = ['id', 'diferencia_rem'];
 
     public $incrementing = false;
     // No necesitas usar timestamps
@@ -159,6 +159,8 @@ class AfipMapucheSicoss extends Model
         'incsalarial' => 'decimal:2',
         'remimp11' => 'decimal:2',
     ];
+
+
 
     protected $encodedFields = ['apnom', 'prov'];
 
@@ -321,6 +323,13 @@ class AfipMapucheSicoss extends Model
         return Attribute::make(
             get: fn($value) => EncodingService::toUtf8($value),
             set: fn($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    protected function diferenciaRem(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $this->rem_total - $this->rem_impo6,
         );
     }
 }

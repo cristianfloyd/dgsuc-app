@@ -6,8 +6,13 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicoss;
+use Illuminate\Support\Collection;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
@@ -15,8 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
 use App\Contracts\TableService\AfipMapucheSicossTableServiceInterface;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource\RelationManagers;
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Storage;
 
 class AfipMapucheSicossResource extends Resource
 {
@@ -25,6 +28,8 @@ class AfipMapucheSicossResource extends Resource
     protected static ?string $model = AfipMapucheSicoss::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'AFIP';
+    protected static ?string $navigationLabel = 'Controles Sicoss';
+    protected static ?string $pluralLabel = 'Controles Sicoss';
 
 
 
@@ -33,44 +38,56 @@ class AfipMapucheSicossResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('periodo_fiscal')
+                TextColumn::make('periodo_fiscal')
                     ->label('Período Fiscal')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('cuil')
+                TextColumn::make('cuil')
                     ->label('CUIL')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('apnom')
+                TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('conyuge')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('conyuge')
                     ->label('Cónyuge')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('cant_hijos')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('cant_hijos')
                     ->label('Cant. Hijos')
-                    ->numeric(),
-                Tables\Columns\TextColumn::make('cod_situacion')
-                    ->label('Situación'),
-                Tables\Columns\TextColumn::make('cod_cond')
-                    ->label('Condición'),
-                Tables\Columns\TextColumn::make('rem_total')
-                    ->label('Remuneración Total')
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('cod_situacion')
+                    ->label('Situación')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('cod_cond')
+                    ->label('Condición')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rem_total')
+                    ->label('Rem Total')
                     ->money('ARS'),
-                Tables\Columns\TextColumn::make('rem_impo1')
-                    ->label('Remuneración 1')
+                TextColumn::make('rem_impo6')
+                    ->label('Rem impo 6')
                     ->money('ARS'),
-                Tables\Columns\TextColumn::make('asig_fam_pag')
-                    ->label('Asig. Familiar')
-                    ->money('ARS')
-
+                TextColumn::make('diferencia_rem')
+                    ->label('Diferencia Rem')
+                    ->money('ARS'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                //
+                Tables\Actions\Action::make('exportarFiltrados')
+                    ->label('Exportar Filtrados')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        $registros = static::getModel()::query()->get();
+                        $path = static::generarArchivoSicoss($registros);
+                        return response()->download($path)->deleteFileAfterSend();
+                    })
+                    ->color('success'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -98,13 +115,14 @@ class AfipMapucheSicossResource extends Resource
         ];
     }
 
-    public static function generarArchivoSicoss(): string
+
+    public static function generarArchivoSicoss(Collection $registros = null): string
     {
-        $registros = static::getModel()::all();
+        $registros = $registros ?? static::getModel()::all();
         $contenido = '';
 
         // Función auxiliar para formatear decimales con 2 decimales
-        $formatearDecimal = function($valor, $longitud) {
+        $formatearDecimal = function ($valor, $longitud) {
             $valor = $valor ?? 0;
             // Formatea el número con 2 decimales y punto como separador
             $numeroFormateado = number_format($valor, 2, '.', '');
@@ -112,12 +130,23 @@ class AfipMapucheSicossResource extends Resource
             return str_pad($numeroFormateado, $longitud, '0', STR_PAD_LEFT);
         };
 
+        // Nueva función para manejar strings con caracteres especiales
+        $formatearString = function ($valor, $longitud) {
+            $valor = $valor ?? '';
+            // Convertir a ISO-8859-1 (Latin1) para manejar acentos
+            $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
+            // Limitar la longitud considerando caracteres especiales
+            $valor = substr($valor, 0, $longitud);
+            // Rellenar con espacios hasta alcanzar la longitud exacta
+            return str_pad($valor, $longitud, ' ', STR_PAD_RIGHT);
+        };
+
         foreach ($registros as $registro) {
             $linea = '';
 
             // Datos de identificación personal
             $linea .= str_pad($registro->cuil ?? '0', 11, '0', STR_PAD_LEFT);
-            $linea .= str_pad(substr($registro->apnom ?? '', 0, 30), 30, ' ', STR_PAD_RIGHT);
+            $linea .= $formatearString($registro->apnom, 30);;
 
             // Datos familiares
             $linea .= $registro->conyuge ? '1' : '0';
@@ -130,7 +159,8 @@ class AfipMapucheSicossResource extends Resource
             $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', STR_PAD_LEFT);
 
             // Datos aportes y obra social
-            $linea .= ' ' . number_format($registro->porc_aporte ?? 0, 4, '.', '');
+
+            $linea .= $formatearDecimal($registro->porc_aporte, 5);
             $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', STR_PAD_LEFT);
             $linea .= str_pad($registro->cod_os ?? '0', 6, '0', STR_PAD_LEFT);
             $linea .= str_pad($registro->cant_adh ?? '0', 2, '0', STR_PAD_LEFT);

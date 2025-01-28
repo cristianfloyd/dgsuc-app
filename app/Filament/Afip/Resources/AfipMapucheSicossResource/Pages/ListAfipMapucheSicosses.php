@@ -4,7 +4,9 @@ namespace App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
 
 use Filament\Actions;
 use Illuminate\Support\Facades\Log;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheSicossTableService;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Filament\Resources\Pages\BaseListRecords;
@@ -44,6 +46,16 @@ class ListAfipMapucheSicosses extends BaseListRecords
             Actions\Action::make('importar')
                             ->label('Importar')
                             ->url(fn (): string => static::$resource::getUrl('import')),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'todos' => Tab::make('Todos'),
+            'diferencia_negativa' => Tab::make('Diferencia Negativa')
+                ->icon('heroicon-m-arrow-trending-down')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereRaw('rem_total - rem_impo6 < 0')),
         ];
     }
 }
