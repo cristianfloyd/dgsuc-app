@@ -42,6 +42,7 @@ class OrdenDePagoResource extends Resource
                 TextColumn::make('codn_progr')->label('Programa'),
                 TextColumn::make('remunerativo')->money('ARS')->label('Remunerativo')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('no_remunerativo')->money('ARS')->label('No Remunerativo')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('otros_no_remunerativo')->money('ARS')->label('Otros No Remunerativo')->toggleable()->toggledHiddenByDefault(),
                 TextColumn::make('bruto')->money('ARS')->label('bruto'),
                 TextColumn::make('descuentos')->money('ARS'),
                 TextColumn::make('aportes')->money('ARS'),

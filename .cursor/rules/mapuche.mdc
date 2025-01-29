@@ -1,0 +1,213 @@
+---
+description: Reglas de implementacion:
+globs: 
+---
+# Reglas
+
+- [tabla-services-guide.md](mdc:documentacion/tabla-services-guide.md)
+
+- Estructura de directorios:
+    ````
+    app/
+    ├── Filament/
+    │   ├── Resources/      # Recursos de Filament
+    │   ├── Widgets/       # Widgets para dashboards
+    │   └── Pages/         # Páginas personalizadas
+    ├── Models/
+    │   ├── Mapuche/      # Modelos para la DB de Mapuche
+    │   └── App/          # Modelos para la DB principal
+    ├── Services/
+    │   └── Reports/      # Servicios para generación de reportes
+    └── Traits/
+        └── DatabaseConnection.php  # Trait para manejar conexiones
+
+- Trait para manejar conexiones a la base de datos secundaria 
+  - [MapucheConnectionTrait.php](mdc:app/Traits/MapucheConnectionTrait.php)
+
+- **Ejemplo de implementacion en un Modelo Mapuche**
+    ```php
+    <?php
+
+    namespace App\Models\Mapuche;
+
+    use App\Traits\DatabaseConnection;
+    use App\Services\Tables\EmployeeTableService;
+    use Illuminate\Database\Eloquent\Model;
+
+    class Dh01 extends Model
+    {
+        use DatabaseConnection;
+
+        protected $connection = 'mapuche';
+
+        public static function bootEmployee()
+        {
+            static::ensureTableExists();
+        }
+
+        protected static function ensureTableExists()
+        {
+            $service = app(EmployeeTableService::class);
+            $manager = app(TableInitializationManager::class);
+
+            if (!$manager->isTableInitialized($service)) {
+                $manager->initializeTable($service);
+            }
+        }
+    }
+    ```
+- **Separación de Responsabilidades**:
+  - Usar servicios para la lógica de negocio compleja
+  - Mantener los recursos de Filament limpios y enfocados en la UI
+  - Implementar caching para consultas pesadas
+
+
+- **Convenciones de Nombres**:
+  ```plaintext
+  - Modelos: Singular, PascalCase (Employee)
+  - Tablas: Plural, snake_case (employees)
+  - Recursos Filament: Sufijo Resource (EmployeeResource)
+  - Widgets: Sufijo Widget (EmployeeStatsWidget)
+  ```
+
+7. **Ejemplo de Recurso Filament**
+  ```php:app/Filament/Resources/EmployeeResource.php
+    <?php
+
+    namespace App\Filament\Resources;
+
+    use App\Filament\Resources\EmployeeResource\Pages;
+    use App\Models\Mapuche\Employee;
+    use Filament\Resources\Resource;
+    use Filament\Tables;
+    use Filament\Forms;
+
+    class Dh01Resource extends Resource
+    {
+        protected static ?string $model = Dh01::class;
+
+        protected static ?string $navigationIcon = 'heroicon-o-users';
+
+        public static function form(Forms\Form $form): Forms\Form
+        {
+            return $form
+                ->schema([
+                    // Define tus campos aquí
+                ]);
+        }
+
+        public static function table(Tables\Table $table): Tables\Table
+        {
+            return $table
+                ->columns([
+                    // Define tus columnas aquí
+                ])
+                ->filters([
+                    // Define tus filtros aquí
+                ]);
+        }
+    }
+  ```
+
+5. **Definición de Tabla**
+
+`````php:app/Contracts/Tables/EmployeeTableDefinition.php
+<?php
+
+namespace App\Contracts\Tables;
+
+class EmployeeTableDefinition implements AbstractTableDefinitionInterface
+{
+    public function getTableName(): string
+    {
+        return 'employees';
+    }
+
+    public function getColumns(): array
+    {
+        return [
+            'id' => ['type' => 'bigIncrements'],
+            'legajo' => ['type' => 'string'],
+            'nombre' => ['type' => 'string'],
+            'apellido' => ['type' => 'string'],
+            // ... más columnas según necesidad
+        ];
+    }
+
+    public function getIndexes(): array
+    {
+        return [
+            'employees_legajo_index' => ['legajo'],
+        ];
+    }
+}
+`````
+
+6. **Servicio de Tabla**
+
+`````php:app/Services/Tables/EmployeeTableService.php
+<?php
+
+namespace App\Services\Tables;
+
+use App\Services\Abstract\AbstractTableService;
+use App\Contracts\Tables\EmployeeTableDefinition;
+
+class Dh01TableService extends AbstractTableService
+{
+    protected Dh01TableDefinition $definition;
+
+    public function __construct(Dh01TableDefinition $definition)
+    {
+        $this->definition = $definition;
+    }
+
+    protected function populateTable(): void
+    {
+        // Lógica para poblar la tabla desde Mapuche
+        $this->getConnectionFromTrait()->statement("
+            INSERT INTO {$this->getTableName()} (legajo, nombre, apellido)
+            SELECT legajo, nombre, apellido 
+            FROM mapuche.empleados
+        ");
+    }
+}
+`````
+
+
+7. **Reglas Adicionales para el Proyecto**
+  
+  - **Inicialización de Tablas**:
+    - Las tablas se crean automáticamente al acceder al modelo o recurso
+    - No se requieren migraciones para tablas de Mapuche
+    - Los datos se sincronizan automáticamente según la definición
+
+  - **Recomendaciones para Reportes**:
+    - Usar colas (queues) para reportes grandes
+    - Implementar exportación a Excel/PDF usando Laravel Excel
+    - Cachear resultados frecuentes
+
+  
+  - **Manejo de Datos**:
+    - **Convenciones de Nombres**:
+      ```plaintext
+      - Definiciones: {Nombre}TableDefinition
+      - Servicios: {Nombre}TableService
+      - Modelos: Mapuche/{Nombre}
+      ```
+
+8. **Optimización**:
+
+  - Implementar índices en tablas críticas
+  - Usar eager loading para relaciones
+  - Paginar resultados grandes
+  - Implementar caching estratégico
+
+- **Esta estructura permite**:
+  - Crear tablas dinámicamente sin migraciones
+  - Mantener la sincronización con la base de datos Mapuche
+  - Separar claramente las responsabilidades
+  - Facilitar el testing y mantenimiento
+  - Seguir las mejores prácticas de Laravel y Filament
+
+

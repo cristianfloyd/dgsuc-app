@@ -2,7 +2,7 @@
 
 namespace App\Models\Reportes;
 
-use Attribute;
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -11,6 +11,7 @@ use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use App\Services\OrdenesDescuentoTableService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 
@@ -21,7 +22,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected $primaryKey = 'id';
     public $incrementing = true;
     public $timestamps = true;
-    protected $table = OrdenesDescuentoTableDefinition::TABLE_NAME;
+    protected $table = OrdenesDescuentoTableDefinition::TABLE;
 
     protected $fillable = [
         'nro_liqui',
@@ -54,17 +55,18 @@ class OrdenesDescuento extends Model implements HasLabel
     {
         parent::boot();
 
-        $tableService = new OrdenesDescuentoTableService();
+        $tableService = new OrdenesDescuentoTableService(new OrdenesDescuentoTableDefinition());
 
         if (!$tableService->exists()) {
-            $tableService->createAndPopulate();
-            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE_NAME . " creada y poblada exitosamente");
+            $tableService->createTable();
+            // $tableService->createAndPopulate();
+            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE . " creada y poblada exitosamente");
         }
     }
 
     protected static function initializeTable(): void
     {
-        $tableService = new OrdenesDescuentoTableService();
+        $tableService = new OrdenesDescuentoTableService(new OrdenesDescuentoTableDefinition());
         if (!$tableService->exists()) {
             $tableService->createAndPopulate();
         }
@@ -122,7 +124,33 @@ class OrdenesDescuento extends Model implements HasLabel
     }
 
     /* ###################### Accesors y mutators ###################### */
-    
+
+    /**
+     * Convierte desc_liqui a UTF-8 al recuperar el valor
+     */
+    protected function descLiqui(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    protected function descConce(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    protected function descItem(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value)
+        );
+    }
 
     // ######################  Scopes útiles para el reporte  ######################
     public function scopePeriodo($query, $periodo)
@@ -156,6 +184,7 @@ class OrdenesDescuento extends Model implements HasLabel
                   ->orWhere('desc_conce', 'like', "%{$search}%");
         });
     }
+
 
     // Relaciones que pueden ser útiles en Filament
     public function scopeOrdenadoPorUacad($query)

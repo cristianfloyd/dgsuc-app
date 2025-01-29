@@ -169,11 +169,12 @@ class Dh12 extends Model
     /**
      * Diagnóstico mejorado para caracteres especiales
      */
+
     public static function diagnosticarCodificacion($codn_conce)
     {
         // Usamos la conexión específica
         $connection = static::getMapucheConnection();
-        
+
         $connection->statement("SET client_encoding TO 'SQL_ASCII'");
 
         $resultado = $connection->select("

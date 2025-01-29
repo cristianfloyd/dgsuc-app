@@ -176,9 +176,10 @@ class OrdenesDescuentoResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $tableService = new OrdenesDescuentoTableService();
-        if (!$tableService->exists()) {
-            $tableService->createAndPopulate();
+        $service = app()->make(OrdenesDescuentoTableService::class);
+
+        if (!$service->exists()) {
+            $service->createAndPopulate();
         }
 
         return parent::getEloquentQuery();

@@ -13,13 +13,14 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
+use App\Repositories\Mapuche\Dh16Repository;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
 use App\Services\Reportes\BloqueosProcessService;
-use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
-use App\Repositories\Mapuche\Dh16Repository;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
+use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,6 +57,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(Dh16RepositoryInterface::class, Dh16Repository::class);
+
+        $this->app->bind(OrdenesDescuentoTableService::class, function ($app) {
+            return new OrdenesDescuentoTableService(
+                new OrdenesDescuentoTableDefinition()
+            );
+        });
     }
 
     /**

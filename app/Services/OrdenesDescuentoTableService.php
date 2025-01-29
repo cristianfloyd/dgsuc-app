@@ -152,7 +152,6 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
     protected function createIndexes(): void
     {
         $connection = $this->getConnectionName();
-        $schema = Schema::connection($connection);
 
         foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
             $indexName = "suc_rep_ordenes_descuento_{$name}_index";
@@ -162,8 +161,8 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
                 ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
 
             if (!$indexExists) {
-                $schema->table(self::TABLE_NAME, function ($table) use ($columns) {
-                    $table->index($columns);
+                Schema::connection($connection)->table(self::TABLE_NAME, function ($table) use ($columns, $name) {
+                    $table->index($columns, $name);
                 });
             }
         }
@@ -176,31 +175,18 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
 
     private function createTableIfNotExists(): void
     {
-        if (!Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME)) {
-            Schema::connection($this->getConnectionName())->create(self::TABLE_NAME, function ($table) {
+        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_ordenes_descuento')) {
+            Schema::connection($this->getConnectionName())->create('suc.rep_ordenes_descuento', function ($table) {
                 $this->addLaravelPrimaryKey($table);
                 foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
                     if ($column !== 'id') {
                         $this->addColumn($table, $column, $definition);
                     }
                 }
-
-                // Verificar y crear índices después de crear la tabla
-                foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns)
-                {
-                    $indexName = "suc_rep_ordenes_descuento_{$name}_index";
-
-                    $indexExists = DB::connection($this->getConnectionName())
-                        ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
-
-                    if (!$indexExists) {
-                        Schema::connection($this->getConnectionName())->table(
-                            self::TABLE_NAME, function ($table) use ($columns, $name) {
-                                $table->index($columns, $name);
-                        });
-                    }
-                }
             });
+
+            // Mover la creación de índices fuera del callback de create
+            $this->createIndexes();
         }
     }
 
@@ -229,7 +215,7 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
     }
 
 
-    protected function populateTable(): void
+    public function populateTable(): void
     {
         DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
     }

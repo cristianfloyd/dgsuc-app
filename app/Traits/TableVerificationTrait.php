@@ -9,7 +9,7 @@ trait TableVerificationTrait
     protected function verifyAndInitializeTable(string $tableServiceClass): bool
     {
         try {
-            $tableService = new $tableServiceClass();
+            $tableService = app($tableServiceClass);
 
             if (!$tableService->exists()) {
                 $tableService->createAndPopulate();
