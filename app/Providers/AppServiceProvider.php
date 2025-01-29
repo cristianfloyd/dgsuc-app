@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\WorkflowService;
 use App\Listeners\JobFailedListener;
+use App\Services\SicossExportService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Queue\Events\JobFailed;
@@ -17,6 +18,8 @@ use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use App\Repositories\Mapuche\Dh16Repository;
+use App\Repositories\Mapuche\Dh16RepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,6 +50,12 @@ class AppServiceProvider extends ServiceProvider
                 $parameters['nroLiqui'] ?? throw new \InvalidArgumentException('nroLiqui es requerido')
             );
         });
+
+        $this->app->singleton(SicossExportService::class, function ($app) {
+            return new SicossExportService();
+        });
+
+        $this->app->bind(Dh16RepositoryInterface::class, Dh16Repository::class);
     }
 
     /**

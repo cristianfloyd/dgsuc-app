@@ -10,10 +10,13 @@ use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Collection;
+use Illuminate\Container\Container;
+use App\Services\SicossExportService;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\Response;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -87,21 +90,10 @@ class AfipMapucheSicossResource extends Resource
             ])
             ->headerActions([
                 Tables\Actions\Action::make('exportarFiltrados')
-                ->label('Exportar Filtrados')
-                ->icon('heroicon-o-document-arrow-down')
-                ->action(function ($livewire) {
-                    // Obtener el query builder con los filtros aplicados
-                    $query = $livewire->getFilteredTableQuery();
-
-                    // Obtener los registros filtrados
-                    $registrosFiltrados = $query->get();
-
-                    // Generar el archivo con los registros filtrados
-                    $path = static::generarArchivoSicoss($registrosFiltrados);
-
-                    return response()->download($path)->deleteFileAfterSend();
-                })
-                ->color('success')
+                    ->label('Exportar Filtrados')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire))
+                    ->color('success')
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -109,6 +101,11 @@ class AfipMapucheSicossResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('exportarSeleccionados')
+                        ->label('Exportar Seleccionados')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(fn (Collection $records) => static::exportarRegistros($records))
+                        ->color('success')
                 ]),
             ]);
     }
@@ -129,6 +126,28 @@ class AfipMapucheSicossResource extends Resource
         ];
     }
 
+    /**
+     * Exporta los registros filtrados a un archivo.
+     *
+     * Esta función utiliza el query builder de Livewire para obtener los registros filtrados
+     * y luego llama a la función exportarRegistros para generar el archivo de exportación.
+     *
+     * @param $livewire El objeto Livewire que contiene el query builder filtrado.
+     * @return Response El objeto Response que contiene el archivo de exportación.
+     */
+    protected static function exportarRegistrosFiltrados($livewire): Response
+    {
+        $registrosFiltrados = $livewire->getFilteredTableQuery()->get();
+        return static::exportarRegistros($registrosFiltrados);
+    }
+
+    protected static function exportarRegistros(Collection $registros): Response
+    {
+        // Obtener la instancia del servicio desde el contenedor
+        $exportService = Container::getInstance()->make(SicossExportService::class);
+        $path = $exportService->generarArchivo($registros);
+        return response()->download($path)->deleteFileAfterSend();
+    }
 
     public static function generarArchivoSicoss(Collection $registros = null): string
     {
