@@ -19,6 +19,7 @@ class OrdenesDescuento extends Model implements HasLabel
 {
     use HasFactory, MapucheConnectionTrait;
 
+    private static $connectionInstance = null;
     protected $primaryKey = 'id';
     public $incrementing = true;
     public $timestamps = true;
@@ -59,9 +60,51 @@ class OrdenesDescuento extends Model implements HasLabel
 
         if (!$tableService->exists()) {
             $tableService->createTable();
-            // $tableService->createAndPopulate();
-            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE . " creada y poblada exitosamente");
+            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE . " creada exitosamente.");
         }
+
+        $connection = static::getMapucheConnection();
+
+        // Configuramos la codificación de la conexión
+        $connection->statement("SET client_encoding TO 'LATIN1'");
+        $connection->statement("SET names 'LATIN1'");
+
+
+        static::retrieved(function ($model) {
+            // Convertimos todos los campos de texto al recuperar
+            $textFields = ['desc_conce', 'desc_liqui', 'desc_item', 'descripcion_beneficiario', 'descripcion_dep_pago', 'programa_descripcion'];
+
+            foreach ($textFields as $field) {
+                if (isset($model->attributes[$field])) {
+                    // Primero convertimos de LATIN1 a UTF-8
+                    $value = mb_convert_encoding($model->attributes[$field], 'UTF-8', 'ISO-8859-1');
+                    // Limpiamos caracteres no válidos
+                    $value = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $value);
+                    $model->attributes[$field] = $value;
+                }
+            }
+        });
+
+        static::saving(function ($model) {
+            // Convertimos todos los campos de texto al guardar
+            $textFields = ['desc_conce', 'desc_liqui', 'desc_item', 'descripcion_beneficiario', 'descripcion_dep_pago', 'programa_descripcion'];
+
+            foreach ($textFields as $field) {
+                if (isset($model->attributes[$field])) {
+                    // Convertimos de UTF-8 a LATIN1 para guardar
+                    $model->attributes[$field] = mb_convert_encoding($model->attributes[$field], 'ISO-8859-1', 'UTF-8');
+                }
+            }
+        });
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static;
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 
     protected static function initializeTable(): void
@@ -125,30 +168,64 @@ class OrdenesDescuento extends Model implements HasLabel
 
     /* ###################### Accesors y mutators ###################### */
 
-    /**
-     * Convierte desc_liqui a UTF-8 al recuperar el valor
-     */
+    protected function descItem(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (empty($value)) return $value;
+
+                // Si el valor viene como binary string (comienza con b")
+                if (substr($value, 0, 2) === 'b"') {
+                    // Remover b" del inicio y " del final
+                    $value = substr($value, 2, -1);
+                }
+
+                // El valor hex muestra que está en ISO-8859-1
+                // 0xed es el código para 'í' en ISO-8859-1
+                $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+
+                // Verificar y limpiar caracteres no válidos
+                return preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $value);
+            },
+            set: function ($value) {
+                if (empty($value)) return $value;
+
+                // Asegurar que el valor esté en UTF-8 antes de convertir
+                if (!mb_check_encoding($value, 'UTF-8')) {
+                    $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+                }
+
+                // Convertir a ISO-8859-1 para almacenar
+                return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
+            }
+        );
+    }
+
     protected function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value)
+            get: function ($value) {
+                if (empty($value)) return $value;
+                return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+            },
+            set: function ($value) {
+                if (empty($value)) return $value;
+                return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
+            }
         );
     }
 
     protected function descConce(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value)
-        );
-    }
-
-    protected function descItem(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value)
+            get: function ($value) {
+                if (empty($value)) return $value;
+                return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+            },
+            set: function ($value) {
+                if (empty($value)) return $value;
+                return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
+            }
         );
     }
 
@@ -180,8 +257,8 @@ class OrdenesDescuento extends Model implements HasLabel
     {
         return $query->where(function ($query) use ($search) {
             $query->where('desc_liqui', 'like', "%{$search}%")
-                  ->orWhere('codc_uacad', 'like', "%{$search}%")
-                  ->orWhere('desc_conce', 'like', "%{$search}%");
+                ->orWhere('codc_uacad', 'like', "%{$search}%")
+                ->orWhere('desc_conce', 'like', "%{$search}%");
         });
     }
 
@@ -197,5 +274,78 @@ class OrdenesDescuento extends Model implements HasLabel
         return $query->where('nro_liqui', $nroLiqui);
     }
 
+    // ############################# DIAGNOSTICOS #############################
+    /**
+     * Método de diagnóstico para problemas de codificación
+     */
+    public static function diagnosticarCodificacion($id)
+    {
+        try {
+            $connection = static::getMapucheConnection();
+            $connection->statement("SET client_encoding TO 'LATIN1'");
 
+            $registro = static::find($id);
+
+            if (!$registro) {
+                return ['error' => 'Registro no encontrado'];
+            }
+
+            $campos = ['desc_conce', 'desc_liqui', 'desc_item'];
+            $diagnostico = [];
+
+            foreach ($campos as $campo) {
+                if (isset($registro->$campo)) {
+                    $valorOriginal = $registro->getRawOriginal($campo);
+
+                    // Intentar diferentes conversiones
+                    $valorConvertidoISO = mb_convert_encoding($valorOriginal, 'UTF-8', 'ISO-8859-1');
+                    $valorConvertidoLATIN1 = mb_convert_encoding($valorOriginal, 'UTF-8', 'LATIN1');
+
+                    $diagnostico[$campo] = [
+                        'valor_original' => $valorOriginal,
+                        'valor_raw_hex' => bin2hex($valorOriginal),
+                        'valor_utf8' => mb_convert_encoding($valorOriginal, 'UTF-8', mb_detect_encoding($valorOriginal)),
+                        'valor_desde_iso' => $valorConvertidoISO,
+                        'valor_desde_latin1' => $valorConvertidoLATIN1,
+                        'encoding_detectado' => mb_detect_encoding($valorOriginal, ['UTF-8', 'ISO-8859-1', 'ASCII'], true),
+                        'longitud' => strlen($valorOriginal),
+                        'longitud_mb' => mb_strlen($valorOriginal),
+                        'caracteres_especiales' => preg_match('/[áéíóúÁÉÍÓÚñÑ]/', $valorOriginal) ? 'Sí' : 'No'
+                    ];
+                }
+            }
+
+            // Agregar información de codificación a nivel de base de datos
+            $dbEncodings = $connection->select("
+                SELECT
+                    pg_encoding_to_char(encoding) as encoding,
+                    datcollate,
+                    datctype
+                FROM pg_database
+                WHERE datname = current_database()
+            ");
+
+            return [
+                'id' => $id,
+                'campos' => $diagnostico,
+                'configuracion_db' => [
+                    'client_encoding' => $connection->selectOne("SHOW client_encoding")->client_encoding,
+                    'server_encoding' => $connection->selectOne("SHOW server_encoding")->server_encoding,
+                    'database_encoding' => $dbEncodings[0]->encoding ?? 'Unknown',
+                    'database_collate' => $dbEncodings[0]->datcollate ?? 'Unknown',
+                    'database_ctype' => $dbEncodings[0]->datctype ?? 'Unknown',
+                    'php_encoding' => mb_internal_encoding(),
+                    'default_charset' => ini_get('default_charset')
+                ]
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error en diagnóstico de codificación', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return ['error' => $e->getMessage()];
+        }
+    }
 }

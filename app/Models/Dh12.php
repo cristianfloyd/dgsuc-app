@@ -164,9 +164,6 @@ class Dh12 extends Model
 
     // ############################# DIAGNOSTICOS #############################
     /**
-     * Método de diagnóstico mejorado
-     */
-    /**
      * Diagnóstico mejorado para caracteres especiales
      */
 

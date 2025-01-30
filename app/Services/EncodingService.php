@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\Log;
 class EncodingService
 {
     // Constantes para las codificaciones soportadas
-    private const string UTF8 = 'UTF-8';
-    private const string LATIN1 = 'ISO-8859-1';
+    private const UTF8 = 'UTF-8';
+    private const LATIN1 = 'ISO-8859-1';
+    private const WINDOWS1252 = 'WINDOWS-1252';
+    private const ASCII = 'ASCII';
 
     /**
      * Convierte el valor proporcionado a codificación UTF-8.
@@ -40,6 +42,13 @@ class EncodingService
 
             // Intentamos la conversión desde Latin1 a UTF-8
             $converted = iconv(self::LATIN1, self::UTF8 . '//TRANSLIT//IGNORE', $value);
+
+            $encoding = mb_detect_encoding($value, [self::UTF8], true);
+            if ($encoding === self::ASCII) {
+                return iconv(self::ASCII, self::LATIN1 . '//TRANSLIT//IGNORE', $value);
+            }
+
+
 
             if ($converted === false) {
                 throw new InvalidArgumentException('Error en la conversión a UTF-8');
