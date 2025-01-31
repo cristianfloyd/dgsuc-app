@@ -4,12 +4,17 @@ namespace App\Filament\Resources\ReporteConceptoListadoResource\Pages;
 
 use Filament\Actions;
 use App\Exports\ReportExport;
+use App\Traits\ConceptoListadoTabs;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use App\Services\ConceptosSindicatosService;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
 use App\Filament\Reportes\Resources\ReporteConceptoListadoResource;
 
 class ListReporteConceptoListados extends ListRecords
 {
+    use ConceptoListadoTabs;
     protected static string $resource = ReporteConceptoListadoResource::class;
 
 
@@ -42,7 +47,7 @@ class ListReporteConceptoListados extends ListRecords
                     // ->orderBy('codc_uacad')
                     // ->orderBy('nro_legaj')
                     ;
-                    // dd($query->toSql());
+                    
                     return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                 })
                 ->requiresConfirmation()
