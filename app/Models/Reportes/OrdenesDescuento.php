@@ -52,6 +52,8 @@ class OrdenesDescuento extends Model implements HasLabel
         'total_imp_nd' => 'decimal:2',
     ];
 
+    protected $encodedFields = ['desc_conce', 'desc_liqui', 'desc_item'];
+
     public static function boot()
     {
         parent::boot();

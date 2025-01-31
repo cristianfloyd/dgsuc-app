@@ -7,6 +7,7 @@ use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
+use App\Traits\Mapuche\EncodingTrait;
 use App\Models\EstadoLiquidacionModel;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dh22 extends Model
 {
-    use MapucheConnectionTrait, HasFactory;
+    use MapucheConnectionTrait, HasFactory, EncodingTrait;
 
     /**
      * Indica el nombre de la tabla asociada al modelo.
