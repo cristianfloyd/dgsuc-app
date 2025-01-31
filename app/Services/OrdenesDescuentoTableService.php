@@ -14,7 +14,7 @@ class OrdenesDescuentoTableService extends AbstractTableService
 {
     use MapucheConnectionTrait, TableServiceTrait;
 
-    private const string TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
+    private const TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
     private OrdenesDescuentoTableDefinition $definition;
 
     public function __construct(OrdenesDescuentoTableDefinition $definition)

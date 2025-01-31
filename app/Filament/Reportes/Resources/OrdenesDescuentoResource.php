@@ -13,6 +13,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use App\Exports\OrdenesDescuentoExport;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use App\Exports\OrdenesDescuentoSheet200;
 use App\Models\Reportes\OrdenesDescuento;
 use Filament\Tables\Filters\SelectFilter;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Exports\OrdenAportesyContribuciones;
 use App\Services\OrdenesDescuentoTableService;
 use App\Exports\OrdenesDescuentoMultipleExport;
+use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
 
 class OrdenesDescuentoResource extends Resource
@@ -115,6 +117,24 @@ class OrdenesDescuentoResource extends Resource
                 //
             ])
             ->headerActions([
+                Action::make('populate')
+                    ->label('Poblar Tabla')
+                    ->tooltip('Sincronizar datos desde la base de datos Mapuche')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Desea sincronizar los datos?')
+                    ->modalDescription('Esta acción actualizará los datos desde la base de datos Mapuche. Puede tomar varios minutos.')
+                    ->modalSubmitActionLabel('Sí, sincronizar')
+                    ->action(function () {
+                        $tableService = new OrdenesDescuentoTableService(new OrdenesDescuentoTableDefinition());
+                        $tableService->populateTable();
+
+                        Notification::make()
+                            ->success()
+                            ->title('Tabla poblada exitosamente')
+                            ->send();
+                    }),
                 Action::make('export')
                     ->label('Exportar Todo')
                     ->tooltip('Exportar todos los registros a un archivo Excel en dos hojas')
@@ -140,7 +160,23 @@ class OrdenesDescuentoResource extends Resource
                             $livewire->getFilteredTableQuery()
                             ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos())))
                             ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx');
-                    })
+                    }),
+                Action::make('truncate')
+                    ->label('Limpiar Tabla')
+                    ->tooltip('Eliminar todos los registros de la tabla')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Está seguro que desea eliminar todos los registros?')
+                    ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
+                    ->modalSubmitActionLabel('Sí, eliminar todo')
+                    ->action(function () {
+                        OrdenesDescuento::truncate();
+                        Notification::make()
+                            ->success()
+                            ->title('Tabla limpiada exitosamente')
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
