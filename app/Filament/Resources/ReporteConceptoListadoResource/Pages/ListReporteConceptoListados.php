@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ReporteConceptoListadoResource\Pages;
 
 use Filament\Actions;
 use App\Exports\ReportExport;
+use App\Traits\ConceptoListadoTabs;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,7 @@ use App\Filament\Reportes\Resources\ReporteConceptoListadoResource;
 
 class ListReporteConceptoListados extends ListRecords
 {
+    use ConceptoListadoTabs;
     protected static string $resource = ReporteConceptoListadoResource::class;
 
 
@@ -52,32 +54,6 @@ class ListReporteConceptoListados extends ListRecords
                 ->modalHeading('¿Desea descargar el reporte?')
                 ->modalDescription('Se generará un archivo Excel con los datos filtrados.')
                 ->modalSubmitActionLabel('Descargar'),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'todos' => Tab::make('Todos')
-                ->badge(fn() => $this->getFilteredTableQuery()->count()),
-
-            'dosuba' => Tab::make('DOSUBA')
-                ->badge(fn() => $this->getFilteredTableQuery()
-                        ->whereIn('codn_conce', ConceptosSindicatosService::getDosubaCodigos())
-                    ->count()
-                )
-                ->modifyQueryUsing(fn (Builder $query) => $query
-                        ->whereIn('codn_conce', ConceptosSindicatosService::getDosubaCodigos())
-                ),
-
-            'apuba' => Tab::make('APUBA')
-                ->badge(fn() => $this->getFilteredTableQuery()
-                        ->whereIn('codn_conce', ConceptosSindicatosService::getApubaCodigos())
-                    ->count()
-                )
-                ->modifyQueryUsing(fn (Builder $query) => $query
-                    ->whereIn('codn_conce', ConceptosSindicatosService::getApubaCodigos())
-                ),
         ];
     }
 }
