@@ -47,7 +47,7 @@ class ListReporteConceptoListados extends ListRecords
                     // ->orderBy('codc_uacad')
                     // ->orderBy('nro_legaj')
                     ;
-                    // dd($query->toSql());
+                    
                     return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                 })
                 ->requiresConfirmation()
