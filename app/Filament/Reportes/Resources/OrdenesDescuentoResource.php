@@ -39,7 +39,7 @@ class OrdenesDescuentoResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nro_liqui'),
-                TextColumn::make('desc_liqui')->sortable(),
+                TextColumn::make('desc_liqui')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('codc_uacad')->label('UA')->sortable()->searchable(),
                 TextColumn::make('desc_item')->label('Dependencia')->sortable()->searchable(),
                 TextColumn::make('codn_funci')->sortable(),
@@ -95,23 +95,30 @@ class OrdenesDescuentoResource extends Resource
                                 fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             );
                         }),
-                SelectFilter::make('codc_uacad')
-                    ->label('Unidad Académica')
-                    ->options(fn () => OrdenesDescuento::distinct()
-                        ->orderBy('codc_uacad')
-                        ->pluck('desc_item', 'codc_uacad')
-                        ->toArray())
-                    ->searchable()
-                    ->preload(),
-                SelectFilter::make('codn_conce')
-                    ->label('Concepto')
-                    ->options(fn () => OrdenesDescuento::distinct()
-                        ->orderBy('codn_conce')
-                        ->pluck('desc_conce', 'codn_conce')
-                        ->toArray())
-                    ->searchable()
-                    ->multiple()
-                    ->preload(),
+                    SelectFilter::make('codc_uacad')
+                        ->label('Unidad Académica')
+                        ->options(function () {
+                            $data = OrdenesDescuento::distinct()
+                                ->orderBy('codc_uacad')
+                                ->pluck('desc_item', 'codc_uacad')
+                                ->toArray();
+
+                            // Sanitizar los datos para asegurar que estén en UTF-8 válido
+                            return array_map(function ($item) {
+                                return mb_convert_encoding($item, 'UTF-8', 'auto');
+                            }, $data);
+                        })
+                        ->searchable()
+                        ->preload(),
+                    SelectFilter::make('codn_conce')
+                        ->label('Concepto')
+                        ->options(fn () => OrdenesDescuento::distinct()
+                            ->orderBy('codn_conce')
+                            ->pluck('desc_conce', 'codn_conce')
+                            ->toArray())
+                        ->searchable()
+                        ->multiple()
+                        ->preload(),
             ])
             ->actions([
                 //

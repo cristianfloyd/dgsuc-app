@@ -58,46 +58,57 @@ class OrdenesDescuento extends Model implements HasLabel
     {
         parent::boot();
 
-        $tableService = new OrdenesDescuentoTableService(new OrdenesDescuentoTableDefinition());
-
-        if (!$tableService->exists()) {
-            $tableService->createTable();
-            Log::info("Tabla " . OrdenesDescuentoTableDefinition::TABLE . " creada exitosamente.");
-        }
-
         $connection = static::getMapucheConnection();
-
-        // Configuramos la codificación de la conexión
         $connection->statement("SET client_encoding TO 'LATIN1'");
-        $connection->statement("SET names 'LATIN1'");
-
 
         static::retrieved(function ($model) {
-            // Convertimos todos los campos de texto al recuperar
-            $textFields = ['desc_conce', 'desc_liqui', 'desc_item', 'descripcion_beneficiario', 'descripcion_dep_pago', 'programa_descripcion'];
-
-            foreach ($textFields as $field) {
+            foreach ($model->encodedFields as $field) {
                 if (isset($model->attributes[$field])) {
-                    // Primero convertimos de LATIN1 a UTF-8
-                    $value = mb_convert_encoding($model->attributes[$field], 'UTF-8', 'ISO-8859-1');
-                    // Limpiamos caracteres no válidos
-                    $value = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $value);
-                    $model->attributes[$field] = $value;
+                    $model->attributes[$field] = iconv('ISO-8859-1', 'UTF-8', $model->attributes[$field]);
                 }
             }
         });
 
         static::saving(function ($model) {
-            // Convertimos todos los campos de texto al guardar
-            $textFields = ['desc_conce', 'desc_liqui', 'desc_item', 'descripcion_beneficiario', 'descripcion_dep_pago', 'programa_descripcion'];
-
-            foreach ($textFields as $field) {
+            foreach ($model->encodedFields as $field) {
                 if (isset($model->attributes[$field])) {
-                    // Convertimos de UTF-8 a LATIN1 para guardar
-                    $model->attributes[$field] = mb_convert_encoding($model->attributes[$field], 'ISO-8859-1', 'UTF-8');
+                    $model->attributes[$field] = iconv('UTF-8', 'ISO-8859-1', $model->attributes[$field]);
                 }
             }
         });
+    }
+
+
+    protected function sanitizeData(array $data): array
+    {
+        return array_map(function ($item) {
+            if (is_string($item)) {
+                return mb_convert_encoding($item, 'UTF-8', 'auto');
+            }
+            return $item;
+        }, $data);
+    }
+
+
+    protected function handleEncodedField($value)
+    {
+        if (empty($value)) return $value;
+        return iconv('UTF-8', 'UTF-8//TRANSLIT', $value);
+    }
+
+    protected function descItem(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $this->handleEncodedField($value),
+            set: fn($value) => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $value)
+        );
+    }
+
+
+    public function getDataForSelect(): array
+    {
+        $data = $this->pluck('desc_conce', 'codn_conce')->toArray();
+        return $this->sanitizeData($data);
     }
 
     protected static function getMapucheConnection()
@@ -170,46 +181,43 @@ class OrdenesDescuento extends Model implements HasLabel
 
     /* ###################### Accesors y mutators ###################### */
 
-    protected function descItem(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                if (empty($value)) return $value;
+    // protected function descItem(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: function ($value) {
+    //             if (empty($value)) return $value;
 
-                // Si el valor viene como binary string (comienza con b")
-                if (substr($value, 0, 2) === 'b"') {
-                    // Remover b" del inicio y " del final
-                    $value = substr($value, 2, -1);
-                }
+    //             // Si el valor viene como binary string (comienza con b")
+    //             if (substr($value, 0, 2) === 'b"') {
+    //                 // Remover b" del inicio y " del final
+    //                 $value = substr($value, 2, -1);
+    //             }
 
-                // El valor hex muestra que está en ISO-8859-1
-                // 0xed es el código para 'í' en ISO-8859-1
-                $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+    //             // El valor hex muestra que está en ISO-8859-1
+    //             // 0xed es el código para 'í' en ISO-8859-1
+    //             $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
 
-                // Verificar y limpiar caracteres no válidos
-                return preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $value);
-            },
-            set: function ($value) {
-                if (empty($value)) return $value;
+    //             // Verificar y limpiar caracteres no válidos
+    //             return preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', $value);
+    //         },
+    //         set: function ($value) {
+    //             if (empty($value)) return $value;
 
-                // Asegurar que el valor esté en UTF-8 antes de convertir
-                if (!mb_check_encoding($value, 'UTF-8')) {
-                    $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-                }
+    //             // Asegurar que el valor esté en UTF-8 antes de convertir
+    //             if (!mb_check_encoding($value, 'UTF-8')) {
+    //                 $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+    //             }
 
-                // Convertir a ISO-8859-1 para almacenar
-                return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
-            }
-        );
-    }
+    //             // Convertir a ISO-8859-1 para almacenar
+    //             return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
+    //         }
+    //     );
+    // }
 
     protected function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                if (empty($value)) return $value;
-                return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-            },
+            get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) return $value;
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
@@ -220,10 +228,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descConce(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                if (empty($value)) return $value;
-                return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-            },
+            get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) return $value;
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');

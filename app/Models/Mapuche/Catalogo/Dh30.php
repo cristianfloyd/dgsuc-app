@@ -54,15 +54,23 @@ class Dh30 extends Model
         // Establecer codificación SQL_ASCII para la conexión
         DB::statement("SET client_encoding TO 'SQL_ASCII'");
 
-
         static::retrieved(function ($model) {
             if(isset($model->desc_abrev)) {
-                $model->desc_abrev = EncodingService::toUtf8($model->desc_abrev);
+                $model->desc_abrev = $model->handleMixedEncoding($model->desc_abrev);
             }
             if(isset($model->desc_item)) {
-                $model->desc_item = EncodingService::toUtf8($model->desc_item);
+                $model->desc_item = $model->handleMixedEncoding($model->desc_item);
             }
         });
+
+        // static::retrieved(function ($model) {
+        //     if (isset($model->desc_abrev)) {
+        //         $model->desc_abrev = EncodingService::toUtf8($model->desc_abrev);
+        //     }
+        //     if (isset($model->desc_item)) {
+        //         $model->desc_item = EncodingService::toUtf8($model->desc_item);
+        //     }
+        // });
 
         static::saving(function ($model) {
             if (isset($model->attributes['desc_abrev'])) {
@@ -74,11 +82,27 @@ class Dh30 extends Model
         });
     }
 
+    public function handleMixedEncoding($value)
+    {
+        if (mb_detect_encoding($value) === 'ASCII') {
+            return EncodingService::toUtf8($value);
+        }
+        return $value;
+    }
+
+ 
+
     public function scopeWithoutEncoding($query)
     {
         return $query->whereRaw("encode(desc_abrev::bytea, 'escape') IS NOT NULL");
     }
 
+    public function scopeByEncoding($query, $encoding)
+    {
+        return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
+            ->get()
+            ->filter(fn($item) => mb_detect_encoding($item->desc_item) === $encoding);
+    }
 
     public function getKeyName(): array
     {
@@ -98,7 +122,7 @@ class Dh30 extends Model
         );
     }
 
-        public function dh08(): HasMany
+    public function dh08(): HasMany
     {
         // return $this->hasMany(Dh08::class, ['nro_tabla', 'desc_abrev'], ['nro_tabla', 'desc_abrev']);
         return $this->hasMany(Dh08::class, 'nro_tabla', 'nro_tabla')

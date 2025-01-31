@@ -99,20 +99,7 @@ class ConceptoListado extends Model
         return false;
     }
 
-    /**
-     * Trunca la tabla para limpiar datos temporales
-     */
-    public static function truncateTable(): void
-    {
-        try {
-            static::getMapucheConnection()
-                ->statement('TRUNCATE TABLE suc.rep_concepto_listado RESTART IDENTITY CASCADE');
-            Cache::tags(['rep_concepto_listado'])->flush();
-        } catch (\Exception $e) {
-            Log::error("Error al truncar tabla suc.rep_concepto_listado: " . $e->getMessage());
-            throw $e;
-        }
-    }
+
 
     public function getNombreCompletoAttribute() {
         return "{$this->apellido}, {$this->nombre}";
