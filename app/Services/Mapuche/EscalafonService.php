@@ -5,10 +5,13 @@ namespace App\Services\Mapuche;
 use App\Models\Dh89;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\QueryException;
 
 class EscalafonService
 {
+    use MapucheConnectionTrait;
+
     /**
      * Create a new class instance.
      */

@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+
 
 /**
  * Trait MapucheConnectionTrait
@@ -20,7 +20,7 @@ trait MapucheConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-desa'; // Esto se refiere al nombre de la conexión en config/database.php
+        return 'pgsql-prod'; // Esto se refiere al nombre de la conexión en config/database.php
     }
 
 
@@ -52,9 +52,9 @@ trait MapucheConnectionTrait
         return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
     }
 
+
     public function getTableName(): string
     {
         return $this->getTable();
     }
 }
-

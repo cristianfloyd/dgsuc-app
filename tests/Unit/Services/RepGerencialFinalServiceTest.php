@@ -2,24 +2,23 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use App\Services\RepGerencialFinalService;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class RepGerencialFinalServiceTest extends TestCase
 {
-    use MapucheConnectionTrait {
-        MapucheConnectionTrait::getTable as protected traitGetTable;
-    }
+    use MapucheConnectionTrait;
 
     public function getTable($table = null): string
     {
         if ($table === null) {
-            return $this->traitGetTable();
+            return $this->getMapucheTable();
         }
-        return parent::getTable($table);
+        return $table;
     }
 
     private RepGerencialFinalService $service;
@@ -28,7 +27,7 @@ class RepGerencialFinalServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new RepGerencialFinalService();
+        $this->service = new RepGerencialFinalService(new PeriodoFiscalService());
         $this->connection = $this->getConnectionName();
     }
 

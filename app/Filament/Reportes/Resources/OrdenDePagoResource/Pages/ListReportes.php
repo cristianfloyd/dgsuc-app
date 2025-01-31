@@ -21,7 +21,7 @@ use App\Filament\Reportes\Resources\OrdenDePagoResource\Widgets\OrdenPagoStatsWi
 
 class ListReportes extends ListRecords
 {
-    protected $connection = 'pgsql-liqui';
+
     protected static string $resource = OrdenDePagoResource::class;
     protected static string $view = 'filament.resources.reporte-resource.pages.list-reportes';
 
@@ -102,7 +102,6 @@ class ListReportes extends ListRecords
                             ->success()
                             ->send();
 
-                        $this->refresh();
                     } catch (Exception $e) {
                         Notification::make()
                             ->title('Error al limpiar la tabla')
