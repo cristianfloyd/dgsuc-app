@@ -6,14 +6,15 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Models\Mapuche\Dh22;
+use App\Services\NominaProcessor;
 use App\Services\CheFileGenerator;
 use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
+use App\Repositories\NominaRepository;
 use App\Traits\MapucheConnectionTrait;
-use Filament\Forms\Components\TextInput;
+use App\Services\TemporaryTableManager;
 use Filament\Notifications\Notification;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
 
@@ -38,6 +39,15 @@ class GenerateComprobanteNomina extends Page
 
     }
 
+    /**
+     * Configura el formulario para la generación de comprobantes de nomina.
+     *
+     * Este método configura el formulario para la generación de comprobantes de nomina, incluyendo campos para seleccionar liquidaciones, año y mes.
+     * Cuando se selecciona una liquidación, se actualizan automáticamente los campos de año y mes, y se registra un log de la selección.
+     *
+     * @param Form $form El formulario a configurar.
+     * @return Form El formulario configurado.
+     */
     public function form(Form $form): Form
     {
         return $form
@@ -107,7 +117,10 @@ class GenerateComprobanteNomina extends Page
             $this->connection->beginTransaction();
 
             $formData = $this->form->getState();
-            $generator = new CheFileGenerator();
+            $generator = new CheFileGenerator(
+                new TemporaryTableManager(new NominaRepository()),
+                new NominaProcessor(new TemporaryTableManager(new NominaRepository()))
+            );
 
             // Correct way to access the first liquidation from the array
             $nroLiqui = (int) $formData['liquidaciones'][0];

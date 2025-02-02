@@ -3,16 +3,16 @@
 namespace App\Models\Mapuche;
 
 /**
- * Configuration helper class for Mapuche system using Rrhhini model
+ * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini
  */
 class MapucheConfig
 {
     /**
-     * Get RRHH parameter value
+     * Obtener el valor de un parámetro de RRHH.
      *
-     * @param string $section Main section
-     * @param string $parameter Parameter name
-     * @param mixed $default Default value if parameter not found
+     * @param string $section Sección principal
+     * @param string $parameter Nombre del parámetro
+     * @param mixed $default Valor por defecto si el parámetro no se encuentra
      * @return mixed
      */
     public static function getParametroRrhh(string $section, string $parameter, $default = null)
@@ -22,11 +22,11 @@ class MapucheConfig
     }
 
     /**
-     * Set RRHH parameter value
+     * Establecer el valor de un parámetro de RRHH.
      *
-     * @param string $section Main section
-     * @param string $parameter Parameter name
-     * @param mixed $value Value to set
+     * @param string $section Sección principal
+     * @param string $parameter Nombre del parámetro
+     * @param mixed $value Valor a establecer
      * @return bool
      */
     public static function setParametroRrhh(string $section, string $parameter, $value): bool
@@ -43,9 +43,11 @@ class MapucheConfig
     }
 
     /**
-     * Get percentage for differential retirement contribution
+     * Obtener el porcentaje de aporte diferencial de jubilación.
      *
-     * @return float
+     * Retorna el valor del porcentaje de aporte diferencial de jubilación configurado en el sistema.
+     *
+     * @return float El valor del porcentaje de aporte diferencial de jubilación.
      */
     public static function getPorcentajeAporteDiferencialJubilacion(): float
     {
@@ -53,9 +55,11 @@ class MapucheConfig
     }
 
     /**
-     * Get SICOSS report becarios parameter
+     * Obtener el valor de informar becarios para SICOSS.
      *
-     * @return bool
+     * Retorna el valor configurado para informar becarios en SICOSS.
+     *
+     * @return bool El valor de informar becarios.
      */
     public static function getSicossInformarBecarios(): bool
     {
@@ -63,9 +67,11 @@ class MapucheConfig
     }
 
     /**
-     * Get SICOSS ART with limit parameter
+     * Obtener el valor de ART con tope.
      *
-     * @return string
+     * Retorna el valor configurado para ART con tope.
+     *
+     * @return string El valor de ART con tope.
      */
     public static function getSicossArtTope(): string
     {
@@ -73,9 +79,11 @@ class MapucheConfig
     }
 
     /**
-     * Get non-remunerative concepts in ART parameter
+     * Obtener los conceptos no remunerativos incluidos en el ART.
      *
-     * @return string
+     * Retorna el valor de los conceptos no remunerativos incluidos en el ART, configurados en el sistema.
+     *
+     * @return string El valor de los conceptos no remunerativos incluidos en el ART.
      */
     public static function getSicossConceptosNoRemunerativosEnArt(): string
     {
@@ -83,9 +91,11 @@ class MapucheConfig
     }
 
     /**
-     * Get differential contributions categories parameter
+     * Obtener las categorías de aportes diferenciales configuradas.
      *
-     * @return string
+     * Retorna el valor de las categorías de aportes diferenciales configuradas en el sistema.
+     *
+     * @return string El valor de las categorías de aportes diferenciales.
      */
     public static function getSicossCategoriasAportesDiferenciales(): string
     {
@@ -93,12 +103,26 @@ class MapucheConfig
     }
 
     /**
-     * Get extra hours novelties parameter
+     * Obtener el número de horas extras para novedades.
      *
-     * @return int
+     * Retorna el número de horas extras configuradas para novedades.
+     *
+     * @return int El número de horas extras.
      */
     public static function getSicossHorasExtrasNovedades(): int
     {
         return (int)self::getParametroRrhh('Sicoss', 'HorasExtrasNovedades', 0);
     }
+
+    /**
+     * Obtener los parámetros de ajustes de imputaciones contables.
+     *
+     * Retorna el valor del parámetro de ajustes de imputaciones contables, que indica si está habilitado o deshabilitado.
+     *
+     * @return string El valor del parámetro, que puede ser 'Habilitada' o 'Deshabilitada'.
+     */
+    public static function getParametrosAjustesImpContable(): string
+	{
+		return self::getParametroRrhh('Presupuesto', 'GestionAjustesImputacionesPresupuestarias','Deshabilitada');
+	}
 }
