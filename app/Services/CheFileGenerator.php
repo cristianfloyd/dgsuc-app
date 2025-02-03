@@ -205,4 +205,42 @@ class CheFileGenerator
     {
         $this->connection->statement("DROP TABLE IF EXISTS che");
     }
+
+    public function iniciarGeneracionChe(array $liquidaciones, int $anio, int $mes): void
+    {
+        // Crear tablas temporales necesarias
+        $this->temporaryTableManager->createTemporaryTables($this->nroLiqui);
+
+        try {
+            // Procesar y almacenar los comprobantes de nómina
+            $this->processAndStore($liquidaciones, $anio, $mes);
+
+            // Insertar los datos en la tabla de la base de datos
+            foreach ($liquidaciones as $indice => $liquidacion) {
+                $content = $this->generateCheContent($liquidaciones, $anio, $mes, $indice);
+                
+                // Aquí se asume que tienes un modelo para la tabla donde deseas insertar los datos
+                $this->insertIntoDatabase($content);
+            }
+        } finally {
+            // Limpiar las tablas temporales
+            $this->temporaryTableManager->dropTemporaryTables();
+        }
+    }
+
+    /**
+     * Inserta los datos generados en la tabla de la base de datos.
+     */
+    private function insertIntoDatabase(array $content): void
+    {
+        // Asumiendo que tienes un modelo llamado CheData
+        \App\Models\CheData::create([
+            'neto_liquidado' => $content['neto_liquidado'],
+            'accion' => $content['accion'],
+            // Aquí puedes agregar más campos según la estructura de tu tabla
+            // 'campo1' => $content['campo1'],
+            // 'campo2' => $content['campo2'],
+            // ...
+        ]);
+    }
 }

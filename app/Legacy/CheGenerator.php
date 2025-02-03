@@ -92,6 +92,9 @@ class CheGenerator
 
         // Actualización de descripciones de grupo
         $this->updateCheGroupDescriptions();
+
+        // Inserción de datos en la tabla de la base de datos
+        $this->insertIntoDatabase();
     }
 
     public function createBasicTempTable($liquidacion): void
@@ -330,5 +333,52 @@ class CheGenerator
             ->table('che')
             ->where('tipo_conce', 'D')
             ->update(['importe' => DB::raw('-importe')]);
+    }
+
+    /**
+     * Inserta los datos generados en la tabla de la base de datos.
+     */
+    private function insertIntoDatabase(): void
+    {
+        $aportes = $this->getAportes(); // Obtener los aportes generados
+
+        foreach ($aportes as $aporte) {
+            \App\Models\ComprobanteNominaModel::create([
+                'anio_periodo' => date('Y'), // Asumiendo que el año es el actual
+                'mes_periodo' => date('m'), // Asumiendo que el mes es el actual
+                'nro_liqui' => $aporte['nro_liqui'], // Asegúrate de que este campo esté disponible en $aporte
+                'desc_liqui' => $aporte['desc_grupo'], // O el campo que corresponda
+                'tipo_pago' => 'CHE', // O el tipo de pago que corresponda
+                'importe' => $this->llenaBlancoIzq(
+                    number_format($aporte['total'], 2, '.', ''),
+                    16
+                ),
+                'area_administrativa' => $aporte['area_administrativa'], // Asegúrate de que este campo esté disponible
+                'subarea_administrativa' => $aporte['subarea_administrativa'], // Asegúrate de que este campo esté disponible
+                'numero_retencion' => $aporte['numero_retencion'] ?? null, // Si aplica
+                'descripcion_retencion' => $aporte['descripcion_retencion'] ?? null, // Si aplica
+                'requiere_cheque' => $aporte['requiere_cheque'] ?? false, // Si aplica
+                'codigo_grupo' => $aporte['codigo_grupo'] ?? null, // Si aplica
+            ]);
+        }
+
+        // También puedes insertar los netos liquidados
+        \App\Models\ComprobanteNominaModel::create([
+            'anio_periodo' => date('Y'),
+            'mes_periodo' => date('m'),
+            'nro_liqui' => null, // O el número de liquidación correspondiente
+            'desc_liqui' => 'Neto Liquidado',
+            'tipo_pago' => 'CHE',
+            'importe' => $this->llenaBlancoIzq(
+                number_format($this->netos, 2, '.', ''),
+                16
+            ),
+            'area_administrativa' => null, // O el valor correspondiente
+            'subarea_administrativa' => null, // O el valor correspondiente
+            'numero_retencion' => null,
+            'descripcion_retencion' => null,
+            'requiere_cheque' => false,
+            'codigo_grupo' => null,
+        ]);
     }
 }
