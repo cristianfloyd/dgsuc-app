@@ -13,9 +13,12 @@ use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use App\Exports\DosubaSinLiquidarExport;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Infolists\Components\IconEntry;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
@@ -47,7 +50,6 @@ class DosubaSinLiquidarResource extends Resource
                                     ->limit(5)
                                     ->pluck('desc_liqui', 'nro_liqui')
                             )
-                            ->required()
                             ->searchable(),
                     ])
             ]);
@@ -82,6 +84,14 @@ class DosubaSinLiquidarResource extends Resource
                     ->sortable(),
                 TextColumn::make('ultima_liquidacion')
                     ->label('Última Liquidación')
+                    ->sortable(),
+                IconColumn::make('embarazada')
+                    ->label('Embarazada')
+                    ->boolean()
+                    ->sortable(),
+                IconColumn::make('fallecido')
+                    ->label('Fallecido')
+                    ->boolean()
                     ->sortable(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Período')

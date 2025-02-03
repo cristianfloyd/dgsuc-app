@@ -3,7 +3,9 @@
 namespace App\Traits;
 
 use Filament\Resources\Components\Tab;
+use App\Services\ConceptoListadoService;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\ConceptosSindicatosService;
 
 trait ConceptoListadoTabs
 {
@@ -32,16 +34,22 @@ trait ConceptoListadoTabs
 
             'dosuba' => Tab::make('DOSUBA')
                 ->icon('heroicon-o-heart')
-                ->badge(fn() => $this->getTabBadge(['1234', '1235', '1236']))
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getDosubaCodigos()))
                 ->modifyQueryUsing(fn (Builder $query) =>
-                    $this->getTabQuery($query, ['1234', '1235', '1236'])
+                    $this->getTabQuery($query, ConceptosSindicatosService::getDosubaCodigos())
                 ),
 
             'apuba' => Tab::make('APUBA')
                 ->icon('heroicon-o-users')
-                ->badge(fn() => $this->getTabBadge(['5678', '5679', '5680']))
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getApubaCodigos()))
                 ->modifyQueryUsing(fn (Builder $query) =>
-                    $this->getTabQuery($query, ['5678', '5679', '5680'])
+                    $this->getTabQuery($query, ConceptosSindicatosService::getApubaCodigos())
+                ),
+            'aduba' => Tab::make('ADUBA')
+                ->icon('heroicon-o-users')
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getAdubaCodigos()))
+                ->modifyQueryUsing(fn (Builder $query) =>
+                $this->getTabQuery($query, ConceptosSindicatosService::getAdubaCodigos())
                 ),
         ];
     }

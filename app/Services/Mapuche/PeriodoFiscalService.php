@@ -118,8 +118,12 @@ class PeriodoFiscalService
         return $periodoFiscal['month'];
     }
 
-    public function getPeriodoFiscalFromId(int $id): array
+    public function getPeriodoFiscalFromId(int $id = null): array
     {
+        if ($id === null) {
+            Log::warning('No se proporcionó un ID para obtener el período fiscal');
+            return $this->getPeriodoFiscalFromDatabase();
+        }
         $periodoFiscal = Dh22::find($id);
         return [
             'year' => $periodoFiscal->per_liano,

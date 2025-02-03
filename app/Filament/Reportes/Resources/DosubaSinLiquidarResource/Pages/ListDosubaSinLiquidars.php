@@ -3,12 +3,12 @@
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
 use Filament\Actions;
-use Filament\Actions\CreateAction;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
-use Filament\Notifications\Notification;
 
 class ListDosubaSinLiquidars extends ListRecords
 {
@@ -38,8 +38,8 @@ class ListDosubaSinLiquidars extends ListRecords
                 ->color('danger') // Puedes cambiar el color según tu preferencia
                 ->requiresConfirmation() // Solicita confirmación antes de ejecutar la acción
                 ->modalHeading('Confirmar Vaciar Tabla')
-                ->modalSubheading('¿Estás seguro de que deseas vaciar la tabla? Esta acción no se puede deshacer.')
-                ->modalButton('Vaciar')
+                ->modalDescription('¿Estás seguro de que deseas vaciar la tabla? Esta acción no se puede deshacer.')
+                ->modalSubmitActionLabel('Vaciar')
         ];
     }
 }

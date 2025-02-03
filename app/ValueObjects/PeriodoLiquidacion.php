@@ -24,13 +24,13 @@ class PeriodoLiquidacion
     }
 
     /**
-     * Devuelve la fecha de inicio del periodo de liquidación, que es 2 meses antes de la fecha de referencia.
+     * Devuelve la fecha de inicio del periodo de liquidación, que es 1 mes antes de la fecha de referencia.
      *
      * @return Carbon La fecha de inicio del periodo de liquidación.
      */
     public function getFechaInicio(): Carbon
     {
-        return $this->fecha->copy()->subMonths(2);
+        return $this->fecha->copy()->subMonths(1);
     }
 
     /**

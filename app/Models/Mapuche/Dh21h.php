@@ -35,6 +35,7 @@ class Dh21h extends Model
      * Nombre de la tabla
      */
     protected $table = 'dh21h';
+    protected $schema = 'mapuche';
 
     /**
      * Llave primaria

@@ -4,6 +4,7 @@ namespace App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
 use App\Models\Mapuche\Dh22;
 use App\Models\Mapuche\Dh21h;
+use Illuminate\Support\Facades\Log;
 use Filament\Resources\Pages\CreateRecord;
 use App\Services\Mapuche\DosubaReportService;
 use App\Services\Mapuche\PeriodoFiscalService;
@@ -21,6 +22,7 @@ class CreateDosubaSinLiquidar extends CreateRecord
     {
         DosubaSinLiquidarModel::createTableIfNotExists();
         DosubaSinLiquidarModel::cleanOldRecords();
+        Log::info('CreateDosubaSinLiquidar mount');
     }
 
     protected function beforeCreate(): void

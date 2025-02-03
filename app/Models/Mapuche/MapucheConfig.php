@@ -2,6 +2,8 @@
 
 namespace App\Models\Mapuche;
 
+use App\Services\Mapuche\PeriodoFiscalService;
+
 /**
  * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini
  */
@@ -125,4 +127,40 @@ class MapucheConfig
 	{
 		return self::getParametroRrhh('Presupuesto', 'GestionAjustesImputacionesPresupuestarias','Deshabilitada');
 	}
+
+    /**
+     * Obtener el año fiscal actual.
+     *
+     * @return string
+     */
+    public static function getAnioFiscal(): string
+    {
+        $periodoService = app(PeriodoFiscalService::class);
+        return $periodoService->getYear();
+    }
+
+    /**
+     * Obtener el mes fiscal actual.
+     *
+     * @return string
+     */
+    public static function getMesFiscal(): string
+    {
+        $periodoService = app(PeriodoFiscalService::class);
+        return $periodoService->getMonth();
+    }
+
+    /**
+     * Obtener el periodo fiscal actual.
+     *
+     * Concatena el año y mes fiscal actual en formato YYYYMM.
+     *
+     * @return string El periodo fiscal en formato YYYYMM (ej: '202304')
+     */
+    public static function getPeriodoFiscal(): string
+    {
+        $periodoService = app(PeriodoFiscalService::class);
+
+        return $periodoService->getYear() . $periodoService->getMonth();
+    }
 }

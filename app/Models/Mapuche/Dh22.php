@@ -35,6 +35,7 @@ class Dh22 extends Model
      * @var string
      */
     protected $table = 'dh22';
+    protected $schema = 'mapuche';
 
     /**
      * La clave primaria asociada con la tabla.

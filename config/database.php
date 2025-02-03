@@ -121,7 +121,7 @@ return [
             'client_encoding' => 'UTF8',
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'suc',
+            'search_path' => 'mapuche,suc',
             'sslmode' => 'prefer',
         ],
 

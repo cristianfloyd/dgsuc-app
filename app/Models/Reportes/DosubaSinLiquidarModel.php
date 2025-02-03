@@ -27,7 +27,9 @@ class DosubaSinLiquidarModel extends Model
         'codc_uacad',
         'ultima_liquidacion',
         'periodo_fiscal',
-        'fecha_generacion'
+        'fecha_generacion',
+        'embarazada',
+        'fallecido'
     ];
 
     protected $casts = [
@@ -54,6 +56,8 @@ class DosubaSinLiquidarModel extends Model
                     ultima_liquidacion INTEGER,
                     periodo_fiscal VARCHAR(6),
                     session_id VARCHAR(255),
+                    embarazada BOOLEAN DEFAULT FALSE,
+                    fallecido BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )

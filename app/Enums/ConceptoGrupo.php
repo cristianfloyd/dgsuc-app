@@ -20,7 +20,7 @@ enum ConceptoGrupo: string
         return match($this) {
             self::DOSUBA => [
                 // Rango de conceptos DOSUBA
-                207, 210, 211, 213, 214, 246, 252, 283, 285, 287, 310
+                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287, 310
             ],
             self::CONTRIBUCIONES_AFIP => [
                 // Rango de conceptos AFIP
