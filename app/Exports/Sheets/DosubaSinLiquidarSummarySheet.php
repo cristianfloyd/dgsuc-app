@@ -20,10 +20,17 @@ use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting, WithEvents
 {
     protected $records;
+    protected string $periodo;
 
-    public function __construct(Collection $records)
+    public function __construct(Collection $records, string $periodo)
     {
-        $this->records = $records; // #1d2554
+        $this->records = $records;
+        $this->periodo = $periodo;
+    }
+
+    protected function formatPeriodo(): string
+    {
+        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 
     public function collection()
@@ -31,6 +38,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
         return new Collection([
             // Encabezado
             ['REPORTE DOSUBA LEGAJOS SIN LIQUIDAR', ''],
+            ['Período:', $this->formatPeriodo()],
             ['Fecha de generación:', now()->format('d/m/Y H:i:s')],
             ['Sector:', 'DG del Sistema Universitario de Computación'],
             ['', ''], // Línea en blanco
@@ -67,8 +75,8 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
             // Pie de página
             ['', ''],
-            ['Generado por:', auth()->user()->name ?? 'Sistema'],
-            ['Período:', now()->format('F Y')],
+            ['Generado por:', auth()->user()?->name ?? 'Sistema'],
+            ['Período:', $this->formatPeriodo()],
             ['Versión:', config('app.version', '1.0')],
         ]);
     }
@@ -78,8 +86,6 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
         return 'Resumen';
     }
 
-
-
     public function styles(Worksheet $sheet)
     {
         // Obtener la última fila
@@ -87,15 +93,15 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
         // Estilos base
         $styles = [
-            // Estilo para título principal
-            'A1:B1' => [
+            // Estilo para título principal y período
+            'A1:B2' => [
                 'font' => [
                     'bold' => true, 'size' => 14,
-                    'color' => ['rgb' => 'FFFFFF'] // Texto blanco
+                    'color' => ['rgb' => 'FFFFFF']
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '1d3557'] // Azul oscuro
+                    'startColor' => ['rgb' => '1d3557']
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER
@@ -106,10 +112,9 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             ],
 
             // Estilo para información de encabezado
-            'A2:A4' => [
+            'A3:A5' => [
                 'font' => ['bold' => true],
             ],
-
 
             // Estilo para pie de página
             'A'.($lastRow-2).':A'.$lastRow => [
@@ -159,17 +164,6 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_RIGHT
             ],
-
-        'A5:B5' => [
-                'font' => ['bold' => true],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '91bde1']
-                ],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER
-                ],
-            ],
         ];
 
         return $styles;
@@ -183,21 +177,23 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
     }
 
     public function registerEvents(): array
-{
-    return [
-        AfterSheet::class => function(AfterSheet $event) {
-            // Combinar celdas para el título
-            $event->sheet->mergeCells('A1:B1');
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                // Combinar celdas para el título y período
+                $event->sheet->mergeCells('A1:B1');
+                $event->sheet->mergeCells('A2:B2');
 
-            // Ajustar altura de la fila del título
-            $event->sheet->getRowDimension(1)->setRowHeight(30);
+                // Ajustar altura de las filas
+                $event->sheet->getRowDimension(1)->setRowHeight(30);
+                $event->sheet->getRowDimension(2)->setRowHeight(25);
 
-            // Agregar bordes al pie de página
-            $lastRow = $event->sheet->getHighestRow();
-            $event->sheet->getStyle('A'.($lastRow-2).':B'.$lastRow)->getBorders()
-                ->getAllBorders()
-                ->setBorderStyle(Border::BORDER_THIN);
-        }
-    ];
-}
+                // Agregar bordes al pie de página
+                $lastRow = $event->sheet->getHighestRow();
+                $event->sheet->getStyle('A'.($lastRow-2).':B'.$lastRow)->getBorders()
+                    ->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN);
+            }
+        ];
+    }
 }

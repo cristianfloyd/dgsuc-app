@@ -19,7 +19,7 @@ class DosubaIntegradorService
     {
         // Obtenemos los legajos sin liquidar
         $queryLegajosSinLiquidar = $this->legajosSinLiquidarService->getLegajosSinLiquidar();
-
+        dump($queryLegajosSinLiquidar);
         // Obtenemos los CUIL del reporte DOSUBA
         $cuilsDosuba = $this->dosubaReportService->getDosubaReport()
             ->pluck('CUIL')
