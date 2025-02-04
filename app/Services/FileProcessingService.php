@@ -81,10 +81,7 @@ class FileProcessingService
                 'data' => []
             ];
         }
-        // if ($afipFile->process_id !== $mapucheFile->process_id) {
-        //     Log::error('Los archivos no tienen el mismo UUID.');
-        //     return;
-        // }
+        
 
         $result = [
             'success' => true,
@@ -98,7 +95,9 @@ class FileProcessingService
 
         // Procesar archivo AFIP
         $afipResult = $this->processFileAfip($afipFile);
+
         $result['data']['afip'] = $afipResult;
+        
         if (!$afipResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo AFIP';
@@ -107,7 +106,9 @@ class FileProcessingService
 
         // Procesar archivo Mapuche
         $mapucheResult = $this->processFileMapuche($mapucheFile);
+        
         $result['data']['mapuche'] = $mapucheResult;
+        
         if (!$mapucheResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo Mapuche';
@@ -129,32 +130,6 @@ class FileProcessingService
         }
 
         return $result;
-
-
-        // if ($afipFile && $mapucheFile) {
-        //     // Procesar e importar el archivo AFIP
-        //     $this->processFileAfip($afipFile);
-        //
-        //
-        //     // Procesar e importar el archivo Mapuche
-        //     $this->processFileMapuche($mapucheFile);
-        //
-        //
-        //     Log::info('Archivos procesados e importados correctamente.');
-        //
-        //     // Ejecutar el paso de comparación de CUILs
-        //     // $this->executeCompareCuilsStep();
-        //     $this->workflowExecutionService
-        //         ->setPerPage(10)
-        //         ->setPeriodoFiscal($afipFile->periodo_fiscal)
-        //         ->setNroLiqui(1)
-        //         ->executeWorkflowSteps();
-        //
-        //     // Eliminar ambos archivos
-        //     // $this->deleteFiles($afipFile, $mapucheFile); ese solo elimina de la base de datos, no del disco
-        // } else {
-        //     Log::error('No se han subido ambos archivos.');
-        // }
     }
 
     /**
@@ -168,7 +143,7 @@ class FileProcessingService
         $uploadedFileId = $afipFile->id;
         $processLog = $this->workflowService->getLatestWorkflow();
         $step = $this->workflowService->getCurrentStep($processLog);
-        $uploadedFile = UploadedFile::findOrFail($uploadedFileId);
+        $uploadedFile = UploadedFile::query()->findOrFail($uploadedFileId);
         $system = $uploadedFile->origen;
         $tableName = 'afip_relaciones_activas';
 
@@ -176,17 +151,6 @@ class FileProcessingService
         $mappedData = $this->fileProcessor->handleFileImport($uploadedFile, $system);
         Log::info('Datos mapeados:', [$mappedData->count()]);
 
-        // $result = ImportAfipRelacionesActivasJob::dispatchSync(
-        //     $this->fileProcessor,
-        //     $this->employeeService,
-        //     $this->validationService,
-        //     $this->transactionService,
-        //     $this->workflowService,
-        //     $this->columnMetadata,
-        //     $this->databaseService,
-        //     $this->tableManagementService,
-        //     $uploadedFileId
-        // );
 
 
         if ($mappedData->isEmpty()) {

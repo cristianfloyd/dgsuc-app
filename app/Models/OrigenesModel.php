@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use FTP\Connection;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\OrigenRepositoryInterface;
@@ -17,6 +16,35 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         'id',
         'name',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+        self::verificarYCrearTabla();
+    }
+
+    public static function connectionName(): string
+    {
+        return (new static)->getConnectionName();
+    }
+
+    /**
+     * Verifica si la tabla existe y la crea si no existe
+     * 
+     * @return void
+     */
+    public static function verificarYCrearTabla(): void
+    {
+        $schema = \Illuminate\Support\Facades\DB::connection(self::connectionName())->getSchemaBuilder();
+        
+        if (!$schema->hasTable('suc.origenes_models')) {
+            $schema->create('suc.origenes_models', function ($table) {
+                $table->id();
+                $table->string('name');
+                $table->timestamps();
+            });
+        }
+    }
 
     /**
      * Encuentra un registro de origen por su ID.
