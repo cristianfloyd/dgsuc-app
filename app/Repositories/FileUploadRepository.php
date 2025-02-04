@@ -18,11 +18,12 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      */
     public function findOrFail($id): UploadedFile
     {
-        return UploadedFile::findOrFail($id);
+        $uploadedFile = UploadedFile::query()->findOrFail($id);
+        return $uploadedFile;
     }
 
     /**
-     * Create a new uploaded file record.
+     * Crea un nuevo registro de archivo cargado.
      *
      * @param array $data
      * @return \App\Models\Mapuche\UploadedFile
