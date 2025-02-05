@@ -14,7 +14,7 @@ trait FilamentTableInitializationTrait
     /**
      * Inicializa la tabla asociada al recurso
      */
-    protected function bootFilamentTableInitializationTrait(): void
+    public static function bootFilamentTableInitializationTrait(): void
     {
         Log::info("Iniciando boot del trait", [
             'class' => static::class,
@@ -22,7 +22,7 @@ trait FilamentTableInitializationTrait
         ]);
 
         $manager = app(TableInitializationManager::class);
-        $service = app($this->getTableServiceClass());
+        $service = app(static::getTableServiceClass());
 
         Log::info("Servicio instanciado", [
             'service_class' => get_class($service),
@@ -44,5 +44,6 @@ trait FilamentTableInitializationTrait
      *
      * @return string Nombre completo de la clase del servicio
      */
-    abstract protected function getTableServiceClass(): string;
+    // abstract protected function getTableServiceClass(): string;
+    abstract public static function getTableServiceClass(): string;
 }

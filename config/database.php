@@ -66,14 +66,14 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB4_HOST', '127.0.0.1'),
             'port' => env('DB4_PORT', '5432'),
-            'database' => env('DB4_DATABASE','desa'),
+            'database' => env('DB4_DATABASE', 'desa'),
             'username' => env('DB4_USERNAME', 'postgres'),
             'password' => env('DB4_PASSWORD', '1234'),
             'charset' => env('DB4_CHARSET', 'SQL_ASCII'),
             'collate' => env('DB4_COLLATION', 'UTF8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'mapuche',
+            'search_path' => 'mapuche,suc',
             'sslmode' => 'prefer',
         ],
         'pgsql-suc' => [
@@ -104,7 +104,7 @@ return [
             'client_encoding' => 'UTF8',
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'suc',
+            'search_path' => 'mapuche,suc',
             'sslmode' => 'prefer',
         ],
 
@@ -224,7 +224,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

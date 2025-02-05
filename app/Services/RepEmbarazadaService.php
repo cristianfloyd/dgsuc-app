@@ -59,7 +59,7 @@ class RepEmbarazadaService
             latest_dh03 AS (
                 SELECT *,
                     ROW_NUMBER() OVER (PARTITION BY nro_legaj ORDER BY nro_legaj) as rn
-                FROM dh03
+                FROM mapuche.dh03
             )
             SELECT DISTINCT
                 d3.nro_legaj,
@@ -68,7 +68,7 @@ class RepEmbarazadaService
                 concat(d1.nro_cuil1, d1.nro_cuil, d1.nro_cuil2) as cuil,
                 d3.codc_uacad
             FROM embarazadas e
-            JOIN dh01 d1 ON e.nro_legaj = d1.nro_legaj
+            JOIN mapuche.dh01 d1 ON e.nro_legaj = d1.nro_legaj
             LEFT JOIN latest_dh03 d3 ON d3.nro_legaj = d1.nro_legaj AND d3.rn = 1
             ORDER BY 1
         ");

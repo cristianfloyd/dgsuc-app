@@ -21,6 +21,7 @@ use App\Exports\Sheets\DosubaSinLiquidarDataSheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use App\Exports\Sheets\DosubaSinLiquidarSummarySheet;
+use App\Exports\Sheets\RepFallecidosSheet;
 
 class DosubaSinLiquidarExport implements WithMultipleSheets
 {
@@ -39,6 +40,7 @@ class DosubaSinLiquidarExport implements WithMultipleSheets
             'summary' => new DosubaSinLiquidarSummarySheet($this->records, $this->periodo),
             'data' => new DosubaSinLiquidarDataSheet($this->records),
             'embarazadas' => new RepEmbarazadasSheet($this->periodo),
+            'fallecidos' => new RepFallecidosSheet($this->periodo),
         ];
     }
 }

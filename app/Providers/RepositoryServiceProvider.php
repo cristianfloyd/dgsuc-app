@@ -18,6 +18,8 @@ use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
+use App\Repositories\FallecidoRepository;
+use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(Dh19RepositoryInterface::class, Dh19Repository::class);
         $this->app->bind(Dh21hRepositoryInterface::class, Dh21hRepository::class);
         $this->app->bind(EmbargoRepositoryInterface::class, EmbargoRepository::class);
+        $this->app->bind(
+            FallecidoRepositoryInterface::class,
+            FallecidoRepository::class
+        );
     }
 
     /**

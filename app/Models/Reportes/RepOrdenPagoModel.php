@@ -18,7 +18,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
 {
     use MapucheConnectionTrait, HasFactory;
 
-    public const int TABLA_UNIDAD_ACADEMICA = 13;
+    public const TABLA_UNIDAD_ACADEMICA = 13;
     protected static ?string $label = 'Orden de Pago';
     protected $primaryKey = 'id';
     public $timestamps = true;

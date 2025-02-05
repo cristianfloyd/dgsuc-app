@@ -11,26 +11,28 @@ use phpDocumentor\Reflection\Types\Boolean;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\Validation\BooleanType;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
 
 class Dh09Data extends Data
 {
     public function __construct(
-        #[Integer]
+        #[IntegerType]
         public readonly int $nro_legaj,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $vig_otano,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $vig_otmes,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $nro_tab02,
 
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_estcv,
 
-        #[Boolean]
+        #[BooleanType]
         public readonly bool $sino_embargo,
 
         #[StringType(max: 1), Nullable]
@@ -39,13 +41,13 @@ class Dh09Data extends Data
         #[StringType(max: 1), Nullable]
         public readonly ?string $sino_jubil,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $nro_tab08,
 
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_bprev,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $nro_tab09,
 
         #[StringType(max: 4), Nullable]
@@ -63,7 +65,7 @@ class Dh09Data extends Data
         #[StringType(max: 20), Nullable]
         public readonly ?string $desc_envio,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $cant_cargo,
 
         #[StringType(max: 40), Nullable]
@@ -90,7 +92,7 @@ class Dh09Data extends Data
         #[Date, Nullable]
         public readonly ?Carbon $fecha_grado,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $nro_agremiacion,
 
         #[Date, Nullable]
@@ -111,7 +113,7 @@ class Dh09Data extends Data
         #[StringType(max: 4), Nullable]
         public readonly ?string $coddependesemp,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $conyugedependiente,
 
         #[Date, Nullable]
@@ -126,7 +128,7 @@ class Dh09Data extends Data
         #[StringType(max: 20), Nullable]
         public readonly ?string $tipo_norma,
 
-        #[Integer, Nullable]
+        #[IntegerType, Nullable]
         public readonly ?int $nro_norma,
 
         #[StringType(max: 20), Nullable]
@@ -135,7 +137,7 @@ class Dh09Data extends Data
         #[Date, Nullable]
         public readonly ?Carbon $fec_norma,
 
-        #[Boolean]
+        #[BooleanType]
         public readonly bool $fuerza_reparto = false,
     ) {}
 
