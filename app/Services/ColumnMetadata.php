@@ -51,7 +51,7 @@ class ColumnMetadata
     {
 
         $this->widthsAfip = [
-            6,  // periodo fiscal
+            6,  // periodo fiscal (no se utiliza en el archivo TXT)
             2,  // codigo movimiento
             2,  // Tipo de registro
             11, // CUIL del empleado

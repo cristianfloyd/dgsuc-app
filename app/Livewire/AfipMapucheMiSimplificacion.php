@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Filament\Tables\Table;
+use App\Services\ColumnMetadata;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
@@ -108,55 +109,91 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
 
     public function exportarTxt()
     {
-        // Define field lengths according to the format
-        $fieldLengths = [
-            'tipo_registro' => 2,
-            'codigo_movimiento' => 2,
-            'cuil' => 11,
-            'trabajador_agropecuario' => 1,
-            'modalidad_contrato' => 3,
-            'inicio_rel_lab' => 10,
-            'fin_rel_lab' => 10,
-            'obra_social' => 6,
-            'codigo_situacion_baja' => 2,
-            'fecha_tel_renuncia' => 10,
-            'retribucion_pactada' => 15,
-            'modalidad_liquidacion' => 1,
-            'domicilio' => 5,
-            'actividad' => 6,
-            'puesto' => 4,
-            'rectificacion' => 2,
-            'ccct' => 10,
-            'tipo_servicio' => 3,
-            'categoria' => 6,
-            'fecha_susp_serv_temp' => 10,
-            'nro_form_agro' => 10,
-            'covid' => 1
+        // Usar los mismos anchos de columna que en ColumnMetadata
+        $columnMetadata = new ColumnMetadata();
+        $columnMetadata->setSystem('afip');
+        $columnWidths = $columnMetadata->getWidths();
+
+        // Eliminar el primer elemento (periodo fiscal) del array
+        array_shift($columnWidths);
+
+        // Mapeo de campos de la base de datos a la posición en el archivo
+        $fieldOrder = [
+            'codigo_movimiento',
+            'tipo_registro',
+            'cuil',
+            'trabajador_agropecuario',
+            'modalidad_contrato',
+            'inicio_rel_lab',
+            'fin_rel_lab',
+            'obra_social',
+            'codigo_situacion_baja',
+            'fecha_tel_renuncia',
+            'retribucion_pactada',
+            'modalidad_liquidacion',
+            'domicilio',
+            'actividad',
+            'puesto',
+            'rectificacion',
+            'nro_form_agro',
+            'tipo_servicio',
+            'categoria',
+            'ccct',
+            'espacios_en_blanco'
         ];
 
-        // Get all records with the specified fields
-        $data = ModelsAfipMapucheMiSimplificacion::all(array_keys($fieldLengths))->toArray();
+        // Obtener los registros
+        $records = ModelsAfipMapucheMiSimplificacion::all();
 
-        // Build the TXT content
+        // Construir el contenido del archivo
         $txtContent = "";
-        foreach ($data as $row) {
+        foreach ($records as $record) {
             $line = "";
-            foreach ($fieldLengths as $field => $length) {
-                $value = $row[$field] ?? '';
-                // Convert null to empty string and ensure proper padding
-                $value = $value === null ? '' : $value;
-                $line .= str_pad($value, $length, '0', STR_PAD_LEFT);
+            foreach ($fieldOrder as $index => $field) {
+                $width = $columnWidths[$index];
+
+                // Manejar el caso especial de espacios en blanco al final
+                if ($field === 'espacios_en_blanco') {
+                    $value = str_repeat(' ', $width);
+                } else {
+                    $value = $record->{$field} ?? '';
+
+                    // Formatear fechas si es necesario
+                    if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
+                        $value = $value ? date('Y-m-d', strtotime($value)) : str_repeat(' ', $width);
+                    }
+
+                    // Formatear números si es necesario
+                    if ($field === 'retribucion_pactada') {
+                        $value = number_format((float)$value, 2, '', ''); // Quitamos el punto decimal
+                    }
+
+                    // Formatear el campo nro_form_agro
+                    if ($field === 'nro_form_agro') {
+                        $value = '9999999999';
+                    }
+
+                    // Formatear el campo ccct (Código de Convenio Colectivo de Trabajo)
+                    if ($field === 'ccct') {
+                        $value = '9999/99';
+                    }
+                }
+
+                // Aplicar el padding según el tipo de campo
+                if ($field === 'cuil' || $field === 'retribucion_pactada') {
+                    $line .= str_pad($value, $width, '0', STR_PAD_LEFT);
+                } else {
+                    $line .= str_pad($value, $width, ' ', STR_PAD_RIGHT);
+                }
             }
             $txtContent .= $line . "\n";
         }
 
-        // Generate filename with timestamp
+        // Generar el nombre del archivo
         $fileName = 'mi_simplificacion_' . now()->format('Ymd_His') . '.txt';
 
-        // Store the file
+        // Almacenar y descargar el archivo
         Storage::disk('local')->put($fileName, $txtContent);
-
-        // Return download response
         return response()->download(storage_path("app/{$fileName}"))->deleteFileAfterSend(true);
     }
 
