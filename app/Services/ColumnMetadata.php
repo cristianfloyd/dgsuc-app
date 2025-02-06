@@ -7,6 +7,7 @@ class ColumnMetadata
      /** @var array<int, int> */
     private array $widthsAfip;
     private array $widthsMapuche;
+    private array $widthsMiSimplificacion;
     private string $currentSystem;
 
     /**
@@ -79,11 +80,37 @@ class ColumnMetadata
             // Anchos pra Mapuche
             6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
         ];
+
+        $this->widthsMiSimplificacion = [
+            // Anchos pra Mi Simplificacion
+            2, // codigo movimiento
+            2,
+            11,
+            1,
+            3,
+            10,
+            10,
+            6,
+            2,
+            10,
+            15,
+            1,
+            5,
+            6,
+            4,
+            2,
+            10,
+            6,
+            3,
+            10,
+            10,
+            1
+        ];
     }
 
     public function setSystem(string $system): void
     {
-        if (!in_array($system, ['afip', 'mapuche'])) {
+        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion'])) {
             throw new \InvalidArgumentException('Sistema no válido');
         }
         $this->currentSystem = $system;
@@ -94,9 +121,18 @@ class ColumnMetadata
      *
      * @return array<int, int>
      */
-    public  function getWidths(): array
+    public function getWidths(): array
     {
-        return $this->currentSystem === 'afip' ? $this->widthsAfip : $this->widthsMapuche;
+        switch ($this->currentSystem) {
+            case 'afip':
+                return $this->widthsAfip;
+            case 'mapuche':
+                return $this->widthsMapuche;
+            case 'miSimplificacion':
+                return $this->widthsMiSimplificacion;
+            default:
+                throw new \InvalidArgumentException('Sistema no válido');
+        }
     }
 
     /**

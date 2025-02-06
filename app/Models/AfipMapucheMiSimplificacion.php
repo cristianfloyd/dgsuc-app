@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PuestoDesempenado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
@@ -17,22 +18,6 @@ class AfipMapucheMiSimplificacion extends Model
 
     protected $table = 'afip_mapuche_mi_simplificacion';
     protected $schema = 'suc';
-
-
-    public function getSchema(): string
-    {
-        return $this->schema;
-    }
-
-    public function getTableName(): string
-    {
-        return $this->table;
-    }
-
-    public function getFullTableName(): string
-    {
-        return "{$this->schema}.{$this->table}";
-    }
 
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
     public $incrementing = false;
@@ -69,6 +54,25 @@ class AfipMapucheMiSimplificacion extends Model
         'nro_form_agro',
         'covid'
     ];
+
+    protected $casts = [
+        'puesto' => PuestoDesempenado::class,
+    ];
+
+    public function getSchema(): string
+    {
+        return $this->schema;
+    }
+
+    public function getTableName(): string
+    {
+        return $this->table;
+    }
+
+    public function getFullTableName(): string
+    {
+        return "{$this->schema}.{$this->table}";
+    }
 
     /**
      * Obtiene el valor de la clave primaria.

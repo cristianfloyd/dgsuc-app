@@ -2,11 +2,23 @@
 
 namespace App\Traits;
 
+/**
+ * Trait para manejar categorías de cargos
+ *
+ * @method bool hasCategory(string $category)
+ * @method array getCategoriesByGroup(string $group)
+ * @method string|null getGroupByCategory(string $category)
+ */
 trait CategoriasConstantTrait
 {
     /**
-     * Constantes agrupadas para las categorías de cargos.
-     * Estos valores corresponden a la columna codc_categ del modelo Dh11.
+     * Categorías agrupadas por tipo
+     * DOCS: Categorías docentes secundarios
+     * DOC2: Categorías Preuniversitarios
+     * DOCU: Categorías docentes universitarias
+     * AUTS: Categorías autoridades secundarias
+     * AUTU: Categorías autoridades universitarias
+     * NODO: Categorías no docentes
      */
     public const array CATEGORIAS = [
         'DOCS' => [
@@ -41,5 +53,44 @@ trait CategoriasConstantTrait
             'ESTI','INVE','MAEA','MAEE','MAEO',
         ],
     ];
+
+
+    /**
+     * Verifica si existe una categoría
+     */
+    public function hasCategory(string $category): bool
+    {
+        foreach (self::CATEGORIAS as $group) {
+            if (in_array($category, $group)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Obtiene todas las categorías de un grupo
+     * @throws \InvalidArgumentException si el grupo no existe
+     */
+    public function getCategoriesByGroup(string $group): array
+    {
+        if (!array_key_exists($group, self::CATEGORIAS)) {
+            throw new \InvalidArgumentException("Grupo de categorías '$group' no existe");
+        }
+        return self::CATEGORIAS[$group];
+    }
+
+    /**
+     * Obtiene el grupo al que pertenece una categoría
+     */
+    public function getGroupByCategory(string $category): ?string
+    {
+        foreach (self::CATEGORIAS as $group => $categories) {
+            if (in_array($category, $categories)) {
+                return $group;
+            }
+        }
+        return null;
+    }
 }
 

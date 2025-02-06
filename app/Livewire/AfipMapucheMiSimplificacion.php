@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Filament\Tables\Table;
+use App\Enums\PuestoDesempenado;
 use App\Services\ColumnMetadata;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Contracts\HasForms;
@@ -111,20 +112,20 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
     {
         // Usar los mismos anchos de columna que en ColumnMetadata
         $columnMetadata = new ColumnMetadata();
-        $columnMetadata->setSystem('afip');
+        $columnMetadata->setSystem('miSimplificacion');
         $columnWidths = $columnMetadata->getWidths();
 
         // Eliminar el primer elemento (periodo fiscal) del array
-        array_shift($columnWidths);
+        // array_shift($columnWidths);
 
         // Mapeo de campos de la base de datos a la posición en el archivo
         $fieldOrder = [
-            'codigo_movimiento',
             'tipo_registro',
+            'codigo_movimiento',
             'cuil',
             'trabajador_agropecuario',
             'modalidad_contrato',
-            'inicio_rel_lab',
+            'inicio_rel_laboral',
             'fin_rel_lab',
             'obra_social',
             'codigo_situacion_baja',
@@ -135,11 +136,12 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
             'actividad',
             'puesto',
             'rectificacion',
-            'nro_form_agro',
-            'tipo_servicio',
-            'categoria',
             'ccct',
-            'espacios_en_blanco'
+            'categoria',
+            'tipo_servicio',
+            'fecha_susp_serv_temp',
+            'nro_form_agro',
+            'covid'
         ];
 
         // Obtener los registros
@@ -159,8 +161,10 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                     $value = $record->{$field} ?? '';
 
                     // Formatear fechas si es necesario
-                    if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
+                    if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab'])) {
                         $value = $value ? date('Y-m-d', strtotime($value)) : str_repeat(' ', $width);
+                    } elseif ($field === 'fecha_tel_renuncia') {
+                        $value = '0';
                     }
 
                     // Formatear números si es necesario
@@ -176,6 +180,12 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                     // Formatear el campo ccct (Código de Convenio Colectivo de Trabajo)
                     if ($field === 'ccct') {
                         $value = '9999/99';
+                    }
+
+                    // Formatear el campo puesto
+                    if ($field === 'puesto') {
+                        // Aseguramos obtener el valor (código) del enum
+                        $value = $record->puesto?->value ?? '';
                     }
                 }
 
