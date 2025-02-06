@@ -9,10 +9,13 @@ use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 use App\Contracts\FileProcessorInterface;
+use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
 use App\Contracts\TransactionServiceInterface;
+use App\Contracts\TableManagementServiceInterface;
+
 
 /** Componente Livewire que maneja la importación de archivos AFIP y el almacenamiento de las relaciones activas.
  *
@@ -25,7 +28,7 @@ use App\Contracts\TransactionServiceInterface;
 class AfipRelacionesActivas extends Component
 {
     public $relacionesActivas;
-    public $archivosCargados;
+    public $archivosCargados = [];
     public $archivoSeleccionado; //este es el archivo que se va a abrir en la vista
     public int $archivoSeleccionadoId; //este es el id del archivo que se va a abrir en la vista
     public $nextStepUrl = null;
@@ -89,7 +92,13 @@ class AfipRelacionesActivas extends Component
 
     public function mount()
     {
-
+        $this->archivosCargados = $this->uploadedFileModel->all()
+            ->map(function($archivo) {
+                return [
+                    'id' => $archivo->id,
+                    'original_name' => $archivo->original_name . ' (' . $archivo->periodo_fiscal . ')'
+                ];
+            });
     }
 
     public function updatedarchivoSeleccionadoId($value)
@@ -112,7 +121,7 @@ class AfipRelacionesActivas extends Component
     {
         if ($archivoId !== null) {
             $this->archivoSeleccionadoId = $archivoId;
-            $this->archivoSeleccionado = UploadedFile::find($archivoId);
+            $this->archivoSeleccionado = $this->uploadedFileModel()->find($archivoId);
             Log::info("importar() en AfipRelacionesActivas \$archivoId pasado como argumento: $archivoId");
         }
         $this->validateFileSelection();
@@ -128,6 +137,7 @@ class AfipRelacionesActivas extends Component
 
             $uploadedFileId = $this->archivoSeleccionadoId;
 
+
             // Despachar el Job
             ImportAfipRelacionesActivasJob::dispatchSync(
                 $this->fileProcessor,
@@ -136,6 +146,8 @@ class AfipRelacionesActivas extends Component
                 $this->transactionService,
                 $this->workflowService,
                 $this->columnMetadata,
+                app(DatabaseServiceInterface::class),        // Inyectamos el servicio
+                app(TableManagementServiceInterface::class), // Inyectamos el servicio
                 $uploadedFileId
             );
 
@@ -165,12 +177,8 @@ class AfipRelacionesActivas extends Component
 
     public function render()
     {
-
         if ($this->showUploadForm) {
-            $archivosCargados = $this->uploadedFileModel->all();
-            return view('livewire.afip-relaciones-activas',[
-                'archivosCargados' => $archivosCargados,
-            ]);
+            return view('livewire.afip-relaciones-activas');
         } else {
             return view('livewire.uploadtxtcompleted', [
                 'redirectUrl' => $this->nextStepUrl,

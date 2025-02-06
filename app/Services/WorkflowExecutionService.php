@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\WorkflowStatus;
+use App\Models\TablaTempCuils;
 use App\Services\TempTableService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\QueryException;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
+use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
@@ -239,7 +241,12 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
      */
     public function cuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+        $model = new AfipMapucheMiSimplificacion();
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())
+        ->table($this->tempTableService->getFullTableName() . ' as ttc')
+        ->leftJoin($model->getFullTableName(). ' as amms', 'ttc.cuil', 'amms.cuil')
+        ->whereNull('amms.cuil')
+        ->pluck('ttc.cuil')->toArray();
 
         return $cuilsNoEncontrados;
     }

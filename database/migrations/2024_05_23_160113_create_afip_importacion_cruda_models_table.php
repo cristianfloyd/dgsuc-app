@@ -8,10 +8,13 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration
 {
     use MapucheConnectionTrait;
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::connection($this->getConnectionName())->table('suc.uploaded_files', function (Blueprint $table) {
-            $table->string('process_id')->nullable()->after('user_name');
+        Schema::connection($this->getConnectionName())->create('suc.afip_importacion_cruda', function (Blueprint $table) {
+            $table->string('linea_completa');
         });
     }
 
@@ -20,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection($this->getConnectionName())->table('suc.uploaded_files', function (Blueprint $table) {
-            $table->dropColumn('process_id');
-        });
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_importacion_cruda');
     }
 };

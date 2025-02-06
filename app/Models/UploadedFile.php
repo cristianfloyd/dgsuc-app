@@ -15,9 +15,10 @@ class UploadedFile extends Model
     use MapucheConnectionTrait;
 
     protected $table = 'suc.uploaded_files';
-    
+
     protected $fillable = [
         'periodo_fiscal',
+        'nro_liqui',
         'origen',
         'filename',
         'original_name',
@@ -30,7 +31,7 @@ class UploadedFile extends Model
 
     /**
      * Crea un nuevo registro de archivo cargado en la base de datos.
-     * 
+     *
      * Este método crea una nueva instancia de UploadedFile con los datos proporcionados
      * y la guarda en la base de datos.
      *
@@ -70,9 +71,9 @@ class UploadedFile extends Model
     /**
      * Busca registros en la tabla de archivos cargados.
      *
-     * @param Builder $query El objeto de consulta.
+     * @param \Illuminate\Database\Eloquent\Builder $query El objeto de consulta.
      * @param string $search El término de búsqueda.
-     * @return Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
+     * @return \Illuminate\Database\Eloquent\Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
      */
     public function scopeSearch($query, $search)
     {

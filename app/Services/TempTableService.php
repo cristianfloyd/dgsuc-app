@@ -12,8 +12,17 @@ class TempTableService extends DatabaseService
 {
     use MapucheConnectionTrait;
 
+    protected $model;
 
-    protected $tempTableName = 'tabla_temp_cuils';
+    public function __construct()
+    {
+        $this->model = new TablaTempCuils();
+    }
+
+    public function getFullTableName(): string
+    {
+        return $this->model->getFullTableName();
+    }
 
     /**
      * Inserta un conjunto de CUILs en la tabla temporal.
@@ -29,10 +38,12 @@ class TempTableService extends DatabaseService
         try {
             DB::connection($this->getConnectionName())->beginTransaction();
 
+            $tableName = $this->getFullTableName();
+
             // Verificar si la tabla existe
-            if (!Schema::connection($this->getConnectionName())->hasTable($this->tempTableName)) {
+            if (!Schema::connection($this->getConnectionName())->hasTable($tableName)) {
                 // Si no existe, crearla
-                TablaTempCuils::class()->createTable();
+                $this->model->createTable();
             } else {
                 // Si existe, vaciarla
                 $this->clearTempTable();
@@ -40,19 +51,20 @@ class TempTableService extends DatabaseService
 
             // Insertar los nuevos datos
             foreach (array_chunk($cuils, 1000) as $chunk) {
-                DB::connection($this->getConnectionName())->table($this->tempTableName)->insert(
-                    array_map(function ($cuil) {
+                DB::connection($this->getConnectionName())
+                    ->table($tableName)
+                    ->insert(array_map(function ($cuil) {
                         return ['cuil' => $cuil];
-                    }, $chunk)
-                );
+                    }, $chunk));
             }
 
             DB::connection($this->getConnectionName())->commit();
-            Log::info('Datos insertados correctamente en la tabla temporal.');
+            Log::info("Datos insertados correctamente en la tabla {$tableName}.");
             return true;
+
         } catch (\Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
-            Log::error('Error al insertar datos en la tabla temporal: ' . $e->getMessage());
+            Log::error("Error al insertar datos en la tabla {$this->model->getFullTableName()}: " . $e->getMessage());
             return false;
         }
     }
@@ -67,14 +79,17 @@ class TempTableService extends DatabaseService
     public function clearTempTable(): bool
     {
         try {
+            $tableName = $this->getFullTableName();
+            DB::connection($this->getConnectionName())
+                ->table($tableName)
+                ->truncate();
 
-            DB::connection($this->getConnectionName())->table($this->tempTableName)->truncate();
-            Log::info('Tabla temporal limpiada correctamente.');
+            Log::info("Tabla {$tableName} limpiada correctamente.");
             return true;
 
         } catch (\Exception $e) {
             // Manejar la excepción aquí
-            Log::error('Error al limpiar la tabla temporal: ' . $e->getMessage());
+            Log::error("Error al limpiar la tabla {$this->model->getFullTableName()}: " . $e->getMessage());
             return false;
         }
     }
@@ -88,6 +103,8 @@ class TempTableService extends DatabaseService
      */
     public function getTempTableCount(): int
     {
-        return DB::connection($this->getConnectionName())->table($this->tempTableName)->count();
+        return DB::connection($this->getConnectionName())
+            ->table($this->getFullTableName())
+            ->count();
     }
 }

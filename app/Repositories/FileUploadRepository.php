@@ -26,7 +26,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Crea un nuevo registro de archivo cargado.
      *
      * @param array $data
-     * @return \App\Models\Mapuche\UploadedFile
+     * @return UploadedFile
      */
     public function create(array $data): UploadedFile
     {
@@ -47,7 +47,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
     /**
      * Obtiene todos los archivos cargados.
      *
-     * @return \Illuminate\Database\Eloquent\Collection|UploadedFile[]
+     * @return Collection|UploadedFile[]
      */
     public function all(): Collection|array
     {

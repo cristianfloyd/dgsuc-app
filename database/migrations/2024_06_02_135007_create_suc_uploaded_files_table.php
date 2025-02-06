@@ -18,12 +18,14 @@ return new class extends Migration
         Schema::connection($this->getConnectionName())->create('suc.uploaded_files', function (Blueprint $table) {
             $table->id();
             $table->string('periodo_fiscal');
+            $table->string('nro_liqui');
             $table->string('origen');
             $table->string('filename');
             $table->string('original_name');
             $table->string('file_path');
             $table->string('user_id');
             $table->string('user_name');
+            $table->string('process_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

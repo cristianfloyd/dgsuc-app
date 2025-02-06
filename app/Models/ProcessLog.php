@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\MapucheConnectionTrait;
 class ProcessLog extends Model
 {
     protected $fillable = [
@@ -24,7 +24,7 @@ class ProcessLog extends Model
     /**
      * Obtiene una relación HasMany con los registros de registro de procesos que tienen este registro de registro de proceso como padre.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function logs(): HasMany
     {

@@ -1,16 +1,18 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
 
 return new class extends Migration
 {
     /**
      * Establece la conexión de base de datos a utilizar para esta migración.
      */
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
 
 
     /**
@@ -18,7 +20,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suc.ret_tabla_basicos_conc_esp', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.ret_tabla_basicos_conc_esp', function (Blueprint $table) {
             $table->date('fecha_desde');
             $table->date('fecha_hasta');
             $table->char('cat_id', 4);
@@ -42,7 +44,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.ret_tabla_basicos_conc_esp');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_tabla_basicos_conc_esp');
     }
 };
 

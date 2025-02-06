@@ -165,24 +165,17 @@ class WorkflowService implements WorkflowServiceInterface
      * @param string $currentStep El paso actual en el flujo de trabajo.
      * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
      */
-    public function getNextStep(string $currentStep): ?string
+    public function getNextStep(?string $currentStep = 'start'): ?string
     {
-        $steps = array_keys($this->getSteps());
-        if (($currentStepIndex = array_search($currentStep, $steps)) === false) {
-            throw new \InvalidArgumentException("Paso no válido: {$currentStep}");
-        }
+        $currentStep = $currentStep ?? 'start';
 
-        Log::info("getNextStep() -> Paso actual: {$currentStep}");
-        /**
-         * Obtiene el siguiente paso en el flujo de trabajo.
-         *
-         * Si el paso actual es el último en el flujo de trabajo, devuelve null.
-         *
-         * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
-         */
-        $pasos = $steps[$currentStepIndex + 1] ?? null;
-        Log::info("getNextStep() -> Siguiente paso: {$pasos}");
-        return $pasos;
+        $workflow = [
+            'start' => 'obtener_cuils_not_in_afip',
+            'obtener_cuils_not_in_afip' => 'obtener_cuils_no_insertados',
+            // ... otros pasos del workflow
+        ];
+
+        return $workflow[$currentStep] ?? null;
     }
 
     /** Verifica si un paso del proceso ha sido completado.
@@ -202,9 +195,13 @@ class WorkflowService implements WorkflowServiceInterface
      * @param string $step El nombre del paso del flujo de trabajo.
      * @return string La URL del paso del flujo de trabajo.
      */
-    public function getStepUrl(string $step): string
+    public function getStepUrl(?string $step): ?string
     {
-        // return route('workflow.step', ['step' => $step]);
+        if (!$step) {
+            Log::warning('Se intentó obtener URL para un paso nulo');
+            return null;
+        }
+
         $urls = [
             'subir_archivo_afip' => '/afip/subir-archivo',
             'subir_archivo_mapuche' => '/afip/subir-archivo',
@@ -217,7 +214,7 @@ class WorkflowService implements WorkflowServiceInterface
             'exportar_txt_para_afip' => '/export-results'
         ];
 
-        return $urls[$step] ?? '/';
+        return $urls[$step] ?? null;
     }
 
 

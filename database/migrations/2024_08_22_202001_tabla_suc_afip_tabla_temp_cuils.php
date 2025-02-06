@@ -1,16 +1,17 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
 
     public function up()
     {
-        Schema::connection($this->connection)->create('suc.afip_tabla_temp_cuils', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.afip_tabla_temp_cuils', function (Blueprint $table) {
             $table->id();
             $table->string('cuil', 11)->unique();
         });
@@ -18,6 +19,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::connection($this->connection)->dropIfExists('suc.afip_tabla_temp_cuils');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_tabla_temp_cuils');
     }
 };

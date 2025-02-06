@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -15,9 +16,9 @@ class TableManagementService implements TableManagementServiceInterface
 {
     use MapucheConnectionTrait;
     private static $connectionInstance = null;
-    private const string DEFAULT_CONNECTION = 'pgsql-mapuche';
 
-    protected static function getMapucheConnection()
+
+    protected static function getMapucheConnection(): Connection
     {
         if (self::$connectionInstance === null) {
             $model = new static;
@@ -25,6 +26,14 @@ class TableManagementService implements TableManagementServiceInterface
         }
         return self::$connectionInstance;
     }
+
+    protected static function getMapucheConnectionName(): string
+    {
+        return (new static)->getConnectionFromTrait()->getName();
+    }
+
+
+
 
     /**
      * Verifica y prepara una tabla de base de datos.
@@ -37,24 +46,36 @@ class TableManagementService implements TableManagementServiceInterface
      */
     public static function verifyAndPrepareTable(string $tableName, string $connection = null): array
     {
-        $dbconnection = static::getMapucheConnection();
         try {
-            $connection = $connection ?: $dbconnection;
-            $schema = self::getSchemaConnection($connection);
-            $db = self::getDbConnection($connection);
+            // Separar schema y nombre de tabla si se proporciona con formato schema.tabla
+            $parts = explode('.', $tableName);
+            $schema = count($parts) > 1 ? $parts[0] : 'suc';  // Default schema 'suc'
+            $tableNameWithoutSchema = count($parts) > 1 ? $parts[1] : $parts[0];
+
+            // Obtenemos el nombre de la conexión como string
+            $connectionName = $connection ?: self::getMapucheConnectionName();
+
+            $schemaBuilder = self::getSchemaConnection($connectionName);
+            $db = self::getDbConnection($connectionName);
 
             $result = [
                 'success' => true,
-                'message' => "Tabla {$tableName} verificada y preparada.",
+                'message' => "Tabla {$schema}.{$tableNameWithoutSchema} verificada y preparada.",
                 'actions' => [],
-                'data' => ['tableName' => $tableName, 'connection' => $connection]
+                'data' => [
+                    'schema' => $schema,
+                    'tableName' => $tableNameWithoutSchema,
+                    'fullTableName' => "{$schema}.{$tableNameWithoutSchema}",
+                    'connection' => $connectionName
+                ]
             ];
 
-            if (!$schema->hasTable($tableName)) {
-                static::createTable($tableName, $schema);
+            // Verificar existencia de la tabla en el schema correcto
+            if (!$schemaBuilder->hasTable("{$schema}.{$tableNameWithoutSchema}")) {
+                static::createTable($tableNameWithoutSchema, $schemaBuilder);
                 $result['actions'][] = 'created';
-            } elseif (static::tableHasData($tableName, $db)) {
-                static::truncateTable($tableName, $db);
+            } elseif (static::tableHasData("{$schema}.{$tableNameWithoutSchema}", $db)) {
+                static::truncateTable("{$schema}.{$tableNameWithoutSchema}", $db);
                 $result['actions'][] = 'truncated';
             } else {
                 $result['actions'][] = 'verified';
@@ -68,7 +89,11 @@ class TableManagementService implements TableManagementServiceInterface
                 'success' => false,
                 'message' => "Error al verificar y preparar la tabla {$tableName}",
                 'error' => $e->getMessage(),
-                'data' => ['tableName' => $tableName, 'connection' => $connection]
+                'data' => [
+                    'schema' => $schema ?? null,
+                    'tableName' => $tableNameWithoutSchema ?? null,
+                    'connection' => $connectionName ?? null
+                ]
             ];
         }
     }
@@ -83,9 +108,9 @@ class TableManagementService implements TableManagementServiceInterface
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
      * @return \Illuminate\Database\Schema\Builder La instancia de la conexión de base de datos.
      */
-    private static function getSchemaConnection(string $connection = null)
+    private static function getSchemaConnection(?string $connectionName = null)
     {
-        return $connection ? Schema::connection($connection) : Schema::connection(config(self::DEFAULT_CONNECTION));
+        return Schema::connection($connectionName ?: self::getMapucheConnectionName());
     }
 
     /**
@@ -96,9 +121,9 @@ class TableManagementService implements TableManagementServiceInterface
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
      * @return \Illuminate\Database\Connection La instancia de la conexión de base de datos.
      */
-    private static function getDbConnection(string $connection = null)
+    private static function getDbConnection(?string $connectionName = null)
     {
-        return $connection ? DB::connection($connection) : DB::connection(config(self::DEFAULT_CONNECTION));
+        return DB::connection($connectionName ?: self::getMapucheConnectionName());
     }
 
     private static function createTable(string $tableName, $schema): void

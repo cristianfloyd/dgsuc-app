@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Exception;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use App\Models\Mapuche\Dh22;
 use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
 use Livewire\WithFileUploads;
@@ -12,16 +13,20 @@ use App\Services\UploadService;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Contracts\HasForms;
 use App\Services\FileProcessingService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Contracts\OrigenRepositoryInterface;
 use Illuminate\Validation\ValidationException;
+use Filament\Forms\Concerns\InteractsWithForms;
 use App\Contracts\FileUploadRepositoryInterface;
 
 
-class Uploadtxt extends Component
+class Uploadtxt extends Component implements HasForms
 {
     use WithFileUploads;
+    use InteractsWithForms;
 
 
     public $archivotxt;
@@ -38,6 +43,7 @@ class Uploadtxt extends Component
     public $nextStepUrl = null;
     public $processId;
     public $showButtonProcessFiles = false;
+    public int $selectedLiquidacion;
 
     protected $workflowService;
     protected $processLog;
@@ -80,6 +86,7 @@ class Uploadtxt extends Component
         $this->origenes = OrigenesModel::all();
         $this->processId = (string)Str::uuid(); // generar un ID de proceso único y convertirlo a string
         Log::info("Process ID: {$this->processId}");
+        Log::debug('Componente Uploadtxt montado');
     }
 
     /**
@@ -159,7 +166,8 @@ class Uploadtxt extends Component
                 'origen' => $origenModel->name,
                 'user_id' => 1,
                 'user_name' => 'admin',
-                'process_id' => $this->processId, // Asignar el UUID del proceso
+                'process_id' => $this->processId,
+                'nro_liqui' => $this->selectedLiquidacion,
             ]);
 
             if (!$uploadedFile) {
@@ -209,7 +217,17 @@ class Uploadtxt extends Component
     private function validateAndPrepare($origen)
     {
         Log::debug("uploadtxt->validateAndPrepare, Paso actual: {$origen}");
-        $this->validateInput($origen);
+
+        // Validar la liquidación seleccionada
+        $this->validate([
+            'selectedLiquidacion' => 'required|exists:pgsql-mapuche.mapuche.dh22,nro_liqui',
+            'archivotxt' . ucfirst($origen) => 'required|file|mimes:txt,csv|max:20480',
+        ], [
+            'selectedLiquidacion.required' => 'Debe seleccionar una liquidación',
+            'selectedLiquidacion.exists' => 'La liquidación seleccionada no existe',
+            // ... otros mensajes de validación ...
+        ]);
+
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
         Log::info("uploadtxt->validateAndPrepare, Paso actual: {$this->currentStep}");
@@ -379,9 +397,55 @@ class Uploadtxt extends Component
         //
     }
 
+    protected function getFormSchema(): array
+    {
+        $options = Dh22::query()
+            ->definitiva()
+            ->orderBy('nro_liqui', 'desc')
+            ->limit(12)
+            ->get();
+
+        Log::debug('Liquidaciones encontradas:', [
+            'count' => $options->count(),
+            'liquidaciones' => $options->map(fn($liq) => [
+                'nro_liqui' => $liq->nro_liqui,
+                'desc_liqui' => $liq->desc_liqui
+            ])->toArray()
+        ]);
+
+        return [
+            Select::make('selectedLiquidacion')
+                ->label('Liquidación')
+                ->options(function () use ($options) {
+                    $mappedOptions = $options->mapWithKeys(function ($liquidacion) {
+                        $option = "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}";
+                        Log::debug("Opción generada:", [
+                            'nro_liqui' => $liquidacion->nro_liqui,
+                            'option' => $option
+                        ]);
+                        return [$liquidacion->nro_liqui => $option];
+                    })->toArray();
+
+                    Log::debug('Opciones finales del selector:', $mappedOptions);
+                    return $mappedOptions;
+                })
+                ->searchable()
+                ->preload()
+                ->required()
+                ->placeholder('Seleccione una liquidación')
+                ->helperText('Seleccione la liquidación definitiva correspondiente')
+                ->columnSpanFull()
+                ->afterStateUpdated(function ($state) {
+                    Log::debug('Liquidación seleccionada:', ['selectedLiquidacion' => $state]);
+                })
+        ];
+    }
 
     public function render()
     {
+        Log::debug('Renderizando componente Uploadtxt', [
+            'selectedLiquidacion' => $this->selectedLiquidacion ?? 'no seleccionada'
+        ]);
         if ( $this->showUploadForm) {
             return view('livewire.uploadtxt');
         } else {

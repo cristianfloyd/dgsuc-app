@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-suc';
-    
+    use MapucheConnectionTrait;
+
     /**
      * Ejecuta la migración.
      */
     public function up(): void
     {
-        Schema::create('suc.ret_udas', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.ret_udas', function (Blueprint $table) {
             $table->integer('nro_legaj');
             $table->integer('nro_cargo');
             $table->string('periodo');
@@ -53,6 +54,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.ret_udas');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_udas');
     }
 };

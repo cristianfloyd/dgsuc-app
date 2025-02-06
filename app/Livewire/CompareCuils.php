@@ -12,6 +12,7 @@ use Livewire\Attributes\Computed;
 use App\Services\TempTableService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Services\ProcessLogService;
 use Illuminate\Support\Facades\Log;
 use App\Services\CuilCompareService;
 use App\Traits\MapucheConnectionTrait;
@@ -43,7 +44,7 @@ class CompareCuils extends Component
 
     public $cuilsNotInAfip;
     public $cuilsCount = 0;
-    public $nroLiqui = 1;
+    public $nroLiqui = 2;
     public int $periodoFiscal = self::DEFAULT_PERIODO_FISCAL;
     public array $cuilsToSearch = [];
 
@@ -75,8 +76,15 @@ class CompareCuils extends Component
     private $cuilCompareService;
     private $tempTableService;
     private $mapucheMiSimplificacionService;
+    private $processLogService;
 
-    public function boot(WorkflowServiceInterface $workflowService, MessageManagerInterface $messageManager, CuilCompareService $cuilCompareService, TempTableService $tempTableService, MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService)
+    public function boot(
+        WorkflowServiceInterface $workflowService,
+        MessageManagerInterface $messageManager,
+        CuilCompareService $cuilCompareService,
+        TempTableService $tempTableService,
+        MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService,
+        ProcessLogService $processLogService)
     {
         $this->workflowService = $workflowService;
         $this->messageManager = $messageManager;
@@ -84,6 +92,7 @@ class CompareCuils extends Component
         $this->tempTableService = $tempTableService;
         $this->mapucheMiSimplificacionService = $mapucheMiSimplificacionService;
         $this->perPage = self::PER_PAGE;
+        $this->processLogService = $processLogService;
     }
 
     public function mount()
@@ -127,7 +136,14 @@ class CompareCuils extends Component
      */
     public function cuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+        $afipModel = new AfipMapucheMiSimplificacion();
+
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())
+            ->table($this->tempTableService->getFullTableName() . ' as ttc')
+            ->leftJoin($afipModel->getFullTableName() . ' as amms', 'ttc.cuil', 'amms.cuil')
+            ->whereNull('amms.cuil')
+            ->pluck('ttc.cuil')
+            ->toArray();
 
         return $cuilsNoEncontrados;
     }
@@ -377,16 +393,45 @@ class CompareCuils extends Component
      */
     public function loadCuilsNotInAfip()
     {
-        Log::info('loadCuilsNotInAfip iniciado');
-        $this->processLog = $this->workflowService->getLatestWorkflow();
-        $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
+        try {
+            Log::info('loadCuilsNotInAfip iniciado');
 
-        if ($this->currentStep === WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value) {
-            $this->executeWorkflowSteps();
-        } else {
-            // Estamos en el paso incorrecto, obtener la url y redireccionar
-            $url = $this->workflowService->getStepUrl($this->currentStep);
-            Log::warning("url: {$url}");
+            // Verificar el último registro de ProcessLog
+            Log::info('Buscando el último registro de ProcessLog en ProcessLogService');
+            $lastProcess = $this->processLogService->getLatestProcess();
+
+            // Obtener el siguiente paso del workflow
+            $nextStep = $this->workflowService->getNextStep($lastProcess?->current_step ?? 'start');
+
+            if (!$nextStep) {
+                Log::warning('No se pudo determinar el siguiente paso del workflow');
+                $this->dispatch('notify', [
+                    'type' => 'warning',
+                    'message' => 'No se pudo determinar el siguiente paso del proceso'
+                ]);
+                return;
+            }
+
+            // Obtener la URL del paso actual
+            $stepUrl = $this->workflowService->getStepUrl($nextStep);
+
+            if (!$stepUrl) {
+                Log::error('No se pudo obtener la URL del paso actual');
+                $this->dispatch('notify', [
+                    'type' => 'error',
+                    'message' => 'Error al obtener la URL del paso actual'
+                ]);
+                return;
+            }
+
+            // Resto de la lógica...
+
+        } catch (\Exception $e) {
+            Log::error('Error en loadCuilsNotInAfip: ' . $e->getMessage());
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Error al cargar los CUILs: ' . $e->getMessage()
+            ]);
         }
     }
 

@@ -2,21 +2,37 @@
 
 namespace App\Models;
 
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
-use App\Traits\MapucheDesaConnectionTrait;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    use MapucheDesaConnectionTrait;
-    protected $table = 'suc.afip_mapuche_mi_simplificacion';
-    public $timestamps = false;
+    use MapucheConnectionTrait;
 
+
+    protected $table = 'afip_mapuche_mi_simplificacion';
+    protected $schema = 'suc';
+
+
+    public function getSchema(): string
+    {
+        return $this->schema;
+    }
+
+    public function getTableName(): string
+    {
+        return $this->table;
+    }
+
+    public function getFullTableName(): string
+    {
+        return "{$this->schema}.{$this->table}";
+    }
 
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
     public $incrementing = false;
@@ -134,21 +150,19 @@ class AfipMapucheMiSimplificacion extends Model
      */
     public function newQuery()
     {
-        return parent::newQuery()->addSelect(
-            '*',
-            DB::connection($this->getColumns())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
-        )
-        ->orderBy('periodo_fiscal')
-        ->orderBy('cuil');
+        return parent::newQuery()
+            ->from("{$this->getFullTableName()} as ami")
+        ->addSelect(
+            'ami.*',
+            DB::connection($this->getConnectionName())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
+        );
     }
 
-
-
-
-
-
-
-
+    // Método para consultas grandes
+    public function scopeChunked($query, $callback, $count = 1000)
+    {
+        $query->chunk($count, $callback);
+    }
 
     public function createTable(): bool
     {
@@ -233,5 +247,10 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return empty($value) ? $query :  $query->where('cuil', 'ilike', "%$value%")
             ->orWhere('nro_legaj', 'ilike', "%$value%");
+    }
+
+    public function getSchemaName(): string
+    {
+        return $this->schema;
     }
 }

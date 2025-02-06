@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
     protected $table = 'suc.afip_mapuche_sicoss';
     /**
      * Run the migrations.
@@ -14,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('suc.afip_mapuche_sicoss', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.afip_mapuche_sicoss', function (Blueprint $table) {
             $table->char('periodo_fiscal', 6);
             $table->char('cuil', 11)->nullable()->unique();
             $table->char('apnom', 30)->nullable();
@@ -88,6 +89,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.afip_mapuche_sicoss');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_mapuche_sicoss');
     }
 };

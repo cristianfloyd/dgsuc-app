@@ -59,7 +59,7 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
      */
     public function handle(): array
     {
-        $uploadedFile = UploadedFile::findOrFail($this->uploadedFileId);
+        $uploadedFile = UploadedFile::query()->findOrFail($this->uploadedFileId);
         $system = $uploadedFile->origen;
         Log::info('sistema: ' . $system);
         $tableName = self::$tableName;
@@ -88,7 +88,7 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                     //     $uploadedFile
                     // );
                     $mappedData = $this->fileProcessor->handleFileImport($uploadedFile, $system);
-                    Log::info('Datos mapeados:', [$mappedData->count()]);
+                    Log::info('Datos mapeados (Control en ImportAfipRelacionesActivasJob):', [$mappedData->count()]);
 
                     // Paso 2: Verificar y preparar la tabla
                     Log::info('Verificando y preparando tabla:', [$tableName]);
@@ -101,6 +101,8 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                             'data' => array_merge(['file' => $uploadedFile->id, 'step' => $step], $tableResult['data']),
                             'error' => $tableResult['error'] ?? null
                         ];
+                    } else {
+                        Log::info('Tabla preparada:', [$tableResult]);
                     }
 
                     // Almacenar los datos procesados en la base de datos

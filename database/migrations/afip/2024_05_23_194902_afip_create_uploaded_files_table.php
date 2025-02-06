@@ -15,7 +15,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //Se crea la tabla uploaded_files con los campos: id, filename, ogirinal_name, file_path, timestamps
         Schema::connection($this->getConnectionName())->create('suc.afip_uploaded_files', function (Blueprint $table) {
             $table->id();
             $table->text('filename');

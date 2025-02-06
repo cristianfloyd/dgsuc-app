@@ -115,7 +115,7 @@ interface WorkflowServiceInterface
      * @param string $step
      * @return string
      */
-    public function getStepUrl(string $step): string;
+    public function getStepUrl(?string $step): ?string;
 
     /**
      * Marca un paso como fallido en el flujo de trabajo.

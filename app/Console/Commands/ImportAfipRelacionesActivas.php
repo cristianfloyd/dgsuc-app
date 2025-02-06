@@ -80,6 +80,7 @@ class ImportAfipRelacionesActivas extends Command
                 );
 
                 // 5. Guardar las líneas procesadas
+                Log::info('Guardando líneas procesadas (' . $processedLines->count() . ') AfipRelacionesActivas');
                 $this->employeeService->storeProcessedLines($processedLines->toArray());
             });
 
