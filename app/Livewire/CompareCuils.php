@@ -21,26 +21,27 @@ use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
+use App\Data\Mapuche\AgenteData;
 
 class CompareCuils extends Component
 {
     use WithPagination, MapucheConnectionTrait;
 
     // Constantes
-    private const int PER_PAGE = 10;
-    private const string IN_PROGRESS = 'in_progress';
-    private const string COMPLETED = 'completed';
+    private const PER_PAGE = 10;
+    private const IN_PROGRESS = 'in_progress';
+    private const COMPLETED = 'completed';
 
-    private const string MSG_WORKFLOW_COMPLETED = 'Flujo de trabajo completado';
-    private const string MSG_DATA_INSERTED = 'Datos insertados en Mi Simplificacion';
-    private const string MSG_ERROR_INSERT = 'Error al insertar Mi Simplificacion';
-    private const string LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
+    private const MSG_WORKFLOW_COMPLETED = 'Flujo de trabajo completado';
+    private const MSG_DATA_INSERTED = 'Datos insertados en Mi Simplificacion';
+    private const MSG_ERROR_INSERT = 'Error al insertar Mi Simplificacion';
+    private const LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
 
-    private const int DEFAULT_PERIODO_FISCAL = 202312;
-    private const string EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
-    private const string EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
-    private const string EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
-    private const string EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
+    private const DEFAULT_PERIODO_FISCAL = 202312;
+    private const EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+    private const EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
+    private const EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+    private const EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
 
     public $cuilsNotInAfip;
     public $cuilsCount = 0;
@@ -84,8 +85,8 @@ class CompareCuils extends Component
         CuilCompareService $cuilCompareService,
         TempTableService $tempTableService,
         MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService,
-        ProcessLogService $processLogService)
-    {
+        ProcessLogService $processLogService
+    ) {
         $this->workflowService = $workflowService;
         $this->messageManager = $messageManager;
         $this->cuilCompareService = $cuilCompareService;
@@ -100,8 +101,7 @@ class CompareCuils extends Component
         $this->processLog = $this->workflowService->getLatestWorkflow();
         if ($this->processLog) {
             $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
-            if($this->currentStep === null)
-            {
+            if ($this->currentStep === null) {
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
                 return;
             };
@@ -260,7 +260,7 @@ class CompareCuils extends Component
      */
     public function mapucheMiSimplificacion(): void
     {
-        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value , self::IN_PROGRESS);
+        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value, self::IN_PROGRESS);
 
         $this->dispatch('mapuche-mi-simplificacion', $this->nroLiqui, $this->periodoFiscal);
         $this->reset('cuilsNotInAfipLoaded');
@@ -276,7 +276,7 @@ class CompareCuils extends Component
         $this->workflowService->completeStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value);
 
         // Iniciar el siguiente paso: ejecutar_funcion_almacenada
-        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value , self::IN_PROGRESS);
+        $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value, self::IN_PROGRESS);
         $this->ejecutarFuncionAlmacenada();
     }
 
@@ -296,14 +296,13 @@ class CompareCuils extends Component
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = WorkflowStatus::EXPORTAR_TXT_PARA_AFIP->value;
         $this->workflowService->completeStep($this->processLog, $this->currentStep);
-
     }
 
     public function funcionAlmacenada()
     {
         $this->processLog = $this->workflowService->getLatestWorkflow();
         $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
-        if ($this->currentStep === WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value){
+        if ($this->currentStep === WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value) {
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value, self::IN_PROGRESS);
             $this->ejecutarFuncionAlmacenada();
             $this->dispatch(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, $this->currentStep, $this->processLog);
@@ -495,31 +494,31 @@ class CompareCuils extends Component
 
     public function poblarTablaTempCuils(): void
     {
-        if ($this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value)
-        {
+        if ($this->currentStep === WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value) {
             $this->cuilsToSearch = $this->cuilsNotInAfip->toArray();
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value, self::IN_PROGRESS);
-            if($this->tempTableService->populateTempTable($this->cuilsToSearch))
-            {
+            if ($this->tempTableService->populateTempTable($this->cuilsToSearch)) {
                 $this->cuilsCount = $this->tempTableService->getTempTableCount();
                 Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui}" . "{$this->periodoFiscal} {$this->cuilsCount}");
             };
-
         }
     }
 
-    public function searchEmployee($dni)
+    public function searchEmployee($dni): void
     {
         $this->selectedDni = $dni;
         $employee = Dh01::where('nro_docum', $dni)->first();
 
         if ($employee) {
+            $agenteData = AgenteData::fromModel($employee);
+
+            // Mantenemos el mismo formato de array para no romper la vista
             $this->employeeInfo = [
-                'nombre' => $employee->desc_nombr,
-                'apellido' => $employee->desc_appat . ' ' . $employee->desc_apmat,
-                'nro_legaj' => $employee->nro_legaj,
-                'DNI' => $employee->nro_docum,
-                'fecha_inicio' => $employee->dh03()->orderBy('fec_alta', 'asc')->value('fec_alta'),
+                'nombre' => $agenteData->nombre,
+                'apellido' => $agenteData->apellido,
+                'nro_legaj' => $agenteData->nroLegaj,
+                'DNI' => $agenteData->dni,
+                'fecha_inicio' => $agenteData->fechaInicio?->format('Y-m-d'),
             ];
             $this->showModal = true;
         } else {
@@ -539,7 +538,7 @@ class CompareCuils extends Component
     {
         $this->cargos = Dh03::where('nro_legaj', $nroLegaj)
             ->orderBy('fec_alta', 'desc')
-            ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq' ])
+            ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq'])
             ->toArray();
 
         $this->showCargoModal();

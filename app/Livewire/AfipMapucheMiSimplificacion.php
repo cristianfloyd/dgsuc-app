@@ -100,7 +100,7 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                 Action::make('exportTxt')
                     ->label('Exportar TXT')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => $this->exportarTxt())
+                    ->action(fn() => $this->exportarTxt())
                     ->color('success')
             ])
             ->defaultSort('nro_legaj', 'asc')
@@ -115,8 +115,6 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
         $columnMetadata->setSystem('miSimplificacion');
         $columnWidths = $columnMetadata->getWidths();
 
-        // Eliminar el primer elemento (periodo fiscal) del array
-        // array_shift($columnWidths);
 
         // Mapeo de campos de la base de datos a la posición en el archivo
         $fieldOrder = [

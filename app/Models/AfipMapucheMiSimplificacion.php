@@ -5,16 +5,18 @@ namespace App\Models;
 use App\Enums\PuestoDesempenado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\HasPuestoDesempenado;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Traits\HasUnidadAcademica;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    use MapucheConnectionTrait;
-
+    use MapucheConnectionTrait, HasPuestoDesempenado, HasUnidadAcademica;
 
     protected $table = 'afip_mapuche_mi_simplificacion';
     protected $schema = 'suc';
@@ -55,9 +57,111 @@ class AfipMapucheMiSimplificacion extends Model
         'covid'
     ];
 
+    protected $appends = ['puesto_descripcion', 'puesto_escalafon'];
+
     protected $casts = [
         'puesto' => PuestoDesempenado::class,
     ];
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::retrieved(function ($model)
+        {
+            if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
+                $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
+            }
+        });
+    }
+
+    // ############################ ACCESORS ############################
+    /**
+     * Accessor y Mutator para el puesto
+     */
+    protected function puesto(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) {
+                    return null;
+                }
+
+                $puestoEnum = $this->determinarPuestoDesempenado($value);
+
+                if (!$puestoEnum) {
+                    $puestoEnum = PuestoDesempenado::tryFrom($value);
+                }
+
+                return $puestoEnum;
+            }
+        );
+    }
+
+    /**
+     * Accessor para la descripción del puesto
+     */
+    protected function puestoDescripcion(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->descripcion();
+            }
+        );
+    }
+
+    /**
+     * Accessor para el escalafón del puesto
+     */
+    protected function puestoEscalafon(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->escalafon();
+            }
+        );
+    }
+
+    /**
+     * Accessor y Mutator para el domicilio
+     */
+    protected function domicilio(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // Si tenemos actividad null pero un código de unidad válido,
+                // intentamos determinar los códigos
+                if ($this->attributes['actividad'] === null && $value) {
+                    $this->determinarCodigosUnidadAcademica($value);
+                }
+                return str_pad($value, 5, '0', STR_PAD_LEFT);
+            },
+            set: function ($value) {
+                $this->determinarCodigosUnidadAcademica($value);
+                return $value;
+            }
+        );
+    }
+
+
+    // ################################################################
+
+    // ################################################################
 
     public function getSchema(): string
     {
@@ -156,10 +260,10 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return parent::newQuery()
             ->from("{$this->getFullTableName()} as ami")
-        ->addSelect(
-            'ami.*',
-            DB::connection($this->getConnectionName())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
-        );
+            ->addSelect(
+                'ami.*',
+                DB::connection($this->getConnectionName())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
+            );
     }
 
     // Método para consultas grandes
@@ -172,6 +276,7 @@ class AfipMapucheMiSimplificacion extends Model
     {
         if (!Schema::connection($this->getConnectionName())->hasTable($this->table)) {
             Schema::connection($this->getConnectionName())->create($this->table, function (Blueprint $table) {
+                $table->id();
                 $table->integer('nro_legaj');
                 $table->char('nro_liqui', 6);
                 $table->char('sino_cerra', 1);
@@ -256,5 +361,69 @@ class AfipMapucheMiSimplificacion extends Model
     public function getSchemaName(): string
     {
         return $this->schema;
+    }
+
+
+
+
+
+    /**
+     * Scope para filtrar por tipo de puesto
+     */
+    public function scopeByPuesto($query, PuestoDesempenado $puesto)
+    {
+        $categorias = match ($puesto) {
+            PuestoDesempenado::PROFESOR_UNIVERSITARIO => $this->getCategoriesByGroup('DOCU'),
+            PuestoDesempenado::PROFESOR_SECUNDARIO => array_merge(
+                $this->getCategoriesByGroup('DOCS'),
+                $this->getCategoriesByGroup('DOC2')
+            ),
+            PuestoDesempenado::NODOCENTE => $this->getCategoriesByGroup('NODO'),
+            PuestoDesempenado::DIRECTIVO => array_merge(
+                $this->getCategoriesByGroup('AUTU'),
+                $this->getCategoriesByGroup('AUTS')
+            ),
+            default => [],
+        };
+
+        // Asegurarnos de que las categorías se pasen como strings
+        return $query->whereIn('puesto', array_map('strval', $categorias));
+    }
+
+    /**
+     * Método helper para debug de categorías
+     */
+    public static function debugCategorias(PuestoDesempenado $puesto): array
+    {
+        $model = new static;
+        $categorias = match ($puesto) {
+            PuestoDesempenado::PROFESOR_UNIVERSITARIO => $model->getCategoriesByGroup('DOCU'),
+            PuestoDesempenado::PROFESOR_SECUNDARIO => array_merge(
+                $model->getCategoriesByGroup('DOCS'),
+                $model->getCategoriesByGroup('DOC2')
+            ),
+            PuestoDesempenado::NODOCENTE => $model->getCategoriesByGroup('NODO'),
+            PuestoDesempenado::DIRECTIVO => array_merge(
+                $model->getCategoriesByGroup('AUTU'),
+                $model->getCategoriesByGroup('AUTS')
+            ),
+            default => [],
+        };
+
+        return array_map('strval', $categorias);
+    }
+
+    /**
+     * Método helper para debug de categorías y consultas
+     */
+    public static function debugPuestoQuery(PuestoDesempenado $puesto): array
+    {
+        $query = static::byPuesto($puesto);
+
+        return [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'categorias_usadas' => static::debugCategorias($puesto),
+        ];
     }
 }

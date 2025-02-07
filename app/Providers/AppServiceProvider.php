@@ -11,7 +11,9 @@ use App\Services\RepEmbarazadaService;
 use Illuminate\Queue\Events\JobFailed;
 use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\ExportServiceInterface;
 use Illuminate\Queue\Events\JobProcessed;
+use App\Services\AfipMapucheExportService;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Repositories\Mapuche\Dh16Repository;
@@ -67,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(RepEmbarazadaServiceInterface::class, RepEmbarazadaService::class);
+        $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
     }
 
     /**

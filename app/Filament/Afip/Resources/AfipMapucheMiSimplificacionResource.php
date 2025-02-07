@@ -6,8 +6,12 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\AfipMapucheExportService;
 use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
@@ -16,6 +20,11 @@ use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\RelationMana
 class AfipMapucheMiSimplificacionResource extends Resource
 {
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
+    protected static ?string $navigationGroup = 'AFIP';
+    protected static ?string $navigationLabel = 'Mi Simplificación';
+    protected static ?string $pluralNavigationLabel = 'Mi Simplificación';
+    protected static ?string $label = 'Mi Simplificación';
+    protected static ?string $pluralLabel = 'Mi Simplificación';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -104,24 +113,35 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nro_legaj')
+                TextColumn::make('periodo_fiscal')
+                    ->label('Periodo Fiscal')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
+                TextColumn::make('nro_legaj')
                     ->label('Legajo')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('cuil')
+                TextColumn::make('cuil')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('periodo_fiscal')
+                TextColumn::make('inicio_rel_laboral')
+                    ->label('Inicio Rel. Laboral')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('sino_cerra')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('danger'),
-                // Tables\Columns\TextColumn::make('puesto')
-                //     ->badge()
-                //     ->color('primary'),
+                TextColumn::make('fin_rel_laboral')
+                    ->label('Fin Rel. Laboral')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
+                TextColumn::make('domicilio'),
+                TextColumn::make('actividad'),
+                TextColumn::make('puesto')
+                    ->badge()
+                    ->label('Puesto')
+                    ->colors([
+                        'primary' => fn($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
+                        'secondary' => fn($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
+                        'warning' => fn($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
+                        'success' => fn($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
+                    ]),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('sino_cerra')
@@ -136,13 +156,30 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->label('Periodo Fiscal'),
                     ]),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('exportTxt')
+                    ->label('Exportar TXT')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        try {
+                            return app(AfipMapucheExportService::class)->exportToTxt();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error al exportar')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->color('success')
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('periodo_fiscal', 'desc');

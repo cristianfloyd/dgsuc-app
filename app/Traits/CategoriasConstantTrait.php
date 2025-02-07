@@ -20,7 +20,7 @@ trait CategoriasConstantTrait
      * AUTU: Categorías autoridades universitarias
      * NODO: Categorías no docentes
      */
-    public const array CATEGORIAS = [
+    public const CATEGORIAS = [
         'DOCS' => [
                     'HOME', 'PEO6', 'ACPN', 'AYCP', 'AYEO', 'ATTP', 'JTPM', 'PR15', 'JTEP', 'JGEP',
                     'MEPS', 'MEPR', 'MC20', 'MENI', 'MEPI', 'MJMA', 'PREO', 'ASPE', 'BIPH', 'BIBL',
