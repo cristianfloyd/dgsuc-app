@@ -42,14 +42,15 @@ trait MapucheConnectionTrait
     public function getTable(Model|string $table = null): string
     {
         $table = parent::getTable();
-        // Si ya tiene en esquema definido, retornamos tal cual
+        // Si ya tiene el esquema definido, retornamos tal cual
         if (str_contains($table, '.')) {
             return $table;
         }
 
+        // Usar el esquema definido en el modelo o 'mapuche' como fallback
         $schema = $this->schema ?? 'mapuche';
 
-        return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
+        return "{$schema}.{$table}";
     }
 
 

@@ -16,6 +16,7 @@ return new class extends Migration
     {
 
         Schema::connection($this->getConnectionName())->create('suc.afip_mapuche_sicoss', function (Blueprint $table) {
+            $table->id();
             $table->char('periodo_fiscal', 6);
             $table->char('cuil', 11)->nullable()->unique();
             $table->char('apnom', 30)->nullable();
@@ -29,7 +30,7 @@ return new class extends Migration
             $table->char('cod_mod_cont', 3)->nullable();
             $table->char('cod_os', 6)->nullable();
             $table->char('cant_adh', 2)->nullable();
-            $table->char('rem_total', 12)->nullable();
+            $table->decimal('rem_total', 15,2)->nullable();
             $table->char('rem_impo1', 12)->nullable();
             $table->char('asig_fam_pag', 9)->nullable();
             $table->char('aporte_vol', 9)->nullable();
@@ -60,11 +61,11 @@ return new class extends Migration
             $table->char('cant_dias_trab', 9)->nullable();
             $table->char('rem_impo5', 12)->nullable();
             $table->char('convencionado', 1)->nullable();
-            $table->char('rem_impo6', 12)->nullable();
+            $table->decimal('rem_impo6', 15,2)->nullable();
             $table->char('tipo_oper', 1)->nullable();
             $table->char('adicionales', 12)->nullable();
             $table->char('premios', 12)->nullable();
-            $table->char('rem_dec_788_05', 12)->nullable();
+            $table->char('rem_dec_788', 12)->nullable();
             $table->char('rem_imp7', 12)->nullable();
             $table->char('nro_horas_ext', 3)->nullable();
             $table->char('cpto_no_remun', 12)->nullable();
@@ -74,13 +75,16 @@ return new class extends Migration
             $table->char('contrib_dif', 9)->nullable();
             $table->char('hstrab', 3)->nullable();
             $table->char('seguro', 1)->nullable();
-            $table->char('ley_27430', 12)->nullable();
+            $table->char('ley', 12)->nullable();
             $table->char('incsalarial', 12)->nullable();
             $table->char('remimp11', 12)->nullable();
 
             // Definir la clave primaria compuesta.
             $table->primary(['periodo_fiscal', 'cuil']);
-            // $table->foreign('cuil')->references('cuil')->on('mapuche.dh01');
+            // Indices
+            $table->index('periodo_fiscal');
+            $table->index('cuil');
+            $table->index(['periodo_fiscal', 'cuil']); // Índice compuesto para la consulta principal
         });
     }
 

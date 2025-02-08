@@ -160,17 +160,17 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('cod_mod_cont', 3)->nullable();
             $table->char('cod_os', 6)->nullable();
             $table->char('cant_adh', 2)->nullable();
-            $table->char('rem_total', 12)->nullable();
-            $table->char('rem_impo1', 12)->nullable();
+            $table->decimal('rem_total', 15,2)->nullable();
+            $table->decimal('rem_impo1', 15,2)->nullable();
             $table->char('asig_fam_pag', 9)->nullable();
             $table->char('aporte_vol', 9)->nullable();
             $table->char('imp_adic_os', 9)->nullable();
             $table->char('exc_aport_ss', 9)->nullable();
             $table->char('exc_aport_os', 9)->nullable();
             $table->char('prov', 50)->nullable();
-            $table->char('rem_impo2', 12)->nullable();
-            $table->char('rem_impo3', 12)->nullable();
-            $table->char('rem_impo4', 12)->nullable();
+            $table->decimal('rem_impo2', 15,2)->nullable();
+            $table->decimal('rem_impo3', 15,2)->nullable();
+            $table->decimal('rem_impo4', 15,2)->nullable();
             $table->char('cod_siniestrado', 2)->nullable();
             $table->char('marca_reduccion', 1)->nullable();
             $table->char('recomp_lrt', 9)->nullable();
@@ -191,11 +191,11 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('cant_dias_trab', 9)->nullable();
             $table->char('rem_impo5', 12)->nullable();
             $table->char('convencionado', 1)->nullable();
-            $table->char('rem_impo6', 12)->nullable();
+            $table->decimal('rem_impo6', 15,2)->nullable();
             $table->char('tipo_oper', 1)->nullable();
             $table->char('adicionales', 12)->nullable();
             $table->char('premios', 12)->nullable();
-            $table->char('rem_dec_788_05', 12)->nullable();
+            $table->char('rem_dec_788', 12)->nullable();
             $table->char('rem_imp7', 12)->nullable();
             $table->char('nro_horas_ext', 3)->nullable();
             $table->char('cpto_no_remun', 12)->nullable();
@@ -205,7 +205,7 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('contrib_dif', 9)->nullable();
             $table->char('hstrab', 3)->nullable();
             $table->char('seguro', 1)->nullable();
-            $table->char('ley_27430', 12)->nullable();
+            $table->char('ley', 12)->nullable();
             $table->char('incsalarial', 12)->nullable();
             $table->char('remimp11', 12)->nullable();
 

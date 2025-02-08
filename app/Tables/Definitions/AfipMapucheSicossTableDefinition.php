@@ -6,11 +6,11 @@ use App\Contracts\Tables\AbstractTableDefinitionInterface;
 
 class AfipMapucheSicossTableDefinition implements AbstractTableDefinitionInterface
 {
-    public const string TABLE = 'afip_mapuche_sicoss';
-    public const string SCHEMA = 'suc';
+    public const TABLE = 'afip_mapuche_sicoss';
+    public const SCHEMA = 'suc';
 
     // Definición de columnas basada en el modelo de negocio sicoss.php
-    public const array COLUMNS = [
+    public const COLUMNS = [
         'id' => [
             'type' => 'bigIncrements',
             'primary' => true,
@@ -260,7 +260,7 @@ class AfipMapucheSicossTableDefinition implements AbstractTableDefinitionInterfa
             'precision' => 12,
             'scale' => 2
         ],
-        'rem_dec_788_05' => [
+        'rem_dec_788' => [
             'type' => 'decimal',
             'precision' => 12,
             'scale' => 2
@@ -311,7 +311,7 @@ class AfipMapucheSicossTableDefinition implements AbstractTableDefinitionInterfa
             'type' => 'integer',
             'length' => 1
         ],
-        'ley_27430' => [
+        'ley' => [
             'type' => 'decimal',
             'precision' => 12,
             'scale' => 2
@@ -330,7 +330,7 @@ class AfipMapucheSicossTableDefinition implements AbstractTableDefinitionInterfa
 
 
     // Índices necesarios para optimizar consultas
-    public const array INDEXES = [
+    public const  INDEXES = [
         'periodo_fiscal_cuil_idx' => ['periodo_fiscal', 'cuil'],
         'cuil_idx' => ['cuil'],
         'periodo_fiscal_idx' => ['periodo_fiscal']

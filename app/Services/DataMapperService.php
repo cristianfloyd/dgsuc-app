@@ -7,11 +7,11 @@ use App\Contracts\DataMapperInterface;
 class DataMapperService implements DataMapperInterface
 {
     /**
-    * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
-    * @param array $datosProcessados Linea de datos procesados.
-    * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
-    */
-    public function mapDataToModel(array $datosProcesados):array
+     * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     * @param array $datosProcessados Linea de datos procesados.
+     * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
+     */
+    public function mapDataToModel(array $datosProcesados): array
     {
         $datosMapeados = [
             'periodo_fiscal' => $datosProcesados[0],
@@ -62,7 +62,7 @@ class DataMapperService implements DataMapperInterface
             'tipo_oper' => $datosProcesados[45],
             'adicionales' => $datosProcesados[46],
             'premios' => $datosProcesados[47],
-            'rem_dec_788_05' => $datosProcesados[48],
+            'rem_dec_788' => $datosProcesados[48],
             'rem_imp7' => $datosProcesados[49],
             'nro_horas_ext' => $datosProcesados[50],
             'cpto_no_remun' => $datosProcesados[51],
@@ -72,7 +72,7 @@ class DataMapperService implements DataMapperInterface
             'contrib_dif' => $datosProcesados[55],
             'hstrab' => $datosProcesados[56],
             'seguro' => $datosProcesados[57],
-            'ley_27430' => $datosProcesados[58],
+            'ley' => $datosProcesados[58],
             'incsalarial' => $datosProcesados[59],
             'remimp11' => $datosProcesados[60],
         ];
@@ -84,18 +84,18 @@ class DataMapperService implements DataMapperInterface
      * @param array $line Los datos a mapear.
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
-    public function mapLineToDatabaseModel(array $line):array
+    public function mapLineToDatabaseModel(array $line): array
     {
         return $this->mapDataToModel($line);
     }
 
-    
+
     /**
-    * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
-    * @param array $datosProcessados Los datos procesados.
-    * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
-    */
-    public function mapearDatosAlModelo(array $datosProcesados):array
+     * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     * @param array $datosProcessados Los datos procesados.
+     * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
+     */
+    public function mapearDatosAlModelo(array $datosProcesados): array
     {
         $datosMapeados = [
             'periodo_fiscal' => $datosProcesados[0],
@@ -146,7 +146,7 @@ class DataMapperService implements DataMapperInterface
             'tipo_oper' => $datosProcesados[45],
             'adicionales' => $datosProcesados[46],
             'premios' => $datosProcesados[47],
-            'rem_dec_788_05' => $datosProcesados[48],
+            'rem_dec_788' => $datosProcesados[48],
             'rem_imp7' => $datosProcesados[49],
             'nro_horas_ext' => $datosProcesados[50],
             'cpto_no_remun' => $datosProcesados[51],
@@ -156,7 +156,7 @@ class DataMapperService implements DataMapperInterface
             'contrib_dif' => $datosProcesados[55],
             'hstrab' => $datosProcesados[56],
             'seguro' => $datosProcesados[57],
-            'ley_27430' => $datosProcesados[58],
+            'ley' => $datosProcesados[58],
             'incsalarial' => $datosProcesados[59],
             'remimp11' => $datosProcesados[60],
         ];
@@ -164,10 +164,10 @@ class DataMapperService implements DataMapperInterface
     }
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
-    * @param array $datosProcessados Los datos procesados.
-    * @return array Los datos mapeados al modelo AfipRelacionesActivas.
-    */
-    public function mapDataToModelAfipRelacionesActivas(array $datosProcesados):array
+     * @param array $datosProcessados Los datos procesados.
+     * @return array Los datos mapeados al modelo AfipRelacionesActivas.
+     */
+    public function mapDataToModelAfipRelacionesActivas(array $datosProcesados): array
     {
         $datosMapeados = [
 

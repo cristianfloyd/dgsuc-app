@@ -542,7 +542,7 @@ class AfipMapucheSicossImportService
             // Conceptos adicionales
             'adicionales' => ['start' => 354, 'length' => 12, 'type' => 'D'],
             'premios' => ['start' => 366, 'length' => 12, 'type' => 'D'],
-            'rem_dec_788_05' => ['start' => 378, 'length' => 12, 'type' => 'D'],
+            'rem_dec_788' => ['start' => 378, 'length' => 12, 'type' => 'D'],
             'rem_imp7' => ['start' => 390, 'length' => 12, 'type' => 'D'],
             'nro_horas_ext' => ['start' => 402, 'length' => 3, 'type' => 'N'],
             'cpto_no_remun' => ['start' => 405, 'length' => 12, 'type' => 'D'],
@@ -556,7 +556,7 @@ class AfipMapucheSicossImportService
             // Datos finales
             'hstrab' => ['start' => 459, 'length' => 3, 'type' => 'N'],
             'seguro' => ['start' => 462, 'length' => 1, 'type' => 'N'],
-            'ley_27430' => ['start' => 463, 'length' => 12, 'type' => 'D'],
+            'ley' => ['start' => 463, 'length' => 12, 'type' => 'D'],
             'incsalarial' => ['start' => 475, 'length' => 12, 'type' => 'D'],
             'remimp11' => ['start' => 487, 'length' => 12, 'type' => 'D']
         ];

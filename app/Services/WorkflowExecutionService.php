@@ -24,17 +24,17 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
 
 
     //constantes
-    private const int PER_PAGE = 10;
-    private const string IN_PROGRESS = 'in_progress';
+    private const  PER_PAGE = 10;
+    private const  IN_PROGRESS = 'in_progress';
 
-    private const string LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
+    private const  LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
 
-    public const string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
-    private const int DEFAULT_PERIODO_FISCAL = 202312;
-    private const string EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
-    private const string EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
-    private const string EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
-    private const string EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
+    public const  EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
+    private const  DEFAULT_PERIODO_FISCAL = 202312;
+    private const  EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+    private const  EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
+    private const  EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+    private const  EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
 
     // propiedades protegidas
     protected $currentStep;

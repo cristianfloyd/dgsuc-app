@@ -2,108 +2,111 @@
 
 namespace App\Models;
 
+use App\Models\Dh01;
+use App\Models\Dh03;
 use App\Models\Mapuche\Dh22;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mapuche\Catalogo\Dh30;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AfipMapucheArt extends Model
 {
-    // Configuración de la conexión y tabla
-    protected $connection = 'pgsql-suc';
+    use MapucheConnectionTrait;
     protected $table = 'afip_art';
+    protected $schema = 'suc';
 
     // Configuración de la clave primaria
-    protected $primaryKey = 'cuil_original';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+
     public $timestamps = false;
 
     protected $fillable = [
-        'cuil_formateado',
-        'cuil_original',
+        'cuil',
         'apellido_y_nombre',
         'nacimiento',
-        'sueldo',
+        'sueldo', // rem_9
         'sexo',
-        'nro_legaj',
-        'establecimiento',
-        'tarea',
-        'conce'
+        'establecimiento',  // codc_uacad
+        'tarea',           // se mapeará desde Dh03 (campo tipo_escal)
     ];
 
     // Conversión de tipos de datos
     protected $casts = [
         'nacimiento' => 'date',
-        'nro_legaj' => 'integer',
-        'conce' => 'integer'
     ];
 
-    // Método para obtener el ID para FilamentPHP
-    public function getFilamentId(): string
-    {
-        return $this->getAttribute($this->getKeyName());
-    }
-
-    // Método para establecer el ID para FilamentPHP
-    public function setFilamentId($value): void
-    {
-        $this->setAttribute($this->getKeyName(), $value);
-    }
 
     /**
-     * Obtiene el nombre completo del usuario.
+     * Obtiene la conexión de Mapuche.
      *
-     * @return string El nombre completo del usuario.
+     * @return \Illuminate\Database\Connection
      */
-    protected function nombreCompleto(): Attribute
+    public static function getMapucheConnection()
     {
-        return Attribute::make(
-            get: fn () => $this->apellido_y_nombre
-        );
-    }
-
-    // Método de búsqueda para FilamentPHP
-    public function scopeSearch($query, $search)
-    {
-        return $query->where('apellido_y_nombre', 'ilike', "%{$search}%")
-                    ->orWhere('cuil_formateado', 'ilike', "%{$search}%")
-                    ->orWhere('cuil_original', 'ilike', "%{$search}%");
+        return (new static)->getConnectionFromTrait();
     }
 
     /**
-     * Obtiene una nueva instancia de query para el modelo.
+     * Método para actualizar los datos de ART desde SICOSS y Mapuche
+     * Actualiza el registro obteniendo datos de:
+     *  - AfipMapucheSicoss: CUIL, apellido_y_nombre y sueldo (rem_imp9)
+     *  - Dh01: nacimiento (fec_nacim) y sexo (tipo_sexo),
+     *  - Dh03: establecimiento (codc_uacad) y tarea (tipo_escal)
      *
-     * @return Builder
+     * @param string $periodoFiscal Formato esperado: YYYYMM
+     * @return bool True si se actualizó correctamente, false en caso contrario.
      */
-    public function newQuery()
+    public function actualizarAfipArt(string $periodoFiscal): bool
     {
-        return parent::newQuery()->addSelect(
-            '*',
-            DB::raw("CONCAT(codn_conce, '-', nro_orden_formula) as id")
-        );
-        // ->orderBy('nro_orden_formula')
-        // ->orderBy('codn_conce');
-    }
+        // Obtener datos desde AfipMapucheSicoss usando el periodo fiscal
+        $sicoss = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal)
+            ->where('cuil', $this->cuil)
+            ->first();
 
-    /**
-     * Metodo para ejecutar la funcion almacenada actualizar_afip_art(nroLiqui int)
-     * @param int $nroLiqui
-     * @return bool True si la función se ejecutó correctamente, false en caso contrario.
-     */
-    public function actualizarAfipArt(int $nroLiqui): bool
-    {
-        if ($this->verificarNroLiqui($nroLiqui)) {
-            $result = DB::selectOne('SELECT suc.actualizar_afip_art(?)', [$nroLiqui]);
-            return $result->actualizar_afip_art === 'OK';
+        if ($sicoss) {
+            $this->cuil = $sicoss->cuil;
+            $this->apellido_y_nombre = $sicoss->apnom;
+            $this->sueldo = $sicoss->rem_imp9;
         }
-        return false;
+
+        // Obtener datos desde Dh01 usando el CUIL (11 dígitos)
+        $dh01 = Dh01::whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil])->first();
+        if ($dh01) {
+            $this->nacimiento = $dh01->fec_nacim;
+            $this->sexo = $dh01->tipo_sexo;
+
+            // Buscar en Dh03 mediante el número de legajo obtenido de Dh01
+            $dh03 = Dh03::where('nro_legaj', $dh01->nro_legaj)->first();
+            if ($dh03) {
+                $this->establecimiento = $dh03->codc_uacad;
+                $this->tarea = $dh03->tipo_escal;
+            }
+        }
+
+        return $this->save();
     }
 
     /**
-     * Método para verificar el número de liquidación exista en la tabla mapuche.dh21
+     * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
+     *
+     * @param string $cuil
+     * @return int|null El número de legajo si se encuentra, o null en caso contrario.
+     */
+    private function obtenerLegajoDesdeCuil(string $cuil): ?int
+    {
+        $dh01 = Dh01::whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$cuil])->first();
+        return $dh01 ? $dh01->nro_legaj : null;
+    }
+
+    /**
+     * Método para verificar que el número de liquidación exista en la tabla mapuche.dh21.
+     *
      * @param int $nroLiqui
      * @return bool True si nroLiqui existe, false en caso contrario.
      */
@@ -112,13 +115,76 @@ class AfipMapucheArt extends Model
         return Dh22::verificarNroLiqui($nroLiqui);
     }
 
+
     /**
-     * Obtiene la relación de pertenencia entre el modelo AfipMapucheArt y el modelo Dh22.
+     * Método estático para actualizar todos los registros de ART para un período fiscal
+     * usando una única operación SQL.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param string $periodoFiscal
+     * @return int Número de registros procesados
      */
-    public function dh22(): BelongsTo
+    public static function actualizarAfipArtBatch(string $periodoFiscal): int
     {
-        return $this->belongsTo(Dh22::class, 'nro_legaj', 'nro_legaj');
+        $sql = "
+            INSERT INTO suc.afip_art (nro_legaj,
+                          cuil,
+                          apellido_y_nombre,
+                          nacimiento,
+                          sueldo,
+                          sexo,
+                          establecimiento,
+                          tarea)
+            WITH base_cuils AS (SELECT DISTINCT cuil, CAST( SUBSTRING( cuil, 3, LENGTH( cuil ) - 3 ) AS INTEGER ) AS dni
+                                FROM suc.afip_mapuche_sicoss),
+                 latest_dh03 AS (SELECT DISTINCT ON (nro_legaj) nro_legaj, codc_categ, codc_uacad, chkstopliq
+                                 FROM mapuche.dh03
+                                 ORDER BY nro_legaj, fec_alta DESC)
+            SELECT d.nro_legaj,
+                   b.cuil,
+                   TRIM( s.apnom )::VARCHAR       AS apellido_y_nombre,
+                   d.fec_nacim                    AS nacimento,
+                   s.rem_imp9::NUMERIC(15, 2)     AS sueldo,
+                   d.tipo_sexo                    AS sexo,
+                   TRIM( d3.codc_uacad )::VARCHAR AS establecimiento,
+                   d11.codigoescalafon            AS tarea
+            FROM base_cuils b
+            	     LEFT JOIN suc.afip_mapuche_sicoss s ON b.cuil = s.cuil
+            	     LEFT JOIN mapuche.dh01 d ON b.dni = d.nro_cuil
+            	     LEFT JOIN latest_dh03 d3 ON d.nro_legaj = d3.nro_legaj
+            	     LEFT JOIN mapuche.dh11 d11 ON d3.codc_categ = d11.codc_categ
+        ";
+
+        return DB::connection(self::getMapucheConnection())
+            ->affectingStatement($sql, [
+                'periodo_fiscal' => $periodoFiscal
+            ]);
+    }
+
+    // ########################################## RELACIONES ##########################################
+
+    public function afip_mapuche_sicoss(): HasOne
+    {
+        return $this->hasOne(AfipMapucheSicoss::class, 'cuil', 'cuil');
+    }
+
+    public function dh30(): BelongsTo
+    {
+        return $this->belongsTo(Dh30::class, 'establecimiento', 'desc_abrev')
+            ->where('nro_tabla', 13)
+            ->withoutGlobalScopes()
+            ->where(function ($query) {
+                if ($this->establecimiento) {
+                    $query->whereRaw('TRIM("mapuche"."dh30"."desc_abrev") = TRIM(?)', [$this->establecimiento]);
+                }
+            });
+    }
+
+    // ########################################## ACCESORES y MUTADORES ##########################################
+    protected function establecimiento(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $value ? trim($value) : null,
+            set: fn($value) => $value ? trim($value) : null
+        );
     }
 }

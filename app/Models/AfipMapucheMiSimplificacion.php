@@ -21,8 +21,8 @@ class AfipMapucheMiSimplificacion extends Model
     protected $table = 'afip_mapuche_mi_simplificacion';
     protected $schema = 'suc';
 
-    protected $primaryKey = ['periodo_fiscal', 'cuil'];
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    public $incrementing = true;
 
     // Campos que se pueden asignar masivament
     protected $fillable = [
@@ -59,17 +59,14 @@ class AfipMapucheMiSimplificacion extends Model
 
     protected $appends = ['puesto_descripcion', 'puesto_escalafon'];
 
-    protected $casts = [
-        'puesto' => PuestoDesempenado::class,
-    ];
 
+    
 
     protected static function boot()
     {
         parent::boot();
 
-        static::retrieved(function ($model)
-        {
+        static::retrieved(function ($model) {
             if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
                 $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
             }
@@ -95,7 +92,8 @@ class AfipMapucheMiSimplificacion extends Model
                 }
 
                 return $puestoEnum;
-            }
+            },
+            set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
         );
     }
 
@@ -163,6 +161,8 @@ class AfipMapucheMiSimplificacion extends Model
 
     // ################################################################
 
+
+
     public function getSchema(): string
     {
         return $this->schema;
@@ -178,93 +178,8 @@ class AfipMapucheMiSimplificacion extends Model
         return "{$this->schema}.{$this->table}";
     }
 
-    /**
-     * Obtiene el valor de la clave primaria.
-     *
-     * @return string
-     */
-    public function getKey(): string
-    {
-        return "{$this->periodo_fiscal}-{$this->cuil}";
-    }
 
-    /**
-     * Obtiene la clave primaria del modelo.
-     *
-     * @return string
-     */
-    public function getKeyName(): string
-    {
-        return 'id';
-    }
 
-    /**
-     * Determina si la clave primaria es compuesta.
-     *
-     * @return bool
-     */
-    public function getIncrementing()
-    {
-        return $this->incrementing;
-    }
-
-    public function getRouteKey(): string
-    {
-        return "{$this->periodo_fiscal}|{$this->cuil}";
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'id';
-    }
-
-    /**
-     * Recupera el modelo por su clave única.
-     *
-     * @param  mixed  $key
-     * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
-     */
-    public function resolveRouteBinding($key, $field = null)
-    {
-        if ($field === 'id') {
-            [$periodo_fiscal, $cuil] = explode('-', $key);
-            return $this->where('periodo_fiscal', $periodo_fiscal)
-                ->where('cuil', $cuil)
-                ->first();
-        }
-        return parent::resolveRouteBinding($key, $field);
-    }
-
-    /**
-     * Recupera un modelo por su clave única compuesta.
-     *
-     * @param string $id La clave única compuesta en el formato "periodo_fiscal-cuil".
-     * @param array $columns Los campos a recuperar (por defecto, todos los campos).
-     * @return \Illuminate\Database\Eloquent\Model|null El modelo encontrado, o null si no se encuentra.
-     */
-    public function find($id, $columns = ['*'])
-    {
-        list($periodo_fiscal, $cuil) = explode('-', $id);
-        return $this->where('periodo_fiscal', $periodo_fiscal)
-            ->where('cuil', $cuil)
-            ->first($columns);
-    }
-
-    /**
-     * Obtiene una nueva instancia de query para el modelo.
-     *
-     * @return Builder
-     */
-    public function newQuery()
-    {
-        return parent::newQuery()
-            ->from("{$this->getFullTableName()} as ami")
-            ->addSelect(
-                'ami.*',
-                DB::connection($this->getConnectionName())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
-            );
-    }
 
     // Método para consultas grandes
     public function scopeChunked($query, $callback, $count = 1000)
@@ -307,7 +222,7 @@ class AfipMapucheMiSimplificacion extends Model
                 $table->char('covid', 1)->nullable();
 
                 // Definición de la clave primaria compuesta
-                $table->primary(['periodo_fiscal', 'cuil']);
+                $table->unique(['periodo_fiscal', 'cuil']);
             });
             Log::info("Tabla {$this->table} creada en la base de datos {$this->connection}, desde el modelo");
             return true; // Table created successfully
@@ -388,42 +303,5 @@ class AfipMapucheMiSimplificacion extends Model
 
         // Asegurarnos de que las categorías se pasen como strings
         return $query->whereIn('puesto', array_map('strval', $categorias));
-    }
-
-    /**
-     * Método helper para debug de categorías
-     */
-    public static function debugCategorias(PuestoDesempenado $puesto): array
-    {
-        $model = new static;
-        $categorias = match ($puesto) {
-            PuestoDesempenado::PROFESOR_UNIVERSITARIO => $model->getCategoriesByGroup('DOCU'),
-            PuestoDesempenado::PROFESOR_SECUNDARIO => array_merge(
-                $model->getCategoriesByGroup('DOCS'),
-                $model->getCategoriesByGroup('DOC2')
-            ),
-            PuestoDesempenado::NODOCENTE => $model->getCategoriesByGroup('NODO'),
-            PuestoDesempenado::DIRECTIVO => array_merge(
-                $model->getCategoriesByGroup('AUTU'),
-                $model->getCategoriesByGroup('AUTS')
-            ),
-            default => [],
-        };
-
-        return array_map('strval', $categorias);
-    }
-
-    /**
-     * Método helper para debug de categorías y consultas
-     */
-    public static function debugPuestoQuery(PuestoDesempenado $puesto): array
-    {
-        $query = static::byPuesto($puesto);
-
-        return [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
-            'categorias_usadas' => static::debugCategorias($puesto),
-        ];
     }
 }

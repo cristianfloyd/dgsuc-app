@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\AfipArt;
+use App\Models\AfipMapucheArt as AfipArt;
 use Illuminate\Database\Eloquent\Collection;
 
 /**

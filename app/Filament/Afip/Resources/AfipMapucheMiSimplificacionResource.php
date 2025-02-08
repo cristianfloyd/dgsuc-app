@@ -8,7 +8,10 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
@@ -32,79 +35,81 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nro_legaj')
+                TextInput::make('nro_legaj')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('nro_liqui')
+                TextInput::make('nro_liqui')
                     ->required()
                     ->maxLength(6),
-                Forms\Components\TextInput::make('sino_cerra')
+                TextInput::make('sino_cerra')
                     ->required()
                     ->maxLength(1),
-                Forms\Components\TextInput::make('desc_estado_liquidacion')
+                TextInput::make('desc_estado_liquidacion')
                     ->required()
                     ->maxLength(50),
-                Forms\Components\TextInput::make('nro_cargo')
+                TextInput::make('nro_cargo')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('periodo_fiscal')
+                TextInput::make('periodo_fiscal')
                     ->required()
                     ->maxLength(6),
-                Forms\Components\TextInput::make('tipo_registro')
+                TextInput::make('tipo_registro')
                     ->required()
                     ->maxLength(2)
                     ->default(01),
-                Forms\Components\TextInput::make('codigo_movimiento')
+                TextInput::make('codigo_movimiento')
                     ->required()
                     ->maxLength(2)
                     ->default('AT'),
-                Forms\Components\TextInput::make('cuil')
+                TextInput::make('cuil')
                     ->required()
                     ->maxLength(11),
-                Forms\Components\TextInput::make('trabajador_agropecuario')
+                TextInput::make('trabajador_agropecuario')
                     ->required()
                     ->maxLength(1)
                     ->default('N'),
-                Forms\Components\TextInput::make('modalidad_contrato')
+                TextInput::make('modalidad_contrato')
                     ->maxLength(3)
                     ->default('008'),
-                Forms\Components\TextInput::make('inicio_rel_laboral')
+                TextInput::make('inicio_rel_laboral')
                     ->required()
                     ->maxLength(10),
-                Forms\Components\TextInput::make('fin_rel_laboral')
+                TextInput::make('fin_rel_laboral')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('obra_social')
+                TextInput::make('obra_social')
                     ->maxLength(6)
                     ->default('000000'),
-                Forms\Components\TextInput::make('codigo_situacion_baja')
+                TextInput::make('codigo_situacion_baja')
                     ->maxLength(2),
-                Forms\Components\TextInput::make('fecha_tel_renuncia')
+                TextInput::make('fecha_tel_renuncia')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('retribucion_pactada')
+                TextInput::make('retribucion_pactada')
                     ->maxLength(15),
-                Forms\Components\TextInput::make('modalidad_liquidacion')
+                TextInput::make('modalidad_liquidacion')
                     ->required()
                     ->maxLength(1)
                     ->default(1),
-                Forms\Components\TextInput::make('domicilio')
+                TextInput::make('domicilio')
                     ->maxLength(5),
-                Forms\Components\TextInput::make('actividad')
+                TextInput::make('actividad')
                     ->maxLength(6),
-                Forms\Components\TextInput::make('puesto')
-                    ->maxLength(4),
-                Forms\Components\TextInput::make('rectificacion')
+                Select::make('puesto')
+                    ->options(PuestoDesempenado::class)
+                    ->nullable()
+                    ->columnSpanFull(),
+                TextInput::make('rectificacion')
                     ->maxLength(2),
-                Forms\Components\TextInput::make('ccct')
+                TextInput::make('ccct')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('tipo_servicio')
+                TextInput::make('tipo_servicio')
                     ->maxLength(3),
-                Forms\Components\TextInput::make('categoria')
+                TextInput::make('categoria')
                     ->maxLength(6),
-                Forms\Components\TextInput::make('fecha_susp_serv_temp')
+                TextInput::make('fecha_susp_serv_temp')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('nro_form_agro')
+                TextInput::make('nro_form_agro')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('covid')
+                TextInput::make('covid')
                     ->maxLength(1),
             ]);
     }
@@ -113,6 +118,10 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo Fiscal')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -151,7 +160,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ]),
                 Tables\Filters\Filter::make('periodo_fiscal')
                     ->form([
-                        Forms\Components\TextInput::make('periodo_fiscal')
+                        TextInput::make('periodo_fiscal')
                             ->mask('999999')
                             ->label('Periodo Fiscal'),
                     ]),
@@ -200,5 +209,13 @@ class AfipMapucheMiSimplificacionResource extends Resource
             'create' => Pages\CreateAfipMapucheMiSimplificacion::route('/create'),
             'edit' => Pages\EditAfipMapucheMiSimplificacion::route('/{record}/edit'),
         ];
+    }
+
+    // Agregar este método para manejar la consulta
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->select('*')
+            ->addSelect(DB::raw('puesto as puesto_raw')); // Agregamos el campo puesto sin cast
     }
 }

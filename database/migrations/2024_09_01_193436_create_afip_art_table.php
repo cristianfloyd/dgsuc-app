@@ -19,16 +19,20 @@ return new class extends Migration
     public function up()
     {
         Schema::connection($this->getConnectionName())->create('suc.afip_art', function (Blueprint $table) {
-            $table->string('cuil_formateado', 13)->nullable();
-            $table->string('cuil_original', 11)->primary();
+            $table->id();
+            $table->integer('nro_legaj');
+            $table->string('cuil', 11)->primary();
             $table->string('apellido_y_nombre', 255)->nullable();
             $table->date('nacimiento')->nullable();
-            $table->string('sueldo')->nullable();
+            $table->integer('sueldo', 15, 2)->nullable();
             $table->char('sexo', 1)->nullable();
-            $table->integer('nro_legaj')->nullable();
             $table->string('establecimiento', 50)->nullable();
-            $table->string('tarea', 50)->nullable();
-            $table->integer('concepto')->nullable();
+            $table->char('tarea', 4)->nullable();
+
+            // Indices
+            $table->index('apellido_y_nombre');  // Útil para búsquedas por nombre
+            $table->index('establecimiento');    // Útil para filtros por establecimiento
+            $table->index(['cuil', 'establecimiento']); // Índice compuesto para búsquedas combinadas
         });
     }
 
