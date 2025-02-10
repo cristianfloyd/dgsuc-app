@@ -152,7 +152,7 @@ class FileProcessingService
      *                 - recordsProcessed: int|null Cantidad de registros procesados (solo si success=true)
      *                 - error: string|null Mensaje de error (solo si success=false)
      */
-    private function processFileAfip($afipFile): array
+    private function processFileAfip(UploadedFile $afipFile): array
     {
         $uploadedFileId = $afipFile->id;
         $processLog = $this->workflowService->getLatestWorkflow();

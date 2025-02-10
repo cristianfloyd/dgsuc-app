@@ -11,7 +11,7 @@ return new class extends Migration
 
     protected $table = 'suc.afip_relaciones_activas';
     //sin timestamps
-    protected $timestamps = false;
+    protected $timestamps = true;
 
     /**
      * Ejecuta la migracion.

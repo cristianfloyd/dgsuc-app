@@ -48,11 +48,11 @@ class FileUploadService
     }
 
     /**
-     * Carga un archivo al servidor.
+     * Sube un archivo al servidor.
      *
-     * @param \Illuminate\Http\UploadedFile $file The file to be uploaded
-     * @param string $path The path where the file should be stored
-     * @return string|false The path of the uploaded file if successful, false otherwise
+     * @param \Illuminate\Http\UploadedFile $file El archivo que se va a subir
+     * @param string $path La ruta donde se debe almacenar el archivo
+     * @return string|false La ruta del archivo subido si es exitoso, falso en caso contrario
      */
     public function uploadFile(UploadedFile $file, string $path)
     {

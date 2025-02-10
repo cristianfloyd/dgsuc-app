@@ -17,6 +17,7 @@ use App\Services\AfipMapucheExportService;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Repositories\Mapuche\Dh16Repository;
+use App\Services\AfipRelacionesActivasService;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
@@ -25,6 +26,7 @@ use App\Services\Reportes\BloqueosProcessService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -70,6 +72,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(RepEmbarazadaServiceInterface::class, RepEmbarazadaService::class);
         $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
+        $this->app->bind(AfipRelacionesActivasServiceInterface::class, AfipRelacionesActivasService::class);
     }
 
     /**
