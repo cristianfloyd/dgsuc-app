@@ -20,13 +20,13 @@ class AfipMapucheArt extends Model
     protected $table = 'afip_art';
     protected $schema = 'suc';
 
-    // Configuración de la clave primaria
     protected $primaryKey = 'id';
     public $incrementing = true;
 
     public $timestamps = false;
 
     protected $fillable = [
+        'nro_legaj',
         'cuil',
         'apellido_y_nombre',
         'nacimiento',

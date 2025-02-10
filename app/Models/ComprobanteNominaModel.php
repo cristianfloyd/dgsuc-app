@@ -31,7 +31,7 @@ class ComprobanteNominaModel extends Model
     protected $casts = [
         'anio_periodo' => 'integer',
         'mes_periodo' => 'integer',
-        'numero_liquidacion' => 'integer',
+        'nro_liqui' => 'integer',
         'importe_neto' => 'decimal:2',
         'importe_retencion' => 'decimal:2',
         'requiere_cheque' => 'boolean'

@@ -54,12 +54,6 @@ class EmbargoResource extends Resource
         $this->insertIntoDh25 = false; // Lógica para determinar este booleano
 
         // Usar estas variables para actualizar los datos
-        EmbargoProcesoResult::updateData(
-            $this->nroComplementarias,
-            $this->nroLiquiDefinitiva,
-            $this->nroLiquiProxima,
-            $this->insertIntoDh25
-        );
     }
 
 
@@ -101,13 +95,13 @@ class EmbargoResource extends Resource
         $instance = new static();
         $instance->setPropertyValues($data);
 
-        // Llamar a EmbargoProcesoResult::updateData con los parámetros actualizados
-        EmbargoProcesoResult::updateData(
-            $data['nroComplementarias'] ?? [],
-            $data['nroLiquiDefinitiva'] ?? 0,
-            $data['nroLiquiProxima'] ?? 0,
-            $data['insertIntoDh25'] ?? false
-        );
+
+        // Actualizamos las propiedades del recurso
+        $instance->nroLiquiProxima = $data['nroLiquiProxima'] ?? 0;
+        $instance->nroComplementarias = $data['nroComplementarias'] ?? [];
+        $instance->nroLiquiDefinitiva = $data['nroLiquiDefinitiva'] ?? 0;
+        $instance->insertIntoDh25 = $data['insertIntoDh25'] ?? false;
+
 
         log::debug('Datos actualizados correctamente', $data);
 

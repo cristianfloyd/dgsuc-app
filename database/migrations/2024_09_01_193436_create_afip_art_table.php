@@ -20,11 +20,11 @@ return new class extends Migration
     {
         Schema::connection($this->getConnectionName())->create('suc.afip_art', function (Blueprint $table) {
             $table->id();
-            $table->integer('nro_legaj');
+            $table->integer('nro_legaj')->nullable();
             $table->string('cuil', 11)->primary();
             $table->string('apellido_y_nombre', 255)->nullable();
             $table->date('nacimiento')->nullable();
-            $table->integer('sueldo', 15, 2)->nullable();
+            $table->decimal('sueldo', 15, 2)->nullable();
             $table->char('sexo', 1)->nullable();
             $table->string('establecimiento', 50)->nullable();
             $table->char('tarea', 4)->nullable();

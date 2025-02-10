@@ -38,7 +38,12 @@ class AfipMapucheArtResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('cuil')->label('CUIL'),
-                TextColumn::make('apellido_y_nombre')->label('Apellido y Nombre'),
+                TextColumn::make('apellido_y_nombre')
+                    ->label('Apellido y Nombre')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
+                    })
+                    ->formatStateUsing(fn (string $state): string => strtoupper($state)),
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
                 TextColumn::make('sueldo')->label('Sueldo'),
                 TextColumn::make('sexo')->label('Sexo'),

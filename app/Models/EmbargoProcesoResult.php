@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Sushi\Sushi;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,14 +17,15 @@ use Illuminate\Database\Eloquent\Builder;
 class EmbargoProcesoResult extends Model
 {
     use MapucheConnectionTrait;
+    protected $table = 'suc.embargo_proceso_results';
 
+    protected $primaryKey = 'id';
+    public $incrementing = true;
 
     // Deshabilitar timestamps ya que no son parte del resultado de la consulta
     public $timestamps = false;
 
 
-    // Definir el nombre de la tabla (opcional, ya que no es una tabla de base de datos)
-    protected $table = 'suc.embargo_proceso_results';
 
     // Definir los atributos rellenables basados en las columnas del resultado de la consulta
     protected $fillable = [

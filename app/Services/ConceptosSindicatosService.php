@@ -8,7 +8,7 @@ class ConceptosSindicatosService
 {
     public static function getDosubaCodigos(): array
     {
-        return ConceptoGrupo::DOSUBA->getConceptos();
+        return ConceptoGrupo::DOSUBASIN310->getConceptos();
     }
 
     public static function getApubaCodigos(): array
@@ -25,7 +25,6 @@ class ConceptosSindicatosService
         return [
             '270', //
             '271', //
-            '273', //
         ];
     }
 }

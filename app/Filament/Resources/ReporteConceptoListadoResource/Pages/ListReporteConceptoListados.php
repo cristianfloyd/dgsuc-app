@@ -21,13 +21,17 @@ class ListReporteConceptoListados extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('download')->label('Excel')
+            Actions\Action::make('download')
+                ->label('Excel')
                 ->icon('heroicon-o-document-arrow-down')
                 ->button()
-                ->action(function ($data) {
+                ->action(function ($livewire) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
                     $query = $this->getFilteredSortedTableQuery();
-                    // dd($query->toSql());
+                    $query2 = $livewire->getTableQuery();
+
+                    // dd($query2->toSql());
+
                     // comprobar que el query no este vacio
                     if ($query->count() == 0) {
                         return redirect()->route('filament.resources.reporte-concepto-listado.index')
@@ -44,10 +48,8 @@ class ListReporteConceptoListados extends ListRecords
                         'codn_conce',
                         'impp_conce'
                     ])
-                    // ->orderBy('codc_uacad')
-                    // ->orderBy('nro_legaj')
                     ;
-                    
+
                     return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                 })
                 ->requiresConfirmation()
