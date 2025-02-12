@@ -11,6 +11,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AfipMapucheArtExport;
+use Filament\Resources\Components\Tab;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,7 +30,7 @@ class AfipMapucheArtResource extends Resource
     {
         return $form
             ->schema([
-                TextColumn::make('cuil_original')->label('CUIL'),
+                TextInput::make('cuil')->label('CUIL'),
             ]);
     }
 
@@ -98,12 +99,9 @@ class AfipMapucheArtResource extends Resource
             ->defaultPaginationPageOption(5);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+
+
+
 
     public static function getActions(): array
     {
