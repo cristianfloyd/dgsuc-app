@@ -157,7 +157,7 @@ class FileProcessingService
         $uploadedFileId = $afipFile->id;
         $processLog = $this->workflowService->getLatestWorkflow();
         $step = $this->workflowService->getCurrentStep($processLog);
-        $uploadedFile = UploadedFile::query()->findOrFail($uploadedFileId);
+        $uploadedFile = (new UploadedFile())->findOrFail($uploadedFileId);
         $system = $uploadedFile->origen;
         $tableName = 'afip_relaciones_activas';
 
