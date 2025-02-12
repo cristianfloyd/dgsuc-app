@@ -38,6 +38,8 @@ class AfipMapucheSicossCalculoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('periodo_fiscal')
+                    ->label('Período Fiscal')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cuil')
                     ->searchable()
                     ->sortable(),
@@ -49,6 +51,27 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->searchable(),
                 TextColumn::make('caracter')
                     ->searchable(),
+                TextColumn::make('rem1')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('rem2')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('aportesijp')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('aporteinssjp')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('contribucionsijp')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('contribucioninssjp')
+                    ->money('ARS')
+                    ->sortable(),
+                TextColumn::make('aportediferencialsijp')
+                    ->money('ARS')
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('codc_uacad')

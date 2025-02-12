@@ -124,9 +124,9 @@ class ColumnMetadata
 
         $this->startPositionsSicossCalculo = [
             'cuil' => 1,
-            'rem_total' => 76,
-            'rem_impo1' => 91,
-            'rem_impo2' => 106,
+            'remtotal' => 76,
+            'rem1' => 91,
+            'rem2' => 106,
             'aportesijp' => 136,
             'aporteinssjp' => 151,
             'contribucionsijp' => 301,

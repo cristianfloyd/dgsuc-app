@@ -24,18 +24,23 @@ class AfipMapucheSicossCalculoImportService
         $imported = 0;
         $errors = [];
         $handle = fopen($filePath, 'r');
+        $batch = [];
+        $batchSize = 1000; // Procesar 1000 registros por lote
 
         while (($line = fgets($handle)) !== false) {
             if (empty($line)) continue;
 
             try {
-                DB::connection($this->getConnectionName())->beginTransaction();
+                $batch[] = $this->parseLine($line, $periodoFiscal);
 
-                $data = $this->parseLine($line);
-                AfipMapucheSicossCalculo::create($data);
+                if (count($batch) >= $batchSize) {
+                    DB::connection($this->getConnectionName())->beginTransaction();
+                    AfipMapucheSicossCalculo::insert($batch);
+                    DB::connection($this->getConnectionName())->commit();
 
-                DB::connection($this->getConnectionName())->commit();
-                $imported++;
+                    $imported += count($batch);
+                    $batch = [];
+                }
             } catch (\Exception $e) {
                 DB::connection($this->getConnectionName())->rollBack();
                 $errors[] = "Error en línea {$processed}: {$e->getMessage()}";
@@ -46,11 +51,27 @@ class AfipMapucheSicossCalculoImportService
             }
 
             $processed++;
-            $progressCallback([
-                'processed' => $processed,
-                'percentage' => $this->calculateProgress($processed, $imported),
-                'memory' => memory_get_usage(true)
-            ]);
+
+            if ($processed % 100 === 0) { // Actualizar progreso cada 100 registros
+                $progressCallback([
+                    'processed' => $processed,
+                    'percentage' => $this->calculateProgress($processed, $imported),
+                    'memory' => memory_get_usage(true)
+                ]);
+            }
+        }
+
+        // Procesar el último lote si existe
+        if (!empty($batch)) {
+            try {
+                DB::beginTransaction();
+                AfipMapucheSicossCalculo::insert($batch);
+                DB::commit();
+                $imported += count($batch);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $errors[] = "Error en último lote: {$e->getMessage()}";
+            }
         }
 
         fclose($handle);
@@ -61,16 +82,18 @@ class AfipMapucheSicossCalculoImportService
         ];
     }
 
-    private function parseLine(string $line): array
+
+    private function parseLine(string $line, string $periodoFiscal): array
     {
         return [
+            'periodo_fiscal' => $periodoFiscal,
             'cuil' => substr($line,
                 $this->columnMetadata->getStartPosition('cuil') - 1,
                 $this->columnMetadata->getColumnWidth(0)
             ),
             'remtotal' => (float) str_replace(',', '.', substr($line,
                 $this->columnMetadata->getStartPosition('remtotal') - 1,
-                $this->columnMetadata->getColumnWidth(1)
+                $this->columnMetadata->getColumnWidth(6)
             )),
             'rem1' => (float) str_replace(',', '.', substr($line,
                 $this->columnMetadata->getStartPosition('rem1') - 1,

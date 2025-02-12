@@ -42,6 +42,8 @@ return [
     */
 
     'default_filesystem_disk' => env('FILAMENT_FILESYSTEM_DISK', 'public'),
+    'upload_directory' => 'uploads',
+    'upload_max_filesize' => 50960, // ~50MB en kilobytes
 
     /*
     |--------------------------------------------------------------------------

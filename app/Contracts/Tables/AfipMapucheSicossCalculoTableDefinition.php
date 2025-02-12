@@ -20,6 +20,11 @@ class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinition
                 'type' => 'bigIncrements',
                 'primary' => true,
             ],
+            'periodo_fiscal' => [
+                'type' => 'string',
+                'length' => 6,
+                'nullable' => false,
+            ],
             'cuil' => [
                 'type' => 'string',
                 'length' => 11,
@@ -99,6 +104,7 @@ class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinition
         return [
             'primary' => ['id'],
             'idx_cuil_unique' => ['cuil'],
+            'idx_periodo_fiscal_cuil' => ['periodo_fiscal', 'cuil'],
             'idx_uacad_caracter' => ['codc_uacad', 'caracter']
         ];
     }

@@ -78,7 +78,7 @@ class ImportAfipMapucheSicossCalculo extends Page
                                 'text/x-csv',
                                 'application/x-txt'
                             ])
-                            ->maxSize(40960)
+                            ->maxSize(50960)
                             ->disk('public')
                             ->helperText('Formato esperado: Archivo TXT de SICOSS Cálculo')
                             ->directory('afip-mapuche-sicoss-calculo')

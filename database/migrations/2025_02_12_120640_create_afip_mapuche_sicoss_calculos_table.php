@@ -22,6 +22,7 @@ return new class extends Migration
             $table->id();
 
             // Campos de texto
+            $table->string('periodo_fiscal', 6);
             $table->string('cuil', 11);
 
             // Campos que permiten nulos
@@ -44,6 +45,7 @@ return new class extends Migration
             // Índices
             $table->primary('cuil');
             $table->index(['codc_uacad', 'caracter'], 'idx_uacad_caracter');
+            $table->index(['periodo_fiscal', 'cuil'], 'idx_periodo_fiscal_cuil');
 
             // Comentarios en la tabla y columnas
             $table->comment('Tabla de cálculos AFIP SICOSS Mapuche');

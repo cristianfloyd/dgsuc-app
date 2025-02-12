@@ -33,7 +33,7 @@ class AfipMapucheSicossCalculo extends Model
      * Schema y tabla
      */
     protected $table = 'suc.afip_mapuche_sicoss_calculos';
-    
+
     // protected $schema = 'suc';
     protected $primaryKey = 'id';
 
@@ -46,6 +46,7 @@ class AfipMapucheSicossCalculo extends Model
      * Campos asignables masivamente
      */
     protected $fillable = [
+        'periodo_fiscal',
         'cuil',  // posicion 1 longitud 11
         'remtotal',
         'rem1',
