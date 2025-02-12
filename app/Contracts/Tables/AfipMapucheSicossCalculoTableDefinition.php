@@ -29,19 +29,19 @@ class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinition
                 'type' => 'decimal',
                 'precision' => 15,
                 'scale' => 2,
-                'nullable' => false,
+                'nullable' => true,
             ],
             'rem1' => [
                 'type' => 'decimal',
                 'precision' => 15,
                 'scale' => 2,
-                'nullable' => false,
+                'nullable' => true,
             ],
             'rem2' => [
                 'type' => 'decimal',
                 'precision' => 15,
                 'scale' => 2,
-                'nullable' => false,
+                'nullable' => true,
             ],
             'aportesijp' => [
                 'type' => 'decimal',
@@ -83,13 +83,13 @@ class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinition
                 'type' => 'string',
                 'length' => 3,
                 'fixed' => true,
-                'nullable' => false,
+                'nullable' => true,
             ],
             'caracter' => [
                 'type' => 'string',
                 'length' => 4,
                 'fixed' => true,
-                'nullable' => false,
+                'nullable' => true,
             ],
         ];
     }

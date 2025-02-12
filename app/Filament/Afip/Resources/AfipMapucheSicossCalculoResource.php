@@ -10,7 +10,7 @@ use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\EditAfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ListAfipMapucheSicossCalculos;
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\CreateAfipMapucheSicossCalculo;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ImportAfipMapucheSicossCalculo;
 
 class AfipMapucheSicossCalculoResource extends Resource
 {
@@ -23,8 +23,8 @@ class AfipMapucheSicossCalculoResource extends Resource
     {
         return [
             'index' => ListAfipMapucheSicossCalculos::route('/'),
-            'create' => CreateAfipMapucheSicossCalculo::route('/create'),
             'edit' => EditAfipMapucheSicossCalculo::route('/{record}/edit'),
+            'import' => ImportAfipMapucheSicossCalculo::route('/import'),
         ];
     }
 

@@ -9,6 +9,8 @@ class ColumnMetadata
     private array $widthsMapuche;
     private array $widthsMiSimplificacion;
     private string $currentSystem;
+    private array $widthsSicossCalculo;
+    private array $startPositionsSicossCalculo;
 
     /**
      * @var array<string, int> Mapeo de nombres de columnas a índices
@@ -106,11 +108,31 @@ class ColumnMetadata
             10,
             1
         ];
+
+        $this->widthsSicossCalculo = [
+            11,  // cuil (posicion 1)
+            15,  // aportesijp (posicion 136)
+            15,  // aporteinssjp (posicion 151)
+            15,  // contribucionsijp (posicion 301)
+            15,  // contribucioninssjp (posicion 316)
+            15,  // aportediferencialsijp (posicion 166)
+            15,  // aportesres33_41re (posicion 1196)
+        ];
+
+        $this->startPositionsSicossCalculo = [
+            'cuil' => 1,
+            'aportesijp' => 136,
+            'aporteinssjp' => 151,
+            'contribucionsijp' => 301,
+            'contribucioninssjp' => 316,
+            'aportediferencialsijp' => 166,
+            'aportesres33_41re' => 196,
+        ];
     }
 
     public function setSystem(string $system): void
     {
-        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion'])) {
+        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
             throw new \InvalidArgumentException('Sistema no válido');
         }
         $this->currentSystem = $system;
@@ -130,6 +152,8 @@ class ColumnMetadata
                 return $this->widthsMapuche;
             case 'miSimplificacion':
                 return $this->widthsMiSimplificacion;
+            case 'sicossCalculo':
+                return $this->widthsSicossCalculo;
             default:
                 throw new \InvalidArgumentException('Sistema no válido');
         }
@@ -167,5 +191,16 @@ class ColumnMetadata
     public function getTotalWidth(): int
     {
         return array_sum($this->widthsAfip);
+    }
+
+    /**
+     * Obtiene la posición de inicio de un campo específico en el sistema 'sicossCalculo'.
+     *
+     * @param string $field Nombre del campo
+     * @return int Posición de inicio del campo, o 0 si no se encuentra
+     */
+    public function getStartPosition(string $field): int
+    {
+        return $this->startPositionsSicossCalculo[$field] ?? 0;
     }
 }

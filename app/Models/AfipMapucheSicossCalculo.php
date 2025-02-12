@@ -45,16 +45,16 @@ class AfipMapucheSicossCalculo extends Model
      * Campos asignables masivamente
      */
     protected $fillable = [
-        'cuil',
+        'cuil',  // posicion 1 longitud 11
         'remtotal',
         'rem1',
         'rem2',
-        'aportesijp',
-        'aporteinssjp',
-        'contribucionsijp',
-        'contribucioninssjp',
-        'aportediferencialsijp',
-        'aportesres33_41re',
+        'aportesijp', // posicion 136 longitud 15
+        'aporteinssjp', // posicion 151 longitud 15
+        'contribucionsijp', // posicion 301 longitud 15
+        'contribucioninssjp', // posicion 316 longitud 15
+        'aportediferencialsijp', // posicion 166 longitud 15
+        'aportesres33_41re', // posicion 1196 longitud 15
         'codc_uacad',
         'caracter'
     ];

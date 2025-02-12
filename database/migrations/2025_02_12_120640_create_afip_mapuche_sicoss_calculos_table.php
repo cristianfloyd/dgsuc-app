@@ -20,14 +20,16 @@ return new class extends Migration
         Schema::connection($this->getConnectionName())->create('suc.afip_mapuche_sicoss_calculos', function (Blueprint $table) {
             // Clave primaria autoincremental
             $table->id();
-            
+
             // Campos de texto
             $table->string('cuil', 11);
 
+            // Campos que permiten nulos
+            $table->decimal('remtotal', 15, 2)->nullable();
+            $table->decimal('rem1', 15, 2)->nullable();
+            $table->decimal('rem2', 15, 2)->nullable();
+
             // Campos monetarios usando decimal(15,2) para compatibilidad con PostgreSQL money
-            $table->decimal('remtotal', 15, 2);
-            $table->decimal('rem1', 15, 2);
-            $table->decimal('rem2', 15, 2);
             $table->decimal('aportesijp', 15, 2);
             $table->decimal('aporteinssjp', 15, 2);
             $table->decimal('contribucionsijp', 15, 2);
@@ -35,9 +37,9 @@ return new class extends Migration
             $table->decimal('aportediferencialsijp', 15, 2);
             $table->decimal('aportesres33_41re', 15, 2);
 
-            // Campos char fijos
-            $table->char('codc_uacad', 3);
-            $table->char('caracter', 4);
+            // Campos char fijos que permiten nulos
+            $table->char('codc_uacad', 3)->nullable();
+            $table->char('caracter', 4)->nullable();
 
             // Índices
             $table->primary('cuil');
