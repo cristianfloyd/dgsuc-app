@@ -32,8 +32,9 @@ class AfipMapucheSicossCalculo extends Model
     /**
      * Schema y tabla
      */
-    protected $table = 'afip_mapuche_sicoss_calculos';
-    protected $schema = 'suc';
+    protected $table = 'suc.afip_mapuche_sicoss_calculos';
+    
+    // protected $schema = 'suc';
     protected $primaryKey = 'id';
 
     /**

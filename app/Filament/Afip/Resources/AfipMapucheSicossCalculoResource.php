@@ -6,8 +6,14 @@ namespace App\Filament\Afip\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
 use App\Models\AfipMapucheSicossCalculo;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\ActionGroup;
+use App\Services\AfipMapucheSicossCalculoUpdateService;
+use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\EditAfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ListAfipMapucheSicossCalculos;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ImportAfipMapucheSicossCalculo;
@@ -32,16 +38,16 @@ class AfipMapucheSicossCalculoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('cuil')
+                TextColumn::make('cuil')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('remtotal')
+                TextColumn::make('remtotal')
                     ->money('ARS')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('codc_uacad')
+                TextColumn::make('codc_uacad')
                     ->label('UA/CAD')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('caracter')
+                TextColumn::make('caracter')
                     ->searchable(),
             ])
             ->filters([
@@ -52,6 +58,39 @@ class AfipMapucheSicossCalculoResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->headerActions([
+                ActionGroup::make([
+                    Action::make('updateFromSicoss')
+                    ->label('Actualizar desde SICOSS')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Actualizar datos desde SICOSS?')
+                    ->modalDescription('Esta acción actualizará los importes desde la tabla SICOSS')
+                    ->modalSubmitActionLabel('Sí, actualizar')
+                    ->action(fn () => app(AfipMapucheSicossCalculoRepository::class)->updateFromSicoss(date('Ym'))),
+
+                Action::make('truncateTable')
+                    ->label('Vaciar Tabla')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Vaciar tabla?')
+                    ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
+                    ->modalSubmitActionLabel('Sí, vaciar tabla')
+                    ->action(function() {
+                        app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                        Notification::make()
+                            ->success()
+                            ->title('Tabla vaciada')
+                            ->body('Se han eliminado todos los registros correctamente')
+                            ->send();
+                    })
+                ])
+                ->icon('heroicon-o-cog-8-tooth')
+                ->tooltip('Acciones')
+                ->size('lg'),
             ]);
     }
 
@@ -81,5 +120,37 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->required()
                     ->maxLength(4),
             ]);
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            Action::make('updateFromSicoss')
+                ->label('Actualizar desde SICOSS')
+                ->action(function () {
+                    $service = app(AfipMapucheSicossCalculoUpdateService::class);
+                    $result = $service->updateFromSicoss(date('Ym'));
+
+                    if (empty($result['errors'])) {
+                        Notification::make()
+                            ->success()
+                            ->title('Actualización exitosa')
+                            ->body("Se actualizaron {$result['updated']} registros")
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->warning()
+                            ->title('Actualización con errores')
+                            ->body(implode("\n", $result['errors']))
+                            ->send();
+                    }
+                })
+                ->requiresConfirmation()
+                ->modalHeading('¿Actualizar datos desde SICOSS?')
+                ->modalDescription('Esta acción actualizará los importes desde la tabla SICOSS')
+                ->modalSubmitActionLabel('Sí, actualizar')
+                ->color('success')
+                ->icon('heroicon-o-arrow-path')
+        ];
     }
 }

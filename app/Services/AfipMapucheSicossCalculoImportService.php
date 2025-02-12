@@ -68,9 +68,18 @@ class AfipMapucheSicossCalculoImportService
                 $this->columnMetadata->getStartPosition('cuil') - 1,
                 $this->columnMetadata->getColumnWidth(0)
             ),
-            'remtotal' => null,
-            'rem1' => null,
-            'rem2' => null,
+            'remtotal' => (float) str_replace(',', '.', substr($line,
+                $this->columnMetadata->getStartPosition('remtotal') - 1,
+                $this->columnMetadata->getColumnWidth(1)
+            )),
+            'rem1' => (float) str_replace(',', '.', substr($line,
+                $this->columnMetadata->getStartPosition('rem1') - 1,
+                $this->columnMetadata->getColumnWidth(2)
+            )),
+            'rem2' => (float) str_replace(',', '.', substr($line,
+                $this->columnMetadata->getStartPosition('rem2') - 1,
+                $this->columnMetadata->getColumnWidth(3)
+            )),
             'aportesijp' => (float) str_replace(',', '.', substr($line,
                 $this->columnMetadata->getStartPosition('aportesijp') - 1,
                 $this->columnMetadata->getColumnWidth(4)

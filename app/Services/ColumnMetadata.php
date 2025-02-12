@@ -111,6 +111,9 @@ class ColumnMetadata
 
         $this->widthsSicossCalculo = [
             11,  // cuil (posicion 1)
+            15,  // remtotal (posicion 76)
+            15,  // remimpo1 (posicion 91)
+            15,  // remimpo2 (posicion 106)
             15,  // aportesijp (posicion 136)
             15,  // aporteinssjp (posicion 151)
             15,  // contribucionsijp (posicion 301)
@@ -121,6 +124,9 @@ class ColumnMetadata
 
         $this->startPositionsSicossCalculo = [
             'cuil' => 1,
+            'rem_total' => 76,
+            'rem_impo1' => 91,
+            'rem_impo2' => 106,
             'aportesijp' => 136,
             'aporteinssjp' => 151,
             'contribucionsijp' => 301,
