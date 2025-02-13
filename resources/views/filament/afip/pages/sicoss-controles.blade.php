@@ -1,6 +1,5 @@
 <x-filament-panels::page>
     <x-filament::tabs>
-        {{-- Resumen de Resultados --}}
         <x-filament::tabs.item
             :active="$activeTab === 'resumen'"
             wire:click="$set('activeTab', 'resumen')">
@@ -11,40 +10,36 @@
                 </div>
             </x-slot>
 
-            @if($resultadosControles)
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3 mt-4">
-                    {{-- Card CUILs --}}
-                    <x-filament::card>
-                        <h3 class="text-lg font-medium">CUILs con Diferencias</h3>
-                        <p class="text-sm text-gray-500">
-                            {{ count($resultadosControles['resultados']['cuils_faltantes'] ?? []) }} registros
-                        </p>
-                    </x-filament::card>
+            @if($selectedConnection)
+                <div class="p-4">
+                    <p class="text-lg">Conexión actual: <strong>{{ $selectedConnection }}</strong></p>
 
-                    {{-- Card Aportes --}}
-                    <x-filament::card>
-                        <h3 class="text-lg font-medium">Diferencias en Aportes</h3>
-                        <p class="text-sm text-gray-500">
-                            {{ count($resultadosControles['resultados']['diferencias_encontradas'] ?? []) }} registros
-                        </p>
-                    </x-filament::card>
+                    @if($resultadosControles)
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3 mt-4">
+                            <x-filament::card>
+                                <h3 class="text-lg font-medium">CUILs con Diferencias</h3>
+                                <p class="text-gray-500">{{ count($resultadosControles['cuils'] ?? []) }} registros</p>
+                            </x-filament::card>
 
-                    {{-- Card ART --}}
-                    <x-filament::card>
-                        <h3 class="text-lg font-medium">Diferencias en ART</h3>
-                        <p class="text-sm text-gray-500">
-                            {{ count($resultadosControles['resultados']['diferencias_art'] ?? []) }} registros
-                        </p>
-                    </x-filament::card>
+                            <x-filament::card>
+                                <h3 class="text-lg font-medium">Diferencias en Aportes</h3>
+                                <p class="text-gray-500">{{ count($resultadosControles['aportes'] ?? []) }} registros</p>
+                            </x-filament::card>
+
+                            <x-filament::card>
+                                <h3 class="text-lg font-medium">Diferencias en ART</h3>
+                                <p class="text-gray-500">{{ count($resultadosControles['art'] ?? []) }} registros</p>
+                            </x-filament::card>
+                        </div>
+                    @endif
                 </div>
             @else
-                <div class="text-center py-4">
-                    <p class="text-gray-500">Seleccione una conexión y ejecute los controles para ver resultados</p>
+                <div class="text-center p-4">
+                    <p class="text-lg text-gray-500">No hay conexión seleccionada</p>
                 </div>
             @endif
         </x-filament::tabs.item>
 
-        {{-- Tabla de CUILs --}}
         <x-filament::tabs.item
             :active="$activeTab === 'cuils'"
             wire:click="$set('activeTab', 'cuils')">
@@ -54,11 +49,9 @@
                     <span>CUILs</span>
                 </div>
             </x-slot>
-
-            {{ $this->table }}
+            {{-- Aquí irá la tabla de CUILs --}}
         </x-filament::tabs.item>
 
-        {{-- Tabla de Aportes --}}
         <x-filament::tabs.item
             :active="$activeTab === 'aportes'"
             wire:click="$set('activeTab', 'aportes')">
@@ -68,11 +61,9 @@
                     <span>Aportes</span>
                 </div>
             </x-slot>
-
-            {{ $this->table }}
+            {{-- Aquí irá la tabla de Aportes --}}
         </x-filament::tabs.item>
 
-        {{-- Tabla de ART --}}
         <x-filament::tabs.item
             :active="$activeTab === 'art'"
             wire:click="$set('activeTab', 'art')">
@@ -82,8 +73,7 @@
                     <span>ART</span>
                 </div>
             </x-slot>
-
-            {{ $this->table }}
+            {{-- Aquí irá la tabla de ART --}}
         </x-filament::tabs.item>
     </x-filament::tabs>
 </x-filament-panels::page>
