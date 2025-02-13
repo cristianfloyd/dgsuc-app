@@ -109,7 +109,34 @@ class AfipMapucheSicossCalculoResource extends Resource
                             ->title('Tabla vaciada')
                             ->body('Se han eliminado todos los registros correctamente')
                             ->send();
-                    })
+                    }),
+
+                    Action::make('updateUacadCaracter')
+                        ->label('Actualizar UA/CAD y Carácter')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('¿Actualizar UA/CAD y Carácter?')
+                        ->modalDescription('Esta acción actualizará los campos UA/CAD y Carácter desde Mapuche')
+                        ->modalSubmitActionLabel('Sí, actualizar')
+                        ->action(function () {
+                            $result = app(AfipMapucheSicossCalculoUpdateService::class)
+                                ->updateUacadAndCaracter();
+
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Actualización exitosa')
+                                    ->body($result['message'])
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Error en la actualización')
+                                    ->body($result['message'])
+                                    ->send();
+                            }
+                        })
                 ])
                 ->icon('heroicon-o-cog-8-tooth')
                 ->tooltip('Acciones')

@@ -20,6 +20,7 @@ use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Afip\Pages\SicossControles;
 
 class AfipPanelProvider extends PanelProvider
 {
@@ -36,12 +37,13 @@ class AfipPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
                 DashboardSelector::class,
+                SicossControles::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
-                ->label('Cambiar Panel')
-                ->icon('heroicon-o-arrows-right-left')
-                ->url(fn (): string => '/selector-panel'),
+                    ->label('Cambiar Panel')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->url(fn(): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Afip/Widgets'), for: 'App\\Filament\\Afip\\Widgets')
             ->widgets([
