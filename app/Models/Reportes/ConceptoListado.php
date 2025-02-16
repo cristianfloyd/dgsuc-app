@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Services\ConceptoListadoService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class ConceptoListado extends Model
 {
@@ -135,5 +137,22 @@ class ConceptoListado extends Model
     public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
+    }
+
+    // ######################## MUTADORES Y ACCESORES ########################
+    public function apellido(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn($value) => strtoupper($value),
+        );
+    }
+
+    public function nombre(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn($value) => strtoupper($value),
+        );
     }
 }

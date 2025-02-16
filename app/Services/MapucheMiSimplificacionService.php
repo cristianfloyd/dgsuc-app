@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Dh21;
+use App\Models\Mapuche\Dh22;
 use App\Models\TablaTempCuils;
 use App\Models\AfipMapucheSicoss;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -39,7 +41,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      */
     public function execute(int $nroLiqui, int $periodoFiscal): bool
     {
-
+        Log::info('Ejecutando MapucheMiSimplificacionService: ' . $nroLiqui . ' ' . $periodoFiscal);
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
             return false;
         }
@@ -66,11 +68,11 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      */
     private function validarExistenciaEnBaseDeDatos(int $nroLiqui, int $periodoFiscal): bool
     {
-        // Verificamos la existencia del número de liquidación en Dh21
-        $existeNroLiqui = Dh21::where('nro_liqui', $nroLiqui)->exists();
+        // Verificamos la existencia del número de liquidación en Dh22
+        $existeNroLiqui = Dh22::query()->where('nro_liqui', $nroLiqui)->exists();
 
         // Verificamos la existencia del período fiscal en AfipMapucheSicoss
-        $existePeriodoFiscal = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal)->exists();
+        $existePeriodoFiscal = AfipMapucheSicoss::query()->where('periodo_fiscal', $periodoFiscal)->exists();
 
         $existeEnBD = $existeNroLiqui && $existePeriodoFiscal;
 
@@ -165,28 +167,50 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
 
     /**
-     * Verifica si la tabla `MapucheMiSim` no está vacía.
+     * Verifica si la tabla contiene registros.
      *
-     * Esta función comprueba si la tabla `afip_mapuche_mi_simplificacion` existe en la base de datos y, en caso afirmativo, verifica si contiene registros. Devuelve `true` si la tabla no está vacía, y `false` en caso contrario.
-     *
-     * @return bool Verdadero si la tabla no está vacía, falso en caso contrario.
+     * @return bool Verdadero si la tabla existe y contiene registros, falso en caso contrario.
      */
     public function isNotEmpty(): bool
     {
-        $table = $this->afipMapucheMiSimplificacion->getTable();
-        //Verifica si la tabla existe
-        if (!Schema::connection($this->getConnectionName())->hasTable($table)) {
-            Log::info("La tabla {$table} no existe en la base de datos {$this->getConnectionName()}.");
-            return false;
-        }
-        //Verifica si la tabla contiene datos
-        $count = $this->afipMapucheMiSimplificacion->count();
+        try {
+            $model = $this->afipMapucheMiSimplificacion;
+            $fullTableName = $model->getFullTableName();
+            $connection = $this->getConnectionName();
 
-        if ($count > 0) {
-            Log::info("La tabla {$table} no está vacía y contiene {$count} registros.");
-            return true;
-        } else {
-            Log::info("La tabla {$table} está vacía.");
+            // Primero verificamos si el schema existe
+            $schemaExists = DB::connection($connection)
+                ->select("SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?", [$model->getSchemaName()]);
+
+            if (empty($schemaExists)) {
+                Log::info("El schema {$model->getSchemaName()} no existe en la base de datos {$connection}.");
+                return false;
+            }
+
+            // Luego verificamos si la tabla existe
+            if (!Schema::connection($connection)->hasTable($fullTableName)) {
+                Log::info("La tabla {$fullTableName} no existe en la base de datos {$connection}.");
+                return false;
+            }
+
+            // Verificamos si hay registros de manera eficiente
+            $exists = DB::connection($connection)
+                ->table($fullTableName)
+                ->exists();
+
+            if ($exists) {
+                $count = DB::connection($connection)
+                    ->table($fullTableName)
+                    ->count();
+                Log::info("La tabla {$fullTableName} contiene {$count} registros.");
+                return true;
+            }
+
+            Log::info("La tabla {$fullTableName} está vacía.");
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
             return false;
         }
     }

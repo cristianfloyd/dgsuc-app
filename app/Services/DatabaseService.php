@@ -15,9 +15,9 @@ class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
     private static $connectionInstance = null;
-    private const int DEFAULT_CHUNK_SIZE = 1000;
+    private const DEFAULT_CHUNK_SIZE = 1000;
 
-    
+
     /**
      * Create a new class instance.
      */
@@ -141,7 +141,7 @@ class DatabaseService implements DatabaseServiceInterface
         }
 
         $rowInserted = 0;
-
+        Log::info('Antes de la insercion contamos los datos: ' . $mappedData->count());
         try {
             DB::connection($conexion)->beginTransaction();
 

@@ -29,7 +29,7 @@ return new class extends Migration
 	        $table->integer('duracioncontrato',4)->default(0)->nullable();
 	        $table->char('incisoimputacion',5)->nullable();
 	        $table->float('montocontrato',8)->nullable();
-	        $table->integer('nro_legaj',4)->nullable();
+	        $table->integer('nro_legaj');
 	        $table->date('fec_alta')->nullable();
 	        $table->date('fec_baja')->nullable();
 	        $table->char('codc_carac',4)->nullable();

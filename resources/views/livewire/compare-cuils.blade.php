@@ -1,4 +1,4 @@
-@php use App\Enum\WorkflowStatus; @endphp
+@php use App\Enums\WorkflowStatus; @endphp
 <div>
     <!-- Sección de alertas -->
     <div class="fixed top-0 right-0 m-4">

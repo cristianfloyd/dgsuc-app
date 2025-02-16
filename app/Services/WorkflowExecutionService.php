@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\WorkflowStatus;
+use App\Models\TablaTempCuils;
 use App\Services\TempTableService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\QueryException;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
+use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
@@ -22,17 +24,17 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
 
 
     //constantes
-    private const int PER_PAGE = 10;
-    private const string IN_PROGRESS = 'in_progress';
+    private const  PER_PAGE = 10;
+    private const  IN_PROGRESS = 'in_progress';
 
-    private const string LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
+    private const  LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
 
-    public const string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
-    private const int DEFAULT_PERIODO_FISCAL = 202312;
-    private const string EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
-    private const string EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
-    private const string EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
-    private const string EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
+    public const  EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
+    private const  DEFAULT_PERIODO_FISCAL = 202312;
+    private const  EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+    private const  EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
+    private const  EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+    private const  EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
 
     // propiedades protegidas
     protected $currentStep;
@@ -239,7 +241,12 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
      */
     public function cuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection($this->getConnectionName())->table('suc.tabla_temp_cuils as ttc')->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')->whereNull('amms.cuil')->pluck('ttc.cuil')->toArray();
+        $model = new AfipMapucheMiSimplificacion();
+        $cuilsNoEncontrados = DB::connection($this->getConnectionName())
+        ->table($this->tempTableService->getFullTableName() . ' as ttc')
+        ->leftJoin($model->getFullTableName(). ' as amms', 'ttc.cuil', 'amms.cuil')
+        ->whereNull('amms.cuil')
+        ->pluck('ttc.cuil')->toArray();
 
         return $cuilsNoEncontrados;
     }

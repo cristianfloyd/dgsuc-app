@@ -106,7 +106,7 @@ class SicossExportService
         // Conceptos adicionales
         $linea .= $this->formatearDecimal($registro->adicionales, 12);
         $linea .= $this->formatearDecimal($registro->premios, 12);
-        $linea .= $this->formatearDecimal($registro->rem_dec_788_05, 12);
+        $linea .= $this->formatearDecimal($registro->rem_dec_788, 12);
         $linea .= $this->formatearDecimal($registro->rem_imp7, 12);
         $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', STR_PAD_LEFT);
         $linea .= $this->formatearDecimal($registro->cpto_no_remun, 12);
@@ -120,7 +120,7 @@ class SicossExportService
         // Datos finales
         $linea .= str_pad($registro->hstrab ?? '0', 3, '0', STR_PAD_LEFT);
         $linea .= $registro->seguro ? '1' : '0';
-        $linea .= $this->formatearDecimal($registro->ley_27430, 12);
+        $linea .= $this->formatearDecimal($registro->ley, 12);
         $linea .= $this->formatearDecimal($registro->incsalarial, 12);
         $linea .= $this->formatearDecimal($registro->remimp11, 12);
 

@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Filament\Afip\Resources\AfipMapucheArtResource\Pages;
+
+use Filament\Actions;
+use Filament\Actions\Action;
+use App\Models\AfipMapucheArt;
+use Filament\Resources\Components\Tab;
+use Filament\Support\Enums\ActionSize;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Actions\PoblarAfipArtAction;
+use App\Filament\Afip\Resources\AfipMapucheArtResource;
+
+class ListAfipMapucheArt extends ListRecords
+{
+    protected static string $resource = AfipMapucheArtResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            PoblarAfipArtAction::make()
+                ->label('Poblar ART')
+                ->modalHeading('Confirmación de Poblado ART')
+                ->modalDescription('
+                    **¡Importante!** Antes de continuar, asegúrese de que:
+
+                    - El recurso "Controles SICOSS" contenga datos para el período fiscal seleccionado.
+                    - El período fiscal ingresado coincida con los datos que desea procesar.
+                    - Este proceso puede tomar varios minutos dependiendo de la cantidad de registros.
+                ')
+                ->modalSubmitActionLabel('Sí, poblar datos')
+                ->modalIcon('heroicon-o-arrow-up-tray')
+                ->color('success')
+                ->size(ActionSize::Large)
+                ->icon('heroicon-o-arrow-up-tray')
+                ->slideOver(),
+
+            Action::make('vaciar_tabla')
+                ->label('Vaciar Tabla')
+                ->modalHeading('Confirmación para Vaciar Tabla')
+                ->modalDescription('
+                    **¡Advertencia!** Esta acción:
+
+                    - Eliminará **TODOS** los registros de la tabla ART.
+                    - Es irreversible.
+                    - Se recomienda hacer una copia de seguridad antes de proceder.
+                ')
+                ->modalSubmitActionLabel('Sí, vaciar tabla')
+                ->modalIcon('heroicon-o-trash')
+                ->color('danger')
+                ->size(ActionSize::Large)
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->action(function () {
+                    try {
+                        AfipMapucheArt::truncate();
+                        Notification::make()
+                            ->title('Tabla vaciada exitosamente')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Error al vaciar la tabla')
+                            ->body('No se pudo completar la operación')
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ,
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('Todos')
+                ->icon('heroicon-o-users'),
+            'sin_legajo' => Tab::make('Sin Legajo')
+                ->icon('heroicon-o-exclamation-circle')
+                ->badge(AfipMapucheArt::whereNull('nro_legaj')->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('nro_legaj')),
+            'con_legajo' => Tab::make('Con Legajo')
+                ->icon('heroicon-o-check-circle')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('nro_legaj')),
+        ];
+    }
+}

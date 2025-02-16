@@ -100,7 +100,7 @@ class DosubaSinLiquidarDataSheet implements
 
     public function title(): string
     {
-        return 'Datos';
+        return '2 Meses';
     }
 
     // Formato de columnas específicas

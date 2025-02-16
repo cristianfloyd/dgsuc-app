@@ -34,11 +34,11 @@ class AfipMapucheSicoss extends Model
     // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
     //protected $primaryKey = ['periodo_fiscal', 'cuil'];
 
-    protected $primaryKey = ['id'];
+    protected $primaryKey = 'id';
 
-    protected $appends = ['id', 'diferencia_rem'];
+    protected $appends = ['diferencia_rem'];
 
-    public $incrementing = false;
+    public $incrementing = true;
     // No necesitas usar timestamps
     public $timestamps = false;
 
@@ -92,7 +92,7 @@ class AfipMapucheSicoss extends Model
         'tipo_oper',
         'adicionales',
         'premios',
-        'rem_dec_788_05',
+        'rem_dec_788',
         'rem_imp7',
         'nro_horas_ext',
         'cpto_no_remun',
@@ -102,7 +102,7 @@ class AfipMapucheSicoss extends Model
         'contrib_dif',
         'hstrab',
         'seguro',
-        'ley_27430',
+        'ley',
         'incsalarial',
         'remimp11',
     ];
@@ -147,7 +147,7 @@ class AfipMapucheSicoss extends Model
         'tipo_oper' => 'string',
         'adicionales' => 'decimal:2',
         'premios' => 'decimal:2',
-        'rem_dec_788_05' => 'decimal:2',
+        'rem_dec_788' => 'decimal:2',
         'rem_imp7' => 'decimal:2',
         'nro_horas_ext' => 'integer',
         'cpto_no_remun' => 'decimal:2',
@@ -157,7 +157,7 @@ class AfipMapucheSicoss extends Model
         'contrib_dif' => 'decimal:2',
         'hstrab' => 'decimal:2',
         'seguro' => 'boolean',
-        'ley_27430' => 'decimal:2',
+        'ley' => 'decimal:2',
         'incsalarial' => 'decimal:2',
         'remimp11' => 'decimal:2',
     ];
@@ -207,73 +207,6 @@ class AfipMapucheSicoss extends Model
         );
     }
 
-    // ##################################################################################################################
-    // Métodos para obtener el ID para FilamentPHP
-
-    public function getKeyName()
-    {
-        return 'id';
-    }
-
-    /**
-     * Devuelve la clave compuesta del modelo, que es una combinación del período fiscal y el CUIL.
-     * Devolver una representación única de la clave primaria compuesta.
-     *
-     * @return string La clave compuesta en el formato "periodo_fiscal-cuil".
-     */
-    public function getKey()
-    {
-        return "{$this->periodo_fiscal}-{$this->cuil}";
-    }
-
-    /**
-     * Resuelve el enlace de ruta para este modelo.
-     * Este método debe resolver la entidad a partir de la clave compuesta.
-     *
-     * @param string $value El valor de la clave compuesta (periodo_fiscal-cuil).
-     * @param string|null $field El campo opcional a utilizar para la resolución de la ruta.
-     * @return AfipMapucheSicoss|null El modelo correspondiente al valor de la clave compuesta, o null si no se encuentra.
-     */
-    public function resolveRouteBinding($value, $field = null)
-    {
-        [$periodoFiscal, $cuil] = explode('-', $value);
-        return $this->where('periodo_fiscal', $periodoFiscal)
-            ->where('cuil', $cuil)
-            ->first();
-    }
-
-    /**
-     * Devuelve el nombre de la key de ruta para este modelo.
-     * Este método se utiliza para generar las rutas de Filament PHP.
-     *
-     * @return string
-     */
-    public function getRouteKeyName()
-    {
-        return 'id';
-    }
-
-    /**
-     * Agregar un atributo id virtual:
-     * Añade un atributo id que combine periodo_fiscal y cuil.
-     * @return string
-     */
-    public function getIdAttribute()
-    {
-        return "{$this->periodo_fiscal}-{$this->cuil}";
-    }
-
-    // Método para obtener el ID virtual para FilamentPHP
-    public function getFilamentId(): string
-    {
-        return $this->id;
-    }
-
-    // Método para establecer el ID para FilamentPHP
-    public function setFilamentId($value): void
-    {
-        [$this->periodo_fiscal, $this->cuil] = explode('-', $value);
-    }
 
 
     // ####################################### RELACIONES ##############################################################
@@ -324,6 +257,30 @@ class AfipMapucheSicoss extends Model
         return Attribute::make(
             get: fn($value) => EncodingService::toUtf8($value),
             set: fn($value) => EncodingService::toLatin1($value)
+        );
+    }
+
+    protected function remTotal(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
+        );
+    }
+
+    protected function remImpo6(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
+        );
+    }
+
+    protected function remImpo9(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
         );
     }
 
@@ -459,39 +416,39 @@ class AfipMapucheSicoss extends Model
 
             // Ejecutar la consulta
             $results = DB::connection(self::getMapucheConnection())
-            ->select($sql, [
-                'variantes_vacaciones' => config('mapuche.licencias.vacaciones'),
-                'variantes_protecintegral' => config('mapuche.licencias.proteccion_integral'),
-                'fecha_inicio' => $fechaInicio,
-                'fecha_fin' => $fechaFin,
-                'mes' => $mes,
-                'anio' => $anio
-            ]);
+                ->select($sql, [
+                    'variantes_vacaciones' => config('mapuche.licencias.vacaciones'),
+                    'variantes_protecintegral' => config('mapuche.licencias.proteccion_integral'),
+                    'fecha_inicio' => $fechaInicio,
+                    'fecha_fin' => $fechaFin,
+                    'mes' => $mes,
+                    'anio' => $anio
+                ]);
 
             // Insertar los resultados en la tabla
             foreach ($results as $result) {
                 self::connection(self::getMapucheConnection())
-                ->create([
-                    'periodo_fiscal' => $periodoFiscal,
-                    'cuil' => $result->nro_cuil,
-                    'apnom' => $result->apyno,
-                    'conyuge' => (int)$result->conyugue,
-                    'cant_hijos' => (int)$result->hijos,
-                    'cod_situacion' => (int)$result->codigosituacion,
-                    'cod_cond' => (int)$result->CodigoCondicion,
-                    'cod_act' => (int)$result->CodigoActividad,
-                    'cod_zona' => (int)$result->codigozona,
-                    'porc_aporte' => (float)$result->aporteAdicional,
-                    'cod_mod_cont' => (int)$result->codigocontratacion,
-                    'cod_os' => $result->codc_bprev,
-                    'cant_adh' => (int)$result->adherentes,
-                    'rem_total' => (float)$result->sac,
-                    'rem_impo1' => (float)$result->rem_impo6,
-                    'asig_fam_pag' => (float)$result->asig_fam_pag,
-                    'aporte_vol' => (float)$result->aporteAdicional,
-                    'convencionado' => $result->trabajadorconvencionado,
-                    'dias_trabajados' => 30 - $result->dias_licencia
-                ]);
+                    ->create([
+                        'periodo_fiscal' => $periodoFiscal,
+                        'cuil' => $result->nro_cuil,
+                        'apnom' => $result->apyno,
+                        'conyuge' => (int)$result->conyugue,
+                        'cant_hijos' => (int)$result->hijos,
+                        'cod_situacion' => (int)$result->codigosituacion,
+                        'cod_cond' => (int)$result->CodigoCondicion,
+                        'cod_act' => (int)$result->CodigoActividad,
+                        'cod_zona' => (int)$result->codigozona,
+                        'porc_aporte' => (float)$result->aporteAdicional,
+                        'cod_mod_cont' => (int)$result->codigocontratacion,
+                        'cod_os' => $result->codc_bprev,
+                        'cant_adh' => (int)$result->adherentes,
+                        'rem_total' => (float)$result->sac,
+                        'rem_impo1' => (float)$result->rem_impo6,
+                        'asig_fam_pag' => (float)$result->asig_fam_pag,
+                        'aporte_vol' => (float)$result->aporteAdicional,
+                        'convencionado' => $result->trabajadorconvencionado,
+                        'dias_trabajados' => 30 - $result->dias_licencia
+                    ]);
             }
 
             $connection->commit();

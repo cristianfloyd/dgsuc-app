@@ -1,18 +1,19 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('suc.afip_importacion_cruda', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.afip_importacion_cruda', function (Blueprint $table) {
             $table->string('linea_completa');
         });
     }
@@ -22,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.afip_importacion_cruda');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_importacion_cruda');
     }
 };

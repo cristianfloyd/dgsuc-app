@@ -7,12 +7,12 @@ trait HasLaboralStatus
     /**
      * Estados laborales disponibles
      */
-    public const string STATUS_PERMANENT = 'P';    // Permanente
-    public const string STATUS_CONTRACT = 'C';      // Contratado
-    public const string STATUS_AD_HONOREM = 'A';    // Ad Honorem
-    public const string STATUS_SCHOLARSHIP = 'B';    // Beca
-    public const string STATUS_SUBSTITUTE = 'S';     // Suplente
-    public const string STATUS_OTHER = 'O';         // Otro
+    public const STATUS_PERMANENT = 'P';    // Permanente
+    public const STATUS_CONTRACT = 'C';      // Contratado
+    public const STATUS_AD_HONOREM = 'A';    // Ad Honorem
+    public const STATUS_SCHOLARSHIP = 'B';    // Beca
+    public const STATUS_SUBSTITUTE = 'S';     // Suplente
+    public const STATUS_OTHER = 'O';         // Otro
 
     /**
      * Obtiene el estado laboral en formato legible

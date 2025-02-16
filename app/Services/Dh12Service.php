@@ -20,7 +20,6 @@ class Dh12Service
     public static function getConceptosParaSelect()
     {
         return Dh12::select('codn_conce', 'desc_conce')
-            ->whereRaw('codn_conce/100 IN (1,2)')
             ->orderBy('codn_conce')
             ->get()
             ->mapWithKeys(function ($item) {

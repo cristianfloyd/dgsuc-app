@@ -7,12 +7,15 @@ class ColumnMetadata
      /** @var array<int, int> */
     private array $widthsAfip;
     private array $widthsMapuche;
+    private array $widthsMiSimplificacion;
     private string $currentSystem;
+    private array $widthsSicossCalculo;
+    private array $startPositionsSicossCalculo;
 
     /**
      * @var array<string, int> Mapeo de nombres de columnas a índices
      */
-    private const array COLUMN_MAP = [
+    private const COLUMN_MAP = [
         'PERIODO_FISCAL' => 0,
         'CODIGO_MOVIMIENTO' => 1,
         'TIPO_REGISTRO' => 2,
@@ -51,7 +54,7 @@ class ColumnMetadata
     {
 
         $this->widthsAfip = [
-            6,  // periodo fiscal
+            6,  // periodo fiscal (no se utiliza en el archivo TXT)
             2,  // codigo movimiento
             2,  // Tipo de registro
             11, // CUIL del empleado
@@ -79,11 +82,63 @@ class ColumnMetadata
             // Anchos pra Mapuche
             6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
         ];
+
+        $this->widthsMiSimplificacion = [
+            // Anchos pra Mi Simplificacion
+            2, // codigo movimiento
+            2,
+            11,
+            1,
+            3,
+            10,
+            10,
+            6,
+            2,
+            10,
+            15,
+            1,
+            5,
+            6,
+            4,
+            2,
+            10,
+            6,
+            3,
+            10,
+            10,
+            1
+        ];
+
+        $this->widthsSicossCalculo = [
+            11,  // cuil (posicion 1)
+            15,  // remtotal (posicion 76)
+            15,  // remimpo1 (posicion 91)
+            15,  // remimpo2 (posicion 106)
+            15,  // aportesijp (posicion 136)
+            15,  // aporteinssjp (posicion 151)
+            15,  // contribucionsijp (posicion 301)
+            15,  // contribucioninssjp (posicion 316)
+            15,  // aportediferencialsijp (posicion 166)
+            15,  // aportesres33_41re (posicion 1196)
+        ];
+
+        $this->startPositionsSicossCalculo = [
+            'cuil' => 1,
+            'remtotal' => 76,
+            'rem1' => 91,
+            'rem2' => 106,
+            'aportesijp' => 136,
+            'aporteinssjp' => 151,
+            'contribucionsijp' => 301,
+            'contribucioninssjp' => 316,
+            'aportediferencialsijp' => 166,
+            'aportesres33_41re' => 196,
+        ];
     }
 
     public function setSystem(string $system): void
     {
-        if (!in_array($system, ['afip', 'mapuche'])) {
+        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
             throw new \InvalidArgumentException('Sistema no válido');
         }
         $this->currentSystem = $system;
@@ -94,9 +149,20 @@ class ColumnMetadata
      *
      * @return array<int, int>
      */
-    public  function getWidths(): array
+    public function getWidths(): array
     {
-        return $this->currentSystem === 'afip' ? $this->widthsAfip : $this->widthsMapuche;
+        switch ($this->currentSystem) {
+            case 'afip':
+                return $this->widthsAfip;
+            case 'mapuche':
+                return $this->widthsMapuche;
+            case 'miSimplificacion':
+                return $this->widthsMiSimplificacion;
+            case 'sicossCalculo':
+                return $this->widthsSicossCalculo;
+            default:
+                throw new \InvalidArgumentException('Sistema no válido');
+        }
     }
 
     /**
@@ -131,5 +197,16 @@ class ColumnMetadata
     public function getTotalWidth(): int
     {
         return array_sum($this->widthsAfip);
+    }
+
+    /**
+     * Obtiene la posición de inicio de un campo específico en el sistema 'sicossCalculo'.
+     *
+     * @param string $field Nombre del campo
+     * @return int Posición de inicio del campo, o 0 si no se encuentra
+     */
+    public function getStartPosition(string $field): int
+    {
+        return $this->startPositionsSicossCalculo[$field] ?? 0;
     }
 }

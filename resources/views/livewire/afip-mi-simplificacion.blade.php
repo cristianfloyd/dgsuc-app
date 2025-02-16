@@ -73,3 +73,14 @@
         </div>
     @endif
 </div>
+@push('css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://unpkg.com/flatpickr/dist/plugins/monthSelect/style.css" rel="stylesheet">
+    @filamentStyles
+@endpush
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://unpkg.com/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    @filamentScripts
+@endpush

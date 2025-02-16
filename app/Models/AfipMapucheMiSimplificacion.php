@@ -2,24 +2,27 @@
 
 namespace App\Models;
 
-
+use App\Enums\PuestoDesempenado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\HasPuestoDesempenado;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
-use App\Traits\MapucheDesaConnectionTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Traits\HasUnidadAcademica;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    use MapucheDesaConnectionTrait;
-    protected $table = 'suc.afip_mapuche_mi_simplificacion';
-    public $timestamps = false;
+    use MapucheConnectionTrait, HasPuestoDesempenado, HasUnidadAcademica;
 
+    protected $table = 'afip_mapuche_mi_simplificacion';
+    protected $schema = 'suc';
 
-    protected $primaryKey = ['periodo_fiscal', 'cuil'];
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    public $incrementing = true;
 
     // Campos que se pueden asignar masivament
     protected $fillable = [
@@ -54,106 +57,141 @@ class AfipMapucheMiSimplificacion extends Model
         'covid'
     ];
 
+    protected $appends = ['puesto_descripcion', 'puesto_escalafon'];
+
+
+    
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::retrieved(function ($model) {
+            if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
+                $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
+            }
+        });
+    }
+
+    // ############################ ACCESORS ############################
     /**
-     * Obtiene el valor de la clave primaria.
-     *
-     * @return string
+     * Accessor y Mutator para el puesto
      */
-    public function getKey(): string
+    protected function puesto(): Attribute
     {
-        return "{$this->periodo_fiscal}-{$this->cuil}";
-    }
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) {
+                    return null;
+                }
 
-    /**
-     * Obtiene la clave primaria del modelo.
-     *
-     * @return string
-     */
-    public function getKeyName(): string
-    {
-        return 'id';
-    }
+                $puestoEnum = $this->determinarPuestoDesempenado($value);
 
-    /**
-     * Determina si la clave primaria es compuesta.
-     *
-     * @return bool
-     */
-    public function getIncrementing()
-    {
-        return $this->incrementing;
-    }
+                if (!$puestoEnum) {
+                    $puestoEnum = PuestoDesempenado::tryFrom($value);
+                }
 
-    public function getRouteKey(): string
-    {
-        return "{$this->periodo_fiscal}|{$this->cuil}";
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'id';
-    }
-
-    /**
-     * Recupera el modelo por su clave única.
-     *
-     * @param  mixed  $key
-     * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
-     */
-    public function resolveRouteBinding($key, $field = null)
-    {
-        if ($field === 'id') {
-            [$periodo_fiscal, $cuil] = explode('-', $key);
-            return $this->where('periodo_fiscal', $periodo_fiscal)
-                ->where('cuil', $cuil)
-                ->first();
-        }
-        return parent::resolveRouteBinding($key, $field);
+                return $puestoEnum;
+            },
+            set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
+        );
     }
 
     /**
-     * Recupera un modelo por su clave única compuesta.
-     *
-     * @param string $id La clave única compuesta en el formato "periodo_fiscal-cuil".
-     * @param array $columns Los campos a recuperar (por defecto, todos los campos).
-     * @return \Illuminate\Database\Eloquent\Model|null El modelo encontrado, o null si no se encuentra.
+     * Accessor para la descripción del puesto
      */
-    public function find($id, $columns = ['*'])
+    protected function puestoDescripcion(): Attribute
     {
-        list($periodo_fiscal, $cuil) = explode('-', $id);
-        return $this->where('periodo_fiscal', $periodo_fiscal)
-            ->where('cuil', $cuil)
-            ->first($columns);
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->descripcion();
+            }
+        );
     }
 
     /**
-     * Obtiene una nueva instancia de query para el modelo.
-     *
-     * @return Builder
+     * Accessor para el escalafón del puesto
      */
-    public function newQuery()
+    protected function puestoEscalafon(): Attribute
     {
-        return parent::newQuery()->addSelect(
-            '*',
-            DB::connection($this->getColumns())->raw("CONCAT(periodo_fiscal, '-', cuil) as id")
-        )
-        ->orderBy('periodo_fiscal')
-        ->orderBy('cuil');
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->escalafon();
+            }
+        );
+    }
+
+    /**
+     * Accessor y Mutator para el domicilio
+     */
+    protected function domicilio(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // Si tenemos actividad null pero un código de unidad válido,
+                // intentamos determinar los códigos
+                if ($this->attributes['actividad'] === null && $value) {
+                    $this->determinarCodigosUnidadAcademica($value);
+                }
+                return str_pad($value, 5, '0', STR_PAD_LEFT);
+            },
+            set: function ($value) {
+                $this->determinarCodigosUnidadAcademica($value);
+                return $value;
+            }
+        );
+    }
+
+
+    // ################################################################
+
+    // ################################################################
+
+
+
+    public function getSchema(): string
+    {
+        return $this->schema;
+    }
+
+    public function getTableName(): string
+    {
+        return $this->table;
+    }
+
+    public function getFullTableName(): string
+    {
+        return "{$this->schema}.{$this->table}";
     }
 
 
 
 
-
-
-
-
+    // Método para consultas grandes
+    public function scopeChunked($query, $callback, $count = 1000)
+    {
+        $query->chunk($count, $callback);
+    }
 
     public function createTable(): bool
     {
         if (!Schema::connection($this->getConnectionName())->hasTable($this->table)) {
             Schema::connection($this->getConnectionName())->create($this->table, function (Blueprint $table) {
+                $table->id();
                 $table->integer('nro_legaj');
                 $table->char('nro_liqui', 6);
                 $table->char('sino_cerra', 1);
@@ -184,7 +222,7 @@ class AfipMapucheMiSimplificacion extends Model
                 $table->char('covid', 1)->nullable();
 
                 // Definición de la clave primaria compuesta
-                $table->primary(['periodo_fiscal', 'cuil']);
+                $table->unique(['periodo_fiscal', 'cuil']);
             });
             Log::info("Tabla {$this->table} creada en la base de datos {$this->connection}, desde el modelo");
             return true; // Table created successfully
@@ -233,5 +271,37 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return empty($value) ? $query :  $query->where('cuil', 'ilike', "%$value%")
             ->orWhere('nro_legaj', 'ilike', "%$value%");
+    }
+
+    public function getSchemaName(): string
+    {
+        return $this->schema;
+    }
+
+
+
+
+
+    /**
+     * Scope para filtrar por tipo de puesto
+     */
+    public function scopeByPuesto($query, PuestoDesempenado $puesto)
+    {
+        $categorias = match ($puesto) {
+            PuestoDesempenado::PROFESOR_UNIVERSITARIO => $this->getCategoriesByGroup('DOCU'),
+            PuestoDesempenado::PROFESOR_SECUNDARIO => array_merge(
+                $this->getCategoriesByGroup('DOCS'),
+                $this->getCategoriesByGroup('DOC2')
+            ),
+            PuestoDesempenado::NODOCENTE => $this->getCategoriesByGroup('NODO'),
+            PuestoDesempenado::DIRECTIVO => array_merge(
+                $this->getCategoriesByGroup('AUTU'),
+                $this->getCategoriesByGroup('AUTS')
+            ),
+            default => [],
+        };
+
+        // Asegurarnos de que las categorías se pasen como strings
+        return $query->whereIn('puesto', array_map('strval', $categorias));
     }
 }

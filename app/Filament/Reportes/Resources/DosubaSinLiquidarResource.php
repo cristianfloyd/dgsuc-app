@@ -2,6 +2,7 @@
 
 namespace App\Filament\Reportes\Resources;
 
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -17,6 +18,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use App\Exports\DosubaSinLiquidarExport;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Infolists\Components\IconEntry;
 use App\Models\Reportes\DosubaSinLiquidarModel;
@@ -110,7 +112,7 @@ class DosubaSinLiquidarResource extends Resource
                     ->action(function ($records) {
                         try {
                             return Excel::download(
-                                new DosubaSinLiquidarExport($records),
+                                new DosubaSinLiquidarExport($records, $records->first()->periodo_fiscal),
                                 'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx'
                             );
                         } catch (\Exception $e) {
@@ -122,24 +124,40 @@ class DosubaSinLiquidarResource extends Resource
                     })
             ])
             ->headerActions([
-                Action::make('exportAll')
-                    ->label('Exportar Todo')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->visible(fn() => $hasData)
-                    ->action(function () {
-                        try {
-                            $records = DosubaSinLiquidarModel::where('session_id', session()->getId())->get();
+                ActionGroup::make([
+                    // ... other actions ...
+                    Action::make('export')
+                        ->label('Exportar a Excel')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->form([
+                            Select::make('periodo')
+                                ->label('Período')
+                                ->options(function() {
+                                    $options = [];
+                                    $date = Carbon::now();
+
+                                    for ($i = 0; $i < 12; $i++) {
+                                        $periodo = $date->format('Ym');
+                                        $options[$periodo] = $date->format('Y/m');
+                                        $date->subMonth();
+                                    }
+
+                                    return $options;
+                                })
+                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
+                                ->required()
+                        ])
+                        ->action(function (array $data) {
                             return Excel::download(
-                                new DosubaSinLiquidarExport($records),
-                                'dosuba-sin-liquidar-completo-' . now()->format('Y-m-d') . '.xlsx'
+                                new DosubaSinLiquidarExport(
+                                    records: DosubaSinLiquidarModel::all(),
+                                    periodo: $data['periodo']
+                                ),
+                                'dosuba-sin-liquidar-' . $data['periodo'] . '.xlsx'
                             );
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Error al exportar')
-                                ->danger()
-                                ->send();
-                        }
-                    })
+                        }),
+                ])->label('Acciones de Tabla')
+                  ->icon('heroicon-o-cog'),
             ])
             ->emptyStateHeading('No hay datos disponibles')
             ->emptyStateDescription('Genera un nuevo reporte para ver los resultados.')

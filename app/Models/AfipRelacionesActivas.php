@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
@@ -15,7 +16,12 @@ class AfipRelacionesActivas extends Model
     use MapucheConnectionTrait;
 
 
-    protected $table = 'suc.afip_relaciones_activas';
+    protected $table = 'afip_relaciones_activas';
+    protected $schema = 'suc';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    public $timestamps = true;
+
 
     protected $fillable = [
         'periodo_fiscal', //periodo fiscal,6
@@ -87,7 +93,7 @@ class AfipRelacionesActivas extends Model
     * @param array $datosProcessados Los datos procesados.
     * @return array Los datos mapeados al modelo AfipRelacionesActivas.
     */
-    static function mapearDatosAlModelo(array $datosProcesados):array
+    public static function mapearDatosAlModelo(array $datosProcesados):array
     {
         $datosMapeados = [
 
@@ -132,5 +138,14 @@ class AfipRelacionesActivas extends Model
     public function scopeByCuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
+    }
+
+    // ######################### ACCESORES Y MUTADORES #########################
+    protected function retribucionPactada(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => floatval(trim($value)),
+            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT)
+        );
     }
 }

@@ -17,6 +17,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         'name',
     ];
 
+    
     public static function boot()
     {
         parent::boot();
@@ -30,13 +31,13 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
 
     /**
      * Verifica si la tabla existe y la crea si no existe
-     * 
+     *
      * @return void
      */
     public static function verificarYCrearTabla(): void
     {
         $schema = \Illuminate\Support\Facades\DB::connection(self::connectionName())->getSchemaBuilder();
-        
+
         if (!$schema->hasTable('suc.origenes_models')) {
             $schema->create('suc.origenes_models', function ($table) {
                 $table->id();

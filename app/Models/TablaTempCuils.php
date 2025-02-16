@@ -12,8 +12,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TablaTempCuils extends Model
 {
     use MapucheConnectionTrait;
-    protected $table = 'suc.tabla_temp_cuils';
+    protected $table = 'afip_tabla_temp_cuils';
     protected $primaryKey = 'id';
+    protected $schema = 'suc';
 
     protected $fillable = [
         'cuil',
@@ -115,5 +116,15 @@ class TablaTempCuils extends Model
     public function scopeCuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
+    }
+
+    public function getSchemaName(): string
+    {
+        return $this->schema;
+    }
+
+    public function getFullTableName(): string
+    {
+        return "{$this->schema}.{$this->table}";
     }
 }

@@ -5,6 +5,7 @@ namespace App\Enums;
 enum ConceptoGrupo: string
 {
     case DOSUBA = 'dosuba';
+    case DOSUBASIN310 = 'dosubasin310';
     case AFIP = 'afip';
     case APORTES_Y_CONTRIBUCIONES = 'aportes_y_contribuciones';
     case CONTRIBUCIONES_AFIP = 'contribuciones_afip';
@@ -21,6 +22,9 @@ enum ConceptoGrupo: string
             self::DOSUBA => [
                 // Rango de conceptos DOSUBA
                 207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287, 310
+            ],
+            self::DOSUBASIN310 => [
+                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287
             ],
             self::CONTRIBUCIONES_AFIP => [
                 // Rango de conceptos AFIP

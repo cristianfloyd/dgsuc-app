@@ -57,23 +57,25 @@ class ImportAfipMapucheSicoss extends Page
     protected function getFormSchema(): array
     {
         return [
-            Section::make('Período Fiscal')
-                ->schema([
-                    Select::make('year')
-                        ->label('Año')
-                        ->options($this->getYearOptions())
-                        ->default($this->year)
-                        ->required(),
-                    Select::make('month')
-                        ->label('Mes')
-                        ->options($this->getMonthOptions())
-                        ->default($this->month)
-                        ->required(),
-                ]),
+
             Section::make('Importación de archivo SICOSS')
-                ->description('Seleccione el archivo TXT generado por SICOSS para importar')
+                ->description('Seleccione el archivo TXT generado por Mapuche->sicoss para importar')
                 ->schema([
                     Group::make([
+                        Section::make('Período Fiscal')
+                            ->schema([
+                                Select::make('year')
+                                    ->label('Año')
+                                    ->options($this->getYearOptions())
+                                    ->default($this->year)
+                                    ->required(),
+                                Select::make('month')
+                                    ->label('Mes')
+                                    ->options($this->getMonthOptions())
+                                    ->default($this->month)
+                                    ->required(),
+                            ])
+                            ->columnSpan(1),
                         FileUpload::make('file')
                             ->label('Archivo TXT')
                             ->acceptedFileTypes([
@@ -90,7 +92,9 @@ class ImportAfipMapucheSicoss extends Page
                             ->visibility('private')
                             ->required()
                             ->preserveFilenames()
+                            ->columnSpan(2),
                     ])
+                        ->columns(3)
                 ])
                 ->collapsible()
         ];

@@ -15,7 +15,9 @@ use App\Services\SicossExportService;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
+use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Actions\PoblarAfipArtAction;
 use Symfony\Component\HttpFoundation\Response;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
@@ -31,8 +33,8 @@ class AfipMapucheSicossResource extends Resource
     protected static ?string $model = AfipMapucheSicoss::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'AFIP';
-    protected static ?string $navigationLabel = 'Controles Sicoss';
-    protected static ?string $pluralLabel = 'Controles Sicoss';
+    protected static ?string $navigationLabel = 'Mapuche SICOSS';
+    protected static ?string $pluralLabel = 'Mapuche SICOSS';
 
 
 
@@ -52,7 +54,10 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->searchable()
+                    ->searchable(query: function(Builder $query, string $search): Builder {
+                        return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
+                    })
+                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('conyuge')
                     ->label('Cónyuge')
@@ -80,40 +85,84 @@ class AfipMapucheSicossResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('periodo_fiscal')
-                ->label('Período Fiscal')
-                ->options(function() {
-                    return AfipMapucheSicoss::distinct()
-                        ->pluck('periodo_fiscal', 'periodo_fiscal')
-                        ->toArray();
-                })
-                ->searchable()
+                    ->label('Período Fiscal')
+                    ->options(function () {
+                        return AfipMapucheSicoss::distinct()
+                            ->pluck('periodo_fiscal', 'periodo_fiscal')
+                            ->toArray();
+                    })
+                    ->searchable()
             ])
             ->headerActions([
-                Tables\Actions\Action::make('exportarFiltrados')
-                    ->label('Exportar Filtrados')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire))
-                    ->color('success')
+                ActionGroup::make([
+                    Action::make('exportarSicoss')
+                        ->label('Exportar Excel')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(function () {
+                            $path = AfipMapucheSicossResource::generarArchivoSicoss();
+                            return response()->download($path)->deleteFileAfterSend();
+                        })
+                        ->color('success'),
+                    Action::make('importar')
+                        ->label('Importar')
+                        ->url(fn(): string => self::getUrl('import'))
+                        ->color('success')
+                        ->icon('heroicon-o-arrow-up-tray'),
+                    PoblarAfipArtAction::make('poblar_art')
+                        ->label('Poblar ART')
+                        ->modalHeading('Confirmación de Poblado ART')
+                        ->modalDescription('
+                                **¡Importante!** Esta acción:
+
+                                - Utilizará los datos del período fiscal actual para poblar la tabla ART.
+                                - El proceso puede tomar varios minutos dependiendo de la cantidad de registros.
+                                - Se recomienda verificar que los datos de SICOSS estén completos antes de proceder.
+                            ')
+                        ->modalSubmitActionLabel('Sí, poblar ART')
+                        ->modalIcon('heroicon-o-arrow-up-tray')
+                        ->color('success')
+                        ->icon('heroicon-o-arrow-up-tray')
+                        ->requiresConfirmation()
+                        ->slideOver(),
+                    Action::make('exportarFiltrados')
+                        ->label('Exportar Filtrados')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire))
+                        ->color('success'),
+                ])
+                    ->icon('heroicon-o-cog-8-tooth')
+                    ->tooltip('Acciones')
+                    ->size('lg'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('exportarSeleccionados')
                         ->label('Exportar Seleccionados')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn (Collection $records) => static::exportarRegistros($records))
+                        ->action(fn(Collection $records) => static::exportarRegistros($records))
                         ->color('success')
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(5);
     }
 
     public static function getRelations(): array
     {
         return [
             //
+        ];
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            PoblarAfipArtAction::make()
+                ->label('Poblar ART')
+                ->color('success')
+                ->icon('heroicon-o-arrow-up-tray'),
         ];
     }
 
@@ -246,7 +295,7 @@ class AfipMapucheSicossResource extends Resource
             // Conceptos adicionales
             $linea .= $formatearDecimal($registro->adicionales, 12);
             $linea .= $formatearDecimal($registro->premios, 12);
-            $linea .= $formatearDecimal($registro->rem_dec_788_05, 12);
+            $linea .= $formatearDecimal($registro->rem_dec_788, 12);
             $linea .= $formatearDecimal($registro->rem_imp7, 12);
             $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', STR_PAD_LEFT);
             $linea .= $formatearDecimal($registro->cpto_no_remun, 12);
@@ -260,7 +309,7 @@ class AfipMapucheSicossResource extends Resource
             // Datos finales
             $linea .= str_pad($registro->hstrab ?? '0', 3, '0', STR_PAD_LEFT);
             $linea .= $registro->seguro ? '1' : '0';
-            $linea .= $formatearDecimal($registro->ley_27430, 12);
+            $linea .= $formatearDecimal($registro->ley, 12);
             $linea .= $formatearDecimal($registro->incsalarial, 12);
             $linea .= $formatearDecimal($registro->remimp11, 12);
 

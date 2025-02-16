@@ -32,13 +32,15 @@ class ReporteConceptoListadoResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('nro_liqui')->label('Liquidación'),
+                TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('nro_legaj')->sortable()->searchable(),
-                TextColumn::make('nro_cargo')->label('Secuencia'),
+                TextColumn::make('nro_cargo')->label('Secuencia')->toggleable(isToggledHiddenByDefault:true),
                 TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('apellido')->label('Apellido'),
                 TextColumn::make('nombre')->label('Nombre'),
-                TextColumn::make('cuil')->label('CUIL'),
-                TextColumn::make('desc_liqui')->toggleable()->toggledHiddenByDefault(),
+                TextColumn::make('cuil')->label('CUIL')
+                    ->toggleable(isToggledHiddenByDefault:true),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
@@ -148,7 +150,7 @@ class ReporteConceptoListadoResource extends Resource
         return [
             'index' => ListReporteConceptoListados::route('/'),
             // 'create' => CreateReporteConceptoListado::route('/create'),
-            'edit' => EditReporteConceptoListado::route('/{record}/edit'),
+            //'edit' => EditReporteConceptoListado::route('/{record}/edit'),
         ];
     }
 

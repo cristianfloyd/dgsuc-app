@@ -2,16 +2,17 @@
 
 namespace App\Livewire;
 
-use App\Contracts\FileUploadRepositoryInterface;
-use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use Livewire\Component;
 use App\Models\ProcessLog;
 use Livewire\Attributes\On;
+use App\Enums\WorkflowStatus;
 use Livewire\Attributes\Computed;
+use illuminate\Support\Facades\Log;
+use App\Services\FileProcessingService;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
-use App\Services\FileProcessingService;
-use illuminate\Support\Facades\Log;
+use App\Contracts\FileUploadRepositoryInterface;
+use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class AfipMiSimplificacion extends Component
 {
@@ -173,12 +174,15 @@ class AfipMiSimplificacion extends Component
      */
     public function resetWorkflow(): void
     {
+        Log::info("AfipMiSimplificacion->resetWorkflow");
+        Log::info($this->currentProcess);
         if ($this->currentProcess) {
             $this->workflowService->resetWorkflow($this->currentProcess);
             $this->currentProcess = $this->workflowService->getLatestWorkflow();
             $this->currentStep = $this->workflowService->getCurrentStep($this->currentProcess);
             $this->processFinished = $this->workflowService->isProcessCompleted($this->currentProcess);
         }
+        Log::info($this->currentProcess);
     }
 
 
@@ -242,8 +246,8 @@ class AfipMiSimplificacion extends Component
      */
     private function canEndProcess(): bool
     {
-        $status = $this->currentProcess && $this->currentProcess->status === 'in_progress' && $this->allStepsCompleted();
-        // dd($this->currentProcess->status);
+        $status = $this->currentProcess && $this->currentProcess->status === 'in_progress' || $this->allStepsCompleted();
+        // dd($this->currentProcess->status, $this->currentStep);
         return $status;
     }
 

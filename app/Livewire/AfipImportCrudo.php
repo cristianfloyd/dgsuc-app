@@ -5,9 +5,9 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\UploadedFile;
 use Illuminate\Http\Request;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
 use App\Models\afipImportacionCrudaModel;
-use Livewire\WithPagination;
 
 class AfipImportCrudo extends Component
 {
@@ -22,7 +22,7 @@ class AfipImportCrudo extends Component
     public $ocultartabla = 0 , $datosImportados ,$showButton = 0;
     public function save():void
     {
-        $archivo = UploadedFile::findOrFail($this->selectedArchivo);
+        $archivo = UploadedFile::query()->findOrFail($this->selectedArchivo);
         $filepath = storage_path() .'/app/public/'. $archivo->file_path;
         $fileContent = Storage::get($filepath);
 

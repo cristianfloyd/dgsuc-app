@@ -9,7 +9,7 @@ use InvalidArgumentException;
 
 readonly class CategoryIdentifier implements Stringable
 {
-    private const int CATEGORY_LENGTH = 4;
+    private const CATEGORY_LENGTH = 4;
 
     public function __construct(
         private string $category,

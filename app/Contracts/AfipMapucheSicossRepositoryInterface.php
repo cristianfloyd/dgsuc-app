@@ -40,4 +40,11 @@ interface AfipMapucheSicossRepositoryInterface
      * @return bool
      */
     public function delete(AfipMapucheSicoss $model): bool;
+
+    /**
+     * Trunca la tabla AfipMapucheSicoss.
+     *
+     * @return void
+     */
+    public function truncate(): void;
 }

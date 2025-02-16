@@ -1,16 +1,17 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
 
 
     public function up()
     {
-        DB::unprepared("
+        DB::connection($this->getConnectionName())->unprepared("
             CREATE OR REPLACE FUNCTION suc.get_mi_simplificacion_tt(
                 nro_liqui_param INT,
                 periodo_fiscal_param CHAR(6)
@@ -49,10 +50,10 @@ return new class extends Migration
                 SELECT
                     d.nro_legaj,
                     d.nro_cargo,
-                    d3.fec_alta AS inicio_rel_lab,
+                    TO_CHAR(d3.fec_alta, 'YYYY-MM-DD') AS inicio_rel_lab,
                     ROW_NUMBER() OVER (PARTITION BY d.nro_legaj ORDER BY d3.fec_alta) AS rn
                 FROM
-                    mapuche.dh21 d
+                    mapuche.dh21h d
                 INNER JOIN mapuche.dh03 d3
                     ON d.nro_cargo = d3.nro_cargo
                 WHERE
@@ -73,12 +74,12 @@ return new class extends Migration
                 'N' AS trabajador_agropecuario,
                 '008' AS modalidad_contrato,
                 MinCargos.inicio_rel_lab,
-                d3.fec_baja AS fin_rel_lab,
+                TO_CHAR(d3.fec_baja, 'YYYY-MM-DD') AS fin_rel_lab,
                 '000000' AS obra_social,
                 '01' AS codigo_situacion_baja,
                 '0000000000' AS fecha_tel_renuncia,
                 TO_CHAR(ROUND(SUM(d.impp_conce)::NUMERIC , 2), 'FM999999999999.00') AS retribucion_pactada,
-                1 AS modalidad_liquidaicon,
+                '1' AS modalidad_liquidaicon,
                 d3.codc_uacad AS domicilio,
                 NULL AS actividad,
                 NULL AS puesto,
@@ -90,7 +91,7 @@ return new class extends Migration
                 '0000000000' AS nro_form_agrop,
                 '0' AS covid
             FROM
-                mapuche.dh21 d
+                mapuche.dh21h d
             INNER JOIN mapuche.dh01 d2
                 ON d.nro_legaj = d2.nro_legaj
             INNER JOIN mapuche.dh03 d3
@@ -128,7 +129,6 @@ return new class extends Migration
 
     public function down()
     {
-        DB::unprepared('DROP FUNCTION IF EXISTS suc.get_mi_simplificacion_tt');
+        DB::connection($this->getConnectionName())->unprepared('DROP FUNCTION IF EXISTS suc.get_mi_simplificacion_tt');
     }
-}
-;
+};

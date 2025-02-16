@@ -7,20 +7,26 @@ use App\Listeners\JobFailedListener;
 use App\Services\SicossExportService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use App\Services\RepEmbarazadaService;
 use Illuminate\Queue\Events\JobFailed;
 use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\ExportServiceInterface;
 use Illuminate\Queue\Events\JobProcessed;
+use App\Services\AfipMapucheExportService;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Repositories\Mapuche\Dh16Repository;
+use App\Services\AfipRelacionesActivasService;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
+use App\Contracts\RepEmbarazadaServiceInterface;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,6 +69,10 @@ class AppServiceProvider extends ServiceProvider
                 new OrdenesDescuentoTableDefinition()
             );
         });
+
+        $this->app->bind(RepEmbarazadaServiceInterface::class, RepEmbarazadaService::class);
+        $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
+        $this->app->bind(AfipRelacionesActivasServiceInterface::class, AfipRelacionesActivasService::class);
     }
 
     /**

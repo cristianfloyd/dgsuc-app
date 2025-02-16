@@ -69,6 +69,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::post('/afip/sicossimporter', SicossImporter::class)->name('mapuche-sicoss');
     Route::get('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
     Route::post('/afip/compare-cuils', CompareCuils::class)->name('compare-cuils');
+    
     Route::get('/reporte/orden-pago', OrdenPagoReporte::class)->name('reporte-orden-pago');
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');

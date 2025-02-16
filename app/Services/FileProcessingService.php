@@ -81,7 +81,7 @@ class FileProcessingService
                 'data' => []
             ];
         }
-        
+
 
         $result = [
             'success' => true,
@@ -93,34 +93,34 @@ class FileProcessingService
             ]
         ];
 
-        // Procesar archivo AFIP
+        // 1.- Procesar archivo AFIP
         $afipResult = $this->processFileAfip($afipFile);
 
         $result['data']['afip'] = $afipResult;
-        
+
         if (!$afipResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo AFIP';
             return $result;
         }
 
-        // Procesar archivo Mapuche
+        // 2.- Procesar archivo Mapuche
         $mapucheResult = $this->processFileMapuche($mapucheFile);
-        
+
         $result['data']['mapuche'] = $mapucheResult;
-        
+
         if (!$mapucheResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo Mapuche';
             return $result;
         }
 
-        // Ejecutar workflow
+        // 3.- Ejecutar workflow
         try {
             $workflowResult = $this->workflowExecutionService
                 ->setPerPage(10)
                 ->setPeriodoFiscal($afipFile->periodo_fiscal)
-                ->setNroLiqui(1)
+                ->setNroLiqui($afipFile->nro_liqui)
                 ->executeWorkflowSteps();
             $result['data']['workflow'] = $workflowResult;
         } catch (\Exception $e) {
@@ -128,22 +128,36 @@ class FileProcessingService
             $result['message'] = 'Error en la ejecución del workflow: ' . $e->getMessage();
             $result['data']['workflow'] = ['error' => $e->getMessage()];
         }
-
+        Log::info('Resultado del procesamiento fileProcessingService:', $result);
         return $result;
     }
 
+
     /**
-     * Procesa el archivo AFIP y ejecuta el trabajo de importación de relaciones activas.
+     * Procesa un archivo AFIP y lo importa a la base de datos.
      *
-     * @param UploadedFile $afipFile El archivo AFIP a procesar.
-     * @return array El resultado de la ejecución del trabajo de importación.
+     * Este método realiza los siguientes pasos:
+     * 1. Procesa el archivo y mapea los datos
+     * 2. Verifica y prepara la tabla destino
+     * 3. Inserta los datos mapeados en la base de datos
+     *
+     * @param UploadedFile $afipFile El archivo AFIP a procesar
+     * @return array Resultado del procesamiento con la siguiente estructura:
+     *               - success: bool Indica si el proceso fue exitoso
+     *               - message: string Mensaje descriptivo del resultado
+     *               - data: array Datos adicionales del proceso
+     *                 - file: int ID del archivo procesado
+     *                 - tableName: string Nombre de la tabla destino
+     *                 - step: string Paso actual del workflow
+     *                 - recordsProcessed: int|null Cantidad de registros procesados (solo si success=true)
+     *                 - error: string|null Mensaje de error (solo si success=false)
      */
-    private function processFileAfip($afipFile): array
+    private function processFileAfip(UploadedFile $afipFile): array
     {
         $uploadedFileId = $afipFile->id;
         $processLog = $this->workflowService->getLatestWorkflow();
         $step = $this->workflowService->getCurrentStep($processLog);
-        $uploadedFile = UploadedFile::query()->findOrFail($uploadedFileId);
+        $uploadedFile = (new UploadedFile())->findOrFail($uploadedFileId);
         $system = $uploadedFile->origen;
         $tableName = 'afip_relaciones_activas';
 

@@ -13,8 +13,8 @@ class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterfac
     public function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss
     {
         return AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal)
-                                ->where('cuil', $cuil)
-                                ->first();
+            ->where('cuil', $cuil)
+            ->first();
     }
 
     public function create(AfipMapucheSicossDTO $dto): AfipMapucheSicoss
@@ -32,5 +32,15 @@ class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterfac
     public function delete(AfipMapucheSicoss $model): bool
     {
         return $model->delete();
+    }
+
+    /**
+     * Truncar la tabla AfipMapucheSicoss.
+     *
+     * @return void
+     */
+    public function truncate(): void
+    {
+        AfipMapucheSicoss::truncate();
     }
 }

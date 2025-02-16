@@ -15,21 +15,21 @@ return new class extends Migration
             $table->id();
             $table->integer('anio_periodo');
             $table->integer('mes_periodo');
-            $table->integer('numero_liquidacion');
-            $table->string('descripcion_liquidacion', 60);
+            $table->integer('nro_liqui');
+            $table->string('desc_liqui', 60);
             $table->string('tipo_pago', 30);
-            $table->decimal('importe_neto', 15, 2);
+            $table->decimal('importe', 15, 2);
             $table->string('area_administrativa', 3);
             $table->string('subarea_administrativa', 3);
             $table->integer('numero_retencion')->nullable();
             $table->string('descripcion_retencion', 50)->nullable();
-            $table->decimal('importe_retencion', 15, 2)->nullable();
+            // $table->decimal('importe_retencion', 15, 2)->nullable();
             $table->boolean('requiere_cheque')->default(false);
             $table->string('codigo_grupo', 7)->nullable();
             $table->timestamps();
 
             $table->index(['anio_periodo', 'mes_periodo']);
-            $table->index('numero_liquidacion');
+            $table->index('nro_liqui');
         });
     }
 

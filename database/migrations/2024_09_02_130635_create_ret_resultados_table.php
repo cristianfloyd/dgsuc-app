@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
-    protected $connection = 'pgsql-mapuche';
+    use MapucheConnectionTrait;
 
     /**
      * Ejecuta la migración.
      */
     public function up(): void
     {
-        Schema::create('suc.ret_resultado', function (Blueprint $table) {
+        Schema::connection($this->getConnectionName())->create('suc.ret_resultado', function (Blueprint $table) {
             $table->integer('nro_legaj');
             $table->integer('nro_cargo_nuevo');
             $table->char('categ_n', 4);
@@ -147,6 +148,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suc.ret_resultado');
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_resultado');
     }
 };

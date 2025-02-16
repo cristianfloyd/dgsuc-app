@@ -55,22 +55,15 @@ class Dh30 extends Model
         DB::statement("SET client_encoding TO 'SQL_ASCII'");
 
         static::retrieved(function ($model) {
-            if(isset($model->desc_abrev)) {
+            if (isset($model->desc_abrev)) {
                 $model->desc_abrev = $model->handleMixedEncoding($model->desc_abrev);
             }
-            if(isset($model->desc_item)) {
+            if (isset($model->desc_item)) {
                 $model->desc_item = $model->handleMixedEncoding($model->desc_item);
             }
         });
 
-        // static::retrieved(function ($model) {
-        //     if (isset($model->desc_abrev)) {
-        //         $model->desc_abrev = EncodingService::toUtf8($model->desc_abrev);
-        //     }
-        //     if (isset($model->desc_item)) {
-        //         $model->desc_item = EncodingService::toUtf8($model->desc_item);
-        //     }
-        // });
+
 
         static::saving(function ($model) {
             if (isset($model->attributes['desc_abrev'])) {
@@ -90,7 +83,7 @@ class Dh30 extends Model
         return $value;
     }
 
- 
+
 
     public function scopeWithoutEncoding($query)
     {
@@ -114,11 +107,35 @@ class Dh30 extends Model
         return false;
     }
 
-    public function descAvrev(): Attribute
+    protected function descAbrev(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value)
+            get: function ($value) {
+                if (!$value) return null;
+                $value = $this->handleMixedEncoding($value);
+                return trim($value);
+            },
+            set: function ($value) {
+                if (!$value) return null;
+                $value = EncodingService::toLatin1($value);
+                return trim($value);
+            }
+        );
+    }
+
+    protected function descItem(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) return null;
+                $value = $this->handleMixedEncoding($value);
+                return trim($value);
+            },
+            set: function ($value) {
+                if (!$value) return null;
+                $value = EncodingService::toLatin1($value);
+                return trim($value);
+            }
         );
     }
 

@@ -9,6 +9,7 @@ use App\Repositories\Dh61Repository;
 use App\Repositories\EmbargoRepository;
 use App\Services\CategoryUpdateService;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\FallecidoRepository;
 use App\Contracts\Dh19RepositoryInterface;
 use App\Repositories\RepOrdenPagoRepository;
 use App\Repositories\Dh11RepositoryInterface;
@@ -18,6 +19,9 @@ use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
+use App\Repositories\Interfaces\FallecidoRepositoryInterface;
+use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
+use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -33,6 +37,14 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(Dh19RepositoryInterface::class, Dh19Repository::class);
         $this->app->bind(Dh21hRepositoryInterface::class, Dh21hRepository::class);
         $this->app->bind(EmbargoRepositoryInterface::class, EmbargoRepository::class);
+        $this->app->bind(
+            FallecidoRepositoryInterface::class,
+            FallecidoRepository::class
+        );
+        $this->app->bind(
+            abstract: AfipMapucheSicossCalculoRepository::class,
+            concrete: EloquentAfipMapucheSicossCalculoRepository::class
+        );
     }
 
     /**
