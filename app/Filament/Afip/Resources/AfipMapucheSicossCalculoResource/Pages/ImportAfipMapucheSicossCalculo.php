@@ -146,6 +146,8 @@ class ImportAfipMapucheSicossCalculo extends Page
                 ->body("Se importaron {$result['imported']} registros")
                 ->persistent()
                 ->send();
+
+            $this->redirect(AfipMapucheSicossCalculoResource::getUrl('index'));
         } else {
             Notification::make()
                 ->warning()

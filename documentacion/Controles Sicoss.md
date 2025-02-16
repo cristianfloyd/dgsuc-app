@@ -27,5 +27,3 @@
 
 - dh21aporte: Almacena totales de aportes y contribuciones
 - dh21art: Almacena totales de ART
-
-

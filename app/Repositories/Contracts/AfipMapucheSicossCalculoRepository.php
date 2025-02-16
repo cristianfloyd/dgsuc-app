@@ -15,5 +15,4 @@ interface AfipMapucheSicossCalculoRepository
     public function delete(string $cuil): bool;
     public function paginate(int $perPage = 15): LengthAwarePaginator;
     public function truncate(): void;
-    public function updateFromSicoss(string $periodoFiscal): array;
 }

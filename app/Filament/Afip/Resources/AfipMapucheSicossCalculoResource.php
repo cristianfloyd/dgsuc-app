@@ -84,59 +84,29 @@ class AfipMapucheSicossCalculoResource extends Resource
             ])
             ->headerActions([
                 ActionGroup::make([
-                    Action::make('updateFromSicoss')
-                    ->label('Actualizar desde SICOSS')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Actualizar datos desde SICOSS?')
-                    ->modalDescription('Esta acción actualizará los importes desde la tabla SICOSS')
-                    ->modalSubmitActionLabel('Sí, actualizar')
-                    ->action(fn () => app(AfipMapucheSicossCalculoRepository::class)->updateFromSicoss(date('Ym'))),
+                    Action::make('import')
+                        ->label('Importar SICOSS Calculos')
+                        ->icon('heroicon-o-arrow-up-tray')
+                        ->color('primary')
+                        ->url(fn (): string => static::getUrl('import'))
+                        ->button(),
 
-                Action::make('truncateTable')
-                    ->label('Vaciar Tabla')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Vaciar tabla?')
-                    ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
-                    ->modalSubmitActionLabel('Sí, vaciar tabla')
-                    ->action(function() {
-                        app(AfipMapucheSicossCalculoRepository::class)->truncate();
-                        Notification::make()
-                            ->success()
-                            ->title('Tabla vaciada')
-                            ->body('Se han eliminado todos los registros correctamente')
-                            ->send();
-                    }),
-
-                    Action::make('updateUacadCaracter')
-                        ->label('Actualizar UA/CAD y Carácter')
-                        ->icon('heroicon-o-arrow-path')
-                        ->color('warning')
+                    Action::make('truncateTable')
+                        ->label('Vaciar Tabla')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
                         ->requiresConfirmation()
-                        ->modalHeading('¿Actualizar UA/CAD y Carácter?')
-                        ->modalDescription('Esta acción actualizará los campos UA/CAD y Carácter desde Mapuche')
-                        ->modalSubmitActionLabel('Sí, actualizar')
-                        ->action(function () {
-                            $result = app(AfipMapucheSicossCalculoUpdateService::class)
-                                ->updateUacadAndCaracter();
-
-                            if ($result['success']) {
-                                Notification::make()
-                                    ->success()
-                                    ->title('Actualización exitosa')
-                                    ->body($result['message'])
-                                    ->send();
-                            } else {
-                                Notification::make()
-                                    ->danger()
-                                    ->title('Error en la actualización')
-                                    ->body($result['message'])
-                                    ->send();
-                            }
-                        })
+                        ->modalHeading('¿Vaciar tabla?')
+                        ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
+                        ->modalSubmitActionLabel('Sí, vaciar tabla')
+                        ->action(function() {
+                            app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                            Notification::make()
+                                ->success()
+                                ->title('Tabla vaciada')
+                                ->body('Se han eliminado todos los registros correctamente')
+                                ->send();
+                        }),
                 ])
                 ->icon('heroicon-o-cog-8-tooth')
                 ->tooltip('Acciones')
@@ -170,37 +140,5 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->required()
                     ->maxLength(4),
             ]);
-    }
-
-    public static function getActions(): array
-    {
-        return [
-            Action::make('updateFromSicoss')
-                ->label('Actualizar desde SICOSS')
-                ->action(function () {
-                    $service = app(AfipMapucheSicossCalculoUpdateService::class);
-                    $result = $service->updateFromSicoss(date('Ym'));
-
-                    if (empty($result['errors'])) {
-                        Notification::make()
-                            ->success()
-                            ->title('Actualización exitosa')
-                            ->body("Se actualizaron {$result['updated']} registros")
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->warning()
-                            ->title('Actualización con errores')
-                            ->body(implode("\n", $result['errors']))
-                            ->send();
-                    }
-                })
-                ->requiresConfirmation()
-                ->modalHeading('¿Actualizar datos desde SICOSS?')
-                ->modalDescription('Esta acción actualizará los importes desde la tabla SICOSS')
-                ->modalSubmitActionLabel('Sí, actualizar')
-                ->color('success')
-                ->icon('heroicon-o-arrow-path')
-        ];
     }
 }

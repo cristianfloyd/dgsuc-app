@@ -33,13 +33,29 @@ class ListAfipMapucheSicossCalculos extends ListRecords
     protected function getHeaderActions(): array
 {
     return [
-        Action::make('updateFromSicoss')
-            ->label('Actualizar desde SICOSS')
+        Action::make('updateUacadAndCaracter')
+            ->label('Actualizar UA/CAD y Carácter')
             ->icon('heroicon-o-arrow-path')
             ->button()
-            ->color('success')
+            ->color('warning')
             ->requiresConfirmation()
-            ->action(fn () => app(AfipMapucheSicossCalculoUpdateService::class)->updateFromSicoss(date('Ym'))),
+            ->action(function() {
+                $result = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
+
+                if ($result['success']) {
+                    Notification::make()
+                        ->success()
+                        ->title('Actualización exitosa')
+                        ->body($result['message'])
+                        ->send();
+                } else {
+                    Notification::make()
+                        ->danger()
+                        ->title('Error en la actualización')
+                        ->body($result['message'])
+                        ->send();
+                }
+            }),
         Action::make('truncateTable')
             ->label('Vaciar Tabla')
             ->icon('heroicon-o-trash')

@@ -4,17 +4,32 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\ControlArtDiferencia;
+use App\Models\ControlCuilsDiferencia;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Query\Builder;
+use App\Models\ControlAportesDiferencia;
 
+/**
+ * Servicio para ejecutar controles de SICOSS
+ */
 class SicossControlService
 {
     use MapucheConnectionTrait;
 
-    protected $connection;
+    /** @var string Conexión de base de datos actual */
+    protected string $connection;
 
-    public function setConnection(string $connection): void
+    /**
+     * Establece la conexión de base de datos a utilizar
+     *
+     * @param string $connection Nombre de la conexión
+     * @return self
+     */
+    public function setConnection(string $connection): self
     {
         $this->connection = $connection;
+        return $this;
     }
 
     protected function getConnection(): string
@@ -26,7 +41,7 @@ class SicossControlService
     }
 
     /**
-     * Realiza controles y actualizaciones post-importación
+     * Ejecuta todos los controles post importación de SICOSS
      *
      * @return array Resultados de los controles con la siguiente estructura:
      * [
@@ -40,226 +55,231 @@ class SicossControlService
      */
     public function ejecutarControlesPostImportacion(): array
     {
-        $resultados = [];
-
-        try {
-            DB::connection($this->getConnection())->beginTransaction();
-
-            // 1. Control de CUILs faltantes y materialización de resultados
-            $this->materializarControlCuils();
-            $cuilsFaltantes = $this->obtenerResultadosControlCuils();
-            $resultados['cuils_faltantes'] = $cuilsFaltantes;
-
-            // 2. Actualización de UA/CAD y Carácter
-            $actualizados = $this->actualizarUacadCaracter();
-            $resultados['registros_actualizados'] = $actualizados;
-
-            // 3. Control y materialización de aportes y contribuciones
-            $this->materializarControlAportes();
-            $diferencias = $this->obtenerResultadosControlAportes();
-            $resultados['diferencias_encontradas'] = $diferencias;
-
-            // 4. Control y materialización de ART
-            $this->materializarControlArt();
-            $diferenciasArt = $this->obtenerResultadosControlArt();
-            $resultados['diferencias_art'] = $diferenciasArt;
-
-            DB::connection($this->getConnection())->commit();
-
-            return [
-                'success' => true,
-                'resultados' => $resultados
-            ];
-        } catch (\Exception $e) {
-            DB::connection($this->getConnection())->rollBack();
-            Log::error('Error en controles post-importación SICOSS: ' . $e->getMessage());
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+        return [
+            'aportes_contribuciones' => $this->controlAportesContribuciones(),
+        ];
     }
 
     /**
-     * Materializa los resultados del control de CUILs en una tabla temporal
+     * Control de Aportes y Contribuciones
+     * Compara los aportes y contribuciones calculados en DH21 vs los registrados en SICOSS
      *
-     * @throws \Exception Si hay error en la creación de la tabla o inserción de datos
+     * @return array{
+     *  diferencias_por_cuil: array,
+     *  diferencias_por_dependencia: array,
+     *  totales: array
+     * }
      */
-    private function materializarControlCuils(): void
+    protected function controlAportesContribuciones(): array
     {
-        // Primero ejecutamos la consulta
-        $resultados = DB::connection($this->getConnection())->select("
-            WITH cuils_dh21 AS (
-                SELECT DISTINCT
-                    (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
-                    'DH21' as origen
-                FROM mapuche.dh21h
-                JOIN mapuche.dh01 ON dh21h.nro_legaj = dh01.nro_legaj
-                WHERE nro_liqui IN (2,4,5)
-            ),
-            cuils_sicoss AS (
-                SELECT DISTINCT cuil, 'SICOSS' as origen
-                FROM suc.afip_mapuche_sicoss_calculos
-            )
-            SELECT cuil, origen
-            FROM (
-                SELECT cuil, origen FROM cuils_dh21
-                UNION ALL
-                SELECT cuil, origen FROM cuils_sicoss
-            ) t
-            GROUP BY cuil, origen
-            HAVING COUNT(*) = 1
-        ");
+        // Crear tabla temporal con totales de DH21
+        $this->crearTablaDH21Aportes();
 
-        // Luego insertamos en la tabla permanente
-        foreach ($resultados as $resultado) {
-            DB::connection($this->getConnection())->table('suc.control_cuils_diferencias')->insert([
-                'cuil' => $resultado->cuil,
-                'origen' => $resultado->origen,
-                'fecha_control' => now(),
-                'connection' => $this->getConnection()
+        return [
+            'diferencias_por_cuil' => $this->obtenerDiferenciasPorCuil(),
+            'diferencias_por_dependencia' => $this->obtenerDiferenciasPorDependencia(),
+            'totales' => $this->obtenerTotalesAportesContribuciones()
+        ];
+    }
+
+    /**
+     * Crea la tabla temporal dh21aporte con los totales de aportes y contribuciones
+     *
+     * @return void
+     */
+    public function crearTablaDH21Aportes(): void
+    {
+        DB::connection($this->connection)->unprepared("
+            DROP TABLE IF EXISTS dh21aporte;
+
+            SELECT
+                mapuche.dh21h.nro_legaj,
+                (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
+                SUM(CASE
+                    WHEN codn_conce IN (201, 202, 203, 205, 204) THEN impp_conce * 1
+                    ELSE impp_conce * 0
+                END)::numeric::money AS aportesijpdh21,
+                SUM(CASE
+                    WHEN codn_conce IN (247) THEN impp_conce * 1
+                    ELSE impp_conce * 0
+                END)::numeric::money AS aporteinssjpdh21,
+                SUM(CASE
+                    WHEN codn_conce IN (301, 302, 303, 304, 307) THEN impp_conce * 1
+                    ELSE impp_conce * 0
+                END)::numeric::money AS contribucionsijpdh21,
+                SUM(CASE
+                    WHEN codn_conce IN (347) THEN impp_conce * 1
+                    ELSE impp_conce * 0
+                END)::numeric::money AS contribucioninssjpdh21
+            INTO TEMP dh21aporte
+            FROM mapuche.dh21h
+            JOIN mapuche.dh01 ON mapuche.dh21h.nro_legaj = mapuche.dh01.nro_legaj
+            WHERE nro_liqui IN(
+                SELECT d22.nro_liqui FROM mapuche.dh22 d22
+                WHERE d22.sino_genimp = true AND d22.per_liano = 2025 AND per_limes = 1
+                ORDER BY 1
+            )
+            GROUP BY mapuche.dh21h.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2;
+        ");
+    }
+
+    /**
+     * Obtiene las diferencias de aportes y contribuciones por CUIL
+     *
+     * @return array<int, array{
+     *   nro_legaj: int,
+     *   cuil: string,
+     *   diferencia_aportes: float,
+     *   diferencia_contribuciones: float
+     * }>
+     */
+    public function obtenerDiferenciasPorCuil(): array
+    {
+        // Primero limpiamos los registros anteriores
+        ControlAportesDiferencia::truncate();
+
+        $diferencias = DB::connection($this->connection)
+            ->table('dh21aporte as a')
+            ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+            ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
+            ->whereNotIn('a.nro_legaj', function (Builder $query) {
+                $query->select('nro_legaj')
+                    ->from('mapuche.dh21')
+                    ->whereIn('codn_conce', [123, 248]);
+            })
+            ->select([
+                'a.cuil',
+                'a.aportesijpdh21',
+                'a.aporteinssjpdh21',
+                DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric
+                    as diferencia")
+            ])
+            ->get();
+
+        // Almacenamos las diferencias encontradas
+        foreach ($diferencias as $diferencia) {
+            ControlAportesDiferencia::create([
+                'cuil' => $diferencia->cuil,
+                'aportesijpdh21' => $diferencia->aportesijpdh21,
+                'aporteinssjpdh21' => $diferencia->aporteinssjpdh21,
+                'diferencia' => $diferencia->diferencia
             ]);
         }
+
+        return $diferencias->toArray();
     }
 
     /**
-     * Obtiene los resultados del control de CUILs
+     * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter
      *
-     * @return array Registros con diferencias de CUILs
+     * @return array<int, array{
+     *   codc_uacad: string,
+     *   caracter: string,
+     *   diferencia_total: float
+     * }>
      */
-    private function obtenerResultadosControlCuils(): array
+    public function obtenerDiferenciasPorDependencia(): array
     {
-        return DB::connection($this->getConnection())->select("
-            SELECT *
-            FROM suc.control_cuils_diferencias
-            ORDER BY origen, cuil
-        ");
+        return DB::connection($this->connection)
+            ->table('dh21aporte as a')
+            ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->groupBy('b.codc_uacad', 'b.caracter')
+            ->select([
+                'b.codc_uacad',
+                'b.caracter',
+                DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
+            ])
+            ->orderBy('b.codc_uacad')
+            ->orderBy('b.caracter')
+            ->get()
+            ->toArray();
     }
 
     /**
-     * Materializa los resultados del control de aportes en una tabla temporal
+     * Obtiene los totales de aportes y contribuciones
      *
-     * @throws \Exception Si hay error en la creación de la tabla o inserción de datos
+     * @return array{
+     *   dh21: array{aportes: float, contribuciones: float},
+     *   sicoss: array{aportes: float, contribuciones: float}
+     * }
      */
-    private function materializarControlAportes(): void
+    public function obtenerTotalesAportesContribuciones(): array
     {
-        DB::connection($this->getConnection())->statement("
-            DROP TABLE IF EXISTS suc.control_aportes_diferencias;
+        $totalesDH21 = DB::connection($this->connection)
+            ->table('dh21aporte')
+            ->select([
+                DB::raw('SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric)) as aportes'),
+                DB::raw('SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric)) as contribuciones')
+            ])
+            ->first();
 
-            CREATE TABLE suc.control_aportes_diferencias AS
-            SELECT a.*,
-                (aportesijpdh21 + aporteinssjpdh21) - (
-                    aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re
-                ) AS diferencia
-            FROM dh21aporte a
-            JOIN suc.afip_mapuche_sicoss_calculos b ON a.cuil = b.cuil
-            WHERE abs(
-                (
-                    (aportesijpdh21 + aporteinssjpdh21) - (
-                        aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re
-                    )
-                )::numeric
-            ) > 1
-        ");
+        $totalesSicoss = DB::connection($this->connection)
+            ->table('suc.afip_mapuche_sicoss_calculos')
+            ->select([
+                DB::raw('SUM((aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re)::numeric) as aportes'),
+                DB::raw('SUM((contribucionsijp + contribucioninssjp)::numeric) as contribuciones')
+            ])
+            ->first();
+
+        return [
+            'dh21' => [
+                'aportes' => (float) $totalesDH21->aportes,
+                'contribuciones' => (float) $totalesDH21->contribuciones
+            ],
+            'sicoss' => [
+                'aportes' => (float) $totalesSicoss->aportes,
+                'contribuciones' => (float) $totalesSicoss->contribuciones
+            ]
+        ];
     }
 
     /**
-     * Obtiene los resultados del control de aportes
-     *
-     * @return array Registros con diferencias en aportes
+     * Obtiene el query builder para las diferencias por CUIL
      */
-    private function obtenerResultadosControlAportes(): array
+    public function getQueryDiferenciasPorCuil(): Builder
     {
-        return DB::connection($this->getConnection())->select("
-            SELECT *
-            FROM suc.control_aportes_diferencias
-            ORDER BY diferencia DESC
-        ");
+        return DB::connection($this->connection)
+            ->table('dh21aporte as a')
+            ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+            ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
+            ->whereNotIn('a.nro_legaj', function (Builder $query) {
+                $query->select('nro_legaj')
+                    ->from('mapuche.dh21')
+                    ->whereIn('codn_conce', [123, 248]);
+            })
+            ->select([
+                'a.nro_legaj',
+                'a.cuil',
+                DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric
+                    as diferencia_aportes"),
+                DB::raw("((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_contribuciones")
+            ]);
     }
 
     /**
-     * Materializa los resultados del control de ART en una tabla temporal
-     *
-     * @throws \Exception Si hay error en la creación de la tabla o inserción de datos
+     * Obtiene el query builder para las diferencias por dependencia
      */
-    private function materializarControlArt(): void
+    public function getQueryDiferenciasPorDependencia(): Builder
     {
-        DB::connection($this->getConnection())->statement("
-            DROP TABLE IF EXISTS suc.control_art_diferencias;
-
-            CREATE TABLE suc.control_art_diferencias AS
-            WITH dh21art AS (
-                SELECT dh21h.nro_legaj,
-                    (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
-                    SUM(CASE WHEN codn_conce IN (306, 308) THEN impp_conce ELSE 0 END)::numeric AS art_contrib
-                FROM mapuche.dh21h
-                JOIN mapuche.dh01 ON dh21h.nro_legaj = dh01.nro_legaj
-                WHERE nro_liqui IN (2, 4, 5)
-                GROUP BY dh21h.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2
-            )
-            SELECT
-                a.cuil,
-                a.art_contrib,
-                ((b.rem_imp9::numeric * 0.005) + 1172) as calculo_teorico,
-                (a.art_contrib - ((b.rem_imp9::numeric * 0.005) + 1172)) as diferencia
-            FROM dh21art a
-            JOIN suc.afip_mapuche_sicoss b ON a.cuil = b.cuil
-            WHERE ABS(a.art_contrib - ((b.rem_imp9::numeric * 0.005) + 1172)) > 1
-        ");
-    }
-
-    /**
-     * Obtiene los resultados del control de ART
-     *
-     * @return array Registros con diferencias en ART
-     */
-    private function obtenerResultadosControlArt(): array
-    {
-        return DB::connection($this->getConnection())->select("
-            SELECT *
-            FROM suc.control_art_diferencias
-            ORDER BY diferencia DESC
-        ");
-    }
-
-    /**
-     * Actualiza UA/CAD y Carácter desde Mapuche
-     */
-    private function actualizarUacadCaracter(): int
-    {
-        return DB::connection($this->getConnection())->affectingStatement("
-            WITH cuils AS (
-                SELECT dh01.nro_legaj,
-                       CONCAT(dh01.nro_cuil1::text,
-                              LPAD(dh01.nro_cuil::CHARACTER(8)::TEXT, 8, '0'::TEXT),
-                              dh01.nro_cuil2::text) AS cuil
-                FROM mapuche.dh01
-                JOIN suc.afip_mapuche_sicoss_calculos am ON
-                    CONCAT(dh01.nro_cuil1::text,
-                           LPAD(dh01.nro_cuil::CHARACTER(8)::TEXT, 8, '0'::TEXT),
-                           dh01.nro_cuil2::text) = am.cuil
-            ),
-            dh03_agregado AS (
-                SELECT nro_legaj,
-                       MAX(codc_uacad) as codc_uacad,
-                       MIN(codc_carac) as codc_carac
-                FROM mapuche.dh03
-                GROUP BY nro_legaj
-            )
-            UPDATE suc.afip_mapuche_sicoss_calculos a
-            SET codc_uacad = subq.codc_uacad,
-                caracter = CASE
-                            WHEN subq.codc_carac IN ('PERM', 'REGU')
-                            THEN 'PERM'
-                            ELSE 'CONT'
-                          END
-            FROM (
-                SELECT c.cuil, d.codc_uacad, d.codc_carac
-                FROM cuils c
-                JOIN dh03_agregado d ON c.nro_legaj = d.nro_legaj
-            ) subq
-            WHERE a.cuil = subq.cuil
-        ");
+        return DB::connection($this->connection)
+            ->table('dh21aporte as a')
+            ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->groupBy('b.codc_uacad', 'b.caracter')
+            ->select([
+                'b.codc_uacad',
+                'b.caracter',
+                DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
+            ]);
     }
 }

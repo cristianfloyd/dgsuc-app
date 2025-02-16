@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class ControlAportesDiferencia extends Model
 {
+    use MapucheConnectionTrait;
+    
     protected $table = 'suc.control_aportes_diferencias';
     public $timestamps = false;
 
