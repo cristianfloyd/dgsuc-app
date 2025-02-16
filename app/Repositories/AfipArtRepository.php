@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\AfipArt;
+use App\Models\AfipMapucheArt;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -19,29 +19,29 @@ class AfipArtRepository
      */
     public function getAll(): Collection
     {
-        return AfipArt::all();
+        return AfipMapucheArt::all();
     }
 
     /**
      * Busca un registro por su CUIL original
      *
      * @param string $cuil
-     * @return AfipArt|null
+     * @return AfipMapucheArt|null
      */
-    public function findByCuil(string $cuil): ?AfipArt
+    public function findByCuil(string $cuil): ?AfipMapucheArt
     {
-        return AfipArt::find($cuil);
+        return AfipMapucheArt::find($cuil);
     }
 
     /**
      * Crea un nuevo registro
      *
      * @param array $data
-     * @return AfipArt
+     * @return AfipMapucheArt
      */
-    public function create(array $data): AfipArt
+    public function create(array $data): AfipMapucheArt
     {
-        return AfipArt::create($data);
+        return AfipMapucheArt::create($data);
     }
 
     /**
@@ -53,7 +53,7 @@ class AfipArtRepository
      */
     public function update(string $cuil, array $data): bool
     {
-        $afipArt = AfipArt::find($cuil);
+        $afipArt = AfipMapucheArt::find($cuil);
         return $afipArt ? $afipArt->update($data) : false;
     }
 
@@ -65,7 +65,7 @@ class AfipArtRepository
      */
     public function delete(string $cuil): bool
     {
-        $afipArt = AfipArt::find($cuil);
+        $afipArt = AfipMapucheArt::find($cuil);
         return $afipArt ? $afipArt->delete() : false;
     }
 }

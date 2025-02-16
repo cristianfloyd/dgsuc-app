@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Repositories;
 
-use Tests\TestCase;
-use App\Models\AfipArt;
-use App\Contracts\AfipArtRepository;
+use App\Repositories\AfipArtRepository;
+use App\Models\AfipMapucheArt as AfipArt;
+use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AfipArtRepositoryTest extends TestCase

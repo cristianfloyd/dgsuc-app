@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Contracts\AfipArtRepository;
+use App\Models\AfipMapucheArt;
 use App\Http\Requests\AfipArtRequest;
-use App\Models\AfipArt;
+use App\Repositories\AfipArtRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -40,9 +40,9 @@ class AfipArtService
      * Busca un registro por su CUIL original
      *
      * @param string $cuil
-     * @return AfipArt|null
+     * @return AfipMapucheArt|null
      */
-    public function findByCuil(string $cuil): ?AfipArt
+    public function findByCuil(string $cuil): ?AfipMapucheArt
     {
         return $this->afipArtRepository->findByCuil($cuil);
     }
@@ -51,9 +51,9 @@ class AfipArtService
      * Crea un nuevo registro
      *
      * @param AfipArtRequest $request
-     * @return AfipArt
+     * @return AfipMapucheArt
      */
-    public function create(AfipArtRequest $request): AfipArt
+    public function create(AfipArtRequest $request): AfipMapucheArt
     {
         return $this->afipArtRepository->create($request->validated());
     }

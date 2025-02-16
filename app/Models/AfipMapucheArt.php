@@ -3,21 +3,21 @@
 namespace App\Models;
 
 use App\Models\Mapuche\Dh22;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AfipMapucheArt extends Model
 {
-    // Configuración de la conexión y tabla
-    protected $connection = 'pgsql-suc';
+    use MapucheConnectionTrait;
     protected $table = 'afip_art';
+    protected $schema = 'suc';
 
-    // Configuración de la clave primaria
-    protected $primaryKey = 'cuil_original';
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    public $incrementing = true;
     protected $keyType = 'string';
     public $timestamps = false;
 

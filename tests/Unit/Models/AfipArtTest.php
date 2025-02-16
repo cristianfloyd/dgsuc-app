@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models;
 
-use Tests\TestCase;
-use App\Models\AfipArt;
+use App\Models\AfipMapucheArt as AfipArt;
+use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AfipArtTest extends TestCase
