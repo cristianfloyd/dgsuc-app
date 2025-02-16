@@ -33,8 +33,8 @@ class AfipMapucheSicossResource extends Resource
     protected static ?string $model = AfipMapucheSicoss::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'AFIP';
-    protected static ?string $navigationLabel = 'Controles Sicoss';
-    protected static ?string $pluralLabel = 'Controles Sicoss';
+    protected static ?string $navigationLabel = 'Mapuche SICOSS';
+    protected static ?string $pluralLabel = 'Mapuche SICOSS';
 
 
 

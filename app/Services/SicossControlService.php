@@ -9,6 +9,7 @@ use App\Models\ControlCuilsDiferencia;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Query\Builder;
 use App\Models\ControlAportesDiferencia;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 /**
  * Servicio para ejecutar controles de SICOSS
@@ -85,41 +86,58 @@ class SicossControlService
     /**
      * Crea la tabla temporal dh21aporte con los totales de aportes y contribuciones
      *
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
      * @return void
      */
-    public function crearTablaDH21Aportes(): void
+    public function crearTablaDH21Aportes(?int $anio = null, ?int $mes = null): void
     {
+        // Si no se proporcionan parámetros, usar el periodo fiscal actual
+        if ($anio === null || $mes === null) {
+            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $anio = $anio ?? $periodoFiscal['year'];
+            $mes = $mes ?? $periodoFiscal['month'];
+        }
+
+        // Determinar qué tabla usar basado en el período
+        $periodoActual = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+        $tablaNovedad = ($anio == $periodoActual['year'] && $mes == $periodoActual['month'])
+            ? 'mapuche.dh21'
+            : 'mapuche.dh21h';
+
         DB::connection($this->connection)->unprepared("
             DROP TABLE IF EXISTS dh21aporte;
 
             SELECT
-                mapuche.dh21h.nro_legaj,
+                {$tablaNovedad}.nro_legaj,
                 (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
                 SUM(CASE
                     WHEN codn_conce IN (201, 202, 203, 205, 204) THEN impp_conce * 1
                     ELSE impp_conce * 0
-                END)::numeric::money AS aportesijpdh21,
+                END)::numeric(15,2) AS aportesijpdh21,
                 SUM(CASE
                     WHEN codn_conce IN (247) THEN impp_conce * 1
                     ELSE impp_conce * 0
-                END)::numeric::money AS aporteinssjpdh21,
+                END)::numeric(15,2) AS aporteinssjpdh21,
                 SUM(CASE
                     WHEN codn_conce IN (301, 302, 303, 304, 307) THEN impp_conce * 1
                     ELSE impp_conce * 0
-                END)::numeric::money AS contribucionsijpdh21,
+                END)::numeric(15,2) AS contribucionsijpdh21,
                 SUM(CASE
                     WHEN codn_conce IN (347) THEN impp_conce * 1
                     ELSE impp_conce * 0
-                END)::numeric::money AS contribucioninssjpdh21
+                END)::numeric(15,2) AS contribucioninssjpdh21
             INTO TEMP dh21aporte
-            FROM mapuche.dh21h
-            JOIN mapuche.dh01 ON mapuche.dh21h.nro_legaj = mapuche.dh01.nro_legaj
+            FROM {$tablaNovedad}
+            JOIN mapuche.dh01 ON {$tablaNovedad}.nro_legaj = mapuche.dh01.nro_legaj
             WHERE nro_liqui IN(
                 SELECT d22.nro_liqui FROM mapuche.dh22 d22
-                WHERE d22.sino_genimp = true AND d22.per_liano = 2025 AND per_limes = 1
+                WHERE d22.sino_genimp = true
+                AND d22.per_liano = {$anio}
+                AND per_limes = {$mes}
                 ORDER BY 1
             )
-            GROUP BY mapuche.dh21h.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2;
+            GROUP BY {$tablaNovedad}.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2;
         ");
     }
 
@@ -150,10 +168,10 @@ class SicossControlService
             })
             ->select([
                 'a.cuil',
-                'a.aportesijpdh21',
-                'a.aporteinssjpdh21',
+                DB::raw("aportesijpdh21::numeric(15,2) as aportesijpdh21"),
+                DB::raw("aporteinssjpdh21::numeric(15,2) as aporteinssjpdh21"),
                 DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
-                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric(15,2)
                     as diferencia")
             ])
             ->get();
@@ -164,7 +182,8 @@ class SicossControlService
                 'cuil' => $diferencia->cuil,
                 'aportesijpdh21' => $diferencia->aportesijpdh21,
                 'aporteinssjpdh21' => $diferencia->aporteinssjpdh21,
-                'diferencia' => $diferencia->diferencia
+                'diferencia' => $diferencia->diferencia,
+                'fecha_control' => now()
             ]);
         }
 

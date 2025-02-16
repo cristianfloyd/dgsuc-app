@@ -15,7 +15,7 @@ class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
     private static $connectionInstance = null;
-    private const int DEFAULT_CHUNK_SIZE = 1000;
+    private const DEFAULT_CHUNK_SIZE = 1000;
 
 
     /**

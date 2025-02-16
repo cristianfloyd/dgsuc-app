@@ -8,15 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class ControlAportesDiferencia extends Model
 {
     use MapucheConnectionTrait;
-    
+
     protected $table = 'suc.control_aportes_diferencias';
     public $timestamps = false;
 
     protected $fillable = [
         'cuil',
+        'codc_uacad',
+        'caracter',
         'aportesijpdh21',
         'aporteinssjpdh21',
-        'diferencia'
+        'diferencia',
+        'fecha_control',
+        'connection'
     ];
 
     protected $casts = [

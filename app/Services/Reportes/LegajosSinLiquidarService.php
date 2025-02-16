@@ -14,7 +14,7 @@ use App\Exceptions\LiquidacionNotFoundException;
 
 class LegajosSinLiquidarService
 {
-    private const int MESES_ANALISIS = 3;
+    private const MESES_ANALISIS = 3;
 
     public function __construct(
         private readonly Dh22 $dh22,

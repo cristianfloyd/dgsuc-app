@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class FileProcessorService extends AbstractFileProcessor implements FileProcessorInterface
 {
-    private const string UTF8_ENCODING = 'UTF-8';
+    private const UTF8_ENCODING = 'UTF-8';
 
     private int $periodoFiscal;
     private string $absolutePath;

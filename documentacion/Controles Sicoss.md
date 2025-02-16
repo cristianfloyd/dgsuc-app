@@ -1,7 +1,8 @@
-# Controles Sicoss
+# Controles Sicoss 
 
 ## 1. Controles principales
 
+(El trait SicossConnectionTrait establece la conexion de la based de datos)
 1. Control de Aportes y Contribuciones
     - Compara los aportes y contribuciones calculados en DH21 vs los registrados en SICOSS
     - Incluye:
