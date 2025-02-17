@@ -19,7 +19,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Pages\DashboardSelector;
-
+use App\Filament\Pages\DocumentationPage;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
                 // Pages\Dashboard::class,
                 Profile::class,
                 DashboardSelector::class,
+                DocumentationPage::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
