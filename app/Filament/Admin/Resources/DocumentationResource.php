@@ -16,6 +16,8 @@ use App\Filament\Admin\Resources\DocumentationResource\Pages\ViewDocumentation;
 use App\Filament\Admin\Resources\DocumentationResource\Pages\ListDocumentation;
 use App\Filament\Admin\Resources\DocumentationResource\Pages\CreateDocumentation;
 use App\Filament\Admin\Resources\DocumentationResource\Pages\EditDocumentation;
+use Filament\Tables\Actions\Action;
+use Filament\Notifications\Notification;
 
 class DocumentationResource extends Resource
 {
@@ -80,7 +82,24 @@ class DocumentationResource extends Resource
                 ToggleColumn::make('is_published')
                     ->label('Publicado'),
             ])
-            ->defaultSort('order');
+            ->defaultSort('order')
+            ->actions([
+                Action::make('view_docs')
+                    ->label('Ver Documentación')
+                    ->icon('heroicon-o-document-text')
+                    ->action(function (Documentation $record) {
+                        $filePath = base_path("docs/filament/{$record->slug}.md");
+                        if (file_exists($filePath)) {
+                            return response()->file($filePath);
+                        }
+
+                        Notification::make()
+                            ->title('Documento no encontrado')
+                            ->danger()
+                            ->send();
+                    })
+                    ->visible(fn(Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md")))
+            ]);
     }
 
     public static function getPages(): array
@@ -91,5 +110,36 @@ class DocumentationResource extends Resource
             'edit' => EditDocumentation::route('/{record}/edit'),
             'view' => ViewDocumentation::route('/{record}'),
         ];
+    }
+
+    public static function syncMarkdownFiles(): void
+    {
+        $markdownFiles = glob(base_path('docs/filament/*.md'));
+
+        foreach ($markdownFiles as $file) {
+            $content = file_get_contents($file);
+            $filename = basename($file, '.md');
+
+            // Extract title from markdown first heading
+            preg_match('/^#\s*(.+)$/m', $content, $matches);
+            $title = $matches[1] ?? $filename;
+
+            Documentation::updateOrCreate(
+                ['slug' => $filename],
+                [
+                    'title' => $title,
+                    'content' => $content,
+                    'section' => 'filament', // You might want to adjust this
+                    'is_published' => true,
+                    'order' => 0, // You might want to adjust this
+                ]
+            );
+        }
+
+        // Optionally remove records that don't have corresponding files
+        $existingSlugs = collect($markdownFiles)->map(fn($file) => basename($file, '.md'));
+        Documentation::where('section', 'filament')
+            ->whereNotIn('slug', $existingSlugs)
+            ->delete();
     }
 }

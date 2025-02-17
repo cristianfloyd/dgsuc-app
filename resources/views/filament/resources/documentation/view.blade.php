@@ -5,7 +5,7 @@
 
     <x-filament::button
         class="mt-4"
-        icon="heroicon-o-download"
+        icon="heroicon-o-arrow-down-tray"
         href="{{ route('documentation.download') }}"
     >
         Descargar PDF

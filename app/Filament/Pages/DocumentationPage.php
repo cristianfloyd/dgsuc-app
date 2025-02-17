@@ -3,83 +3,117 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use App\Models\Documentation;
 use League\CommonMark\CommonMarkConverter;
-use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\File;
+use Filament\Notifications\Notification;
 
 class DocumentationPage extends Page
 {
-    public $activeSection = 'general';
-    protected $listeners = ['darkModeChanged'];
-
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationLabel = 'Documentación';
     protected static ?string $title = 'Documentación del Sistema';
-
     protected static string $view = 'filament.pages.documentation';
 
-    public $documentation;
+    protected static ?string $navigationGroup = 'Ayuda';
+    protected static ?int $navigationSort = 100;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
+
+    public string $activeSection = 'index';
+    protected array $documentationData = [];
+    protected array $markdownFiles = [
+        'index' => 'Resumen General',
+        'panel-liquidaciones' => 'Panel de Liquidaciones',
+        'panel-embargos' => 'Panel de Embargos',
+        'panel-admin' => 'Panel Administrativo',
+        'recursos' => 'Recursos del Sistema',
+        'controles-sicoss' => 'Controles SICOSS',
+        'bloqueos' => 'Sistema de Bloqueos'
+    ];
 
     public function mount()
     {
-        $this->documentation = Documentation::where('is_published', true)
-            ->orderBy('section')
-            ->orderBy('order')
-            ->get()
-            ->map(function ($doc) {
-                $doc->rendered_content = $this->renderMarkdown($doc->content);
-                return $doc;
-            });
+        $this->loadDocumentation();
     }
 
-    public function setActiveSection($section)
-    {
-        $this->activeSection = $section;
-    }
-
-    public function darkModeChanged()
-    {
-        // Re-renderizar contenido con estilos dark/light
-        $this->documentation = $this->documentation->map(function ($doc) {
-            $doc->rendered_content = $this->renderMarkdown($doc->content);
-            return $doc;
-        });
-    }
-
-    protected function renderMarkdown($content)
+    protected function loadDocumentation()
     {
         $converter = new CommonMarkConverter([
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
+            'heading_permalink' => [
+                'html_class' => 'heading-permalink',
+                'symbol' => '#',
+                'insert' => 'before',
+            ],
         ]);
 
-        return $converter->convert($content);
+        foreach ($this->markdownFiles as $file => $title) {
+            $filePath = base_path("docs/filament/{$file}.md");
+
+            if (File::exists($filePath)) {
+                $content = File::get($filePath);
+                $this->documentationData[] = [
+                    'title' => $title,
+                    'section' => $file,
+                    'content' => $content,
+                    'rendered_content' => (string) $converter->convert($content)
+                ];
+            }
+        }
+
+        if (empty($this->documentationData)) {
+            Notification::make()
+                ->warning()
+                ->title('No se encontró documentación')
+                ->body('No se encontraron archivos de documentación en el directorio especificado.')
+                ->send();
+        }
     }
 
-    public function print()
+    public function setActiveSection(string $section): void
+    {
+        $this->activeSection = $section;
+    }
+
+    public function print(): void
     {
         $this->dispatch('print-documentation');
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
-        $converter = new CommonMarkConverter();
-        $markdown = $this->renderMarkdown($this->documentation->first()->content);
-
         return [
-            'documentation' => $markdown,
+            'documentation' => $this->documentationData,
             'sections' => $this->getSections(),
         ];
     }
 
     protected function getSections(): array
     {
-        return [
-            'general' => 'Documentación General',
-            'liquidaciones' => 'Panel de Liquidaciones',
-            'embargos' => 'Panel de Embargos',
-            'reportes' => 'Panel de Reportes',
-            'admin' => 'Panel Administrativo'
-        ];
+        return collect($this->markdownFiles)
+            ->map(function ($title, $key) {
+                return [
+                    'key' => $key,
+                    'title' => $title,
+                ];
+            })
+            ->toArray();
+    }
+
+    public function getHeadings(): array
+    {
+        $currentDoc = collect($this->documentationData)
+            ->firstWhere('section', $this->activeSection);
+
+        if (!$currentDoc) {
+            return [];
+        }
+
+        preg_match_all('/#+ (.*)/', $currentDoc['content'], $matches);
+        return $matches[1] ?? [];
     }
 }

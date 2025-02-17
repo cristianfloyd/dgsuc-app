@@ -1,55 +1,118 @@
-<x-filament::page>
-    <div class="grid grid-cols-12 gap-4">
-        {{-- Sidebar mejorado con indicador activo --}}
-        <div class="col-span-3">
-            <div class="sticky top-4">
-                <nav class="space-y-1">
-                    @foreach($sections as $key => $label)
-                        <a href="#{{ $key }}"
-                           class="block p-2 text-sm rounded-lg transition-colors
-                                  {{ $activeSection === $key
-                                     ? 'bg-primary-500 text-white'
-                                     : 'hover:bg-gray-100 dark:hover:bg-gray-800' }}"
-                           wire:click="setActiveSection('{{ $key }}')">
-                            {{ $label }}
-                        </a>
+<x-filament-panels::page>
+    <div class="grid grid-cols-12 gap-6">
+        {{-- Sidebar con lista de documentos --}}
+        <div class="col-span-12 lg:col-span-3">
+            <x-filament::section>
+                <x-slot name="heading">
+                    Secciones
+                </x-slot>
+
+                <div class="space-y-2">
+                    @foreach($sections as $section)
+                        <x-filament::button
+                            wire:click="setActiveSection('{{ $section['key'] }}')"
+                            :color="$activeSection === $section['key'] ? 'primary' : 'gray'"
+                            :variant="$activeSection === $section['key'] ? 'filled' : 'outlined'"
+                            class="w-full justify-start"
+                        >
+                            {{ $section['title'] }}
+                        </x-filament::button>
                     @endforeach
-                </nav>
-            </div>
+                </div>
+            </x-filament::section>
         </div>
 
-        {{-- Contenido principal con scroll spy --}}
-        <div class="col-span-9">
-            <div class="prose max-w-none dark:prose-invert"
-                 x-data="{ activeSection: @entangle('activeSection') }"
-                 x-on:scroll.window="updateActiveSection">
+        {{-- Contenido principal --}}
+        <div class="col-span-12 lg:col-span-9">
+            <x-filament::section>
+                <x-slot name="heading">
+                    <div class="flex items-center justify-between">
+                        <span>
+                            {{ collect($sections)->firstWhere('key', $activeSection)['title'] ?? 'Documentación' }}
+                        </span>
+
+                        <x-filament::button
+                            wire:click="print"
+                            icon="heroicon-m-printer"
+                            size="sm"
+                        >
+                            Imprimir
+                        </x-filament::button>
+                    </div>
+                </x-slot>
+
                 @foreach($documentation as $doc)
-                    <section id="{{ $doc->section }}"
-                             class="scroll-mt-16">
-                        <h2>{{ $doc->title }}</h2>
-                        {!! $doc->rendered_content !!}
-                    </section>
+                    <div
+                        x-show="$wire.activeSection === '{{ $doc['section'] }}'"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        class="prose dark:prose-invert max-w-none"
+                    >
+                        {!! $doc['rendered_content'] !!}
+                    </div>
                 @endforeach
-            </div>
+            </x-filament::section>
         </div>
     </div>
 
-    {{-- Barra de acciones flotante --}}
-    <div class="fixed bottom-4 right-4 flex gap-2">
-        <x-filament::button
-            icon="heroicon-o-download"
-            href="{{ route('documentation.download') }}"
-            class="shadow-lg"
-        >
-            Descargar PDF
-        </x-filament::button>
+    {{-- Estilos específicos para la documentación --}}
+    <style>
+        .prose h1, .prose h2, .prose h3, .prose h4 {
+            scroll-margin-top: 100px;
+        }
 
-        <x-filament::button
-            icon="heroicon-o-printer"
-            wire:click="print"
-            class="shadow-lg"
-        >
-            Imprimir
-        </x-filament::button>
-    </div>
-</x-filament::page>
+        .heading-permalink {
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-right: 0.5em;
+            text-decoration: none;
+        }
+
+        .prose :where(h1, h2, h3, h4):hover .heading-permalink {
+            opacity: 1;
+        }
+
+        /* Estilos para bloques de código */
+        .prose :where(pre) {
+            @apply bg-gray-950 dark:bg-gray-900 rounded-lg;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        /* Estilos para tablas */
+        .prose :where(table) {
+            @apply w-full;
+        }
+
+        .prose :where(thead) {
+            @apply bg-gray-50 dark:bg-gray-800;
+        }
+
+        .prose :where(th, td) {
+            @apply p-2 border dark:border-gray-700;
+        }
+
+        @media print {
+            .fi-sidebar,
+            .fi-header,
+            .fi-btn {
+                display: none !important;
+            }
+
+            .prose {
+                max-width: none !important;
+            }
+        }
+    </style>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('livewire:initialized', () => {
+                Livewire.on('print-documentation', () => {
+                    window.print();
+                });
+            });
+        </script>
+    @endpush
+</x-filament-panels::page>

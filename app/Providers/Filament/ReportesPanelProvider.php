@@ -22,6 +22,8 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
 use App\Filament\Pages\DashboardSelector;
+use App\Filament\Pages\DocumentationPage;
+
 class ReportesPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -54,7 +56,7 @@ class ReportesPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
                 DashboardSelector::class,
-                // ReporteEmbargos::class,
+                DocumentationPage::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Reportes/Widgets'), for: 'App\\Filament\\Reportes\\Widgets')
             ->widgets([
