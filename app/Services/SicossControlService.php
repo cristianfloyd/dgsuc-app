@@ -144,15 +144,29 @@ class SicossControlService
     /**
      * Obtiene las diferencias de aportes y contribuciones por CUIL
      *
-     * @return array<int, array{
-     *   nro_legaj: int,
-     *   cuil: string,
-     *   diferencia_aportes: float,
-     *   diferencia_contribuciones: float
-     * }>
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
+     * @return array{
+     *   registros_procesados: int,
+     *   diferencias_encontradas: int,
+     *   fecha_proceso: string
+     * }
      */
-    public function obtenerDiferenciasPorCuil(): array
+    public function obtenerDiferenciasPorCuil(?int $anio = null, ?int $mes = null): array
     {
+        // Si no se proporcionan parámetros, usar el periodo fiscal actual
+        if ($anio === null || $mes === null) {
+            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $anio = $anio ?? $periodoFiscal['year'];
+            $mes = $mes ?? $periodoFiscal['month'];
+        }
+
+        // Determinar qué tabla usar basado en el período
+        $periodoActual = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+        $tablaNovedad = ($anio == $periodoActual['year'] && $mes == $periodoActual['month'])
+            ? 'mapuche.dh21'
+            : 'mapuche.dh21h';
+
         // Primero limpiamos los registros anteriores
         ControlAportesDiferencia::truncate();
 
@@ -161,9 +175,9 @@ class SicossControlService
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
             ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                 (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
-            ->whereNotIn('a.nro_legaj', function (Builder $query) {
+            ->whereNotIn('a.nro_legaj', function (Builder $query) use ($tablaNovedad) {
                 $query->select('nro_legaj')
-                    ->from('mapuche.dh21')
+                    ->from($tablaNovedad)
                     ->whereIn('codn_conce', [123, 248]);
             })
             ->select([
@@ -176,18 +190,25 @@ class SicossControlService
             ])
             ->get();
 
-        // Almacenamos las diferencias encontradas
-        foreach ($diferencias as $diferencia) {
-            ControlAportesDiferencia::create([
+        // Inserción masiva en la tabla de control
+        $registrosParaInsertar = $diferencias->map(function ($diferencia) {
+            return [
                 'cuil' => $diferencia->cuil,
                 'aportesijpdh21' => $diferencia->aportesijpdh21,
                 'aporteinssjpdh21' => $diferencia->aporteinssjpdh21,
                 'diferencia' => $diferencia->diferencia,
                 'fecha_control' => now()
-            ]);
-        }
+            ];
+        })->chunk(1000)->each(function ($chunk) {
+            ControlAportesDiferencia::insert($chunk->toArray());
+        });
 
-        return $diferencias->toArray();
+        // Retornamos solo el resumen del proceso
+        return [
+            'registros_procesados' => $diferencias->count(),
+            'diferencias_encontradas' => $diferencias->count(),
+            'fecha_proceso' => now()->toDateTimeString()
+        ];
     }
 
     /**
