@@ -3,12 +3,14 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use League\CommonMark\CommonMarkConverter;
+use Filament\Actions\Action;
 use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
+use League\CommonMark\CommonMarkConverter;
 
 class DocumentationPage extends Page
 {
+
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationLabel = 'Documentación';
     protected static ?string $title = 'Documentación del Sistema';
@@ -34,10 +36,14 @@ class DocumentationPage extends Page
         'bloqueos' => 'Sistema de Bloqueos'
     ];
 
+   
+
     public function mount()
     {
         $this->loadDocumentation();
     }
+
+
 
     protected function loadDocumentation()
     {

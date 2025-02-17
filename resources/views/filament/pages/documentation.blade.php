@@ -1,7 +1,7 @@
 <x-filament-panels::page>
-    <div class="grid grid-cols-12 gap-6">
-        {{-- Sidebar con lista de documentos --}}
-        <div class="col-span-12 lg:col-span-3">
+    <div class="flex flex-col lg:flex-row gap-4">
+        {{-- Sidebar --}}
+        <div class="lg:w-1/4">
             <x-filament::section>
                 <x-slot name="heading">
                     Secciones
@@ -23,7 +23,7 @@
         </div>
 
         {{-- Contenido principal --}}
-        <div class="col-span-12 lg:col-span-9">
+        <div class="lg:w-3/4">
             <x-filament::section>
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
@@ -41,17 +41,71 @@
                     </div>
                 </x-slot>
 
-                @foreach($documentation as $doc)
-                    <div
-                        x-show="$wire.activeSection === '{{ $doc['section'] }}'"
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0"
-                        x-transition:enter-end="opacity-100"
-                        class="prose dark:prose-invert max-w-none"
-                    >
-                        {!! $doc['rendered_content'] !!}
+                {{-- Pestañas para cambiar entre vista HTML y Markdown --}}
+                <div x-data="{ activeTab: 'rendered' }">
+                    <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                        <x-filament::tabs>
+                            <x-filament::tabs.item
+                                :active="true"
+                                x-on:click="activeTab = 'rendered'"
+                                icon="heroicon-m-eye"
+                            >
+                                Vista Previa
+                            </x-filament::tabs.item>
+
+                            <x-filament::tabs.item
+                                x-on:click="activeTab = 'raw'"
+                                icon="heroicon-m-code-bracket"
+                            >
+                                Markdown
+                            </x-filament::tabs.item>
+                        </x-filament::tabs>
                     </div>
-                @endforeach
+
+                    @foreach($documentation as $doc)
+                        {{-- Vista HTML Renderizada --}}
+                        <div
+                            x-show="$wire.activeSection === '{{ $doc['section'] }}' && activeTab === 'rendered'"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            class="prose dark:prose-invert max-w-none"
+                        >
+                            {!! $doc['rendered_content'] !!}
+                        </div>
+
+                        {{-- Vista Raw Markdown --}}
+                        <div
+                            x-show="$wire.activeSection === '{{ $doc['section'] }}' && activeTab === 'raw'"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            class="relative"
+                        >
+                            <pre class="language-markdown rounded-lg bg-gray-950 dark:bg-gray-900 p-4 overflow-x-auto">
+                                <code class="text-sm text-gray-200">{{ $doc['content'] }}</code>
+                            </pre>
+
+                            {{-- Botón para copiar el contenido Markdown --}}
+                            <button
+                                x-data="{ copied: false }"
+                                x-on:click="
+                                    navigator.clipboard.writeText($el.parentElement.querySelector('code').textContent);
+                                    copied = true;
+                                    setTimeout(() => copied = false, 2000)
+                                "
+                                class="absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-300 rounded-lg"
+                            >
+                                <span x-show="!copied">
+                                    <x-heroicon-m-clipboard class="w-5 h-5" />
+                                </span>
+                                <span x-show="copied">
+                                    <x-heroicon-m-clipboard-document-check class="w-5 h-5 text-green-500" />
+                                </span>
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
             </x-filament::section>
         </div>
     </div>
@@ -103,6 +157,18 @@
             .prose {
                 max-width: none !important;
             }
+        }
+
+        /* Estilos adicionales para el código Markdown */
+        pre.language-markdown {
+            tab-size: 4;
+            -moz-tab-size: 4;
+        }
+
+        pre.language-markdown code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         }
     </style>
 
