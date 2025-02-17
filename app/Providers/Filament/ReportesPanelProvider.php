@@ -21,7 +21,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
-
+use App\Filament\Pages\DashboardSelector;
 class ReportesPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -53,6 +53,7 @@ class ReportesPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Reportes/Pages'), for: 'App\\Filament\\Reportes\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                DashboardSelector::class,
                 // ReporteEmbargos::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Reportes/Widgets'), for: 'App\\Filament\\Reportes\\Widgets')

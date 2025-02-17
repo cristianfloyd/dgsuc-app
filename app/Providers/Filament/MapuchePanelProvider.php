@@ -21,6 +21,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Pages\DashboardSelector;
+
 
 class MapuchePanelProvider extends PanelProvider
 {
@@ -43,6 +45,7 @@ class MapuchePanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Mapuche/Pages'), for: 'App\\Filament\\Mapuche\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                DashboardSelector::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Mapuche/Widgets'), for: 'App\\Filament\\Mapuche\\Widgets')
             ->widgets([

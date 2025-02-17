@@ -19,7 +19,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-
+use App\Filament\Pages\DashboardSelector;
 class LiquidacionesPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -46,6 +46,7 @@ class LiquidacionesPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Liquidaciones/Pages'), for: 'App\\Filament\\Liquidaciones\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                DashboardSelector::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Liquidaciones/Widgets'), for: 'App\\Filament\\Liquidaciones\\Widgets')
             ->widgets([

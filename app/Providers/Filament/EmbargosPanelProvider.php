@@ -19,7 +19,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Embargos\Resources\Mapuche\EmbargoResource\Pages\EmbargoReport;
-
+use App\Filament\Pages\DashboardSelector;
 class EmbargosPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -36,6 +36,7 @@ class EmbargosPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Embargos/Pages'), for: 'App\\Filament\\Embargos\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                DashboardSelector::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()

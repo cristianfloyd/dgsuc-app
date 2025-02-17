@@ -18,6 +18,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Pages\DashboardSelector;
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 // Pages\Dashboard::class,
                 Profile::class,
+                DashboardSelector::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
