@@ -1,16 +1,16 @@
-<x-filament-panels::page>
+<x-filament::page>
+    <x-filament::tabs>
+        @foreach($this->getViewData()['tabs'] as $key => $label)
+            <x-filament::tabs.item
+                :active="$activeTab === $key"
+                wire:click="$set('activeTab', '{{ $key }}')"
+            >
+                {{ $label }}
+            </x-filament::tabs.item>
+        @endforeach
+    </x-filament::tabs>
 
-
-    <div class="mt-4">
-        @if(!$this->hasResults())
-            <div class="p-4 text-sm text-yellow-700 bg-yellow-100 rounded-lg dark:bg-yellow-900 dark:text-yellow-200">
-                <p>No hay resultados disponibles. Ejecute los controles para ver el análisis.</p>
-            </div>
-        @else
-            {{ $this->table }}
-        @endif
-    </div>
-
-    <x-filament::modal />
-
-</x-filament-panels::page>
+    @if($activeTab === 'diferencias_aportes' || $activeTab === 'diferencias_contribuciones')
+        {{ $this->table }}
+    @endif
+</x-filament::page>

@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use App\Models\ControlAportesDiferencia;
 use Filament\Notifications\Notification;
+use App\Models\ControlContribucionesDiferencia;
 use Filament\Tables\Concerns\InteractsWithTable;
 
 class SicossControles extends Page implements HasTable
@@ -124,8 +125,8 @@ class SicossControles extends Page implements HasTable
         return [
             'tabs' => [
                 'resumen' => 'Resumen',
-                'diferencias_cuil' => 'Diferencias por CUIL',
-                'diferencias_dependencia' => 'Diferencias por Dependencia',
+                'diferencias_aportes' => 'Diferencias por Aportes',
+                'diferencias_contribuciones' => 'Diferencias por Contribuciones',
             ],
         ];
     }
@@ -156,8 +157,15 @@ class SicossControles extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        // Determinamos qué query usar según la pestaña activa
+        $query = match ($this->activeTab) {
+            'diferencias_aportes' => ControlAportesDiferencia::query(),
+            'diferencias_contribuciones' => ControlContribucionesDiferencia::query(),
+            default => ControlAportesDiferencia::query()
+        };
+
         return $table
-            ->query(ControlAportesDiferencia::query())
+            ->query($query)
             ->columns([
                 TextColumn::make('cuil')
                     ->label('CUIL')
@@ -180,7 +188,8 @@ class SicossControles extends Page implements HasTable
             ])
             ->defaultSort('diferencia', 'desc')
             ->striped()
-            ->paginated([25, 50, 100])
+            ->paginated([5,10,25, 50, 100])
+            ->defaultPaginationPageOption(5)
             ->searchable();
     }
 

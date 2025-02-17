@@ -10,6 +10,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Query\Builder;
 use App\Models\ControlAportesDiferencia;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Models\ControlContribucionesDiferencia;
 
 /**
  * Servicio para ejecutar controles de SICOSS
@@ -77,7 +78,8 @@ class SicossControlService
         $this->crearTablaDH21Aportes();
 
         return [
-            'diferencias_por_cuil' => $this->obtenerDiferenciasPorCuil(),
+            'diferencias_de_aportes' => $this->obtenerDiferenciasDeAportes(),
+            'diferencias_de_contribuciones' => $this->obtenerDiferenciasDeContribuciones(),
             'diferencias_por_dependencia' => $this->obtenerDiferenciasPorDependencia(),
             'totales' => $this->obtenerTotalesAportesContribuciones()
         ];
@@ -142,7 +144,7 @@ class SicossControlService
     }
 
     /**
-     * Obtiene las diferencias de aportes y contribuciones por CUIL
+     * Obtiene las diferencias de aportes por CUIL
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
@@ -152,13 +154,13 @@ class SicossControlService
      *   fecha_proceso: string
      * }
      */
-    public function obtenerDiferenciasPorCuil(?int $anio = null, ?int $mes = null): array
+    public function obtenerDiferenciasDeAportes(?int $anio = null, ?int $mes = null): array
     {
         // Si no se proporcionan parámetros, usar el periodo fiscal actual
         if ($anio === null || $mes === null) {
             $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
-            $anio = $anio ?? $periodoFiscal['year'];
-            $mes = $mes ?? $periodoFiscal['month'];
+            $anio ??= $periodoFiscal['year'];
+            $mes ??= $periodoFiscal['month'];
         }
 
         // Determinar qué tabla usar basado en el período
@@ -210,6 +212,69 @@ class SicossControlService
             'fecha_proceso' => now()->toDateTimeString()
         ];
     }
+
+    /**
+     * Obtiene las diferencias de contribuciones por CUIL
+     *
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
+     * @return array{
+     *   registros_procesados: int,
+     *   diferencias_encontradas: int,
+     *   fecha_proceso: string
+     * }
+     */
+    public function obtenerDiferenciasDeContribuciones(?int $anio = null, ?int $mes = null): array
+    {
+        // Si no se proporcionan parámetros, usar el periodo fiscal actual
+        if ($anio === null || $mes === null) {
+            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $anio ??= $periodoFiscal['year'];
+            $mes ??= $periodoFiscal['month'];
+        }
+
+        // Primero limpiamos los registros anteriores
+        ControlContribucionesDiferencia::truncate();
+
+        $diferencias = DB::connection($this->connection)
+            ->table('dh21aporte as a')
+            ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->select([
+                'a.cuil',
+                'a.nro_legaj',
+                DB::raw("contribucionsijpdh21::numeric(15,2) as contribucionsijpdh21"),
+                DB::raw("contribucioninssjpdh21::numeric(15,2) as contribucioninssjpdh21"),
+                DB::raw("contribucionsijp::numeric(15,2) as contribucionsijp"),
+                DB::raw("contribucioninssjp::numeric(15,2) as contribucioninssjp"),
+                DB::raw("((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric(15,2) as diferencia")
+            ])
+            ->get();
+
+        $registrosParaInsertar = $diferencias->map(function ($diferencia) {
+            return [
+                'cuil' => $diferencia->cuil,
+                'nro_legaj' => $diferencia->nro_legaj,
+                'contribucionsijpdh21' => $diferencia->contribucionsijpdh21,
+                'contribucioninssjpdh21' => $diferencia->contribucioninssjpdh21,
+                'contribucionsijp' => $diferencia->contribucionsijp,
+                'contribucioninssjp' => $diferencia->contribucioninssjp,
+                'diferencia' => $diferencia->diferencia,
+                'fecha_control' => now()
+            ];
+        })->chunk(1000)->each(function ($chunk) {
+            ControlContribucionesDiferencia::insert($chunk->toArray());
+        });
+
+        return [
+            'registros_procesados' => $diferencias->count(),
+            'diferencias_encontradas' => $diferencias->count(),
+            'fecha_proceso' => now()->toDateTimeString()
+        ];
+    }
+
 
     /**
      * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter

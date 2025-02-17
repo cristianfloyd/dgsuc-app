@@ -1,4 +1,4 @@
-# Sistema de Gestión de Liquidaciones y Control
+# Sistema de Gestión y Control
 
 ## Resumen
 
