@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources\EmbargoResource\Pages;
+namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
 use App\Traits\DisplayResourceProperties;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\EmbargoResource;
+use App\Filament\Embargos\Resources\EmbargoResource;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use App\Filament\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
+use App\Filament\Embargos\Resources\EmbargoResource\Widgets\DisplayPropertiesWidget;
 
 class ListEmbargos extends ListRecords
 {

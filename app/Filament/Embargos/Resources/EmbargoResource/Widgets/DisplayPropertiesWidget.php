@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\EmbargoResource\Widgets;
+namespace App\Filament\Embargos\Resources\EmbargoResource\Widgets;
 
 use Livewire\Attributes\On;
 use Filament\Widgets\Widget;

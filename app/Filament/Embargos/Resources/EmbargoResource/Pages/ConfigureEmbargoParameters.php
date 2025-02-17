@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\EmbargoResource\Pages;
+namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
 use Filament\Forms\Form;
 use Livewire\Attributes\On;
@@ -13,8 +13,8 @@ use Illuminate\Http\RedirectResponse;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use App\Traits\DisplayResourceProperties;
-use App\Filament\Resources\EmbargoResource;
 use Livewire\Features\SupportRedirects\Redirector;
+use App\Filament\Embargos\Resources\EmbargoResource;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 
 

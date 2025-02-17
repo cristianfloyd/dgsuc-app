@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\EmbargoResource\Pages;
+namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
 use Filament\Resources\Pages\Page;
 use App\Models\EmbargoProcesoResult;
-use App\Filament\Resources\EmbargoResource;
+use App\Filament\Embargos\Resources\EmbargoResource;
 
 class DashboardEmbargo extends Page
 {

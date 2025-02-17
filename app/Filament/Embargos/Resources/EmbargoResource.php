@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Embargos\Resources;
 
 use Filament\Tables\Table;
 use Livewire\Attributes\On;
@@ -13,7 +13,7 @@ use App\Services\EmbargoTableService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use App\Traits\DisplayResourceProperties;
-use App\Filament\Resources\EmbargoResource\Pages;
+use App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
 
 class EmbargoResource extends Resource

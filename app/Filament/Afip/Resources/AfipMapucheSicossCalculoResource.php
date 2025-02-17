@@ -111,7 +111,8 @@ class AfipMapucheSicossCalculoResource extends Resource
                 ->icon('heroicon-o-cog-8-tooth')
                 ->tooltip('Acciones')
                 ->size('lg'),
-            ]);
+            ])
+            ->defaultPaginationPageOption(5);
     }
 
     public static function form(Forms\Form $form): Forms\Form

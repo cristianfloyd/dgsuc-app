@@ -11,6 +11,6 @@ class Dashboard extends Page
 
     public function getTitle(): string
     {
-        return 'Panel de Control';
+        return 'Panel de Reportes';
     }
 }
