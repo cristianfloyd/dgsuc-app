@@ -10,7 +10,6 @@ return new class extends Migration
     use MapucheConnectionTrait;
 
     protected $table = 'suc.afip_relaciones_activas';
-    //sin timestamps
     protected $timestamps = true;
 
     /**
@@ -42,6 +41,8 @@ return new class extends Migration
             $table->char('categoria_profesional', 6)->nullable();
             $table->char('ccct', 7)->nullable();
             $table->char('no_hay_datos',4)->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
