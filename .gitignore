@@ -18,3 +18,4 @@ yarn-error.log
 /.idea
 /.vscode
 app/Traits/MapucheConnectionTrait.php
+app/Traits/MapucheConnectionTrait.php
