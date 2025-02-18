@@ -70,7 +70,7 @@ class ImportAction extends Action
             ])
             ->action(function (array $data): void {
                 try {
-                    // Inside action method:
+                    // Dentro del método de acción:
                     $file = $data['file'];
                     $filePath = $file;
                     $filename = basename($filePath);
@@ -78,7 +78,7 @@ class ImportAction extends Action
                     $timenow = time();
                     $newFilename = pathinfo($filename, PATHINFO_FILENAME) . "-{$timenow}.{$extension}";
 
-                    // Filament already moved the file to storage, we just need the path
+                    // Filament ya movió el archivo a almacenamiento, solo necesitamos la ruta
                     $filePath = Storage::disk('public')->path($file);
 
 
@@ -108,7 +108,7 @@ class ImportAction extends Action
                     );
 
 
-                    // Process the file using FileProcessor service
+                    // Procesar el archivo usando el servicio FileProcessor
                     $fileProcessor = app(FileProcessorService::class);
                     $processedData = $fileProcessor->handleFileImport($uploadedFile, 'afip');
 

@@ -63,6 +63,52 @@ class SicossControlService
     }
 
     /**
+     * Ejecuta específicamente el control de aportes
+     */
+    public function ejecutarControlAportes(?int $anio = null, ?int $mes = null): array
+    {
+        // Crear tabla temporal necesaria
+        $this->crearTablaDH21Aportes($anio, $mes);
+
+        // Ejecutar control específico de aportes
+        $diferenciasAportes = $this->obtenerDiferenciasDeAportes($anio, $mes);
+
+        return [
+            'diferencias_de_aportes' => $diferenciasAportes,
+        ];
+    }
+
+    /**
+     * Ejecuta específicamente el control de contribuciones
+     */
+    public function ejecutarControlContribuciones(?int $anio = null, ?int $mes = null): array
+    {
+        // Crear tabla temporal necesaria
+        $this->crearTablaDH21Aportes($anio, $mes);
+
+        // Ejecutar control específico de contribuciones
+        $diferenciasContribuciones = $this->obtenerDiferenciasDeContribuciones($anio, $mes);
+
+        return [
+            'diferencias_de_contribuciones' => $diferenciasContribuciones,
+        ];
+    }
+
+    /**
+     * Ejecuta el control de diferencias por dependencia
+     */
+    public function ejecutarControlPorDependencia(?int $anio = null, ?int $mes = null): array
+    {
+        // Crear tabla temporal necesaria
+        $this->crearTablaDH21Aportes($anio, $mes);
+
+        return [
+            'diferencias_por_dependencia' => $this->obtenerDiferenciasPorDependencia(),
+        ];
+    }
+
+
+    /**
      * Control de Aportes y Contribuciones
      * Compara los aportes y contribuciones calculados en DH21 vs los registrados en SICOSS
      *

@@ -7,7 +7,8 @@ use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dh01 extends Model
 {
@@ -37,17 +38,24 @@ class Dh01 extends Model
         'periodoalta', 'anioalta', 'periodoactualizacion', 'anioactualizacion', 'pcia_nacim', 'pais_nacim'
     ];
 
-    // Definir las relaciones
+    protected $appends = [
+        'cuil',
+        'cuil_completo'
+    ];
+
+    // ###################################################################################
+    // ######################################  RELACIONES ################################
+    public function relacionesActivas(): BelongsTo
+    {
+        return $this->belongsTo(AfipRelacionesActivas::class, 'cuil', 'cuil');
+    }
+
     public function dh03()
     {
         return $this->hasMany(dh03::class, 'nro_legaj', 'nro_legaj');
     }
 
-    /**
-     * Obtiene los cargos asociados a este registro de Dh01.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+
     public function cargos()
     {
         return $this->hasMany(Dh03::class, 'nro_legaj', 'nro_legaj');
@@ -70,19 +78,34 @@ class Dh01 extends Model
             ->orWhere('desc_nombr', 'like', '%'.strtoupper($searchTerm).'%');
     }
 
+    public function scopeByCuil($query, $cuil)
+    {
+        return $query->whereRaw("(
+            LPAD(nro_cuil1::text, 2, '0') ||
+            LPAD(nro_cuil::text, 8, '0') ||
+            LPAD(nro_cuil2::text, 1, '0')
+        ) = ?", [$cuil]);
+    }
+
     public function getCuilCompletoAttribute()
     {
-        return "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}";
+        // Aseguramos que cada parte tenga el largo correcto
+        $cuil1 = str_pad($this->nro_cuil1, 2, '0', STR_PAD_LEFT);
+        $cuil = str_pad($this->nro_cuil, 8, '0', STR_PAD_LEFT);
+        $cuil2 = str_pad($this->nro_cuil2, 1, '0', STR_PAD_LEFT);
+
+        return $cuil1 . $cuil . $cuil2;
     }
 
 
+    // ###############################################
+    // ###########  Mutadores y Accesores  ###########
 
-    // Mutador para convertir desc_nombr a UTF-8 al obtener el valor
     public function getDescNombrAttribute($value)
     {
         return EncodingService::toUtf8(trim($value));
     }
-    // Mutador para convertir desc_nombr a Latin1 antes de guardar
+
     public function setDescNombrAttribute($value)
     {
         $this->attributes['desc_nombr'] = EncodingService::toLatin1($value);
@@ -100,11 +123,24 @@ class Dh01 extends Model
         return EncodingService::toUtf8(trim($value));
     }
 
-
     public function NombreCompleto(): Attribute
     {
         return Attribute::make(
             get: fn() => "{$this->desc_appat}, {$this->desc_nombr}",
+        );
+    }
+
+    protected function cuil(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Aseguramos que cada parte tenga el largo correcto
+                $cuil1 = str_pad($this->nro_cuil1, 2, '0', STR_PAD_LEFT);
+                $cuil = str_pad($this->nro_cuil, 8, '0', STR_PAD_LEFT);
+                $cuil2 = str_pad($this->nro_cuil2, 1, '0', STR_PAD_LEFT);
+
+                return "$cuil1$cuil$cuil2";
+            }
         );
     }
 }

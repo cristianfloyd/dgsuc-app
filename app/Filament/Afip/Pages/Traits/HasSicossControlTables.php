@@ -12,9 +12,10 @@ trait HasSicossControlTables
     protected function getColumnsForActiveTab(): array
     {
         return match ($this->activeTab) {
-            'cuils' => $this->getCuilsColumns(),
-            'aportes' => $this->getAportesColumns(),
-            'art' => $this->getArtColumns(),
+            'diferencias_cuils' => $this->getCuilsColumns(),
+            'diferencias_aportes' => $this->getAportesColumns(),
+            'diferencias_contribuciones' => $this->getContribucionesColumns(),
+            'diferencias_art' => $this->getArtColumns(),
             default => [],
         };
     }
@@ -66,6 +67,37 @@ trait HasSicossControlTables
         ];
     }
 
+    protected function getContribucionesColumns(): array
+    {
+        return [
+            TextColumn::make('cuil')
+                ->searchable()
+                ->sortable()
+                ->copyable(),
+            TextColumn::make('contribucionsijpdh21')
+                ->label('Contribución SIJP DH21')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('contribucioninssjpdh21')
+                ->label('Contribución INSSJP DH21')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('contribucionsijp')
+                ->label('Contribución SIJP')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('contribucioninssjp')
+                ->label('Contribución INSSJP')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('diferencia')
+                ->money('ARS')
+                ->sortable()
+                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
+                ->description(fn($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
+        ];
+    }
+
     protected function getArtColumns(): array
     {
         return [
@@ -94,6 +126,7 @@ trait HasSicossControlTables
         return match ($this->activeTab) {
             'cuils' => DB::table('suc.control_cuils_diferencias'),
             'aportes' => DB::table('suc.control_aportes_diferencias'),
+            'contribuciones' => DB::table('suc.control_contribuciones_diferencias'),
             'art' => DB::table('suc.control_art_diferencias'),
             default => DB::table('suc.control_cuils_diferencias')->whereRaw('1=0'),
         };

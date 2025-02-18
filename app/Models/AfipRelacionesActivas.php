@@ -9,6 +9,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
@@ -18,38 +19,38 @@ class AfipRelacionesActivas extends Model
     use SoftDeletes;
 
 
-    protected $table = 'afip_relaciones_activas';
-    protected $schema = 'suc';
+    protected $table = 'suc.afip_relaciones_activas';
     protected $primaryKey = 'id';
     public $incrementing = true;
     public $timestamps = true;
 
 
     protected $fillable = [
-        'periodo_fiscal', //periodo fiscal,6
-        'codigo_movimiento', //codigo movimiento,2
-        'tipo_registro', //Tipo de registro,2
-        'cuil', //CUIL del empleado,11
-        'marca_trabajador_agropecuario', //Marca de trabajador agropecuario,1
-        'modalidad_contrato', //Modalidad de contrato,3
-        'fecha_inicio_relacion_laboral', //Fecha de inicio de la rel. Laboral,10
-        'fecha_fin_relacion_laboral', //Fecha de fin relacion laboral,10
-        'codigo_o_social', //Código de obra social,6
-        'cod_situacion_baja', //codigo situacion baja,2
-        'fecha_telegrama_renuncia', //Fecha telegrama renuncia,10
-        'retribucion_pactada', //Retribución pactada,15
-        'modalidad_liquidacion', //Modalidad de liquidación,1
-        'suc_domicilio_desem', //Sucursal-Domicilio de desempeño,5
-        'actividad_domicilio_desem', //Actividad en el domicilio de desempeño,6
-        'puesto_desem', //Puesto desempeñado,4
-        'rectificacion', //Rectificación,1
-        'numero_formulario_agro', //Numero Formulario Agropecuario,10
-        'tipo_servicio', //Tipo de Servicio,3
-        'categoria_profesional', //Categoría Profesional,6
-        'ccct', //Código de Convenio Colectivo de Trabajo,7
-        'no_hay_datos' // campo vacio,5
+        'periodo_fiscal',
+        'codigo_movimiento',
+        'tipo_registro',
+        'cuil',
+        'marca_trabajador_agropecuario',
+        'modalidad_contrato',
+        'fecha_inicio_relacion_laboral',
+        'fecha_fin_relacion_laboral',
+        'codigo_o_social',
+        'cod_situacion_baja',
+        'fecha_telegrama_renuncia',
+        'retribucion_pactada',
+        'modalidad_liquidacion',
+        'suc_domicilio_desem',
+        'actividad_domicilio_desem',
+        'puesto_desem',
+        'rectificacion',
+        'numero_formulario_agro',
+        'tipo_servicio',
+        'categoria_profesional',
+        'ccct',
+        'no_hay_datos'
     ];
 
+    protected $appends = ['nro_cuil'];
 
 
     /**
@@ -86,16 +87,16 @@ class AfipRelacionesActivas extends Model
         } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
             // Manejo del error, log, etc.
-            log::error('Error al insertar los datos' .$e->getMessage   (),['exception' => $e]);
+            log::error('Error al insertar los datos' . $e->getMessage(), ['exception' => $e]);
             return false;
         }
     }
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
-    * @param array $datosProcessados Los datos procesados.
-    * @return array Los datos mapeados al modelo AfipRelacionesActivas.
-    */
-    public static function mapearDatosAlModelo(array $datosProcesados):array
+     * @param array $datosProcessados Los datos procesados.
+     * @return array Los datos mapeados al modelo AfipRelacionesActivas.
+     */
+    public static function mapearDatosAlModelo(array $datosProcesados): array
     {
         $datosMapeados = [
 
@@ -146,8 +147,30 @@ class AfipRelacionesActivas extends Model
     protected function retribucionPactada(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => floatval(trim($value)),
-            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT)
+            get: fn(string $value) => floatval(trim($value)),
+            set: fn(float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT)
         );
+    }
+
+    protected function nroCuil(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
+                if ($this->cuil) {
+                    // Extrae los 8 dígitos del medio de `cuil`
+                    return intval(substr($this->cuil, 2, 8));
+                }
+                return null;
+            }
+        );
+    }
+
+
+    // #######################################################################
+    // ###########################  RELACIONES ###############################
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
     }
 }

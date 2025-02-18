@@ -58,7 +58,7 @@ return [
             'collate' => env('DB2_COLLATION', 'UTF8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'mapuche',
+            'search_path' => 'mapuche,suc',
             'sslmode' => 'prefer',
         ],
         'pgsql-desa' => [

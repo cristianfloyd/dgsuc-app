@@ -1,16 +1,20 @@
-<x-filament::page>
+<x-filament-panels::page>
     <x-filament::tabs>
-        @foreach($this->getViewData()['tabs'] as $key => $label)
+        @foreach($this->getViewData()['tabs'] as $tabKey => $tabLabel)
             <x-filament::tabs.item
-                :active="$activeTab === $key"
-                wire:click="$set('activeTab', '{{ $key }}')"
+                :active="$this->activeTab === $tabKey"
+                wire:click="$set('activeTab', '{{ $tabKey }}')"
             >
-                {{ $label }}
+                {{ $tabLabel }}
             </x-filament::tabs.item>
         @endforeach
     </x-filament::tabs>
 
-    @if($activeTab === 'diferencias_aportes' || $activeTab === 'diferencias_contribuciones')
-        {{ $this->table }}
+    @if($this->activeTab === 'resumen')
+        {{-- @include('filament.afip.pages.partials.sicoss-resumen', ['stats' => $this->getResumenStats()]) --}}
+    @else
+        <div class="mt-4">
+            {{ $this->table }}
+        </div>
     @endif
-</x-filament::page>
+</x-filament-panels::page>

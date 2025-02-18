@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Actions\Action;
 use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
 use League\CommonMark\CommonMarkConverter;
@@ -36,7 +35,7 @@ class DocumentationPage extends Page
         'bloqueos' => 'Sistema de Bloqueos'
     ];
 
-   
+
 
     public function mount()
     {

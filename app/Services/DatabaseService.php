@@ -2,6 +2,7 @@
 
 namespace app\Services;
 
+use PDO;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,19 +15,14 @@ use Illuminate\Database\Eloquent\Collection;
 class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
+
     private static $connectionInstance = null;
     private const DEFAULT_CHUNK_SIZE = 1000;
 
 
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-        //
-    }
 
-    protected static function getMapucheConnection()
+
+    protected static function getMapucheConnection(): PDO
     {
         if (self::$connectionInstance === null) {
             $model = new static;
@@ -80,7 +76,7 @@ class DatabaseService implements DatabaseServiceInterface
     public function insertarDatosMasivos2(array $datosMapeados): bool
     {
         $tamanoLote = 1000; // Ajusta este valor según tus necesidades
-        $connection = static::getConnectionFromTrait(); // Conexión a la base de datos específica
+        $connection = self::getMapucheConnection(); // Conexión a la base de datos específica
 
         try {
             $connection->beginTransaction(); // Inicia la transacción
@@ -91,10 +87,10 @@ class DatabaseService implements DatabaseServiceInterface
                 $placeholders = implode(',', array_fill(0, count($lote[0]), '?'));
 
                 // Construye la consulta de inserción
-                $query = "INSERT INTO suc.afip_relaciones_activas (" . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";
+                $query = "INSERT INTO afip_relaciones_activas (" . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";
 
                 // Prepara la consulta
-                $statement = $connection->getPdo()->prepare($query);
+                $statement = $connection->prepare($query);
 
                 // Ejecuta la consulta para cada fila en el lote
                 foreach ($lote as $row) {
