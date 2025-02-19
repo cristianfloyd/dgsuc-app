@@ -8,6 +8,7 @@ use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 use App\Models\ControlArtDiferencia;
 use Filament\Support\Enums\MaxWidth;
 use App\Traits\SicossConnectionTrait;
@@ -46,6 +47,7 @@ class SicossControles extends Page implements HasTable
     public $resultadosControles = null;
     public $loading = false;
     public $record = null;
+    public $mostrarResumen = false;
 
     public function mount()
     {
@@ -59,9 +61,6 @@ class SicossControles extends Page implements HasTable
                 return [$name => $name];
             })
             ->all(); // Usar all() para obtener un array plano
-
-        // Opcional: para debug
-        logger()->info('Available Connections', $this->availableConnections);
 
         $this->selectedConnection = $this->selectedConnection ?? $this->getConnectionName();
     }
@@ -172,24 +171,24 @@ class SicossControles extends Page implements HasTable
             ],
             'comparacion_931' => [
                 'aportes' => [
-                    'dh21' => DB::connection($this->getConnectionName())->table('suc.dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
+                    'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
                     'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
                         ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
                 ],
                 'contribuciones' => [
-                    'dh21' => DB::connection($this->getConnectionName())->table('suc.dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
+                    'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
                     'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
                 ],
             ],
             'cuils_no_encontrados' => [
-                'en_dh21' => DB::connection($this->getConnectionName())->table('suc.dh21aporte')
+                'en_dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')
                     ->whereNotIn('cuil', function ($query) {
                         $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
                     })
                     ->count(),
                 'en_sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
                     ->whereNotIn('cuil', function ($query) {
-                        $query->select('cuil')->from('suc.dh21aporte');
+                        $query->select('cuil')->from('dh21aporte');
                     })
                     ->count(),
             ],
@@ -217,8 +216,8 @@ class SicossControles extends Page implements HasTable
             ->columns($this->getColumnsForActiveTab())
             ->defaultSort('diferencia', 'desc')
             ->striped()
-            ->paginated([5, 10, 25, 50, 100])
             ->defaultPaginationPageOption(5)
+            ->paginated([5, 10, 25, 50, 100])
             ->searchable()
             ->actions($this->getTableActions());
     }
@@ -308,6 +307,16 @@ class SicossControles extends Page implements HasTable
                     }),
             ],
             default => [
+                Action::make('mostrarResumen')
+                    ->label('Resumen')
+                    ->icon('heroicon-o-eye')
+                    ->extraAttributes([
+                        'x-data' => '{}',
+                        'x-transition' => '',
+                        'class' => 'fi-transition-all fi-duration-300 fi-ease-in-out'
+                    ])
+                    ->action('toggleResumen'),
+
                 Action::make('ejecutarControles')
                     ->label('Ejecutar Todos los Controles')
                     ->icon('heroicon-o-play')
@@ -382,4 +391,50 @@ class SicossControles extends Page implements HasTable
     {
         $this->record = null;
     }
+
+    public function toggleResumen(): void
+    {
+        try {
+            // Verificamos si hay datos en las tablas de control
+            $hasData = ControlAportesDiferencia::count() > 0 &&
+                        ControlContribucionesDiferencia::count() > 0;
+
+            if ($hasData) {
+                $this->mostrarResumen = !$this->mostrarResumen;
+
+                if ($this->mostrarResumen) {
+                    // Creamos la tabla temporal usando el servicio
+                    $service = app(SicossControlService::class);
+                    $service->setConnection($this->getConnectionName());
+                    $service->crearTablaDH21Aportes();
+
+                    // Ejecutamos las estadísticas
+                    $this->resultadosControles = [
+                        'aportes_contribuciones' => $this->getResumenStats()
+                    ];
+                    Log::info('Resultados del resumen', $this->resultadosControles);
+                }
+
+                Notification::make()
+                    ->title($this->mostrarResumen ? 'Mostrando estadísticas del resumen' : 'Ocultando resumen')
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('No hay datos para mostrar')
+                    ->warning()
+                    ->body('Debe ejecutar los controles primero para ver el resumen')
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error al generar el resumen')
+                ->danger()
+                ->body('No se pudo crear la tabla temporal necesaria')
+                ->send();
+
+            $this->mostrarResumen = false;
+        }
+    }
+
 }

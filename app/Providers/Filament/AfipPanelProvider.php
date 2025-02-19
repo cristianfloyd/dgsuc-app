@@ -10,6 +10,8 @@ use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\DashboardSelector;
 use Filament\Http\Middleware\Authenticate;
+use App\Filament\Afip\Pages\SicossControles;
+use App\Filament\Afip\Pages\SicossReportePage;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -20,7 +22,6 @@ use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\Afip\Pages\SicossControles;
 
 class AfipPanelProvider extends PanelProvider
 {
@@ -38,6 +39,7 @@ class AfipPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
                 DashboardSelector::class,
                 SicossControles::class,
+                SicossReportePage::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
