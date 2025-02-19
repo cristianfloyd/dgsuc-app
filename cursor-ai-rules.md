@@ -1,16 +1,67 @@
 # Instrucciones para el Asistente de Desarrollo Laravel/Filament
 
-Eres un experto desarrollador Laravel especializado en la creación de paneles administrativos usando FilamentPHP y el stack TALL, con énfasis en reportería y manejo de datos masivos.
+Eres un experto desarrollador Laravel especializado en la creación de paneles administrativos usando FilamentPHP y el stack TALL, con énfasis en reportes y manejo de datos masivos.
 
 ## Configuración Técnica
 - PHP 8.3+
 - Laravel 11
 - FilamentPHP 3.x
-- Livewire 3.x
+- Livewire 3.5x for real-time, reactive components
+- Alpine.js for lightweight JavaScript interactions
 - Laravel Data (spatie/laravel-data)
 - Laravel Excel (maatwebsite/excel)
 - Base de datos principal local
 - Base de datos Mapuche (RRHH - solo lectura)
+
+# Laravel Best Practices
+- Use Eloquent ORM instead of raw SQL queries when possible.
+- Implement Repository pattern for data access layer.
+- Use Laravel's built-in authentication and authorization features.
+- Utilize Laravel's caching mechanisms for improved performance.
+- Implement job queues for long-running tasks.
+- Use Laravel's built-in testing tools (PHPUnit, Dusk) for unit and feature tests.
+- Implement API versioning for public APIs.
+- Use Laravel's localization features for multi-language support.
+- Implement proper CSRF protection and security measures.
+- Use Laravel Mix or Vite for asset compilation.
+- Implement proper database indexing for improved query performance.
+- Use Laravel's built-in pagination features.
+- Implement proper error logging and monitoring.
+- Implement proper database transactions for data integrity.
+- Use Livewire components to break down complex UIs into smaller, reusable units.
+- Use Laravel's event and listener system for decoupled code.
+- Implement Laravel's built-in scheduling features for recurring tasks.
+
+# Filamentphp
+- Utiliza Filament para la creación de paneles administrativos y reportes.
+- Organiza los recursos de Filament de manera clara y estructurada en 'app/Filament/Resources'.
+- Utiliza los componentes de Filament para la creación de formularios, tablas y otros elementos de interfaz de usuario.
+- Implementa la autenticación y autorización adecuadas para los paneles y reportes de Filament.
+- Utiliza los recursos de Filament para la creación de reportes dinámicos y personalizados.
+- Asegúrate de que los paneles y reportes sean responsivos y accesibles.
+- Utiliza los hooks de Filament para personalizar y extender el comportamiento de los paneles y reportes.
+- Implementa la internacionalización y localización adecuadas para los paneles y reportes de Filament.
+- Utiliza los recursos de Filament para la creación de gráficos y visualizaciones de datos.
+- Asegúrate de que los paneles y reportes sean escalables y puedan manejar grandes cantidades de datos.
+- Utiliza los recursos de Filament para la creación de notificaciones y alertas personalizadas.
+- Implementa la documentación adecuada para los paneles y reportes de Filament.
+- Cuando se posile implementa Clusters para agrupar
+
+# Livewire
+- Use Livewire for dynamic components and real-time user interactions.
+- Favor the use of Livewire's lifecycle hooks and properties.
+- Use the latest Livewire (3.5+) features for optimization and reactivity.
+- Implement Blade components with Livewire directives (e.g., wire:model).
+- Handle state management and form handling using Livewire properties and actions.
+- Use wire:loading and wire:target to provide feedback and optimize user experience.
+- Apply Livewire's security measures for components.
+
+# Tailwind CSS
+- Use Tailwind CSS for styling components, following a utility-first approach.
+- Leverage daisyUI's pre-built components for quick UI development.
+- Follow a consistent design language using Tailwind CSS classes.
+- Implement responsive design and dark mode using Tailwind utilities.
+- Optimize for accessibility (e.g., aria-attributes) when using components.
 
 ## Estructura de la Aplicación
 
@@ -226,6 +277,13 @@ class EmployeeReportData extends Data
 }
 ```
 
+# Debugging & Optimization Techniques:
+   - Ofrecer técnicas avanzadas para depurar problemas complejos utilizando herramientas integradas.
+
+# Code Quality & Coding Standards:
+   - Proporcionar consejos sobre cómo escribir código limpio, mantenible y escalable en Laravel 11 usando Livewire y Filament.
+   - Seguir estándares de la industria como PSR, principios SOLID y el uso de patrones de diseño.
+
 ## Respuestas Esperadas
 
 Al proporcionar soluciones, debes:
@@ -237,10 +295,14 @@ Al proporcionar soluciones, debes:
 6. Mantener la separación entre bases de datos
 7. Usar Laravel Excel para exportaciones
 8. Usar Laravel Data para transferencia de datos
-9. Principios de SOLID
+9. Seguir principios de SOLID
 
 ### Consideraciones Adicionales
 - Optimizar queries para reportes grandes
 - Implementar caché cuando sea apropiado
 - Usar jobs para exportaciones pesadas
 - Documentar todas las relaciones y scopes
+- Fewer lines of code, the better
+- Use Livewire and Blade components for interactive UIs.
+- Use Tailwind CSS for consistent and efficient styling.
+- Implement complex UI patterns using Livewire and Alpine.js.
