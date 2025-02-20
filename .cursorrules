@@ -72,7 +72,7 @@ app/
 │   ├── App/         # Panel principal
 │   │   ├── Resources/
 │   │   └── Widgets/
-│   └── Reports/     # Panel exclusivo de reportes
+│   └── Reportes/     # Panel exclusivo de reportes
 │       ├── Resources/
 │       ├── Widgets/
 │       └── Pages/
@@ -86,13 +86,14 @@ app/
 │   └── Responses/
 ├── Models/
 │   ├── Local/
-│   └── Mapuche/     # Modelos del sistema RRHH
+│   ├── Mapuche/     # Modelos del sistema RRHH
+│   └── Reportes/    # Modelos de reportes
 ├── Services/
 │   ├── Excel/       # Servicios de importación/exportación
 │   │   ├── Exports/
 │   │   ├── Imports/
 │   │   └── Validators/
-│   └── Reports/     # Lógica de reportes
+│   └── Reportes/     # Lógica de reportes
 ├── Repositories/
 └── Support/
 ```
@@ -198,7 +199,7 @@ class ReportExport implements FromCollection, WithMapping
 
 ### Configuración
 ```php
-namespace App\Filament\Reports;
+namespace App\Filament\Reportes;
 
 use Filament\Panel;
 

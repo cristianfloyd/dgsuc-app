@@ -102,6 +102,16 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_cache_'),
+
+    'ttl' => env('CACHE_TTL', 3600),
+
+    'reports' => [
+        'sicoss' => [
+            'data_ttl' => env('CACHE_SICOSS_DATA_TTL', 24 * 3600), // 24 horas por defecto
+            'totals_ttl' => env('CACHE_SICOSS_TOTALS_TTL', 12 * 3600), // 12 horas por defecto
+            'prefix' => 'sicoss_report_',
+        ],
+    ],
 
 ];
