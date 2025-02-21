@@ -2,12 +2,12 @@
 
 namespace App\Services\Reports;
 
-use App\Models\Mapuche\MapucheSicossReporte;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Data\Responses\SicossReporteData;
-use App\Data\Responses\SicossTotalesData;
 use App\Traits\ReportCacheTrait;
 use Illuminate\Support\Collection;
+use App\Data\Responses\SicossReporteData;
+use App\Data\Responses\SicossTotalesData;
+use App\Models\Mapuche\MapucheSicossReporte;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class SicossReporteService
 {
