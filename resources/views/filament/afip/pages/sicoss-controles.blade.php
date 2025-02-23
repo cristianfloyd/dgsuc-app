@@ -12,7 +12,7 @@
 
     @if($this->activeTab === 'resumen')
         @include('filament.afip.pages.partials.sicoss-resumen', [
-            'stats' => $this->getResumenStats(),
+            'stats' => $this->cachedStats,
             'resultadosControles' => $this->resultadosControles
         ])
     @else

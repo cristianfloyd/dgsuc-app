@@ -92,8 +92,13 @@ class SicossControlService
         ];
     }
 
+
     /**
-     * Ejecuta el control de diferencias por dependencia
+     * Ejecuta el control por dependencia
+     *
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
+     * @return array Resultados del control por dependencia
      */
     public function ejecutarControlPorDependencia(?int $anio = null, ?int $mes = null): array
     {
