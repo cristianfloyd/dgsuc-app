@@ -31,10 +31,12 @@ class AfipMapucheSicossResource extends Resource
     use FilamentAfipMapucheSicossTableTrait;
 
     protected static ?string $model = AfipMapucheSicoss::class;
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
     protected static ?string $navigationGroup = 'AFIP';
     protected static ?string $navigationLabel = 'Mapuche SICOSS';
     protected static ?string $pluralLabel = 'Mapuche SICOSS';
+    protected static ?int $navigationSort = 0;
+
 
 
 

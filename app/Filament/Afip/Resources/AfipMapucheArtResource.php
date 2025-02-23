@@ -25,6 +25,8 @@ class AfipMapucheArtResource extends Resource
     protected static ?string $modelLabel = 'Afip Art';
     protected static ?string $pluralModelLabel = 'Afip Art';
     protected static ?string $navigationGroup = 'AFIP';
+    protected static ?int $navigationSort = 4;
+
 
     public static function form(Form $form): Form
     {
@@ -38,11 +40,19 @@ class AfipMapucheArtResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('cuil')->label('CUIL'),
+                TextColumn::make('cuil')->label('CUIL')
+                    ->copyable()
+                    ->copyMessage('CUIL copiado al portapapeles') // Mensaje opcional de confirmación
+                    ->copyMessageDuration(1500)
+                    ->icon('heroicon-o-clipboard-document') // Icono opcional
+                    ->tooltip('Haz clic para copiar'),
                 TextColumn::make('apellido_y_nombre')
                     ->label('Apellido y Nombre')
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
+                        return $query->where(function($query) use ($search) {
+                            $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
+                                  ->orWhere('cuil', 'ilike', '%' . $search . '%');
+                        });
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
@@ -50,7 +60,6 @@ class AfipMapucheArtResource extends Resource
                 TextColumn::make('sexo')->label('Sexo'),
                 TextColumn::make('dh30.desc_item')
                     ->label('Establecimiento')
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('tarea')->label('Tarea'),
             ])
@@ -75,26 +84,13 @@ class AfipMapucheArtResource extends Resource
                     }),
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->headerActions([
-                Action::make('export')
-                    ->label('Exportar a Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(function ($livewire) {
-                        return Excel::download(
-                            new AfipMapucheArtExport(
-                                session('periodo_fiscal', date('Ym')),
-                                $livewire->getFilteredTableQuery()
-                            ),
-                            'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx'
-                        );
-                    })
+                //
             ])
             ->defaultPaginationPageOption(5);
     }

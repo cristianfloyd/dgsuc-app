@@ -11,6 +11,8 @@ return new class extends Migration
 
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.control_contribuciones_diferencias');
+
         Schema::connection($this->getConnectionName())->create('suc.control_contribuciones_diferencias', function (Blueprint $table) {
             $table->id();
             $table->string('cuil', 11);

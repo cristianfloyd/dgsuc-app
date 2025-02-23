@@ -17,6 +17,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_mapuche_sicoss_calculos');
+
         Schema::connection($this->getConnectionName())->create('suc.afip_mapuche_sicoss_calculos', function (Blueprint $table) {
             // Clave primaria autoincremental
             $table->id();

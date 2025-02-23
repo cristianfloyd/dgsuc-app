@@ -18,6 +18,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_art');
+
         Schema::connection($this->getConnectionName())->create('suc.afip_art', function (Blueprint $table) {
             $table->id();
             $table->integer('nro_legaj')->nullable();

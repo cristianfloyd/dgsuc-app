@@ -21,9 +21,11 @@ use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ImportAfi
 class AfipMapucheSicossCalculoResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicossCalculo::class;
-    protected static ?string $navigationIcon = 'heroicon-o-calculator';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
     protected static ?string $navigationGroup = 'AFIP';
     protected static ?string $navigationLabel = 'SICOSS Calculo';
+    protected static ?int $navigationSort = 2;
+
 
     public static function getPages(): array
     {

@@ -35,8 +35,8 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Reporte SICOSS';
     protected static ?string $title = 'Reporte SICOSS';
-    protected static ?string $navigationGroup = 'AFIP';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'SICOSS';
+    protected static ?int $navigationSort = 2;
 
     public $periodoFiscal;
     public $anio;

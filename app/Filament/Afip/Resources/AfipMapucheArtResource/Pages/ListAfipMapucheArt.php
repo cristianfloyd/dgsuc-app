@@ -5,6 +5,8 @@ namespace App\Filament\Afip\Resources\AfipMapucheArtResource\Pages;
 use Filament\Actions;
 use Filament\Actions\Action;
 use App\Models\AfipMapucheArt;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AfipMapucheArtExport;
 use Filament\Resources\Components\Tab;
 use Filament\Support\Enums\ActionSize;
 use Filament\Notifications\Notification;
@@ -20,6 +22,18 @@ class ListAfipMapucheArt extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('export')
+                    ->label('Exportar a Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function ($livewire) {
+                        return Excel::download(
+                            new AfipMapucheArtExport(
+                                session('periodo_fiscal', date('Ym')),
+                                $livewire->getFilteredTableQuery()
+                            ),
+                            'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx'
+                        );
+                    }),
             PoblarAfipArtAction::make()
                 ->label('Poblar ART')
                 ->modalHeading('Confirmación de Poblado ART')

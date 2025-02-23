@@ -17,6 +17,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_relaciones_activas');
+
         Schema::connection($this->getConnectionName())->create('suc.afip_relaciones_activas', function (Blueprint $table) {
             $table->id();
             $table->char('periodo_fiscal', 6);

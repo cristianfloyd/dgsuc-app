@@ -15,6 +15,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.uploaded_files');
+
         Schema::connection($this->getConnectionName())->create('suc.uploaded_files', function (Blueprint $table) {
             $table->id();
             $table->string('periodo_fiscal');

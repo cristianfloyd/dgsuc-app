@@ -15,6 +15,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.rep_bloqueos_import');
+
         Schema::connection($this->getConnectionName())->create('suc.rep_bloqueos_import', function (Blueprint $table) {
             $table->id();
             $table->timestamp('fecha_registro')->useCurrent();
