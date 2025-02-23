@@ -66,4 +66,16 @@ class ControlAportesDiferencia extends Model
     {
         return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
     }
+
+    public function cargos()
+    {
+        return $this->hasOneThrough(
+            Dh03::class,
+            Dh01::class,
+            'nro_cuil', // Clave foránea en Dh01
+            'nro_legaj', // Clave foránea en Dh03
+            'nro_cuil', // Clave local en ControlAportesDiferencia
+            'nro_legaj'  // Clave local en Dh01
+        );
+    }
 }

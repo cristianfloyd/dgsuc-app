@@ -11,7 +11,10 @@
     </x-filament::tabs>
 
     @if($this->activeTab === 'resumen')
-        @include('filament.afip.pages.partials.sicoss-resumen', ['stats' => $this->getResumenStats()])
+        @include('filament.afip.pages.partials.sicoss-resumen', [
+            'stats' => $this->getResumenStats(),
+            'resultadosControles' => $this->resultadosControles
+        ])
     @else
         <div class="mt-4">
             {{ $this->table }}

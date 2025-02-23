@@ -57,9 +57,7 @@ class SicossControlService
      */
     public function ejecutarControlesPostImportacion(): array
     {
-        return [
-            'aportes_contribuciones' => $this->controlAportesContribuciones(),
-        ];
+        return $this->controlAportesContribuciones();
     }
 
     /**
@@ -103,7 +101,7 @@ class SicossControlService
         $this->crearTablaDH21Aportes($anio, $mes);
 
         return [
-            'diferencias_por_dependencia' => $this->obtenerDiferenciasPorDependencia(),
+            'diferencias_por_dependencia' => $this->getDiferenciasContribucionesPorDependencia(),
         ];
     }
 
@@ -125,8 +123,10 @@ class SicossControlService
 
         return [
             'diferencias_de_aportes' => $this->obtenerDiferenciasDeAportes(),
-            'diferencias_de_contribuciones' => $this->obtenerDiferenciasDeContribuciones(),
-            'diferencias_por_dependencia' => $this->obtenerDiferenciasPorDependencia(),
+            'diferencias_por_dependencia' => [
+                'diferencias_aportes_dependencia' => $this->getDiferenciasAportesPorDependencia(),
+                'diferencias_contribuciones_dependencia' => $this->getDiferenciasContribucionesPorDependencia(),
+            ],
             'totales' => $this->obtenerTotalesAportesContribuciones()
         ];
     }
@@ -152,7 +152,7 @@ class SicossControlService
         $tablaNovedad = ($anio == $periodoActual['year'] && $mes == $periodoActual['month'])
             ? 'mapuche.dh21'
             : 'mapuche.dh21h';
-
+        Log::info('Tabla Novedad', ['tabla' => $tablaNovedad]);
         DB::connection($this->connection)->unprepared("
             DROP TABLE IF EXISTS dh21aporte;
 
@@ -331,7 +331,7 @@ class SicossControlService
      *   diferencia_total: float
      * }>
      */
-    public function obtenerDiferenciasPorDependencia(): array
+    public function getDiferenciasContribucionesPorDependencia(): array
     {
         return DB::connection($this->connection)
             ->table('dh21aporte as a')
@@ -418,19 +418,49 @@ class SicossControlService
     /**
      * Obtiene el query builder para las diferencias por dependencia
      */
-    public function getQueryDiferenciasPorDependencia(): Builder
+    // public function getQueryContribucionesDiferenciasPorDependencia(): Builder
+    // {
+    //     return DB::connection($this->connection)
+    //         ->table('dh21aporte as a')
+    //         ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+    //         ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+    //             (contribucionsijp + contribucioninssjp))::numeric) > 1")
+    //         ->groupBy('b.codc_uacad', 'b.caracter')
+    //         ->select([
+    //             'b.codc_uacad',
+    //             'b.caracter',
+    //             DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+    //                 (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
+    //         ]);
+    // }
+
+    /**
+     * Obtiene las diferencias de aportes agrupadas por dependencia y carácter
+     *
+     * @param float $minDiferencia Diferencia mínima a considerar
+     * @return array<int, array{
+     *   codc_uacad: string,
+     *   caracter: string,
+     *   diferencia_total: float
+     * }>
+     */
+    public function getDiferenciasAportesPorDependencia(float $minDiferencia = 1): array
     {
         return DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > ?", [$minDiferencia])
             ->groupBy('b.codc_uacad', 'b.caracter')
             ->select([
                 'b.codc_uacad',
                 'b.caracter',
-                DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
-            ]);
+                DB::raw("SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric as diferencia_total")
+            ])
+            ->orderBy('b.codc_uacad')
+            ->orderBy('b.caracter')
+            ->get()
+            ->toArray();
     }
 }
