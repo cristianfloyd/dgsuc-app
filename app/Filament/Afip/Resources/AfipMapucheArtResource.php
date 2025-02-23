@@ -55,6 +55,7 @@ class AfipMapucheArtResource extends Resource
                         });
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),
+                TextColumn::make('nro_legaj'),
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
                 TextColumn::make('sueldo')->label('Sueldo'),
                 TextColumn::make('sexo')->label('Sexo'),
