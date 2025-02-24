@@ -20,6 +20,7 @@ class Dh21Resource extends Resource
     protected static ?string $model = Dh21::class;
     protected static ?string $modelLabel = 'Tabla Liquidaciones';
     protected static ?string $navigationLabel = 'Liquidaciones (Dh21)';
+    protected static ?string $slug = 'dh21';
 
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -122,8 +123,9 @@ class Dh21Resource extends Resource
             ])
             ->defaultSort('nro_legaj', 'desc')
             ->paginated(5) //configurar la paginacion
-            ->paginationPageOptions([5, 10, 25, 50, 100, 250, 500, 1000])
+            ->paginationPageOptions([5, 10, 25, 50, 100])
             ->defaultPaginationPageOption(5)
+            ->deferLoading()
         ;
     }
 

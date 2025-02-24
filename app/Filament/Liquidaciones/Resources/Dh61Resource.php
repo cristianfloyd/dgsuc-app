@@ -142,7 +142,9 @@ class Dh61Resource extends Resource
             ])
             ->bulkActions([
                 //
-            ]);
+            ])
+            ->deferLoading()
+            ->defaultPaginationPageOption(5);
     }
 
     public static function getRelations(): array

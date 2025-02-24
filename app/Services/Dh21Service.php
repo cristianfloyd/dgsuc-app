@@ -7,8 +7,10 @@ use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\Dh21Repository;
+use App\Data\Responses\ConceptoTotalData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Spatie\LaravelData\DataCollection;
 
 class Dh21Service
 {
@@ -37,18 +39,20 @@ class Dh21Service
         return $query->sum('impp_conce');
     }
 
+
     /**
-     * Obtiene una consulta para calcular los totales de los conceptos de una liquidación.
+     * Obtiene los conceptos totales aplicando filtros opcionales.
      *
      * @param int|null $nro_liqui Número de liquidación (opcional)
      * @param int|null $codn_fuent Código de fuente (opcional)
-     * @return \Illuminate\Database\Eloquent\Builder Consulta para calcular los totales de los conceptos
+     * @return Builder Query builder con los conceptos totales
+     * @throws \Exception Si ocurre un error durante la consulta
      */
     public function conceptosTotales(int $nro_liqui = null, int $codn_fuent = null): Builder
     {
         try {
             // Construcción de la consulta base
-            $query = $this->dh21->query()
+            return $this->dh21->query()
                 ->select(
                     DB::raw('ROW_NUMBER() OVER (ORDER BY codn_conce) as id_liquidacion'),
                     'codn_conce',
@@ -71,12 +75,29 @@ class Dh21Service
                 // Ordenación por codn_conce
                 ->orderBy('codn_conce');
 
-            return $query;
         } catch (\Exception $e) {
             // Manejo de excepciones
             Log::error('Error en conceptosTotales: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Obtiene la colección de conceptos totales como DTOs tipados.
+     * Útil para APIs, exportaciones y transformaciones de datos.
+     *
+     * @param int|null $nro_liqui Número de liquidación (opcional)
+     * @param int|null $codn_fuent Código de fuente (opcional)
+     * @return DataCollection<ConceptoTotalData>
+     */
+    public function getConceptosTotalesCollection(int $nro_liqui = null, int $codn_fuent = null): DataCollection
+    {
+        return new DataCollection(
+            ConceptoTotalData::class,
+            $this->conceptosTotales($nro_liqui, $codn_fuent)
+                ->get()
+                ->map(fn ($item) => ConceptoTotalData::fromArray($item->toArray()))
+        );
     }
 
     /**
