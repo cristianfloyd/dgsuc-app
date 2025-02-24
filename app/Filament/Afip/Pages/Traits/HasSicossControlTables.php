@@ -59,6 +59,24 @@ trait HasSicossControlTables
                 ->label('Aportes INSSJP DH21')
                 ->money('ARS')
                 ->sortable(),
+            TextColumn::make('aportesijp')
+                ->label('Aportes SIJP SICOSS')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('aporteinssjp')
+                ->label('Aportes INSSJP SICOSS')
+                ->money('ARS')
+                ->sortable(),
+            TextColumn::make('total_aportes_dh21')
+                ->label('Total Aportes DH21')
+                ->money('ARS')
+                ->state(fn ($record) => $record->aportesijpdh21 + $record->aporteinssjpdh21)
+                ->sortable(),
+            TextColumn::make('total_aportes_sicoss')
+                ->label('Total Aportes SICOSS')
+                ->money('ARS')
+                ->state(fn ($record) => $record->aportesijp + $record->aporteinssjp)
+                ->sortable(),
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
@@ -121,6 +139,27 @@ trait HasSicossControlTables
         ];
     }
 
+    protected function getDiferenciasCuilsColumns(): array
+    {
+        return [
+            TextColumn::make('cuil')
+                ->label('CUIL')
+                ->searchable()
+                ->sortable()
+                ->copyable(),
+            TextColumn::make('origen')
+                ->label('Origen')
+                ->badge()
+                ->color(fn(string $state): string => match ($state) {
+                    'DH21' => 'warning',
+                    'SICOSS' => 'danger',
+                    default => '',
+                }),
+            TextColumn::make('fecha_control')
+                ->label('Fecha de Control')
+                ->dateTime('d/m/Y H:i:s'),
+        ];
+    }
     protected function getQueryForActiveTab(): Builder
     {
         return match ($this->activeTab) {

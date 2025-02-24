@@ -43,6 +43,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                 TextColumn::make('periodo_fiscal')
                     ->label('Período Fiscal')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cuil')
+                    ->copyable()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('remtotal')

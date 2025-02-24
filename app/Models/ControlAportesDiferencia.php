@@ -20,6 +20,12 @@ class ControlAportesDiferencia extends Model
         'caracter',
         'aportesijpdh21',
         'aporteinssjpdh21',
+        'contribucionsijpdh21',
+        'contribucioninssjpdh21',
+        'aportesijp',
+        'aporteinssjp',
+        'contribucionsijp',
+        'contribucioninssjp',
         'diferencia',
         'fecha_control',
         'connection'
@@ -28,6 +34,12 @@ class ControlAportesDiferencia extends Model
     protected $casts = [
         'aportesijpdh21' => 'decimal:2',
         'aporteinssjpdh21' => 'decimal:2',
+        'contribucionsijpdh21' => 'decimal:2',
+        'contribucioninssjpdh21' => 'decimal:2',
+        'aportesijp' => 'decimal:2',
+        'aporteinssjp' => 'decimal:2',
+        'contribucionsijp' => 'decimal:2',
+        'contribucioninssjp' => 'decimal:2',
         'diferencia' => 'decimal:2'
     ];
 
@@ -76,6 +88,46 @@ class ControlAportesDiferencia extends Model
             'nro_legaj', // Clave foránea en Dh03
             'nro_cuil', // Clave local en ControlAportesDiferencia
             'nro_legaj'  // Clave local en Dh01
+        );
+    }
+
+    /**
+     * Obtiene el total de aportes DH21
+     */
+    public function totalAportesDh21(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->aportesijpdh21 + $this->aporteinssjpdh21
+        );
+    }
+
+    /**
+     * Obtiene el total de contribuciones DH21
+     */
+    public function totalContribucionesDh21(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21
+        );
+    }
+
+    /**
+     * Obtiene el total de aportes SICOSS
+     */
+    public function totalAportesSicoss(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->aportesijp + $this->aporteinssjp
+        );
+    }
+
+    /**
+     * Obtiene el total de contribuciones SICOSS
+     */
+    public function totalContribucionesSicoss(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->contribucionsijp + $this->contribucioninssjp
         );
     }
 }

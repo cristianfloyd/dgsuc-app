@@ -31,6 +31,12 @@ return new class extends Migration
             $table->string('caracter', 4)->nullable();
             $table->decimal('aportesijpdh21', 12, 2);
             $table->decimal('aporteinssjpdh21', 12, 2);
+            $table->decimal('contribucionsijpdh21', 12, 2);
+            $table->decimal('contribucioninssjpdh21', 12, 2);
+            $table->decimal('aportesijp', 12, 2)->nullable();
+            $table->decimal('aporteinssjp', 12, 2)->nullable();
+            $table->decimal('contribucionsijp', 12, 2)->nullable();
+            $table->decimal('contribucioninssjp', 12, 2)->nullable();
             $table->decimal('diferencia', 12, 2);
             $table->timestamp('fecha_control');
             $table->string('connection')->nullable();

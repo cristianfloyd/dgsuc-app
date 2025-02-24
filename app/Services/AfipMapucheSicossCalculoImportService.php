@@ -93,7 +93,7 @@ class AfipMapucheSicossCalculoImportService
             ),
             'remtotal' => (float) str_replace(',', '.', substr($line,
                 $this->columnMetadata->getStartPosition('remtotal') - 1,
-                $this->columnMetadata->getColumnWidth(6)
+                $this->columnMetadata->getColumnWidth(1)
             )),
             'rem1' => (float) str_replace(',', '.', substr($line,
                 $this->columnMetadata->getStartPosition('rem1') - 1,

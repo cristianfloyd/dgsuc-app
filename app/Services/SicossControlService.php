@@ -237,6 +237,12 @@ class SicossControlService
                 'a.cuil',
                 DB::raw("aportesijpdh21::numeric(15,2) as aportesijpdh21"),
                 DB::raw("aporteinssjpdh21::numeric(15,2) as aporteinssjpdh21"),
+                DB::raw("contribucionsijpdh21::numeric(15,2) as contribucionsijpdh21"),
+                DB::raw("contribucioninssjpdh21::numeric(15,2) as contribucioninssjpdh21"),
+                DB::raw("aportesijp::numeric(15,2) as aportesijp"),
+                DB::raw("aporteinssjp::numeric(15,2) as aporteinssjp"),
+                DB::raw("contribucionsijp::numeric(15,2) as contribucionsijp"),
+                DB::raw("contribucioninssjp::numeric(15,2) as contribucioninssjp"),
                 DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                     (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric(15,2)
                     as diferencia")
@@ -249,8 +255,15 @@ class SicossControlService
                 'cuil' => $diferencia->cuil,
                 'aportesijpdh21' => $diferencia->aportesijpdh21,
                 'aporteinssjpdh21' => $diferencia->aporteinssjpdh21,
+                'contribucionsijpdh21' => $diferencia->contribucionsijpdh21,
+                'contribucioninssjpdh21' => $diferencia->contribucioninssjpdh21,
+                'aportesijp' => $diferencia->aportesijp,
+                'aporteinssjp' => $diferencia->aporteinssjp,
+                'contribucionsijp' => $diferencia->contribucionsijp,
+                'contribucioninssjp' => $diferencia->contribucioninssjp,
                 'diferencia' => $diferencia->diferencia,
-                'fecha_control' => now()
+                'fecha_control' => now(),
+                'connection' => $this->connection
             ];
         })->chunk(1000)->each(function ($chunk) {
             ControlAportesDiferencia::insert($chunk->toArray());
@@ -420,24 +433,7 @@ class SicossControlService
             ]);
     }
 
-    /**
-     * Obtiene el query builder para las diferencias por dependencia
-     */
-    // public function getQueryContribucionesDiferenciasPorDependencia(): Builder
-    // {
-    //     return DB::connection($this->connection)
-    //         ->table('dh21aporte as a')
-    //         ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-    //         ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-    //             (contribucionsijp + contribucioninssjp))::numeric) > 1")
-    //         ->groupBy('b.codc_uacad', 'b.caracter')
-    //         ->select([
-    //             'b.codc_uacad',
-    //             'b.caracter',
-    //             DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-    //                 (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
-    //         ]);
-    // }
+
 
     /**
      * Obtiene las diferencias de aportes agrupadas por dependencia y carácter
@@ -467,5 +463,100 @@ class SicossControlService
             ->orderBy('b.caracter')
             ->get()
             ->toArray();
+    }
+
+    /**
+     * Ejecuta el control de CUILs para identificar aquellos que existen en un sistema pero no en el otro
+     *
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
+     * @return array{
+     *   registros_procesados: int,
+     *   cuils_solo_dh21: int,
+     *   cuils_solo_sicoss: int,
+     *   fecha_proceso: string
+     * }
+     */
+    public function ejecutarControlCuils(?int $anio = null, ?int $mes = null): array
+    {
+        try {
+            // Si no se proporcionan parámetros, usar el periodo fiscal actual
+            if ($anio === null || $mes === null) {
+                $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+                $anio ??= $periodoFiscal['year'];
+                $mes ??= $periodoFiscal['month'];
+            }
+
+            // Crear tabla temporal necesaria
+            $this->crearTablaDH21Aportes($anio, $mes);
+
+            // Primero limpiamos los registros anteriores
+            ControlCuilsDiferencia::truncate();
+
+            // Obtener CUILs que están en DH21 pero no en SICOSS
+            $cuilsSoloDh21 = DB::connection($this->connection)
+                ->table('dh21aporte as a')
+                ->select([
+                    'a.cuil',
+                    DB::raw("'DH21' as origen"),
+                    DB::raw("now() as fecha_control"),
+                    DB::raw("'{$this->connection}' as connection")
+                ])
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('suc.afip_mapuche_sicoss_calculos as b')
+                        ->whereColumn('a.cuil', 'b.cuil');
+                });
+
+            // Obtener CUILs que están en SICOSS pero no en DH21
+            $cuilsSoloSicoss = DB::connection($this->connection)
+                ->table('suc.afip_mapuche_sicoss_calculos as b')
+                ->select([
+                    'b.cuil',
+                    DB::raw("'SICOSS' as origen"),
+                    DB::raw("now() as fecha_control"),
+                    DB::raw("'{$this->connection}' as connection")
+                ])
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('dh21aporte as a')
+                        ->whereColumn('b.cuil', 'a.cuil');
+                });
+
+            // Unir los resultados y hacer la inserción
+            $insertQuery = $cuilsSoloDh21->union($cuilsSoloSicoss);
+
+            // Insertar directamente usando una subconsulta
+            DB::connection($this->connection)->statement("
+                INSERT INTO suc.control_cuils_diferencias (cuil, origen, fecha_control, connection)
+                {$insertQuery->toSql()}
+            ", $insertQuery->getBindings());
+
+            // Obtener conteos para el resumen
+            $conteos = [
+                'cuils_solo_dh21' => ControlCuilsDiferencia::where('origen', 'DH21')->count(),
+                'cuils_solo_sicoss' => ControlCuilsDiferencia::where('origen', 'SICOSS')->count(),
+            ];
+
+            return [
+                'registros_procesados' => $conteos['cuils_solo_dh21'] + $conteos['cuils_solo_sicoss'],
+                'cuils_solo_dh21' => $conteos['cuils_solo_dh21'],
+                'cuils_solo_sicoss' => $conteos['cuils_solo_sicoss'],
+                'fecha_proceso' => now()->toDateTimeString(),
+                'periodo' => [
+                    'anio' => $anio,
+                    'mes' => $mes
+                ]
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error en ejecutarControlCuils:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'anio' => $anio,
+                'mes' => $mes
+            ]);
+            throw $e;
+        }
     }
 }

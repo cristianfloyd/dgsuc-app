@@ -131,8 +131,8 @@ class ColumnMetadata
             'aporteinssjp' => 151,
             'contribucionsijp' => 301,
             'contribucioninssjp' => 316,
-            'aportediferencialsijp' => 166,
-            'aportesres33_41re' => 196,
+            'aportediferencialsijp' => 704,
+            'aportesres33_41re' => 798,
         ];
     }
 

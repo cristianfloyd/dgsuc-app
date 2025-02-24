@@ -22,12 +22,12 @@ use Filament\Notifications\Notification;
 use App\Models\ControlContribucionesDiferencia;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Actions\Action as TableAction;
+use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Resources\RelationManagers\RelationGroup;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
+use Filament\Notifications\Actions\Action as NotificationAction;
 use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
 use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
-use Illuminate\Support\Facades\View as ViewFacade;
-use Filament\Notifications\Actions\Action as NotificationAction;
 
 class SicossControles extends Page implements HasTable
 {
@@ -136,6 +136,7 @@ class SicossControles extends Page implements HasTable
                 'resumen' => 'Resumen',
                 'diferencias_aportes' => 'Diferencias por Aportes',
                 'diferencias_contribuciones' => 'Diferencias por Contribuciones',
+                'diferencias_cuils' => 'CUILs no encontrados',
             ],
         ];
     }
@@ -172,7 +173,7 @@ class SicossControles extends Page implements HasTable
                 $service = app(SicossControlService::class);
                 $service->setConnection($this->getConnectionName());
                 $service->crearTablaDH21Aportes();
-                
+
                 return [
                     'totales' => [
                         'cuils_procesados' => ControlAportesDiferencia::count(),
@@ -234,7 +235,6 @@ class SicossControles extends Page implements HasTable
     public function table(Table $table): Table
     {
         // Si estamos en la pestaña resumen, retornamos una tabla vacía
-        // El contenido del resumen se manejará en la vista principal
         if ($this->activeTab === 'resumen') {
             return $table->query(ControlAportesDiferencia::query());
         }
@@ -244,13 +244,16 @@ class SicossControles extends Page implements HasTable
                 ->with(['sicossCalculo', 'relacionActiva', 'dh01']),
             'diferencias_contribuciones' => ControlContribucionesDiferencia::query()
                 ->with(['sicossCalculo', 'relacionActiva', 'dh01']),
+            'diferencias_cuils' => ControlCuilsDiferencia::query(),
             default => ControlAportesDiferencia::query()
         };
 
         return $table
             ->query($query)
             ->columns($this->getColumnsForActiveTab())
-            ->defaultSort('diferencia', 'desc')
+            ->when($this->activeTab !== 'diferencias_cuils', fn (Table $table) =>
+                $table->defaultSort('diferencia', 'desc')
+            )
             ->striped()
             ->defaultPaginationPageOption(5)
             ->paginated([5, 10, 25, 50, 100])
@@ -291,14 +294,26 @@ class SicossControles extends Page implements HasTable
                     ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
+            'diferencias_cuils' => [
+                TableAction::make('view_cuils')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-m-eye')
+                    ->modalContent(function ($record): View {
+                        return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
+                            'record' => $record,
+                        ]);
+                    })
+                    ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
+                    ->modalWidth(MaxWidth::SevenExtraLarge),
+            ],
             default => [],
         };
     }
 
     protected function getColumnsForActiveTab(): array
     {
-        if ($this->activeTab === 'diferencias_cuil') {
-            return $this->getCuilsColumns();
+        if ($this->activeTab === 'diferencias_cuils') {
+            return $this->getDiferenciasCuilsColumns();
         }
 
         if ($this->activeTab === 'diferencias_aportes') {
@@ -342,9 +357,18 @@ class SicossControles extends Page implements HasTable
                         $this->ejecutarControlContribuciones();
                     }),
             ],
+            'diferencias_cuils' => [
+                Action::make('ejecutarControlCuils')
+                    ->label('Ejecutar Control de CUILs')
+                    ->icon('heroicon-o-user-group')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Ejecutar control de CUILs?')
+                    ->modalDescription('Esta acción verificará los CUILs que existen en un sistema pero no en el otro.')
+                    ->action(function () {
+                        $this->ejecutarControlCuils();
+                    }),
+            ],
             default => [
-
-
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
@@ -420,7 +444,36 @@ class SicossControles extends Page implements HasTable
         }
     }
 
+    public function ejecutarControlCuils(): void
+    {
+        try {
+            $this->loading = true;
+            $service = app(SicossControlService::class);
+            $service->setConnection($this->getConnectionName());
 
+            $resultados = $service->ejecutarControlCuils();
+
+            // Invalidamos el caché después de ejecutar el control
+            cache()->forget('sicoss_resumen_stats');
+
+            // Actualizamos los stats
+            $this->cargarResumen();
+
+            Notification::make()
+                ->success()
+                ->title('Control de CUILs Ejecutado')
+                ->body('Se ha completado el control de CUILs')
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error en el control de CUILs')
+                ->body($e->getMessage())
+                ->send();
+        } finally {
+            $this->loading = false;
+        }
+    }
 
     public function viewRecord(): array
     {

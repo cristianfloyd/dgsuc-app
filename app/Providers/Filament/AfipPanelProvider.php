@@ -9,6 +9,7 @@ use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\DashboardSelector;
+use App\Filament\Afip\Pages\SicossUpdates;
 use Filament\Http\Middleware\Authenticate;
 use App\Filament\Afip\Pages\SicossControles;
 use App\Filament\Afip\Pages\SicossReportePage;
@@ -40,6 +41,7 @@ class AfipPanelProvider extends PanelProvider
                 DashboardSelector::class,
                 SicossControles::class,
                 SicossReportePage::class,
+                SicossUpdates::class,
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
@@ -70,6 +72,9 @@ class AfipPanelProvider extends PanelProvider
             ->navigationGroups([
                 'AFIP',
                 'Configuración',
-            ]);
+            ])
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->maxContentWidth('full')
+            ->font('Poppins');
     }
 }
