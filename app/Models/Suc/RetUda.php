@@ -17,7 +17,7 @@ class RetUda extends Model
      *
      * @var string
      */
-    protected $table = 'suc.ret_udas';
+    protected $table = 'suc.ret_uda';
 
     /**
      * Indica si el modelo debe ser timestamped.
