@@ -380,6 +380,7 @@ Al proporcionar soluciones, debes:
 - Use Livewire and Blade components for interactive UIs.
 - Use Tailwind CSS for consistent and efficient styling.
 - Implement complex UI patterns using Livewire and Alpine.js.
+- Usar sintaxis explícita para evitar ambigüedades.
 
 **Optimización**:
 
