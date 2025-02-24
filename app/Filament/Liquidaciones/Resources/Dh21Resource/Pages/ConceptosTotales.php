@@ -93,10 +93,11 @@ class ConceptosTotales extends Page implements HasTable
         $this->table->query($this->updateQuery($nro_liqui));
     }
 
+
     /**
-     * Método para actualizar el query con el filtro de codigoEscalafon.
+     * Filtra los conceptos totales de la tabla por el código de escalafón proporcionado.
      *
-     * @param int $codigoEscalafon El código de escalafón para filtrar.
+     * @param string|null $codigoEscalafon El código de escalafón a filtrar, o null para obtener todos los conceptos.
      * @return void
      */
     public function filterByCodigoEscalafon(string $codigoEscalafon = null): void

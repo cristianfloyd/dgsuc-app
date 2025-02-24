@@ -5,76 +5,50 @@ namespace App\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Application;
+use App\Support\PanelRegistry;
 
 class PanelSelector extends Component
 {
-    public function render(): View|Factory|Application
+    public string $search = '';
+    public string $selectedCategory = 'all';
+    public bool $darkMode = true;
+
+    public function mount()
+    {
+        $this->darkMode = session('darkMode', true);
+    }
+
+    public function toggleTheme()
+    {
+        $this->darkMode = !$this->darkMode;
+        session(['darkMode' => $this->darkMode]);
+        $this->dispatch('toggle-theme');
+    }
+
+    public function render(): View
     {
         return view('livewire.panel-selector', [
-            'panels' => $this->getAvailablePanels()
+            'panels' => $this->getFilteredPanels(),
+            'categories' => PanelRegistry::getCategories()
         ]);
     }
 
-    private function getAvailablePanels(): Collection
+    private function getFilteredPanels(): Collection
     {
-        return collect([
-            [
-                'id' => 'admin',
-                'name' => 'Panel Administrativo',
-                'url' => '/admin',
-                'icon' => 'heroicon-o-cog',
-            ],
-            [
-                'id' => 'dashboard',
-                'name' => 'Escritorio SUC',
-                'icon' => 'heroicon-o-clipboard-document-list',
-                'url' => '/dashboard',
-                'description' => 'S.U.C. - Panel de control de operaciones'
-            ],
-            [
-                'id' => 'mapuche',
-                'name' => 'Panel Mapuche',
-                'url' => '/mapuche',
-                'icon' => 'heroicon-o-document-text',
-            ],
-            [
-                'id' => 'embargos',
-                'name' => 'Panel Embargos',
-                'icon' => 'heroicon-o-document-duplicate',
-                'url' => '/embargos',
-                'description' => 'Gestión de embargos'
-            ],
-            [
-                'id' => 'sicoss',
-                'name' => 'Panel SICOSS',
-                'icon' => 'heroicon-o-document-duplicate',
-                'url' => '/sicoss',
-                'description' => 'Gestión de importación y procesamiento SICOSS'
-            ],
-            [
-                'id' => 'afip',
-                'name' => 'Panel AFIP',
-                'icon' => 'heroicon-o-clipboard-document-list',
-                'url' => '/afip-panel',
-                'description' => 'Gestión de datos y relaciones con AFIP'
-            ],
-            [
-                'id' => 'reportes',
-                'name' => 'Panel de Reportes',
-                'icon' => 'heroicon-o-chart-bar',
-                'url' => '/reportes',
-                'description' => 'Generación y visualización de reportes'
-            ],
-            [
-                'id' => 'liquidaciones',
-                'name' => 'Panel de Liquidaciones',
-                'icon' => 'heroicon-o-currency-dollar',
-                'url' => '/liquidaciones',
-                'description' => 'Gestión de liquidaciones y órdenes de pago'
-            ]
-        ])
-        ;
+        return PanelRegistry::getAllPanels()
+            ->when(
+                $this->search,
+                fn($panels) =>
+                $panels->filter(
+                    fn($panel) =>
+                    str_contains(strtolower($panel['name']), strtolower($this->search)) ||
+                        str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search))
+                )
+            )
+            ->when(
+                $this->selectedCategory !== 'all',
+                fn($panels) =>
+                $panels->where('category', $this->selectedCategory)
+            );
     }
 }

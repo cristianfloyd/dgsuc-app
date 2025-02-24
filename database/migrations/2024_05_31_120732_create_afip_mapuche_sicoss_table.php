@@ -14,6 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('suc.afip_mapuche_sicoss');
 
         Schema::connection($this->getConnectionName())->create('suc.afip_mapuche_sicoss', function (Blueprint $table) {
             $table->id();

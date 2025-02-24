@@ -11,6 +11,8 @@ return new class extends Migration
     use MapucheConnectionTrait;
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.comprobantes_nomina');
+
         Schema::connection($this->getConnectionName())->create('suc.comprobantes_nomina', function (Blueprint $table) {
             $table->id();
             $table->integer('anio_periodo');

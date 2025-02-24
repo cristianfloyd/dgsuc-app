@@ -3,5 +3,20 @@
 @tailwind utilities;
 
 [x-cloak] {
-    display: none;
+    display: none !important;
+}
+
+@keyframes progress-indeterminate {
+    0% { transform: translateX(-100%) }
+    100% { transform: translateX(100%) }
+}
+
+.animate-progress-indeterminate {
+    animation: progress-indeterminate 1.5s infinite linear;
+}
+
+.transition {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
 }

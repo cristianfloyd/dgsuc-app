@@ -2,15 +2,15 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Mapuche\Dh22;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Widgets\Widget;
-use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use App\Models\Mapuche\Dh22;
+use Filament\Widgets\Widget;
+use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
 
 /**
  * Representa un widget de Filament que permite seleccionar una liquidación de un modelo Dh22.
@@ -64,8 +64,11 @@ class IdLiquiSelector extends Widget implements HasForms
                     )
                     ->reactive()
                     ->afterStateUpdated(function ($state) {
-                        $this->dispatch('idLiquiSelected', $state);
-                        Log::debug("idLiquiSelected", ['state' => $state]);
+                        // Convertimos el valor a entero antes de enviarlo
+                        $liquidacionId = $state ? (int) $state : null;
+
+                        $this->dispatch('idLiquiSelected', $liquidacionId);
+                        Log::debug("idLiquiSelected", ['state' => $liquidacionId]);
                     }),
             ]);
     }

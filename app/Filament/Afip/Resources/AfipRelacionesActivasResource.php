@@ -18,7 +18,7 @@ class AfipRelacionesActivasResource extends Resource
 {
     protected static ?string $model = AfipRelacionesActivas::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
     protected static ?string $navigationGroup = 'AFIP';
     protected static ?int $navigationSort = 1;
 

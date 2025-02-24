@@ -29,30 +29,26 @@ use App\Livewire\AfipRelacionesActivas;
 use App\Http\Controllers\UsersController;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Livewire\AfipMapucheMiSimplificacion;
-use App\Http\Controllers\PanelAccessController;
-use App\Http\Controllers\PanelSelectorController;
+use App\Http\Controllers\DocumentationController;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
 use App\Http\Controllers\BloqueosHistorialController;
 use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
-use App\Http\Controllers\DocumentationController;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
 
-Route::middleware(['check.materialized.view'])->group(function () {
-    Route::get('/suc/reporte-liquidacion', ReporteLiquidacion::class)->name('reporte-liquidacion');
-});
+
 
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])
     ->group(function () {
         // Rutas protegidas que requieren autenticación y gestión de conexión BD
     });
-Route::get('/panel-selector', [PanelSelectorController::class, 'index'])->name('panel-selector');
-Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
+
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+    Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
     Route::get('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () {
         return view('dashboard');

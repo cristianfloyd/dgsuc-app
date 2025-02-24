@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+        x-data="{ darkMode: $persist(true).as('darkMode') }"
+        :class="{ 'dark': darkMode }">
 
 <head>
     <meta charset="utf-8">
@@ -15,14 +17,20 @@
             display: none !important;
         }
     </style>
-    
+
     @livewireStyles
     @filamentStyles
     @vite('resources/css/app.css')
 </head>
 
-<body class="antialiased">
-    {{ $slot }}
+<body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-screen">
+        @livewire('navigation-menu')
+        <!-- Page Content -->
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
 
     @livewireScripts
     @filamentScripts

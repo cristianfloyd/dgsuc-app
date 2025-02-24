@@ -26,7 +26,8 @@ use Filament\Resources\RelationManagers\RelationGroup;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
 use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
 use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
-
+use Illuminate\Support\Facades\View as ViewFacade;
+use Filament\Notifications\Actions\Action as NotificationAction;
 
 class SicossControles extends Page implements HasTable
 {
@@ -47,54 +48,70 @@ class SicossControles extends Page implements HasTable
     public $resultadosControles = null;
     public $loading = false;
     public $record = null;
-    public $mostrarResumen = false;
+    public $cachedStats = null;
 
     public function mount()
     {
-        $connections = config('database.connections');
-
-        $this->availableConnections = collect($connections)
+        $this->availableConnections = collect(config('database.connections'))
             ->filter(function ($config, $name) {
                 return str_starts_with($name, 'pgsql-');
             })
             ->mapWithKeys(function ($config, $name) {
                 return [$name => $name];
             })
-            ->all(); // Usar all() para obtener un array plano
+            ->all();
 
         $this->selectedConnection = $this->selectedConnection ?? $this->getConnectionName();
     }
 
-
     public function ejecutarControles(): void
     {
         try {
-            // Indicador de progreso
             $this->loading = true;
 
-            // Instanciamos y configuramos el servicio
+            Notification::make()
+                ->title('Iniciando controles SICOSS')
+                ->info()
+                ->send();
+
             $service = app(SicossControlService::class);
             $service->setConnection($this->getConnectionName());
 
-            // Ejecutamos los controles
             $this->resultadosControles = $service->ejecutarControlesPostImportacion();
 
-            // Notificación de éxito con más detalles
+            $diferenciasAportes = abs($this->resultadosControles['totales']['dh21']['aportes'] -
+                $this->resultadosControles['totales']['sicoss']['aportes']);
+
+            $diferenciasContribuciones = abs($this->resultadosControles['totales']['dh21']['contribuciones'] -
+                $this->resultadosControles['totales']['sicoss']['contribuciones']);
+
+            $viewContent = ViewFacade::make('filament.afip.notifications.control-sicoss', [
+                'diferenciasAportes' => number_format($diferenciasAportes, 2, ',', '.'),
+                'diferenciasContribuciones' => number_format($diferenciasContribuciones, 2, ',', '.'),
+                'totalCuils' => $this->getDiferenciasCount(),
+                'totalDependencias' => $this->getDependenciasCount()
+            ])->render();
+
+            // Invalidamos el caché después de ejecutar los controles
+            cache()->forget('sicoss_resumen_stats');
+
+            // Actualizamos los stats después de ejecutar los controles
+            $this->cargarResumen();
+
             Notification::make()
                 ->success()
-                ->title('Controles ejecutados')
-                ->body(sprintf(
-                    'Se encontraron %d diferencias en CUILs y %d en dependencias',
-                    $this->getDiferenciasCount(),
-                    $this->getDependenciasCount()
-                ))
+                ->title('Controles completados')
+                ->body($viewContent)
                 ->actions([
-                    Action::make('ver_resumen')
+                    NotificationAction::make('ver_resumen')
                         ->label('Ver Resumen')
+                        ->color('primary')
+                        ->icon('heroicon-o-document-text')
                         ->action(fn() => $this->activeTab = 'resumen'),
                 ])
                 ->persistent()
                 ->send();
+
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de controles SICOSS', [
                 'error' => $e->getMessage(),
@@ -147,52 +164,71 @@ class SicossControles extends Page implements HasTable
         return count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
     }
 
-    public function getResumenStats(): array
+    protected function getResumenStats(): array
     {
-        if (!$this->hasResults()) {
+        try {
+            return cache()->remember('sicoss_resumen_stats', now()->addMinutes(5), function () {
+                // Creamos la tabla temporal primero
+                $service = app(SicossControlService::class);
+                $service->setConnection($this->getConnectionName());
+                $service->crearTablaDH21Aportes();
+                
+                return [
+                    'totales' => [
+                        'cuils_procesados' => ControlAportesDiferencia::count(),
+                        'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
+                        'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
+                    ],
+                    'diferencias_por_dependencia' => DB::connection($this->getConnectionName())
+                        ->table('suc.control_aportes_diferencias')
+                        ->select('codc_uacad', 'caracter')
+                        ->selectRaw('SUM(diferencia) as diferencia_total')
+                        ->groupBy('codc_uacad', 'caracter')
+                        ->having(DB::raw('ABS(SUM(diferencia))'), '>', 1)
+                        ->get(),
+                    'totales_monetarios' => [
+                        'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
+                        'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
+                    ],
+                    'comparacion_931' => [
+                        'aportes' => [
+                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
+                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
+                                ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
+                        ],
+                        'contribuciones' => [
+                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
+                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
+                        ],
+                    ],
+                    'cuils_no_encontrados' => [
+                        'en_dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')
+                            ->whereNotIn('cuil', function ($query) {
+                                $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
+                            })
+                            ->count(),
+                        'en_sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
+                            ->whereNotIn('cuil', function ($query) {
+                                $query->select('cuil')->from('dh21aporte');
+                            })
+                            ->count(),
+                    ],
+                ];
+            });
+        } catch (\Exception $e) {
+            logger()->error('Error obteniendo resumen stats:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Error cargando resumen')
+                ->body('No se pudieron cargar los datos del resumen.')
+                ->send();
+
             return [];
         }
-
-        return [
-            'totales' => [
-                'cuils_procesados' => ControlAportesDiferencia::count(),
-                'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-                'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-            ],
-            'diferencias_por_dependencia' => DB::connection($this->getConnectionName())->table('suc.control_aportes_diferencias')
-                ->select('codc_uacad', 'caracter')
-                ->selectRaw('SUM(diferencia) as diferencia_total')
-                ->groupBy('codc_uacad', 'caracter')
-                ->having(DB::raw('ABS(SUM(diferencia))'), '>', 1)
-                ->get(),
-            'totales_monetarios' => [
-                'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
-                'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
-            ],
-            'comparacion_931' => [
-                'aportes' => [
-                    'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
-                    'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
-                        ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
-                ],
-                'contribuciones' => [
-                    'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
-                    'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
-                ],
-            ],
-            'cuils_no_encontrados' => [
-                'en_dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')
-                    ->whereNotIn('cuil', function ($query) {
-                        $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
-                    })
-                    ->count(),
-                'en_sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
-                    ->whereNotIn('cuil', function ($query) {
-                        $query->select('cuil')->from('dh21aporte');
-                    })
-                    ->count(),
-            ],
-        ];
     }
 
     public function table(Table $table): Table
@@ -307,22 +343,14 @@ class SicossControles extends Page implements HasTable
                     }),
             ],
             default => [
-                Action::make('mostrarResumen')
-                    ->label('Resumen')
-                    ->icon('heroicon-o-eye')
-                    ->extraAttributes([
-                        'x-data' => '{}',
-                        'x-transition' => '',
-                        'class' => 'fi-transition-all fi-duration-300 fi-ease-in-out'
-                    ])
-                    ->action('toggleResumen'),
+
 
                 Action::make('ejecutarControles')
-                    ->label('Ejecutar Todos los Controles')
+                    ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Ejecutar controles SICOSS?')
-                    ->modalDescription('Esta acción ejecutará todos los controles disponibles.')
+                    // ->requiresConfirmation()
+                    // ->modalHeading('¿Ejecutar controles SICOSS?')
+                    // ->modalDescription('Esta acción ejecutará todos los controles disponibles.')
                     ->action(function () {
                         $this->ejecutarControles();
                     }),
@@ -337,8 +365,13 @@ class SicossControles extends Page implements HasTable
             $service = app(SicossControlService::class);
             $service->setConnection($this->getConnectionName());
 
-            // Ejecutar solo el control de aportes
             $resultados = $service->ejecutarControlAportes();
+
+            // Invalidamos el caché después de ejecutar el control
+            cache()->forget('sicoss_resumen_stats');
+
+            // Actualizamos los stats
+            $this->cargarResumen();
 
             Notification::make()
                 ->success()
@@ -346,7 +379,11 @@ class SicossControles extends Page implements HasTable
                 ->body('Se ha completado el control de aportes')
                 ->send();
         } catch (\Exception $e) {
-            // Manejo de errores
+            Notification::make()
+                ->danger()
+                ->title('Error en el control de aportes')
+                ->body($e->getMessage())
+                ->send();
         } finally {
             $this->loading = false;
         }
@@ -359,8 +396,13 @@ class SicossControles extends Page implements HasTable
             $service = app(SicossControlService::class);
             $service->setConnection($this->getConnectionName());
 
-            // Ejecutar solo el control de contribuciones
             $resultados = $service->ejecutarControlContribuciones();
+
+            // Invalidamos el caché después de ejecutar el control
+            cache()->forget('sicoss_resumen_stats');
+
+            // Actualizamos los stats
+            $this->cargarResumen();
 
             Notification::make()
                 ->success()
@@ -368,7 +410,11 @@ class SicossControles extends Page implements HasTable
                 ->body('Se ha completado el control de contribuciones')
                 ->send();
         } catch (\Exception $e) {
-            // Manejo de errores
+            Notification::make()
+                ->danger()
+                ->title('Error en el control de contribuciones')
+                ->body($e->getMessage())
+                ->send();
         } finally {
             $this->loading = false;
         }
@@ -392,49 +438,9 @@ class SicossControles extends Page implements HasTable
         $this->record = null;
     }
 
-    public function toggleResumen(): void
+    public function cargarResumen()
     {
-        try {
-            // Verificamos si hay datos en las tablas de control
-            $hasData = ControlAportesDiferencia::count() > 0 &&
-                        ControlContribucionesDiferencia::count() > 0;
-
-            if ($hasData) {
-                $this->mostrarResumen = !$this->mostrarResumen;
-
-                if ($this->mostrarResumen) {
-                    // Creamos la tabla temporal usando el servicio
-                    $service = app(SicossControlService::class);
-                    $service->setConnection($this->getConnectionName());
-                    $service->crearTablaDH21Aportes();
-
-                    // Ejecutamos las estadísticas
-                    $this->resultadosControles = [
-                        'aportes_contribuciones' => $this->getResumenStats()
-                    ];
-                    Log::info('Resultados del resumen', $this->resultadosControles);
-                }
-
-                Notification::make()
-                    ->title($this->mostrarResumen ? 'Mostrando estadísticas del resumen' : 'Ocultando resumen')
-                    ->success()
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('No hay datos para mostrar')
-                    ->warning()
-                    ->body('Debe ejecutar los controles primero para ver el resumen')
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error al generar el resumen')
-                ->danger()
-                ->body('No se pudo crear la tabla temporal necesaria')
-                ->send();
-
-            $this->mostrarResumen = false;
-        }
+        $this->cachedStats = $this->getResumenStats();
+        $this->dispatch('resumen-loaded');
     }
-
 }
