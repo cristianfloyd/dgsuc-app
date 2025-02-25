@@ -86,9 +86,13 @@ class BloqueosResource extends Resource
                         return $column->getState();
                     })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('chkstopliq')->boolean(),
-                TextColumn::make('mensaje_error'),
+                TextColumn::make('mensaje_error')
+                    ->limit(20)
+                    ->tooltip(function (TextColumn $column): ?string{
+                        return $column->getState();
+                    })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('tiene_cargo_asociado')
-                    ->label('Cargo en Mapuche')
+                    ->label('Asociado')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
