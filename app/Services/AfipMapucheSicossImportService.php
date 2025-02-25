@@ -123,7 +123,6 @@ class AfipMapucheSicossImportService
         } catch (\Exception $e) {
             $stats['errors'][] = "Error al procesar lote: " . $e->getMessage();
             Log::error('Error al procesar lote SICOSS', [
-                'error' => $e->getMessage(),
                 'batch_size' => count($batch)
             ]);
         }

@@ -68,7 +68,7 @@ class BloqueosProcessService
 
             if ($bloqueosData !== null) {
                 // Validar que todos los registros estén en estado correcto
-                $registrosInvalidos = $bloqueosData->filter(function ($bloqueo) {
+                $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
                     return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
                            !is_null($bloqueo->mensaje_error);
                 });
@@ -80,7 +80,7 @@ class BloqueosProcessService
                     );
                 }
 
-                $query->whereIn('id', $bloqueosData->pluck('id'));
+                $query->whereIn('id', collect($bloqueosData)->pluck('id'));
             }
 
             // Verificar que existan registros para procesar
@@ -122,8 +122,8 @@ class BloqueosProcessService
                         } else {
                             // Actualizar estado en caso de error
                             $bloqueo->update([
-                                'estado' => BloqueosEstadoEnum::ERROR_PROCESAMIENTO,
-                                'mensaje_error' => $resultado->error_message
+                                'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
+                                'mensaje_error' => $resultado->message
                             ]);
                         }
                     } catch (\Exception $e) {
@@ -133,7 +133,7 @@ class BloqueosProcessService
                         ]);
 
                         $bloqueo->update([
-                            'estado' => BloqueosEstadoEnum::ERROR_PROCESAMIENTO,
+                            'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
                             'mensaje_error' => $e->getMessage()
                         ]);
                     }

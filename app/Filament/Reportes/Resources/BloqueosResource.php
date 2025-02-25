@@ -5,7 +5,6 @@ namespace App\Filament\Reportes\Resources;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
@@ -64,7 +63,6 @@ class BloqueosResource extends Resource
 
     public static function table(Table $table): Table
     {
-
         return $table
             ->columns([
                 TextColumn::make('estado')
@@ -88,7 +86,14 @@ class BloqueosResource extends Resource
                         return $column->getState();
                     })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('chkstopliq')->boolean(),
-                TextColumn::make('mensaje_error')
+                TextColumn::make('mensaje_error'),
+                IconColumn::make('tiene_cargo_asociado')
+                    ->label('Cargo en Mapuche')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
             ])
             ->filters([
                 // Filtro por tipo de bloqueo
@@ -212,7 +217,7 @@ class BloqueosResource extends Resource
                     })
                     ->deselectRecordsAfterCompletion()
             ]);
-        }
+    }
 
     protected static function getResultados(): Collection
     {
@@ -288,6 +293,4 @@ class BloqueosResource extends Resource
             'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx'
         );
     }
-
-
 }

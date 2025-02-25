@@ -37,7 +37,7 @@ class ImportDataTableService
                 $table->string('tipo');
                 $table->text('observaciones')->nullable();
                 $table->boolean('chkstopliq')->default(false);
-
+                $table->boolean('tiene_cargo_asociado')->default(false);
                 // Campos de tracking y estado
                 $table->string('estado')->default(BloqueosEstadoEnum::IMPORTADO->value);
                 $table->text('mensaje_error')->nullable();

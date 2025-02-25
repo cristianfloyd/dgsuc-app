@@ -50,7 +50,9 @@ trait HasSicossControlTables
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()
-                ->copyable(),
+                ->copyable()
+                ->copyMessage('CUIL copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('aportesijpdh21')
                 ->label('Aportes SIJP DH21')
                 ->money('ARS')
@@ -91,7 +93,9 @@ trait HasSicossControlTables
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()
-                ->copyable(),
+                ->copyable()
+                ->copyMessage('CUIL copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('contribucionsijpdh21')
                 ->label('Contribución SIJP DH21')
                 ->money('ARS')
@@ -122,7 +126,9 @@ trait HasSicossControlTables
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()
-                ->copyable(),
+                ->copyable()
+                ->copyMessage('CUIL copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('art_contrib')
                 ->label('Contribución ART')
                 ->money('ARS')
@@ -146,7 +152,9 @@ trait HasSicossControlTables
                 ->label('CUIL')
                 ->searchable()
                 ->sortable()
-                ->copyable(),
+                ->copyable()
+                ->copyMessage('CUIL copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('origen')
                 ->label('Origen')
                 ->badge()

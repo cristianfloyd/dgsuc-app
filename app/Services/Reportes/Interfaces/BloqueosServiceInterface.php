@@ -3,8 +3,6 @@
 namespace App\Services\Reportes\Interfaces;
 
 use Illuminate\Support\Collection;
-use App\Data\Reportes\BloqueosData;
-use App\Models\Reportes\BloqueosDataModel;
 
 interface BloqueosServiceInterface
 {

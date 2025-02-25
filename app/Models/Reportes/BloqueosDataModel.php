@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class BloqueosDataModel extends Model
 {
     use MapucheConnectionTrait, HasFactory;
+    
     protected $table = 'suc.rep_bloqueos_import';
     protected $primaryKey = 'id';
 
@@ -33,6 +34,7 @@ class BloqueosDataModel extends Model
         'chkstopliq',
         'estado',
         'mensaje_error',
+        'tiene_cargo_asociado',
     ];
 
     protected $casts = [
@@ -41,6 +43,7 @@ class BloqueosDataModel extends Model
         'chkstopliq' => 'boolean',
         'fec_baja' => 'date:Y-m-d',
         'estado' => BloqueosEstadoEnum::class,
+        'tiene_cargo_asociado' => 'boolean',
     ];
 
     protected static function boot()
@@ -57,6 +60,17 @@ class BloqueosDataModel extends Model
             $this->estado = BloqueosEstadoEnum::ERROR_VALIDACION;
             $this->mensaje_error = 'Par legajo-cargo no encontrado en Mapuche';
         }
+        $this->save();
+    }
+
+    /**
+     * Verifica y actualiza si el legajo tiene cargo asociado en Mapuche
+     */
+    public function verificarCargoAsociado(): void
+    {
+        $tieneCargoAsociado = Dh03::validarParLegajoCargo($this->nro_legaj, $this->nro_cargo);
+        
+        $this->tiene_cargo_asociado = $tieneCargoAsociado;
         $this->save();
     }
 

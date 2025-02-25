@@ -6,6 +6,7 @@ namespace App\Providers;
 use App\Repositories\Dh11Repository;
 use App\Repositories\Dh19Repository;
 use App\Repositories\Dh61Repository;
+use App\Repositories\Dh90Repository;
 use App\Repositories\EmbargoRepository;
 use App\Services\CategoryUpdateService;
 use Illuminate\Support\ServiceProvider;
@@ -18,6 +19,7 @@ use App\Repositories\Mapuche\Dh21hRepository;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
+use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
@@ -44,6 +46,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             abstract: AfipMapucheSicossCalculoRepository::class,
             concrete: EloquentAfipMapucheSicossCalculoRepository::class
+        );
+        $this->app->bind(
+            Dh90RepositoryInterface::class,
+            Dh90Repository::class
         );
     }
 
