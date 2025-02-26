@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DatabaseSchema;
 use App\Traits\CargoQueries;
+use App\Traits\MapucheConnectionTrait;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh90 que almacena información de cargos asociados.
@@ -21,7 +22,12 @@ use App\Traits\CargoQueries;
  */
 class Dh90 extends Model
 {
-    use HasFactory, DatabaseSchema, CargoQueries;
+    use HasFactory, DatabaseSchema {
+        DatabaseSchema::getTable insteadof MapucheConnectionTrait;
+    }
+    use CargoQueries, MapucheConnectionTrait {
+        MapucheConnectionTrait::getConnectionName insteadof DatabaseSchema;
+    }
 
     /**
      * Nombre de la tabla en la base de datos.

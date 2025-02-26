@@ -28,6 +28,7 @@ use App\Filament\Reportes\Resources\BloqueosResource\Pages\EditImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 use Filament\Notifications\Notification;
+use Filament\Tables\Filters\Filter;
 
 class BloqueosResource extends Resource
 {
@@ -67,8 +68,7 @@ class BloqueosResource extends Resource
             ->columns([
                 TextColumn::make('estado')
                     ->badge()
-                    ->color(fn (BloqueosEstadoEnum $state): string => $state->getColor())
-                    ,
+                    ->color(fn(BloqueosEstadoEnum $state): string => $state->getColor()),
                 TextColumn::make('nro_liqui')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_registro')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true),
@@ -82,13 +82,13 @@ class BloqueosResource extends Resource
                 TextColumn::make('tipo')->searchable(),
                 TextColumn::make('observaciones')
                     ->limit(20)
-                    ->tooltip(function (TextColumn $column): ?string{
+                    ->tooltip(function (TextColumn $column): ?string {
                         return $column->getState();
                     })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('chkstopliq')->boolean(),
                 TextColumn::make('mensaje_error')
                     ->limit(20)
-                    ->tooltip(function (TextColumn $column): ?string{
+                    ->tooltip(function (TextColumn $column): ?string {
                         return $column->getState();
                     })->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('tiene_cargo_asociado')
@@ -98,6 +98,32 @@ class BloqueosResource extends Resource
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger'),
+                TextColumn::make('cargoAsociado.nro_cargoasociado')
+                    ->label('Cargo Asociado')
+                    ->tooltip('Número de cargo asociado')
+                    ->toggleable()
+                    ->searchable(),
+                TextColumn::make('cargoAsociado.tipoasociacion')
+                    ->label('Tipo Asociación')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'S' => 'success',
+                        'R' => 'warning',
+                        default => 'gray',
+                    })
+                    ->toggleable(),
+                TextColumn::make('cargoAsociado.nro_cargoasociado')
+                    ->label('Info Cargo Asociado')
+                    ->formatStateUsing(
+                        fn($record) =>
+                        $record->cargoAsociado
+                            ? "Cargo: {$record->cargoAsociado->nro_cargoasociado}
+                               (Tipo: {$record->cargoAsociado->tipoasociacion})"
+                            : 'Sin cargo asociado'
+                    )
+                    ->tooltip('Información completa del cargo asociado')
+                    ->toggleable()
+                    ->searchable(),
             ])
             ->filters([
                 // Filtro por tipo de bloqueo
@@ -114,9 +140,15 @@ class BloqueosResource extends Resource
                         '1' => 'Procesado',
                         '0' => 'Pendiente',
                     ]),
+                // Filtro para registros con cargo asociado
+                Filter::make('con_cargo_asociado')
+                    ->label('Con Cargo Asociado')
+                    ->query(fn($query) => $query->whereHas('cargoAsociado'))
+                    ->toggle(),
             ])
-            ->recordClasses(fn (BloqueosDataModel $record): string =>
-                match(true) {
+            ->recordClasses(
+                fn(BloqueosDataModel $record): string =>
+                match (true) {
                     $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
                     $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
                     default => ''
@@ -127,13 +159,13 @@ class BloqueosResource extends Resource
                 Action::make('edit')
                     ->label('Editar')
                     ->icon('heroicon-o-pencil-square')
-                    ->url(fn (BloqueosDataModel $record): string =>
-                        static::getUrl('edit', ['record' => $record]))
+                    ->url(fn(BloqueosDataModel $record): string =>
+                    static::getUrl('edit', ['record' => $record]))
                     ->color('warning'),
                 Action::make('procesarBloqueos')
                     ->label('Procesar Bloqueo')
                     ->icon('heroicon-o-arrow-path')
-                    ->modalContent(fn ($records): View => view('filament.resources.bloqueos-resource.process-modal', [
+                    ->modalContent(fn($records): View => view('filament.resources.bloqueos-resource.process-modal', [
                         'registro' => $records
                     ]))
                     ->modalWidth(MaxWidth::FiveExtraLarge)
@@ -173,7 +205,7 @@ class BloqueosResource extends Resource
                 BulkAction::make('procesarBloqueos')
                     ->label('Procesar Seleccionados')
                     ->icon('heroicon-o-arrow-path')
-                    ->modalContent(fn ($records): View => view('filament.resources.bloqueos-resource.process-modal', [
+                    ->modalContent(fn($records): View => view('filament.resources.bloqueos-resource.process-modal', [
                         'registros' => $records
                     ]))
                     ->modalWidth(MaxWidth::FiveExtraLarge)
@@ -225,7 +257,7 @@ class BloqueosResource extends Resource
 
     protected static function getResultados(): Collection
     {
-        return Cache::remember('bloqueos_resultados_' . auth()->id(), 3600, function () {
+        return Cache::remember('bloqueos_resultados_' . auth()->guard('web')->id(), 3600, function () {
             if (!static::$resultadosProcesamiento) {
                 $service = app(BloqueosProcessService::class);
                 static::$resultadosProcesamiento = $service->procesarBloqueos();
@@ -285,7 +317,7 @@ class BloqueosResource extends Resource
         return [
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn ($grupo) => $grupo->count()),
+                ->map(fn($grupo) => $grupo->count()),
             'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count()
         ];
     }

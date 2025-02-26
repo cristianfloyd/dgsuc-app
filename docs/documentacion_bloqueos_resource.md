@@ -59,7 +59,117 @@ Para procesar los bloqueos:
 3. Revise la información en la ventana modal.
 4. Confirme para aplicar los bloqueos en el sistema Mapuche.
 
-### 4. Exportación de Resultados
+#### Flujo Detallado del Procesamiento
+
+El método `procesarBloqueos` sigue el siguiente flujo de trabajo:
+
+1. **Preparación**:
+   - Inicia una transacción en la base de datos
+   - Verifica la existencia de la tabla de respaldo (backup)
+   - Filtra solo los registros en estado "VALIDADO" y sin mensajes de error
+
+2. **Validación Inicial**:
+   - Verifica que existan registros para procesar
+   - Si se proporcionan registros específicos, valida que todos estén en estado correcto
+
+3. **Procesamiento por Lotes**:
+   - Procesa los registros en grupos de 100 para optimizar el rendimiento
+   - Para cada lote:
+     - Prepara un backup de los registros actuales en DH03 **antes de modificarlos**
+     - Solo se incluyen en el backup los registros que realmente existen en DH03
+     - Almacena este backup en la tabla `suc.dh03_backup_bloqueos`
+
+4. **Procesamiento Individual**:
+   - Valida la existencia del par legajo-cargo
+   - Si el par legajo-cargo no existe, el registro se marca con error y no se procesa
+   - Según el tipo de bloqueo:
+     - **Licencia**: Activa el flag de stop liquidación
+     - **Fallecido/Renuncia**: Actualiza la fecha de baja solo si la nueva fecha es anterior a la existente
+   - Actualiza el estado del registro a "PROCESADO" si fue exitoso
+   - Elimina el registro de la tabla temporal
+   - Registra el resultado en el log del sistema
+
+> **Importante**: El sistema solo respalda los registros que realmente serán modificados. Si un registro no requiere cambios (por ejemplo, porque ya tiene la misma fecha de baja), no se incluirá en el backup.
+
+5. **Manejo de Errores**:
+   - Si ocurre un error en un registro individual:
+     - Marca el registro como "ERROR_PROCESO"
+     - Almacena el mensaje de error
+     - Continúa con el siguiente registro
+   - Si ocurre un error general:
+     - Revierte toda la transacción
+     - Registra el error en los logs
+     - Notifica al usuario
+
+6. **Finalización**:
+   - Confirma la transacción si todo fue exitoso
+   - Genera un resumen de operaciones:
+     - Total de registros procesados
+     - Cantidad de operaciones exitosas
+     - Cantidad de operaciones fallidas
+
+#### Mecanismo de Backup y Restauración
+
+- El backup se realiza **antes** de modificar cada registro
+- Solo se respaldan los registros que realmente existen en DH03
+- Cada registro de backup incluye:
+  - Información del cargo (nro_cargo, nro_legaj, nro_liqui)
+  - Estado original (fec_baja, chkstopliq)
+  - Información del bloqueo (tipo_bloqueo, fecha_baja_nueva)
+  - Metadatos (fecha_backup, session_id)
+- La restauración revierte los cambios utilizando los datos originales almacenados
+- El sistema utiliza el ID de sesión para asegurar que solo se restauren los cambios de la sesión actual
+
+#### Consideraciones del Procesamiento
+
+- Solo se procesan registros previamente validados
+- El proceso es transaccional: o se completa todo o no se realiza ningún cambio
+- Se mantiene un registro detallado de todas las operaciones
+- Cada tipo de bloqueo (licencia, fallecido, renuncia) tiene su lógica específica de procesamiento
+- El sistema permite la restauración de cambios mediante el backup automático
+
+### 4. Restauración de Cambios
+
+La funcionalidad "Restaurar Cambios" permite revertir las modificaciones realizadas en la tabla DH03 durante el procesamiento de bloqueos.
+
+#### Acceso a la Funcionalidad
+
+- Ubicada en la página de listado de datos importados
+- Botón "Restaurar Cambios" con ícono de flecha de retorno
+- Color amarillo (warning) para indicar una acción de precaución
+- Muestra un indicador numérico con la cantidad de cambios que pueden restaurarse
+
+#### Proceso de Restauración
+
+1. Al hacer clic en el botón "Restaurar Cambios", se muestra un diálogo de confirmación
+2. El diálogo advierte que la acción revertirá los últimos cambios realizados en la tabla DH03
+3. Al confirmar, el sistema:
+   - Recupera todos los registros de backup asociados a la sesión actual del usuario
+   - Restaura los valores originales en la tabla DH03 (fechas de baja y estado de bloqueo de liquidación)
+   - Elimina los registros de backup una vez restaurados
+4. Muestra una notificación de éxito o error según el resultado
+
+#### Características Importantes
+
+- **Segmentación por sesión**: Solo restaura los cambios realizados en la sesión actual del usuario
+- **Orden de restauración**: Procesa los registros en orden inverso (del más reciente al más antiguo)
+- **Limpieza automática**: Elimina los registros de backup después de restaurarlos
+- **Transaccional**: Todo el proceso se ejecuta dentro de una transacción para garantizar la integridad
+
+#### Casos de Uso
+
+Esta funcionalidad es útil cuando:
+- Se han procesado bloqueos por error
+- Se necesita revertir cambios específicos en la tabla DH03
+- Se requiere una forma rápida de deshacer modificaciones recientes
+
+#### Consideraciones de Seguridad
+
+- La restauración está limitada a la sesión actual del usuario
+- Requiere confirmación explícita para evitar restauraciones accidentales
+- No afecta a los cambios realizados por otros usuarios
+
+### 5. Exportación de Resultados
 
 Para exportar los resultados:
 

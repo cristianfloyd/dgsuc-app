@@ -41,8 +41,8 @@ class EditImportData extends EditRecord
                             ->content(fn($record) => $record->created_at->format('d/m/Y H:i')),
                     ])
                     ->columnSpan(1),
-                Section::make('Información Principal')
-                    ->description('Datos principales del bloqueo')
+                Section::make('Datos principales del bloqueo')
+                    ->description('')
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('nro_legaj')
@@ -71,9 +71,18 @@ class EditImportData extends EditRecord
                         ]),
                     ])
                     ->columnSpan(1),
+                Section::make('')
+                    ->schema([
+                        Placeholder::make('')
+                            ->content(fn($record) => view('filament.components.cargo-info', [
+                                'cargo' => $record->cargo
+                            ])),
+                    ])
+                    ->visible(fn($record) => $record->cargo()->exists())
+                    ->columnSpan(1),
                 Grid::make(3)
                     ->schema([
-                        Section::make('Detalles del Bloqueo')
+                        Section::make('')
                             ->schema([
                                 DatePicker::make('fecha_baja')
                                     ->label('Fecha de Baja')
@@ -102,16 +111,7 @@ class EditImportData extends EditRecord
                                 // ->columnSpanFull(),
                             ])->columns(2)
                             ->columnSpan(2),
-                        Section::make('Información del Cargo')
-                            ->schema([
-                                Placeholder::make('cargo_info')
-                                    ->content(fn($record) => view('filament.components.cargo-info', [
-                                        'cargo' => $record->cargo
-                                    ])),
-                            ])
-                            ->collapsible()
-                            ->visible(fn($record) => $record->cargo()->exists())
-                            ->columnSpan(1),
+
                     ])->columns(3),
 
             ])
@@ -185,7 +185,7 @@ class EditImportData extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['usuario_modificacion'] = auth()->user()->name;
+        $data['usuario_modificacion'] = auth()->guard('web')->user()->name;
         $data['fecha_modificacion'] = now();
 
         return $data;
@@ -203,7 +203,7 @@ class EditImportData extends EditRecord
                         ->first();
 
                     if ($siguiente) {
-                        $this->redirect(self::getUrl('edit', ['record' => $siguiente]));
+                        $this->redirect(self::getUrl(['edit', 'record' => $siguiente]));
                     }
                 }),
         ];
