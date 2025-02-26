@@ -1,6 +1,6 @@
 @if($sicossCalculo)
 <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
-    <h3 class="text-lg font-medium">Cálculo SICOSS</h3>
+    <h3 class="text-lg font-medium">SICOSS Calculo</h3>
     <dl class="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div>
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Remuneración Total</dt>

@@ -29,14 +29,15 @@ Existen varias opciones para validar los registros importados:
 
 1. Para cada registro, utilice el botón "Validar" en la columna de acciones.
 2. El sistema verificará si el par legajo-cargo existe en Mapuche.
-3. El estado del registro se actualizará automáticamente.
+3. El sistema verificará si el cargo tiene un cargo asociado y realizará validaciones adicionales.
+4. El estado del registro se actualizará automáticamente.
 
 #### Validación Masiva
 
 1. Seleccione los registros que desea validar utilizando las casillas de verificación.
 2. Utilice la acción masiva "Validar Registros".
 3. Confirme la acción en el diálogo de confirmación.
-4. El sistema mostrará un resumen de los resultados.
+4. El sistema mostrará un resumen de los resultados, incluyendo información sobre cargos asociados.
 
 #### Validación de Todos los Registros
 
@@ -57,10 +58,31 @@ Durante la validación, el sistema puede asignar estados especiales según las c
 1. **Fechas Coincidentes**: Cuando la fecha de baja importada es idéntica a la ya existente en Mapuche.
 2. **Fecha Superior**: Cuando la fecha de baja importada es posterior a la fecha registrada en Mapuche.
 3. **Licencia Ya Bloqueada**: Cuando se intenta aplicar una licencia a un cargo que ya tiene el stop de liquidación activado.
+4. **Falta Cargo Asociado**: Cuando un cargo tiene un cargo asociado en Mapuche (tabla DH90), pero este cargo asociado no está incluido en los bloqueos importados.
+5. **Fecha Cargo No Coincide**: Cuando un cargo y su cargo asociado están incluidos en los bloqueos, pero las fechas de baja importadas para ambos no coinciden.
 
 Estos estados ayudan a identificar situaciones que requieren atención especial antes del procesamiento.
 
-### 3. Procesamiento de Bloqueos
+### 3. Validación de Cargos Asociados
+
+El sistema realiza una validación especial para cargos asociados:
+
+1. **Detección de Cargos Asociados**: El sistema verifica si un cargo tiene un cargo asociado en la tabla DH90 de Mapuche.
+2. **Verificación de Inclusión**: Si un cargo tiene un cargo asociado, el sistema verifica que este cargo asociado también esté incluido en los bloqueos importados.
+3. **Comparación de Fechas**: Si ambos cargos (principal y asociado) están incluidos en los bloqueos, el sistema verifica que las fechas de baja importadas para ambos sean idénticas.
+
+#### Flujo de Validación de Cargos Asociados
+
+1. Se verifica si el cargo tiene un cargo asociado en Mapuche.
+2. Si tiene un cargo asociado, se busca este cargo en los bloqueos importados.
+3. Si el cargo asociado no está en los bloqueos, se marca el registro con el estado "FALTA_CARGO_ASOCIADO".
+4. Si el cargo asociado está en los bloqueos, se comparan las fechas de baja:
+   - Si las fechas no coinciden, se marca el registro con el estado "FECHA_CARGO_NO_COINCIDE".
+   - Si las fechas coinciden, se continúa con la validación normal.
+
+> **Nota importante**: Para que un bloqueo sea válido, si el cargo tiene un cargo asociado, ambos deben estar incluidos en los bloqueos y tener la misma fecha de baja.
+
+### 4. Procesamiento de Bloqueos
 
 Para procesar los bloqueos:
 
@@ -111,14 +133,14 @@ El método `procesarBloqueos` sigue el siguiente flujo de trabajo:
 > - Se registra en el log que no se realizaron cambios
 
 5. **Manejo de Errores**:
-   - Si ocurre un error en un registro individual:
-     - Marca el registro como "ERROR_PROCESO"
-     - Almacena el mensaje de error
-     - Continúa con el siguiente registro
-   - Si ocurre un error general:
-     - Revierte toda la transacción
-     - Registra el error en los logs
-     - Notifica al usuario
+    - Si ocurre un error en un registro individual:
+    - Marca el registro como "ERROR_PROCESO"
+    - Almacena el mensaje de error
+    - Continúa con el siguiente registro
+    - Si ocurre un error general:
+    - Revierte toda la transacción
+    - Registra el error en los logs
+    - Notifica al usuario
 
 6. **Finalización**:
    - Confirma la transacción si todo fue exitoso
@@ -147,7 +169,7 @@ El método `procesarBloqueos` sigue el siguiente flujo de trabajo:
 - Cada tipo de bloqueo (licencia, fallecido, renuncia) tiene su lógica específica de procesamiento
 - El sistema permite la restauración de cambios mediante el backup automático
 
-### 4. Restauración de Cambios
+### 5. Restauración de Cambios
 
 La funcionalidad "Restaurar Cambios" permite revertir las modificaciones realizadas en la tabla DH03 durante el procesamiento de bloqueos.
 
@@ -178,6 +200,7 @@ La funcionalidad "Restaurar Cambios" permite revertir las modificaciones realiza
 #### Casos de Uso
 
 Esta funcionalidad es útil cuando:
+
 - Se han procesado bloqueos por error
 - Se necesita revertir cambios específicos en la tabla DH03
 - Se requiere una forma rápida de deshacer modificaciones recientes
@@ -188,7 +211,7 @@ Esta funcionalidad es útil cuando:
 - Requiere confirmación explícita para evitar restauraciones accidentales
 - No afecta a los cambios realizados por otros usuarios
 
-### 5. Exportación de Resultados
+### 6. Exportación de Resultados
 
 Para exportar los resultados:
 
@@ -209,6 +232,9 @@ La tabla principal muestra los siguientes campos:
 - **Fecha dh03**: Fecha de baja registrada en Mapuche.
 - **Tipo**: Tipo de movimiento (licencia, renuncia, fallecimiento).
 - **Cargo en Mapuche**: Indica si el cargo existe en Mapuche.
+- **Asociado**: Indica si el cargo tiene un cargo asociado en Mapuche.
+- **Cargo Asociado**: Muestra el número del cargo asociado, si existe.
+- **Tipo Asociación**: Muestra el tipo de asociación entre cargos.
 
 > **Nota**: Puede personalizar las columnas visibles utilizando el selector de columnas.
 
@@ -216,6 +242,13 @@ La tabla principal muestra los siguientes campos:
 
 - **Tipo**: Filtra por tipo de movimiento.
 - **Estado**: Filtra por estado de procesamiento.
+- **Con Cargo Asociado**: Muestra solo los registros que tienen cargos asociados.
+- **Fechas Coincidentes**: Muestra registros donde la fecha de baja coincide con la registrada en Mapuche.
+- **Licencia Bloqueada**: Muestra licencias que ya están bloqueadas.
+- **Falta Cargo Asociado**: Muestra registros donde falta incluir el cargo asociado en los bloqueos.
+- **Fecha Cargo No Coincide**: Muestra registros donde las fechas de baja del cargo principal y asociado no coinciden.
+- **Ocultar Procesados**: Oculta los registros ya procesados (activado por defecto).
+- **Solo Procesados**: Muestra solo los registros ya procesados.
 
 ### Indicadores Visuales
 
@@ -224,6 +257,9 @@ La tabla principal muestra los siguientes campos:
 - Los registros con errores se destacan en rojo.
 - Los registros con licencias ya bloqueadas se muestran con un fondo amarillo.
 - Los registros con fechas superiores a las existentes se muestran con un fondo naranja.
+- Los registros donde falta el cargo asociado se muestran con un fondo naranja.
+- Los registros donde las fechas de cargo no coinciden se muestran con un fondo rojo.
+- Los registros ya procesados se muestran con un fondo gris.
 
 ## Edición de Registros
 
@@ -250,12 +286,21 @@ Los registros duplicados se marcan automáticamente durante la importación. Pue
 
 Si un registro no puede ser validado, se mostrará un mensaje de error específico en la columna "Mensaje Error".
 
+### Problemas con Cargos Asociados
+
+Si un registro tiene problemas con cargos asociados, verifique:
+
+- Que el cargo asociado esté incluido en los bloqueos importados.
+- Que las fechas de baja del cargo principal y asociado sean idénticas.
+
 ### Problemas de Procesamiento
 
 Si ocurre un error durante el procesamiento, verifique:
+
 - Que el par legajo-cargo exista en Mapuche.
 - Que las fechas sean coherentes.
 - Que el tipo de movimiento sea válido.
+- Que los cargos asociados estén correctamente validados.
 
 ### Fechas Coincidentes o Superiores
 
@@ -270,10 +315,11 @@ Si un registro tiene estado "Licencia Ya Bloqueada", significa que el cargo ya t
 
 1. **Validar antes de procesar**: Siempre valide los registros antes de procesarlos.
 2. **Verificar duplicados**: Revise los registros duplicados para evitar bloqueos múltiples.
-3. **Exportar resultados**: Exporte los resultados para tener un respaldo de las operaciones realizadas.
-4. **Verificar asociación**: Utilice la función "Validar Cargos en Mapuche" para asegurarse de que todos los registros corresponden a cargos existentes.
-5. **Revisar estados especiales**: Preste especial atención a los registros con estados como "Fechas Coincidentes", "Fecha Superior" o "Licencia Ya Bloqueada".
+3. **Verificar cargos asociados**: Asegúrese de que todos los cargos asociados estén incluidos en los bloqueos y con fechas coincidentes.
+4. **Exportar resultados**: Exporte los resultados para tener un respaldo de las operaciones realizadas.
+5. **Verificar asociación**: Utilice la función "Validar Cargos en Mapuche" para asegurarse de que todos los registros corresponden a cargos existentes.
+6. **Revisar estados especiales**: Preste especial atención a los registros con estados como "Fechas Coincidentes", "Fecha Superior", "Licencia Ya Bloqueada", "Falta Cargo Asociado" o "Fecha Cargo No Coincide".
 
 ---
 
-Para más información o soporte, contacte al equipo de desarrollo. 
+Para más información o soporte contacte al SUC.
