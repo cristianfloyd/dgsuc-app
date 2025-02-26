@@ -242,4 +242,17 @@ class Dh03 extends Model
         return static::validarLegajoCargo($nroLegaj, $nroCargo)->exists();
     }
 
+    /**
+     * Método estático para buscar un cargo por legajo y número de cargo
+     *
+     * @param int $nroLegaj
+     * @param int $nroCargo
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public static function buscarPorLegajoCargo(int $nroLegaj, int $nroCargo)
+    {
+        return static::query()->where('nro_legaj', $nroLegaj)
+            ->where('nro_cargo', $nroCargo);
+    }
+
 }

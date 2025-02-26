@@ -186,7 +186,7 @@ class BloqueosProcessService
             }
 
             if (!$cargo) {
-                $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+                $cargo = Dh03::buscarPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
             }
 
             // Guardar datos originales antes de cualquier modificación

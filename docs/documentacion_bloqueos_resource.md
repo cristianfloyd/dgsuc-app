@@ -50,6 +50,16 @@ Existen varias opciones para validar los registros importados:
 2. El sistema verificará si cada par legajo-cargo existe en Mapuche.
 3. Se actualizará el indicador "Cargo en Mapuche" para cada registro.
 
+#### Estados de Validación Especiales
+
+Durante la validación, el sistema puede asignar estados especiales según las condiciones encontradas:
+
+1. **Fechas Coincidentes**: Cuando la fecha de baja importada es idéntica a la ya existente en Mapuche.
+2. **Fecha Superior**: Cuando la fecha de baja importada es posterior a la fecha registrada en Mapuche.
+3. **Licencia Ya Bloqueada**: Cuando se intenta aplicar una licencia a un cargo que ya tiene el stop de liquidación activado.
+
+Estos estados ayudan a identificar situaciones que requieren atención especial antes del procesamiento.
+
 ### 3. Procesamiento de Bloqueos
 
 Para procesar los bloqueos:
@@ -89,7 +99,16 @@ El método `procesarBloqueos` sigue el siguiente flujo de trabajo:
    - Elimina el registro de la tabla temporal
    - Registra el resultado en el log del sistema
 
-> **Importante**: El sistema solo respalda los registros que realmente serán modificados. Si un registro no requiere cambios (por ejemplo, porque ya tiene la misma fecha de baja), no se incluirá en el backup.
+> **Nota sobre fechas idénticas**: Cuando la fecha de baja importada es idéntica a la ya existente en Mapuche, el sistema:
+> - No realiza ninguna actualización en la base de datos
+> - No crea un registro de backup (ya que no hay cambios que restaurar)
+> - Marca el registro como "PROCESADO" y lo elimina de la tabla temporal
+> - Registra en el log que no se realizaron cambios
+
+> **Nota sobre licencias ya bloqueadas**: Cuando se intenta procesar una licencia para un cargo que ya tiene el stop de liquidación activado:
+> - No se realiza ninguna actualización en la base de datos
+> - Se marca el registro como "PROCESADO" (ya que el estado deseado ya existe)
+> - Se registra en el log que no se realizaron cambios
 
 5. **Manejo de Errores**:
    - Si ocurre un error en un registro individual:
@@ -203,6 +222,8 @@ La tabla principal muestra los siguientes campos:
 - Los registros con fechas coincidentes se muestran con un fondo verde.
 - Los registros de tipo "licencia" se muestran con un fondo azul.
 - Los registros con errores se destacan en rojo.
+- Los registros con licencias ya bloqueadas se muestran con un fondo amarillo.
+- Los registros con fechas superiores a las existentes se muestran con un fondo naranja.
 
 ## Edición de Registros
 
@@ -236,12 +257,22 @@ Si ocurre un error durante el procesamiento, verifique:
 - Que las fechas sean coherentes.
 - Que el tipo de movimiento sea válido.
 
+### Fechas Coincidentes o Superiores
+
+- Si un registro tiene estado "Fechas Coincidentes", significa que la fecha de baja ya está configurada con el mismo valor en Mapuche.
+- Si un registro tiene estado "Fecha Superior", significa que la fecha de baja en el archivo es posterior a la ya registrada en Mapuche.
+
+### Licencias Ya Bloqueadas
+
+Si un registro tiene estado "Licencia Ya Bloqueada", significa que el cargo ya tiene activado el stop de liquidación en Mapuche.
+
 ## Mejores Prácticas
 
 1. **Validar antes de procesar**: Siempre valide los registros antes de procesarlos.
 2. **Verificar duplicados**: Revise los registros duplicados para evitar bloqueos múltiples.
 3. **Exportar resultados**: Exporte los resultados para tener un respaldo de las operaciones realizadas.
 4. **Verificar asociación**: Utilice la función "Validar Cargos en Mapuche" para asegurarse de que todos los registros corresponden a cargos existentes.
+5. **Revisar estados especiales**: Preste especial atención a los registros con estados como "Fechas Coincidentes", "Fecha Superior" o "Licencia Ya Bloqueada".
 
 ---
 

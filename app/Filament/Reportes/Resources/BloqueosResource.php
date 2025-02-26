@@ -75,10 +75,10 @@ class BloqueosResource extends Resource
                 TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('dependencia')->sortable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('nro_legaj')->searchable(),
-                TextColumn::make('nro_cargo')->searchable(),
+                TextColumn::make('nro_legaj')->searchable()->copyable(),
+                TextColumn::make('nro_cargo')->searchable()->copyable(),
                 TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
-                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->sortable(),
+                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->date('Y-m-d')->sortable(),
                 TextColumn::make('tipo')->searchable(),
                 TextColumn::make('observaciones')
                     ->limit(20)
@@ -144,6 +144,10 @@ class BloqueosResource extends Resource
                 Filter::make('con_cargo_asociado')
                     ->label('Con Cargo Asociado')
                     ->query(fn($query) => $query->whereHas('cargoAsociado'))
+                    ->toggle(),
+                Filter::make('fechas_coincidentes')
+                    ->label('Fechas Coincidentes')
+                    ->query(fn($query) => $query->whereRaw('fecha_baja = (SELECT fec_baja FROM dh03 WHERE dh03.nro_legaj = rep_bloqueos_import.nro_legaj AND dh03.nro_cargo = rep_bloqueos_import.nro_cargo)'))
                     ->toggle(),
             ])
             ->recordClasses(
