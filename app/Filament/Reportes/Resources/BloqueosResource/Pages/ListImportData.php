@@ -5,23 +5,23 @@ namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
 use Filament\Actions;
 use Filament\Actions\Action;
 use App\Enums\BloqueosEstadoEnum;
+use Illuminate\Support\HtmlString;
 use Filament\Resources\Components\Tab;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
+use League\CommonMark\MarkdownConverter;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\BloqueosDataService;
+use League\CommonMark\Environment\Environment;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Filament\Reportes\Resources\BloqueosResource;
-use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
-use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
-use League\CommonMark\Environment\Environment;
-use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
-use League\CommonMark\MarkdownConverter;
-use Illuminate\Support\HtmlString;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
 
 class ListImportData extends ListRecords
 {
@@ -99,7 +99,7 @@ class ListImportData extends ListRecords
                 }),
             Actions\Action::make('procesar')
                 ->label('Procesar Bloqueos')
-                ->tooltip('Procesar los registros validados')
+                ->tooltip('Procesa los registros con estado validado')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->requiresConfirmation()
@@ -165,6 +165,7 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 }),
             Actions\Action::make('restaurar')
                 ->label('Restaurar Cambios')
+                ->tooltip('Revertir los últimos cambios realizados en DH03 por el usuario actual')
                 ->color('warning')
                 ->icon('heroicon-o-arrow-uturn-left')
                 ->requiresConfirmation()
@@ -240,6 +241,10 @@ Nota: Solo se procesarán los registros en estado "validado".')
         return [
             'Todo' => Tab::make()
                 ->badge(fn() => $this->getModel()::all()->count()),
+            'valido' => Tab::make()
+                ->badge(fn() => $this->getModel()::where('estado', 'validado')->count())
+                ->badgeColor('success')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'validado')),
             'Duplicados' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('estado', 'duplicado')->count())
                 ->badgeColor('warning')
@@ -256,10 +261,6 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->count())
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')),
-            'valido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', 'validado')->count())
-                ->badgeColor('success')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'validado')),
             'error_validacion' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('estado', 'error_validacion')->count())
                 ->badgeColor('danger')

@@ -36,7 +36,7 @@ class BloqueosDataProcessor extends Component
     public int $registrosProcesados = 0;
     public float $porcentajeCompletado = 0;
     private BloqueosProcessService $service;
-    // El nro_liqui lo obtendremos del primer registro
+
     private function getNroLiquidacion(): int
     {
         return $this->registros->first()->nro_liqui;
@@ -194,7 +194,7 @@ class BloqueosDataProcessor extends Component
     private function getCacheKey(): string
     {
         // Incluimos nro_liqui en la clave de caché
-        return "bloqueos_resultados_{$this->getNroLiquidacion()}_" . auth()->id();
+        return "bloqueos_resultados_{$this->getNroLiquidacion()}_" . auth()->guard('web')->id();
     }
 
     private function notificarResultados(): void

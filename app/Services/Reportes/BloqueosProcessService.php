@@ -4,6 +4,7 @@ namespace App\Services\Reportes;
 
 use Carbon\Carbon;
 use App\Models\Dh03;
+use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Data\Reportes\BloqueosData;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Data\Reportes\BloqueoProcesadoData;
-use App\Enums\BloqueosEstadoEnum;
 
 class BloqueosProcessService
 {
@@ -64,18 +64,20 @@ class BloqueosProcessService
             // Definir el query base con validaciones de estado
             $query = BloqueosDataModel::query()
                 ->where('estado', BloqueosEstadoEnum::VALIDADO)
-                ->whereNull('mensaje_error');
+                ->whereNull('mensaje_error')
+                ->where('esta_procesado', false); // Solo procesamos los que no están procesados
 
             if ($bloqueosData !== null) {
                 // Validar que todos los registros estén en estado correcto
                 $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
                     return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
-                        !is_null($bloqueo->mensaje_error);
+                        !is_null($bloqueo->mensaje_error) ||
+                        $bloqueo->esta_procesado === true;
                 });
 
                 if ($registrosInvalidos->isNotEmpty()) {
                     throw new \Exception(
-                        'Existen registros no validados o con errores. ' .
+                        'Existen registros no validados, con errores o ya procesados. ' .
                             'Por favor, valide todos los registros antes de procesar.'
                     );
                 }
@@ -113,15 +115,14 @@ class BloqueosProcessService
                             $resultados->push($resultado->toResource());
 
                             if ($resultado->success) {
-                                // Actualizar estado antes de eliminar
+                                // Actualizar estado y marcar como procesado en lugar de eliminar
                                 $bloqueo->update([
                                     'estado' => BloqueosEstadoEnum::PROCESADO,
-                                    'mensaje_error' => null
+                                    'mensaje_error' => null,
+                                    'esta_procesado' => true
                                 ]);
 
-                                $bloqueo->delete();
-
-                                Log::info('Registro procesado y eliminado', [
+                                Log::info('Registro procesado y marcado como procesado', [
                                     'id' => $bloqueo->id,
                                     'tipo' => $bloqueo->tipo,
                                     'legajo' => $bloqueo->nro_legaj,
@@ -326,6 +327,7 @@ class BloqueosProcessService
 
             // Identificar grupos de registros con el mismo nro_legaj y nro_cargo
             $duplicados = BloqueosDataModel::select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
+                ->where('esta_procesado', false) // Solo procesamos los que no están procesados
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->havingRaw('COUNT(*) > 1')
                 ->get();
@@ -336,6 +338,7 @@ class BloqueosProcessService
                 // Obtener todos los registros duplicados para este par legajo-cargo
                 $registrosDuplicados = BloqueosDataModel::where('nro_legaj', $grupo->nro_legaj)
                     ->where('nro_cargo', $grupo->nro_cargo)
+                    ->where('esta_procesado', false) // Solo procesamos los que no están procesados
                     ->orderBy('created_at', 'asc') // Procesamos primero los más antiguos
                     ->get();
 
@@ -368,18 +371,18 @@ class BloqueosProcessService
                     }
 
                     if ($resultado->success) {
-                        $this->eliminarDuplicado($primerRegistro);
+                        $this->marcarComoProcesado($primerRegistro);
                         $procesados++;
                     }
 
-                    // Marcar el resto como duplicados y eliminarlos
+                    // Marcar el resto como duplicados y procesados
                     foreach ($registrosDuplicados as $duplicado) {
                         $duplicado->update([
                             'estado' => BloqueosEstadoEnum::DUPLICADO,
-                            'mensaje_error' => 'Registro duplicado. Se procesó el registro más antiguo.'
+                            'mensaje_error' => 'Registro duplicado. Se procesó el registro más antiguo.',
+                            'esta_procesado' => true
                         ]);
 
-                        $duplicado->delete();
                         $procesados++;
                     }
                 }
@@ -401,6 +404,28 @@ class BloqueosProcessService
 
             throw $e;
         }
+    }
+
+    /**
+     * Marca un registro como procesado.
+     *
+     * @param BloqueosDataModel $registro El registro a marcar como procesado
+     * @return void
+     */
+    private function marcarComoProcesado(BloqueosDataModel $registro): void
+    {
+        $registro->update([
+            'estado' => BloqueosEstadoEnum::PROCESADO,
+            'mensaje_error' => null,
+            'esta_procesado' => true
+        ]);
+
+        Log::info('Registro marcado como procesado', [
+            'id' => $registro->id,
+            'tipo' => $registro->tipo,
+            'legajo' => $registro->nro_legaj,
+            'cargo' => $registro->nro_cargo
+        ]);
     }
 
     private function procesarLicencias()
@@ -434,28 +459,5 @@ class BloqueosProcessService
                     }
                 }
             });
-    }
-
-    /**
-     * Elimina un registro duplicado después de procesarlo.
-     *
-     * @param BloqueosDataModel $duplicado El registro duplicado a eliminar
-     * @return void
-     */
-    private function eliminarDuplicado(BloqueosDataModel $duplicado): void
-    {
-        $duplicado->update([
-            'estado' => BloqueosEstadoEnum::PROCESADO,
-            'mensaje_error' => null
-        ]);
-
-        $duplicado->delete();
-
-        Log::info('Registro duplicado procesado y eliminado', [
-            'id' => $duplicado->id,
-            'tipo' => $duplicado->tipo,
-            'legajo' => $duplicado->nro_legaj,
-            'cargo' => $duplicado->nro_cargo
-        ]);
     }
 }

@@ -20,7 +20,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Filters\SelectFilter;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
@@ -78,7 +77,7 @@ class BloqueosResource extends Resource
                 TextColumn::make('nro_legaj')->searchable()->copyable(),
                 TextColumn::make('nro_cargo')->searchable()->copyable(),
                 TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
-                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->date('Y-m-d')->sortable(),
+                TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->date('Y-m-d')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tipo')->searchable(),
                 TextColumn::make('observaciones')
                     ->limit(20)
@@ -93,6 +92,13 @@ class BloqueosResource extends Resource
                     })->toggleable(),
                 IconColumn::make('tiene_cargo_asociado')
                     ->label('Asociado')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+                IconColumn::make('esta_procesado')
+                    ->label('Procesado')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -138,49 +144,68 @@ class BloqueosResource extends Resource
                     ->label('Licencia Bloqueada')
                     ->query(fn($query) => $query->where('tipo', 'licencia')->where('estado', BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA))
                     ->toggle(),
+                Filter::make('falta_cargo_asociado')
+                    ->label('Falta Cargo Asociado')
+                    ->query(fn($query) => $query->where('estado', BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO))
+                    ->toggle(),
+                Filter::make('fecha_cargo_no_coincide')
+                    ->label('Fecha Cargo No Coincide')
+                    ->query(fn($query) => $query->where('estado', BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE))
+                    ->toggle(),
+                Filter::make('ocultar_procesados')
+                    ->label('Ocultar Procesados')
+                    ->query(fn($query) => $query->where('esta_procesado', false))
+                    ->toggle()
+                    ->default(true),
+                Filter::make('solo_procesados')
+                    ->label('Solo Procesados')
+                    ->query(fn($query) => $query->where('esta_procesado', true))
+                    ->toggle(),
             ])
             ->recordClasses(
                 fn(BloqueosDataModel $record): string =>
                 match (true) {
                     $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
                     $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
+                    $record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'bg-orange-50 dark:bg-orange-900/50 !border-l-4 !border-l-orange-900 !dark:border-l-orange-900',
+                    $record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => 'bg-red-50 dark:bg-red-900/50 !border-l-4 !border-l-red-900 !dark:border-l-red-900',
+                    $record->esta_procesado => 'bg-gray-50 dark:bg-gray-900/50 !border-l-4 !border-l-gray-900 !dark:border-l-gray-900',
                     default => ''
                 }
             )
             ->actions([
-                // Agregar esta nueva acción de edición
                 Action::make('edit')
                     ->label('Editar')
                     ->icon('heroicon-o-pencil-square')
                     ->url(fn(BloqueosDataModel $record): string =>
                     static::getUrl('edit', ['record' => $record]))
                     ->color('warning'),
-                Action::make('procesarBloqueos')
-                    ->label('Procesar Bloqueo')
-                    ->icon('heroicon-o-arrow-path')
-                    ->modalContent(fn($records): View => view('filament.resources.bloqueos-resource.process-modal', [
-                        'registro' => $records
-                    ]))
-                    ->modalWidth(MaxWidth::FiveExtraLarge)
-                    ->modalHeading('Procesamiento de Bloqueos')
-                    ->modalSubmitAction(false)
-                    ->modalCancelAction(false),
                 Action::make('validar')
                     ->label('Validar')
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
                     ->modalHeading('¿Validar registro?')
-                    ->modalDescription('Se validará el par legajo-cargo contra Mapuche.')
+                    ->modalDescription('Se validará el par legajo-cargo contra Mapuche y se verificarán los cargos asociados.')
                     ->action(function ($record) {
                         $record->validarEstado();
 
-                        $mensaje = $record->estado === BloqueosEstadoEnum::VALIDADO
-                            ? 'Registro validado correctamente'
-                            : 'Error en la validación: ' . $record->mensaje_error;
+                        $mensaje = match ($record->estado) {
+                            BloqueosEstadoEnum::VALIDADO => 'Registro validado correctamente',
+                            BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'Error: ' . $record->mensaje_error,
+                            BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => 'Error: ' . $record->mensaje_error,
+                            default => 'Error en la validación: ' . $record->mensaje_error
+                        };
+
+                        $color = match ($record->estado) {
+                            BloqueosEstadoEnum::VALIDADO => 'success',
+                            BloqueosEstadoEnum::FECHAS_COINCIDENTES => 'warning',
+                            BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA => 'warning',
+                            default => 'danger'
+                        };
 
                         Notification::make()
                             ->title($mensaje)
-                            ->color($record->estado === BloqueosEstadoEnum::VALIDADO ? 'success' : 'danger')
+                            ->color($color)
                             ->send();
                     })
             ])
@@ -222,17 +247,29 @@ class BloqueosResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
                     ->modalHeading('¿Validar registros seleccionados?')
-                    ->modalDescription('Se validará el par legajo-cargo de cada registro contra Mapuche.')
+                    ->modalDescription('Se validará el par legajo-cargo de cada registro contra Mapuche y se verificarán los cargos asociados.')
                     ->action(function (Collection $records) {
                         $totalRegistros = $records->count();
                         $validados = 0;
                         $conError = 0;
+                        $faltaCargoAsociado = 0;
+                        $fechaCargoNoCoincide = 0;
+                        $licenciaYaBloqueada = 0;
+                        $fechasCoincidentes = 0;
 
                         foreach ($records as $record) {
                             $record->validarEstado();
 
                             if ($record->estado === BloqueosEstadoEnum::VALIDADO) {
                                 $validados++;
+                            } else if ($record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO) {
+                                $faltaCargoAsociado++;
+                            } else if ($record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE) {
+                                $fechaCargoNoCoincide++;
+                            } else if ($record->estado === BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA) {
+                                $licenciaYaBloqueada++;
+                            } else if ($record->estado === BloqueosEstadoEnum::FECHAS_COINCIDENTES) {
+                                $fechasCoincidentes++;
                             } else {
                                 $conError++;
                             }
@@ -240,12 +277,19 @@ class BloqueosResource extends Resource
 
                         Notification::make()
                             ->title('Validación completada')
-                            ->body("Total procesados: {$totalRegistros}\nValidados: {$validados}\nCon error: {$conError}")
+                            ->body("Total procesados: {$totalRegistros}\n" .
+                                "Validados: {$validados}\n" .
+                                "Falta cargo asociado: {$faltaCargoAsociado}\n" .
+                                "Fecha cargo no coincide: {$fechaCargoNoCoincide}\n" .
+                                "Licencia ya bloqueada: {$licenciaYaBloqueada}\n" .
+                                "Fechas coincidentes: {$fechasCoincidentes}\n" .
+                                "Con error: {$conError}")
                             ->success()
                             ->send();
                     })
                     ->deselectRecordsAfterCompletion()
-            ]);
+            ])
+            ->deferLoading();
     }
 
     protected static function getResultados(): Collection
@@ -295,7 +339,8 @@ class BloqueosResource extends Resource
             'resultados' => $resultados,
             'exitosos' => $resultados->where('estado', 'Procesado')->count(),
             'fallidos' => $resultados->where('estado', 'Error')->count(),
-            'resumen' => static::generarResumenProcesamiento($resultados)
+            'resumen' => static::generarResumenProcesamiento($resultados),
+            'total_procesados' => BloqueosDataModel::where('esta_procesado', true)->count(),
         ]);
     }
 
@@ -311,7 +356,9 @@ class BloqueosResource extends Resource
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
                 ->map(fn($grupo) => $grupo->count()),
-            'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count()
+            'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count(),
+            'total_procesados_historico' => BloqueosDataModel::where('esta_procesado', true)->count(),
+            'total_pendientes' => BloqueosDataModel::where('esta_procesado', false)->count(),
         ];
     }
 
