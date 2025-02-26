@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Contracts\View\View;
 use Filament\Support\Enums\MaxWidth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
@@ -27,8 +29,6 @@ use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\EditImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
-use Filament\Notifications\Notification;
-use Filament\Tables\Filters\Filter;
 
 class BloqueosResource extends Resource
 {
@@ -90,7 +90,7 @@ class BloqueosResource extends Resource
                     ->limit(20)
                     ->tooltip(function (TextColumn $column): ?string {
                         return $column->getState();
-                    })->toggleable(isToggledHiddenByDefault: true),
+                    })->toggleable(),
                 IconColumn::make('tiene_cargo_asociado')
                     ->label('Asociado')
                     ->boolean()
@@ -101,7 +101,7 @@ class BloqueosResource extends Resource
                 TextColumn::make('cargoAsociado.nro_cargoasociado')
                     ->label('Cargo Asociado')
                     ->tooltip('Número de cargo asociado')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('cargoAsociado.tipoasociacion')
                     ->label('Tipo Asociación')
@@ -126,21 +126,6 @@ class BloqueosResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                // Filtro por tipo de bloqueo
-                SelectFilter::make('tipo')
-                    ->options([
-                        'Licencia' => 'licencia',
-                        'Fallecido' => 'fallecido',
-                        'Renuncia' => 'renuncia',
-                    ]),
-                // Filtro por estado de procesamiento
-                SelectFilter::make('chkstopliq')
-                    ->label('Estado')
-                    ->options([
-                        '1' => 'Procesado',
-                        '0' => 'Pendiente',
-                    ]),
-                // Filtro para registros con cargo asociado
                 Filter::make('con_cargo_asociado')
                     ->label('Con Cargo Asociado')
                     ->query(fn($query) => $query->whereHas('cargoAsociado'))
@@ -148,6 +133,10 @@ class BloqueosResource extends Resource
                 Filter::make('fechas_coincidentes')
                     ->label('Fechas Coincidentes')
                     ->query(fn($query) => $query->whereRaw('fecha_baja = (SELECT fec_baja FROM dh03 WHERE dh03.nro_legaj = rep_bloqueos_import.nro_legaj AND dh03.nro_cargo = rep_bloqueos_import.nro_cargo)'))
+                    ->toggle(),
+                Filter::make('licencia_bloqueada')
+                    ->label('Licencia Bloqueada')
+                    ->query(fn($query) => $query->where('tipo', 'licencia')->where('estado', BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA))
                     ->toggle(),
             ])
             ->recordClasses(

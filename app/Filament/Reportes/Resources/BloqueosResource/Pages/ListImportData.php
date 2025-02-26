@@ -17,6 +17,11 @@ use App\Filament\Reportes\Resources\BloqueosResource;
 use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
 use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
+use League\CommonMark\MarkdownConverter;
+use Illuminate\Support\HtmlString;
 
 class ListImportData extends ListRecords
 {
@@ -35,14 +40,12 @@ class ListImportData extends ListRecords
                 ->label('Importar datos')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->tooltip('Importar datos desde el archivo Excel')
-                ->badge(1)
                 ->color('info'),
             Action::make('validar_todos')
                 ->label('Validar Todos')
                 ->tooltip('Validar todos los registros contra Mapuche')
                 ->icon('heroicon-o-check-circle')
                 ->color('info')
-                ->badge(2)
                 ->requiresConfirmation()
                 ->modalHeading('¿Validar todos los registros?')
                 ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
@@ -73,7 +76,6 @@ class ListImportData extends ListRecords
                 ->tooltip('Verificar si cada registro tiene un cargo asociado en Mapuche')
                 ->icon('heroicon-o-link')
                 ->color('info')
-                ->badge(3)
                 ->requiresConfirmation()
                 ->modalHeading('¿Validar cargos asociados en Mapuche?')
                 ->modalDescription('Esta acción verificará si cada registro tiene un cargo asociado en Mapuche.')
@@ -100,7 +102,6 @@ class ListImportData extends ListRecords
                 ->tooltip('Procesar los registros validados')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->badge(4)
                 ->requiresConfirmation()
                 ->modalHeading('¿Procesar bloqueos?')
                 ->modalDescription('Esta acción realizará los siguientes pasos:
@@ -135,7 +136,6 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 ->label('Procesar Duplicados')
                 ->color('warning')
                 ->icon('heroicon-o-document-duplicate')
-                ->badge(5)
                 ->requiresConfirmation()
                 ->modalHeading('¿Procesar registros duplicados?')
                 ->modalDescription('Esta acción procesará los registros duplicados siguiendo estas reglas:
@@ -150,7 +150,7 @@ Nota: Solo se procesarán los registros en estado "validado".')
                     try {
                         $service = new BloqueosProcessService();
                         $service->procesarBloqueosDuplicados();
-            
+
                         Notification::make()
                             ->title('Duplicados procesados exitosamente')
                             ->success()
@@ -167,7 +167,6 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 ->label('Restaurar Cambios')
                 ->color('warning')
                 ->icon('heroicon-o-arrow-uturn-left')
-                ->badge(5)
                 ->requiresConfirmation()
                 ->modalHeading('¿Restaurar cambios en DH03?')
                 ->modalDescription('Esta acción revertirá los últimos cambios realizados en la tabla DH03.')
@@ -192,7 +191,6 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 ->label('Vaciar Tabla')
                 ->color('danger')
                 ->icon('heroicon-o-trash')
-                ->badge(6)
                 ->requiresConfirmation()
                 ->modalHeading('¿Vaciar tabla de bloqueos?')
                 ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
@@ -214,7 +212,26 @@ Nota: Solo se procesarán los registros en estado "validado".')
                             ->send();
                     }
                 }),
+            Action::make('documentation')
+                ->label('Documentación')
+                ->icon('heroicon-o-book-open')
+                ->color('secondary')
+                ->modalHeading('Documentación de Bloqueos')
+                ->modalWidth('7xl')
+                ->modalContent(function () {
+                    $markdown = file_get_contents(resource_path('docs/documentacion_bloqueos_resource.md'));
 
+                    $environment = new Environment();
+                    $environment->addExtension(new CommonMarkCoreExtension());
+                    $environment->addExtension(new GithubFlavoredMarkdownExtension());
+
+                    $converter = new MarkdownConverter($environment);
+                    $html = $converter->convert($markdown)->getContent();
+
+                    return view('filament.documentation-modal', [
+                        'documentacionHtml' => $html
+                    ]);
+                }),
         ];
     }
 
@@ -228,17 +245,17 @@ Nota: Solo se procesarán los registros en estado "validado".')
                 ->badgeColor('warning')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', 'duplicado')),
             'Licencia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->where('estado', 'validado')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'licencia')->count())
                 ->badgeColor('info')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'licencia')->where('estado', 'validado')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'licencia')),
             'Fallecido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'fallecido')->where('estado', 'validado')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'fallecido')->count())
                 ->badgeColor('danger')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'fallecido')->where('estado', 'validado')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'fallecido')),
             'Renuncia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->where('estado', 'validado')->count())
+                ->badge(fn() => $this->getModel()::where('tipo', 'renuncia')->count())
                 ->badgeColor('warning')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')->where('estado', 'validado')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', 'renuncia')),
             'valido' => Tab::make()
                 ->badge(fn() => $this->getModel()::where('estado', 'validado')->count())
                 ->badgeColor('success')
