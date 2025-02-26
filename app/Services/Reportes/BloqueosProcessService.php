@@ -70,13 +70,13 @@ class BloqueosProcessService
                 // Validar que todos los registros estén en estado correcto
                 $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
                     return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
-                           !is_null($bloqueo->mensaje_error);
+                        !is_null($bloqueo->mensaje_error);
                 });
 
                 if ($registrosInvalidos->isNotEmpty()) {
                     throw new \Exception(
                         'Existen registros no validados o con errores. ' .
-                        'Por favor, valide todos los registros antes de procesar.'
+                            'Por favor, valide todos los registros antes de procesar.'
                     );
                 }
 
@@ -90,41 +90,53 @@ class BloqueosProcessService
 
             // Procesar en lotes
             $query->chunk(100, function ($lote) use (&$resultados) {
-                // Preparar backup del lote actual
-                $backup = $this->prepararBackupLote($lote);
-                if ($backup->isNotEmpty()) {
-                    DB::connection($this->getConnectionName())
-                        ->table('suc.dh03_backup_bloqueos')
-                        ->insert($backup->toArray());
-                }
-
-                // Procesar registros
+                // Procesamos cada registro individualmente
                 foreach ($lote as $bloqueo) {
                     try {
-                        $resultado = $this->procesarRegistro($bloqueo);
-                        $resultados->push($resultado->toResource());
+                        // Obtenemos el cargo antes de cualquier modificación
+                        $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
 
-                        if ($resultado->success) {
-                            // Actualizar estado antes de eliminar
-                            $bloqueo->update([
-                                'estado' => BloqueosEstadoEnum::PROCESADO,
-                                'mensaje_error' => null
-                            ]);
+                        if ($cargo) {
+                            // Procesamos el registro y verificamos si se realizaron cambios
+                            $resultado = $this->procesarRegistro($bloqueo, $cargo);
 
-                            $bloqueo->delete();
+                            // Si el procesamiento fue exitoso y se realizaron cambios, guardamos el backup
+                            if ($resultado->success && $resultado->cambiosRealizados) {
+                                // Crear backup solo para este registro específico
+                                $backupData = $this->prepararBackupRegistro($bloqueo, $cargo, $resultado->datosOriginales);
 
-                            Log::info('Registro procesado y eliminado', [
-                                'id' => $bloqueo->id,
-                                'tipo' => $bloqueo->tipo,
-                                'legajo' => $bloqueo->nro_legaj,
-                                'cargo' => $bloqueo->nro_cargo
-                            ]);
+                                DB::connection($this->getConnectionName())
+                                    ->table('suc.dh03_backup_bloqueos')
+                                    ->insert($backupData);
+                            }
+
+                            $resultados->push($resultado->toResource());
+
+                            if ($resultado->success) {
+                                // Actualizar estado antes de eliminar
+                                $bloqueo->update([
+                                    'estado' => BloqueosEstadoEnum::PROCESADO,
+                                    'mensaje_error' => null
+                                ]);
+
+                                $bloqueo->delete();
+
+                                Log::info('Registro procesado y eliminado', [
+                                    'id' => $bloqueo->id,
+                                    'tipo' => $bloqueo->tipo,
+                                    'legajo' => $bloqueo->nro_legaj,
+                                    'cargo' => $bloqueo->nro_cargo,
+                                    'cambios_realizados' => $resultado->cambiosRealizados
+                                ]);
+                            } else {
+                                // Actualizar estado en caso de error
+                                $bloqueo->update([
+                                    'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
+                                    'mensaje_error' => $resultado->message
+                                ]);
+                            }
                         } else {
-                            // Actualizar estado en caso de error
-                            $bloqueo->update([
-                                'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
-                                'mensaje_error' => $resultado->message
-                            ]);
+                            // ... existing code ...
                         }
                     } catch (\Exception $e) {
                         Log::error('Error procesando registro individual', [
@@ -149,7 +161,6 @@ class BloqueosProcessService
             ]);
 
             return $resultados;
-
         } catch (\Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en procesamiento de bloqueos', [
@@ -161,12 +172,12 @@ class BloqueosProcessService
         }
     }
 
-    public function procesarRegistro(BloqueosDataModel $bloqueo): BloqueoProcesadoData
+    public function procesarRegistro(BloqueosDataModel $bloqueo, Dh03 $cargo = null): BloqueoProcesadoData
     {
         try {
             // Validamos la existencia del par legajo-cargo
             Log::info('Validando existencia del par legajo-cargo');
-            if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+            if (!$cargo && !Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
                 return BloqueoProcesadoData::fromError(
                     'Combinacion de legajo y cargo no encontrada',
                     $bloqueo,
@@ -174,13 +185,19 @@ class BloqueosProcessService
                 );
             }
 
-            $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+            if (!$cargo) {
+                $cargo = Dh03::buscarPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+            }
 
-
+            // Guardar datos originales antes de cualquier modificación
+            $datosOriginales = [
+                'fec_baja' => $cargo->fec_baja,
+                'chkstopliq' => $cargo->chkstopliq
+            ];
 
             // Procesar según tipo
             Log::info("Procesando tipo de bloqueo: {$bloqueo->tipo}");
-            match ($bloqueo->tipo) {
+            $cambiosRealizados = match ($bloqueo->tipo) {
                 'licencia' => $this->procesarLicencia($cargo),
                 'fallecido', 'renuncia' => $this->procesarBaja($cargo, $bloqueo->fecha_baja),
                 default => throw new \Exception('Tipo de bloqueo no válido')
@@ -188,10 +205,11 @@ class BloqueosProcessService
 
             // Si llegamos aquí, el proceso fue exitoso
             $resultado = BloqueoProcesadoData::fromSuccess($bloqueo);
+            $resultado->cambiosRealizados = $cambiosRealizados;
+            $resultado->datosOriginales = $datosOriginales;
 
-            Log::info('Proceso exitoso:', $resultado->toArray());
+            Log::info('Proceso exitoso:', array_merge($resultado->toArray(), ['cambios_realizados' => $cambiosRealizados]));
             return $resultado;
-
         } catch (\Exception $e) {
             // En caso de error, el registro permanece en la tabla
             return BloqueoProcesadoData::fromError(
@@ -205,46 +223,58 @@ class BloqueosProcessService
         }
     }
 
-
-    private function procesarLicencia(Dh03 $cargo): void
+    private function procesarLicencia(Dh03 $cargo): bool
     {
+        // Si ya está bloqueado, no hacemos cambios
+        if ($cargo->chkstopliq) {
+            return false;
+        }
+
         $cargo->update(['chkstopliq' => true]);
+        return true;
     }
 
-    private function procesarBaja(Dh03 $cargo, string $fechaBaja): void
+    private function procesarBaja(Dh03 $cargo, string $fechaBaja): bool
     {
         $fechaBajaImportada = Carbon::parse($fechaBaja);
         $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;
 
         if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
             $cargo->update(['fec_baja' => $fechaBajaImportada]);
+            return true;
         }
+
+        return false;
     }
 
-    public function prepararBackupLote(Collection $bloqueos): Collection
+    /**
+     * Prepara un backup para un registro específico.
+     *
+     * @param BloqueosDataModel $bloqueo El bloqueo que se está procesando
+     * @param Dh03 $cargo El cargo asociado al bloqueo
+     * @param array $datosOriginales Los datos originales antes de la modificación
+     * @return array Datos preparados para el backup
+     */
+    public function prepararBackupRegistro(BloqueosDataModel $bloqueo, Dh03 $cargo, array $datosOriginales): array
     {
-        Log::info('Preparando backup del lote de bloqueos');
-        $backup = $bloqueos->map(function ($bloqueo) {
-            $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+        Log::info('Preparando backup para registro individual', [
+            'cargo' => $cargo->nro_cargo,
+            'legajo' => $cargo->nro_legaj,
+            'datos_originales' => $datosOriginales
+        ]);
 
-            if (!$cargo) return null;
-
-            return [
-                'nro_cargo' => $cargo->nro_cargo,
-                'nro_legaj' => $cargo->nro_legaj,
-                'nro_liqui' => $bloqueo->nro_liqui,
-                'fec_baja' => $cargo->fec_baja,
-                'fecha_baja_nueva' => $bloqueo->fecha_baja,
-                'chkstopliq' => $cargo->chkstopliq,
-                'tipo_bloqueo' => $bloqueo->tipo,
-                'fecha_backup' => now(),
-                'session_id' => session()->getId()
-            ];
-        })->filter();
-        Log::info('Backup preparado', ['backup' => $backup]);
-        return $backup;
+        return [
+            'nro_cargo' => $cargo->nro_cargo,
+            'nro_legaj' => $cargo->nro_legaj,
+            'nro_liqui' => $bloqueo->nro_liqui,
+            'fec_baja' => $datosOriginales['fec_baja'],
+            'fecha_baja_nueva' => $bloqueo->fecha_baja,
+            'chkstopliq' => $datosOriginales['chkstopliq'],
+            'tipo_bloqueo' => $bloqueo->tipo,
+            'fecha_backup' => now(),
+            'session_id' => session()->getId()
+        ];
     }
-
 
     public function restaurarBackup(): bool
     {
@@ -286,6 +316,92 @@ class BloqueosProcessService
         }
     }
 
+    public function procesarBloqueosDuplicados(): bool
+    {
+        try {
+            DB::connection($this->getConnectionName())->beginTransaction();
+
+            // Aseguramos que existe la tabla de backup
+            $this->crearTablaBackupSiNoExiste();
+
+            // Identificar grupos de registros con el mismo nro_legaj y nro_cargo
+            $duplicados = BloqueosDataModel::select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
+                ->groupBy('nro_legaj', 'nro_cargo')
+                ->havingRaw('COUNT(*) > 1')
+                ->get();
+
+            $procesados = 0;
+
+            foreach ($duplicados as $grupo) {
+                // Obtener todos los registros duplicados para este par legajo-cargo
+                $registrosDuplicados = BloqueosDataModel::where('nro_legaj', $grupo->nro_legaj)
+                    ->where('nro_cargo', $grupo->nro_cargo)
+                    ->orderBy('created_at', 'asc') // Procesamos primero los más antiguos
+                    ->get();
+
+                // Verificar si el cargo existe en Mapuche
+                if (Dh03::validarParLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo)) {
+                    $cargo = Dh03::validarLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo)->first();
+
+                    // Guardar datos originales antes de cualquier modificación
+                    $datosOriginales = [
+                        'fec_baja' => $cargo->fec_baja,
+                        'chkstopliq' => $cargo->chkstopliq
+                    ];
+
+                    // Procesar solo el primer registro (el más antiguo)
+                    $primerRegistro = $registrosDuplicados->shift();
+                    $resultado = $this->procesarRegistro($primerRegistro, $cargo);
+
+                    if ($resultado->success && $resultado->cambiosRealizados) {
+                        // Crear backup solo si se realizaron cambios
+                        $backupData = $this->prepararBackupRegistro($primerRegistro, $cargo, $datosOriginales);
+
+                        DB::connection($this->getConnectionName())
+                            ->table('suc.dh03_backup_bloqueos')
+                            ->insert($backupData);
+
+                        Log::info('Backup creado para registro duplicado', [
+                            'cargo' => $cargo->nro_cargo,
+                            'legajo' => $cargo->nro_legaj
+                        ]);
+                    }
+
+                    if ($resultado->success) {
+                        $this->eliminarDuplicado($primerRegistro);
+                        $procesados++;
+                    }
+
+                    // Marcar el resto como duplicados y eliminarlos
+                    foreach ($registrosDuplicados as $duplicado) {
+                        $duplicado->update([
+                            'estado' => BloqueosEstadoEnum::DUPLICADO,
+                            'mensaje_error' => 'Registro duplicado. Se procesó el registro más antiguo.'
+                        ]);
+
+                        $duplicado->delete();
+                        $procesados++;
+                    }
+                }
+            }
+
+            DB::connection($this->getConnectionName())->commit();
+
+            Log::info("Procesamiento de duplicados completado", [
+                'total_procesados' => $procesados
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            DB::connection($this->getConnectionName())->rollBack();
+            Log::error('Error procesando duplicados', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e;
+        }
+    }
 
     private function procesarLicencias()
     {
@@ -318,5 +434,28 @@ class BloqueosProcessService
                     }
                 }
             });
+    }
+
+    /**
+     * Elimina un registro duplicado después de procesarlo.
+     *
+     * @param BloqueosDataModel $duplicado El registro duplicado a eliminar
+     * @return void
+     */
+    private function eliminarDuplicado(BloqueosDataModel $duplicado): void
+    {
+        $duplicado->update([
+            'estado' => BloqueosEstadoEnum::PROCESADO,
+            'mensaje_error' => null
+        ]);
+
+        $duplicado->delete();
+
+        Log::info('Registro duplicado procesado y eliminado', [
+            'id' => $duplicado->id,
+            'tipo' => $duplicado->tipo,
+            'legajo' => $duplicado->nro_legaj,
+            'cargo' => $duplicado->nro_cargo
+        ]);
     }
 }
