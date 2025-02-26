@@ -47,7 +47,7 @@ class BloqueosData extends Data
             'n_de_cargo' => [
                 'required',
                 'numeric',
-                Rule::unique('pgsql-mapuche.suc.rep_bloqueos_import', 'nro_cargo')
+                Rule::unique('pgsql-prod.suc.rep_bloqueos_import', 'nro_cargo')
             ],
             'tipo_de_movimiento' => ['required', 'string', 'in:Licencia,Fallecido,Renuncia'],
             'fecha_de_baja' => [
