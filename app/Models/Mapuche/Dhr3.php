@@ -6,6 +6,7 @@ namespace App\Models\Mapuche;
 
 use App\Models\Dh12;
 use App\Traits\HasCompositePrimaryKey;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,10 +32,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dhr3 extends Model
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
 
-    protected $connection = 'pgsql-mapuche';
-    protected $table = 'mapuche.dhr3';
+    protected $table = 'dhr3';
     public $timestamps = false;
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo', 'codc_hhdd', 'nro_renglo'];
     public $incrementing = false;
