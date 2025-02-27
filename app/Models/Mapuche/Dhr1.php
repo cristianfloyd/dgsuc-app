@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Mapuche;
 
 use App\Models\Mapuche\Dh22;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -29,19 +30,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dhr1 extends Model
 {
-    /** @use HasFactory<\Database\Factories\Mapuche\Dhr1Factory> */
     use HasFactory;
     use HasUuids;
+    use MapucheConnectionTrait;
 
-    /**
-     * Conexión a la base de datos
-     */
-    protected $connection = 'pgsql-mapuche';
 
     /**
      * Esquema y tabla específicos
      */
-    protected $table = 'mapuche.dhr1';
+    protected $table = 'dhr1';
 
     /**
      * Clave primaria
