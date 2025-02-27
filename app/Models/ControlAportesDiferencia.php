@@ -61,12 +61,17 @@ class ControlAportesDiferencia extends Model
         );
     }
 
-    // ################################################
-    // ################## RELACIONES ##################
-    // ################################################
+    // ###############################################################
+    // ######################## RELACIONES ###########################
+    // ###############################################################
     public function sicossCalculo(): BelongsTo
     {
         return $this->belongsTo(AfipMapucheSicossCalculo::class, 'cuil', 'cuil');
+    }
+
+    public function mapucheSicoss(): BelongsTo
+    {
+        return $this->belongsTo(AfipMapucheSicoss::class, 'cuil', 'cuil');
     }
 
     public function relacionActiva(): BelongsTo
@@ -84,10 +89,10 @@ class ControlAportesDiferencia extends Model
         return $this->hasOneThrough(
             Dh03::class,
             Dh01::class,
-            'nro_cuil', // Clave foránea en Dh01
-            'nro_legaj', // Clave foránea en Dh03
-            'nro_cuil', // Clave local en ControlAportesDiferencia
-            'nro_legaj'  // Clave local en Dh01
+            'nro_cuil',          // Clave foránea en Dh01
+            'nro_legaj',        // Clave foránea en Dh03
+            'nro_cuil',          // Clave local en ControlAportesDiferencia
+            'nro_legaj'    // Clave local en Dh01
         );
     }
 

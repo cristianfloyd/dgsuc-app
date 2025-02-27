@@ -35,6 +35,12 @@
                     {{ $dh01->tipo_estad }}
                 </dd>
             </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Codigo Actividad</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">
+                    {{ $record->mapucheSicoss->cod_act }}
+                </dd>
+            </div>
         </dl>
     </div>
     @else

@@ -53,6 +53,7 @@ trait HasSicossControlTables
                 ->copyable()
                 ->copyMessage('CUIL copiado')
                 ->copyMessageDuration(1500),
+            TextColumn::make('mapucheSicoss.cod_act'),
             TextColumn::make('aportesijpdh21')
                 ->label('Aportes SIJP DH21')
                 ->money('ARS')
