@@ -372,14 +372,19 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    // ->requiresConfirmation()
+                    ->requiresConfirmation()
                     // ->modalHeading('¿Ejecutar controles SICOSS?')
                     // ->modalDescription('Esta acción ejecutará todos los controles disponibles.')
                     ->action(function () {
                         $this->ejecutarControles();
-                    }),
+                    })
             ],
         };
+    }
+
+    private function verControles(): void
+    {
+        dump('HOla Mundo');
     }
 
     public function ejecutarControlAportes(): void

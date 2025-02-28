@@ -148,8 +148,8 @@ class SicossControlService
         // Si no se proporcionan parámetros, usar el periodo fiscal actual
         if ($anio === null || $mes === null) {
             $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
-            $anio = $anio ?? $periodoFiscal['year'];
-            $mes = $mes ?? $periodoFiscal['month'];
+            $anio ??= $periodoFiscal['year'];
+            $mes ??= $periodoFiscal['month'];
         }
 
         // Determinar qué tabla usar basado en el período
