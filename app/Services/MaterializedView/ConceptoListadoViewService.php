@@ -33,8 +33,6 @@ class ConceptoListadoViewService
     public function create(): void
     {
         try {
-            //code...
-
                 // sql de la migracion original
                 DB::connection($this->getConnectionName())->statement("
                 CREATE MATERIALIZED VIEW IF NOT EXISTS suc.concepto_listado AS

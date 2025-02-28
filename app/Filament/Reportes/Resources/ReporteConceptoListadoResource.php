@@ -67,7 +67,7 @@ class ReporteConceptoListadoResource extends Resource
 
                                     return Dh22::query()
                                         ->WithPeriodoFiscal($periodo)
-                                        ->definitiva()
+                                        // ->definitiva()
                                         ->pluck('desc_liqui', 'nro_liqui')
                                         ->toArray();
                                 })
