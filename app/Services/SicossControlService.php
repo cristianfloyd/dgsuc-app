@@ -45,6 +45,8 @@ class SicossControlService
     /**
      * Ejecuta todos los controles post importación de SICOSS
      *
+     * @param int|null $year Año fiscal
+     * @param int|null $month Mes fiscal
      * @return array Resultados de los controles con la siguiente estructura:
      * [
      *     'success' => bool,
@@ -55,21 +57,35 @@ class SicossControlService
      *     ]
      * ]
      */
-    public function ejecutarControlesPostImportacion(): array
+    public function ejecutarControlesPostImportacion(?int $year = null, ?int $month = null): array
     {
-        return $this->controlAportesContribuciones();
+        // Si no se proporciona año y mes, obtenerlos del servicio
+        if (!$year || !$month) {
+            $periodoFiscalService = app(PeriodoFiscalService::class);
+            $periodoFiscal = $periodoFiscalService->getPeriodoFiscalFromDatabase();
+            $year = $periodoFiscal['year'];
+            $month = $periodoFiscal['month'];
+        }
+
+        // Formatear el período fiscal como YYYYMM
+        $periodoFiscal = $year * 100 + $month;
+
+        // Crear tabla temporal con el período fiscal específico
+        $this->crearTablaDH21Aportes($periodoFiscal);
+
+        return $this->controlAportesContribuciones($year, $month);
     }
 
     /**
      * Ejecuta específicamente el control de aportes
      */
-    public function ejecutarControlAportes(?int $anio = null, ?int $mes = null): array
+    public function ejecutarControlAportes(?int $year = null, ?int $month = null): array
     {
         // Crear tabla temporal necesaria
-        $this->crearTablaDH21Aportes($anio, $mes);
+        $this->crearTablaDH21Aportes($year, $month);
 
         // Ejecutar control específico de aportes
-        $diferenciasAportes = $this->obtenerDiferenciasDeAportes($anio, $mes);
+        $diferenciasAportes = $this->obtenerDiferenciasDeAportes($year, $month);
 
         return [
             'diferencias_de_aportes' => $diferenciasAportes,
@@ -121,13 +137,13 @@ class SicossControlService
      *  totales: array
      * }
      */
-    protected function controlAportesContribuciones(): array
+    protected function controlAportesContribuciones(int $year, int $month): array
     {
         // Crear tabla temporal con totales de DH21
-        $this->crearTablaDH21Aportes();
+        $this->crearTablaDH21Aportes($year, $month);
 
         return [
-            'diferencias_de_aportes' => $this->obtenerDiferenciasDeAportes(),
+            'diferencias_de_aportes' => $this->obtenerDiferenciasDeAportes($year, $month),
             'diferencias_por_dependencia' => [
                 'diferencias_aportes_dependencia' => $this->getDiferenciasAportesPorDependencia(),
                 'diferencias_contribuciones_dependencia' => $this->getDiferenciasContribucionesPorDependencia(),

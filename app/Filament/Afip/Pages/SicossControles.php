@@ -5,6 +5,7 @@ namespace App\Filament\Afip\Pages;
 use Filament\Pages\Page;
 use App\Models\DH21Aporte;
 use Filament\Tables\Table;
+use Livewire\Attributes\On;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
@@ -19,6 +20,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use App\Models\ControlAportesDiferencia;
 use Filament\Notifications\Notification;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Models\ControlContribucionesDiferencia;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Actions\Action as TableAction;
@@ -49,6 +51,15 @@ class SicossControles extends Page implements HasTable
     public $loading = false;
     public $record = null;
     public $cachedStats = null;
+    public $year;
+    public $month;
+
+    protected PeriodoFiscalService $periodoFiscalService;
+
+    public function boot(PeriodoFiscalService $periodoFiscalService): void
+    {
+        $this->periodoFiscalService = $periodoFiscalService;
+    }
 
     public function mount()
     {
@@ -61,11 +72,38 @@ class SicossControles extends Page implements HasTable
             })
             ->all();
 
-        $this->selectedConnection = $this->selectedConnection ?? $this->getConnectionName();
+        $this->selectedConnection ??= $this->getConnectionName();
+
+        // Obtener el período fiscal actual
+        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
+        $this->year = $periodoFiscal['year'];
+        $this->month = $periodoFiscal['month'];
+    }
+
+    #[On('fiscalPeriodUpdated')]
+    public function handlePeriodoFiscalUpdated(): void
+    {
+        // Obtener el período fiscal de la sesión en lugar de la base de datos
+        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
+        $this->year = $periodoFiscal['year'];
+        $this->month = $periodoFiscal['month'];
+
+        // Limpiar caché y resultados anteriores
+        $this->resultadosControles = null;
+        $this->cachedStats = null;
+        cache()->forget('sicoss_resumen_stats');
+
+        // Notificar al usuario
+        Notification::make()
+            ->title('Período fiscal actualizado')
+            ->body("Período actual: {$this->year}-{$this->month}")
+            ->success()
+            ->send();
     }
 
     public function ejecutarControles(): void
     {
+        Log::info('Iniciando controles SICOSS', ['year' => $this->year, 'month' => $this->month]);
         try {
             $this->loading = true;
 
@@ -77,7 +115,8 @@ class SicossControles extends Page implements HasTable
             $service = app(SicossControlService::class);
             $service->setConnection($this->getConnectionName());
 
-            $this->resultadosControles = $service->ejecutarControlesPostImportacion();
+            // Pasar el período fiscal al servicio
+            $this->resultadosControles = $service->ejecutarControlesPostImportacion($this->year, $this->month);
 
             $diferenciasAportes = abs($this->resultadosControles['totales']['dh21']['aportes'] -
                 $this->resultadosControles['totales']['sicoss']['aportes']);
@@ -380,9 +419,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    ->requiresConfirmation()
-                    // ->modalHeading('¿Ejecutar controles SICOSS?')
-                    // ->modalDescription('Esta acción ejecutará todos los controles disponibles.')
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function () {
                         $this->ejecutarControles();
                     })
@@ -508,5 +545,12 @@ class SicossControles extends Page implements HasTable
     {
         $this->cachedStats = $this->getResumenStats();
         $this->dispatch('resumen-loaded');
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
+        ];
     }
 }
