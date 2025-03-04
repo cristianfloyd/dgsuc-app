@@ -111,7 +111,6 @@ class SicossControles extends Page implements HasTable
                 ])
                 ->persistent()
                 ->send();
-
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de controles SICOSS', [
                 'error' => $e->getMessage(),
@@ -174,18 +173,23 @@ class SicossControles extends Page implements HasTable
                 $service->setConnection($this->getConnectionName());
                 $service->crearTablaDH21Aportes();
 
-                return [
+                $data = [
                     'totales' => [
                         'cuils_procesados' => ControlAportesDiferencia::count(),
                         'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
                         'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
                     ],
                     'diferencias_por_dependencia' => DB::connection($this->getConnectionName())
-                        ->table('suc.control_aportes_diferencias')
-                        ->select('codc_uacad', 'caracter')
-                        ->selectRaw('SUM(diferencia) as diferencia_total')
-                        ->groupBy('codc_uacad', 'caracter')
-                        ->having(DB::raw('ABS(SUM(diferencia))'), '>', 1)
+                        ->table('dh21aporte as a')
+                        ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
+                        ->select('b.codc_uacad', 'b.caracter')
+                        ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
+                            (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_total')
+                        ->whereRaw('ABS(((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
+                            (b.contribucionsijp + b.contribucioninssjp))::numeric) > 1')
+                        ->groupBy('b.codc_uacad', 'b.caracter')
+                        ->orderBy('b.codc_uacad')
+                        ->orderBy('b.caracter')
                         ->get(),
                     'totales_monetarios' => [
                         'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
@@ -215,6 +219,8 @@ class SicossControles extends Page implements HasTable
                             ->count(),
                     ],
                 ];
+
+                return $data;
             });
         } catch (\Exception $e) {
             logger()->error('Error obteniendo resumen stats:', [
@@ -251,7 +257,9 @@ class SicossControles extends Page implements HasTable
         return $table
             ->query($query)
             ->columns($this->getColumnsForActiveTab())
-            ->when($this->activeTab !== 'diferencias_cuils', fn (Table $table) =>
+            ->when(
+                $this->activeTab !== 'diferencias_cuils',
+                fn(Table $table) =>
                 $table->defaultSort('diferencia', 'desc')
             )
             ->striped()

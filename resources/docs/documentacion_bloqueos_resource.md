@@ -4,6 +4,46 @@
 
 El módulo de Bloqueos permite gestionar el proceso de bloqueo de cargos en el sistema Mapuche. Este recurso facilita la importación, validación y procesamiento de solicitudes de bloqueo para diferentes tipos de movimientos como licencias, renuncias o fallecimientos.
 
+## Flujo Principal de Trabajo (Probado y Funcional)
+
+El proceso de bloqueos sigue un flujo específico y probado que garantiza la correcta gestión de los datos:
+
+1. **Importación de Datos**
+   - Haga clic en "Importar datos" en la parte superior derecha
+   - Cargue el archivo Excel con el formato establecido
+   - El sistema validará el formato y detectará duplicados iniciales
+
+2. **Validación General**
+   - Utilice el botón "Validar Todos"
+   - Este proceso verifica todos los registros contra Mapuche
+   - Se actualizarán los estados de todos los registros
+
+3. **Validación de Cargos Asociados**
+   - Use el botón "Validar Cargos Asociados"
+   - Verifica la existencia de cargos asociados en Mapuche
+   - Actualiza los indicadores de asociación
+
+4. **Procesamiento de Bloqueos**
+   - Utilice el botón "Procesar Bloqueos"
+   - Solo procesa registros previamente validados
+   - Crea respaldos automáticos antes de cada modificación
+
+5. **Procesamiento de Duplicados**
+   - Use el botón "Procesar Duplicados"
+   - Identifica y gestiona registros duplicados
+   - Mantiene solo el registro más antiguo de cada grupo
+
+> **Nota**: Este flujo de trabajo ha sido probado y es el recomendado para la operación normal del sistema.
+
+## Funcionalidades en Desarrollo
+
+Las siguientes funcionalidades están actualmente en fase de desarrollo y no se recomienda su uso en producción:
+
+- Validación individual de registros
+- Validación por lotes seleccionados
+- Procesamiento individual de bloqueos
+- Procesamiento por lotes seleccionados
+
 ## Acceso al Módulo
 
 El módulo de Bloqueos se encuentra en el panel de Reportes, identificado con el ícono de "rectangle-stack" y la etiqueta "Bloqueos".
