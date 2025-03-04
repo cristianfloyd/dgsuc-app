@@ -30,11 +30,11 @@ class ConceptoListadoResourceService
     public function getFilteredQuery(array $filters = []): Builder
     {
         // Si no hay filtros, retornamos query vacía
-        if (empty($filters)) {
-            return ConceptoListado::query()
-                ->orderBy('codc_uacad')
-                ->orderBy('nro_legaj');
-        }
+        // if (empty($filters)) {
+        //     return ConceptoListado::query()
+        //         ->orderBy('codc_uacad')
+        //         ->orderBy('nro_legaj');
+        // }
 
         $cacheKey = $this->getCacheKey($filters);
 
@@ -63,9 +63,9 @@ class ConceptoListadoResourceService
     private function applyFilters(Builder $query, array $filters): Builder
     {
         // Validamos que al menos exista un filtro obligatorio
-        if (empty($filters['codn_conce'])) {
-            return ConceptoListado::query()->whereRaw('1 = 0');
-        }
+        // if (empty($filters['codn_conce'])) {
+        //     return ConceptoListado::query()->whereRaw('1 = 0');
+        // }
 
 
         $query = ConceptoListado::query()

@@ -53,6 +53,11 @@ class PeriodoLiquidacion
         return $this->fecha->copy()->subMonths(3);
     }
 
+    public function getFechaSegundoMes(): Carbon
+    {
+        return $this->fecha->copy()->subMonths(2);
+    }
+
     /**
      * Devuelve el año correspondiente a la fecha de referencia del periodo de liquidación.
      *

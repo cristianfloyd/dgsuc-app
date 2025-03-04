@@ -31,10 +31,12 @@ class CreateDosubaSinLiquidar extends CreateRecord
         $formData = $this->form->getState();
         $liquidacionBase = $formData['liquidacion_base'];
 
+        Log::info('liquidacion seleccionada:', ['liquidacion' => $liquidacionBase]);
         // Obtenemos el periodo fiscal de la liquidación base
         $periodoFiscalService = app(PeriodoFiscalService::class);
         $periodoFiscal = $periodoFiscalService->getPeriodoFiscalFromId($liquidacionBase);
 
+        Log::info('periodo fiscal:', ['periodo' => $periodoFiscal]);
         // Utilizamos el servicio existente
         $dosubaService = app(DosubaReportService::class);
         $legajosSinLiquidar = $dosubaService->getDosubaReport(

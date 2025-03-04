@@ -16,7 +16,6 @@ class ConceptosSindicatosService
         return [
             '258', //
             '266', //
-            '265'  //
         ];
     }
 
