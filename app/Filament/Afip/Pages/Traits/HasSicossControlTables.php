@@ -2,6 +2,7 @@
 
 namespace App\Filament\Afip\Pages\Traits;
 
+use Carbon\Carbon;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\Builder;
@@ -16,6 +17,7 @@ trait HasSicossControlTables
             'diferencias_aportes' => $this->getAportesColumns(),
             'diferencias_contribuciones' => $this->getContribucionesColumns(),
             'diferencias_art' => $this->getArtColumns(),
+            'conceptos' => $this->getConceptosColumns(),
             default => [],
         };
     }
@@ -169,6 +171,32 @@ trait HasSicossControlTables
                 ->dateTime('d/m/Y H:i:s'),
         ];
     }
+
+    protected function getConceptosColumns(): array
+    {
+        return [
+            TextColumn::make('codn_conce')
+                ->label('Código')
+                ->searchable()
+                ->sortable(),
+
+            TextColumn::make('desc_conce')
+                ->label('Descripción')
+                ->searchable()
+                ->sortable()
+                ->wrap(),
+
+            TextColumn::make('importe')
+                ->label('Importe')
+                ->money('ARS')
+                ->sortable(),
+
+            TextColumn::make('created_at')
+                ->label('Fecha de Control')
+                ->dateTime()
+                ->sortable(),
+        ];
+    }
     protected function getQueryForActiveTab(): Builder
     {
         return match ($this->activeTab) {
@@ -176,6 +204,9 @@ trait HasSicossControlTables
             'aportes' => DB::table('suc.control_aportes_diferencias'),
             'contribuciones' => DB::table('suc.control_contribuciones_diferencias'),
             'art' => DB::table('suc.control_art_diferencias'),
+            'conceptos' => DB::table('suc.control_conceptos_periodos')
+                ->where('year', $this->year ?? Carbon::now()->year)
+                ->where('month', $this->month ?? Carbon::now()->month),
             default => DB::table('suc.control_cuils_diferencias')->whereRaw('1=0'),
         };
     }

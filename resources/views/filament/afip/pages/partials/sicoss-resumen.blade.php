@@ -43,6 +43,138 @@
     @else
         {{-- Contenido existente del resumen --}}
         <div>
+            {{-- NUEVA SECCIÓN: Tarjeta de Control de Conteos (Collapsible) --}}
+            @if(isset($conteos))
+                <x-filament::section class="mb-6">
+                    <div
+                        x-data="{ expanded: false }"
+                        class="w-full"
+                    >
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2 cursor-pointer" x-on:click="expanded = !expanded">
+                                <h3 class="text-lg font-medium">Control de Conteos ({{ $year }}-{{ sprintf('%02d', $month) }})</h3>
+                                <button type="button" class="text-gray-500 hover:text-primary-500 transition-colors">
+                                    <x-heroicon-o-chevron-down x-show="!expanded" class="w-5 h-5" />
+                                    <x-heroicon-o-chevron-up x-show="expanded" class="w-5 h-5" />
+                                </button>
+                            </div>
+                            <x-filament::button
+                                size="sm"
+                                color="gray"
+                                icon="heroicon-o-arrow-path"
+                                wire:click="ejecutarControlConteos"
+                                wire:loading.attr="disabled"
+                            >
+                                Actualizar
+                            </x-filament::button>
+                        </div>
+
+                        <div x-show="expanded" x-collapse x-cloak>
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <h4 class="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                        Registros en DH21
+                                    </h4>
+                                    <p class="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                                        {{ number_format($conteos['dh21aporte'], 0, ',', '.') }}
+                                    </p>
+                                </div>
+
+                                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                    <h4 class="text-sm font-medium text-green-700 dark:text-green-300">
+                                        Registros en SICOSS Cálculos
+                                    </h4>
+                                    <p class="text-2xl font-bold text-green-800 dark:text-green-200">
+                                        {{ number_format($conteos['sicoss_calculos'], 0, ',', '.') }}
+                                    </p>
+                                </div>
+
+                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                    <h4 class="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                        Registros en SICOSS
+                                    </h4>
+                                    <p class="text-2xl font-bold text-purple-800 dark:text-purple-200">
+                                        {{ number_format($conteos['sicoss'], 0, ',', '.') }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if($diferencia_conteos > 0)
+                                <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                    <h4 class="text-sm font-medium text-red-700 dark:text-red-300">
+                                        Diferencia entre DH21 y SICOSS Cálculos
+                                    </h4>
+                                    <p class="text-xl font-bold text-red-800 dark:text-red-200">
+                                        {{ number_format($diferencia_conteos, 0, ',', '.') }} registros
+                                    </p>
+                                    <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+                                        Esta diferencia puede indicar problemas en la sincronización de datos entre sistemas.
+                                    </p>
+                                </div>
+                            @else
+                                <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                    <h4 class="text-sm font-medium text-green-700 dark:text-green-300">
+                                        No hay diferencias entre DH21 y SICOSS Cálculos
+                                    </h4>
+                                    <p class="text-sm text-green-600 dark:text-green-400 mt-1">
+                                        Los sistemas están correctamente sincronizados.
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Resumen compacto (visible cuando está colapsado) --}}
+                        <div x-show="!expanded" class="mt-2">
+                            <div class="flex flex-wrap gap-4 items-center">
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center justify-center w-3 h-3 rounded-full bg-blue-500"></span>
+                                    <span class="text-sm">DH21: <strong>{{ number_format($conteos['dh21aporte'], 0, ',', '.') }}</strong></span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center justify-center w-3 h-3 rounded-full bg-green-500"></span>
+                                    <span class="text-sm">SICOSS Cálculos: <strong>{{ number_format($conteos['sicoss_calculos'], 0, ',', '.') }}</strong></span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center justify-center w-3 h-3 rounded-full bg-purple-500"></span>
+                                    <span class="text-sm">SICOSS: <strong>{{ number_format($conteos['sicoss'], 0, ',', '.') }}</strong></span>
+                                </div>
+
+                                @if($diferencia_conteos > 0)
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center justify-center w-3 h-3 rounded-full bg-red-500"></span>
+                                        <span class="text-sm text-red-600 font-medium">Diferencia: <strong>{{ number_format($diferencia_conteos, 0, ',', '.') }}</strong></span>
+                                    </div>
+                                @else
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center justify-center w-3 h-3 rounded-full bg-green-500"></span>
+                                        <span class="text-sm text-green-600 font-medium">Sin diferencias</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </x-filament::section>
+            @else
+                <x-filament::section class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium">Control de Conteos</h3>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            No hay datos de conteos disponibles. Ejecute el control de conteos para ver los resultados.
+                        </p>
+                        <x-filament::button
+                            color="primary"
+                            icon="heroicon-o-list-bullet"
+                            wire:click="ejecutarControlConteos"
+                            wire:loading.attr="disabled"
+                        >
+                            Ejecutar Control de Conteos
+                        </x-filament::button>
+                    </div>
+                </x-filament::section>
+            @endif
+
             <x-filament::grid
                 style="--cols-lg: repeat(4, minmax(0, 1fr));"
                 class="lg:grid-cols-[--cols-lg] py-4"

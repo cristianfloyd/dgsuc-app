@@ -71,7 +71,7 @@ class SicossControlService
         $periodoFiscal = $year * 100 + $month;
 
         // Crear tabla temporal con el período fiscal específico
-        $this->crearTablaDH21Aportes($periodoFiscal);
+        $this->crearTablaDH21Aportes($year, $month);
 
         return $this->controlAportesContribuciones($year, $month);
     }

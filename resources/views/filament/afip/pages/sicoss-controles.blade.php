@@ -1,6 +1,4 @@
 <x-filament-panels::page>
-   
-
     <x-filament::tabs>
         @foreach($this->getViewData()['tabs'] as $tabKey => $tabLabel)
             <x-filament::tabs.item
