@@ -1,9 +1,36 @@
 <x-filament-panels::page>
     <div class="space-y-6">
+        @if(empty($selectedIdLiqui))
+            <div class="rounded-xl bg-amber-50 p-4 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+                <p class="font-medium">
+                    Por favor, seleccione al menos una liquidación para continuar.
+                </p>
+            </div>
+        @endif
+
         @if($isProcessing)
             <div class="flex items-center justify-center p-6">
                 <x-filament::loading-indicator class="w-8 h-8" />
                 <span class="ml-3">Procesando actualizaciones...</span>
+            </div>
+        @endif
+
+        @if(!empty($selectedIdLiqui) && !$isProcessing && empty($updateResults))
+            <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                <div class="p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+                        Liquidaciones seleccionadas
+                    </h3>
+                    <div class="mt-4">
+                        <ul class="list-disc pl-5 space-y-2">
+                            @foreach($selectedIdLiqui as $idLiqui)
+                                <li class="text-sm text-gray-700 dark:text-gray-300">
+                                    Liquidación #{{ $idLiqui }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         @endif
 

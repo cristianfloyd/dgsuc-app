@@ -7,13 +7,24 @@ namespace App\Services\Afip;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
+use App\Services\Mapuche\TableSelectorService;
 
 class SicossUpdateService
 {
     use MapucheConnectionTrait;
 
-    public function executeUpdates(array $liquidaciones = [6]): array
+    protected TableSelectorService $tableSelectorService;
+
+    public function __construct(TableSelectorService $tableSelectorService)
     {
+        $this->tableSelectorService = $tableSelectorService;
+    }
+
+    public function executeUpdates(?array $liquidaciones = null): array
+    {
+        // Si no se proporcionan liquidaciones, usar la liquidación 6 por defecto
+        $liquidaciones = $liquidaciones ?: [6];
+
         $results = [];
         DB::connection($this->getConnectionName())->beginTransaction();
 
@@ -24,8 +35,8 @@ class SicossUpdateService
             // Paso 1: Crear tabla temporal base
             $results['create_temp_table'] = $this->createTemporaryTables($liquidaciones);
 
-            // Paso 2: Alteraciones de tabla
-            $results['alter_tables'] = $this->alterTemporaryTables();
+            // Paso 2: Alteraciones de tabla, ya no es necesario
+            // $results['alter_tables'] = $this->alterTemporaryTables();
 
             // Update 1: Actualizar codsit
             $results['update_1_codsit'] = $this->updateCodsit($liquidaciones);
@@ -68,7 +79,7 @@ class SicossUpdateService
         return $results;
     }
 
-    protected function dropTemporaryTables(): array
+    public function dropTemporaryTables(): array
     {
         $connection = DB::connection($this->getConnectionName());
         $connection->statement("DROP TABLE IF EXISTS tcargosliq");
@@ -80,7 +91,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function alterTemporaryTables(): array
+    public function alterTemporaryTables(): array
     {
         $connection = DB::connection($this->getConnectionName());
 
@@ -94,7 +105,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function createTcodact(): array
+    public function createTcodact(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->statement("
@@ -110,7 +121,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateSituacionCodsit(): array
+    public function updateSituacionCodsit(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("
@@ -127,7 +138,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateCondicionActividad(): array
+    public function updateCondicionActividad(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("
@@ -151,7 +162,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateCondicionEspecial(): array
+    public function updateCondicionEspecial(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("
@@ -174,7 +185,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateActividad(): array
+    public function updateActividad(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("
@@ -196,7 +207,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function createTemporaryTables(array $liquidaciones = [6]): array
+    public function createTemporaryTables(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         $results = ['tables' => [], 'total_affected' => 0];
@@ -205,8 +216,11 @@ class SicossUpdateService
             // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
             $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
+            // Determinar qué tabla usar según el período fiscal
+            $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
+
             // 1. Crear tabla temporal base
-            $affected = $connection->select("
+            $query = "
                 SELECT C.codigoescalafon,
                        A.codc_agrup,
                        A.codc_categ,
@@ -218,7 +232,7 @@ class SicossUpdateService
                        nro_liqui
                 INTO temp tcargosliq
                 FROM mapuche.dh03 A,
-                     mapuche.dh21 b,
+                     mapuche.{$dh21Table} b,
                      mapuche.dh11 C,
                      mapuche.dh01 d
                 WHERE A.nro_legaj = b.nro_legaj
@@ -242,7 +256,9 @@ class SicossUpdateService
                          C.desc_categ,
                          b.nro_cargo,
                          b.nro_legaj
-            ", $liquidaciones);
+            ";
+
+            $affected = $connection->select($query, $liquidaciones);
 
             $results['tables']['base'] = count($affected);
 
@@ -263,20 +279,22 @@ class SicossUpdateService
         return $results;
     }
 
-    protected function updateCodsit(array $liquidaciones = [6]): array
+    public function updateCodsit(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
         $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
-        $affected = $connection->update(
-        "UPDATE tcargosliq SET codsit = 5
-                FROM mapuche.dh21
-                WHERE mapuche.dh21.nro_liqui IN ($placeholders)
-                AND tcargosliq.nro_cargo = mapuche.dh21.nro_cargo
-                AND mapuche.dh21.codn_conce = '126'",
-            $liquidaciones
-        );
+        // Determinar qué tabla usar según el período fiscal
+        $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
+
+        $query = "UPDATE tcargosliq SET codsit = 5
+                FROM mapuche.{$dh21Table}
+                WHERE mapuche.{$dh21Table}.nro_liqui IN ($placeholders)
+                AND tcargosliq.nro_cargo = mapuche.{$dh21Table}.nro_cargo
+                AND mapuche.{$dh21Table}.codn_conce = '126'";
+
+        $affected = $connection->update($query, $liquidaciones);
 
         return [
             'status' => 'success',
@@ -284,7 +302,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateR21(): array
+    public function updateR21(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("UPDATE tcargosliq SET r21 = 'S'
@@ -299,26 +317,29 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateCodact(array $liquidaciones = [6]): array
+    public function updateCodact(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
         $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
-        $affected = $connection->update("UPDATE tcargosliq
+        // Determinar qué tabla usar según el período fiscal
+        $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
+
+        $query = "UPDATE tcargosliq
                      SET codact = CASE
-                         WHEN mapuche.dh21.codn_conce = 717 THEN 4
-                         WHEN mapuche.dh21.codn_conce = 735 THEN 2
-                         WHEN mapuche.dh21.codn_conce = 737 THEN 1
-                         WHEN mapuche.dh21.codn_conce = 788 THEN 3
+                         WHEN mapuche.{$dh21Table}.codn_conce = 717 THEN 4
+                         WHEN mapuche.{$dh21Table}.codn_conce = 735 THEN 2
+                         WHEN mapuche.{$dh21Table}.codn_conce = 737 THEN 1
+                         WHEN mapuche.{$dh21Table}.codn_conce = 788 THEN 3
                      END
-                     FROM mapuche.dh21
-                     WHERE mapuche.dh21.nro_liqui IN ($placeholders)
-                     AND tcargosliq.nro_cargo = mapuche.dh21.nro_cargo
-                     AND tcargosliq.nro_liqui = mapuche.dh21.nro_liqui
-                     AND mapuche.dh21.codn_conce IN (717, 735, 737, 788)",
-            $liquidaciones
-        );
+                     FROM mapuche.{$dh21Table}
+                     WHERE mapuche.{$dh21Table}.nro_liqui IN ($placeholders)
+                     AND tcargosliq.nro_cargo = mapuche.{$dh21Table}.nro_cargo
+                     AND tcargosliq.nro_liqui = mapuche.{$dh21Table}.nro_liqui
+                     AND mapuche.{$dh21Table}.codn_conce IN (717, 735, 737, 788)";
+
+        $affected = $connection->update($query, $liquidaciones);
 
         return [
             'status' => 'success',
@@ -326,7 +347,7 @@ class SicossUpdateService
         ];
     }
 
-    protected function updateDefaults(): array
+    public function updateDefaults(): array
     {
         $affected = DB::connection($this->getConnectionName())
             ->update("UPDATE mapuche.dha8
@@ -342,13 +363,16 @@ class SicossUpdateService
         ];
     }
 
-    protected function insertIntoDha8(array $liquidaciones = [6]): array
+    public function insertIntoDha8(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         // Ejemplo de generación de placeholders si es necesario parametrizar liquidaciones:
         $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
-        $affected = $connection->update("
+        // Determinar qué tabla usar según el período fiscal
+        $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
+
+        $query = "
             INSERT INTO mapuche.dha8(nro_legajo,
                                      codigosituacion,
                                      codigocondicion,
@@ -356,10 +380,12 @@ class SicossUpdateService
                                      codigomodalcontrat,
                                      provincialocalidad)
             SELECT DISTINCT nro_legaj, 1, 1, '1', 8, NULL
-            FROM mapuche.dh21
+            FROM mapuche.{$dh21Table}
             WHERE nro_liqui IN ($placeholders)
               AND nro_legaj NOT IN (SELECT nro_legajo FROM mapuche.dha8)
-        ", $liquidaciones);
+        ";
+
+        $affected = $connection->update($query, $liquidaciones);
 
         return [
             'status' => 'success',
@@ -367,21 +393,26 @@ class SicossUpdateService
         ];
     }
 
-    protected function verificarAgentesInactivos(array $liquidaciones = [6]): array
+    public function verificarAgentesInactivos(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
+        // Determinar qué tabla usar según el período fiscal
+        $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
+
         // Crear tabla temporal aaa
         $connection->statement("DROP TABLE IF EXISTS aaa");
-        $connection->statement("
+        $query = "
             SELECT DISTINCT nro_legaj
             INTO TEMP aaa
-            FROM mapuche.dh21
+            FROM mapuche.{$dh21Table}
             WHERE nro_liqui IN ($placeholders)
             AND codn_conce = -51
             AND impp_conce > 0
-        ", $liquidaciones);
+        ";
+
+        $connection->statement($query, $liquidaciones);
 
         // Obtener agentes sin código de actividad
         $agentes = $connection->select("

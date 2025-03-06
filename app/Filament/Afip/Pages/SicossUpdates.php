@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Afip\Pages;
 
 use Filament\Pages\Page;
+use Livewire\Attributes\On;
 use Filament\Actions\Action;
+use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use App\Services\Afip\SicossUpdateService;
+use App\Filament\Widgets\MultipleIdLiquiSelector;
 
 class SicossUpdates extends Page
 {
@@ -20,6 +23,21 @@ class SicossUpdates extends Page
 
     public array $updateResults = [];
     public bool $isProcessing = false;
+    public ?array $selectedIdLiqui = null;
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            MultipleIdLiquiSelector::class,
+        ];
+    }
+
+    #[On('idsLiquiSelected')]
+    public function handleIdsLiquiSelected($idsLiqui): void
+    {
+        Log::info('idsLiquiSelected', ['idsLiqui' => $idsLiqui]);
+        $this->selectedIdLiqui = $idsLiqui;
+    }
 
     public function runUpdates(): void
     {
@@ -27,7 +45,8 @@ class SicossUpdates extends Page
 
         try {
             $service = app(SicossUpdateService::class);
-            $this->updateResults = $service->executeUpdates();
+            // Pass the selected liquidations to the service if needed
+            $this->updateResults = $service->executeUpdates($this->selectedIdLiqui);
 
             if ($this->updateResults['status'] === 'success') {
                 Notification::make()
@@ -58,7 +77,7 @@ class SicossUpdates extends Page
             Action::make('run_updates')
                 ->label('Ejecutar Actualizaciones')
                 ->action('runUpdates')
-                ->disabled($this->isProcessing)
+                ->disabled($this->isProcessing || empty($this->selectedIdLiqui))
                 ->requiresConfirmation()
                 ->modalDescription('¿Está seguro que desea ejecutar las actualizaciones SICOSS? Este proceso puede tomar varios minutos.')
         ];
