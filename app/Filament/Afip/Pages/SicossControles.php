@@ -12,21 +12,27 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use App\Models\ControlArtDiferencia;
 use Filament\Support\Enums\MaxWidth;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\SicossConnectionTrait;
 use Filament\Support\Enums\Alignment;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\SicossControlService;
+use App\Exports\Sicoss\ConceptosExport;
 use App\Models\ControlConceptosPeriodo;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use App\Models\ControlAportesDiferencia;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\ActionGroup;
+use App\Exports\Sicoss\CuilsDiferenciasExport;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Models\ControlContribucionesDiferencia;
+use App\Exports\Sicoss\AportesDiferenciasExport;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Resources\RelationManagers\RelationGroup;
+use App\Exports\Sicoss\ContribucionesDiferenciasExport;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
@@ -529,6 +535,15 @@ class SicossControles extends Page implements HasTable
                 $this->ejecutarControlConteos();
             });
 
+        // Agregar acción de exportar a todas las pestañas
+        $actions[] = Action::make('export')
+            ->label('Exportar')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->action(function () {
+                return $this->exportActiveTable();
+            })
+            ->disabled(fn() => $this->activeTab === 'resumen');
+
         return $actions;
     }
 
@@ -684,7 +699,6 @@ class SicossControles extends Page implements HasTable
 
             // Guardar los resultados en la sesión para posible uso posterior
             session()->put('sicoss_conteos', $conteos);
-
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de control de conteos', [
                 'error' => $e->getMessage(),
@@ -713,9 +727,24 @@ class SicossControles extends Page implements HasTable
             // Lista de conceptos a controlar
             $conceptos = [
                 // Aportes
-                '201', '202', '203', '204', '205', '247', '248',
+                '201',
+                '202',
+                '203',
+                '204',
+                '205',
+                '247',
+                '248',
                 // Contribuciones
-                '301', '302', '303', '304', '305', '306', '307', '308', '347', '348'
+                '301',
+                '302',
+                '303',
+                '304',
+                '305',
+                '306',
+                '307',
+                '308',
+                '347',
+                '348'
             ];
 
             // Ejecutar la consulta
@@ -785,7 +814,6 @@ class SicossControles extends Page implements HasTable
                 ])
                 ->persistent()
                 ->send();
-
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de control de conceptos', [
                 'error' => $e->getMessage(),
@@ -856,5 +884,75 @@ class SicossControles extends Page implements HasTable
                 ->dateTime()
                 ->sortable(),
         ];
+    }
+
+    protected function exportActiveTable()
+    {
+        $data = match ($this->activeTab) {
+            'diferencias_aportes' => [
+                'class' => AportesDiferenciasExport::class,
+                'filename' => 'diferencias-aportes',
+                'title' => 'Diferencias por Aportes',
+                'data' => ControlAportesDiferencia::query()
+                    ->with(['sicossCalculo', 'relacionActiva', 'dh01'])
+                    ->get()
+            ],
+            'diferencias_contribuciones' => [
+                'class' => ContribucionesDiferenciasExport::class,
+                'filename' => 'diferencias-contribuciones',
+                'title' => 'Diferencias por Contribuciones',
+                'data' => ControlContribucionesDiferencia::query()
+                    ->with(['sicossCalculo', 'relacionActiva', 'dh01'])
+                    ->get()
+            ],
+            'diferencias_cuils' => [
+                'class' => CuilsDiferenciasExport::class,
+                'filename' => 'diferencias-cuils',
+                'title' => 'CUILs no encontrados',
+                'data' => ControlCuilsDiferencia::query()->get()
+            ],
+            'conceptos' => [
+                'class' => ConceptosExport::class,
+                'filename' => 'conceptos',
+                'title' => 'Conceptos por Período',
+                'data' => ControlConceptosPeriodo::query()
+                    ->where('year', $this->year)
+                    ->where('month', $this->month)
+                    ->get()
+            ],
+            default => null
+        };
+
+        if (!$data) {
+            Notification::make()
+                ->warning()
+                ->title('No se puede exportar')
+                ->body('No hay datos para exportar en esta pestaña.')
+                ->send();
+            return;
+        }
+
+        // Construir el nombre del archivo con la extensión explícita
+        $filename = sprintf(
+            '%s-%d-%02d-%s.xlsx',
+            $data['filename'],
+            $this->year,
+            $this->month,
+            now()->format('Ymd-His')
+        );
+
+        // Crear la instancia del exportador con los parámetros adicionales
+        $exporter = new ($data['class'])(
+            $data['data'],
+            $this->year,
+            $this->month
+        );
+
+        // Especificar el tipo de escritor explícitamente
+        return Excel::download(
+            $exporter,
+            $filename,
+            \Maatwebsite\Excel\Excel::XLSX
+        );
     }
 }

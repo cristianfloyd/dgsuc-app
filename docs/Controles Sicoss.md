@@ -47,6 +47,18 @@
     - Verifica y actualiza dependencia (UA/CAD)
     - Verifica y actualiza carácter (PERM/CONT)
 
+5. Control de Conceptos por Período
+    - Verifica los importes de conceptos específicos en un período fiscal
+    - Incluye conceptos de aportes (201-205, 247, 248) y contribuciones (301-308, 347, 348)
+    - Almacena resultados en tabla `control_conceptos_periodos`
+    - Campos almacenados:
+        - Código de concepto
+        - Descripción
+        - Importe
+        - Año y mes
+        - Fecha de control
+        - Conexión utilizada
+
 ## 2. Tablas temporales utilizadas
 
 - dh21aporte: Almacena totales de aportes y contribuciones
@@ -63,12 +75,16 @@
     - Diferencias por Aportes: Detalle de diferencias en aportes
     - Diferencias por Contribuciones: Detalle de diferencias en contribuciones
     - CUILs no encontrados: Listado de CUILs que existen en un sistema pero no en otro
+    - Conceptos por Período: Detalle de importes por concepto en el período fiscal
 
 2. Acciones disponibles:
     - Ejecutar todos los controles
     - Ejecutar control específico de aportes
     - Ejecutar control específico de contribuciones
     - Ejecutar control específico de CUILs
+    - Ejecutar control específico de conceptos
+    - Ejecutar control de conteos
+    - Exportar resultados a Excel
 
 3. Visualización de resultados:
     - Tablas paginadas (5, 10, 25, 50, 100 registros)
@@ -82,7 +98,38 @@
     - Resumen de diferencias encontradas
     - Acceso rápido a resultados
 
-## 4. Consideraciones técnicas
+## 4. Exportación de Datos
+
+1. Funcionalidad de Exportación:
+    - Botón de exportación en cada pestaña activa
+    - Exportación a formato Excel (.xlsx)
+    - Nombre de archivo incluye tipo de reporte, período fiscal y timestamp
+    - Deshabilitado en la pestaña de resumen
+
+2. Tipos de Exportación:
+    - Diferencias por Aportes
+    - Diferencias por Contribuciones
+    - CUILs no encontrados
+    - Conceptos por Período
+
+3. Formato de Exportación:
+    - Encabezado con título del reporte
+    - Período fiscal (año-mes)
+    - Fecha y hora de generación
+    - Estilos mejorados para encabezados
+    - Filas alternas con colores para mejor legibilidad
+    - Bordes en todas las celdas
+    - Autoajuste del ancho de columnas
+    - Pestaña con nombre específico según el reporte
+
+4. Implementación Técnica:
+    - Uso de Laravel Excel (maatwebsite/excel)
+    - Clases de exportación específicas para cada tipo de reporte
+    - Clase base abstracta para compartir funcionalidad común
+    - Implementación de interfaces para estilos y formato
+    - Manejo de errores y notificaciones
+
+## 5. Consideraciones técnicas
 
 1. Período Fiscal:
     - Se puede especificar año y mes
@@ -98,8 +145,10 @@
     - Logging detallado de errores
     - Notificaciones amigables al usuario
     - Rollback en caso de fallos
+    - Validación de tipos de archivo en exportaciones
 
 4. Seguridad:
     - Validación de conexiones
     - Control de acceso por roles
     - Sanitización de inputs
+    - Validación de datos exportados
