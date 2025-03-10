@@ -2,10 +2,12 @@
 
 namespace App\Models\Reportes;
 
+use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Bloqueos extends Model
 {
@@ -122,5 +124,14 @@ class Bloqueos extends Model
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('chkstopliq', true);
+    }
+
+    // ############################################################
+    // ###################### RELACIONES ##########################
+    // ############################################################
+
+    public function legajo(): BelongsTo
+    {
+        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 }

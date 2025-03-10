@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Exports\Sheets;
 
-use App\Models\RepEmbarazada;
+use Carbon\Carbon;
+use App\Models\Reportes\Bloqueos;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -18,9 +17,19 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithStyles, WithTitle, WithEvents, WithColumnFormatting
+class FallecidosBloqueoSheet implements
+    FromQuery,
+    WithTitle,
+    WithHeadings,
+    WithMapping,
+    WithStyles,
+    ShouldAutoSize,
+    WithEvents,
+    WithCustomStartCell,
+    WithColumnFormatting
 {
     protected string $periodo;
 
@@ -31,24 +40,21 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
 
     public function query()
     {
-        return RepEmbarazada::query()->orderBy('nro_legaj');
+        return Bloqueos::query()
+            ->porTipo('fallecido')
+            ->with('legajo')
+            ->orderBy('nro_legaj');
     }
 
-    public function map($embarazada): array
+    public function title(): string
     {
-        return [
-            $embarazada->nro_legaj,
-            trim($embarazada->apellido),
-            trim($embarazada->nombre),
-            $embarazada->cuil,
-            $embarazada->codc_uacad,
-        ];
+        return 'Fallecidos Bloqueos';
     }
 
     public function headings(): array
     {
         return [
-            ['Período: ' . $this->formatPeriodo()],
+            ['Fallecidos ingresados por bloqueos y aún no están en el sistema mapuche - Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -56,18 +62,54 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 'Nombre',
                 'CUIL',
                 'Unidad Académica',
+                'Fecha Baja',
             ]
         ];
     }
 
-    /**
-     * Formatea el período en el formato YYYY/MM
-     *
-     * @return string El período formateado (ej: "2024/03")
-     */
-    protected function formatPeriodo(): string
+    public function startCell(): string
     {
-        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
+        return 'A1';
+    }
+
+    public function map($row): array
+    {
+        // Si tenemos la relación con el legajo, usamos esos datos
+        if ($row->legajo) {
+            return [
+                $row->nro_legaj,
+                trim($row->legajo->desc_appat), // Apellido desde Dh01
+                trim($row->legajo->desc_nombr), // Nombre desde Dh01
+                $row->legajo->cuil, // CUIL desde Dh01
+                $row->dependencia,
+                $row->fecha_baja?->format('d/m/Y'),
+            ];
+        }
+        // Si no tenemos la relación, usamos los datos del bloqueo
+        else {
+            // Intentar separar el nombre completo en apellido y nombre
+            $nombreCompleto = $row->nombre ?? '';
+            $apellido = '';
+            $nombre = '';
+
+            // Si hay un espacio, asumimos que el formato es "Apellido Nombre"
+            if (strpos($nombreCompleto, ' ') !== false) {
+                $partes = explode(' ', $nombreCompleto, 2);
+                $apellido = trim($partes[0]);
+                $nombre = trim($partes[1] ?? '');
+            } else {
+                $apellido = $nombreCompleto;
+            }
+
+            return [
+                $row->nro_legaj,
+                $apellido,
+                $nombre,
+                $row->datos_validacion['cuil'] ?? '', // Intentamos obtener el CUIL de datos_validacion
+                $row->dependencia,
+                $row->fecha_baja?->format('d/m/Y'),
+            ];
+        }
     }
 
     public function styles(Worksheet $sheet)
@@ -81,7 +123,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
         ]);
 
         // Combinar celdas para el título del período
-        $sheet->mergeCells('A1:E1');
+        $sheet->mergeCells('A1:F1');
 
         // Obtener la última fila
         $lastRow = $sheet->getHighestRow();
@@ -116,7 +158,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 ]
             ],
             // Borde para todos los datos
-            "A3:E$lastRow" => [
+            "A3:F$lastRow" => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -131,13 +173,9 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
         return [
             'A' => NumberFormat::FORMAT_NUMBER, // Legajo
             'D' => '@',                         // CUIL como texto
-            'E' => '@'                          // UACAD como texto
+            'E' => '@',                         // UACAD como texto
+            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY // Fecha
         ];
-    }
-
-    public function title(): string
-    {
-        return 'Personal Embarazada';
     }
 
     public function registerEvents(): array
@@ -146,7 +184,6 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet;
                 $lastRow = $sheet->getHighestRow();
-                $lastColumn = $sheet->getHighestColumn();
 
                 // Altura de las filas
                 $sheet->getRowDimension(1)->setRowHeight(30);
@@ -155,7 +192,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 // Filas alternadas para mejor legibilidad
                 for ($row = 4; $row <= $lastRow; $row++) {
                     if ($row % 2 == 0) {
-                        $sheet->getStyle("A$row:E$row")->applyFromArray([
+                        $sheet->getStyle("A$row:F$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'F2F2F2'] // Gris claro

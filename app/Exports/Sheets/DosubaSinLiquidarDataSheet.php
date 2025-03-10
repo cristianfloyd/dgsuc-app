@@ -55,28 +55,35 @@ class DosubaSinLiquidarDataSheet implements
     {
         // Solo aplicamos estilos al encabezado y un borde ligero a los datos
         $lastRow = $sheet->getHighestRow();
-        Log::info("Last row: $lastRow");
         $lastColumn = $sheet->getHighestColumn();
+
         $styles = [
             // Estilos para el encabezado
             1 => [
-                'font' => ['bold' => true],
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '91bde1']
+                    'startColor' => ['rgb' => '4472C4']
                 ],
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
                 ],
                 'borders' => [
-                    'bottom' => [
+                    'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
                     ],
                 ],
             ],
-            // Borde ligero solo para los datos
-            "A2:G$lastRow" => [
+            // Borde para todos los datos
+            "A1:$lastColumn$lastRow" => [
                 'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
                     'outline' => [
                         'borderStyle' => Border::BORDER_MEDIUM,
                     ],
@@ -84,12 +91,13 @@ class DosubaSinLiquidarDataSheet implements
             ],
         ];
 
+        // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 1 == 0) {
+            if ($row % 2 == 0) {
                 $styles["A$row:$lastColumn$row"] = [
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'D9D9D9'] // Gris al 35%
+                        'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
                     ]
                 ];
             }
@@ -155,30 +163,34 @@ class DosubaSinLiquidarDataSheet implements
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 try {
-                    // $lastRow = $event->sheet->getHighestRow() + 2;
                     $lastRow = $event->sheet->getHighestRow();
-                    $event->sheet->setAutoFilter('A1:G1');
+                    $lastColumn = $event->sheet->getHighestColumn();
+
+                    // Configurar filtro automático
+                    $event->sheet->setAutoFilter("A1:{$lastColumn}1");
+
+                    // Ajustar altura de la fila de encabezado
+                    $event->sheet->getRowDimension(1)->setRowHeight(30);
 
                     // Configurar selección por defecto
-                    $event->sheet->getDelegate()->setSelectedCells("A1:G$lastRow");
+                    $event->sheet->getDelegate()->setSelectedCells("A1:{$lastColumn}$lastRow");
 
                     // Configurar vista de hoja
                     $event->sheet->getDelegate()->getSheetView()
                         ->setZoomScale(100)
                         ->setZoomScaleNormal(100);
 
-                    // Mostrar líneas de cuadrícula usando el método correcto
-                    $event->sheet->getDelegate()->setShowGridlines(true);
+                    // Fijar panel superior
+                    $event->sheet->freezePane('A2');
 
                     // Permitir selección de filas
-                    $event->sheet->getStyle('A1:G'.$lastRow)->getProtection()
+                    $event->sheet->getStyle("A1:{$lastColumn}$lastRow")->getProtection()
                         ->setLocked(false)
                         ->setHidden(false);
 
                 } catch (\Exception $e) {
                     Log::error('Error en configuración Excel: ' . $e->getMessage());
                 }
-
             },
         ];
     }
