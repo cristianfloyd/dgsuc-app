@@ -154,6 +154,7 @@
     - Logging detallado de errores
     - Notificaciones amigables al usuario
     - Rollback en caso de fallos
+    - Validación de tipos de archivo en exportaciones
 
 4. Seguridad:
     - Validación de conexiones
