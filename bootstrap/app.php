@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->web(append: [
+            \App\Http\Middleware\SetDatabaseConnection::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
