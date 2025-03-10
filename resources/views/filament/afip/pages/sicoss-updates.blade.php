@@ -3,7 +3,7 @@
         @if(empty($selectedIdLiqui))
             <div class="rounded-xl bg-amber-50 p-4 text-amber-700 dark:bg-amber-900 dark:text-amber-200">
                 <p class="font-medium">
-                    Por favor, seleccione al menos una liquidación para continuar.
+                    Por favor, seleccione el periodo fiscal para continuar.
                 </p>
             </div>
         @endif
