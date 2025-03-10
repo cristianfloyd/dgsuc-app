@@ -14,6 +14,7 @@ use Filament\Forms\Components\FileUpload;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Services\AfipMapucheSicossCalculoImportService;
+use App\Services\AfipMapucheSicossCalculoUpdateService;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource;
 
 class ImportAfipMapucheSicossCalculo extends Page
@@ -105,6 +106,10 @@ class ImportAfipMapucheSicossCalculo extends Page
                 $periodoFiscal,
                 fn($progress) => $this->updateImportProgress($progress)
             );
+
+            if ($result['imported'] > 0) {
+                $data = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
+            }
 
             $this->handleImportResult($result);
             Storage::delete($filePath);
