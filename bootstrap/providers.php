@@ -37,4 +37,5 @@ return [
     App\Providers\ValidationServiceProvider::class,
     App\Providers\WorkflowServiceProvider::class,
     App\Services\TableManagementServiceProvider::class,
+    App\Providers\FilamentServiceProvider::class,
 ];
