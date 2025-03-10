@@ -28,9 +28,8 @@ class ListReporteConceptoListados extends ListRecords
                 ->action(function ($livewire) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
                     $query = $this->getFilteredSortedTableQuery();
-                    $query2 = $livewire->getTableQuery();
+                    // $query2 = $livewire->getTableQuery();
 
-                    // dd($query2->toSql());
 
                     // comprobar que el query no este vacio
                     if ($query->count() == 0) {
@@ -42,6 +41,7 @@ class ListReporteConceptoListados extends ListRecords
                         'desc_liqui',
                         'apellido',
                         'nombre',
+                        'cuil',
                         'nro_legaj',
                         'nro_cargo',
                         'codc_uacad',

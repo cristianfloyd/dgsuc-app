@@ -40,7 +40,7 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('apellido')->label('Apellido'),
                 TextColumn::make('nombre')->label('Nombre'),
                 TextColumn::make('cuil')->label('CUIL')
-                    ->toggleable(isToggledHiddenByDefault:true),
+                    ->toggleable(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
