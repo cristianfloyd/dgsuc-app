@@ -22,8 +22,7 @@ class ComprobanteNominaModelResource extends Resource
 {
     protected static ?string $model = ComprobanteNominaModel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
     protected static ?string $modelLabel = 'CHE';
     protected static ?string $pluralModelLabel = 'CHE';
 

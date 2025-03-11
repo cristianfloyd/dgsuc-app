@@ -9,6 +9,8 @@ use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationGroup;
+use App\Filament\Pages\DashboardSelector;
+use App\Filament\Pages\DocumentationPage;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -21,8 +23,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
-use App\Filament\Pages\DashboardSelector;
-use App\Filament\Pages\DocumentationPage;
 
 class ReportesPanelProvider extends PanelProvider
 {
@@ -38,11 +38,17 @@ class ReportesPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Dosuba')
+                    ->icon('heroicon-o-banknotes'),
+                NavigationGroup::make()
                     ->label('Informes')
                     ->icon('heroicon-o-document-chart-bar'),
                 NavigationGroup::make()
                     ->label('Configuración')
                     ->icon('heroicon-o-cog-6-tooth'),
+                NavigationGroup::make()
+                    ->label('Ayuda')
+                    ->icon('heroicon-o-question-mark-circle'),
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()

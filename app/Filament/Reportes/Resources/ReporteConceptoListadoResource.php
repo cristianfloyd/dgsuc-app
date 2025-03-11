@@ -24,8 +24,7 @@ class ReporteConceptoListadoResource extends Resource
     protected static ?string $model = ConceptoListado::class;
     protected static ?string $modelLabel = 'List. de Concepto';
     protected static ?string $slug = 'listado-concepto';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
 
 
     public static function table(Table $table): Table

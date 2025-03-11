@@ -26,9 +26,9 @@ class DosubaSinLiquidarResource extends Resource
     protected static ?string $label = 'Dosuba Sin Liquidar - Reporte';
     protected static ?string $navigationLabel = 'Dosuba Sin Liquidar';
     protected static ?string $slug = 'reportes/dosuba-sin-liquidar';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Dosuba';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
 

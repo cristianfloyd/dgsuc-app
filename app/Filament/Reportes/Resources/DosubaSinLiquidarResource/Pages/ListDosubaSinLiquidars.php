@@ -5,9 +5,12 @@ namespace App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Models\Reportes\DosubaSinLiquidarModel;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
 
 class ListDosubaSinLiquidars extends ListRecords
@@ -29,6 +32,38 @@ class ListDosubaSinLiquidars extends ListRecords
         return [
             CreateAction::make()
                 ->label('Generar Reporte'),
+            Action::make('documentation')
+                ->label('Documentación')
+                ->icon('heroicon-o-document-text')
+                ->color('info')
+                ->modalHeading('Documentación del Reporte Dosuba Sin Liquidar')
+                ->modalContent(function () {
+                    $markdownPath = base_path('resources/docs/documentacion-dosuba-sin-liquidar.md');
+
+                    if (!File::exists($markdownPath)) {
+                        return 'La documentación no está disponible en este momento.';
+                    }
+
+                    $markdown = File::get($markdownPath);
+
+                    $converter = new GithubFlavoredMarkdownConverter([
+                        'html_input' => 'strip',
+                        'allow_unsafe_links' => false,
+                    ]);
+
+                    $html = $converter->convert($markdown);
+
+                    // Agregar estilos para mejorar la presentación
+                    $styledHtml = '
+                        <div class="prose prose-sm md:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-primary-600 dark:prose-headings:text-primary-400 prose-img:rounded-xl prose-img:shadow-md">
+                            ' . $html . '
+                        </div>
+                    ';
+
+                    return new HtmlString($styledHtml);
+                })
+                ->modalWidth('5xl')
+                ->modalIcon('heroicon-o-information-circle'),
             Action::make('vaciarTabla')
                 ->label('Vaciar Tabla')
                 ->action(function () {

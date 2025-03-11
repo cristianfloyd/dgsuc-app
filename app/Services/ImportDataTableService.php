@@ -41,6 +41,7 @@ class ImportDataTableService
                 // Campos de tracking y estado
                 $table->string('estado')->default(BloqueosEstadoEnum::IMPORTADO->value);
                 $table->text('mensaje_error')->nullable();
+                $table->boolean('esta_procesado')->default(false);
                 $table->json('datos_validacion')->nullable();
                 $table->timestamp('fecha_procesamiento')->nullable();
                 $table->string('procesado_por')->nullable();

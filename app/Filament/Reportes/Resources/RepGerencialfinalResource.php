@@ -30,8 +30,7 @@ class RepGerencialFinalResource extends Resource
     protected static ?string $model = RepGerencialFinal::class;
     protected static ?string $label = 'Reporte Gerencial';
     protected static ?string $pluralLabel = 'Reporte Gerencial';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
     protected static ?string $navigationLabel = 'Reporte Gerencial';
     protected static ?int $navigationSort = 1;
 
