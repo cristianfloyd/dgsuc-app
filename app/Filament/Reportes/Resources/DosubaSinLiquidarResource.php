@@ -3,13 +3,11 @@
 namespace App\Filament\Reportes\Resources;
 
 use Carbon\Carbon;
-use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Dh22;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
@@ -19,8 +17,6 @@ use Filament\Tables\Columns\TextColumn;
 use App\Exports\DosubaSinLiquidarExport;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Columns\BooleanColumn;
-use Filament\Infolists\Components\IconEntry;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
@@ -30,9 +26,9 @@ class DosubaSinLiquidarResource extends Resource
     protected static ?string $label = 'Dosuba Sin Liquidar - Reporte';
     protected static ?string $navigationLabel = 'Dosuba Sin Liquidar';
     protected static ?string $slug = 'reportes/dosuba-sin-liquidar';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Dosuba';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
 

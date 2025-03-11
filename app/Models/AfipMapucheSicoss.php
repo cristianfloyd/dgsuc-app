@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Log;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mapuche\MapucheBase;
+use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
@@ -298,7 +299,13 @@ class AfipMapucheSicoss extends Model
     protected function diferenciaRem(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->rem_total - $this->rem_impo6,
+            get: function($value) {
+                // Convertir a números y manejar valores nulos o vacíos
+                $remTotal = is_numeric($this->rem_total) ? (float)$this->rem_total : 0;
+                $remImpo6 = is_numeric($this->rem_impo6) ? (float)$this->rem_impo6 : 0;
+
+                return $remTotal - $remImpo6;
+            },
         );
     }
 

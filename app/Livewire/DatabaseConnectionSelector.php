@@ -2,45 +2,75 @@
 
 namespace App\Livewire;
 
+use App\Services\DatabaseConnectionService;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Livewire\Component;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
 
-class DatabaseConnectionSelector extends Component
+class DatabaseConnectionSelector extends Component implements HasForms
 {
-    // Propiedad para almacenar la conexión seleccionada
-    public string $selectedConnection;
+    use InteractsWithForms;
 
-    // Propiedad para almacenar las conexiones disponibles
-    public array $availableConnections;
+    public ?string $connection = null;
 
-    public function mount()
+    public function mount(): void
     {
-        // Obtener la conexión actual
-        $this->selectedConnection = Config::get('database.default');
-
-        // Obtener todas las conexiones configuradas
-        $this->availableConnections = array_keys(Config::get('database.connections'));
+        $service = app(DatabaseConnectionService::class);
+        
+        $currentConnection = $service->getCurrentConnection();
+        $this->connection = is_string($currentConnection) ? $currentConnection : null;
+        
+        $this->form->fill([
+            'connection' => $this->connection,
+        ]);
     }
 
-    public function updatedSelectedConnection($value)
+    public function form(Form $form): Form
     {
-        try {
-            // Guardar la selección en la sesión
-            Session::put('database_connection', $value);
+        $service = app(DatabaseConnectionService::class);
 
-            // Actualizar la conexión por defecto
-            Config::set('database.default', $value);
-
-            // Notificar al usuario
-            $this->dispatch('connection-changed', [
-                'message' => "Conexión cambiada a: {$value}"
+        return $form
+            ->schema([
+                Select::make('connection')
+                    ->hiddenLabel()
+                    ->options($service->getAvailableConnections())
+                    ->live()
+                    ->extraAttributes(function ($state) {
+                        $colorClasses = [
+                            'pgsql-mapuche' => 'bg-green-500',
+                            'pgsql-prod' => 'bg-blue-500',
+                            'pgsql-liquibase' => 'bg-yellow-500',
+                        ];
+                        return [
+                            'class' => 'fi-compact ' . ($colorClasses[$state] ?? ''),
+                        ];
+                    })
+                    ->afterStateUpdated(function ($state) use ($service) {
+                        if (is_string($state)) {
+                            $service->setConnection($state);
+                            
+                            // Guardar en cookie para persistencia entre sesiones
+                            Cookie::queue(
+                                DatabaseConnectionService::SESSION_KEY, 
+                                $state, 
+                                60*24*30 // 30 días
+                            );
+                            
+                            $this->dispatch('connection-changed', [
+                                'message' => 'Conexión cambiada a ' . ($service->getAvailableConnections()[$state] ?? $state)
+                            ]);
+                            
+                            $this->redirect(request()->header('Referer'));
+                        }
+                    }),
+            ])
+            // ->statePath('connection')
+            ->extraAttributes([
+                'class' => 'fi-compact-form',
             ]);
-        } catch (\Exception $e) {
-            $this->dispatch('connection-error', [
-                'message' => "Error al cambiar la conexión: {$e->getMessage()}"
-            ]);
-        }
     }
 
     public function render()

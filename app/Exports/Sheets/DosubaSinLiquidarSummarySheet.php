@@ -75,7 +75,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
             // Pie de página
             ['', ''],
-            ['Generado por:', auth()->user()?->name ?? 'Sistema'],
+            ['Generado por:', auth()->guard('web')->user()?->name ?? 'Sistema'],
             ['Período:', $this->formatPeriodo()],
             ['Versión:', config('app.version', '1.0')],
         ]);
@@ -101,7 +101,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '1d3557']
+                    'startColor' => ['rgb' => '4472C4']
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER
@@ -130,7 +130,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '91bde1']
+                    'startColor' => ['rgb' => '4472C4']
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER
@@ -145,7 +145,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 'font' => ['bold' => true, 'size' => 12],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'bdd7ed']
+                    'startColor' => ['rgb' => 'D9E1F2']
                 ],
             ];
         }
@@ -193,6 +193,11 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 $event->sheet->getStyle('A'.($lastRow-2).':B'.$lastRow)->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
+
+                // Configurar vista de hoja
+                $event->sheet->getDelegate()->getSheetView()
+                    ->setZoomScale(100)
+                    ->setZoomScaleNormal(100);
             }
         ];
     }

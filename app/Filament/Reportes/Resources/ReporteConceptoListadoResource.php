@@ -15,6 +15,7 @@ use App\Models\Reportes\ConceptoListado;
 use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\ConceptoListadoResourceService;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\EditReporteConceptoListado;
 use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
@@ -22,10 +23,9 @@ use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConce
 class ReporteConceptoListadoResource extends Resource
 {
     protected static ?string $model = ConceptoListado::class;
-    protected static ?string $modelLabel = 'List. de Concepto';
+    protected static ?string $modelLabel = 'Listado Concepto';
     protected static ?string $slug = 'listado-concepto';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
 
 
     public static function table(Table $table): Table
@@ -35,12 +35,12 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('nro_liqui')->label('Liquidación'),
                 TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('nro_legaj')->sortable()->searchable(),
-                TextColumn::make('nro_cargo')->label('Secuencia')->toggleable(isToggledHiddenByDefault:true),
+                TextColumn::make('nro_cargo')->label('Secuencia')->toggleable(),
                 TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('apellido')->label('Apellido'),
                 TextColumn::make('nombre')->label('Nombre'),
                 TextColumn::make('cuil')->label('CUIL')
-                    ->toggleable(isToggledHiddenByDefault:true),
+                    ->toggleable(),
                 TextColumn::make('periodo_fiscal')
                     ->label('Periodo')
                     ->sortable()
@@ -54,7 +54,7 @@ class ReporteConceptoListadoResource extends Resource
                         ->form([
                             Select::make('periodo_fiscal')
                                 ->label('Periodo')
-                                ->options( Dh22::getPeriodosFiscales())
+                                ->options(fn () => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                                 ->searchable()
                                 ->live()
                                 ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
@@ -62,14 +62,11 @@ class ReporteConceptoListadoResource extends Resource
                             Select::make('nro_liqui')
                                 ->label('Liquidación')
                                 ->options(function (callable $get): array {
-                                    $periodo = $get('periodo_fiscal');
-                                    if (!$periodo) return [];
+                                    $periodoString = $get('periodo_fiscal');
+                                    if (!$periodoString) return [];
 
-                                    return Dh22::query()
-                                        ->WithPeriodoFiscal($periodo)
-                                        // ->definitiva()
-                                        ->pluck('desc_liqui', 'nro_liqui')
-                                        ->toArray();
+                                    [$year, $month] = explode('-', $periodoString);
+                                    return app(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
                                 })
                                 ->searchable()
                                 ->live()

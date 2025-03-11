@@ -23,6 +23,8 @@ use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 
 class AfipPanelProvider extends PanelProvider
 {
@@ -75,6 +77,10 @@ class AfipPanelProvider extends PanelProvider
             ])
             ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth('full')
-            ->font('Poppins');
+            ->font('Poppins')
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): string => Blade::render('@livewire(\'database-connection-selector\')')
+            );
     }
 }

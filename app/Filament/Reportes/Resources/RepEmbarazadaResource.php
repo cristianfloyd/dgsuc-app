@@ -24,8 +24,8 @@ class RepEmbarazadaResource extends Resource
     protected static ?string $model = RepEmbarazada::class;
     protected static ?string $label = 'Reporte Embarazadas';
     protected static ?string $navigationLabel = 'Reporte Embarazadas';
-    protected static ?string $navigationGroup = 'Reportes';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Dosuba';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {

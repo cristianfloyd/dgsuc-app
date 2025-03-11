@@ -34,8 +34,8 @@ class BloqueosResource extends Resource
     protected static ?string $model = BloqueosDataModel::class;
     protected static ?string $label = 'Bloqueos';
     protected static ?string $pluralLabel = 'Bloqueos';
-    protected static ?string $navigationGroup = 'Reportes';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Informes';
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?Collection $resultadosProcesamiento = null;
 

@@ -27,8 +27,7 @@ use App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
 class OrdenesDescuentoResource extends Resource
 {
     protected static ?string $model = OrdenesDescuento::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
     protected static ?int $navigationSort = 2;
 
 

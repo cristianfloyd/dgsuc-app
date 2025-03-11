@@ -20,8 +20,7 @@ class EmbargoResource extends Resource
 {
     protected static ?string $model = Embargo::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
 
 
 

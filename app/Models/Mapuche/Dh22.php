@@ -316,4 +316,29 @@ class Dh22 extends Model
             }
         });
     }
+
+    /**
+     * Scope para filtrar liquidaciones que generan datos impositivos.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeGeneraImpositivo($query)
+    {
+        return $query->where('sino_genimp', true);
+    }
+
+    /**
+     * Scope para filtrar liquidaciones por período fiscal.
+     *
+     * @param Builder $query
+     * @param int $year
+     * @param int $month
+     * @return Builder
+     */
+    public function scopePeriodoFiscal($query, int $year, int $month)
+    {
+        return $query->where('per_liano', $year)
+                    ->where('per_limes', $month);
+    }
 }

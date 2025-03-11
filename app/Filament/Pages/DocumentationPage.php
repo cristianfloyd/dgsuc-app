@@ -10,7 +10,7 @@ use League\CommonMark\CommonMarkConverter;
 class DocumentationPage extends Page
 {
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    // protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationLabel = 'Documentación';
     protected static ?string $title = 'Documentación del Sistema';
     protected static string $view = 'filament.pages.documentation';

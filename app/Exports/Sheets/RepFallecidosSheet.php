@@ -15,10 +15,19 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class RepFallecidosSheet implements FromQuery, WithTitle, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents, WithCustomStartCell
+class RepFallecidosSheet implements
+    FromQuery,
+    WithTitle,
+    WithHeadings,
+    WithMapping,
+    WithStyles,
+    ShouldAutoSize,
+    WithEvents,
+    WithColumnFormatting
 {
     protected string $periodo;
 
@@ -41,6 +50,8 @@ class RepFallecidosSheet implements FromQuery, WithTitle, WithHeadings, WithMapp
     public function headings(): array
     {
         return [
+            ['Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
+            [''], // Línea en blanco
             [
                 'Legajo',
                 'Apellido',
@@ -50,11 +61,6 @@ class RepFallecidosSheet implements FromQuery, WithTitle, WithHeadings, WithMapp
                 'Fecha Defunción',
             ]
         ];
-    }
-
-    public function startCell(): string
-    {
-        return 'A2';
     }
 
     public function map($row): array
@@ -71,60 +77,101 @@ class RepFallecidosSheet implements FromQuery, WithTitle, WithHeadings, WithMapp
 
     public function styles(Worksheet $sheet)
     {
+        // Estilo base para todas las celdas
+        $sheet->getStyle($sheet->calculateWorksheetDimension())->applyFromArray([
+            'font' => [
+                'name' => 'Arial',
+                'size' => 10
+            ]
+        ]);
+
+        // Combinar celdas para el título del período
+        $sheet->mergeCells('A1:F1');
+
+        // Obtener la última fila
+        $lastRow = $sheet->getHighestRow();
+
         return [
-            2 => [
-                'font' => ['bold' => true],
+            1 => [
+                'font' => [
+                    'bold' => true,
+                    'size' => 14,
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'CCCCCC'],
+                    'startColor' => ['rgb' => 'D9E1F2']
                 ],
             ],
+            3 => [  // La fila de encabezados ahora es la 3
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4']
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ]
+            ],
+            // Borde para todos los datos
+            "A3:F$lastRow" => [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'A' => NumberFormat::FORMAT_NUMBER, // Legajo
+            'D' => '@',                         // CUIL como texto
+            'E' => '@',                         // UACAD como texto
+            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY // Fecha
         ];
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function (AfterSheet $event) {
-                // Título en A1
-                $event->sheet->mergeCells('A1:F1');
-                $event->sheet->setCellValue('A1', 'Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2));
-                $event->sheet->getStyle('A1')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    ],
-                ]);
+            AfterSheet::class => function(AfterSheet $event) {
+                $sheet = $event->sheet;
+                $lastRow = $sheet->getHighestRow();
 
-                // Headers en A2
-                $event->sheet->getStyle('A2:F2')->applyFromArray([
-                    'font' => ['bold' => true],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'CCCCCC'],
-                    ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                        ],
-                    ],
-                ]);
+                // Altura de las filas
+                $sheet->getRowDimension(1)->setRowHeight(30);
+                $sheet->getRowDimension(3)->setRowHeight(30);
 
-                // Datos desde A3
-                $lastRow = $event->sheet->getHighestRow();
-                if ($lastRow > 3) {
-                    $event->sheet->getStyle('A3:F' . $lastRow)->applyFromArray([
-                        'borders' => [
-                            'allBorders' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                            ],
-                        ],
-                    ]);
+                // Filas alternadas para mejor legibilidad
+                for ($row = 4; $row <= $lastRow; $row++) {
+                    if ($row % 2 == 0) {
+                        $sheet->getStyle("A$row:F$row")->applyFromArray([
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
+                            ]
+                        ]);
+                    }
                 }
-            },
+
+                // Fijar panel superior
+                $sheet->freezePane('A4');
+
+                // Configurar vista de hoja
+                $sheet->getDelegate()->getSheetView()
+                    ->setZoomScale(100)
+                    ->setZoomScaleNormal(100);
+            }
         ];
     }
 }

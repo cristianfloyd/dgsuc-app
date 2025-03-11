@@ -5,6 +5,7 @@ namespace App\Exports;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use App\Exports\Sheets\RepFallecidosSheet;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -12,6 +13,7 @@ use App\Exports\Sheets\RepEmbarazadasSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use App\Exports\Sheets\FallecidosBloqueoSheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithProperties;
 use App\Models\Reportes\DosubaSinLiquidarModel;
@@ -21,7 +23,6 @@ use App\Exports\Sheets\DosubaSinLiquidarDataSheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use App\Exports\Sheets\DosubaSinLiquidarSummarySheet;
-use App\Exports\Sheets\RepFallecidosSheet;
 
 class DosubaSinLiquidarExport implements WithMultipleSheets
 {
@@ -41,6 +42,7 @@ class DosubaSinLiquidarExport implements WithMultipleSheets
             'data' => new DosubaSinLiquidarDataSheet($this->records),
             'embarazadas' => new RepEmbarazadasSheet($this->periodo),
             'fallecidos' => new RepFallecidosSheet($this->periodo),
+            'fallecidos_bloqueo' => new FallecidosBloqueoSheet($this->periodo),
         ];
     }
 }

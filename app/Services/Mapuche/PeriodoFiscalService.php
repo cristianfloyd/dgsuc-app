@@ -130,4 +130,39 @@ class PeriodoFiscalService
             'month' => $periodoFiscal->per_limes
             ];
     }
+
+    /**
+     * Obtiene los períodos fiscales formateados para usar en selects de Filament
+     *
+     * @return array Array asociativo con formato 'YYYY-MM' => 'YYYY-MM'
+     */
+    public function getPeriodosFiscalesForSelect(): array
+    {
+        return $this->getPeriodosFiscales()['periodosFiscales']
+            ->mapWithKeys(function ($periodo) {
+                $year = $periodo->per_liano;
+                $month = sprintf('%02d', $periodo->per_limes);
+                $label = "$year-$month";
+                $value = "$year-$month";
+                return [$value => $label];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Obtiene las liquidaciones disponibles para un período fiscal específico
+     *
+     * @param string $year Año del período fiscal
+     * @param string $month Mes del período fiscal
+     * @return array Array asociativo con nro_liqui => desc_liqui
+     */
+    public function getLiquidacionesByPeriodo(string $year, string $month): array
+    {
+        return Dh22::query()
+            ->where('per_liano', $year)
+            ->where('per_limes', $month)
+            // ->definitiva()  // Si necesitas mantener este scope
+            ->pluck('desc_liqui', 'nro_liqui')
+            ->toArray();
+    }
 }

@@ -21,8 +21,7 @@ class OrdenDePagoResource extends Resource
     protected static ?string $model = RepOrdenPagoModel::class;
     protected static ?string $modelLabel = 'Orden de Pago';
     protected static ?string $navigationLabel = 'Orden de Pago';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Reportes';
+    protected static ?string $navigationGroup = 'Informes';
 
     public static function form(Form $form): Form
     {
