@@ -2,11 +2,12 @@
 
 namespace App\Models\Mapuche;
 
+use App\Traits\DynamicConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class MapucheBase extends Model
 {
-    protected $connection = 'secondary';
-    
+    use DynamicConnectionTrait;
+
     // Propiedades y métodos comunes para todos los modelos Mapuche
-} 
+}

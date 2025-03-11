@@ -44,7 +44,8 @@ class ReportExport implements
             'apellido' => 'Apellido',
             'nombre' => 'Nombre',
             'cuil' => 'DNI',
-            'nro_legajo' => 'Legajo',
+            'nro_legaj' => 'Legajo',
+            'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
             'impp_conce' => 'Importe'
@@ -63,18 +64,30 @@ class ReportExport implements
     {
         $mappedRow = [];
         foreach (array_keys($this->columns) as $column) {
-            if ($column === 'cuil') {
-                // Procesar el CUIL: eliminar los primeros 2 dígitos y el último dígito
-                $fullCuil = $row->{$column} ?? '';
-                if (strlen($fullCuil) >= 3) {
-                    // Extraer solo la parte central del CUIL
-                    $mappedRow[] = substr($fullCuil, 2, -1);
-                } else {
-                    $mappedRow[] = $fullCuil;
-                }
-            } else {
-                $mappedRow[] = $row->{$column} ?? '';
+            $value = $row->{$column} ?? '';
+
+            // Aplicar transformaciones específicas según el tipo de columna
+            switch ($column) {
+                case 'cuil':
+                    // Procesar el CUIL: eliminar los primeros 2 dígitos y el último dígito
+                    if (strlen($value) >= 3) {
+                        $value = substr($value, 2, -1);
+                    }
+                    break;
+
+                case 'impp_conce':
+                    // Asegurar formato numérico para importes
+                    $value = is_numeric($value) ? $value : 0;
+                    break;
+
+                case 'nro_liqui':
+                case 'nro_legaj':
+                    // Asegurar que los números se muestren como texto
+                    $value = (string)$value;
+                    break;
             }
+
+            $mappedRow[] = $value;
         }
         return $mappedRow;
     }

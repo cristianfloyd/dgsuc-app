@@ -35,7 +35,7 @@ class ReporteConceptoListadoResource extends Resource
                 TextColumn::make('nro_liqui')->label('Liquidación'),
                 TextColumn::make('desc_liqui')->toggleable(),
                 TextColumn::make('nro_legaj')->sortable()->searchable(),
-                TextColumn::make('nro_cargo')->label('Secuencia')->toggleable(isToggledHiddenByDefault:true),
+                TextColumn::make('nro_cargo')->label('Secuencia')->toggleable(),
                 TextColumn::make('codc_uacad')->label('dependencia'),
                 TextColumn::make('apellido')->label('Apellido'),
                 TextColumn::make('nombre')->label('Nombre'),

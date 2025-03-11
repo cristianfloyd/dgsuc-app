@@ -36,7 +36,8 @@ class ReportDetailSheet implements
             'apellido' => 'Apellido',
             'nombre' => 'Nombre',
             'cuil' => 'DNI',
-            'nro_legajo' => 'Legajo',
+            'nro_legaj' => 'Legajo',
+            'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
             'impp_conce' => 'Importe'
