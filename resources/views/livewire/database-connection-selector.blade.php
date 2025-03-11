@@ -5,7 +5,6 @@
                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
                     BD:
                 </span>
-                
                 <div class="w-40">
                     {{ $this->form }}
                 </div>
