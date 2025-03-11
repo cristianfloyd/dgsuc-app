@@ -5,6 +5,8 @@ namespace App\Traits;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use App\Services\DatabaseConnectionService;
 
 /**
  * Trait DynamicConnectionTrait
@@ -16,20 +18,22 @@ use Illuminate\Database\Eloquent\Model;
 trait DynamicConnectionTrait
 {
     /**
-     * Obtiene el nombre de la conexión de base de datos.
-     * Si 'secondary' no está configurada, usa la conexión predeterminada.
+     * Obtiene el nombre de la conexión de base de datos basado en la selección del usuario.
      *
      * @return string
      */
     public function getConnectionName(): string
     {
-        // Verificar si la conexión 'secondary' está configurada
-        if (Config::has('database.connections.secondary')) {
-            return 'secondary';
+        // Obtener la conexión seleccionada de la sesión
+        $selectedConnection = Session::get(DatabaseConnectionService::SESSION_KEY);
+
+        // Verificar si la conexión seleccionada existe y es válida
+        if ($selectedConnection && Config::has("database.connections.{$selectedConnection}")) {
+            return $selectedConnection;
         }
 
-        // Si no está configurada, usar la conexión predeterminada
-        return 'pgsql-prod'; // O cualquier otra conexión predeterminada que prefieras
+        // Si no hay conexión seleccionada o no es válida, usar la conexión predeterminada
+        return DatabaseConnectionService::DEFAULT_CONNECTION;
     }
 
     /**
