@@ -9,6 +9,7 @@ use App\Livewire\ContactUs;
 use App\Livewire\TestCuils;
 use App\Livewire\Uploadtxt;
 use App\Livewire\UsersTable;
+use Illuminate\Http\Request;
 use App\Livewire\CompareCuils;
 use App\Livewire\FileEncoding;
 use App\Livewire\RegisterForm;
@@ -110,3 +111,20 @@ Route::get('/documentation', [DocumentationController::class, 'index'])
 
 Route::get('/documentation/{slug}', [DocumentationController::class, 'show'])
     ->name('documentation.show');
+
+// Ruta para descargar archivos SICOSS
+Route::get('/afip/sicoss/download', function (Request $request) {
+    $path = base64_decode($request->path);
+
+    if (!file_exists($path)) {
+        abort(404, 'Archivo no encontrado');
+    }
+
+    $extension = pathinfo($path, PATHINFO_EXTENSION);
+    $contentType = $extension === 'txt' ? 'text/plain' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    $fileName = basename($path);
+
+    return response()->download($path, $fileName, [
+        'Content-Type' => $contentType,
+    ])->deleteFileAfterSend();
+})->name('afip.sicoss.download')->middleware(['auth']);

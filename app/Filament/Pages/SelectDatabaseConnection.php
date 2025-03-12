@@ -2,20 +2,20 @@
 
 namespace App\Filament\Pages;
 
-use App\Services\DatabaseConnectionService;
+use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Session;
+use Filament\Notifications\Notification;
+use App\Services\DatabaseConnectionService;
+use Filament\Forms\Concerns\InteractsWithForms;
 
 class SelectDatabaseConnection extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-database';
+    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
     protected static ?string $navigationLabel = 'Cambiar Base de Datos';
     protected static ?string $title = 'Seleccionar Base de Datos';
     protected static ?int $navigationSort = 100;
@@ -44,13 +44,13 @@ class SelectDatabaseConnection extends Page implements HasForms
                     ->live()
                     ->afterStateUpdated(function ($state) use ($service) {
                         $service->setConnection($state);
-                        
+
                         Notification::make()
                             ->title('Conexión cambiada')
                             ->body('La conexión a la base de datos ha sido cambiada a ' . $service->getAvailableConnections()[$state])
                             ->success()
                             ->send();
-                            
+
                         $this->redirect(request()->header('Referer', route('filament.admin.pages.dashboard')));
                     }),
             ]);
@@ -60,4 +60,4 @@ class SelectDatabaseConnection extends Page implements HasForms
     {
         return true;
     }
-} 
+}

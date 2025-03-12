@@ -2,23 +2,92 @@
 
 namespace App\Services;
 
+use App\Exports\SicossExport;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 
 class SicossExportService
 {
-    public function generarArchivo(Collection $registros): string
+    /**
+     * Genera un archivo TXT con formato SICOSS a partir de una colección de registros.
+     *
+     * @param Collection $registros Registros a incluir en el archivo
+     * @param string|null $periodoFiscal Periodo fiscal para el nombre del archivo (formato YYYYMM)
+     * @return string Ruta completa del archivo generado
+     */
+    public function generarArchivoTxt(Collection $registros, ?string $periodoFiscal = null): string
     {
         $contenido = '';
+        $totalRegistros = $registros->count();
+        $procesados = 0;
+
+        Log::info("Iniciando exportación de archivo SICOSS TXT con {$totalRegistros} registros");
 
         foreach ($registros as $registro) {
             $linea = $this->generarLinea($registro);
             $contenido .= $linea . PHP_EOL;
+            $procesados++;
+
+            // Loguear progreso cada 100 registros
+            if ($procesados % 100 === 0) {
+                Log::info("Exportación SICOSS TXT: {$procesados}/{$totalRegistros} registros procesados");
+            }
         }
 
-        $nombreArchivo = 'SICOSS_' . date('Ym') . '.txt';
+        // Usar el periodo fiscal proporcionado o el actual
+        $periodoFiscal = $periodoFiscal ?? date('Ym');
+        $nombreArchivo = 'SICOSS_' . $periodoFiscal . '.txt';
+
         Storage::disk('local')->put('tmp/' . $nombreArchivo, $contenido);
+        Log::info("Exportación SICOSS TXT completada: {$procesados} registros exportados a {$nombreArchivo}");
+
         return storage_path('app/tmp/' . $nombreArchivo);
+    }
+
+    /**
+     * Genera un archivo Excel con los datos de SICOSS.
+     *
+     * @param Collection $registros Registros a incluir en el archivo
+     * @param string|null $periodoFiscal Periodo fiscal para el nombre del archivo (formato YYYYMM)
+     * @return string Ruta completa del archivo generado
+     */
+    public function generarArchivoExcel(Collection $registros, ?string $periodoFiscal = null): string
+    {
+        // Usar el periodo fiscal proporcionado o el actual
+        $periodoFiscal = $periodoFiscal ?? date('Ym');
+        $nombreArchivo = 'SICOSS_' . $periodoFiscal . '.xlsx';
+        $rutaArchivo = storage_path('app/tmp/' . $nombreArchivo);
+
+        // Si se implementa una clase de exportación específica para Excel
+        // Excel::store(new SicossExport($registros), 'tmp/' . $nombreArchivo, 'local');
+
+        // Implementación simple sin clase de exportación específica
+        Excel::store(
+            view('exports.sicoss', ['registros' => $registros]),
+            'tmp/' . $nombreArchivo,
+            'local'
+        );
+
+        return $rutaArchivo;
+    }
+
+    /**
+     * Método genérico para generar un archivo en el formato especificado.
+     *
+     * @param Collection $registros Registros a incluir en el archivo
+     * @param string $formato Formato del archivo ('txt' o 'excel')
+     * @param string|null $periodoFiscal Periodo fiscal para el nombre del archivo
+     * @return string Ruta completa del archivo generado
+     */
+    public function generarArchivo(Collection $registros, string $formato = 'txt', ?string $periodoFiscal = null): string
+    {
+        return match(strtolower($formato)) {
+            'excel', 'xlsx' => $this->generarArchivoExcel($registros, $periodoFiscal),
+            'txt', 'text' => $this->generarArchivoTxt($registros, $periodoFiscal),
+            default => $this->generarArchivoTxt($registros, $periodoFiscal),
+        };
     }
 
     /**
@@ -52,7 +121,6 @@ class SicossExportService
         $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', STR_PAD_LEFT);
 
         // Datos aportes y obra social
-
         $linea .= $this->formatearDecimal($registro->porc_aporte, 5);
         $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', STR_PAD_LEFT);
         $linea .= str_pad($registro->cod_os ?? '0', 6, '0', STR_PAD_LEFT);
@@ -118,7 +186,7 @@ class SicossExportService
         $linea .= $this->formatearDecimal($registro->contrib_dif, 9);
 
         // Datos finales
-        $linea .= str_pad($registro->hstrab ?? '0', 3, '0', STR_PAD_LEFT);
+        $linea .= $this->formatearNumero($registro->hstrab, 3);
         $linea .= $registro->seguro ? '1' : '0';
         $linea .= $this->formatearDecimal($registro->ley, 12);
         $linea .= $this->formatearDecimal($registro->incsalarial, 12);
@@ -135,17 +203,66 @@ class SicossExportService
         return str_pad($numeroFormateado, $longitud, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Formatea un string con longitud fija, manejando correctamente caracteres especiales.
+     *
+     * @param string|null $valor El valor a formatear
+     * @param int $longitud La longitud deseada del string resultante
+     * @return string El valor formateado
+     */
     private function formatearString(?string $valor, int $longitud): string
     {
+        // Asegurar que no sea null
         $valor = $valor ?? '';
-        $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
-        $valor = substr($valor, 0, $longitud);
-        return str_pad($valor, $longitud, ' ', STR_PAD_RIGHT);
+
+        // Convertir a ISO-8859-1 (Latin1) para manejar acentos
+        $valorLatin1 = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
+
+        // Calcular la longitud real en bytes (importante para caracteres especiales)
+        $longitudActual = strlen($valorLatin1);
+
+        // Truncar si es necesario
+        if ($longitudActual > $longitud) {
+            $valorLatin1 = substr($valorLatin1, 0, $longitud);
+        }
+
+        // Calcular cuántos espacios necesitamos añadir
+        $espaciosNecesarios = $longitud - strlen($valorLatin1);
+
+        // Añadir espacios al final para alcanzar la longitud exacta
+        if ($espaciosNecesarios > 0) {
+            $valorLatin1 .= str_repeat(' ', $espaciosNecesarios);
+        }
+
+        // Verificar la longitud final
+        if (strlen($valorLatin1) !== $longitud) {
+            // Log de error o ajuste adicional si es necesario
+            $valorLatin1 = str_pad(substr($valorLatin1, 0, $longitud), $longitud, ' ', STR_PAD_RIGHT);
+        }
+
+        return $valorLatin1;
     }
 
+    /**
+     * Formatea un número como string con longitud fija, rellenando con ceros a la izquierda.
+     * Si el valor es mayor que la longitud especificada, se trunca.
+     *
+     * @param mixed $valor El valor a formatear
+     * @param int $longitud La longitud deseada del string resultante
+     * @return string El valor formateado
+     */
     private function formatearNumero($valor, int $longitud): string
     {
-        return str_pad($valor ?? '0', $longitud, '0', STR_PAD_LEFT);
+        // Convertir a string y asegurar que no sea null
+        $valorString = (string)($valor ?? '0');
+
+        // Si el valor es más largo que la longitud deseada, truncarlo
+        if (strlen($valorString) > $longitud) {
+            $valorString = substr($valorString, 0, $longitud);
+        }
+
+        // Rellenar con ceros a la izquierda hasta alcanzar la longitud deseada
+        return str_pad($valorString, $longitud, '0', STR_PAD_LEFT);
     }
 
     private function ajustarLongitud(string $linea, int $longitud): string

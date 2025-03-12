@@ -19,12 +19,9 @@ use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
 use Symfony\Component\HttpFoundation\Response;
-use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
-use App\Contracts\TableService\AfipMapucheSicossTableServiceInterface;
-use App\Filament\Afip\Resources\AfipMapucheSicossResource\RelationManagers;
+
 
 class AfipMapucheSicossResource extends Resource
 {
@@ -60,7 +57,7 @@ class AfipMapucheSicossResource extends Resource
                         return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state))
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('conyuge')
                     ->label('Cónyuge')
                     ->boolean()
@@ -97,14 +94,29 @@ class AfipMapucheSicossResource extends Resource
             ])
             ->headerActions([
                 ActionGroup::make([
-                    Action::make('exportarSicoss')
-                        ->label('Exportar Excel')
+                    Action::make('exportarSicossTxt')
+                        ->label('Exportar TXT SICOSS')
                         ->icon('heroicon-o-document-arrow-down')
                         ->action(function () {
-                            $path = AfipMapucheSicossResource::generarArchivoSicoss();
+                            $exportService = Container::getInstance()->make(SicossExportService::class);
+                            $path = $exportService->generarArchivoTxt(static::getModel()::all());
                             return response()->download($path)->deleteFileAfterSend();
                         })
                         ->color('success'),
+                    Action::make('exportarSicossExcel')
+                        ->label('Exportar Excel')
+                        ->icon('heroicon-o-table-cells')
+                        ->action(function () {
+                            $exportService = Container::getInstance()->make(SicossExportService::class);
+                            $path = $exportService->generarArchivoExcel(static::getModel()::all());
+                            return response()->download($path)->deleteFileAfterSend();
+                        })
+                        ->color('success'),
+                    Action::make('exportarAvanzado')
+                        ->label('Exportación Avanzada')
+                        ->url(fn(): string => self::getUrl('export'))
+                        ->color('success')
+                        ->icon('heroicon-o-adjustments-horizontal'),
                     Action::make('importar')
                         ->label('Importar')
                         ->url(fn(): string => self::getUrl('import'))
@@ -126,10 +138,15 @@ class AfipMapucheSicossResource extends Resource
                         ->icon('heroicon-o-arrow-up-tray')
                         ->requiresConfirmation()
                         ->slideOver(),
-                    Action::make('exportarFiltrados')
-                        ->label('Exportar Filtrados')
+                    Action::make('exportarFiltradosTxt')
+                        ->label('Exportar Filtrados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire))
+                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
+                        ->color('success'),
+                    Action::make('exportarFiltradosExcel')
+                        ->label('Exportar Filtrados (Excel)')
+                        ->icon('heroicon-o-table-cells')
+                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
                         ->color('success'),
                 ])
                     ->icon('heroicon-o-cog-8-tooth')
@@ -141,10 +158,15 @@ class AfipMapucheSicossResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('exportarSeleccionados')
-                        ->label('Exportar Seleccionados')
+                    Tables\Actions\BulkAction::make('exportarSeleccionadosTxt')
+                        ->label('Exportar Seleccionados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn(Collection $records) => static::exportarRegistros($records))
+                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'txt'))
+                        ->color('success'),
+                    Tables\Actions\BulkAction::make('exportarSeleccionadosExcel')
+                        ->label('Exportar Seleccionados (Excel)')
+                        ->icon('heroicon-o-table-cells')
+                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'excel'))
                         ->color('success')
                 ]),
             ])
@@ -174,6 +196,7 @@ class AfipMapucheSicossResource extends Resource
             'index' => Pages\ListAfipMapucheSicosses::route('/'),
             'create' => Pages\CreateAfipMapucheSicoss::route('/create'),
             'import' => Pages\ImportAfipMapucheSicoss::route('/import'),
+            'export' => Pages\ExportAfipMapucheSicoss::route('/export'),
         ];
     }
 
@@ -184,25 +207,52 @@ class AfipMapucheSicossResource extends Resource
      * y luego llama a la función exportarRegistros para generar el archivo de exportación.
      *
      * @param $livewire El objeto Livewire que contiene el query builder filtrado.
+     * @param string $formato El formato de exportación ('txt' o 'excel').
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
-    protected static function exportarRegistrosFiltrados($livewire): Response
+    protected static function exportarRegistrosFiltrados($livewire, string $formato = 'txt'): Response
     {
         $registrosFiltrados = $livewire->getFilteredTableQuery()->get();
-        return static::exportarRegistros($registrosFiltrados);
+        return static::exportarRegistros($registrosFiltrados, $formato);
     }
 
-    protected static function exportarRegistros(Collection $registros): Response
+    /**
+     * Exporta los registros proporcionados a un archivo.
+     *
+     * @param Collection $registros Los registros a exportar.
+     * @param string $formato El formato de exportación ('txt' o 'excel').
+     * @return Response El objeto Response que contiene el archivo de exportación.
+     */
+    protected static function exportarRegistros(Collection $registros, string $formato = 'txt'): Response
     {
         // Obtener la instancia del servicio desde el contenedor
         $exportService = Container::getInstance()->make(SicossExportService::class);
-        $path = $exportService->generarArchivo($registros);
+
+        // Obtener el período fiscal del primer registro o usar el actual
+        $periodoFiscal = $registros->isNotEmpty()
+            ? $registros->first()->periodo_fiscal
+            : date('Ym');
+
+        // Generar el archivo en el formato especificado
+        $path = $exportService->generarArchivo($registros, $formato, $periodoFiscal);
+
         return response()->download($path)->deleteFileAfterSend();
     }
 
-    public static function generarArchivoSicoss(Collection $registros = null): string
+    /**
+     * Genera un archivo SICOSS con los datos de los registros proporcionados.
+     *
+     * Esta función toma una colección de registros y genera un archivo de texto con el formato
+     * requerido por el sistema SICOSS. El archivo se guarda en el directorio temporal y se
+     * devuelve la ruta completa del archivo generado.
+     *
+     * @param ?Collection $registros Una colección de registros a incluir en el archivo SICOSS.
+     *                               Si no se proporciona, se utilizarán todos los registros.
+     * @return string La ruta completa del archivo SICOSS generado.
+     */
+    public static function generarArchivoSicoss(?Collection $registros = null): string
     {
-        $registros = $registros ?? static::getModel()::all();
+        $registros ??= static::getModel()::all();
         $contenido = '';
 
         // Función auxiliar para formatear decimales con 2 decimales

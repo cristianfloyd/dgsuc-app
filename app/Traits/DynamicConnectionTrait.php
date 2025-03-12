@@ -51,7 +51,7 @@ trait DynamicConnectionTrait
      *
      * @return string
      */
-    public function getTable(Model|string $table = null): string
+    public function getTable(?string $table = null): string
     {
         $table = parent::getTable();
         // Si ya tiene el esquema definido, retornamos tal cual
