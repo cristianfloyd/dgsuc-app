@@ -17,4 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+app/Traits/SicossConnectionTrait.php
 app/Traits/MapucheConnectionTrait.php
