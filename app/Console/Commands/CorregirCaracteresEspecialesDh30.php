@@ -2,49 +2,57 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Dh01;
 use Illuminate\Console\Command;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Mapuche\Catalogo\Dh30;
 
-class CorregirCaracteresEspecialesDh01 extends Command
+class CorregirCaracteresEspecialesDh30 extends Command
 {
-    protected $signature = 'mapuche:corregir-caracteres
-                            {--dry-run : Simular corrección sin actualizar la base de datos}
-                            {--limit= : Limitar el número de registros a procesar}
-                            {--apellido= : Filtrar por apellido específico}
-                            {--legajo= : Filtrar por número de legajo específico}';
+    protected $signature = 'mapuche:corregir-caracteres-dh30
+                           {--dry-run : Simular corrección sin actualizar la base de datos}
+                           {--limit= : Limitar el número de registros a procesar}
+                           {--tabla= : Filtrar por número de tabla específico}
+                           {--abrev= : Filtrar por abreviatura específica}
+                           {--item= : Filtrar por descripción de ítem conteniendo texto}';
 
-    protected $description = 'Corrige caracteres especiales en registros de Dh01';
+    protected $description = 'Corrige caracteres especiales en registros de la tabla Dh30';
 
     public function handle()
     {
         $dryRun = $this->option('dry-run');
         $limit = $this->option('limit');
-        $apellidoFiltro = $this->option('apellido');
-        $legajoFiltro = $this->option('legajo');
+        $tablaFiltro = $this->option('tabla');
+        $abrevFiltro = $this->option('abrev');
+        $itemFiltro = $this->option('item');
 
-        $this->info('Iniciando corrección de caracteres especiales en Dh01...');
+        $this->info('Iniciando corrección de caracteres especiales en Dh30...');
 
         // Definir los campos a corregir
-        $camposACorregir = ['desc_appat', 'desc_apmat', 'desc_apcas', 'desc_nombr'];
+        $camposACorregir = ['desc_abrev', 'desc_item'];
 
         // Construir la consulta base
-        $query = Dh01::query();
+        $query = Dh30::query();
 
-        // Aplicar filtro por legajo si se especificó
-        if ($legajoFiltro) {
-            $query->where('nro_legaj', $legajoFiltro);
-            $this->info("Filtrando por legajo: {$legajoFiltro}");
+        // Aplicar filtros si se especificaron
+        if ($tablaFiltro) {
+            $query->where('nro_tabla', $tablaFiltro);
+            $this->info("Filtrando por tabla: {$tablaFiltro}");
         }
-        // Aplicar filtros por apellido si se especificó
-        elseif ($apellidoFiltro) {
-            $query->where('desc_appat', 'like', "%$apellidoFiltro%");
-            $this->info("Filtrando por apellido: {$apellidoFiltro}");
+
+        if ($abrevFiltro) {
+            $query->where('desc_abrev', 'like', "%$abrevFiltro%");
+            $this->info("Filtrando por abreviatura: {$abrevFiltro}");
         }
+
+        if ($itemFiltro) {
+            $query->where('desc_item', 'like', "%$itemFiltro%");
+            $this->info("Filtrando por descripción: {$itemFiltro}");
+        }
+
         // Si no hay filtros específicos, buscar por patrones
-        else {
+        if (!$tablaFiltro && !$abrevFiltro && !$itemFiltro) {
             // Palabras clave para buscar posibles registros problemáticos
             $patronesBusqueda = [
                 // Patrones para Ñ
@@ -69,7 +77,6 @@ class CorregirCaracteresEspecialesDh01 extends Command
             $query->limit($limit);
         }
 
-
         // Obtener registros
         $registros = $query->get();
         $this->info("Se encontraron {$registros->count()} registros para revisar.");
@@ -82,12 +89,13 @@ class CorregirCaracteresEspecialesDh01 extends Command
             $cambios = [];
 
             foreach ($camposACorregir as $campo) {
+                // Obtener el valor original sin procesar
                 $valorOriginal = $registro->getRawOriginal($campo);
 
                 if (!$valorOriginal) continue;
 
-                // Aplicar corrección de codificación específica para Dh01
-                $valorCorregido = $this->corregirCaracteresDh01($valorOriginal);
+                // Aplicar corrección de codificación
+                $valorCorregido = $this->corregirCaracteresDh30($valorOriginal);
 
                 if ($valorCorregido !== $valorOriginal) {
                     $cambios[$campo] = [
@@ -100,7 +108,8 @@ class CorregirCaracteresEspecialesDh01 extends Command
             }
 
             if (!empty($cambios)) {
-                $this->info("Registro #{$registro->nro_legaj}: " . json_encode($cambios, JSON_UNESCAPED_UNICODE));
+                $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: " .
+                             json_encode($cambios, JSON_UNESCAPED_UNICODE));
 
                 if (!$dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();
@@ -110,7 +119,8 @@ class CorregirCaracteresEspecialesDh01 extends Command
                             // Actualizar directamente con query builder para evitar mutators
                             DB::connection($registro->getConnectionName())
                                 ->table($registro->getTable())
-                                ->where('nro_legaj', $registro->nro_legaj)
+                                ->where('nro_tabla', $registro->nro_tabla)
+                                ->where('desc_abrev', $registro->desc_abrev)
                                 ->update([$campo => $valores['corregido']]);
                         }
 
@@ -120,7 +130,7 @@ class CorregirCaracteresEspecialesDh01 extends Command
                     } catch (\Exception $e) {
                         DB::connection($registro->getConnectionName())->rollBack();
                         $this->error("Error al actualizar registro: {$e->getMessage()}");
-                        Log::error("Error al corregir caracteres en Dh01 #{$registro->nro_legaj}", [
+                        Log::error("Error al corregir caracteres en Dh30 #{$registro->nro_tabla}, {$registro->desc_abrev}", [
                             'error' => $e->getMessage(),
                             'cambios' => $cambios
                         ]);
@@ -139,12 +149,12 @@ class CorregirCaracteresEspecialesDh01 extends Command
     }
 
     /**
-     * Función especializada para corregir caracteres en registros de Dh01
+     * Función especializada para corregir caracteres en registros de Dh30
      *
      * @param string $texto Texto a corregir
      * @return string Texto corregido
      */
-    private function corregirCaracteresDh01(string $texto): string
+    private function corregirCaracteresDh30(string $texto): string
     {
         // Caracteres especiales y sus equivalentes correctos
         $char_map = [
@@ -182,25 +192,28 @@ class CorregirCaracteresEspecialesDh01 extends Command
         // Aplicar mapeo directo
         $result = strtr($texto, $char_map);
 
-        // Apellidos específicos con correcciones conocidas
-        $apellidosComunes = [
-            "AGUERO" => "AGÜERO",
-            "ARGUELLO" => "ARGÜELLO",
-            "MUNOZ" => "MUÑOZ",
-            "PINERO" => "PIÑERO",
-            "PINEIRO" => "PIÑEIRO",
-            "CASTANARES" => "CASTAÑARES",
-            "CASTANEDA" => "CASTAÑEDA",
-            "PENA" => "PEÑA",
-            "ACUNA" => "ACUÑA",
-            "NUNEZ" => "NÚÑEZ",
-            "IBANEZ" => "IBÁÑEZ",
-            "MONTANES" => "MONTAÑÉS",
-            "BERGUER" => "BERGÜER"
+        // Palabras comunes con correcciones conocidas para Dh30
+        $palabrasComunes = [
+            "SECCION" => "SECCIÓN",
+            "DIRECCION" => "DIRECCIÓN",
+            "ADMINISTRACION" => "ADMINISTRACIÓN",
+            "EDUCACION" => "EDUCACIÓN",
+            "INVESTIGACION" => "INVESTIGACIÓN",
+            "SECRETARIA" => "SECRETARÍA",
+            "QUIMICA" => "QUÍMICA",
+            "INFORMATICA" => "INFORMÁTICA",
+            "ECONOMICA" => "ECONÓMICA",
+            "MEDICO" => "MÉDICO",
+            "TECNOLOGICO" => "TECNOLÓGICO",
+            "BASICO" => "BÁSICO",
+            "ESTADISTICA" => "ESTADÍSTICA",
+            "OCEANOGRAFIA" => "OCEANOGRAFÍA",
+            "ESPANOL" => "ESPAÑOL"
         ];
 
-        foreach ($apellidosComunes as $mal => $bien) {
-            $result = str_ireplace($mal, $bien, $result);
+        foreach ($palabrasComunes as $mal => $bien) {
+            // Usar expresión regular para reemplazar solo palabras completas
+            $result = preg_replace('/\b' . preg_quote($mal, '/') . '\b/i', $bien, $result);
         }
 
         return $result;
