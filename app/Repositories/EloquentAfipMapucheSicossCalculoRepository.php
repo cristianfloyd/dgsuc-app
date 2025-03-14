@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
+use App\Traits\DynamicConnectionTrait;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Data\AfipMapucheSicossCalculoData;
@@ -14,11 +15,19 @@ use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 
 class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCalculoRepository
 {
-    use MapucheConnectionTrait;
+    use DynamicConnectionTrait;
 
     public function __construct(
         private readonly AfipMapucheSicossCalculo $model
     ) {}
+
+    /**
+     * Obtiene la conexión actual para las operaciones del repositorio
+     */
+    private function getConnection()
+    {
+        return $this->getConnectionFromTrait();
+    }
 
     public function find(string $cuil): ?AfipMapucheSicossCalculoData
     {
@@ -49,6 +58,6 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
 
     public function truncate(): void
     {
-        AfipMapucheSicossCalculo::truncate();
+        $this->getConnection()->table($this->model->getTable())->truncate();
     }
 }

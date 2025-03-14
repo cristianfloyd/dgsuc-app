@@ -6,12 +6,13 @@ namespace App\Services;
 
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
+use App\Traits\DynamicConnectionTrait;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\AfipMapucheSicossCalculo;
 
 class AfipMapucheSicossCalculoUpdateService
 {
-    use MapucheConnectionTrait;
+    use DynamicConnectionTrait;
 
 
     public function updateUacadAndCaracter(): array

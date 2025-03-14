@@ -8,6 +8,8 @@ use Filament\Widgets;
 use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Afip\Pages\SicossUpdates;
 use Filament\Http\Middleware\Authenticate;
@@ -23,8 +25,6 @@ use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Filament\View\PanelsRenderHook;
-use Illuminate\Support\Facades\Blade;
 
 class AfipPanelProvider extends PanelProvider
 {

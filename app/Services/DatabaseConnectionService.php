@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Session;
 
 class DatabaseConnectionService
 {
     public const SESSION_KEY = 'selected_db_connection';
-    public const DEFAULT_CONNECTION = 'pgsql-mapuche';
+    public const DEFAULT_CONNECTION = 'pgsql-prod';
 
     /**
      * Obtener todas las conexiones disponibles para el selector
@@ -17,7 +17,7 @@ class DatabaseConnectionService
     public function getAvailableConnections(): array
     {
         $connections = Config::get('database.connections');
-        
+
         // Filtrar solo las conexiones que comienzan con pgsql-
         return collect($connections)
             ->filter(fn ($config, $name) => str_starts_with($name, 'pgsql-'))
@@ -33,22 +33,22 @@ class DatabaseConnectionService
     {
         // Primero intentar obtener de la sesión
         $connection = Session::get(self::SESSION_KEY);
-        
+
         // Si no está en la sesión, intentar obtener de la cookie
         if (!$connection && Cookie::has(self::SESSION_KEY)) {
             $connection = Cookie::get(self::SESSION_KEY);
-            
+
             // Si se encontró en la cookie, guardarla en la sesión para futuras solicitudes
             if ($connection) {
                 Session::put(self::SESSION_KEY, $connection);
             }
         }
-        
+
         // Si no se encontró en ningún lado o no es un string válido, usar el valor predeterminado
         if (!is_string($connection) || !array_key_exists($connection, $this->getAvailableConnections())) {
             return self::DEFAULT_CONNECTION;
         }
-        
+
         return $connection;
     }
 
@@ -59,7 +59,7 @@ class DatabaseConnectionService
     {
         if (array_key_exists($connection, $this->getAvailableConnections())) {
             Session::put(self::SESSION_KEY, $connection);
-            
+
             // La cookie se establece en el componente Livewire para asegurar
             // que se envíe correctamente al navegador
         }
@@ -73,4 +73,14 @@ class DatabaseConnectionService
         $name = str_replace('pgsql-', '', $name);
         return ucfirst($name);
     }
-} 
+
+    /**
+     * Obtiene el nombre de la conexión actualmente en uso
+     *
+     * @return string|null
+     */
+    public function getCurrentConnectionName(): ?string
+    {
+        return Session::get(self::SESSION_KEY) ?? self::DEFAULT_CONNECTION;
+    }
+}

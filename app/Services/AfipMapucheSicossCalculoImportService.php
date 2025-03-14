@@ -6,12 +6,12 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
+use App\Traits\DynamicConnectionTrait;
 use App\Models\AfipMapucheSicossCalculo;
 
 class AfipMapucheSicossCalculoImportService
 {
-    use MapucheConnectionTrait;
+    use DynamicConnectionTrait;
 
     public function __construct(private readonly ColumnMetadata $columnMetadata)
     {

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Mapuche\MapucheBase;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use App\Data\AfipMapucheSicossCalculoData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
@@ -29,9 +30,10 @@ trait DynamicConnectionTrait
 
         // Verificar si la conexión seleccionada existe y es válida
         if ($selectedConnection && Config::has("database.connections.{$selectedConnection}")) {
+            Log::debug("conexion seleccionada:",[""=> $selectedConnection]);
             return $selectedConnection;
         }
-
+        Log::debug("conexion fallback predeterminada:",[""=> DatabaseConnectionService::DEFAULT_CONNECTION]);
         // Si no hay conexión seleccionada o no es válida, usar la conexión predeterminada
         return DatabaseConnectionService::DEFAULT_CONNECTION;
     }

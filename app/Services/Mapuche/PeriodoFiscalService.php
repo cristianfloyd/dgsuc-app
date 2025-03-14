@@ -118,7 +118,7 @@ class PeriodoFiscalService
         return $periodoFiscal['month'];
     }
 
-    public function getPeriodoFiscalFromId(int $id = null): array
+    public function getPeriodoFiscalFromId(?int $id = null): array
     {
         if ($id === null) {
             Log::warning('No se proporcionó un ID para obtener el período fiscal');
