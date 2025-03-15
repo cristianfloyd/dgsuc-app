@@ -19,6 +19,7 @@ use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
 use Symfony\Component\HttpFoundation\Response;
+use Filament\Tables\Actions\Action as TableAction;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
 
@@ -170,7 +171,16 @@ class AfipMapucheSicossResource extends Resource
                         ->color('success')
                 ]),
             ])
-            ->defaultPaginationPageOption(5);
+            ->defaultPaginationPageOption(5)
+            ->emptyStateHeading('No se encontraron registros')
+            ->emptyStateDescription('Utiliza el botón importar para cargar datos desde un archivo.')
+            ->emptyStateActions([
+                TableAction::make('importar')
+                    ->label('Importar')
+                    ->url(fn(): string => self::getUrl('import'))
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-up-tray')
+            ]);
     }
 
     public static function getRelations(): array
