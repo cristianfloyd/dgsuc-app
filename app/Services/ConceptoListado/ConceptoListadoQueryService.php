@@ -1,15 +1,33 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ConceptoListado;
 
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use Illuminate\Database\Eloquent\Builder;
 
-class ConceptoListadoService
+/**
+ * Servicio para manejar consultas relacionadas con conceptos de listado.
+ *
+ * Esta clase proporciona métodos para obtener consultas de ConceptoListado,
+ * incluyendo una consulta base y una consulta para obtener un único cargo por legajo.
+ *
+ */
+class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
 {
     use MapucheConnectionTrait;
+
+    // Implementación de los métodos de la interfaz
+    public function getConnectionName(): string
+    {
+        return $this->getConnectionFromTrait()->getName();
+    }
+
+    public function getConnection()
+    {
+        return $this->getConnectionFromTrait();
+    }
 
     public function getBaseQuery(): Builder
     {
@@ -17,13 +35,13 @@ class ConceptoListadoService
     }
 
     /**
-    * Obtiene una consulta de Eloquent para uno o varios conceptos.
-    * Asegura un registro único por legajo considerando su cargo activo.
-    *
-    * @param array|int|null $codn_conce Código(s) del concepto a buscar
-    * @param int|null $nro_liqui Número de liquidación
-    * @return \Illuminate\Database\Eloquent\Builder
-    */
+     * Obtiene una consulta de Eloquent para uno o varios conceptos.
+     * Asegura un registro único por legajo considerando su cargo activo.
+     *
+     * @param array|int|null $codn_conce Código(s) del concepto a buscar
+     * @param int|null $nro_liqui Número de liquidación
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function getQueryForConcepto(array|int|null $codn_conce, ?int $nro_liqui = null): Builder
     {
 
@@ -39,7 +57,7 @@ class ConceptoListadoService
                 'dh03.codc_uacad',
                 'dh03.nro_cargo'
             ])
-            ->join('mapuche.dh03', function($join) {
+            ->join('mapuche.dh03', function ($join) {
                 $join->on('dh21.nro_legaj', '=', 'dh03.nro_legaj')
                     ->where('dh03.chkstopliq', '=', 0);
             })
@@ -49,7 +67,7 @@ class ConceptoListadoService
         // Consulta principal
         $query = ConceptoListado::on($connection)
             ->from('mapuche.dh21')
-            ->joinSub($legajoCargo, 'lc', function($join) {
+            ->joinSub($legajoCargo, 'lc', function ($join) {
                 $join->on('dh21.nro_legaj', '=', 'lc.nro_legaj');
             })
             ->join('mapuche.dh01', 'dh21.nro_legaj', '=', 'dh01.nro_legaj')
@@ -76,11 +94,11 @@ class ConceptoListadoService
             ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui);
 
 
-            if ($codn_conce === null) {
-                $query->limit(100); // Límite razonable por defecto
-            }
+        if ($codn_conce === null) {
+            $query->limit(100); // Límite razonable por defecto
+        }
 
-            return $query->orderBy('lc.codc_uacad')
+        return $query->orderBy('lc.codc_uacad')
             ->orderBy('lc.coddependesemp');
     }
 

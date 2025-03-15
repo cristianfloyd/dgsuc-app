@@ -9,7 +9,7 @@ use App\Exports\ReportExport;
 use App\Services\Dh12Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\ConceptoListadoService;
+use App\Services\ConceptoListadoQueryService;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table\Concerns\HasRecords;

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\ConceptoListadoService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Casts\Attribute;

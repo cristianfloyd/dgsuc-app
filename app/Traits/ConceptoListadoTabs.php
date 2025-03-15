@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Filament\Resources\Components\Tab;
-use App\Services\ConceptoListadoService;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\ConceptosSindicatosService;
 
