@@ -114,7 +114,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB5_HOST', '127.0.0.1'),
             'port' => env('DB5_PORT', '5434'),
-            'database' => env('DB5_DATABASE', 'laravel'),
+            'database' => env('DB5_DATABASE', 'siu_mapuche'),
             'username' => env('DB5_USERNAME', 'postgres'),
             'password' => env('DB5_PASSWORD', '1234'),
             'charset' => 'SQL_ASCII',

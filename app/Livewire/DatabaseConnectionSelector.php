@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
-use App\Services\DatabaseConnectionService;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Livewire\Component;
-use Illuminate\Support\Facades\Cookie;
+use Filament\Forms\Form;
+use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use App\Services\EnhancedDatabaseConnectionService;
 
 class DatabaseConnectionSelector extends Component implements HasForms
 {
@@ -18,11 +18,15 @@ class DatabaseConnectionSelector extends Component implements HasForms
 
     public function mount(): void
     {
-        $service = app(DatabaseConnectionService::class);
-        
+        $service = app(EnhancedDatabaseConnectionService::class);
+
         $currentConnection = $service->getCurrentConnection();
         $this->connection = is_string($currentConnection) ? $currentConnection : null;
-        
+
+        Log::debug("DatabaseConnectionSelector montado", [
+            'connection' => $this->connection
+        ]);
+
         $this->form->fill([
             'connection' => $this->connection,
         ]);
@@ -30,7 +34,7 @@ class DatabaseConnectionSelector extends Component implements HasForms
 
     public function form(Form $form): Form
     {
-        $service = app(DatabaseConnectionService::class);
+        $service = app(EnhancedDatabaseConnectionService::class);
 
         return $form
             ->schema([
@@ -42,7 +46,7 @@ class DatabaseConnectionSelector extends Component implements HasForms
                         $colorClasses = [
                             'pgsql-mapuche' => 'bg-green-500',
                             'pgsql-prod' => 'bg-blue-500',
-                            'pgsql-liquibase' => 'bg-yellow-500',
+                            'pgsql-liqui' => 'bg-yellow-500',
                         ];
                         return [
                             'class' => 'fi-compact ' . ($colorClasses[$state] ?? ''),
@@ -50,24 +54,19 @@ class DatabaseConnectionSelector extends Component implements HasForms
                     })
                     ->afterStateUpdated(function ($state) use ($service) {
                         if (is_string($state)) {
+                            Log::debug("Cambiando conexión", ['nueva_conexion' => $state]);
+
                             $service->setConnection($state);
-                            
-                            // Guardar en cookie para persistencia entre sesiones
-                            Cookie::queue(
-                                DatabaseConnectionService::SESSION_KEY, 
-                                $state, 
-                                60*24*30 // 30 días
-                            );
-                            
+
                             $this->dispatch('connection-changed', [
                                 'message' => 'Conexión cambiada a ' . ($service->getAvailableConnections()[$state] ?? $state)
                             ]);
-                            
+
+                            // Recargar la página para aplicar la nueva conexión
                             $this->redirect(request()->header('Referer'));
                         }
                     }),
             ])
-            // ->statePath('connection')
             ->extraAttributes([
                 'class' => 'fi-compact-form',
             ]);
@@ -78,4 +77,3 @@ class DatabaseConnectionSelector extends Component implements HasForms
         return view('livewire.database-connection-selector');
     }
 }
-

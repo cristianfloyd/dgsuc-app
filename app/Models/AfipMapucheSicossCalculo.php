@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Mapuche\MapucheBase;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
 use App\Data\AfipMapucheSicossCalculoData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -24,9 +26,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $codc_uacad Código UA/CAD
  * @property string $caracter Caracter
  */
-class AfipMapucheSicossCalculo extends MapucheBase
+class AfipMapucheSicossCalculo extends Model
 {
-    use HasFactory;
+    use HasFactory, MapucheConnectionTrait;
 
     /**
      * Schema y tabla

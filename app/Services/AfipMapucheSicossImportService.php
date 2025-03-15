@@ -17,7 +17,7 @@ class AfipMapucheSicossImportService
     private $connection;
     private float $startTime;
     private float $endTime;
-    private const int BATCH_SIZE = 1000;
+    private const BATCH_SIZE = 1000;
     private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 
     public function __construct()
@@ -33,7 +33,7 @@ class AfipMapucheSicossImportService
      * @param callable|null $progressCallback Callback para reportar progreso
      * @return array Estadísticas del proceso
      */
-    public function streamImport(string $filePath, string $periodoFiscal, callable $progressCallback = null): array
+    public function streamImport(string $filePath, string $periodoFiscal, ?callable $progressCallback = null): array
     {
         $this->startTimer();
         $stats = $this->initializeStats();

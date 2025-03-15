@@ -17,7 +17,7 @@ trait SicossConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-prod';
+        return 'pgsql-mapuche';
     }
 
     /**

@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use App\Models\AfipMapucheSicossCalculo;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\Action as ActionsTable;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\EditAfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ListAfipMapucheSicossCalculos;
@@ -114,7 +115,33 @@ class AfipMapucheSicossCalculoResource extends Resource
                 ->tooltip('Acciones')
                 ->size('lg'),
             ])
-            ->defaultPaginationPageOption(5);
+            ->defaultPaginationPageOption(5)
+            ->emptyStateHeading('No se encontraron registros')
+            ->emptyStateDescription('No se encontraron registros en la tabla. Puedes importar nuevos registros o vaciar la tabla.')
+            ->emptyStateActions([
+                ActionsTable::make('import')
+                    ->label('Importar SICOSS Calculos')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('primary')
+                    ->url(fn (): string => static::getUrl('import'))
+                    ->button(),
+                ActionsTable::make('truncateTable')
+                    ->label('Vaciar Tabla')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Vaciar tabla?')
+                    ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
+                    ->modalSubmitActionLabel('Sí, vaciar tabla')
+                    ->action(function() {
+                        app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                        Notification::make()
+                            ->success()
+                            ->title('Tabla vaciada')
+                            ->body('Se han eliminado todos los registros correctamente')
+                            ->send();
+                    }),
+            ]);
     }
 
     public static function form(Forms\Form $form): Forms\Form

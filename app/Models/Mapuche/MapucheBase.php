@@ -3,27 +3,27 @@
 namespace App\Models\Mapuche;
 
 use App\Traits\DynamicConnectionTrait;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Session;
-use App\Services\DatabaseConnectionService;
+use App\Services\EnhancedDatabaseConnectionService;
 
 abstract class MapucheBase extends Model
 {
-    use DynamicConnectionTrait;
+    use MapucheConnectionTrait;
 
     /**
-     * Override del getConnectionName para permitir fallback a conexión fija
+     * Override del getConnectionName para permitir fallback a conexión dinámica
      */
     public function getConnectionName(): string
     {
         // Si estamos en el contexto del panel AFIP, usar conexión dinámica
         if ($this->shouldUseDynamicConnection()) {
-            // Obtener directamente de la sesión para evitar el bucle
-            return Session::get(DatabaseConnectionService::SESSION_KEY) ?? 'pgsql-prod';
+            // Usar el servicio mejorado para obtener la conexión
+            return app(EnhancedDatabaseConnectionService::class)->getCurrentConnection();
         }
 
         // Fallback a la conexión fija de Mapuche
-        return 'pgsql-prod';
+        return EnhancedDatabaseConnectionService::DEFAULT_CONNECTION;
     }
 
     /**
@@ -31,10 +31,9 @@ abstract class MapucheBase extends Model
      */
     protected function shouldUseDynamicConnection(): bool
     {
-        // Verificar si estamos en el panel de AFIP
+        // Verificar si estamos en el panel de AFIP o cualquier otro contexto que requiera conexión dinámica
         return str_contains(request()->path(), 'afip-panel') ||
-            session()->has('using_dynamic_connection');
+            session()->has('using_dynamic_connection') ||
+            config('app.use_dynamic_connection', false);
     }
-
-    // Propiedades y métodos comunes para todos los modelos Mapuche
 }

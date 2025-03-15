@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 use App\Services\AfipMapucheSicossCalculoTableService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;
 use App\Services\TableManager\TableInitializationManager;
+use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 

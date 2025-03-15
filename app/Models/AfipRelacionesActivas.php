@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 
 class AfipRelacionesActivas extends Model
 {
@@ -52,6 +53,35 @@ class AfipRelacionesActivas extends Model
 
     protected $appends = ['nro_cuil'];
 
+    protected static function getConnectionSafely(): string
+    {
+        try {
+            // Crear una instancia temporal para acceder a los métodos del trait
+            $instance = new self();
+            $connection = $instance->getConnectionName();
+
+            // Verificar que la conexión existe
+            if (!Config::has("database.connections.{$connection}")) {
+                Log::warning("La conexión '{$connection}' no existe en la configuración, usando predeterminada");
+                return 'pgsql-mapuche';
+            }
+
+            return $connection;
+        } catch (\Exception $e) {
+            Log::error("Error al obtener la conexión", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Retornar una conexión predeterminada segura
+            return 'pgsql-mapuche';
+        }
+    }
+
+    protected static function getConexionNombre(): string
+    {
+        return self::getConnectionSafely();
+    }
 
     /**
      * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
@@ -65,7 +95,7 @@ class AfipRelacionesActivas extends Model
 
 
         // Nombre de la conexión de base de datos a utilizar
-        $conexion = 'pgsql-prod';
+        $conexion = self::getConexionNombre();
 
         // Iniciar la transacion en la conexion especificada
         DB::connection($conexion)->beginTransaction();

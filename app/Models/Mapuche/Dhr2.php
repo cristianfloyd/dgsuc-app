@@ -20,10 +20,7 @@ class Dhr2 extends Model
 {
     use HasFactory, MapucheConnectionTrait;
 
-    /**
-     * Conexión y configuración de tabla
-     */
-    protected $connection = $this->getConnectionName();
+    
     protected $table = 'mapuche.dhr2';
     public $timestamps = false;
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];

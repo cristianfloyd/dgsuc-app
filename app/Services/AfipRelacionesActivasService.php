@@ -19,7 +19,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
      */
     public function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
     {
-        $conexion = 'pgsql-prod';
+        $conexion = $this->model->getConnectionName();
 
         DB::connection($conexion)->beginTransaction();
 

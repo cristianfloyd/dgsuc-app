@@ -21,6 +21,12 @@ class TablaTempCuils extends Model
     ];
     public $timestamps = false;
 
+    protected static function getConnectionNombre(): string
+    {
+        $instance = new self;
+        return $instance->getConnectionName();
+    }
+
     /** Verifica si la tabla suc.tabla_temp_cuils existe en la base de datos.
     *
     * Devuelve verdadero si la tabla existe, falso en caso contrario.
@@ -65,7 +71,7 @@ class TablaTempCuils extends Model
     public static function insertTable(array $cuils): bool
     {
         try {
-            DB::connection('pgsql-prod')->transaction(function () use ($cuils) {
+            DB::connection(self::getConnectionNombre())->transaction(function () use ($cuils) {
                 $data = [];
                 foreach ($cuils as $cuil) {
                     $data[] = ['cuil' => $cuil];

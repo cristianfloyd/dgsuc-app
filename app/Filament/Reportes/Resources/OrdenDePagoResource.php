@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\RepOrdenPagoModel;
+use Filament\Tables\Actions\Action as ActionTable;
 use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages\ListReportes;
 
@@ -55,22 +56,23 @@ class OrdenDePagoResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-
-            ])
+            ->actions([])
             ->bulkActions([
                 //
             ])
             ->emptyStateIcon('heroicon-o-document-text')
             ->emptyStateHeading('No hay reportes generados')
-            ->emptyStateDescription('Para generar un reporte de órdenes de pago sigue estos pasos:
-                1. Haz clic en "Generar Reporte"
-                2. Selecciona las liquidaciones que deseas incluir
-                3. Presiona "Generar OP" para crear el reporte')
+            ->emptyStateDescription(new \Illuminate\Support\HtmlString(
+                view('filament.reportes.orden-pago-empty-state')->render()
+            ))
             ->emptyStateActions([
-                //
+                ActionTable::make('generarReporte')
+                ->label('Generar Reporte')
+                ->icon('heroicon-o-document-currency-dollar')
+                ->url('/reportes/orden-de-pagos/crear')
+                ->color('success'),
             ])
-            ;
+        ;
     }
 
     public static function getPages(): array

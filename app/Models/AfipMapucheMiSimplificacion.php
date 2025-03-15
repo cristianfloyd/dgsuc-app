@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PuestoDesempenado;
+use App\Traits\HasUnidadAcademica;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPuestoDesempenado;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use App\Traits\HasUnidadAcademica;
 
 class AfipMapucheMiSimplificacion extends Model
 {
@@ -60,7 +60,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected $appends = ['puesto_descripcion', 'puesto_escalafon'];
 
 
-    
+
 
     protected static function boot()
     {
@@ -236,8 +236,8 @@ class AfipMapucheMiSimplificacion extends Model
      */
     public static function truncate()
     {
-
-        DB::connection('pgsql-prod')->statement('TRUNCATE TABLE suc.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
+        $instance = new static();
+        DB::connection($instance->getConnectionName())->statement('TRUNCATE TABLE ' . $instance->getSchemaName() . '.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
     }
 
     /**
