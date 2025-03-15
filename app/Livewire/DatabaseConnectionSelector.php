@@ -23,9 +23,9 @@ class DatabaseConnectionSelector extends Component implements HasForms
         $currentConnection = $service->getCurrentConnection();
         $this->connection = is_string($currentConnection) ? $currentConnection : null;
 
-        Log::debug("DatabaseConnectionSelector montado", [
-            'connection' => $this->connection
-        ]);
+        // Log::debug("DatabaseConnectionSelector montado", [
+        //     'connection' => $this->connection
+        // ]);
 
         $this->form->fill([
             'connection' => $this->connection,

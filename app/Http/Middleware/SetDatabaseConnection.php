@@ -36,7 +36,7 @@ class SetDatabaseConnection
 
                 // Usar una conexión predeterminada segura
                 $connection = EnhancedDatabaseConnectionService::DEFAULT_CONNECTION;
-                Log::info("Usando conexión predeterminada: {$connection}");
+                Log::debug("(middleware) Usando conexión predeterminada: {$connection}");
             }
 
             // Configurar la conexión secundaria según la selección del usuario

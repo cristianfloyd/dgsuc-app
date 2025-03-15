@@ -11,7 +11,7 @@ abstract class BaseListRecords extends ListRecords
     public function booted(): void
     {
         $this->initializeTableIfNeeded();
-        Log::info("BaseListRecords::booted desde {$this->getTableServiceClass()}");
+        // Log::info("BaseListRecords::booted desde {$this->getTableServiceClass()}");
     }
 
     protected function initializeTableIfNeeded(): void

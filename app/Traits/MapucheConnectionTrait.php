@@ -36,11 +36,11 @@ trait MapucheConnectionTrait
             : 'pgsql-mapuche';
 
         // Registramos información de depuración
-        Log::debug('MapucheConnectionTrait::getConnectionName', [
-            'conexión_en_sesión' => $selectedConnection,
-            'existe_secondary' => $hasSecondaryConnection ? 'sí' : 'no',
-            'conexión_predeterminada' => $defaultConnection,
-        ]);
+        // Log::debug('MapucheConnectionTrait::getConnectionName', [
+        //     'conexión_en_sesión' => $selectedConnection,
+        //     'existe_secondary' => $hasSecondaryConnection ? 'sí' : 'no',
+        //     'conexión_predeterminada' => $defaultConnection,
+        // ]);
 
         // Estrategia de selección de conexión:
         // 1. Si hay una conexión en la sesión y existe en la configuración, usamos esa
@@ -51,11 +51,11 @@ trait MapucheConnectionTrait
 
             if (empty($dbName)) {
                 Log::warning("La conexión '{$selectedConnection}' no tiene una base de datos configurada, usando predeterminada");
-                Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
+                // Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
                 return $defaultConnection;
             }
 
-            Log::debug("Usando conexión de sesión:", ["" => $selectedConnection]);
+            // Log::debug("Usando conexión de sesión:", ["" => $selectedConnection]);
             return $selectedConnection;
         }
 
@@ -67,7 +67,7 @@ trait MapucheConnectionTrait
 
             if (empty($dbName)) {
                 Log::warning("La conexión 'secondary' no tiene una base de datos configurada, usando predeterminada");
-                Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
+                // Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
                 return $defaultConnection;
             }
 
@@ -76,7 +76,7 @@ trait MapucheConnectionTrait
         }
 
         // 3. Como último recurso, usamos la conexión predeterminada
-        Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
+        // Log::debug("Usando conexión predeterminada:", ["" => $defaultConnection]);
         return $defaultConnection;
     }
 
