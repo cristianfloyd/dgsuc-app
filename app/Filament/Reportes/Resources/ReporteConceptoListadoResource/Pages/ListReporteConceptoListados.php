@@ -6,50 +6,52 @@ use Filament\Actions;
 use App\Models\Mapuche\Dh22;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ReportExport;
-use App\Services\Dh12Service;
 use Illuminate\Support\Facades\DB;
+use App\Traits\ConceptoListadoTabs;
 use Illuminate\Support\Facades\Log;
-use App\Services\ConceptoListadoQueryService;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Table\Concerns\HasRecords;
 use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
-use App\Filament\Resources\ReporteConceptoListadoResource;
+use App\Filament\Reportes\Resources\ReporteConceptoListadoResource;
 
 class ListReporteConceptoListados extends ListRecords
 {
+    use ConceptoListadoTabs;
     protected static string $resource = ReporteConceptoListadoResource::class;
 
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('download')->label('Excel')
+            Actions\Action::make('download')
+                ->label('Excel')
                 ->icon('heroicon-o-document-arrow-down')
                 ->button()
-                ->action(function ($data) {
+                ->action(function ($livewire) {
                     //implementar un servicio que pase la query a excel a traves de laravel-excel
                     $query = $this->getFilteredSortedTableQuery();
-                    // dd($query->toSql());
+                    // $query2 = $livewire->getTableQuery();
+
+
                     // comprobar que el query no este vacio
                     if ($query->count() == 0) {
-                        return redirect()->route('filament.resources.reporte-concepto-listado.index')
+                        return redirect()->route('filament.reportes.resources.reporte-concepto-listado.index')
                             ->with('error', 'No se encontraron registros con los filtros seleccionados.');
                     }
                     $query = $query->select([
+                        'nro_liqui',
                         'desc_liqui',
-                        'desc_appat',
-                        'desc_nombr',
+                        'apellido',
+                        'nombre',
+                        'cuil',
                         'nro_legaj',
-                        'secuencia',
+                        'nro_cargo',
                         'codc_uacad',
                         'codn_conce',
                         'impp_conce'
                     ])
-                    // ->orderBy('codc_uacad')
-                    // ->orderBy('nro_legaj')
                     ;
-                    // dd($query->toSql());
+
                     return ExcelFacade::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');
                 })
                 ->requiresConfirmation()

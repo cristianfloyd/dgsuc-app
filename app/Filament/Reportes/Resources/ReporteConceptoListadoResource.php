@@ -3,7 +3,6 @@
 namespace App\Filament\Reportes\Resources;
 
 use Filament\Tables\Table;
-use App\Models\Mapuche\Dh22;
 use App\Services\Dh12Service;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
@@ -18,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\ConceptoListadoResourceService;
 use App\Services\ConceptoListado\ConceptoListadoSyncService;
-use App\Filament\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
+use App\Filament\Reportes\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 
 class ReporteConceptoListadoResource extends Resource
 {
