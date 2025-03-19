@@ -39,6 +39,7 @@ class EmbargoReportModel extends Model
         'codc_uacad',
         'session_id',
         'nro_liqui',
+        '861'
     ];
 
     // Definimos los tipos de datos para cada columna
@@ -103,6 +104,7 @@ class EmbargoReportModel extends Model
                     codc_uacad VARCHAR(50),
                     session_id VARCHAR(255),
                     nro_liqui INTEGER,
+                    "861" DECIMAL(15,2),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ');
@@ -174,7 +176,8 @@ class EmbargoReportModel extends Model
                     'caratula' => $item->caratula,
                     'codc_uacad' => $item->codc_uacad,
                     'session_id' => $sessionId,
-                    'nro_liqui' => $nro_liqui
+                    'nro_liqui' => $nro_liqui,
+                    '861' => $item->{'861'}
                 ];
             })->toArray();
 

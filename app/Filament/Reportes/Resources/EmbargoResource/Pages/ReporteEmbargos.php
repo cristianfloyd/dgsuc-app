@@ -106,7 +106,8 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                         'nro_embargo',
                         'codn_conce',
                         'importe_descontado',
-                        'nov2_conce'
+                        'nov2_conce',
+                        '861'
                     ])
                     ->where('session_id', session()->getId());
 

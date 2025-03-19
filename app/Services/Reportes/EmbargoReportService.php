@@ -18,7 +18,7 @@ class EmbargoReportService
     public function generateReport(?int $nro_liqui): Collection
     {
         $connection = DB::connection($this->getConnectionName());
-        Log::info("Generating report for nro_liqui: $nro_liqui");
+        Log::info("Generando reporte de embargos para la liquidación: $nro_liqui");
         try {
             // Aseguramos que la tabla existe
             EmbargoReportModel::createTableIfNotExists();
@@ -76,6 +76,21 @@ class EmbargoReportService
                 $item->nom_demandado = EncodingService::toUtf8($item->nom_demandado);
                 return $item;
             });
+
+            // Obtener los importes del concepto 861 para los legajos
+            $importes861 = DB::connection($this->getConnectionName())
+                ->table('mapuche.dh21')
+                ->whereIn('nro_legaj', $embargos->pluck('nro_legaj'))
+                ->where('codn_conce', 861)
+                ->where('nro_liqui', $nro_liqui)
+                ->pluck('impp_conce', 'nro_legaj');
+
+            // Agregar la columna '861' al resultado
+            $embargos = $embargos->map(function ($item) use ($importes861) {
+                $item->{'861'} = $importes861[$item->nro_legaj] ?? 0;
+                return $item;
+            });
+
 
             // convertir a eloquent collection
             return new Collection($embargos);

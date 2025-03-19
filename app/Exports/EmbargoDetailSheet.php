@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Exports\EmbargoSummarySheet;
+use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -18,7 +19,7 @@ use Maatwebsite\Excel\Concerns\WithBackgroundColor;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnFormatting, WithStyles, WithHeadings, WithCustomStartCell,  ShouldAutoSize, WithBackgroundColor, WithTitle
+class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, WithMapping, WithColumnFormatting, WithHeadings, WithCustomStartCell,  ShouldAutoSize, WithBackgroundColor, WithTitle
 {
     public function __construct(protected Builder $query)
     {}
@@ -42,6 +43,7 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
             'Concepto',
             'Importe',
             'Novedad 2',
+            '861'
         ];
     }
 
@@ -56,7 +58,8 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
             'F' => '@',
             'G' => NumberFormat::FORMAT_GENERAL, // nro_embargo
             'H' => NumberFormat::FORMAT_GENERAL, // Concepto
-            'I' => '#,##0.00'  // Importe con 2 decimales
+            'I' => '#,##0.00',  // Importe con 2 decimales
+            'K'  => '#,##0.00',  // Importe con 2 decimales
         ];
     }
 
@@ -71,7 +74,8 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
             $row->nro_embargo,
             $row->codn_conce,
             $row->importe_descontado,
-            $row->nov2_conce
+            $row->nov2_conce,
+            $row->{'861'}
         ];
     }
 
@@ -87,21 +91,10 @@ class EmbargoDetailSheet implements FromCollection, WithMapping, WithColumnForma
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->mergeCells('A1:J1');
-        $sheet->setCellValue('A1', 'REPORTE DE EMBARGOS - ' . now()->format('d/m/Y'));
+        parent::styles($sheet);
 
-        // Aplicar filtros a los encabezados
-        $lastColumn = 'O';
-        $lastRow = $sheet->getHighestRow();
-        $sheet->setAutoFilter("B2:{$lastColumn}{$lastRow}");
-
-        $sheet->getStyle('A1')->getFont()->setSize(16);
-        $sheet->getStyle('E')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        return [
-            1 => ['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => 'center']],
-            2 => ['font' => ['bold' => true], 'background' => ['argb' => 'FFE5E5E5']],
-        ];
+        // Estilos específicos para esta hoja si son necesarios
+        return $this;
     }
 
     public function backgroundColor()
