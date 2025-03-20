@@ -72,6 +72,21 @@ class PeriodoFiscalService
     }
 
     /**
+     * Obtiene el periodo fiscal de una liquidación específica.
+     *
+     * @param int $nroLiqui Número de liquidación para obtener su periodo fiscal.
+     * @return array Un array con el año y el mes del periodo fiscal en el formato ['year' => 'YYYY', 'month' => 'MM'].
+     */
+    public function getPeriodoFiscalFromLiqui(int $nroLiqui): array
+    {
+        $liquidacion = Dh22::query()->where('nro_liqui', $nroLiqui)->first();
+        return [
+            'year' => $liquidacion->per_liano,
+            'month' => $liquidacion->per_limes,
+        ];
+    }
+
+    /**
      * Obtiene el periodo fiscal de la base de datos.
      *
      * @return array Un array con el año y el mes del periodo fiscal en el formato ['year' => 'YYYY', 'month' => 'MM'].

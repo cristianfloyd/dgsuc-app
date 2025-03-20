@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
+use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -14,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting
+class EmbargoUacadSummary extends BaseExcelSheet implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
 
     public function __construct(protected Builder $query)
@@ -55,12 +56,11 @@ class EmbargoUacadSummary implements FromCollection, WithHeadings, WithTitle, Wi
 
     public function styles(Worksheet $sheet)
     {
+        parent::styles($sheet);
+
         $sheet->getStyle('A')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-
-        return [
-            1 => ['font' => ['bold' => true], 'background' => ['argb' => 'FFE5E5E5']],
-        ];
+        return $this;
     }
 }

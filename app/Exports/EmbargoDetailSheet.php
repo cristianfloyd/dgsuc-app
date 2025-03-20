@@ -19,7 +19,7 @@ use Maatwebsite\Excel\Concerns\WithBackgroundColor;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, WithMapping, WithColumnFormatting, WithHeadings, WithCustomStartCell,  ShouldAutoSize, WithBackgroundColor, WithTitle
+class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, WithMapping, WithColumnFormatting, WithHeadings, ShouldAutoSize, WithBackgroundColor, WithTitle
 {
     public function __construct(protected Builder $query)
     {}
@@ -84,10 +84,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, WithM
         return 'Reporte de Embargos';
     }
 
-    public function startCell(): string
-    {
-        return 'B2';
-    }
+
 
     public function styles(Worksheet $sheet)
     {

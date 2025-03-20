@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Collection;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class EmbargoReportModel extends Model
 {
@@ -163,6 +164,8 @@ class EmbargoReportModel extends Model
             // Limpiamos los datos previos de la sesión actual
             self::clearSessionData();
 
+            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromLiqui($nro_liqui);
+
             // Preparamos los datos para inserción
             $dataToInsert = $data->map(function ($item) use ($sessionId, $nro_liqui) {
                 return [
@@ -180,6 +183,8 @@ class EmbargoReportModel extends Model
                     '861' => $item->{'861'}
                 ];
             })->toArray();
+
+
 
             // Insertamos los datos en la tabla
             self::insert($dataToInsert);
