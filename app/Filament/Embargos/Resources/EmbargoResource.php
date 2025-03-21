@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use App\Tables\EmbargoTable;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
 use App\Models\EmbargoProcesoResult;
@@ -13,8 +14,8 @@ use App\Services\EmbargoTableService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use App\Traits\DisplayResourceProperties;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Filament\Embargos\Resources\EmbargoResource\Pages;
-
 
 class EmbargoResource extends Resource
 {
@@ -31,13 +32,18 @@ class EmbargoResource extends Resource
 
     // Propiedades públicas del recurso
     public array $periodoFiscal = [];
+    protected ?PeriodoFiscalService $periodoFiscalService = null;
     public int $nroLiquiProxima = 9;
     public array $nroComplementarias = [];
     public int $nroLiquiDefinitiva = 1;
     public bool $insertIntoDh25 = false;
     protected EmbargoTableService $tableService;
 
-
+    public function __construct()
+    {
+        // Inicializar el servicio de periodo fiscal en el constructor
+        $this->periodoFiscalService = app(PeriodoFiscalService::class);
+    }
 
     public function boot(EmbargoTableService $tableService): void
     {
@@ -45,15 +51,13 @@ class EmbargoResource extends Resource
         $this->ensureTableExists();
     }
 
-    public function mount(EmbargoTable $embargoTable): void
+    public function mount(EmbargoTable $embargoTable,PeriodoFiscalService $periodoFiscalService): void
     {
         $this->embargoTable = $embargoTable;
         $this->nroLiquiProxima = 4; // Lógica para determinar este valor
         $this->nroComplementarias = []; // Lógica para determinar este array
         $this->nroLiquiDefinitiva = 0; // Lógica para determinar este valor
         $this->insertIntoDh25 = false; // Lógica para determinar este booleano
-
-        // Usar estas variables para actualizar los datos
     }
 
 
@@ -90,26 +94,58 @@ class EmbargoResource extends Resource
 
     public static function actualizarDatos(array $data = []): void
     {
-
-
         $instance = new static();
         $instance->setPropertyValues($data);
-
 
         // Actualizamos las propiedades del recurso
         $instance->nroLiquiProxima = $data['nroLiquiProxima'] ?? 0;
         $instance->nroComplementarias = $data['nroComplementarias'] ?? [];
         $instance->nroLiquiDefinitiva = $data['nroLiquiDefinitiva'] ?? 0;
         $instance->insertIntoDh25 = $data['insertIntoDh25'] ?? false;
+        $instance->periodoFiscal = $data['periodoFiscal'] ?? [];
 
+        // Obtener el periodo fiscal del recurso con validación adicional
+        $periodoFiscal = 0;
+        if (isset($instance->periodoFiscal) && isset($instance->periodoFiscal['year']) && isset($instance->periodoFiscal['month'])) {
+            $year = $instance->periodoFiscal['year'];
+            $month = str_pad($instance->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
+            $periodoFiscal = (int)"{$year}{$month}";
+        } else {
+            // Obtener el período fiscal del servicio como fallback
+            $periodoFiscalData = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $year = $periodoFiscalData['year'] ?? date('Y');
+            $month = $periodoFiscalData['month'] ?? date('m');
+            $periodoFiscal = (int)("{$year}" . str_pad($month, 2, '0', STR_PAD_LEFT));
+            Log::warning('Se utilizará el período fiscal del servicio como valor predeterminado', ['periodoFiscal' => $periodoFiscal]);
+        }
 
-        log::debug('Datos actualizados correctamente', $data);
+        try {
+            // Ejecutar el proceso de embargo a través del modelo
+            $results = EmbargoProcesoResult::ejecutarProcesoEmbargo(
+                $instance->nroComplementarias,
+                $instance->nroLiquiDefinitiva,
+                $instance->nroLiquiProxima,
+                $instance->insertIntoDh25,
+                $periodoFiscal
+            );
 
-        // Opcional: Mostrar un mensaje de éxito
-        Notification::make()
-            ->title('Datos actualizados correctamente')
-            ->success()
-            ->send();
+            // Mostrar mensaje de éxito con detalles
+            Notification::make()
+                ->title('Proceso de embargos completado')
+                ->success()
+                ->body('Se procesaron ' . count($results) . ' registros de embargos')
+                ->send();
+
+            // Remover el dd para producción
+            // dd($results);
+        } catch (\Exception $e) {
+            // Notificar error
+            Notification::make()
+                ->title('Error al procesar embargos')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+        }
     }
 
     public static function getPages(): array
@@ -173,11 +209,17 @@ class EmbargoResource extends Resource
      */
     protected function getDefaultProperties(): array
     {
+        // Asegurarse de que periodoFiscalService esté disponible
+        if ($this->periodoFiscalService === null) {
+            $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        }
+
         return [
             'nroLiquiProxima' => $this->nroLiquiProxima,
             'nroComplementarias' => $this->nroComplementarias,
             'nroLiquiDefinitiva' => $this->nroLiquiDefinitiva,
             'insertIntoDh25' => $this->insertIntoDh25,
+            'periodoFiscal' => $this->periodoFiscalService->getPeriodoFiscalFromDatabase()
         ];
     }
 }

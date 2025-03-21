@@ -2,6 +2,7 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
+use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Livewire\Attributes\On;
 use App\Models\Mapuche\Dh22;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use App\Traits\DisplayResourceProperties;
+use App\Services\Mapuche\PeriodoFiscalService;
 use Livewire\Features\SupportRedirects\Redirector;
 use App\Filament\Embargos\Resources\EmbargoResource;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
@@ -55,39 +57,36 @@ class ConfigureEmbargoParameters extends Page implements HasForms
             }
         }
         Log::info('ConfigureEmbargoParameters booted', $this->data);
-        dump($this->periodoFiscal);
     }
 
     public function form(Form $form): Form
     {
+        $periodoFiscalActual = $this->periodoFiscal['periodoFiscal'] ?? null;
+
         return $form
             ->schema(static::addPropertiesToFormSchema([
                 Select::make('nroLiquiDefinitiva')
                     ->label('Liquidación Definitiva')
                     ->options(
-                        Dh22::getLiquidacionesForWidget()
-                            ->when($this->periodoFiscal, function ($query) {
-                                return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                                    $this->periodoFiscal['periodoFiscal']['year'] . str_pad($this->periodoFiscal['periodoFiscal']['month'], 2, '0', STR_PAD_LEFT)
-                                ]);
-                            })
-                            ->pluck('desc_liqui', 'nro_liqui')
+                        Dh22::getLiquidacionesByPeriodoFiscal($periodoFiscalActual)
                     )
+                    ->live()
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        $set('nroLiquiProxima', $state);
+                    })
                     ->required(),
-                TextInput::make('nroLiquiProxima')
+                Select::make('nroLiquiProxima')
                     ->required()
-                    ->numeric(),
+                    ->options(
+                        Dh22::getLiquidacionesByPeriodoFiscal($periodoFiscalActual)
+                    ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')
                     ->multiple()
                     ->options(
                         Dh22::getLiquidacionesForWidget()
-                            ->when($this->periodoFiscal, function ($query) {
-                                return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                                    $this->periodoFiscal['periodoFiscal']['year'] . str_pad($this->periodoFiscal['periodoFiscal']['month'], 2, '0', STR_PAD_LEFT)
-                                ]);
-                            })
-                            ->pluck('desc_liqui', 'nro_liqui')
+                            ->formateadoParaSelect()
+                            ->pluck('descripcion_completa', 'nro_liqui')
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH25'),
@@ -100,6 +99,29 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     public function submit(): RedirectResponse|Redirector
     {
         $data = $this->form->getState();
+
+        // Agregar el periodo fiscal a los datos
+        if (isset($this->periodoFiscal) && isset($this->periodoFiscal['periodoFiscal'])) {
+            $data['periodoFiscal'] = $this->periodoFiscal['periodoFiscal'];
+
+            // Registrar para depuración
+            Log::info('Enviando datos con periodo fiscal', [
+                'data' => $data,
+                'periodoFiscal' => $this->periodoFiscal['periodoFiscal']
+            ]);
+        } else {
+            Log::warning('No se encontró periodo fiscal para agregar a los datos, obteniendo de la sesion');
+            // Obtener el periodo fiscal de la sesión
+            $periodoFiscalSesion = app( PeriodoFiscalService::class)->getPeriodoFiscal();
+            // $periodoFiscalSesion = session('periodo_fiscal');
+            Log::debug('Período fiscal obtenido de la sesión: ' , $periodoFiscalSesion);
+
+            if ($periodoFiscalSesion) {
+                $data['periodoFiscal'] = $periodoFiscalSesion;
+            } else {
+                Log::warning('No se encontró periodo fiscal en la sesión');
+            }
+        }
 
         // Lógica para guardar los parámetros y actualizar los datos
         EmbargoResource::actualizarDatos($data);
@@ -135,7 +157,6 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         $this->periodoFiscal = [
             'periodoFiscal' => $periodoFiscal,
         ];
-        // dd($this->periodoFiscal);
         $updatedProperties = array_merge($currentProperties, $this->periodoFiscal);
         $instance->setPropertyValues($updatedProperties);
         $this->dispatch('propertiesUpdated', $updatedProperties);

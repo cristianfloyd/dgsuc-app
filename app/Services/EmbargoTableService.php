@@ -52,12 +52,17 @@ class EmbargoTableService
             ->create('suc.embargo_proceso_results', function (Blueprint $table) {
                 $table->id();
                 $table->integer('nro_liqui');
+                $table->string('tipo_noved', 1)->nullable();
+                $table->integer('vig_noano')->nullable();
+                $table->integer('vig_nomes')->nullable();
                 $table->integer('tipo_embargo');
                 $table->integer('nro_legaj');
                 $table->decimal('remunerativo', 10, 2);
                 $table->decimal('no_remunerativo', 10, 2);
                 $table->decimal('total', 10, 2);
                 $table->integer('codn_conce');
+                $table->string('tipo_foran', 1)->nullable();
+                $table->string('clas_noved', 1)->nullable();
                 $table->index(['nro_legaj', 'tipo_embargo']);
             });
     }

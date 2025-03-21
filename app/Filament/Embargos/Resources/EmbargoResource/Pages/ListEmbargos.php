@@ -5,6 +5,7 @@ namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
+use App\Services\EmbargoTableService;
 use App\Traits\DisplayResourceProperties;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Embargos\Resources\EmbargoResource;
@@ -17,7 +18,13 @@ class ListEmbargos extends ListRecords
     protected static string $resource = EmbargoResource::class;
     public array $periodoFiscal = [];
     protected EmbargoResource $embargoResource;
+    protected EmbargoTableService $tableService;
 
+    public function boot(EmbargoTableService $tableService): void
+    {
+        $this->tableService = $tableService;
+        $this->tableService->ensureTableExists();
+    }
     public function mount(): void
     {
         $this->embargoResource = new EmbargoResource;

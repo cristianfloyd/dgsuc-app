@@ -3,6 +3,7 @@
 Este documento describe el panel de embargos, sus recursos y funcionalidades principales.
 
 ## Índice
+
 1. [Configuración del Panel](#configuración-del-panel)
 2. [Recursos](#recursos)
    - [Embargo Resource](#embargo-resource)
@@ -18,6 +19,7 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - **Notificaciones**: Habilitadas (Database Notifications)
 
 ### Características Base
+
 - Autenticación requerida
 - Middleware estándar de Laravel
 - Selector de panel en menú de usuario
@@ -28,12 +30,14 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 ### Embargo Resource
 
 #### Navegación
+
 - **Grupo**: Liquidaciones
 - **Etiqueta**: "Embargo"
 - **Slug**: `embargos`
 - **Icono**: `heroicon-o-rectangle-stack`
 
 #### Propiedades Principales
+
 - Período Fiscal
 - Número de Liquidación Próxima
 - Números de Liquidaciones Complementarias
@@ -41,7 +45,9 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Flag de Inserción en DH25
 
 #### Tabla Principal
+
 **Columnas**:
+
 - Número de Liquidación
 - Tipo de Embargo
 - Número de Legajo
@@ -51,12 +57,14 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Código de Concepto
 
 **Acciones**:
+
 - Actualizar Datos
 - Configurar Parámetros
 
 ### Páginas
 
 #### 1. Lista de Embargos (ListEmbargos)
+
 - Vista principal del recurso
 - Widgets en encabezado:
   - Selector de Período Fiscal
@@ -68,6 +76,7 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Layout de 2 columnas para widgets
 
 #### 2. Dashboard de Embargo (DashboardEmbargo)
+
 - Panel de control específico para embargos
 - Gestión de parámetros:
   - Liquidaciones complementarias
@@ -77,7 +86,9 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Funcionalidad de actualización de datos
 
 #### 3. Configuración de Parámetros (ConfigureEmbargoParameters)
+
 **Formulario de Configuración**:
+
 - Selector de Liquidación Definitiva
   - Opciones filtradas por período fiscal
 - Input para Número de Liquidación Próxima
@@ -87,11 +98,13 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Widget de Período Fiscal en encabezado
 
 #### 4. Edición de Embargo (EditEmbargo)
+
 - Funcionalidad estándar de edición
 
 ### Widgets
 
 #### 1. Display Properties Widget
+
 - Vista personalizada para propiedades
 - Actualización en tiempo real
 - Escucha eventos de actualización de propiedades
@@ -100,26 +113,31 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 ## Características Técnicas
 
 ### Traits y Patrones
+
 - Uso del trait `DisplayResourceProperties`
 - Implementación de caché para propiedades
 - Sistema de eventos para sincronización de datos
 
 ### Integración con Base de Datos
+
 - Conexión con tablas de Mapuche
 - Gestión de liquidaciones (DH22)
 - Procesamiento de resultados de embargos
 
 ### Eventos y Comunicación
+
 - Evento `propertiesUpdated` para sincronización
 - Evento `updated-periodo-fiscal` para actualización de período
 - Sistema de notificaciones para feedback al usuario
 
 ### Seguridad
+
 - Middleware de autenticación
 - Protección CSRF
 - Sesiones seguras
 
 ### Personalización
+
 - Formularios responsivos
 - Validación de datos
 - Gestión de estados
@@ -127,8 +145,9 @@ Este documento describe el panel de embargos, sus recursos y funcionalidades pri
 - Interfaz adaptativa
 
 ## Notas de Implementación
+
 - Los cambios en parámetros requieren confirmación
 - La actualización de datos es asíncrona
 - Se mantiene historial de cambios
 - Implementación de caché para optimizar rendimiento
-- Sistema de rollback para cambios críticos 
+- Sistema de rollback para cambios críticos

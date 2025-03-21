@@ -104,6 +104,14 @@ class Dh22 extends Model
 
 
 
+    /**
+     * Prepara una consulta para obtener liquidaciones con información básica para un widget.
+     *
+     * Selecciona el número de liquidación, periodo fiscal formateado y descripción,
+     * ordenados por número de liquidación en orden descendente.
+     *
+     * @return Builder Consulta de liquidaciones preparada para ser ejecutada
+     */
     public static function getLiquidacionesForWidget(): Builder
     {
         return self::query()
@@ -340,5 +348,51 @@ class Dh22 extends Model
     {
         return $query->where('per_liano', $year)
                     ->where('per_limes', $month);
+    }
+
+    /**
+     * Filtra las liquidaciones por un periodo fiscal específico en formato año/mes.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array|null $periodoFiscal Array con ['year' => año, 'month' => mes]
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFilterByPeriodoFiscal($query, ?array $periodoFiscal)
+    {
+        if (!$periodoFiscal) {
+            return $query;
+        }
+
+        return $query->whereRaw(
+            "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
+            [
+                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT)
+            ]
+        );
+    }
+
+    /**
+     * Obtiene las liquidaciones formateadas como "nro_liqui - desc_liqui" para mostrar en selects.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFormateadoParaSelect($query)
+    {
+        return $query->selectRaw("nro_liqui, CONCAT(nro_liqui, ' - ', desc_liqui) as descripcion_completa");
+    }
+
+    /**
+     * Obtiene liquidaciones filtradas por periodo fiscal y formateadas para un select.
+     *
+     * @param array|null $periodoFiscal
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null)
+    {
+        return static::getLiquidacionesForWidget()
+            ->filterByPeriodoFiscal($periodoFiscal)
+            ->formateadoParaSelect()
+            ->pluck('descripcion_completa', 'nro_liqui');
     }
 }

@@ -164,7 +164,6 @@ class EmbargoReportModel extends Model
             // Limpiamos los datos previos de la sesión actual
             self::clearSessionData();
 
-            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromLiqui($nro_liqui);
 
             // Preparamos los datos para inserción
             $dataToInsert = $data->map(function ($item) use ($sessionId, $nro_liqui) {
