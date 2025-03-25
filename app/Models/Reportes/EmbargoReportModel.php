@@ -32,7 +32,10 @@ class EmbargoReportModel extends Model
         'nro_legaj',
         'nombre_completo',
         'codn_conce',
+        'remunerativo',  // columna agregada - suma concepto -51 por cargo
         'importe_descontado',
+        '860', // columna agregada - suma concepto 860 por cargo
+        'nov1_conce', // columna agregada - suma nov1_conce por cargo
         'nov2_conce',
         'nro_embargo',
         'nro_cargo',
@@ -47,11 +50,23 @@ class EmbargoReportModel extends Model
     protected $casts = [
         'id' => 'integer',
         'nro_legaj' => 'integer',
+        'nombre_completo' => 'string',
         'codn_conce' => 'integer',
-        'importe_descontado' => 'float',
+        'remunerativo' => 'decimal:2',
+        'importe_descontado' => 'decimal:2',
+        '860' => 'decimal:2',
+        'nov1_conce' => 'decimal:2',
+        'nov2_conce' => 'decimal:2',
         'nro_embargo' => 'integer',
         'nro_cargo' => 'integer',
+        'caratula' => 'string',
+        'codc_uacad' => 'string',
+        'session_id' => 'string',
+        'nro_liqui' => 'integer',
+        '861' => 'decimal:2',
+        'created_at' => 'datetime'
     ];
+
 
     // ##### mutadores y accesores ##################################
 
@@ -97,7 +112,10 @@ class EmbargoReportModel extends Model
                     nro_legaj INTEGER,
                     nombre_completo VARCHAR(255),
                     codn_conce INTEGER,
+                    remunerativo DECIMAL(15,2),
                     importe_descontado DECIMAL(15,2),
+                    "860" DECIMAL(15,2),
+                    nov1_conce DECIMAL(15,2),
                     nov2_conce DECIMAL(15,2),
                     nro_embargo INTEGER,
                     nro_cargo INTEGER,
@@ -171,7 +189,10 @@ class EmbargoReportModel extends Model
                     'nro_legaj' => $item->nro_legaj,
                     'nombre_completo' => $item->nom_demandado,
                     'codn_conce' => $item->codn_conce,
+                    'remunerativo' => $item->remunerativo,
                     'importe_descontado' => $item->impp_conce,
+                    '860' => $item->{'860'},
+                    'nov1_conce' => $item->nov1_conce,
                     'nov2_conce' => $item->nov2_conce,
                     'nro_embargo' => $item->nro_embargo,
                     'nro_cargo' => $item->nro_cargo,
@@ -228,5 +249,7 @@ class EmbargoReportModel extends Model
             throw $e;
         }
     }
-}
 
+    // ##################################### RELACIONES ##########################################
+
+}

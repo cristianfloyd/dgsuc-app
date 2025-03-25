@@ -104,9 +104,12 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                         'codc_uacad',
                         'caratula',
                         'nro_embargo',
+                        'remunerativo',
                         'codn_conce',
                         'importe_descontado',
+                        'nov1_conce',
                         'nov2_conce',
+                        '860',
                         '861'
                     ])
                     ->where('session_id', session()->getId());
@@ -147,7 +150,11 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                 TextColumn::make('nro_legaj')->label('Legajo')->sortable()->searchable()->numeric(),
                 TextColumn::make('nro_cargo')->label('Cargo')->sortable()->numeric(),
                 TextColumn::make('nombre_completo')->label('Nombre')->searchable(),
-                TextColumn::make('codc_uacad')->label('Unidad Acad'),
+                TextColumn::make('remunerativo')->label('Remunerativo')->sortable()->numeric(),
+                TextColumn::make('860')->label('860')->sortable()->numeric(),
+                TextColumn::make('861')->label('861')->sortable()->numeric(),
+                TextColumn::make('nov1_conce')->label('Nov1')->sortable()->numeric(),
+                TextColumn::make('codc_uacad')->label('Unidad Acad')->sortable(),
                 TextColumn::make('caratula')->label('Caratula')->limit(15)
                     ->tooltip(fn(TextColumn $column): string => $column->getState()),
                 TextColumn::make('nro_embargo')->label('Nro. Embargo')->numeric(),

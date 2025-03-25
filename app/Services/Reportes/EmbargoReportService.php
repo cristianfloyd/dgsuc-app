@@ -59,6 +59,7 @@ class EmbargoReportService
                 'embargos.caratula',
                 'embargos.codn_conce',
                 'd2.impp_conce',
+                'd2.nov1_conce',
                 'd2.nov2_conce',
                 'embargos.nro_embargo',
                 'embargos.detallenovedad',
@@ -85,9 +86,32 @@ class EmbargoReportService
                 ->where('nro_liqui', $nro_liqui)
                 ->pluck('impp_conce', 'nro_legaj');
 
-            // Agregar la columna '861' al resultado
-            $embargos = $embargos->map(function ($item) use ($importes861) {
-                $item->{'861'} = $importes861[$item->nro_legaj] ?? 0;
+            // Obtener los conceptos adicionales en una sola consulta
+            $conceptosAdicionales = DB::connection($this->getConnectionName())
+                ->table('mapuche.dh21')
+                ->select(
+                    'nro_legaj',
+                    'nro_cargo',
+                    DB::raw('SUM(CASE WHEN codn_conce = -51 THEN impp_conce ELSE 0 END) as remunerativo'),
+                    DB::raw('SUM(CASE WHEN codn_conce = 860 THEN impp_conce ELSE 0 END) as concepto_860'),
+                    DB::raw('SUM(CASE WHEN codn_conce = 861 THEN impp_conce ELSE 0 END) as concepto_861')
+                )
+                ->whereIn('nro_legaj', $embargos->pluck('nro_legaj')->unique())
+                ->whereIn('nro_cargo', $embargos->pluck('nro_cargo')->unique())
+                ->where('nro_liqui', $nro_liqui)
+                ->groupBy('nro_legaj', 'nro_cargo')
+                ->get()
+                ->keyBy(fn($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
+
+            // Agregar los conceptos adicionales al resultado
+            $embargos = $embargos->map(function ($item) use ($conceptosAdicionales) {
+                $key = $item->nro_legaj . '-' . $item->nro_cargo;
+                $conceptos = $conceptosAdicionales[$key] ?? null;
+
+                $item->remunerativo = $conceptos ? $conceptos->remunerativo : 0;
+                $item->{'860'} = $conceptos ? $conceptos->concepto_860 : 0;
+                $item->{'861'} = $conceptos ? $conceptos->concepto_861 : 0;
+
                 return $item;
             });
 
