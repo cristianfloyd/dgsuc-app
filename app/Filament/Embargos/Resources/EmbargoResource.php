@@ -70,7 +70,7 @@ class EmbargoResource extends Resource
                 TextColumn::make('nro_legaj')->label('Nro. Legajo'),
                 TextColumn::make('remunerativo')->money('ARS'),
                 TextColumn::make('no_remunerativo')->money('ARS'),
-                TextColumn::make('total')->money('ARS'),
+                TextColumn::make('total')->money('ARS')->formatStateUsing(fn ($state) => $state / 100),
                 TextColumn::make('codn_conce')->label('Código Concepto'),
             ])
             ->defaultSort('nro_legaj')
@@ -78,14 +78,7 @@ class EmbargoResource extends Resource
                 //
             ])
             ->actions([
-                Action::make('Procesar')
-                    ->label('Actualizar Datos')
-                    ->action(fn() => self::actualizarDatos())
-                    ->button(),
-                Action::make('configure')
-                    ->label('Configure Parameters')
-                    ->url(fn(): string => static::getUrl('configure'))
-                    ->icon('heroicon-o-cog')
+                //
             ])
             ->bulkActions([
                 //

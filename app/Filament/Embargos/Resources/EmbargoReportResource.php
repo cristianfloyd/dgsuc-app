@@ -1,24 +1,21 @@
 <?php
 
-namespace App\Filament\Reportes\Resources;
+namespace App\Filament\Embargos\Resources;
 
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\Mapuche\Embargo;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use App\Services\Reportes\EmbargoReportService;
-use App\Filament\Reportes\Resources\EmbargoResource\Pages\ListEmbargos;
-use App\Filament\Reportes\Resources\EmbargoResource\Pages\EmbargoReport;
-use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargo;
-use App\Filament\Reportes\Resources\EmbargoResource\Pages\ReporteEmbargos;
+use App\Filament\Embargos\Resources\EmbargoReportResource\Pages\ListEmbargos;
+use App\Filament\Embargos\Resources\EmbargoReportResource\Pages\ReporteEmbargos;
 
-class EmbargoResource extends Resource
+class EmbargoReportResource extends Resource
 {
     protected static ?string $model = Embargo::class;
+    protected static ?string $label = 'Reporte Embargos';
 
     protected static ?string $navigationGroup = 'Informes';
 

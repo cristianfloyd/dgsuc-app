@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\EmbargoResource\Pages;
+namespace App\Filament\Embargos\Resources\EmbargoReportResource\Pages;
 
 use Filament\Pages\Page;
 use Filament\Tables\Table;
@@ -24,14 +24,14 @@ use Filament\Resources\Pages\PageRegistration;
 use App\Services\Reportes\EmbargoReportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
-use App\Filament\Reportes\Resources\EmbargoResource;
+use App\Filament\Embargos\Resources\EmbargoReportResource;
 use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 
 class ReporteEmbargos extends Page implements HasTable, HasForms
 {
     use InteractsWithTable;
     use InteractsWithForms;
-    protected static string $resource = EmbargoResource::class;
+    protected static string $resource = EmbargoReportResource::class;
     protected static ?string $title = 'Reporte de Embargos';
     protected static string $view = 'filament.resources.embargo.pages.report';
     protected static ?string $slug = 'reporte';
