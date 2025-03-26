@@ -14,7 +14,7 @@ interface TableManagementServiceInterface
      * @param string|null $connection Nombre de la conexión de base de datos a utilizar (opcional).
      * @return array Devuelve un array con información sobre la tabla, como si está vacía o no.
      */
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): array;
+    public static function verifyAndPrepareTable(string $tableName, ?string $connection = null): array;
 
     /**
      * Verifica si una tabla de base de datos está vacía.

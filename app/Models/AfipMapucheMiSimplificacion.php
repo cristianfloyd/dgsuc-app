@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\ValueObjects\NroLiqui;
 use App\Enums\PuestoDesempenado;
 use App\Traits\HasUnidadAcademica;
 use Illuminate\Support\Facades\DB;
+use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPuestoDesempenado;
 use App\Traits\MapucheConnectionTrait;
@@ -73,10 +75,31 @@ class AfipMapucheMiSimplificacion extends Model
         });
     }
 
-    // ############################ ACCESORS ############################
+    // ############################ ACCESORS y MUTATORS ############################
+
     /**
-     * Accessor y Mutator para el puesto
+     * Accessor para el periodo fiscal como objeto PeriodoFiscal
      */
+    protected function periodoFiscalObject(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $periodoStr = $this->attributes['periodo_fiscal'] ?? null;
+                if (!$periodoStr) {
+                    return null;
+                }
+
+                try {
+                    return PeriodoFiscal::fromString($periodoStr);
+                } catch (\InvalidArgumentException $e) {
+                    Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
+                    return null;
+                }
+            }
+        );
+    }
+
+
     protected function puesto(): Attribute
     {
         return Attribute::make(
@@ -281,6 +304,21 @@ class AfipMapucheMiSimplificacion extends Model
 
 
 
+    /**
+     * Scope para filtrar por periodo fiscal
+     *
+     * @param Builder $query
+     * @param string|PeriodoFiscal $periodoFiscal
+     * @return Builder
+     */
+    public function scopeByPeriodoFiscal($query, $periodoFiscal): Builder
+    {
+        $periodoStr = $periodoFiscal instanceof PeriodoFiscal
+            ? $periodoFiscal->toString()
+            : $periodoFiscal;
+
+        return $query->where('periodo_fiscal', $periodoStr);
+    }
 
     /**
      * Scope para filtrar por tipo de puesto
@@ -303,5 +341,43 @@ class AfipMapucheMiSimplificacion extends Model
 
         // Asegurarnos de que las categorías se pasen como strings
         return $query->whereIn('puesto', array_map('strval', $categorias));
+    }
+
+    // ##################### Funcion Almacencada #########################
+
+    /** Inserta datos en la tabla suc.afip_mapuche_mi_simplificacion utilizando la función suc.get_mi_simplificacion_tt.
+     *
+     * @param int|NroLiqui $nroLiqui Número de liquidación.
+     * @param int|string|PeriodoFiscal $periodoFiscal Período fiscal.
+     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
+     */
+    public static function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): bool
+    {
+        try {
+            // Convertir a valor primitivo si es un objeto NroLiqui
+            $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
+
+            // Convertir a string si es un objeto PeriodoFiscal
+            $periodoFiscalValue = $periodoFiscal;
+            if ($periodoFiscal instanceof PeriodoFiscal) {
+                $periodoFiscalValue = $periodoFiscal->toString();
+            }
+
+            // Obtener la conexión a la base de datos
+            $connection = (new self())->getConnectionName();
+
+            // Ejecutar la consulta de inserción
+            DB::connection($connection)->statement(
+                'INSERT INTO suc.afip_mapuche_mi_simplificacion
+                SELECT * FROM suc.get_mi_simplificacion_tt(?, ?)',
+                [$nroLiquiValue, $periodoFiscalValue]
+            );
+            Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use App\ValueObjects\NroLiqui;
 use Illuminate\Support\Carbon;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
@@ -122,10 +123,18 @@ class Dh22 extends Model
     }
 
 
+    /**
+     * Obtiene la descripción de una liquidación específica por su número.
+     *
+     * @param int|NroLiqui $nro_liqui Número de liquidación o instancia de NroLiqui
+     * @return string Descripción de la liquidación
+     */
     public static function getDescripcionLiquidacion($nro_liqui): string
     {
+        $nroLiquiValue = $nro_liqui instanceof NroLiqui ? $nro_liqui->value() : $nro_liqui;
+
         return static::select('desc_liqui')
-            ->where('nro_liqui', $nro_liqui)
+            ->where('nro_liqui', $nroLiquiValue)
             ->first()
             ->desc_liqui;
     }
@@ -199,12 +208,14 @@ class Dh22 extends Model
     /**
      *  Metodo estatico para verificar si existe un nro_liqui en la tabla dh22.
      *
-     * @param int $nroLiqui
+     * @param int|NroLiqui $nroLiqui
      * @return bool True si la función se ejecutó correctamente, false en caso contrario.
      */
     public static function verificarNroLiqui(int $nroLiqui): bool
     {
-        return static::where('nro_liqui', $nroLiqui)->exists();
+        $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
+
+        return static::where('nro_liqui', $nroLiquiValue)->exists();
     }
 
     /* ################################ ACCESORES Y MUTADORES ################################ */
@@ -236,6 +247,17 @@ class Dh22 extends Model
     }
 
     /**
+     * Atributo que obtiene el período fiscal como un objeto PeriodoFiscal.
+     */
+    protected function periodoFiscalObject(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => new PeriodoFiscal($this->per_liano, $this->per_limes),
+        );
+    }
+
+
+    /**
      * Atributo que obtiene y establece el período fiscal en formato YYYYMM a partir de las propiedades `per_liano` y `per_limes` del modelo.
      *
      * El método `get` (Accessor) devuelve el período fiscal en formato YYYYMM concatenando los valores de `per_liano` y `per_limes` con el formato adecuado.
@@ -245,10 +267,19 @@ class Dh22 extends Model
     {
         return Attribute::make(
             get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
-            set: fn(string $value) => [
-                'per_liano' => substr($value, 0, 4),
-                'per_limes' => substr($value, 4, 2),
-            ]
+            set: function($value) {
+                if ($value instanceof PeriodoFiscal) {
+                    return [
+                        'per_liano' => $value->year(),
+                        'per_limes' => $value->month(),
+                    ];
+                }
+
+                return [
+                    'per_liano' => substr($value, 0, 4),
+                    'per_limes' => substr($value, 4, 2),
+                ];
+            }
         );
     }
 
@@ -340,12 +371,17 @@ class Dh22 extends Model
      * Scope para filtrar liquidaciones por período fiscal.
      *
      * @param Builder $query
-     * @param int $year
+     * @param int|PeriodoFiscal $year
      * @param int $month
      * @return Builder
      */
     public function scopePeriodoFiscal($query, int $year, int $month)
     {
+        if ($year instanceof PeriodoFiscal) {
+            return $query->where('per_liano', $year->year())
+                        ->where('per_limes', $year->month());
+        }
+
         return $query->where('per_liano', $year)
                     ->where('per_limes', $month);
     }
@@ -354,13 +390,20 @@ class Dh22 extends Model
      * Filtra las liquidaciones por un periodo fiscal específico en formato año/mes.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array|null $periodoFiscal Array con ['year' => año, 'month' => mes]
+     * @param array|PeriodoFiscal|null $periodoFiscal Array con ['year' => año, 'month' => mes]
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFilterByPeriodoFiscal($query, ?array $periodoFiscal)
     {
         if (!$periodoFiscal) {
             return $query;
+        }
+
+        if ($periodoFiscal instanceof PeriodoFiscal) {
+            return $query->whereRaw(
+                "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
+                [$periodoFiscal->toString()]
+            );
         }
 
         return $query->whereRaw(

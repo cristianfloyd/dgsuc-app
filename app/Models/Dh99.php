@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ValueObjects\PeriodoFiscal;
+use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use App\Services\Mapuche\PeriodoFiscalService;
@@ -78,5 +80,43 @@ class Dh99 extends Model
                 return $periodo['year'] . $periodo['month'];
             }
         );
+    }
+
+    /**
+     * Obtiene el periodo fiscal como un objeto PeriodoFiscal
+     */
+    protected function periodoFiscalObject(): Attribute
+    {
+        return Attribute::make(
+            get: function() {
+                return new PeriodoFiscal($this->per_anoct, $this->per_mesct);
+            }
+        );
+    }
+
+    /**
+     * Establece el periodo fiscal a partir de un objeto PeriodoFiscal o un string en formato YYYYMM
+     *
+     * @param PeriodoFiscal|string $periodoFiscal
+     * @return bool
+     */
+    public function setPeriodoFiscal($periodoFiscal): bool
+    {
+        try {
+            if (is_string($periodoFiscal)) {
+                $periodoFiscal = PeriodoFiscal::fromString($periodoFiscal);
+            }
+
+            if (!($periodoFiscal instanceof PeriodoFiscal)) {
+                throw new \InvalidArgumentException('El periodo fiscal debe ser un string en formato YYYYMM o un objeto PeriodoFiscal');
+            }
+
+            $this->per_anoct = $periodoFiscal->year();
+            $this->per_mesct = $periodoFiscal->month();
+            return $this->save();
+        } catch (\Exception $e) {
+            Log::error('Error al establecer el periodo fiscal: ' . $e->getMessage());
+            return false;
+        }
     }
 }

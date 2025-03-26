@@ -41,7 +41,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      */
     public function execute(int $nroLiqui, int $periodoFiscal): bool
     {
-        Log::info('Ejecutando MapucheMiSimplificacionService: ' . $nroLiqui . ' ' . $periodoFiscal);
+        Log::info("Ejecutando MapucheMiSimplificacionService: {$nroLiqui} {$periodoFiscal}");
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
             return false;
         }

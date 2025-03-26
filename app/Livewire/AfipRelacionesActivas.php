@@ -34,7 +34,7 @@ class AfipRelacionesActivas extends Component
     public $nextStepUrl = null;
 
 
-    
+
     public array $processedLines; //este es el array que va a devolver la funcion processLine
     public string $periodo_fiscal; //este es el periodo fiscal que se va a cargar en la tabla relaciones_activas
 

@@ -14,26 +14,25 @@ class CuilRepository implements CuilRepositoryInterface
     use MapucheConnectionTrait;
 
     /**
-     * Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
+     * Recupera los CUILs que están en afip_mapuche_sicoss pero no en afip_relaciones_activas
+     * para un período fiscal específico.
      *
-     * @param int $perPage Número de resultados por página (opcional, por defecto 10)
-     *  Paginador de los CUIL que no se encuentran en la tabla afip_mapuche_mi_simplificacion
-     *
+     * @param string $periodoFiscal Período fiscal en formato YYYYMM
+     * @return Collection Colección de CUILs
      */
-    public function getCuilsNotInAfip($perPage = 10): Collection
+    public function getCuilsNotInAfip(string $periodoFiscal): Collection
     {
-        $cuils = AfipMapucheSicoss::on($this->getConnectionName())
-        ->select('cuil')
-        ->whereNotExists(function ($query) {
-            $query->select(DB::raw(1))
-                ->from('suc.afip_relaciones_activas')
-                ->whereColumn('afip_relaciones_activas.cuil', 'afip_mapuche_sicoss.cuil');
-        })
-        ->pluck('cuil');
-    // return $this->paginateResults($cuils, $perPage);
-        return new Collection($cuils);
+        return DB::connection($this->getConnectionName())
+            ->table('suc.afip_mapuche_sicoss as ams')
+            ->select('ams.cuil')
+            ->leftJoin('suc.afip_relaciones_activas as ara', function ($join) use ($periodoFiscal) {
+                $join->on('ams.cuil', '=', 'ara.cuil')
+                     ->where('ara.periodo_fiscal', '=', $periodoFiscal);
+            })
+            ->whereNull('ara.cuil')
+            ->where('ams.periodo_fiscal', '=', $periodoFiscal)
+            ->pluck('ams.cuil');
     }
-
 
     /** Recupera las CUIL (Clave Única de Identificación Laboral) que están presentes en la tabla temporal tabla_temp_cuils pero no en la tabla afip_mapuche_mi_simplificacion.
      *

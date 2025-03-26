@@ -6,9 +6,13 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
 use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
+use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\CuilRepository;
+use App\Models\AfipRelacionesActivas;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -16,6 +20,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
 use App\Models\AfipMapucheMiSimplificacion;
+use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\RelationManagers;
@@ -182,6 +187,59 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 ->send();
                         }
                     })
+                    ->color('success'),
+                TableAction::make('poblarMiSimplificacion')
+                    ->label('Poblar Mi Simplificación')
+                    ->form([
+                        Select::make('periodo_fiscal')
+                            ->label('Período Fiscal')
+                            ->options(function () {
+                                return AfipMapucheSicoss::distinct()
+                                    ->pluck('periodo_fiscal', 'periodo_fiscal')
+                                    ->toArray();
+                            })
+                            ->required()
+                            ->searchable()
+                    ])
+                    ->action(function (array $data, CuilRepository $cuilRepository) {
+                        try {
+                            // Obtener CUILs que no están en RelacionesActivas
+                            $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
+
+                            if ($cuils->isEmpty()) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title('No hay CUILs para procesar')
+                                    ->send();
+                                return;
+                            }
+
+                            // Ejecutar la función almacenada para cada CUIL
+                            DB::connection('mapuche')->transaction(function () use ($data, $cuils) {
+                                // Asumiendo que necesitas el nro_liqui, podrías obtenerlo de alguna forma
+                                $nroLiqui = 1; // Ajusta según necesites
+
+                                DB::statement('
+                                    SELECT suc.get_mi_simplificacion_tt(?, ?)',
+                                    [$nroLiqui, $data['periodo_fiscal']]
+                                );
+                            });
+
+                            Notification::make()
+                                ->success()
+                                ->title('Proceso completado')
+                                ->body('Se han procesado ' . $cuils->count() . ' registros.')
+                                ->send();
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Error')
+                                ->body($e->getMessage())
+                                ->send();
+                        }
+                    })
+                    ->icon('heroicon-o-arrow-path')
                     ->color('success')
             ])
             ->actions([
