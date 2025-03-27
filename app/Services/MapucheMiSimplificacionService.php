@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Dh21;
 use App\Models\Mapuche\Dh22;
 use App\Models\TablaTempCuils;
+use App\ValueObjects\NroLiqui;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,13 +36,13 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * 3. Verifica y vacía la tabla si contiene registros.
      * 4. Ejecuta la función almacenada con los parámetros proporcionados.
      *
-     * @param int $nroLiqui Número de liquidación
+     * @param NroLiqui $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si el proceso se ejecutó correctamente, falso en caso contrario
      */
-    public function execute(int $nroLiqui, int $periodoFiscal): bool
+    public function execute(NroLiqui $nroLiqui, int $periodoFiscal): bool
     {
-        Log::info("Ejecutando MapucheMiSimplificacionService: {$nroLiqui} {$periodoFiscal}");
+        Log::info("Ejecutando MapucheMiSimplificacionService: {$nroLiqui->value()} {$periodoFiscal}");
         if (!$this->validarParametros($nroLiqui, $periodoFiscal)) {
             return false;
         }
@@ -52,7 +53,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
         $this->verificarYVaciarTabla();
 
-        return $this->ejecutarFuncionAlmacenada($nroLiqui, $periodoFiscal);
+        return $this->ejecutarFuncionAlmacenada($nroLiqui->value(), $periodoFiscal);
     }
 
     /**
@@ -88,16 +89,16 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos. Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
      *
-     * @param int $nroLiqui Número de liquidación
+     * @param NroLiqui $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario
      */
-    private function validarParametros(int $nroLiqui, int $periodoFiscal): bool
+    private function validarParametros(NroLiqui $nroLiqui,  $periodoFiscal): bool
     {
-        if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui, $periodoFiscal)) {
+        if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui->value(), $periodoFiscal)) {
             return false;
         }
-        if (empty($nroLiqui) || empty($periodoFiscal)) {
+        if (empty($nroLiqui->value()) || empty($periodoFiscal)) {
             Log::warning('nroliqui o periodofiscal vacios');
             return false;
         }

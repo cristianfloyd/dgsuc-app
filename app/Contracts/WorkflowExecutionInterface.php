@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\ValueObjects\NroLiqui;
+
 interface WorkflowExecutionInterface
 {
     public function executeWorkflowSteps();
@@ -38,5 +40,5 @@ interface WorkflowExecutionInterface
     public function getPeriodoFiscal(): int;
 
     public function setNroLiqui(int $nroLiqui): self;
-    public function getNroLiqui(): int;
+    public function getNroLiqui(): NroLiqui;
 }

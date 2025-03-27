@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\WorkflowStatus;
 use App\Models\TablaTempCuils;
+use App\ValueObjects\NroLiqui;
 use App\Services\TempTableService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +42,12 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     protected $cuilsToSearch;
     protected $cuilsNotInAfip;
     protected $cuilsCount;
-    protected $nroLiqui;
+
+    /**
+     * @var NroLiqui Número de liquidación
+     */
+    protected NroLiqui $nroLiqui;
+
     protected $periodoFiscal = self::DEFAULT_PERIODO_FISCAL;
     protected $perPage = self::PER_PAGE;
     protected $cuilsNoInserted = [];
@@ -71,6 +77,13 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         $this->mapucheMiSimplificacion = $mapucheMiSimplificacion;
         $this->messageManager = $messageManager;
         $this->processLog = $this->workflowService->getLatestWorkflow();
+
+        // Inicializar nroLiqui con un valor por defecto
+        try {
+            $this->nroLiqui = new NroLiqui(1); // Valor por defecto que será reemplazado
+        } catch (\InvalidArgumentException $e) {
+            Log::error('Error al inicializar NroLiqui: ' . $e->getMessage());
+        }
     }
 
     public function executeWorkflowSteps()
@@ -186,18 +199,23 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value, self::IN_PROGRESS);
             if ($this->tempTableService->populateTempTable($this->cuilsToSearch)) {
                 $this->cuilsCount = $this->tempTableService->getTempTableCount();
-                Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui}" . "{$this->periodoFiscal} {$this->cuilsCount}");
+                Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui->value()}" . "{$this->periodoFiscal} {$this->cuilsCount}");
             };
         }
     }
 
     private function ejecutarFuncionAlmacenada(): void
     {
-        $result = $this->mapucheMiSimplificacion->execute($this->nroLiqui, $this->periodoFiscal);
-        if ($result) {
-            $this->dispatchEvent(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, ['Función almacenada ejecutada exitosamente']);
-        } else {
-            $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error al ejecutar la función almacenada']);
+        try {
+            $result = $this->mapucheMiSimplificacion->execute($this->nroLiqui, $this->periodoFiscal);
+            if ($result) {
+                $this->dispatchEvent(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, ['Función almacenada ejecutada exitosamente']);
+            } else {
+                $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error al ejecutar la función almacenada']);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al ejecutar la función almacenada: ' . $e->getMessage());
+            $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error: ' . $e->getMessage()]);
         }
     }
 
@@ -266,22 +284,40 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     }
 
     /**
-     * Get the value of nroLiqui
+     * Obtiene el número de liquidación.
+     *
+     * @return NroLiqui
      */
-    public function getNroLiqui(): int
+    public function getNroLiqui(): NroLiqui
     {
         return $this->nroLiqui;
     }
 
     /**
-     * Set the value of nroLiqui
+     * Obtiene el valor primitivo del número de liquidación.
      *
-     * @return  self
+     * @return int
+     */
+    public function getNroLiquiValue(): int
+    {
+        return $this->nroLiqui->value();
+    }
+
+    /**
+     * Establece el número de liquidación.
+     *
+     * @param int|NroLiqui $nroLiqui
+     * @return self
+     * @throws \InvalidArgumentException Si el valor no es válido
      */
     public function setNroLiqui($nroLiqui): self
     {
-        $this->nroLiqui = $nroLiqui;
-
-        return $this;
+        try {
+            $this->nroLiqui = ($nroLiqui instanceof NroLiqui) ? $nroLiqui : new NroLiqui($nroLiqui);
+            return $this;
+        } catch (\InvalidArgumentException $e) {
+            Log::error('Error al establecer NroLiqui: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
