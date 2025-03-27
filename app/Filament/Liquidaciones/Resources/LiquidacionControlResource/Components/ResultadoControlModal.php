@@ -4,6 +4,7 @@ namespace App\Filament\Liquidaciones\Resources\LiquidacionControlResource\Compon
 
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Support\View\Components\Modal;
 
 class ResultadoControlModal extends Modal
 {

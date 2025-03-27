@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Filament\Pages;
 
 use Filament\Forms;

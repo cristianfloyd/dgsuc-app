@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 
 class AfipRelacionesActivas extends Model
 {
@@ -74,7 +74,7 @@ class AfipRelacionesActivas extends Model
             ]);
 
             // Retornar una conexión predeterminada segura
-            return 'pgsql-mapuche';
+            return 'pgsql-prod';
         }
     }
 

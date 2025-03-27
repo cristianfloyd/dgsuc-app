@@ -16,7 +16,7 @@ trait MapucheDesaConnectionTrait
      */
     public function getConnectionName(): string
     {
-        return 'pgsql-mapuche'; // Esto se refiere al nombre de la conexión en config/database.php
+        return 'pgsql-prod'; // Esto se refiere al nombre de la conexión en config/database.php
     }
 
     /**

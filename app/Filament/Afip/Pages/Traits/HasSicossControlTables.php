@@ -49,6 +49,8 @@ trait HasSicossControlTables
     protected function getAportesColumns(): array
     {
         return [
+            TextColumn::make('dh01.nro_legaj')
+                ->label('Legajo'),
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()

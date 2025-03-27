@@ -19,6 +19,7 @@ class AportesDiferenciasExport extends BaseSicossExport
     public function headings(): array
     {
         return [
+            'Legajo',
             'CUIL',
             'Código Actividad',
             'Aportes SIJP DH21',
@@ -34,6 +35,7 @@ class AportesDiferenciasExport extends BaseSicossExport
     public function map($row): array
     {
         return [
+            $row->dh01->nro_legaj ?? '',
             $row->cuil,
             $row->mapucheSicoss->cod_act ?? '',
             $row->aportesijpdh21,

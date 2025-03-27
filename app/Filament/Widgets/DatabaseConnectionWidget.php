@@ -23,7 +23,7 @@ class DatabaseConnectionWidget extends Widget
     {
         return [
             'primary' => $this->getConnectionInfo('pgsql'),
-            'secondary' => $this->getConnectionInfo('pgsql-mapuche'),
+            'secondary' => $this->getConnectionInfo('pgsql-prod'),
         ];
     }
 

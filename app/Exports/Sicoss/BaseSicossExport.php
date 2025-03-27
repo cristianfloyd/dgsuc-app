@@ -2,18 +2,19 @@
 
 namespace App\Exports\Sicoss;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use Illuminate\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 abstract class BaseSicossExport implements
     FromCollection,
@@ -22,7 +23,8 @@ abstract class BaseSicossExport implements
     WithTitle,
     WithStyles,
     WithCustomStartCell,
-    ShouldAutoSize
+    ShouldAutoSize,
+    WithColumnFormatting
 {
     protected Collection $data;
     protected int $year;
@@ -52,6 +54,17 @@ abstract class BaseSicossExport implements
         return 'A6'; // Comenzar los datos en la fila 6 para dejar espacio para el encabezado
     }
 
+    /**
+     * Define los formatos de columna
+     * Implementación requerida por WithColumnFormatting
+     */
+    public function columnFormats(): array
+    {
+        // Aquí puedes definir formatos específicos para columnas si es necesario
+        return [];
+    }
+
+
     public function styles(Worksheet $sheet)
     {
         // Estilo para el título principal
@@ -76,12 +89,16 @@ abstract class BaseSicossExport implements
         $sheet->mergeCells('A4:' . $this->getLastColumn() . '4');
 
         // Estilo para los encabezados de columnas
-        $headingsRow = 5;
+        $headingsRow = 6;
         $headingStyle = $sheet->getStyle('A' . $headingsRow . ':' . $this->getLastColumn() . $headingsRow);
         $headingStyle->getFont()->setBold(true);
         $headingStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
         $headingStyle->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $headingStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Configurar AutoFilter para permitir filtrado y ordenación
+        $filterRange = 'A' . $headingsRow . ':' . $this->getLastColumn() . $headingsRow;
+        $sheet->setAutoFilter($filterRange);
 
         // Estilo para los datos
         $dataFirstRow = $headingsRow + 1;
