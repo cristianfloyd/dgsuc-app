@@ -11,41 +11,61 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    protected Collection $resultados;
+    protected $records;
 
-    public function __construct(Collection $resultados)
+    public function __construct(Collection $records)
     {
-        $this->resultados = $resultados;
+        $this->records = $records;
     }
 
     public function collection()
     {
-        return $this->resultados;
+        return $this->records;
     }
 
     public function headings(): array
     {
         return [
+            'Nombre',
+            'Email',
+            'usuario_mapuche',
             'Nro. Cargo',
             'Legajo',
             'Tipo Bloqueo',
-            'Fecha Proceso',
+            'Fecha Baja',
             'Estado',
-            'Resultado',
-            'Información Adicional'
+            'UACAD',
+            'Observaciones',
+            'Mensaje Error',
+            'Procesado'
         ];
     }
 
-    public function map($resultado): array
+    public function map($record): array
     {
+        // Formatear la fecha correctamente si es una instancia de Carbon o DateTime
+        $fechaBaja = '';
+        if (!empty($record->fecha_baja)) {
+            if ($record->fecha_baja instanceof \Carbon\Carbon || $record->fecha_baja instanceof \DateTime) {
+                $fechaBaja = $record->fecha_baja->format('Y-m-d');
+            } else {
+                $fechaBaja = $record->fecha_baja; // Ya es un string
+            }
+        }
+
         return [
-            $resultado['cargo_id'] ?? '',
-            $resultado['legajo'] ?? '',
-            $resultado['tipo'] ?? '',
-            $resultado['fecha_proceso'] ?? '',
-            $resultado['success'] ? 'Exitoso' : 'Fallido',
-            $resultado['message'] ?? '',
-            is_array($resultado['metadata']) ? json_encode($resultado['metadata']) : ''
+            $record->nombre ?? '',
+            $record->email ?? '',
+            $record->usuario_mapuche ?? '',
+            $record->nro_cargo ?? '',
+            $record->nro_legaj ?? '',
+            $record->tipo ?? '',
+            $fechaBaja,
+            $record->estado->value ?? $record->estado ?? '',
+            $record->cargo->codc_uacad ?? '',
+            $record->observaciones ?? '',
+            $record->mensaje_error ?? '',
+            $record->esta_procesado ? 'Sí' : 'No'
         ];
     }
 

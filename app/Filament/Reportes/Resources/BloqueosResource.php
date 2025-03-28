@@ -70,12 +70,13 @@ class BloqueosResource extends Resource
                     ->color(fn(BloqueosEstadoEnum $state): string => $state->getColor()),
                 TextColumn::make('nro_liqui')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_registro')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true)->copyable(),
+                TextColumn::make('email')->toggleable(isToggledHiddenByDefault: true)->copyable(),
+                TextColumn::make('usuario_mapuche')->toggleable(isToggledHiddenByDefault: true)->copyable(),
                 TextColumn::make('dependencia')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nro_legaj')->searchable()->copyable(),
                 TextColumn::make('nro_cargo')->searchable()->copyable(),
+                TextColumn::make('cargo.codc_uacad')->label('Uacad')->searchable()->sortable(),
                 TextColumn::make('fecha_baja')->date('Y-m-d')->sortable(),
                 TextColumn::make('cargo.fec_baja')->label('Fecha dh03')->date('Y-m-d')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tipo')->searchable(),
@@ -234,11 +235,27 @@ class BloqueosResource extends Resource
                 BulkAction::make('exportarResultados')
                     ->label('Exportar a Excel')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(function () {
-                        $processor = new BloqueosProcessor();
+                    ->action(function (Collection $records) {
+                        $count = $records->count();
+
+                        // Opcional: Verificar que hay registros seleccionados
+                        if ($count === 0) {
+                            Notification::make()
+                                ->title('No hay registros seleccionados')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title("Exportando $count registros")
+                            ->success()
+                            ->send();
+
                         return Excel::download(
-                            new BloqueosResultadosExport($processor->getResultados()),
-                            'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx'
+                            new BloqueosResultadosExport($records),
+                            'resultados_bloqueos_seleccionados_' . now()->format('Y-m-d_His') . '.xlsx'
                         );
                     }),
 
