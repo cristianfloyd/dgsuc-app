@@ -56,4 +56,36 @@ interface RepOrdenPagoRepositoryInterface
      * @throws \Exception
      */
     public function truncate(): bool;
+    
+    /**
+     * Crea la tabla rep_orden_pago si no existe.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function createTableIfNotExists(): void;
+    
+    /**
+     * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function ensureStoredProcedure(): void;
+    
+    /**
+     * Ejecuta el procedimiento almacenado rep_orden_pago con las liquidaciones proporcionadas.
+     *
+     * @param array $liquidaciones Array de números de liquidación
+     * @return void
+     * @throws \Exception
+     */
+    public function executeStoredProcedure(array $liquidaciones): void;
+    
+    /**
+     * Obtiene la definición SQL del procedimiento almacenado rep_orden_pago.
+     *
+     * @return string
+     */
+    public function getStoredProcedureDefinition(): string;
 }
