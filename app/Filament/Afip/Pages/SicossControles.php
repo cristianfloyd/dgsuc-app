@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
+use App\DTOs\Sicoss\ResumenStatsDTO;
 use App\Models\ControlArtDiferencia;
 use Filament\Support\Enums\MaxWidth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,7 @@ use App\Traits\SicossConnectionTrait;
 use Filament\Support\Enums\Alignment;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\SicossControlService;
+use App\Traits\MapucheConnectionTrait;
 use App\Exports\Sicoss\ConceptosExport;
 use App\Models\ControlConceptosPeriodo;
 use Filament\Tables\Columns\TextColumn;
@@ -41,7 +43,6 @@ use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
 class SicossControles extends Page implements HasTable
 {
     use InteractsWithTable;
-    use SicossConnectionTrait;
     use HasSicossControlTables;
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
@@ -70,17 +71,6 @@ class SicossControles extends Page implements HasTable
 
     public function mount()
     {
-        $this->availableConnections = collect(config('database.connections'))
-            ->filter(function ($config, $name) {
-                return str_starts_with($name, 'pgsql-');
-            })
-            ->mapWithKeys(function ($config, $name) {
-                return [$name => $name];
-            })
-            ->all();
-
-        $this->selectedConnection ??= $this->getConnectionName();
-
         // Obtener el período fiscal actual
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
         $this->year = $periodoFiscal['year'];
@@ -110,7 +100,6 @@ class SicossControles extends Page implements HasTable
 
     public function ejecutarControles(): void
     {
-        Log::info('Iniciando controles SICOSS', ['year' => $this->year, 'month' => $this->month]);
         try {
             $this->loading = true;
 
@@ -119,18 +108,19 @@ class SicossControles extends Page implements HasTable
                 ->info()
                 ->send();
 
-            $service = app(SicossControlService::class);
-            $service->setConnection($this->getConnectionName());
+
 
             // Pasar el período fiscal al servicio
-            $this->resultadosControles = $service->ejecutarControlesPostImportacion($this->year, $this->month);
+            $this->resultadosControles = $this->controlService->ejecutarControlesPostImportacion($this->year, $this->month);
 
+            // Calcular diferencias para la notificación
             $diferenciasAportes = abs($this->resultadosControles['totales']['dh21']['aportes'] -
-                $this->resultadosControles['totales']['sicoss']['aportes']);
+            $this->resultadosControles['totales']['sicoss']['aportes']);
 
             $diferenciasContribuciones = abs($this->resultadosControles['totales']['dh21']['contribuciones'] -
-                $this->resultadosControles['totales']['sicoss']['contribuciones']);
+            $this->resultadosControles['totales']['sicoss']['contribuciones']);
 
+            // Preparar la vista para la notificación
             $viewContent = ViewFacade::make('filament.afip.notifications.control-sicoss', [
                 'diferenciasAportes' => number_format($diferenciasAportes, 2, ',', '.'),
                 'diferenciasContribuciones' => number_format($diferenciasContribuciones, 2, ',', '.'),
@@ -251,83 +241,40 @@ class SicossControles extends Page implements HasTable
         return count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
     }
 
+    /**
+     * Obtiene las estadísticas de resumen desde el servicio
+     */
     protected function getResumenStats(): array
     {
         try {
             return cache()->remember('sicoss_resumen_stats', now()->addMinutes(5), function () {
-                // Creamos la tabla temporal primero
-                $service = app(SicossControlService::class);
-                $service->setConnection($this->getConnectionName());
-
+                
+                // Obtener el período fiscal actual
                 $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
                 $this->year = $periodoFiscal['year'];
                 $this->month = $periodoFiscal['month'];
-
-                $service->crearTablaDH21Aportes($this->year, $this->month);
-
-                $data = [
-                    'totales' => [
-                        'cuils_procesados' => ControlAportesDiferencia::count(),
-                        'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-                        'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-                    ],
-                    'diferencias_por_dependencia' => DB::connection($this->getConnectionName())
-                        ->table('dh21aporte as a')
-                        ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-                        ->select('b.codc_uacad', 'b.caracter')
-                        ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
-                            (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_total')
-                        ->whereRaw('ABS(((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
-                            (b.contribucionsijp + b.contribucioninssjp))::numeric) > 1')
-                        ->groupBy('b.codc_uacad', 'b.caracter')
-                        ->orderBy('b.codc_uacad')
-                        ->orderBy('b.caracter')
-                        ->get(),
-                    'totales_monetarios' => [
-                        'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
-                        'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
-                    ],
-                    'comparacion_931' => [
-                        'aportes' => [
-                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
-                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
-                                ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
-                        ],
-                        'contribuciones' => [
-                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
-                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
-                        ],
-                    ],
-                    'cuils_no_encontrados' => [
-                        'en_dh21' => DB::connection($this->getConnectionName())
-                            ->table('dh21aporte')
-                            ->whereNotIn('cuil', function ($query) {
-                                $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
-                            })
-                            ->count(),
-                        'en_sicoss' => DB::connection($this->getConnectionName())
-                            ->table('suc.afip_mapuche_sicoss_calculos')
-                            ->whereNotIn('cuil', function ($query) {
-                                $query->select('cuil')->from('dh21aporte');
-                            })
-                            ->count(),
-                    ],
-                ];
-
-                return $data;
+                
+                // Obtener estadísticas del servicio
+                $statsArray = $this->controlService->getResumenStats($this->year, $this->month);
+                
+                // Convertir a DTO para validación de estructura (opcional)
+                $statsDTO = ResumenStatsDTO::fromArray($statsArray);
+                
+                // Devolver como array para mantener compatibilidad
+                return $statsDTO->toArray();
             });
         } catch (\Exception $e) {
             logger()->error('Error obteniendo resumen stats:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-
+        
             Notification::make()
                 ->danger()
                 ->title('Error cargando resumen')
                 ->body('No se pudieron cargar los datos del resumen.')
                 ->send();
-
+        
             return [];
         }
     }
@@ -556,10 +503,8 @@ class SicossControles extends Page implements HasTable
     {
         try {
             $this->loading = true;
-            $service = app(SicossControlService::class);
-            $service->setConnection($this->getConnectionName());
 
-            $resultados = $service->ejecutarControlAportes();
+            $resultados = $this->controService->ejecutarControlAportes();
 
             // Invalidamos el caché después de ejecutar el control
             cache()->forget('sicoss_resumen_stats');
@@ -587,15 +532,13 @@ class SicossControles extends Page implements HasTable
     {
         try {
             $this->loading = true;
-            $service = app(SicossControlService::class);
-            $service->setConnection($this->getConnectionName());
 
             // Obtener el período fiscal actual
             $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
             $this->year = $periodoFiscal['year'];
             $this->month = $periodoFiscal['month'];
 
-            $resultados = $service->ejecutarControlContribuciones($this->year, $this->month);
+            $resultados = $this->controService->ejecutarControlContribuciones($this->year, $this->month);
 
             // Invalidamos el caché después de ejecutar el control
             cache()->forget('sicoss_resumen_stats');
@@ -623,15 +566,13 @@ class SicossControles extends Page implements HasTable
     {
         try {
             $this->loading = true;
-            $service = app(SicossControlService::class);
-            $service->setConnection($this->getConnectionName());
 
             // Obtener el período fiscal actual
             $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
             $this->year = $periodoFiscal['year'];
             $this->month = $periodoFiscal['month'];
 
-            $resultados = $service->ejecutarControlCuils($this->year, $this->month);
+            $resultados = $this->controService->ejecutarControlCuils($this->year, $this->month);
 
             // Invalidamos el caché después de ejecutar el control
             cache()->forget('sicoss_resumen_stats');
@@ -660,26 +601,16 @@ class SicossControles extends Page implements HasTable
         try {
             $this->loading = true;
 
-            // Obtener conexión actual
-            $connection = $this->getConnectionName();
-            // Crear tabla temporal dh21aporte
-            $service = app(SicossControlService::class);
-            $service->setConnection($connection);
-            $service->crearTablaDH21Aportes($this->year, $this->month);
+            
+            $this->controService->crearTablaDH21Aportes($this->year, $this->month);
 
             // Realizar las consultas de conteo
             $conteos = [
-                'dh21aporte' => DB::connection($connection)
-                    ->table('dh21aporte')
-                    ->count(),
+                'dh21aporte' => $this->controService->getTotalAportesDH21(),
 
-                'sicoss_calculos' => DB::connection($connection)
-                    ->table('suc.afip_mapuche_sicoss_calculos')
-                    ->count(),
+                'sicoss_calculos' => $this->controService->getTotalAportesSicoss(),
 
-                'sicoss' => DB::connection($connection)
-                    ->table('suc.afip_mapuche_sicoss')
-                    ->count(),
+                'sicoss' => $this->controService->getTotalContribucionesSicoss(),
             ];
 
             // Crear vista para la notificación

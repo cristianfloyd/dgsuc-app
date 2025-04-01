@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Services\WorkflowService;
 use App\Listeners\JobFailedListener;
-use App\Services\SicossExportService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use App\Services\RepEmbarazadaService;
@@ -17,12 +16,16 @@ use App\Services\AfipMapucheExportService;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Repositories\Mapuche\Dh16Repository;
+use App\Services\Sicoss\SicossExportService;
 use App\Services\AfipRelacionesActivasService;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
+use App\Services\Sicoss\SicossTxtExportService;
 use App\Contracts\RepEmbarazadaServiceInterface;
 use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Sicoss\SicossExcelExportService;
+use App\Services\Sicoss\SicossReportExportService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
@@ -58,9 +61,9 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(SicossExportService::class, function ($app) {
-            return new SicossExportService();
-        });
+        // $this->app->singleton(SicossExportServiceOld::class, function ($app) {
+        //     return new SicossExportServiceOld();
+        // });
 
         $this->app->bind(Dh16RepositoryInterface::class, Dh16Repository::class);
 
@@ -73,6 +76,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RepEmbarazadaServiceInterface::class, RepEmbarazadaService::class);
         $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
         $this->app->bind(AfipRelacionesActivasServiceInterface::class, AfipRelacionesActivasService::class);
+        
+        // Registrar servicios SICOSS
+        $this->app->singleton(SicossExportService::class);
+        $this->app->singleton(SicossTxtExportService::class);
+        $this->app->singleton(SicossExcelExportService::class);
+        $this->app->singleton(SicossReportExportService::class);
     }
 
     /**

@@ -7,12 +7,11 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Group;
-use App\Services\SicossExportService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
-use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
+use App\Services\Sicoss\SicossExportService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource;
@@ -127,7 +126,7 @@ class ExportAfipMapucheSicoss extends Page
 
             // Exportar según el formato seleccionado
             $exportService = Container::getInstance()->make(SicossExportService::class);
-            $path = $exportService->generarArchivo($registros, $data['format'], $periodoFiscal);
+            $path = $exportService->generarArchivo($registros, $data['format']);
 
             // Notificar éxito y ofrecer descarga
             Notification::make()

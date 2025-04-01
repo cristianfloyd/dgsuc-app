@@ -22,7 +22,6 @@ class EmbargoProcesoResult extends Model
     protected $primaryKey = 'id';
     public $incrementing = true;
 
-    // Deshabilitar timestamps ya que no son parte del resultado de la consulta
     public $timestamps = false;
 
 

@@ -11,12 +11,12 @@ use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Collection;
 use Illuminate\Container\Container;
-use App\Services\SicossExportService;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
 use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Sicoss\SicossExportService;
 use App\Filament\Actions\PoblarAfipArtAction;
 use Symfony\Component\HttpFoundation\Response;
 use Filament\Tables\Actions\Action as TableAction;
@@ -100,7 +100,7 @@ class AfipMapucheSicossResource extends Resource
                         ->icon('heroicon-o-document-arrow-down')
                         ->action(function () {
                             $exportService = Container::getInstance()->make(SicossExportService::class);
-                            $path = $exportService->generarArchivoTxt(static::getModel()::all());
+                            $path = $exportService->generarArchivo(static::getModel()::all(),'txt');
                             return response()->download($path)->deleteFileAfterSend();
                         })
                         ->color('success'),
@@ -109,7 +109,7 @@ class AfipMapucheSicossResource extends Resource
                         ->icon('heroicon-o-table-cells')
                         ->action(function () {
                             $exportService = Container::getInstance()->make(SicossExportService::class);
-                            $path = $exportService->generarArchivoExcel(static::getModel()::all());
+                            $path = $exportService->generarArchivo(static::getModel()::all(),'excel');
                             return response()->download($path)->deleteFileAfterSend();
                         })
                         ->color('success'),
