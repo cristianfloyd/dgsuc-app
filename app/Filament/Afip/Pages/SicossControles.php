@@ -258,11 +258,9 @@ class SicossControles extends Page implements HasTable
                 // Creamos la tabla temporal primero
                 $service = app(SicossControlService::class);
                 $service->setConnection($this->getConnectionName());
-
                 $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
                 $this->year = $periodoFiscal['year'];
                 $this->month = $periodoFiscal['month'];
-
                 $service->crearTablaDH21Aportes($this->year, $this->month);
 
                 $data = [
@@ -277,6 +275,10 @@ class SicossControles extends Page implements HasTable
                         ->select('b.codc_uacad', 'b.caracter')
                         ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
                             (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_total')
+                        ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
+                            (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_contribuciones')
+                        ->selectRaw('SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric as diferencia_aportes')
                         ->whereRaw('ABS(((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
                             (b.contribucionsijp + b.contribucioninssjp))::numeric) > 1')
                         ->groupBy('b.codc_uacad', 'b.caracter')
@@ -547,10 +549,6 @@ class SicossControles extends Page implements HasTable
         return $actions;
     }
 
-    private function verControles(): void
-    {
-        dump('HOla Mundo');
-    }
 
     public function ejecutarControlAportes(): void
     {

@@ -309,7 +309,8 @@
                             <tr class="border-b">
                                 <th class="text-left py-2">Dependencia</th>
                                 <th class="text-left py-2">Carácter</th>
-                                <th class="text-right py-2">Diferencia Total</th>
+                                <th class="text-right py-2">Diferencia Contribuciones</th>
+                                <th class="text-right py-2">Diferencia Aportes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -319,10 +320,17 @@
                                 <td class="py-2">{{ $diferencia->caracter }}</td>
                                 <td @class([
                                     'py-2 text-right font-medium',
-                                    'text-danger-600' => $diferencia->diferencia_total > 0,
-                                    'text-success-600' => $diferencia->diferencia_total <= 0,
+                                    'text-danger-600' => $diferencia->diferencia_contribuciones > 0,
+                                    'text-success-600' => $diferencia->diferencia_contribuciones <= 0,
                                 ])>
-                                    $ {{ number_format($diferencia->diferencia_total, 2, ',', '.') }}
+                                    $ {{ number_format($diferencia->diferencia_contribuciones, 2, ',', '.') }}
+                                </td>
+                                <td @class([
+                                    'py-2 text-right font-medium',
+                                    'text-danger-600' => $diferencia->diferencia_aportes > 0,
+                                    'text-success-600' => $diferencia->diferencia_aportes <= 0,
+                                ])>
+                                    $ {{ number_format($diferencia->diferencia_aportes, 2, ',', '.') }}
                                 </td>
                             </tr>
                             @endforeach

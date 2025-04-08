@@ -144,11 +144,18 @@ class SicossControlService
 
         return [
             'diferencias_de_aportes' => $this->obtenerDiferenciasDeAportes($year, $month),
-            'diferencias_por_dependencia' => [
-                'diferencias_aportes_dependencia' => $this->getDiferenciasAportesPorDependencia(),
-                'diferencias_contribuciones_dependencia' => $this->getDiferenciasContribucionesPorDependencia(),
-            ],
+            'diferencias_por_dependencia' => $this->getDiferenciasPorDependencia(),
             'totales' => $this->obtenerTotalesAportesContribuciones()
+        ];
+    }
+
+    protected function getDiferenciasPorDependencia()
+    {
+        $aportes = $this->getDiferenciasAportesPorDependencia();
+        $contribuciones = $this->getDiferenciasContribucionesPorDependencia();
+        return [
+                'diferencias_aportes_dependencia' => $aportes,
+                'diferencias_contribuciones_dependencia' => $contribuciones,
         ];
     }
 
@@ -244,11 +251,6 @@ class SicossControlService
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
             ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                 (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
-            ->whereNotIn('a.nro_legaj', function (Builder $query) use ($tablaNovedad) {
-                $query->select('nro_legaj')
-                    ->from($tablaNovedad)
-                    ->whereIn('codn_conce', [123, 248]);
-            })
             ->select([
                 'a.cuil',
                 DB::raw("aportesijpdh21::numeric(15,2) as aportesijpdh21"),
@@ -259,7 +261,8 @@ class SicossControlService
                 DB::raw("aporteinssjp::numeric(15,2) as aporteinssjp"),
                 DB::raw("contribucionsijp::numeric(15,2) as contribucionsijp"),
                 DB::raw("contribucioninssjp::numeric(15,2) as contribucioninssjp"),
-                DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                DB::raw("((
+                    aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                     (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric(15,2)
                     as diferencia")
             ])
@@ -294,45 +297,47 @@ class SicossControlService
     }
 
     /**
-     * Obtiene las diferencias de contribuciones por CUIL
-     *
-     * @param int|null $anio Año de la liquidación
-     * @param int|null $mes Mes de la liquidación
-     * @return array{
-     *   registros_procesados: int,
-     *   diferencias_encontradas: int,
-     *   fecha_proceso: string
-     * }
-     */
-    public function obtenerDiferenciasDeContribuciones(?int $anio = null, ?int $mes = null): array
-    {
-        // Si no se proporcionan parámetros, usar el periodo fiscal actual
-        if ($anio === null || $mes === null) {
-            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
-            $anio ??= $periodoFiscal['year'];
-            $mes ??= $periodoFiscal['month'];
-        }
+ * Obtiene las diferencias de contribuciones por CUIL
+ *
+ * @param int|null $anio Año de la liquidación
+ * @param int|null $mes Mes de la liquidación
+ * @return array Resultados del control
+ */
+public function obtenerDiferenciasDeContribuciones(?int $anio = null, ?int $mes = null): array
+{
+    // Si no se proporcionan parámetros, usar el periodo fiscal actual
+    if ($anio === null || $mes === null) {
+        $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+        $anio ??= $periodoFiscal['year'];
+        $mes ??= $periodoFiscal['month'];
+    }
 
-        // Primero limpiamos los registros anteriores
-        ControlContribucionesDiferencia::truncate();
+    // Primero limpiamos los registros anteriores
+    ControlContribucionesDiferencia::truncate();
 
+    try {
+        // Consulta mejorada siguiendo el patrón que funciona correctamente
         $diferencias = DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->whereRaw("abs(
+                ((contribucionsijpdh21 + contribucioninssjpdh21) - 
+                (contribucionsijp + contribucioninssjp))::numeric
+            ) > 1")
             ->select([
                 'a.cuil',
                 'a.nro_legaj',
-                DB::raw("contribucionsijpdh21::numeric(15,2) as contribucionsijpdh21"),
-                DB::raw("contribucioninssjpdh21::numeric(15,2) as contribucioninssjpdh21"),
-                DB::raw("contribucionsijp::numeric(15,2) as contribucionsijp"),
-                DB::raw("contribucioninssjp::numeric(15,2) as contribucioninssjp"),
-                DB::raw("((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                'a.contribucionsijpdh21',
+                'a.contribucioninssjpdh21',
+                'b.contribucionsijp',
+                'b.contribucioninssjp',
+                DB::raw("((contribucionsijpdh21 + contribucioninssjpdh21) - 
                     (contribucionsijp + contribucioninssjp))::numeric(15,2) as diferencia")
             ])
+            ->orderBy('diferencia', 'desc')
             ->get();
 
+        // Inserción masiva en la tabla de control
         $registrosParaInsertar = $diferencias->map(function ($diferencia) {
             return [
                 'cuil' => $diferencia->cuil,
@@ -353,7 +358,20 @@ class SicossControlService
             'diferencias_encontradas' => $diferencias->count(),
             'fecha_proceso' => now()->toDateTimeString()
         ];
+    } catch (\Exception $e) {
+        Log::error('Error al obtener diferencias de contribuciones', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return [
+            'error' => true,
+            'mensaje' => 'Error al procesar diferencias: ' . $e->getMessage(),
+            'fecha_proceso' => now()->toDateTimeString()
+        ];
     }
+}
+
 
 
     /**

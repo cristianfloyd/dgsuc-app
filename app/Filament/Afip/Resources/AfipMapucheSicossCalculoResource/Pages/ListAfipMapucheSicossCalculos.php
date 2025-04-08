@@ -34,29 +34,29 @@ class ListAfipMapucheSicossCalculos extends ListRecords
     protected function getHeaderActions(): array
 {
     return [
-        Action::make('updateUacadAndCaracter')
-            ->label('Actualizar UA/CAD y Carácter')
-            ->icon('heroicon-o-arrow-path')
-            ->button()
-            ->color('warning')
-            ->requiresConfirmation()
-            ->action(function() {
-                $result = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
+        // Action::make('updateUacadAndCaracter')
+        //     ->label('Actualizar UA/CAD y Carácter')
+        //     ->icon('heroicon-o-arrow-path')
+        //     ->button()
+        //     ->color('warning')
+        //     ->requiresConfirmation()
+        //     ->action(function() {
+        //         $result = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
 
-                if ($result['success']) {
-                    Notification::make()
-                        ->success()
-                        ->title('Actualización exitosa')
-                        ->body($result['message'])
-                        ->send();
-                } else {
-                    Notification::make()
-                        ->danger()
-                        ->title('Error en la actualización')
-                        ->body($result['message'])
-                        ->send();
-                }
-            }),
+        //         if ($result['success']) {
+        //             Notification::make()
+        //                 ->success()
+        //                 ->title('Actualización exitosa')
+        //                 ->body($result['message'])
+        //                 ->send();
+        //         } else {
+        //             Notification::make()
+        //                 ->danger()
+        //                 ->title('Error en la actualización')
+        //                 ->body($result['message'])
+        //                 ->send();
+        //         }
+        //     }),
         Action::make('truncateTable')
             ->label('Vaciar Tabla')
             ->icon('heroicon-o-trash')

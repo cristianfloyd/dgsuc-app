@@ -50,7 +50,12 @@ trait HasSicossControlTables
     {
         return [
             TextColumn::make('dh01.nro_legaj')
-                ->label('Legajo'),
+                ->label('Legajo')
+                ->searchable()
+                ->sortable()
+                ->copyable()
+                ->copyMessage('Legajo copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()
@@ -95,6 +100,12 @@ trait HasSicossControlTables
     protected function getContribucionesColumns(): array
     {
         return [
+            TextColumn::make('dh01.nro_legaj')
+                ->label('Legajo')
+                ->sortable()
+                ->copyable()
+                ->copyMessage('Legajo copiado')
+                ->copyMessageDuration(1500),
             TextColumn::make('cuil')
                 ->searchable()
                 ->sortable()
