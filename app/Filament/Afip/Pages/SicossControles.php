@@ -29,6 +29,7 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use App\Models\ControlContribucionesDiferencia;
 use App\Exports\Sicoss\AportesDiferenciasExport;
 use Filament\Tables\Concerns\InteractsWithTable;
+use App\Exports\Sicoss\ResumenDependenciasExport;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Resources\RelationManagers\RelationGroup;
@@ -269,22 +270,9 @@ class SicossControles extends Page implements HasTable
                         'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
                         'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
                     ],
-                    'diferencias_por_dependencia' => DB::connection($this->getConnectionName())
-                        ->table('dh21aporte as a')
-                        ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-                        ->select('b.codc_uacad', 'b.caracter')
-                        ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
-                            (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_total')
-                        ->selectRaw('SUM((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
-                            (b.contribucionsijp + b.contribucioninssjp))::numeric as diferencia_contribuciones')
-                        ->selectRaw('SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
-                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric as diferencia_aportes')
-                        ->whereRaw('ABS(((a.contribucionsijpdh21::numeric + a.contribucioninssjpdh21::numeric) -
-                            (b.contribucionsijp + b.contribucioninssjp))::numeric) > 1')
-                        ->groupBy('b.codc_uacad', 'b.caracter')
-                        ->orderBy('b.codc_uacad')
-                        ->orderBy('b.caracter')
-                        ->get(),
+                    'diferencias_por_dependencia' => app(SicossControlService::class)
+                        ->setConnection($this->getConnectionName())
+                        ->getDiferenciasPorDependencia(),
                     'totales_monetarios' => [
                         'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
                         'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
@@ -544,7 +532,7 @@ class SicossControles extends Page implements HasTable
             ->action(function () {
                 return $this->exportActiveTable();
             })
-            ->disabled(fn() => $this->activeTab === 'resumen');
+            ->disabled(fn() => false);
 
         return $actions;
     }
@@ -887,6 +875,12 @@ class SicossControles extends Page implements HasTable
     protected function exportActiveTable()
     {
         $data = match ($this->activeTab) {
+            'resumen' => [
+                'class' => ResumenDependenciasExport::class,
+                'filename' => 'resumen-diferencias-dependencias',
+                'title' => 'Diferencias por Dependencia',
+                'data' => collect($this->getResumenStats()['diferencias_por_dependencia'])
+            ],
             'diferencias_aportes' => [
                 'class' => AportesDiferenciasExport::class,
                 'filename' => 'diferencias-aportes',

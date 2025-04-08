@@ -12,16 +12,20 @@ class ControlContribucionesDiferencia extends Model
     use MapucheConnectionTrait;
 
     protected $table = 'suc.control_contribuciones_diferencias';
+    public $timestamps = true;
 
     protected $fillable = [
         'cuil',
+        'codc_uacad',
+        'caracter',
         'nro_legaj',
         'contribucionsijpdh21',
         'contribucioninssjpdh21',
         'contribucionsijp',
         'contribucioninssjp',
         'diferencia',
-        'fecha_control'
+        'fecha_control',
+        'connection'
     ];
 
     protected $casts = [
@@ -67,6 +71,24 @@ class ControlContribucionesDiferencia extends Model
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
+    }
+
+    // ################################################
+    // ################## ACCESORES ##################
+    // ################################################
+    
+    /**
+     * Calcula el total de contribuciones sumando los diferentes tipos de contribuciones.
+     * 
+     * @return Attribute Atributo calculado con la suma total de contribuciones
+     */
+    public function totalContribuciones(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp;
+            }
+        );
     }
 }
 

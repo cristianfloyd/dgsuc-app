@@ -12,7 +12,7 @@ class ControlAportesDiferencia extends Model
     use MapucheConnectionTrait;
 
     protected $table = 'suc.control_aportes_diferencias';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'cuil',

@@ -15,7 +15,7 @@ class AfipMapucheSicossCalculoUpdateService
     use DynamicConnectionTrait;
 
 
-    public function updateUacadAndCaracter(): array
+    public function updateUacadAndCaracter(string $table = 'afip_mapuche_sicoss_calculos'): array
     {
         try {
             $affected = DB::connection($this->getConnectionName())->update("
