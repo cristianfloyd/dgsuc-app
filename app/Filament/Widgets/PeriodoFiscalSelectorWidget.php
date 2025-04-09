@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Contracts\HasForms;
@@ -34,12 +35,28 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
     {
         $this->periodoFiscalService = $periodoFiscalService;
     }
+    /**
+     * Inicializa el widget cargando el período fiscal actual
+     */
     public function mount(): void
     {
-        $this->periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
-        $this->year = $this->periodoFiscal['year'];
-        $this->month = $this->periodoFiscal['month'];
-        $this->form->fill();
+        try {
+            // Obtenemos el período fiscal actual (el servicio ya verifica la sesión primero)
+            $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
+            
+            // Convertimos a enteros para los selectores
+            $this->year = (int)$periodoFiscal['year'];
+            $this->month = (int)$periodoFiscal['month'];
+            
+            $this->form->fill();
+            
+            Log::debug("Widget PeriodoFiscal montado con año: {$this->year}, mes: {$this->month}");
+        } catch (\Exception $e) {
+            Log::error("Error al montar el widget PeriodoFiscal: " . $e->getMessage());
+            // Valores predeterminados en caso de error
+            $this->year = Carbon::now()->year;
+            $this->month = Carbon::now()->month;
+        }
     }
 
     public function submit(): void

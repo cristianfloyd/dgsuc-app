@@ -375,7 +375,7 @@ class Dh22 extends Model
      * @param int $month
      * @return Builder
      */
-    public function scopePeriodoFiscal($query, int $year, int $month)
+    public function scopeFilterByYearMonth($query, int $year, int $month)
     {
         if ($year instanceof PeriodoFiscal) {
             return $query->where('per_liano', $year->year())
