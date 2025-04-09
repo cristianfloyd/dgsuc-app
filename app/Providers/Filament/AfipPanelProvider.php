@@ -18,6 +18,7 @@ use App\Filament\Afip\Pages\SicossReportePage;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -53,6 +54,7 @@ class AfipPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Afip/Widgets'), for: 'App\\Filament\\Afip\\Widgets')
             ->widgets([
+                PeriodoFiscalSelectorWidget::class,
                 Widgets\AccountWidget::class,
                 AfipRelacionesActivasStats::class,
             ])

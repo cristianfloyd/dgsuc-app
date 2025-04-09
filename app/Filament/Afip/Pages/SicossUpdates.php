@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use App\Services\Afip\SicossUpdateService;
 use Filament\Widgets\MultipleIdLiquiSelector;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Services\Afip\SicossEmbarazadasService;
 
 class SicossUpdates extends Page
 {
@@ -30,12 +31,17 @@ class SicossUpdates extends Page
     public $year;
     public $month;
     public bool $isHelpVisible = false;
+    public ?array $selectedliquiDefinitiva = null;
 
     protected PeriodoFiscalService $periodoFiscalService;
+    protected SicossEmbarazadasService $sicossEmbarazadasService;
 
-    public function boot(PeriodoFiscalService $periodoFiscalService): void
-    {
+    public function boot(
+        PeriodoFiscalService $periodoFiscalService,
+        SicossEmbarazadasService $sicossEmbarazadasService
+    ): void {
         $this->periodoFiscalService = $periodoFiscalService;
+        $this->sicossEmbarazadasService = $sicossEmbarazadasService;
     }
 
     public function mount()
@@ -63,6 +69,24 @@ class SicossUpdates extends Page
 
         // Limpiar resultados anteriores
         $this->updateResults = [];
+
+        // Obtener las liquidaciones para el nuevo período fiscal
+        $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
+            ->generaImpositivo()
+            ->pluck('nro_liqui', 'desc_liqui')
+            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
+            ->toArray();
+
+        // Actualizar la propiedad selectedIdLiqui
+        $this->selectedIdLiqui = $liquidaciones;
+
+        // Determinar la liquidación definitiva (ejemplo: la última liquidación)
+        $this->selectedliquiDefinitiva = Dh22::FilterByYearMonth($this->year, $this->month)
+            ->generaImpositivo()
+            ->definitiva()
+            ->pluck('nro_liqui', 'desc_liqui')
+            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
+            ->toArray();
 
         // Notificar al usuario
         Notification::make()
@@ -127,6 +151,77 @@ class SicossUpdates extends Page
         }
     }
 
+    /**
+     * Ejecuta la actualización de datos de embarazadas en SICOSS
+     */
+    public function runEmbarazadasUpdate(): void
+    {
+        $this->isProcessing = true;
+
+        try {
+            // Obtener las liquidaciones para el período fiscal seleccionado
+            $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
+                ->generaImpositivo()
+                ->pluck('nro_liqui')
+                ->toArray();
+
+            if (empty($liquidaciones)) {
+                Notification::make()
+                    ->title('Sin liquidaciones')
+                    ->warning()
+                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                    ->send();
+                $this->isProcessing = false;
+                return;
+            }
+
+            // Ejecutar la actualización de embarazadas
+            $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas([
+                'year' => $this->year,
+                'month' => $this->month,
+                'liquidaciones' => $liquidaciones,
+                'nro_liqui' => $liquidaciones[0] // Usar la primera liquidación
+            ]);
+
+            // Guardar resultados para mostrar en la vista
+            $this->updateResults = $resultado;
+
+            // Mostrar notificación según el resultado
+            if ($resultado['status'] === 'success') {
+                Notification::make()
+                    ->title('Actualización de embarazadas completada')
+                    ->success()
+                    ->body($resultado['message'])
+                    ->send();
+            } elseif ($resultado['status'] === 'warning') {
+                Notification::make()
+                    ->title('Advertencia')
+                    ->warning()
+                    ->body($resultado['message'])
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en actualización de embarazadas', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            Notification::make()
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+        } finally {
+            $this->isProcessing = false;
+        }
+    }
+
     protected function getActions(): array
     {
         return [
@@ -138,6 +233,19 @@ class SicossUpdates extends Page
                 ->modalDescription('¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
                     $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
                     '? Este proceso puede tomar varios minutos.'),
+
+            Action::make('run_embarazadas_update')
+                ->label('Actualizar Embarazadas')
+                ->color('warning')
+                ->icon('heroicon-o-user-group')
+                ->action('runEmbarazadasUpdate')
+                ->disabled($this->isProcessing)
+                ->requiresConfirmation()
+                ->modalHeading('Actualizar Situación de Embarazadas')
+                ->modalDescription('¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
+                    $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
+                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'),
+
             Action::make('show_help')
                 ->label(fn () => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
                 ->icon(fn () => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
@@ -145,43 +253,5 @@ class SicossUpdates extends Page
                     $this->isHelpVisible = !$this->isHelpVisible;
                 })
         ];
-    }
-
-    public function showHelp(): void
-    {
-        // Este método puede ser usado para mostrar un modal con la ayuda
-    }
-
-    protected function getHelpContent(): string
-    {
-        return <<<HTML
-        <h2>Descripción General</h2>
-        <p>La herramienta de actualización SICOSS permite a los usuarios actualizar y verificar datos necesarios para la generación de archivos SICOSS. Este proceso asegura que los datos de los agentes estén correctamente categorizados.</p>
-        <h3>Acceso al Sistema</h3>
-        <ul>
-            <li><strong>Ruta de Acceso</strong>: /afip-panel/sicoss-updates</li>
-            <li><strong>Navegación</strong>: AFIP > Actualización SICOSS</li>
-            <li><strong>Permisos</strong>: Necesitas acceso al panel AFIP para utilizar esta herramienta.</li>
-        </ul>
-        <h3>Proceso de Actualización</h3>
-        <ol>
-            <li><strong>Seleccionar Liquidaciones</strong>: Usa el widget de selección para elegir las liquidaciones que deseas procesar. Filtra por período fiscal si es necesario.</li>
-            <li><strong>Ejecutar Actualizaciones</strong>: Haz clic en "Ejecutar Actualizaciones" para iniciar el proceso. El sistema determinará automáticamente si debe usar tablas actuales o históricas.</li>
-            <li><strong>Revisar Resultados</strong>: Observa el progreso y los resultados detallados. Verifica si hay agentes sin código de actividad.</li>
-        </ol>
-        <h3>Resultados y Feedback</h3>
-        <ul>
-            <li><strong>Indicador de Progreso</strong>: Muestra el avance del proceso.</li>
-            <li><strong>Resultados Detallados</strong>: Incluye un listado de liquidaciones seleccionadas y agentes sin actividad.</li>
-            <li><strong>Notificaciones</strong>: Recibirás mensajes de éxito o error al finalizar el proceso.</li>
-        </ul>
-        <h3>Consideraciones Técnicas</h3>
-        <ul>
-            <li><strong>Seguridad</strong>: El acceso está controlado mediante permisos en el panel.</li>
-            <li><strong>Performance</strong>: El sistema está optimizado para procesar grandes cantidades de datos de manera eficiente.</li>
-        </ul>
-        <h3>Soporte</h3>
-        <p>Para asistencia adicional, contacta al equipo de soporte técnico a través del panel de ayuda en el sistema.</p>
-        HTML;
     }
 }
