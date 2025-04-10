@@ -33,7 +33,7 @@ trait MapucheConnectionTrait
         // Determinamos la conexión predeterminada
         $defaultConnection = defined('DatabaseConnectionService::DEFAULT_CONNECTION')
             ? DatabaseConnectionService::DEFAULT_CONNECTION
-            : 'pgsql-prod';
+            : 'pgsql-mapuche';
 
         // Registramos información de depuración
         // Log::debug('MapucheConnectionTrait::getConnectionName', [

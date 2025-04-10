@@ -17,6 +17,7 @@ use App\Traits\SicossConnectionTrait;
 use Filament\Support\Enums\Alignment;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\SicossControlService;
+use App\Traits\MapucheConnectionTrait;
 use App\Exports\Sicoss\ConceptosExport;
 use App\Models\ControlConceptosPeriodo;
 use Filament\Tables\Columns\TextColumn;
@@ -41,9 +42,14 @@ use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
 
 class SicossControles extends Page implements HasTable
 {
-    use InteractsWithTable;
-    use SicossConnectionTrait;
+    use InteractsWithTable {
+        InteractsWithTable::getTable insteadof MapucheConnectionTrait;
+    }
+    // use SicossConnectionTrait;
     use HasSicossControlTables;
+    use MapucheConnectionTrait {
+        MapucheConnectionTrait::getTable as getMapucheTable;
+    }
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
     protected static ?string $navigationGroup = 'SICOSS';
@@ -454,6 +460,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControlAportes')
                     ->label('Ejecutar Control de Aportes')
                     ->icon('heroicon-o-calculator')
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->requiresConfirmation()
                     ->modalHeading('¿Ejecutar control de aportes?')
                     ->modalDescription('Esta acción ejecutará el control específico de aportes.')
@@ -465,6 +472,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControlContribuciones')
                     ->label('Ejecutar Control de Contribuciones')
                     ->icon('heroicon-o-banknotes')
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->requiresConfirmation()
                     ->modalHeading('¿Ejecutar control de contribuciones?')
                     ->modalDescription('Esta acción ejecutará el control específico de contribuciones.')
@@ -476,6 +484,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControlCuils')
                     ->label('Ejecutar Control de CUILs')
                     ->icon('heroicon-o-user-group')
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->requiresConfirmation()
                     ->modalHeading('¿Ejecutar control de CUILs?')
                     ->modalDescription('Esta acción verificará los CUILs que existen en un sistema pero no en el otro.')
@@ -487,6 +496,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControlConceptos')
                     ->label('Ejecutar Control de Conceptos')
                     ->icon('heroicon-o-document-text')
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->requiresConfirmation()
                     ->modalHeading('¿Ejecutar control de conceptos?')
                     ->modalDescription('Esta acción ejecutará el control de conceptos por período fiscal.')
@@ -733,9 +743,15 @@ class SicossControles extends Page implements HasTable
                 '348'
             ];
 
+            Log::info('Ejecutando control de conceptos', [
+                'connection' => $connection,
+                'year' => $this->year,
+                'month' => $this->month,
+            ]);
+
             // Ejecutar la consulta
             $resultados = DB::connection($connection)
-                ->table('mapuche.dh21h as h21')
+                ->table(DB::raw('(SELECT * FROM mapuche.dh21 UNION ALL SELECT * FROM mapuche.dh21h) as h21'))
                 ->join('mapuche.dh12 as h12', function ($join) {
                     $join->on('h21.codn_conce', '=', 'h12.codn_conce');
                 })

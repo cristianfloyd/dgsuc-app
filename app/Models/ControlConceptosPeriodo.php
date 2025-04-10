@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Dh12;
+use App\Enums\TipoConce;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ControlConceptosPeriodo extends Model
@@ -29,6 +32,49 @@ class ControlConceptosPeriodo extends Model
         'month' => 'integer',
         'importe' => 'decimal:2',
     ];
+
+    protected $appends = [
+        'tipo_concepto',
+        'es_aporte',
+        'es_contribucion'
+    ];
+
+    /**
+     * Obtiene el concepto relacionado de la tabla DH12
+     */
+    public function dh12(): BelongsTo
+    {
+        return $this->belongsTo(Dh12::class, 'codn_conce', 'codn_conce')
+            ->withoutGlobalScopes(); // Para asegurar que no se apliquen scopes globales que puedan afectar la relación
+    }
+
+    /**
+     * Determina si el concepto es de tipo Aporte
+     */
+    public function getEsAporteAttribute(): bool
+    {
+        return str_starts_with($this->codn_conce, '2');
+    }
+
+    /**
+     * Determina si el concepto es de tipo Contribución
+     */
+    public function getEsContribucionAttribute(): bool
+    {
+        return str_starts_with($this->codn_conce, '3');
+    }
+
+    /**
+     * Obtiene el tipo de concepto como string
+     */
+    public function getTipoConceptoAttribute(): string
+    {
+        return match (substr($this->codn_conce, 0, 1)) {
+            '2' => 'Aportes',
+            '3' => 'Contribuciones',
+            default => 'Otro'
+        };
+    }
 
     /**
      * Scope para filtrar por período fiscal

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Dh13;
+use App\Models\Dh14;
 use App\Enums\TipoNove;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\MapucheLiquiConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 
 class Dh12 extends Model
 {
@@ -51,13 +53,38 @@ class Dh12 extends Model
      */
     protected $fillable = [
         'codn_conce',
-        'vig_coano', 'vig_comes', 'desc_conce', 'desc_corta', 'tipo_conce',
-        'codc_vige1', 'desc_nove1', 'tipo_nove1', 'cant_ente1', 'cant_deci1',
-        'codc_vige2', 'desc_nove2', 'tipo_nove2', 'cant_ente2', 'cant_deci2',
-        'flag_acumu', 'flag_grupo', 'nro_orcal', 'nro_orimp', 'sino_legaj',
-        'tipo_distr', 'tipo_ganan', 'chk_acumsac', 'chk_acumproy', 'chk_dcto3',
-        'chkacumprhbrprom', 'subcicloliquida', 'chkdifhbrcargoasoc',
-        'chkptesubconcep', 'chkinfcuotasnovper', 'genconimp0', 'sino_visible'
+        'vig_coano',
+        'vig_comes',
+        'desc_conce',
+        'desc_corta',
+        'tipo_conce',
+        'codc_vige1',
+        'desc_nove1',
+        'tipo_nove1',
+        'cant_ente1',
+        'cant_deci1',
+        'codc_vige2',
+        'desc_nove2',
+        'tipo_nove2',
+        'cant_ente2',
+        'cant_deci2',
+        'flag_acumu',
+        'flag_grupo',
+        'nro_orcal',
+        'nro_orimp',
+        'sino_legaj',
+        'tipo_distr',
+        'tipo_ganan',
+        'chk_acumsac',
+        'chk_acumproy',
+        'chk_dcto3',
+        'chkacumprhbrprom',
+        'subcicloliquida',
+        'chkdifhbrcargoasoc',
+        'chkptesubconcep',
+        'chkinfcuotasnovper',
+        'genconimp0',
+        'sino_visible'
     ];
 
     /**
@@ -78,6 +105,7 @@ class Dh12 extends Model
         'chkptesubconcep' => 'boolean',
         'chkinfcuotasnovper' => 'boolean',
         'genconimp0' => 'boolean',
+        'flag_acumu' => 'string'
     ];
 
     protected static function boot()
@@ -131,6 +159,42 @@ class Dh12 extends Model
         return $this->hasMany(Dh13::class, 'codn_conce', 'codn_conce');
     }
 
+    /**
+     * Obtiene los números de acumuladores activos basados en el campo flag_acumu
+     *
+     * @return array<int> Array de números de acumuladores activos
+     */
+    public function getAcumuladoresActivosAttribute(): array
+    {
+        if (empty($this->flag_acumu)) {
+            return [];
+        }
+
+        $acumuladores = [];
+        $flags = str_split($this->flag_acumu);
+        foreach ($flags as $posicion => $valor) {
+            if (strtoupper($valor) === 'S') {
+                // La posición es 0-based, pero los acumuladores son 1-based
+                $acumuladores[] = $posicion + 1;
+            }
+        }
+        return $acumuladores;
+    }
+
+    /**
+     * Obtiene los Dh14 (Acumuladores) asociados con este Dh12 basado en flag_acumu.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dh14s(): HasMany
+    {
+        return $this->hasMany(Dh14::class, 'nro_acumu', 'nro_acumu')
+            ->whereIn('nro_acumu', function (Builder $query) {
+                $query->selectRaw('generate_series(1, length(?)) as pos', [$this->flag_acumu])
+                    ->whereRaw('substring(?, pos, 1) = ?', [$this->flag_acumu, 'S']);
+            });
+    }
+
 
     // ######################## ACCESORES ########################
     /**
@@ -140,8 +204,8 @@ class Dh12 extends Model
     {
 
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value)
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value)
         );
     }
 
@@ -193,7 +257,7 @@ class Dh12 extends Model
 
         // Análisis byte por byte
         $bytes = str_split($registro->desc_conce);
-        $analisis_bytes = array_map(function($byte) {
+        $analisis_bytes = array_map(function ($byte) {
             return [
                 'byte' => bin2hex($byte),
                 'ascii' => ord($byte)

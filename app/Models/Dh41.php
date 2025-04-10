@@ -7,14 +7,53 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/*
+* (D) Ganancias: Acum. de Empleados
+*/
 class Dh41 extends Model
 {
 	use HasFactory, MapucheConnectionTrait;
-	protected $table = 'dh41';
+	
+	/**
+	 * Nombre de la tabla en la base de datos
+	 * @var string
+	 */
+	protected $table = 'mapuche.dh41';
+	
+	/**
+	 * Tipo de la clave primaria
+	 * @var string
+	 */
 	protected $keyType = 'integer';
+	
+	/**
+	 * Clave primaria de la tabla
+	 * @var string
+	 */
 	protected $primaryKey = 'nro_legaj';
+	
+	/**
+	 * Indica si la clave primaria es autoincremental
+	 * @var bool
+	 */
 	public $incrementing = false;
+	
+	/**
+	 * Indica que el modelo no usa timestamps
+	 * @var bool
+	 */
+	public $timestamps = false;
+	
+	/**
+	 * Define las claves primarias compuestas
+	 * @var array
+	 */
+	protected $compositePrimaryKey = ['nro_legaj', 'per_anoga', 'per_mesga'];
 
+	/**
+	 * Atributos que son asignables en masa
+	 * @var array
+	 */
 	protected $fillable = [
 		'nro_legaj',
 		'per_anoga',
@@ -142,10 +181,27 @@ class Dh41 extends Model
 		'imp_sinun_sac',
 		'imp_gtoeduc_inst',
 		'imp_gtoeduc_otact',
-		'imp_gtoeduc_acum'
+		'imp_gtoeduc_acum',
+		'imp_locatario',
+		'imp_locador'
 	];
-	public $timestamps = false;
 
+	/**
+	 * Sobreescribe el método para obtener la clave primaria
+	 * para manejar claves primarias compuestas
+	 * 
+	 * @return array
+	 */
+	public function getKeyName()
+	{
+		return $this->compositePrimaryKey;
+	}
+
+	/**
+	 * Relación con la tabla dh22
+	 * 
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
 	public function dh22()
 	{
 		return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');

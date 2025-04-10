@@ -31,6 +31,7 @@ class SicossControlService
     public function setConnection(string $connection): self
     {
         $this->connection = $connection;
+        Log::info('Conexión establecida en SicossControlService', ['connection' => $this->connection]);
         return $this;
     }
 
@@ -311,7 +312,7 @@ class SicossControlService
                 ->table('dh21aporte as a')
                 ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
                 ->whereRaw("abs(
-                ((contribucionsijpdh21 + contribucioninssjpdh21) - 
+                ((contribucionsijpdh21 + contribucioninssjpdh21) -
                 (contribucionsijp + contribucioninssjp))::numeric
             ) > 1")
                 ->select([
@@ -323,7 +324,7 @@ class SicossControlService
                     'a.contribucioninssjpdh21',
                     'b.contribucionsijp',
                     'b.contribucioninssjp',
-                    DB::raw("((contribucionsijpdh21 + contribucioninssjpdh21) - 
+                    DB::raw("((contribucionsijpdh21 + contribucioninssjpdh21) -
                     (contribucionsijp + contribucioninssjp))::numeric(15,2) as diferencia")
                 ])
                 ->orderBy('diferencia', 'desc')
@@ -473,12 +474,12 @@ class SicossControlService
     {
         return DB::connection($this->connection)
             ->select("
-                SELECT 
+                SELECT
                     CASE
                         WHEN d.codc_uacad IS NOT NULL THEN d.codc_uacad
                         ELSE c.codc_uacad
                     END AS codc_uacad,
-                    CASE 
+                    CASE
                         WHEN d.caracter IS NOT NULL THEN d.caracter
                         ELSE c.caracter
                     END AS caracter,
