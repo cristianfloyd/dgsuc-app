@@ -12,11 +12,11 @@ use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Traits\CharacterEncodingTrait;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\MapucheLiquiConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 
 class Dh12 extends Model
 {
@@ -183,16 +183,10 @@ class Dh12 extends Model
 
     /**
      * Obtiene los Dh14 (Acumuladores) asociados con este Dh12 basado en flag_acumu.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function dh14s(): HasMany
+    public function dh14s()
     {
-        return $this->hasMany(Dh14::class, 'nro_acumu', 'nro_acumu')
-            ->whereIn('nro_acumu', function (Builder $query) {
-                $query->selectRaw('generate_series(1, length(?)) as pos', [$this->flag_acumu])
-                    ->whereRaw('substring(?, pos, 1) = ?', [$this->flag_acumu, 'S']);
-            });
+        return Dh14::query()->whereIn('nro_acumu', $this->getAcumuladoresActivosAttribute());
     }
 
 

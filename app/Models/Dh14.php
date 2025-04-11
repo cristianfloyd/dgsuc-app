@@ -6,6 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * Modelo para la tabla de Acumuladores del sistema Mapuche
@@ -61,6 +62,16 @@ class Dh14 extends Model
         'observacion' => 'string',
         'desc_acumu' => 'string'
     ];
+
+    /**
+     * Accessor para limpiar los espacios en blanco del campo desc_acumu
+     */
+    protected function descAcumu(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $value ? trim($value) : null,
+        );
+    }
 
     /**
      * Obtiene los conceptos (Dh12) que utilizan este acumulador.

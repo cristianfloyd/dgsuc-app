@@ -89,11 +89,14 @@
     @endif
 
     {{-- Acumuladores del Concepto --}}
-    @if($record->dh12 && $record->dh12->dh14s && $record->dh12->dh14s->count() > 0)
+    @php
+        $acumuladores = $record->dh12->dh14s()->get();
+    @endphp
+    @if($acumuladores->count() > 0)
     <div class="rounded-xl bg-gray-50 p-4 mt-4 dark:bg-gray-800">
         <h3 class="text-lg font-medium">Acumuladores</h3>
         <div class="mt-2 space-y-4">
-            @foreach($record->dh12->dh14s as $acumulador)
+            @foreach($acumuladores as $acumulador)
             <div class="border-l-4 border-green-500 pl-4">
                 <div class="text-sm">
                     <div class="font-medium text-gray-700 dark:text-gray-300">
@@ -105,10 +108,12 @@
                         <span class="text-gray-900 dark:text-gray-200">{{ $acumulador->desc_acumu }}</span>
                     </div>
                     @endif
+                    @if($acumulador->observacion)
                     <div class="mt-1">
-                        <span class="font-medium text-gray-500 dark:text-gray-400">Tipo:</span>
-                        <span class="text-gray-900 dark:text-gray-200">{{ $acumulador->tipo_acumu->getDescripcion() }}</span>
+                        <span class="font-medium text-gray-500 dark:text-gray-400">Observación:</span>
+                        <span class="text-gray-900 dark:text-gray-200">{{ $acumulador->observacion }}</span>
                     </div>
+                    @endif
                 </div>
             </div>
             @endforeach

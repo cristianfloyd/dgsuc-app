@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Session;
 class DatabaseConnectionService
 {
     public const SESSION_KEY = 'selected_db_connection';
-    public const DEFAULT_CONNECTION = 'pgsql-prod';
+    public const DEFAULT_CONNECTION = 'pgsql-mapuche';
 
     /**
      * Obtener todas las conexiones disponibles para el selector
