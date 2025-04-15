@@ -14,7 +14,7 @@ La herramienta de actualización SICOSS permite a los usuarios actualizar y veri
 
 ### Página de Actualización SICOSS
 
-- **Funcionalidad**: 
+- **Funcionalidad**:
   - Proporciona un botón para ejecutar actualizaciones.
   - Muestra resultados y feedback del proceso.
   - Permite seleccionar múltiples liquidaciones para procesar.
@@ -28,7 +28,7 @@ La herramienta de actualización SICOSS permite a los usuarios actualizar y veri
 
 ## Proceso de Actualización
 
-1. **Seleccionar Liquidaciones**: 
+1. **Seleccionar Liquidaciones**:
    - Usa el widget de selección para elegir las liquidaciones que deseas procesar.
    - Filtra por período fiscal si es necesario.
 
@@ -53,4 +53,4 @@ La herramienta de actualización SICOSS permite a los usuarios actualizar y veri
 
 ## Soporte
 
-Para asistencia adicional, contacta al equipo de soporte técnico a través del panel de ayuda en el sistema. 
+Para asistencia adicional, contacta al equipo de soporte técnico a través del panel de ayuda en el sistema.
