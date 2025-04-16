@@ -27,9 +27,11 @@ enum PuestoDesempenado: string
     {
         return match($this) {
             self::DIRECTIVO => 'Autoridades Superiores',
-            self::PROFESOR_UNIVERSITARIO, self::PROFESOR_SECUNDARIO => 'Docentes',
+            self::PROFESOR_UNIVERSITARIO, 
+            self::PROFESOR_SECUNDARIO => 'Docentes',
             self::NODOCENTE => 'NoDocentes',
-            self::MEDICO, self::ENFERMERO => 'Asistenciales',
+            self::MEDICO, 
+            self::ENFERMERO => 'Asistenciales',
         };
     }
 

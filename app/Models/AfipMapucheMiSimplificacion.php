@@ -25,6 +25,7 @@ class AfipMapucheMiSimplificacion extends Model
 
     protected $primaryKey = 'id';
     public $incrementing = true;
+    public $timestamps = false;
 
     // Campos que se pueden asignar masivament
     protected $fillable = [
@@ -72,6 +73,16 @@ class AfipMapucheMiSimplificacion extends Model
             if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
                 $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
             }
+            
+            // Determinar puesto si es necesario
+            if ($model->attributes['puesto'] === null && $model->attributes['categoria']) {
+                $puestoEnum = $model->determinarPuestoDesempenado($model->attributes['categoria']);
+                if ($puestoEnum) {
+                    // Actualizar el campo puesto en la base de datos
+                    $model->puesto = $puestoEnum->value;
+                    $model->save();
+                }
+            }
         });
     }
 
@@ -104,21 +115,30 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) {
-                    return null;
+                // Inicializar la variable para evitar problemas de scope
+                $puestoEnum = null;
+                
+                // Caso 1: Si tenemos un valor de puesto en la base de datos
+                if ($value) {
+                    // Primero intentamos determinar el puesto a partir del valor
+                    $puestoEnum = $this->determinarPuestoDesempenado($value);
+                    
+                    // Si no funciona, intentamos convertir directamente
+                    if (!$puestoEnum) {
+                        $puestoEnum = PuestoDesempenado::tryFrom($value);
+                    }
+                } 
+                // Caso 2: Si no tenemos puesto pero sí categoría, intentamos determinar el puesto
+                elseif ($this->attributes['categoria']) {
+                    $puestoEnum = $this->determinarPuestoDesempenado($this->attributes['categoria']);
                 }
-
-                $puestoEnum = $this->determinarPuestoDesempenado($value);
-
-                if (!$puestoEnum) {
-                    $puestoEnum = PuestoDesempenado::tryFrom($value);
-                }
-
+                
                 return $puestoEnum;
             },
             set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
         );
     }
+
 
     /**
      * Accessor para la descripción del puesto

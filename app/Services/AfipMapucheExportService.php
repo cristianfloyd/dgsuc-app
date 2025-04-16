@@ -4,8 +4,8 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Models\AfipMapucheMiSimplificacion;
 use App\Contracts\ExportServiceInterface;
+use App\Models\AfipMapucheMiSimplificacion;
 
 class AfipMapucheExportService implements ExportServiceInterface
 {
@@ -88,8 +88,6 @@ class AfipMapucheExportService implements ExportServiceInterface
             $line .= $value;
         }
 
-
-
         return $line;
     }
 
@@ -121,11 +119,18 @@ class AfipMapucheExportService implements ExportServiceInterface
 
         // Valores fijos
         if ($field === 'nro_form_agro') {
-            $value = '9999999999';
+            $value = '          ';
+        }
+        if ($field === 'categoria') {
+            $value = '999999';
         }
 
         if ($field === 'ccct') {
             $value = '9999/99';
+        }
+
+        if ($field === 'covid') {
+            $value = ' ';
         }
 
         // Formateo de domicilio (5 dígitos con ceros a la izquierda)

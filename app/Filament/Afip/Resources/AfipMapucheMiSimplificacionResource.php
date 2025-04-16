@@ -11,6 +11,7 @@ use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Repositories\CuilRepository;
 use App\Models\AfipRelacionesActivas;
 use Filament\Forms\Components\Select;
@@ -199,10 +200,25 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                     ->toArray();
                             })
                             ->required()
+                            ->searchable(),
+                        Select::make('nro_liqui')
+                            ->label('Número de Liquidación')
+                            ->options(function () {
+                                // Obtener los números de liquidación disponibles
+                                return DB::connection('pgsql-prod')
+                                    ->table('mapuche.dh22')
+                                    ->distinct()
+                                    ->pluck('nro_liqui', 'nro_liqui')
+                                    ->toArray();
+                            })
+                            ->required()
                             ->searchable()
                     ])
                     ->action(function (array $data, CuilRepository $cuilRepository) {
                         try {
+                            // Iniciar una transacción para asegurar la integridad de los datos
+                            DB::connection('pgsql-prod')->beginTransaction();
+                            
                             // Obtener CUILs que no están en RelacionesActivas
                             $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
 
@@ -211,19 +227,21 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                     ->warning()
                                     ->title('No hay CUILs para procesar')
                                     ->send();
+                                DB::rollBack();
                                 return;
                             }
 
-                            // Ejecutar la función almacenada para cada CUIL
-                            DB::connection('mapuche')->transaction(function () use ($data, $cuils) {
-                                // Asumiendo que necesitas el nro_liqui, podrías obtenerlo de alguna forma
-                                $nroLiqui = 1; // Ajusta según necesites
+                            // Utilizar el método del modelo para ejecutar la función almacenada
+                            $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
+                                $data['nro_liqui'], 
+                                $data['periodo_fiscal']
+                            );
 
-                                DB::statement('
-                                    SELECT suc.get_mi_simplificacion_tt(?, ?)',
-                                    [$nroLiqui, $data['periodo_fiscal']]
-                                );
-                            });
+                            if (!$resultado) {
+                                throw new \Exception('Error al ejecutar la función almacenada');
+                            }
+
+                            DB::connection('pgsql-prod')->commit();
 
                             Notification::make()
                                 ->success()
@@ -232,6 +250,15 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 ->send();
 
                         } catch (\Exception $e) {
+                            DB::connection('pgsql-prod')->rollBack();
+                            
+                            // Registrar el error para diagnóstico
+                            Log::error('Error al poblar Mi Simplificación', [
+                                'mensaje' => $e->getMessage(),
+                                'traza' => $e->getTraceAsString(),
+                                'datos' => $data
+                            ]);
+                            
                             Notification::make()
                                 ->danger()
                                 ->title('Error')

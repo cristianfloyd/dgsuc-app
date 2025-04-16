@@ -15,6 +15,8 @@ trait HasPuestoDesempenado
     {
         if (!$categoria) return null;
 
+        $categoria = trim($categoria);
+
         // Obtener el grupo de la categoría usando el método del trait
         $grupo = $this->getGroupByCategory($categoria);
 
