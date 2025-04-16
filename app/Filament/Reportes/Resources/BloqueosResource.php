@@ -7,6 +7,8 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Enums\BloqueosEstadoEnum;
+use App\Exports\FallecidosExport;
+use Filament\Actions\ActionGroup;
 use Illuminate\Support\Collection;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
@@ -305,6 +307,47 @@ class BloqueosResource extends Resource
                             ->send();
                     })
                     ->deselectRecordsAfterCompletion()
+            ])
+            ->headerActions([
+                Action::make('export_fallecidos')
+                ->label('Exportar Fallecidos')
+                ->icon('heroicon-o-document-arrow-down')
+                ->action(function () {
+                    // Verificamos si hay registros en cualquiera de las dos fuentes
+                    $hayFallecidosBloqueos = static::$model::query()
+                        ->where('tipo', 'fallecido')
+                        ->exists();
+
+                    $hayFallecidosRep = \App\Models\RepFallecido::query()
+                        ->exists();
+
+                    if (!$hayFallecidosBloqueos && !$hayFallecidosRep) {
+                        Notification::make()
+                            ->title('No hay registros de fallecidos para exportar')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
+
+                    Notification::make()
+                        ->title('Exportando registros de fallecidos')
+                        ->body('El archivo contendrá dos hojas: Fallecidos por Bloqueos y Fallecidos del Sistema')
+                        ->success()
+                        ->send();
+
+                    return Excel::download(
+                        new FallecidosExport(
+                            $hayFallecidosBloqueos ? static::$model::query()
+                                ->where('tipo', 'fallecido')
+                                ->get() : null,
+                            $hayFallecidosRep ? \App\Models\RepFallecido::query()
+                                ->get() : null,
+                            now()->format('Ym')
+                        ),
+                        'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx'
+                    );
+                })
             ])
             ->deferLoading();
     }

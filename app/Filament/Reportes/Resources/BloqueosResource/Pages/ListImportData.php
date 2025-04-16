@@ -106,15 +106,15 @@ class ListImportData extends ListRecords
                 ->modalHeading('¿Procesar bloqueos?')
                 ->modalDescription('Esta acción realizará los siguientes pasos:
 
-1. Creará un respaldo de la tabla DH03 actual
-2. Filtrará los registros validados correctamente
-3. Para cada registro validado:
-   - Actualizará o creará el bloqueo en DH03
-   - Registrará la fecha de proceso
-   - Actualizará el estado del registro
-4. Generará un resumen de las operaciones realizadas
+                    1. Creará un respaldo de la tabla DH03 actual
+                    2. Filtrará los registros validados correctamente
+                    3. Para cada registro validado:
+                       - Actualizará o creará el bloqueo en DH03
+                       - Registrará la fecha de proceso
+                       - Actualizará el estado del registro
+                    4. Generará un resumen de las operaciones realizadas
 
-Nota: Solo se procesarán los registros en estado "validado".')
+                    Nota: Solo se procesarán los registros en estado "validado".')
                 ->action(function () {
                     try {
                         $service = new BloqueosProcessService();
