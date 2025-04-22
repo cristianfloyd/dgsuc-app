@@ -310,44 +310,43 @@ class BloqueosResource extends Resource
             ])
             ->headerActions([
                 Action::make('export_fallecidos')
-                ->label('Exportar Fallecidos')
-                ->icon('heroicon-o-document-arrow-down')
-                ->action(function () {
-                    // Verificamos si hay registros en cualquiera de las dos fuentes
-                    $hayFallecidosBloqueos = static::$model::query()
-                        ->where('tipo', 'fallecido')
-                        ->exists();
+                    ->label('Exportar Fallecidos')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        // Obtener registros de fallecidos por bloqueos
+                        $registrosBloqueos = static::$model::query()
+                            ->where('tipo', 'fallecido')
+                            ->with(['dh01','cargo'])
+                            ->get();
 
-                    $hayFallecidosRep = \App\Models\RepFallecido::query()
-                        ->exists();
 
-                    if (!$hayFallecidosBloqueos && !$hayFallecidosRep) {
+                        // Obtener registros de fallecidos del sistema
+                        $registrosRep = \App\Models\RepFallecido::query()
+                            ->get();
+
+                        if (!$registrosBloqueos && !$registrosRep) {
+                            Notification::make()
+                                ->title('No hay registros de fallecidos para exportar')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
                         Notification::make()
-                            ->title('No hay registros de fallecidos para exportar')
-                            ->warning()
+                            ->title('Exportando registros de fallecidos')
+                            ->body('El archivo contendrá dos hojas: Fallecidos por Bloqueos y Fallecidos del Sistema')
+                            ->success()
                             ->send();
 
-                        return;
-                    }
-
-                    Notification::make()
-                        ->title('Exportando registros de fallecidos')
-                        ->body('El archivo contendrá dos hojas: Fallecidos por Bloqueos y Fallecidos del Sistema')
-                        ->success()
-                        ->send();
-
-                    return Excel::download(
-                        new FallecidosExport(
-                            $hayFallecidosBloqueos ? static::$model::query()
-                                ->where('tipo', 'fallecido')
-                                ->get() : null,
-                            $hayFallecidosRep ? \App\Models\RepFallecido::query()
-                                ->get() : null,
-                            now()->format('Ym')
-                        ),
-                        'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx'
-                    );
-                })
+                        return Excel::download(
+                            new FallecidosExport(
+                                $registrosBloqueos,
+                                '202503'
+                            ),
+                            'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx'
+                        );
+                    })
             ])
             ->deferLoading();
     }

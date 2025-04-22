@@ -83,6 +83,12 @@
                                         </x-button>
                                     </div>
                                 </form>
+
+                                <div class="mt-6">
+                                    <a href="{{ route('auth.office365') }}" class="w-full justify-center inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ease-in-out duration-150">
+                                        {{ __('Login with Microsoft') }}
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

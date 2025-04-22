@@ -3,6 +3,7 @@
 namespace App\Models\Reportes;
 
 use Carbon\Carbon;
+use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Dh90;
 use App\Enums\LegajoCargo;
@@ -224,6 +225,11 @@ class BloqueosDataModel extends Model
 
     /* ####################################################################################################
     ###########################################  RELACIONES ############################################### */
+
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
 
     public function cargo(): BelongsTo
     {

@@ -21,8 +21,7 @@ class FallecidosExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new FallecidosBloqueoSheet($this->periodo),
-            new RepFallecidosSheet($this->periodo)
+            'bloqueos' => new FallecidosBloqueoSheet($this->records, $this->periodo)
         ];
     }
 }

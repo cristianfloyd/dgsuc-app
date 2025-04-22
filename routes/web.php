@@ -31,6 +31,7 @@ use App\Http\Controllers\UsersController;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\Auth\Office365Controller;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
 use App\Http\Controllers\BloqueosHistorialController;
 use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
@@ -128,3 +129,7 @@ Route::get('/afip/sicoss/download', function (Request $request) {
         'Content-Type' => $contentType,
     ])->deleteFileAfterSend();
 })->name('afip.sicoss.download')->middleware(['auth']);
+
+
+Route::get('auth/microsoft', [Office365Controller::class, 'redirectToProvider'])->name('auth.office365');
+Route::get('auth/microsoft/callback', [Office365Controller::class, 'handleProviderCallback']);
