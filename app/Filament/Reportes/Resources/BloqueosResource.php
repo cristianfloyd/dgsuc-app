@@ -312,7 +312,19 @@ class BloqueosResource extends Resource
                 Action::make('export_fallecidos')
                     ->label('Exportar Fallecidos')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(function () {
+                    ->form([
+                        Forms\Components\Select::make('periodo_fiscal')
+                            ->label('Periodo Fiscal')
+                            ->options(app(\App\Services\Mapuche\PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->required()
+                            ->default(now()->format('Ym'))
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                $set('periodo', $state);
+                            })
+                    ])
+                    ->action(function (array $data) {
+                        $periodoFiscal = $data['periodo_fiscal'];
                         // Obtener registros de fallecidos por bloqueos
                         $registrosBloqueos = static::$model::query()
                             ->where('tipo', 'fallecido')
@@ -342,7 +354,7 @@ class BloqueosResource extends Resource
                         return Excel::download(
                             new FallecidosExport(
                                 $registrosBloqueos,
-                                '202503'
+                                $periodoFiscal
                             ),
                             'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx'
                         );

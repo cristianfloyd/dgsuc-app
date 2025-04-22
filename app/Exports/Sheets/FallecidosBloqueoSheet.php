@@ -53,7 +53,7 @@ class FallecidosBloqueoSheet implements
     public function headings(): array
     {
         return [
-            ['Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
+            ['Período: ' . $this->periodo],
             [''], // Línea en blanco
             [
                 'Legajo',
