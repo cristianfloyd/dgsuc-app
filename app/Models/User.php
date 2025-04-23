@@ -32,6 +32,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'password',
         'is_admin',
         'image',
+        'microsoft_id',
+        'avatar',
+        'office_groups',
     ];
 
     /**
