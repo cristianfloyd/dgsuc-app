@@ -35,6 +35,7 @@ class Office365Controller extends Controller
             if (!$user) {
                 $user = User::create([
                     'name' => $microsoftUser->name,
+                    'username' => str_replace('@uba.ar', '', $microsoftUser->email),
                     'email' => $microsoftUser->email,
                     'email_verified_at' => now(),
                     'microsoft_id' => $microsoftUser->id,

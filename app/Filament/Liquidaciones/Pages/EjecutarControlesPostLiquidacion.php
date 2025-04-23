@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\Liquidaciones\Pages;
 
 use Filament\Forms;
 use Filament\Pages\Page;
