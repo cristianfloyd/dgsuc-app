@@ -2,6 +2,7 @@
 
 namespace App\Filament\Reportes\Resources;
 
+use App\Models\Dh03;
 use Filament\Tables\Table;
 use App\Services\Dh12Service;
 use Filament\Resources\Resource;
@@ -46,7 +47,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->getStateUsing(fn($record) => $record->periodo_fiscal),
                 TextColumn::make('codn_conce')->label('Concepto'),
-                TextColumn::make('impp_conce')->label('Importe'),
+                TextColumn::make('impp_conce')->label('Importe')->searchable()->sortable(),
             ])
             ->filters([
                 Filter::make('periodo_liquidacion')
@@ -70,12 +71,20 @@ class ReporteConceptoListadoResource extends Resource
                             ->searchable()
                             ->live()
                             ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
+                        Select::make('codc_uacad')
+                            ->label('Dependencia')
+                            ->options(fn() => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
+                            ->searchable()
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['nro_liqui'],
                                 fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                            )
+                            ->when(
+                                $data['codc_uacad'],
+                                fn(Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad)
                             );
                     }),
                 SelectFilter::make('codn_conce')
@@ -214,7 +223,6 @@ class ReporteConceptoListadoResource extends Resource
             ->emptyStateIcon('heroicon-o-funnel')
         ;
     }
-
     public static function getRelations(): array
     {
         return [
