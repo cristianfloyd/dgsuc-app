@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Services\EncodingService;
+use App\Models\Mapuche\MapucheGrupo;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Dh01 extends Model
 {
@@ -31,11 +33,30 @@ class Dh01 extends Model
 
 
     protected $fillable = [
-        'nro_legaj', 'desc_appat', 'desc_apmat', 'desc_apcas', 'desc_nombr', 'nro_tabla',
-        'tipo_docum', 'nro_docum',
-        'nro_cuil1', 'nro_cuil', 'nro_cuil2',
-        'tipo_sexo', 'fec_nacim', 'tipo_facto', 'tipo_rh', 'nro_ficha', 'tipo_estad', 'nombrelugarnac',
-        'periodoalta', 'anioalta', 'periodoactualizacion', 'anioactualizacion', 'pcia_nacim', 'pais_nacim'
+        'nro_legaj',
+        'desc_appat',
+        'desc_apmat',
+        'desc_apcas',
+        'desc_nombr',
+        'nro_tabla',
+        'tipo_docum',
+        'nro_docum',
+        'nro_cuil1',
+        'nro_cuil',
+        'nro_cuil2',
+        'tipo_sexo',
+        'fec_nacim',
+        'tipo_facto',
+        'tipo_rh',
+        'nro_ficha',
+        'tipo_estad',
+        'nombrelugarnac',
+        'periodoalta',
+        'anioalta',
+        'periodoactualizacion',
+        'anioactualizacion',
+        'pcia_nacim',
+        'pais_nacim'
     ];
 
     protected $appends = [
@@ -66,16 +87,29 @@ class Dh01 extends Model
         return $this->hasMany(Dh21::class, 'nro_legaj', 'nro_legaj');
     }
 
+    public function grupos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            MapucheGrupo::class,
+            'mapuche.grupo_x_legajo',
+            'nro_legaj',
+            'id_grupo'
+        );
+    }
+
+    // ####################################################################################
+    // ######################################  SCOPES  ####################################
+
     public function scopeSearch($query, $val)
     {
         $searchTerm = EncodingService::toLatin1(strtoupper($val));
 
         return $query->where('nro_legaj', 'like', "%$val%")
             ->orWhere('nro_cuil', 'like', "%$val%")
-            ->orWhere('desc_appat', 'like', '%'.strtoupper($searchTerm).'%')
-            ->orWhere('desc_apmat', 'like', '%'.strtoupper($searchTerm).'%')
-            ->orWhere('desc_apcas', 'like', '%'.strtoupper($searchTerm).'%')
-            ->orWhere('desc_nombr', 'like', '%'.strtoupper($searchTerm).'%');
+            ->orWhere('desc_appat', 'like', '%' . strtoupper($searchTerm) . '%')
+            ->orWhere('desc_apmat', 'like', '%' . strtoupper($searchTerm) . '%')
+            ->orWhere('desc_apcas', 'like', '%' . strtoupper($searchTerm) . '%')
+            ->orWhere('desc_nombr', 'like', '%' . strtoupper($searchTerm) . '%');
     }
 
     public function scopeByCuil($query, $cuil)
@@ -96,6 +130,7 @@ class Dh01 extends Model
 
         return $cuil1 . $cuil . $cuil2;
     }
+
 
 
     // ###############################################
@@ -144,5 +179,3 @@ class Dh01 extends Model
         );
     }
 }
-
-
