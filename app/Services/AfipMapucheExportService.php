@@ -100,6 +100,11 @@ class AfipMapucheExportService implements ExportServiceInterface
             $value = $value->value;
         }
 
+        if ($field === 'inicio_rel_lab') {
+            // Formateo de fechas
+            $value = $this->formatDate($value);
+        }
+
         // Formateo de números: remover comas y decimales
         if (in_array($field, ['retribucion_pactada'])) {
             // Convertir a float, multiplicar por 100 para preservar 2 decimales y convertir a entero
@@ -107,15 +112,21 @@ class AfipMapucheExportService implements ExportServiceInterface
             return str_pad($value, $width, '0', STR_PAD_LEFT);
         }
 
-        // Formateo específico por campo
+
         // Formateo específico por campo
         if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
             // Si el valor es nulo, 0, '0' o vacío, retornamos espacios
             if (empty($value) || $value === '0000000000' || $value === 0) {
                 return str_repeat(' ', $width);
             }
-            return date('Y/m/d', strtotime($value));
-        }
+            try {
+                // Convertimos la fecha al formato deseado usando Carbon
+                $value = \Carbon\Carbon::parse($value)->format('Y/m/d');
+            } catch (\Exception $e) {
+                // Si hay un error en el parseo, retornamos espacios
+                return str_repeat(' ', $width);
+                }
+            }
 
         // Valores fijos
         if ($field === 'nro_form_agro') {
@@ -152,5 +163,22 @@ class AfipMapucheExportService implements ExportServiceInterface
         // Formateo por defecto para campos de texto
         $value = substr($value, 0, $width); // Asegurar que no exceda el ancho
         return str_pad($value, $width, ' ', STR_PAD_RIGHT);
+    }
+
+    private function formatDate($date): string
+    {
+        if (empty($date) || $date === '0000000000') {
+            return ' ';
+        }
+
+        Log::info('Fecha original: ' . $date);
+        try {
+            $date = \Carbon\Carbon::parse($date)->format('Y/m/d');
+            Log::info("Fecha formateada: $date");
+            return $date;
+        } catch (\Exception $e) {
+            Log::error('Error al formatear la fecha: ' . $e->getMessage());
+            return ' ';
+        }
     }
 }

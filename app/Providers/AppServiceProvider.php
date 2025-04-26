@@ -86,10 +86,8 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        // Registramos el componente Filament
-        // $this->loadViewComponentsAs('filament', [
-        //     PanelSwitcherModal::class,
-        // ]);
-        // Livewire::component('panel-switcher-modal', PanelSwitcherModal::class);
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+            $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
+        });        
     }
 }

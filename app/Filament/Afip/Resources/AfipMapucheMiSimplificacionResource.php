@@ -175,7 +175,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ])
             ->headerActions([
                 Tables\Actions\Action::make('exportTxt')
-                    ->label('Exportar TXT')
+                    ->label('Exportar TXT (AFIP)')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
                         try {

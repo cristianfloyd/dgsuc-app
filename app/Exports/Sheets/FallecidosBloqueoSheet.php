@@ -4,6 +4,7 @@ namespace App\Exports\Sheets;
 
 use Carbon\Carbon;
 use App\Models\Reportes\Bloqueos;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -14,102 +15,79 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class FallecidosBloqueoSheet implements
-    FromQuery,
+    FromCollection,
     WithTitle,
     WithHeadings,
     WithMapping,
     WithStyles,
     ShouldAutoSize,
     WithEvents,
-    WithCustomStartCell,
     WithColumnFormatting
 {
+    protected $records;
     protected string $periodo;
 
-    public function __construct(string $periodo)
+    public function __construct($records, string $periodo)
     {
+        $this->records = $records;
         $this->periodo = $periodo;
     }
 
-    public function query()
+    public function collection()
     {
-        return Bloqueos::query()
-            ->porTipo('fallecido')
-            ->with('legajo')
-            ->orderBy('nro_legaj');
+        return $this->records;
     }
 
     public function title(): string
     {
-        return 'Fallecidos Bloqueos';
+        return 'Fallecidos por Bloqueos';
     }
 
     public function headings(): array
     {
         return [
-            ['Fallecidos ingresados por bloqueos y aún no están en el sistema mapuche - Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
+            ['Período: ' . $this->periodo],
             [''], // Línea en blanco
             [
                 'Legajo',
+                'CUIL',
+                'UACAD',
+                'Dependencia',
+                'Fecha Baja',
                 'Apellido',
                 'Nombre',
-                'CUIL',
-                'Unidad Académica',
-                'Fecha Baja',
+                'Observación'
             ]
         ];
     }
 
-    public function startCell(): string
-    {
-        return 'A1';
-    }
-
     public function map($row): array
     {
-        // Si tenemos la relación con el legajo, usamos esos datos
-        if ($row->legajo) {
-            return [
-                $row->nro_legaj,
-                trim($row->legajo->desc_appat), // Apellido desde Dh01
-                trim($row->legajo->desc_nombr), // Nombre desde Dh01
-                $row->legajo->cuil, // CUIL desde Dh01
-                $row->dependencia,
-                $row->fecha_baja?->format('d/m/Y'),
-            ];
+        // Manejo seguro de la fecha
+        $fechaBaja = $row->fecha_baja;
+        if (is_string($fechaBaja)) {
+            $fechaBaja = Carbon::parse($fechaBaja);
         }
-        // Si no tenemos la relación, usamos los datos del bloqueo
-        else {
-            // Intentar separar el nombre completo en apellido y nombre
-            $nombreCompleto = $row->nombre ?? '';
-            $apellido = '';
-            $nombre = '';
 
-            // Si hay un espacio, asumimos que el formato es "Apellido Nombre"
-            if (strpos($nombreCompleto, ' ') !== false) {
-                $partes = explode(' ', $nombreCompleto, 2);
-                $apellido = trim($partes[0]);
-                $nombre = trim($partes[1] ?? '');
-            } else {
-                $apellido = $nombreCompleto;
-            }
+        $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
 
-            return [
-                $row->nro_legaj,
-                $apellido,
-                $nombre,
-                $row->datos_validacion['cuil'] ?? '', // Intentamos obtener el CUIL de datos_validacion
-                $row->dependencia,
-                $row->fecha_baja?->format('d/m/Y'),
-            ];
-        }
+        return [
+            $row->nro_legaj,
+            $cuil ?? '',
+            $row->cargo->codc_uacad,
+            $row->dependencia,
+            $fechaBaja ? $fechaBaja->format('d/m/Y') : '',
+            $row->dh01?->desc_appat ?? '',
+            $row->dh01?->desc_nombr ?? '',
+            $row->observaciones ?? ''
+        ];
     }
 
     public function styles(Worksheet $sheet)
@@ -123,7 +101,7 @@ class FallecidosBloqueoSheet implements
         ]);
 
         // Combinar celdas para el título del período
-        $sheet->mergeCells('A1:F1');
+        $sheet->mergeCells('A1:G1');
 
         // Obtener la última fila
         $lastRow = $sheet->getHighestRow();
@@ -158,7 +136,7 @@ class FallecidosBloqueoSheet implements
                 ]
             ],
             // Borde para todos los datos
-            "A3:F$lastRow" => [
+            "A3:H$lastRow" => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -172,9 +150,9 @@ class FallecidosBloqueoSheet implements
     {
         return [
             'A' => NumberFormat::FORMAT_NUMBER, // Legajo
-            'D' => '@',                         // CUIL como texto
-            'E' => '@',                         // UACAD como texto
-            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY // Fecha
+            'B' => '@',                          // CUIL como texto
+            'C' => '@',                         // UACAD como texto
+            'E' => NumberFormat::FORMAT_DATE_DDMMYYYY, // Fecha
         ];
     }
 
@@ -192,7 +170,7 @@ class FallecidosBloqueoSheet implements
                 // Filas alternadas para mejor legibilidad
                 for ($row = 4; $row <= $lastRow; $row++) {
                     if ($row % 2 == 0) {
-                        $sheet->getStyle("A$row:F$row")->applyFromArray([
+                        $sheet->getStyle("A$row:G$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'F2F2F2'] // Gris claro

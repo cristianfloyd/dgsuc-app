@@ -15,13 +15,17 @@
         "laravel/framework": "^11.0",
         "laravel/jetstream": "^5.1",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.9",
         "league/commonmark": "^2.6",
         "livewire/livewire": "^3.5",
         "maatwebsite/excel": "^3.1",
+        "openspout/openspout": "^4.29",
         "predis/predis": "^2.3",
         "reedware/laravel-composite-relations": "^4.0",
         "robsontenorio/mary": "^1.32",
+        "socialiteproviders/microsoft": "^4.6",
+        "socialiteproviders/microsoft-azure": "^5.2",
         "spatie/laravel-data": "^4.11"
     },
     "require-dev": {

@@ -14,13 +14,14 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class RepFallecidosSheet implements
-    FromQuery,
+    FromCollection,
     WithTitle,
     WithHeadings,
     WithMapping,
@@ -30,16 +31,16 @@ class RepFallecidosSheet implements
     WithColumnFormatting
 {
     protected string $periodo;
-
-    public function __construct(string $periodo)
+    protected $records;
+    public function __construct($records, string $periodo)
     {
+        $this->records = $records;
         $this->periodo = $periodo;
     }
 
-    public function query()
+    public function collection()
     {
-        return RepFallecido::query()
-            ->orderBy('nro_legaj');
+        return $this->records;
     }
 
     public function title(): string
@@ -65,13 +66,14 @@ class RepFallecidosSheet implements
 
     public function map($row): array
     {
+        dump($row);
         return [
             $row->nro_legaj,
             trim($row->apellido),
             trim($row->nombre),
             $row->cuil,
             $row->codc_uacad,
-            $row->fec_defun?->format('d/m/Y'),
+            $row->feccha_baja?->format('d/m/Y'),
         ];
     }
 
