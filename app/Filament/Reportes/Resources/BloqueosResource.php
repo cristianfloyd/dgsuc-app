@@ -24,6 +24,7 @@ use Filament\Notifications\Notification;
 use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Repositories\BloqueosRepositoryInterface;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
@@ -124,6 +125,7 @@ class BloqueosResource extends Resource
     {
         try {
             $service = app(BloqueosProcessService::class);
+            $repository = app(BloqueosRepositoryInterface::class);
             $resultados = $service->procesarBloqueos();
             
             return view('filament.resources.bloqueos.bulk-results', [
@@ -131,7 +133,7 @@ class BloqueosResource extends Resource
                 'exitosos' => $resultados->where('estado', 'Procesado')->count(),
                 'fallidos' => $resultados->where('estado', 'Error')->count(),
                 'resumen' => static::generarResumenProcesamiento($resultados),
-                'total_procesados' => BloqueosDataModel::where('esta_procesado', true)->count(),
+                'total_procesados' => $repository->getTotalProcesados(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error al procesar bloqueos: ' . $e->getMessage(), [
@@ -158,13 +160,14 @@ class BloqueosResource extends Resource
      */
     protected static function generarResumenProcesamiento($resultados): array
     {
+        $repository = app(BloqueosRepositoryInterface::class);
         return [
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
                 ->map(fn($grupo) => $grupo->count()),
             'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count(),
-            'total_procesados_historico' => BloqueosDataModel::where('esta_procesado', true)->count(),
-            'total_pendientes' => BloqueosDataModel::where('esta_procesado', false)->count(),
+            'total_procesados_historico' => $repository->getTotalProcesados(),
+            'total_pendientes' => $repository->getTotalPendientes(),
         ];
     }
 

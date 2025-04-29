@@ -11,6 +11,7 @@ use App\Services\RepEmbarazadaService;
 use Illuminate\Queue\Events\JobFailed;
 use App\Listeners\JobProcessedListener;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\BloqueosRepository;
 use App\Contracts\ExportServiceInterface;
 use Illuminate\Queue\Events\JobProcessed;
 use App\Services\AfipMapucheExportService;
@@ -22,6 +23,7 @@ use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
 use App\Contracts\RepEmbarazadaServiceInterface;
+use App\Repositories\BloqueosRepositoryInterface;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
@@ -73,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RepEmbarazadaServiceInterface::class, RepEmbarazadaService::class);
         $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
         $this->app->bind(AfipRelacionesActivasServiceInterface::class, AfipRelacionesActivasService::class);
+        $this->app->bind(BloqueosRepositoryInterface::class, BloqueosRepository::class);
     }
 
     /**
