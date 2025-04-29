@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use App\Enums\BloqueosTipoEnum;
 use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Log;
 use Filament\Resources\Components\Tab;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
@@ -18,6 +19,7 @@ use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\BloqueosDataService;
 use League\CommonMark\Environment\Environment;
 use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Reportes\BloqueosValidationService;
 use App\Filament\Reportes\Resources\BloqueosResource;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
@@ -50,21 +52,14 @@ class ListImportData extends ListRecords
                 ->requiresConfirmation()
                 ->modalHeading('¿Validar todos los registros?')
                 ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
-                ->action(function () {
+                ->action(function (BloqueosValidationService $service) {
                     $registros = BloqueosDataModel::all();
-                    $total = $registros->count();
-                    $validados = 0;
-                    $conError = 0;
+                    $estadisticas = $service->validarMultiplesRegistros($registros);
 
-                    foreach ($registros as $registro) {
-                        $registro->validarEstado();
+                    $total = $estadisticas['total'];
+                    $validados = $estadisticas['validados'];
+                    $conError = $estadisticas['conError'];
 
-                        if ($registro->estado === BloqueosEstadoEnum::VALIDADO) {
-                            $validados++;
-                        } else {
-                            $conError++;
-                        }
-                    }
 
                     Notification::make()
                         ->title('Validación masiva completada')
@@ -91,6 +86,11 @@ class ListImportData extends ListRecords
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
+                        Log::error('Error en la validación', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
                         Notification::make()
                             ->title('Error en la validación')
                             ->body('Error: ' . $e->getMessage())
@@ -125,6 +125,11 @@ class ListImportData extends ListRecords
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
+                        Log::error('Error al procesar bloqueos', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
                         Notification::make()
                             ->title('Error al procesar bloqueos')
                             ->body('Error: ' . $e->getMessage())
@@ -155,6 +160,11 @@ class ListImportData extends ListRecords
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
+                        Log::error('Error al procesar duplicados', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
                         Notification::make()
                             ->title('Error al procesar duplicados')
                             ->body('Error: ' . $e->getMessage())
@@ -179,6 +189,11 @@ class ListImportData extends ListRecords
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
+                        Log::error('Error al restaurar cambios', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
                         Notification::make()
                             ->title('Error al restaurar cambios')
                             ->body('Error: ' . $e->getMessage())
@@ -203,6 +218,11 @@ class ListImportData extends ListRecords
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
+                        Log::error('Error al vaciar la tabla', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
                         Notification::make()
                             ->title('Error al vaciar la tabla')
                             ->body('Error: ' . $e->getMessage())
