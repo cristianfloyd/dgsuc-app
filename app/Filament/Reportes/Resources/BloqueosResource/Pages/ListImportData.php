@@ -53,19 +53,32 @@ class ListImportData extends ListRecords
                 ->modalHeading('¿Validar todos los registros?')
                 ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
                 ->action(function (BloqueosValidationService $service) {
-                    $registros = BloqueosDataModel::all();
-                    $estadisticas = $service->validarMultiplesRegistros($registros);
+                    try {
+                        $registros = BloqueosDataModel::all();
+                        $estadisticas = $service->validarMultiplesRegistros($registros);
 
-                    $total = $estadisticas['total'];
-                    $validados = $estadisticas['validados'];
-                    $conError = $estadisticas['conError'];
+                        $total = $estadisticas['total'];
+                        $validados = $estadisticas['validados'];
+                        $conError = $estadisticas['conError'];
 
 
-                    Notification::make()
-                        ->title('Validación masiva completada')
-                        ->body("Total procesados: {$total}<br> Validados: {$validados}<br>Con error: {$conError}")
-                        ->success()
-                        ->send();
+                        Notification::make()
+                            ->title('Validación masiva completada')
+                            ->body("Total procesados: {$total}<br> Validados: {$validados}<br>Con error: {$conError}")
+                            ->success()
+                            ->send();
+                    } catch (\Throwable $th) {
+                        Log::error('Error en la validación masiva', [
+                            'error' => $th->getMessage(),
+                            'trace' => $th->getTraceAsString(),
+                            'user_id' => auth()->guard('web')->user()->id,
+                        ]);
+                        Notification::make()
+                            ->title('Error en la validación masiva')
+                            ->body('Error: ' . $th->getMessage())
+                            ->danger()
+                            ->send();
+                    }
                 }),
             Action::make('validar_cargos_asociados')
                 ->label('Validar Cargos Asociados')
