@@ -19,6 +19,16 @@ class BloqueosProcessService
 {
     use MapucheConnectionTrait;
 
+    /**
+     * Crea la tabla de backup para bloqueos si no existe.
+     *
+     * Este método verifica si la tabla 'suc.dh03_backup_bloqueos' existe en la conexión actual.
+     * Si no existe, la crea con una estructura predefinida para almacenar información de respaldo
+     * de bloqueos, incluyendo campos como número de liquidación, número de cargo, fecha de baja,
+     * tipo de bloqueo, entre otros.
+     *
+     * @return void
+     */
     public function crearTablaBackupSiNoExiste(): void
     {
         if (!Schema::connection($this->getConnectionName())->hasTable('suc.dh03_backup_bloqueos')) {
