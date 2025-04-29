@@ -24,6 +24,7 @@ use App\Exports\BloqueosResultadosExport;
 use Filament\Forms\Components\FileUpload;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Reportes\BloqueosValidationService;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ImportData;
 use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
@@ -190,26 +191,24 @@ class BloqueosResource extends Resource
                     ->modalHeading('¿Validar registro?')
                     ->modalDescription('Se validará el par legajo-cargo contra Mapuche y se verificarán los cargos asociados.')
                     ->action(function ($record) {
-                        $record->validarEstado();
-
-                        $mensaje = match ($record->estado) {
-                            BloqueosEstadoEnum::VALIDADO => 'Registro validado correctamente',
-                            BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'Error: ' . $record->mensaje_error,
-                            BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => 'Error: ' . $record->mensaje_error,
-                            default => 'Error en la validación: ' . $record->mensaje_error
-                        };
-
-                        $color = match ($record->estado) {
-                            BloqueosEstadoEnum::VALIDADO => 'success',
-                            BloqueosEstadoEnum::FECHAS_COINCIDENTES => 'warning',
-                            BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA => 'warning',
-                            default => 'danger'
-                        };
-
-                        Notification::make()
-                            ->title($mensaje)
-                            ->color($color)
-                            ->send();
+                        try {
+                            // Usamos el servicio de validación
+                            $validationService = app(BloqueosValidationService::class);
+                            $resultado = $validationService->validarRegistro($record);
+                            
+                            // Mostramos la notificación con el resultado
+                            Notification::make()
+                                ->title($resultado['mensaje'])
+                                ->color($resultado['color'])
+                                ->send();
+                        } catch (\Exception $e) {
+                            // Manejo de excepciones no esperadas
+                            Notification::make()
+                                ->title('Error al validar el registro')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     })
             ])
             ->bulkActions([
@@ -268,43 +267,37 @@ class BloqueosResource extends Resource
                     ->modalHeading('¿Validar registros seleccionados?')
                     ->modalDescription('Se validará el par legajo-cargo de cada registro contra Mapuche y se verificarán los cargos asociados.')
                     ->action(function (Collection $records) {
-                        $totalRegistros = $records->count();
-                        $validados = 0;
-                        $conError = 0;
-                        $faltaCargoAsociado = 0;
-                        $fechaCargoNoCoincide = 0;
-                        $licenciaYaBloqueada = 0;
-                        $fechasCoincidentes = 0;
-
-                        foreach ($records as $record) {
-                            $record->validarEstado();
-
-                            if ($record->estado === BloqueosEstadoEnum::VALIDADO) {
-                                $validados++;
-                            } else if ($record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO) {
-                                $faltaCargoAsociado++;
-                            } else if ($record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE) {
-                                $fechaCargoNoCoincide++;
-                            } else if ($record->estado === BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA) {
-                                $licenciaYaBloqueada++;
-                            } else if ($record->estado === BloqueosEstadoEnum::FECHAS_COINCIDENTES) {
-                                $fechasCoincidentes++;
-                            } else {
-                                $conError++;
+                        try {
+                            // Usamos el servicio de validación para procesar múltiples registros
+                            $validationService = app(BloqueosValidationService::class);
+                            $estadisticas = $validationService->validarMultiplesRegistros($records);
+                            
+                            // Generamos el mensaje de resumen
+                            $mensajeResumen = $validationService->generarMensajeResumen($estadisticas);
+                            
+                            // Mostramos la notificación con el resultado
+                            Notification::make()
+                                ->title('Validación completada')
+                                ->body($mensajeResumen)
+                                ->success()
+                                ->send();
+                                
+                            // Si hubo errores generales, mostramos una notificación adicional
+                            if (isset($estadisticas['error_general'])) {
+                                Notification::make()
+                                    ->title('Advertencia')
+                                    ->body('Ocurrieron algunos errores durante el proceso: ' . $estadisticas['error_general'])
+                                    ->warning()
+                                    ->send();
                             }
+                        } catch (\Exception $e) {
+                            // Manejo de excepciones no esperadas
+                            Notification::make()
+                                ->title('Error al validar los registros')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
                         }
-
-                        Notification::make()
-                            ->title('Validación completada')
-                            ->body("Total procesados: {$totalRegistros}\n" .
-                                "Validados: {$validados}\n" .
-                                "Falta cargo asociado: {$faltaCargoAsociado}\n" .
-                                "Fecha cargo no coincide: {$fechaCargoNoCoincide}\n" .
-                                "Licencia ya bloqueada: {$licenciaYaBloqueada}\n" .
-                                "Fechas coincidentes: {$fechasCoincidentes}\n" .
-                                "Con error: {$conError}")
-                            ->success()
-                            ->send();
                     })
                     ->deselectRecordsAfterCompletion()
             ])
