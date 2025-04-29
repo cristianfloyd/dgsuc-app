@@ -8,7 +8,7 @@ use App\Models\Reportes\BloqueosDataModel;
 
 /**
  * Servicio para validación de bloqueos
- * 
+ *
  * Este servicio encapsula toda la lógica relacionada con la validación
  * de registros de bloqueos, tanto individuales como en lote.
  */
@@ -25,7 +25,7 @@ class BloqueosValidationService
         try {
             // Ejecutamos la validación en el modelo
             $record->validarEstado();
-            
+
             // Preparamos la respuesta según el estado resultante
             $mensaje = match ($record->estado) {
                 BloqueosEstadoEnum::VALIDADO => 'Registro validado correctamente',
@@ -33,14 +33,14 @@ class BloqueosValidationService
                 BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => "Error: {$record->mensaje_error}",
                 default => "Error en la validación: {$record->mensaje_error}"
             };
-            
+
             $color = match ($record->estado) {
                 BloqueosEstadoEnum::VALIDADO => 'success',
                 BloqueosEstadoEnum::FECHAS_COINCIDENTES => 'warning',
                 BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA => 'warning',
                 default => 'danger'
             };
-            
+
             return [
                 'mensaje' => $mensaje,
                 'color' => $color,
@@ -57,7 +57,7 @@ class BloqueosValidationService
             ];
         }
     }
-    
+
     /**
      * Valida múltiples registros de bloqueo
      *
@@ -82,7 +82,7 @@ class BloqueosValidationService
             foreach ($records as $record) {
                 try {
                     $record->validarEstado();
-                    
+
                     // Actualizamos las estadísticas según el estado
                     if ($record->estado === BloqueosEstadoEnum::VALIDADO) {
                         $estadisticas['validados']++;
@@ -109,7 +109,7 @@ class BloqueosValidationService
                     ];
                 }
             }
-            
+
             return $estadisticas;
         } catch (\Exception $e) {
             // Capturamos cualquier excepción no manejada en el proceso global
@@ -117,7 +117,7 @@ class BloqueosValidationService
             return $estadisticas;
         }
     }
-    
+
     /**
      * Genera un mensaje de resumen para mostrar al usuario
      *
@@ -133,5 +133,16 @@ class BloqueosValidationService
             "Licencia ya bloqueada: {$estadisticas['licenciaYaBloqueada']}\n" .
             "Fechas coincidentes: {$estadisticas['fechasCoincidentes']}\n" .
             "Con error: {$estadisticas['conError']}";
+    }
+
+    /**
+     * Valida todos los registros de bloqueos existentes en la base de datos.
+     *
+     * @return array Estadísticas del proceso de validación
+     */
+    public function validarTodosLosRegistros(): array
+    {
+        $registros = BloqueosDataModel::all();
+        return $this->validarMultiplesRegistros($registros);
     }
 }

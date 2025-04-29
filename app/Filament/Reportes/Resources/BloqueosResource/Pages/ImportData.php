@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\Mapuche\Dh22Service;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use App\Traits\MapucheConnectionTrait;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Checkbox;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
@@ -23,6 +26,7 @@ use App\Services\Imports\ImportNotificationService;
 use App\Services\Imports\DuplicateValidationService;
 use App\Filament\Reportes\Resources\BloqueosResource;
 use App\Services\Validation\ExcelRowValidationService;
+use App\Services\Reportes\BloqueosImportOrchestratorService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class ImportData extends Page
@@ -71,7 +75,31 @@ class ImportData extends Page
                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     ])
                     ->maxSize(10240)
-                    ->required()
+                    ->required(),
+                    Section::make('Opciones avanzadas')
+                    ->description('Puedes personalizar el flujo de validación y procesamiento.')
+                    ->collapsible()
+                    ->schema([
+                        Toggle::make('validar_todos')
+                            ->label('Validar todos los registros')
+                            ->offColor('warning')
+                            ->onColor('success')
+                            ->helperText('Si está marcado, se validarán todos los registros.')
+                            ->default(true),
+                        Toggle::make('validar_cargos_asociados')
+                            ->label('Validar cargos asociados')
+                            ->offColor('warning')
+                            ->onColor('success')
+                            ->helperText('Si está marcado, se validarán los cargos asociados.')
+                            ->default(true),
+                        Toggle::make('procesar_todo')
+                            ->label('Procesar bloqueos y limpiar duplicados automáticamente después de importar')
+                            ->offColor('warning')
+                            ->onColor('success')
+                            ->helperText('Si está marcado, se procesarán y limpiarán los registros automáticamente después de la importación.')
+                            ->default(false),
+                    ])
+                    ->columns(3),
             ])
             ->statePath('data');
     }
@@ -122,6 +150,29 @@ class ImportData extends Page
                     $importResult->getDuplicateCount()
                 );
                 Log::info('Importación completada exitosamente', $importResult->toArray());
+
+                // --- INICIO: Ejecutar el orquestador ---
+                $procesarTodo = !empty($this->data['procesar_todo']);
+                $validarTodos = !empty($this->data['validar_todos']);
+                $validarCargosAsociados = !empty($this->data['validar_cargos_asociados']);
+                $orquestador = app(BloqueosImportOrchestratorService::class);
+                $resultados = $orquestador->ejecutarSecuenciaCompleta($procesarTodo, $validarTodos, $validarCargosAsociados);
+
+                if ($resultados['success']) {
+                    Notification::make()
+                        ->title('Importación y procesamiento completados')
+                        ->body('Todos los pasos se ejecutaron correctamente.')
+                        ->success()
+                        ->send();
+                } else {
+                    Notification::make()
+                        ->title('Error en el procesamiento posterior a la importación')
+                        ->body('Ocurrió un error: ' . $resultados['error'])
+                        ->danger()
+                        ->send();
+                    // decidir si redirigir o no en caso de error
+                }
+                // --- FIN: Ejecutar el orquestador ---
 
                 // Redirigir al index después de una importación exitosa
                 $this->redirect(BloqueosResource::getUrl('index'));

@@ -28,7 +28,11 @@ class OrdenPagoStatsWidget extends BaseWidget
                 ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Total Sueldo', money($totales->total_sueldo))
+            // Stat::make('Total Sueldo', money($totales->total_sueldo))
+            //     ->icon('heroicon-o-banknotes')
+            //     ->color('primary'),
+
+            Stat::make('Total Neto', money($totales->total_neto))
                 ->icon('heroicon-o-banknotes')
                 ->color('primary'),
 
@@ -64,6 +68,7 @@ class OrdenPagoStatsWidget extends BaseWidget
                 COUNT(*) as cantidad_registros,
                 SUM(bruto) as total_bruto,
                 SUM(sueldo) as total_sueldo,
+                SUM(neto) as total_neto,
                 SUM(aportes) as total_aportes,
                 SUM(descuentos) as total_descuentos,
                 SUM(imp_gasto) as total_imp_gasto

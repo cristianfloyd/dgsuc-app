@@ -44,147 +44,231 @@ class ListImportData extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray')
                 ->tooltip('Importar datos desde el archivo Excel')
                 ->color('info'),
-            Action::make('validar_todos')
-                ->label('Validar Todos')
-                ->tooltip('Validar todos los registros contra Mapuche')
+            Action::make('validar_todo_completo')
+                ->label('Validar Todo')
+                ->tooltip('Valida todos los registros y verifica cargos asociados en Mapuche')
                 ->icon('heroicon-o-check-circle')
                 ->color('info')
                 ->requiresConfirmation()
-                ->modalHeading('¿Validar todos los registros?')
-                ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
-                ->action(function (BloqueosValidationService $service) {
+                ->modalHeading('¿Validar todos los registros y cargos asociados?')
+                ->modalDescription('Se validarán todos los registros contra Mapuche y se verificará si cada uno tiene un cargo asociado. Esta operación puede tomar tiempo.')
+                ->action(function (
+                    BloqueosValidationService $validationService,
+                    ValidacionCargoAsociadoService $cargoService
+                ) {
                     try {
-                        $registros = BloqueosDataModel::all();
-                        $estadisticas = $service->validarMultiplesRegistros($registros);
+                        // 1. Validar todos los registros
+                        $estadisticasValidacion = $validationService->validarTodosLosRegistros();
 
-                        $total = $estadisticas['total'];
-                        $validados = $estadisticas['validados'];
-                        $conError = $estadisticas['conError'];
+                        // 2. Validar cargos asociados
+                        $estadisticasCargos = $cargoService->validarCargosAsociados();
 
-
+                        // 3. Notificación combinada
                         Notification::make()
-                            ->title('Validación masiva completada')
-                            ->body("Total procesados: {$total}<br> Validados: {$validados}<br>Con error: {$conError}")
+                            ->title('Validación completa')
+                            ->body(
+                                "Validación masiva:<br>
+                                Total procesados: {$estadisticasValidacion['total']}<br>
+                                Validados: {$estadisticasValidacion['validados']}<br>
+                                Con error: {$estadisticasValidacion['conError']}<br><br>
+                                Validación de cargos:<br>
+                                Total: {$estadisticasCargos['total']}<br>
+                                Con cargo: {$estadisticasCargos['con_cargo']}<br>
+                                Sin cargo: {$estadisticasCargos['sin_cargo']}"
+                            )
                             ->success()
                             ->send();
                     } catch (\Throwable $th) {
-                        Log::error('Error en la validación masiva', [
+                        Log::error('Error en la validación completa', [
                             'error' => $th->getMessage(),
                             'trace' => $th->getTraceAsString(),
                             'user_id' => auth()->guard('web')->user()->id,
                         ]);
                         Notification::make()
-                            ->title('Error en la validación masiva')
+                            ->title('Error en la validación')
                             ->body('Error: ' . $th->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
-            Action::make('validar_cargos_asociados')
-                ->label('Validar Cargos Asociados')
-                ->tooltip('Verificar si cada registro tiene un cargo asociado en Mapuche')
-                ->icon('heroicon-o-link')
-                ->color('info')
-                ->requiresConfirmation()
-                ->modalHeading('¿Validar cargos asociados en Mapuche?')
-                ->modalDescription('Esta acción verificará si cada registro tiene un cargo asociado en Mapuche.')
-                ->action(function () {
-                    try {
-                        $service = app(ValidacionCargoAsociadoService::class);
-                        $estadisticas = $service->validarCargosAsociados();
+            // Action::make('validar_todos')
+            //     ->label('Validar Todos')
+            //     ->tooltip('Validar todos los registros contra Mapuche')
+            //     ->icon('heroicon-o-check-circle')
+            //     ->color('info')
+            //     ->requiresConfirmation()
+            //     ->modalHeading('¿Validar todos los registros?')
+            //     ->modalDescription('Se validarán todos los registros contra Mapuche. Esta operación puede tomar tiempo.')
+            //     ->action(function (BloqueosValidationService $service) {
+            //         try {
+            //             $estadisticas = $service->validarTodosLosRegistros();
 
-                        Notification::make()
-                            ->title('Validación de cargos completada')
-                            ->body("Total: {$estadisticas['total']}<br>Con cargo: {$estadisticas['con_cargo']}<br>Sin cargo: {$estadisticas['sin_cargo']}")
-                            ->success()
-                            ->send();
-                    } catch (\Exception $e) {
-                        Log::error('Error en la validación', [
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString(),
-                            'user_id' => auth()->guard('web')->user()->id,
-                        ]);
-                        Notification::make()
-                            ->title('Error en la validación')
-                            ->body('Error: ' . $e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
-            Actions\Action::make('procesar')
-                ->label('Procesar Bloqueos')
-                ->tooltip('Procesa los registros con estado validado')
+
+            //             Notification::make()
+            //                 ->title('Validación masiva completada')
+            //                 ->body("Total procesados: {$estadisticas['total']}<br> Validados: {$estadisticas['validados']}<br>Con error: {$estadisticas['conError']}")
+            //                 ->success()
+            //                 ->send();
+            //         } catch (\Throwable $th) {
+            //             Log::error('Error en la validación masiva', [
+            //                 'error' => $th->getMessage(),
+            //                 'trace' => $th->getTraceAsString(),
+            //                 'user_id' => auth()->guard('web')->user()->id,
+            //             ]);
+            //             Notification::make()
+            //                 ->title('Error en la validación masiva')
+            //                 ->body('Error: ' . $th->getMessage())
+            //                 ->danger()
+            //                 ->send();
+            //         }
+            //     }),
+            // Action::make('validar_cargos_asociados')
+            //     ->label('Validar Cargos Asociados')
+            //     ->tooltip('Verificar si cada registro tiene un cargo asociado en Mapuche')
+            //     ->icon('heroicon-o-link')
+            //     ->color('info')
+            //     ->requiresConfirmation()
+            //     ->modalHeading('¿Validar cargos asociados en Mapuche?')
+            //     ->modalDescription('Esta acción verificará si cada registro tiene un cargo asociado en Mapuche.')
+            //     ->action(function (ValidacionCargoAsociadoService $service): void {
+            //         try {
+            //             $estadisticas = $service->validarCargosAsociados();
+
+            //             Notification::make()
+            //                 ->title('Validación de cargos completada')
+            //                 ->body("Total: {$estadisticas['total']}<br>Con cargo: {$estadisticas['con_cargo']}<br>Sin cargo: {$estadisticas['sin_cargo']}")
+            //                 ->success()
+            //                 ->send();
+            //         } catch (\Exception $e) {
+            //             Log::error('Error en la validación', [
+            //                 'error' => $e->getMessage(),
+            //                 'trace' => $e->getTraceAsString(),
+            //                 'user_id' => auth()->guard('web')->user()->id,
+            //             ]);
+            //             Notification::make()
+            //                 ->title('Error en la validación')
+            //                 ->body('Error: ' . $e->getMessage())
+            //                 ->danger()
+            //                 ->send();
+            //         }
+            //     }),
+            Action::make('procesar_todo')
+                ->label('Procesar Todo')
+                ->tooltip('Procesa los bloqueos validados y los duplicados en un solo paso')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->requiresConfirmation()
-                ->modalHeading('¿Procesar bloqueos?')
-                ->modalDescription('Esta acción realizará los siguientes pasos:
-
-                    1. Creará un respaldo de la tabla DH03 actual
-                    2. Filtrará los registros validados correctamente
-                    3. Para cada registro validado:
-                       - Actualizará o creará el bloqueo en DH03
-                       - Registrará la fecha de proceso
-                       - Actualizará el estado del registro
-                    4. Generará un resumen de las operaciones realizadas
-
-                    Nota: Solo se procesarán los registros en estado "validado".')
+                ->modalHeading('¿Procesar bloqueos y duplicados?')
+                ->modalDescription('Esta acción procesará los bloqueos validados y luego los duplicados, generando un resumen de ambas operaciones.')
                 ->action(function (BloqueosProcessService $service) {
                     try {
-                        $service->procesarBloqueos();
+                        // Procesar bloqueos validados
+                        $resBloqueos = $service->procesarBloqueos();
 
+                        // Procesar duplicados
+                        $resDuplicados = $service->procesarBloqueosDuplicados();
+
+                        // Notificación combinada
                         Notification::make()
-                            ->title('Bloqueos procesados exitosamente')
+                            ->title('Procesamiento completo')
+                            ->body(
+                                "Bloqueos procesados:<br>" .
+                                "Total procesados: " . ($resBloqueos['procesados'] ?? '-') . "<br>" .
+                                "Errores: " . ($resBloqueos['errores'] ?? '0') . "<br>" .
+                                "<br>" .
+                                "Duplicados procesados:<br>" .
+                                "Grupos detectados: " . ($resDuplicados['grupos'] ?? '-') . "<br>" .
+                                "Registros eliminados: " . ($resDuplicados['eliminados'] ?? '-')
+                            )
                             ->success()
                             ->send();
-                    } catch (\Exception $e) {
-                        Log::error('Error al procesar bloqueos', [
+                    } catch (\Throwable $e) {
+                        Log::error('Error al procesar bloqueos y duplicados', [
                             'error' => $e->getMessage(),
                             'trace' => $e->getTraceAsString(),
                             'user_id' => auth()->guard('web')->user()->id,
                         ]);
                         Notification::make()
-                            ->title('Error al procesar bloqueos')
+                            ->title('Error en el procesamiento')
                             ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
-            Action::make('procesar_duplicados')
-                ->label('Procesar Duplicados')
-                ->color('warning')
-                ->icon('heroicon-o-document-duplicate')
-                ->requiresConfirmation()
-                ->modalHeading('¿Procesar registros duplicados?')
-                ->modalDescription('Esta acción procesará los registros duplicados siguiendo estas reglas:
-                    1. Identificará grupos de registros con el mismo par legajo-cargo
-                    2. Para cada grupo:
-                       - Procesará solo el registro más antiguo
-                       - Marcará el resto como duplicados y los eliminará
-                    3. Generará un respaldo de los datos originales
-                    4. Solo se procesarán los duplicados si el par legajo-cargo existe en Mapuche
-                    ¿Desea continuar?')
-                ->action(function (BloqueosProcessService $service) {
-                    try {
-                        $service->procesarBloqueosDuplicados();
+            // Action::make('procesar')
+            //     ->label('Procesar Bloqueos')
+            //     ->tooltip('Procesa los registros con estado validado')
+            //     ->color('success')
+            //     ->icon('heroicon-o-check-circle')
+            //     ->requiresConfirmation()
+            //     ->modalHeading('¿Procesar bloqueos?')
+            //     ->modalDescription('Esta acción realizará los siguientes pasos:
 
-                        Notification::make()
-                            ->title('Duplicados procesados exitosamente')
-                            ->success()
-                            ->send();
-                    } catch (\Exception $e) {
-                        Log::error('Error al procesar duplicados', [
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString(),
-                            'user_id' => auth()->guard('web')->user()->id,
-                        ]);
-                        Notification::make()
-                            ->title('Error al procesar duplicados')
-                            ->body('Error: ' . $e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
+            //         1. Creará un respaldo de la tabla DH03 actual
+            //         2. Filtrará los registros validados correctamente
+            //         3. Para cada registro validado:
+            //            - Actualizará o creará el bloqueo en DH03
+            //            - Registrará la fecha de proceso
+            //            - Actualizará el estado del registro
+            //         4. Generará un resumen de las operaciones realizadas
+
+            //         Nota: Solo se procesarán los registros en estado "validado".')
+            //     ->action(function (BloqueosProcessService $service) {
+            //         try {
+            //             $service->procesarBloqueos();
+
+            //             Notification::make()
+            //                 ->title('Bloqueos procesados exitosamente')
+            //                 ->success()
+            //                 ->send();
+            //         } catch (\Exception $e) {
+            //             Log::error('Error al procesar bloqueos', [
+            //                 'error' => $e->getMessage(),
+            //                 'trace' => $e->getTraceAsString(),
+            //                 'user_id' => auth()->guard('web')->user()->id,
+            //             ]);
+            //             Notification::make()
+            //                 ->title('Error al procesar bloqueos')
+            //                 ->body('Error: ' . $e->getMessage())
+            //                 ->danger()
+            //                 ->send();
+            //         }
+            //     }),
+            // Action::make('procesar_duplicados')
+            //     ->label('Procesar Duplicados')
+            //     ->color('warning')
+            //     ->icon('heroicon-o-document-duplicate')
+            //     ->requiresConfirmation()
+            //     ->modalHeading('¿Procesar registros duplicados?')
+            //     ->modalDescription('Esta acción procesará los registros duplicados siguiendo estas reglas:
+            //         1. Identificará grupos de registros con el mismo par legajo-cargo
+            //         2. Para cada grupo:
+            //            - Procesará solo el registro más antiguo
+            //            - Marcará el resto como duplicados y los eliminará
+            //         3. Generará un respaldo de los datos originales
+            //         4. Solo se procesarán los duplicados si el par legajo-cargo existe en Mapuche
+            //         ¿Desea continuar?')
+            //     ->action(function (BloqueosProcessService $service) {
+            //         try {
+            //             $service->procesarBloqueosDuplicados();
+
+            //             Notification::make()
+            //                 ->title('Duplicados procesados exitosamente')
+            //                 ->success()
+            //                 ->send();
+            //         } catch (\Exception $e) {
+            //             Log::error('Error al procesar duplicados', [
+            //                 'error' => $e->getMessage(),
+            //                 'trace' => $e->getTraceAsString(),
+            //                 'user_id' => auth()->guard('web')->user()->id,
+            //             ]);
+            //             Notification::make()
+            //                 ->title('Error al procesar duplicados')
+            //                 ->body('Error: ' . $e->getMessage())
+            //                 ->danger()
+            //                 ->send();
+            //         }
+            //     }),
             Actions\Action::make('restaurar')
                 ->label('Restaurar Cambios')
                 ->tooltip('Revertir los últimos cambios realizados en DH03 por el usuario actual')
@@ -215,7 +299,7 @@ class ListImportData extends ListRecords
                     }
                 }),
             Actions\Action::make('truncate')
-                ->label('Vaciar Tabla')
+                ->label('Eliminar')
                 ->color('danger')
                 ->icon('heroicon-o-trash')
                 ->requiresConfirmation()
@@ -246,7 +330,7 @@ class ListImportData extends ListRecords
             Action::make('documentation')
                 ->label('Documentación')
                 ->icon('heroicon-o-book-open')
-                ->color('secondary')
+                ->color('primary')
                 ->modalHeading('Documentación de Bloqueos')
                 ->modalWidth('7xl')
                 ->modalContent(function () {
