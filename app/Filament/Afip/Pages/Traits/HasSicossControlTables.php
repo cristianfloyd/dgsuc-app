@@ -69,22 +69,22 @@ trait HasSicossControlTables
                 ->label('Cod. Act.')
                 ->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::Small),
             TextColumn::make('aportesijpdh21')
-                ->label('Aportes SIJP DH21')
+                ->label('SIJP DH21')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aporteinssjpdh21')
-                ->label('Aportes INSSJP DH21')
+                ->label('INSSJP DH21')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aportesijp')
-                ->label('Aportes SIJP SICOSS')
+                ->label('SIJP SICOSS')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aporteinssjp')
-                ->label('Aportes INSSJP SICOSS')
+                ->label('INSSJP SICOSS')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
@@ -105,7 +105,7 @@ trait HasSicossControlTables
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable()
                 ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
+                ->tooltip(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
         ];
     }
 

@@ -15,6 +15,7 @@ use Filament\Support\Enums\MaxWidth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\SicossConnectionTrait;
 use Filament\Support\Enums\Alignment;
+use Illuminate\View\View as ViewView;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\SicossControlService;
 use App\Traits\MapucheConnectionTrait;
@@ -62,9 +63,10 @@ class SicossControles extends Page implements HasTable
     public $availableConnections = [];
     public $activeTab = 'resumen';
     public $resultadosControles = null;
+    public $cachedStats = null;
     public $loading = false;
     public $record = null;
-    public $cachedStats = null;
+    public $search = '';
     public $year;
     public $month;
 
@@ -347,8 +349,13 @@ class SicossControles extends Page implements HasTable
             default => ControlAportesDiferencia::query()
         };
 
+        // TODO: Agregar el header y una vista que incluya un search
         return $table
             ->query($query)
+            ->header(view('filament.afip.pages.partials.sicoss-control-header', [
+                'year' => $this->year,
+                'month' => $this->month,
+            ]))
             ->columns($this->getColumnsForActiveTab())
             ->when(
                 $this->activeTab !== 'diferencias_cuils' && $this->activeTab !== 'conceptos',
@@ -962,5 +969,10 @@ class SicossControles extends Page implements HasTable
             $filename,
             \Maatwebsite\Excel\Excel::XLSX
         );
+    }
+
+    public function buscar()
+    {
+        $this->dispatch('buscar', search: $this->search);
     }
 }

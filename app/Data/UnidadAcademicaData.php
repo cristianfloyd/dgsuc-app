@@ -19,10 +19,10 @@ class UnidadAcademicaData extends Data
         if(!$codigo) return null;
 
         $codigo = trim(strtoupper($codigo));
-        
+
         return match ($codigo) {
             'AGX' => new self('AGX', '00001', TipoActividad::TERCIARIA),
-            'AQX' => new self('AQX', '00002', TipoActividad::TERCIARIA),
+            'AQX' => new self('AQX', '00007', TipoActividad::TERCIARIA),  // AQX y CXX tienen el mismo código de unidad académica
             'BAX' => new self('BAX', '00003', TipoActividad::SECUNDARIA),
             'CBX' => new self('CBX', '00004', TipoActividad::UNIVERSITARIA),
             'CEX' => new self('CEX', '00005', TipoActividad::UNIVERSITARIA),
