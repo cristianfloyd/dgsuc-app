@@ -5,6 +5,7 @@ namespace App\Filament\Afip\Pages\Traits;
 use Carbon\Carbon;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
+use Filament\Support\Enums\Alignment;
 use Illuminate\Database\Query\Builder;
 use Filament\Tables\Columns\TextColumn;
 
@@ -51,6 +52,7 @@ trait HasSicossControlTables
         return [
             TextColumn::make('dh01.nro_legaj')
                 ->label('Legajo')
+                ->alignment(Alignment::Right)->size(TextColumn\TextColumnSize::Small)
                 ->searchable()
                 ->sortable()
                 ->copyable()
@@ -58,39 +60,49 @@ trait HasSicossControlTables
                 ->copyMessageDuration(1500),
             TextColumn::make('cuil')
                 ->searchable()
+                ->alignment(Alignment::Right)->size(TextColumn\TextColumnSize::Small)
                 ->sortable()
                 ->copyable()
                 ->copyMessage('CUIL copiado')
                 ->copyMessageDuration(1500),
-            TextColumn::make('mapucheSicoss.cod_act'),
+            TextColumn::make('mapucheSicoss.cod_act')
+                ->label('Cod. Act.')
+                ->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::Small),
             TextColumn::make('aportesijpdh21')
                 ->label('Aportes SIJP DH21')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aporteinssjpdh21')
                 ->label('Aportes INSSJP DH21')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aportesijp')
                 ->label('Aportes SIJP SICOSS')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('aporteinssjp')
                 ->label('Aportes INSSJP SICOSS')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable(),
             TextColumn::make('total_aportes_dh21')
                 ->label('Total Aportes DH21')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->state(fn ($record) => $record->aportesijpdh21 + $record->aporteinssjpdh21)
                 ->sortable(),
             TextColumn::make('total_aportes_sicoss')
                 ->label('Total Aportes SICOSS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->money('ARS')
                 ->state(fn ($record) => $record->aportesijp + $record->aporteinssjp)
                 ->sortable(),
             TextColumn::make('diferencia')
                 ->money('ARS')
+                ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable()
                 ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
                 ->description(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),

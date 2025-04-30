@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Mapuche\Dh22;
 use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use App\Models\AfipMapucheSicoss;
@@ -18,7 +19,10 @@ use Illuminate\Support\Facades\Storage;
 use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
+use App\Services\Mapuche\PeriodoFiscalService;
+use App\Services\Mapuche\TableSelectorService;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\Afip\SicossEmbarazadasService;
 use Filament\Tables\Actions\Action as TableAction;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
 use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
@@ -54,10 +58,10 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->searchable(query: function(Builder $query, string $search): Builder {
+                    ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
                     })
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
+                    ->formatStateUsing(fn(string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('conyuge')
                     ->label('Cónyuge')
@@ -95,15 +99,71 @@ class AfipMapucheSicossResource extends Resource
             ])
             ->headerActions([
                 ActionGroup::make([
-                    Action::make('exportarSicossTxt')
-                        ->label('Exportar TXT SICOSS')
-                        ->icon('heroicon-o-document-arrow-down')
-                        ->action(function () {
-                            $exportService = Container::getInstance()->make(SicossExportService::class);
-                            $path = $exportService->generarArchivoTxt(static::getModel()::all());
-                            return response()->download($path)->deleteFileAfterSend();
-                        })
-                        ->color('success'),
+                    Action::make('actualizarEmbarazadas')
+                        ->label('Actualizar Embarazadas')
+                        ->icon('heroicon-o-user-group')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Actualizar Situación de Embarazadas')
+                        ->modalDescription('¿Está seguro que desea actualizar la situación de revista de embarazadas para el período fiscal actual? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.')
+                        ->action(function (PeriodoFiscalService $periodoFiscalService, TableSelectorService $tableSelectorService) {
+                            $sicossEmbarazadasService = new SicossEmbarazadasService($tableSelectorService, $periodoFiscalService);
+
+                            $periodoFiscal = $periodoFiscalService->getPeriodoFiscal();
+                            $year = $periodoFiscal['year'];
+                            $month = $periodoFiscal['month'];
+
+                            // Obtener liquidaciones válidas
+                            $liquidaciones = Dh22::filterByYearMonth($year, $month)
+                                ->generaImpositivo()
+                                ->pluck('nro_liqui')
+                                ->toArray();
+
+                            if (empty($liquidaciones)) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Sin liquidaciones')
+                                    ->warning()
+                                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$year}-{$month}")
+                                    ->send();
+                                return;
+                            }
+
+                            $resultado = $sicossEmbarazadasService->actualizarEmbarazadas([
+                                'year' => $year,
+                                'month' => $month,
+                                'liquidaciones' => $liquidaciones,
+                                'nro_liqui' => $liquidaciones[0]
+                            ]);
+
+                            if ($resultado['status'] === 'success') {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Actualización de embarazadas completada')
+                                    ->success()
+                                    ->body($resultado['message'])
+                                    ->send();
+                            } elseif ($resultado['status'] === 'warning') {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Advertencia')
+                                    ->warning()
+                                    ->body($resultado['message'])
+                                    ->send();
+                            } else {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Error en la actualización')
+                                    ->danger()
+                                    ->body($resultado['message'])
+                                    ->send();
+                            }
+                        }),
+                    // Action::make('exportarSicossTxt')
+                    //     ->label('Exportar TXT SICOSS')
+                    //     ->icon('heroicon-o-document-arrow-down')
+                    //     ->action(function () {
+                    //         $exportService = Container::getInstance()->make(SicossExportService::class);
+                    //         $path = $exportService->generarArchivoTxt(static::getModel()::all());
+                    //         return response()->download($path)->deleteFileAfterSend();
+                    //     })
+                    //     ->color('success'),
                     Action::make('exportarSicossExcel')
                         ->label('Exportar Excel')
                         ->icon('heroicon-o-table-cells')

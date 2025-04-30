@@ -203,18 +203,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             ->defaultSort('nro_liqui')
             ->filters(
                 [
-                    // Filter::make('con_aportes')
-                    //     ->label('Con Aportes')
-                    //     ->query(function ($query) {
-                    //         return $query->having(DB::raw('SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce * 1 ELSE impp_conce * 0 END) +
-                    //             SUM(CASE WHEN codn_conce IN (247) THEN impp_conce * 1 ELSE impp_conce * 0 END)'), '>', 0);
-                    //     }),
-                    // Filter::make('con_contribuciones')
-                    //     ->label('Con Contribuciones')
-                    //     ->query(function ($query) {
-                    //         return $query->having(DB::raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END) +
-                    //             SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)'), '>', 0);
-                    //     }),
+                    //
                 ],
                 layout: FiltersLayout::AboveContent,
             )

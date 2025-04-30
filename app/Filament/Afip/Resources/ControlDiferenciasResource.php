@@ -62,13 +62,12 @@ class ControlDiferenciasResource extends Resource
                     ->color('primary')
                     ->modalWidth('6xl')
                     ->modalHeading(fn($record) => "Combinaciones para Legajo {$record->dh01->nro_legaj}")
-                    ->modalSubheading(fn($record) => "Buscando combinaciones que sumen aproximadamente $ " . number_format($record->diferencia, 2, ',', '.'))
-                    ->modalContent(function ($record) {
+                    ->modalDescription(fn($record) => "Buscando combinaciones que sumen aproximadamente $ " . number_format($record->diferencia, 2, ',', '.'))
+                    ->modalContent(function ($record, CombinacionesService $combinacionesService) {
                         // Obtener el número de liquidación (asumiendo que está en el modelo o en sesión)
                         $nroLiqui = new NroLiqui(session('nro_liqui', 10)); // Ajusta según tu implementación
-
+                        
                         // Buscar combinaciones
-                        $combinacionesService = app(CombinacionesService::class);
                         $resultado = $combinacionesService->buscarCombinaciones(
                             $record->dh01->nro_legaj,
                             $nroLiqui,
