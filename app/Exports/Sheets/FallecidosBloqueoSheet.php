@@ -5,6 +5,7 @@ namespace App\Exports\Sheets;
 use Carbon\Carbon;
 use App\Models\Reportes\Bloqueos;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -42,7 +43,9 @@ class FallecidosBloqueoSheet implements
 
     public function collection()
     {
-        return $this->records;
+        $collection = $this->records;
+        $collection = $collection->filter(fn($row) => $row !== null);
+        return $collection;
     }
 
     public function title(): string
@@ -70,6 +73,8 @@ class FallecidosBloqueoSheet implements
 
     public function map($row): array
     {
+        Log::debug('Row en map:', ['row' => $row]);
+
         // Manejo seguro de la fecha
         $fechaBaja = $row->fecha_baja;
         if (is_string($fechaBaja)) {
@@ -78,11 +83,23 @@ class FallecidosBloqueoSheet implements
 
         $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
 
+        if(!$row){
+            return [
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            ];
+        }
         return [
             $row->nro_legaj,
-            $cuil ?? '',
-            $row->cargo->codc_uacad,
-            $row->dependencia,
+            $row?->dh01?->nro_cuil1 ?? 'N/A',
+            $row->cargo->codc_uacad ?? '',
+            $row->dependencia ?? '',
             $fechaBaja ? $fechaBaja->format('d/m/Y') : '',
             $row->dh01?->desc_appat ?? '',
             $row->dh01?->desc_nombr ?? '',

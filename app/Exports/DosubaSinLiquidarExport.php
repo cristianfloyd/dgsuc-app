@@ -41,8 +41,8 @@ class DosubaSinLiquidarExport implements WithMultipleSheets
             'summary' => new DosubaSinLiquidarSummarySheet($this->records, $this->periodo),
             'data' => new DosubaSinLiquidarDataSheet($this->records),
             'embarazadas' => new RepEmbarazadasSheet($this->periodo),
-            'fallecidos' => new RepFallecidosSheet($this->periodo),
-            'fallecidos_bloqueo' => new FallecidosBloqueoSheet($this->periodo),
+            // 'fallecidos' => new RepFallecidosSheet( $this->periodo),
+            // 'fallecidos_bloqueo' => new FallecidosBloqueoSheet( $this->periodo),
         ];
     }
 }

@@ -107,8 +107,9 @@ class DosubaSinLiquidarResource extends Resource
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($records) {
                         try {
+                            $filteredRecords = $records->filter(fn($record) => $record !== null);
                             return Excel::download(
-                                new DosubaSinLiquidarExport($records, $records->first()->periodo_fiscal),
+                                new DosubaSinLiquidarExport($filteredRecords, $filteredRecords->first()?->periodo_fiscal ?? ''),
                                 'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx'
                             );
                         } catch (\Exception $e) {
@@ -144,9 +145,10 @@ class DosubaSinLiquidarResource extends Resource
                                 ->required()
                         ])
                         ->action(function (array $data) {
+                            $records = DosubaSinLiquidarModel::all()->filter(fn($record) => $record !== null);
                             return Excel::download(
                                 new DosubaSinLiquidarExport(
-                                    records: DosubaSinLiquidarModel::all(),
+                                    records: $records,
                                     periodo: $data['periodo']
                                 ),
                                 'dosuba-sin-liquidar-' . $data['periodo'] . '.xlsx'
