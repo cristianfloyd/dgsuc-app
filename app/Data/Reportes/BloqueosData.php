@@ -102,10 +102,6 @@ class BloqueosData extends Data
             mensaje_error: $validatedData['mensaje_error'] ?? null
         );
 
-        Log::debug('DTO creado:', [
-            'instance' => $instance,
-        ]);
-
         return $instance;
     }
 
