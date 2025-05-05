@@ -73,7 +73,7 @@ class AfipMapucheMiSimplificacion extends Model
             if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
                 $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
             }
-            
+
             // Determinar puesto si es necesario
             if ($model->attributes['puesto'] === null && $model->attributes['categoria']) {
                 $puestoEnum = $model->determinarPuestoDesempenado($model->attributes['categoria']);
@@ -117,22 +117,22 @@ class AfipMapucheMiSimplificacion extends Model
             get: function ($value) {
                 // Inicializar la variable para evitar problemas de scope
                 $puestoEnum = null;
-                
+
                 // Caso 1: Si tenemos un valor de puesto en la base de datos
                 if ($value) {
                     // Primero intentamos determinar el puesto a partir del valor
                     $puestoEnum = $this->determinarPuestoDesempenado($value);
-                    
+
                     // Si no funciona, intentamos convertir directamente
                     if (!$puestoEnum) {
                         $puestoEnum = PuestoDesempenado::tryFrom($value);
                     }
-                } 
+                }
                 // Caso 2: Si no tenemos puesto pero sí categoría, intentamos determinar el puesto
                 elseif ($this->attributes['categoria']) {
                     $puestoEnum = $this->determinarPuestoDesempenado($this->attributes['categoria']);
                 }
-                
+
                 return $puestoEnum;
             },
             set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
@@ -199,6 +199,43 @@ class AfipMapucheMiSimplificacion extends Model
         );
     }
 
+    /**
+     * Accessor y Mutator para la fecha de inicio de relación laboral
+     *
+     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function inicioRelLaboral(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+            set: function ($value) {
+                return str_replace('-', '/', $value);
+            }
+        );
+    }
+
+    /**
+     * Accessor y Mutator para la fecha de fin de relación laboral
+     *
+     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function finRelLaboral(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+            set: function ($value) {
+                return str_replace('-', '/', $value);
+            }
+        );
+    }
 
     // ################################################################
 

@@ -177,9 +177,9 @@ class AfipMapucheMiSimplificacionResource extends Resource
                 Tables\Actions\Action::make('exportTxt')
                     ->label('Exportar TXT (AFIP)')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function () {
+                    ->action(function (AfipMapucheExportService $afipMapucheExportService) {
                         try {
-                            return app(AfipMapucheExportService::class)->exportToTxt();
+                            return $afipMapucheExportService->exportToTxt();
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Error al exportar')
@@ -218,7 +218,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                         try {
                             // Iniciar una transacción para asegurar la integridad de los datos
                             DB::connection('pgsql-prod')->beginTransaction();
-                            
+
                             // Obtener CUILs que no están en RelacionesActivas
                             $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
 
@@ -233,7 +233,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
                             // Utilizar el método del modelo para ejecutar la función almacenada
                             $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
-                                $data['nro_liqui'], 
+                                $data['nro_liqui'],
                                 $data['periodo_fiscal']
                             );
 
@@ -251,14 +251,14 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
                         } catch (\Exception $e) {
                             DB::connection('pgsql-prod')->rollBack();
-                            
+
                             // Registrar el error para diagnóstico
                             Log::error('Error al poblar Mi Simplificación', [
                                 'mensaje' => $e->getMessage(),
                                 'traza' => $e->getTraceAsString(),
                                 'datos' => $data
                             ]);
-                            
+
                             Notification::make()
                                 ->danger()
                                 ->title('Error')
