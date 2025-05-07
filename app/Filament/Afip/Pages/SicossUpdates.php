@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use App\Services\Afip\SicossUpdateService;
+use App\Services\Afip\SicossCpto205Service;
 use Filament\Widgets\MultipleIdLiquiSelector;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Afip\SicossEmbarazadasService;
@@ -37,15 +38,18 @@ class SicossUpdates extends Page
     protected PeriodoFiscalService $periodoFiscalService;
     protected SicossEmbarazadasService $sicossEmbarazadasService;
     protected SicossActividadUpdateService $sicossActividadUpdateService;
+    protected SicossCpto205Service $sicossCpto205Service;
 
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
         SicossEmbarazadasService $sicossEmbarazadasService,
-        SicossActividadUpdateService $sicossActividadUpdateService
+        SicossActividadUpdateService $sicossActividadUpdateService,
+        SicossCpto205Service $sicossCpto205Service
     ): void {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->sicossEmbarazadasService = $sicossEmbarazadasService;
         $this->sicossActividadUpdateService = $sicossActividadUpdateService;
+        $this->sicossCpto205Service = $sicossCpto205Service;
     }
 
     public function mount()
@@ -177,6 +181,7 @@ class SicossUpdates extends Page
             // Obtener las liquidaciones para el período fiscal seleccionado
             $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
                 ->generaImpositivo()
+                ->definitiva()
                 ->pluck('nro_liqui')
                 ->toArray();
 
@@ -189,6 +194,7 @@ class SicossUpdates extends Page
                 $this->isProcessing = false;
                 return;
             }
+
 
             // Ejecutar la actualización de embarazadas
             $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas([
@@ -269,6 +275,49 @@ class SicossUpdates extends Page
         }
     }
 
+    /**
+     * Ejecuta la actualización de datos del concepto 205 en SICOSS
+     */
+    public function runConcepto205Update(): void
+    {
+        $this->isProcessing = true;
+
+        try {
+            // Ejecutar la actualización de concepto 205
+            // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
+            $resultado = $this->sicossCpto205Service->actualizarCpto205();
+            $this->updateResults = $resultado;
+
+            // Mostrar notificación según el resultado
+            if ($resultado['status'] === 'success') {
+                Notification::make()
+                    ->title('Actualización de concepto 205 completada')
+                    ->success()
+                    ->body($resultado['message'])
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en actualización de concepto 205', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            Notification::make()
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+        } finally {
+            $this->isProcessing = false;
+        }
+    }
+
     protected function getActions(): array
     {
         return [
@@ -308,7 +357,18 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Código de Actividad')
-                ->modalDescription('¿Está seguro que desea actualizar los códigos de actividad? Este proceso es irreversible y puede afectar datos de AFIP.')
+                ->modalDescription('¿Está seguro que desea actualizar los códigos de actividad? Este proceso es irreversible y puede afectar datos de AFIP.'),
+
+            Action::make('run_concepto205_update')
+                ->label('Actualizar Concepto 205')
+                ->color('success')
+                ->icon('heroicon-o-currency-dollar')
+                ->action('runConcepto205Update')
+                ->disabled($this->isProcessing)
+                ->requiresConfirmation()
+                ->modalHeading('Actualizar Concepto 205')
+                ->modalDescription('Accion en modo de prueba. No se realizará la actualización.')
+                // ->modalDescription('¿Está seguro que desea actualizar los datos del concepto 205? Este proceso creará una tabla temporal con los montos calculados para los agentes que tienen el concepto 789 y 205.')
         ];
     }
 }

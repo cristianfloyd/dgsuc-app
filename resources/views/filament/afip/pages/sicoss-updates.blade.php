@@ -74,6 +74,9 @@
         <!-- Resultados de actualización de embarazadas -->
         <x-sicoss.embarazadas-results :updateResults="$updateResults" />
 
+        <!-- Resultados de actualización concepto 205 -->
+        <x-sicoss.concepto205-results :updateResults="$updateResults" />
+
         <!-- Resultados generales -->
         <x-sicoss.general-results :updateResults="$updateResults" />
 
