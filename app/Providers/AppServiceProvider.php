@@ -26,9 +26,11 @@ use App\Contracts\RepEmbarazadaServiceInterface;
 use App\Repositories\BloqueosRepositoryInterface;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
+use App\Repositories\Mapuche\ConceptosTotalesRepository;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
+use App\Repositories\Interfaces\ConceptosTotalesRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -76,6 +78,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ExportServiceInterface::class, AfipMapucheExportService::class);
         $this->app->bind(AfipRelacionesActivasServiceInterface::class, AfipRelacionesActivasService::class);
         $this->app->bind(BloqueosRepositoryInterface::class, BloqueosRepository::class);
+        $this->app->bind(ConceptosTotalesRepositoryInterface::class,ConceptosTotalesRepository::class
+        );
     }
 
     /**
@@ -89,8 +93,8 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
-            $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
-        });        
+        // Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+        //     $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
+        // });
     }
 }
