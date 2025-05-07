@@ -18,7 +18,7 @@ class LiquidacionControlResource extends Resource
     protected static ?string $model = LiquidacionControl::class;
 
     protected static ?string $navigationGroup = 'Liquidaciones';
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-check';
+    protected static ?string $navigationIcon = 'heroicon-o-check-badge';
     protected static ?string $modelLabel = 'Control Post-Liquidación';
     protected static ?string $pluralModelLabel = 'Controles Post-Liquidación';
 
@@ -34,7 +34,7 @@ class LiquidacionControlResource extends Resource
                 Forms\Components\Select::make('nro_liqui')
                     ->label('Liquidación')
                     ->required()
-                    ->relationship('liquidacion', 'descripcion'),
+                    ->relationship('liquidacion', 'desc_liqui'),
                 Forms\Components\Select::make('estado')
                     ->options([
                         'pendiente' => 'Pendiente',
