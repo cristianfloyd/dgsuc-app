@@ -15,6 +15,7 @@ use App\Services\Afip\SicossUpdateService;
 use Filament\Widgets\MultipleIdLiquiSelector;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Afip\SicossEmbarazadasService;
+use App\Services\Afip\SicossActividadUpdateService;
 
 class SicossUpdates extends Page
 {
@@ -35,13 +36,16 @@ class SicossUpdates extends Page
 
     protected PeriodoFiscalService $periodoFiscalService;
     protected SicossEmbarazadasService $sicossEmbarazadasService;
+    protected SicossActividadUpdateService $sicossActividadUpdateService;
 
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
-        SicossEmbarazadasService $sicossEmbarazadasService
+        SicossEmbarazadasService $sicossEmbarazadasService,
+        SicossActividadUpdateService $sicossActividadUpdateService
     ): void {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->sicossEmbarazadasService = $sicossEmbarazadasService;
+        $this->sicossActividadUpdateService = $sicossActividadUpdateService;
     }
 
     public function mount()
@@ -50,6 +54,17 @@ class SicossUpdates extends Page
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
         $this->year = $periodoFiscal['year'];
         $this->month = $periodoFiscal['month'];
+
+        // Simulación de resultado de actualización
+        // $this->updateResults = [
+        //     'status' => 'warning', // Prueba también con 'error' y 'warning'
+        //     'message' => 'Simulación: Se actualizaron 42 registros de cod_act.',
+        //     'details' => [
+        //         'registros_afectados' => 42,
+        //         'tiempo' => '0.5s',
+        //         'usuario' => 'admin',
+        //     ],
+        // ];
     }
 
     protected function getHeaderWidgets(): array
@@ -222,9 +237,48 @@ class SicossUpdates extends Page
         }
     }
 
+    public function runActividadUpdate(): void
+    {
+        $this->isProcessing = true;
+
+        try {
+            $resultado = $this->sicossActividadUpdateService->actualizarCodAct();
+            $this->updateResults = $resultado;
+
+            if ($resultado['status'] === 'success') {
+                Notification::make()
+                    ->title('Actualización de Actividad completada')
+                    ->success()
+                    ->body($resultado['message'])
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+        } finally {
+            $this->isProcessing = false;
+        }
+    }
+
     protected function getActions(): array
     {
         return [
+            Action::make('show_help')
+                ->label(fn() => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
+                ->icon(fn() => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                ->action(function () {
+                    $this->isHelpVisible = !$this->isHelpVisible;
+                }),
+
             Action::make('run_updates')
                 ->label('Update Dha8')
                 ->action('runUpdates')
@@ -246,12 +300,15 @@ class SicossUpdates extends Page
                     $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
                     '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'),
 
-            Action::make('show_help')
-                ->label(fn () => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
-                ->icon(fn () => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
-                ->action(function () {
-                    $this->isHelpVisible = !$this->isHelpVisible;
-                })
+            Action::make('run_actividad_update')
+                ->label('Actualizar Actividad')
+                ->color('info')
+                ->icon('heroicon-o-briefcase')
+                ->action('runActividadUpdate')
+                ->disabled($this->isProcessing)
+                ->requiresConfirmation()
+                ->modalHeading('Actualizar Código de Actividad')
+                ->modalDescription('¿Está seguro que desea actualizar los códigos de actividad? Este proceso es irreversible y puede afectar datos de AFIP.')
         ];
     }
 }

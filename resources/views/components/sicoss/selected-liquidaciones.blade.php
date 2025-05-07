@@ -1,6 +1,12 @@
 @props(['liquidaciones', 'liquidacionDefinitiva'])
 
-<div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+<div
+    x-data="{ show: true }"
+    x-init="setTimeout(() => show = false, 6000)"
+    x-show="show"
+    x-transition
+    class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+>
     <div class="p-6">
         <div class="my-4">
             <h4 class="text-sm font-medium text-gray-900 dark:text-white">Liquidaciones Definitivas</h4>
