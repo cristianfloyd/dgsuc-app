@@ -2,11 +2,12 @@
 
 namespace App\Data\Mapuche;
 
+use DateTime;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
-use DateTime;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class GrupoData extends Data
 {
@@ -25,7 +26,7 @@ class GrupoData extends Data
         public readonly DateTime $fechaModificacion,
     ) {}
 
-    public static function rules(): array
+    public static function rules(ValidationContext $context): array
     {
         return [
             'nombre' => ['required', 'string', 'max:30'],

@@ -459,69 +459,76 @@ class AfipMapucheSicossImportService
 
     /**
      * Parsea una línea del archivo según especificación SICOSS
+     *
+     * Comportamiento especial para el campo 'seguro':
+     *  - El campo 'seguro' (posición 462, longitud 1) puede venir como:
+     *      - 'T' o '1' (True)
+     *      - 'F' o '0' (False)
+     *  - Se mapea a 1 (true) o 0 (false) respectivamente.
+     *  - Cualquier otro valor se interpreta como 0 (false) por defecto.
+     *
+     * @param string $line Línea a parsear
+     * @param int $lineNumber Número de línea (para logging)
+     * @return array Resultado del parseo
      */
-    // public function parseLine(string $line, int $lineNumber = 0): array
-    // {
-    //     try {
-    //         // Guardamos la longitud original antes de cualquier transformación
-    //         $originalLength = strlen($line);
+    public function parseLine(string $line, int $lineNumber = 0): array
+    {
+        try {
+            // Normalizar eliminando saltos de línea
+            $line = rtrim($line, "\r\n");
 
-    //         // Detectamos la codificación actual y convertimos a UTF-8
-    //         $encoding = mb_detect_encoding($line, ['ISO-8859-1', 'UTF-8', 'ASCII'], true);
-    //         if ($encoding !== 'UTF-8') {
-    //             $line = mb_convert_encoding($line, 'UTF-8', $encoding ?: 'ISO-8859-1');
-    //         }
+            // Verificar longitud correcta
+            if (strlen($line) !== 499) {
+                Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
+                $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
+            }
 
-    //         // Limpiamos caracteres no válidos manteniendo la longitud
-    //         $line = preg_replace('/[^\PC\s]/u', ' ', $line);
+            $structure = $this->getFileStructure();
+            $parsedData = [];
 
-    //         // Aseguramos que la longitud se mantiene
-    //         if (mb_strlen($line, '8bit') < $originalLength) {
-    //             $line = str_pad($line, $originalLength, ' ');
-    //         }
+            foreach ($structure as $field => $config) {
+                $value = substr($line, $config['start'], $config['length']);
 
-    //         if (mb_strlen($line, '8bit') < 499) {
-    //             Log::error("Longitud de línea inválida: " . mb_strlen($line, '8bit'), [
-    //                 'linea_original' => $line,
-    //                 'longitud' => mb_strlen($line, '8bit')
-    //             ]);
-    //             throw new \Exception("Longitud de línea inválida {$lineNumber}, longitud: " . mb_strlen($line, '8bit'));
-    //         }
+                // --- Comportamiento especial para el campo 'seguro' ---
+                if ($field === 'seguro') {
+                    // Normalizar y convertir a entero 1/0 según el valor
+                    $v = strtoupper(trim($value));
+                    if ($v === 'T' || $v === '1') {
+                        $parsedData[$field] = 1;
+                    } elseif ($v === 'F' || $v === '0') {
+                        $parsedData[$field] = 0;
+                    } else {
+                        // Valor no reconocido, se interpreta como 0 (false)
+                        $parsedData[$field] = 0;
+                    }
+                    continue;
+                }
 
-    //         $structure = $this->getFileStructure();
-    //         $parsedData = [];
+                // Tratamiento especial para campos de texto como nombres y provincias
+                if ($config['type'] === 'C') {
+                    // Aplicar tratamiento especial de caracteres
+                    $value = $this->corregirCaracteresEspeciales($value);
+                    $parsedData[$field] = trim($value);
+                } else {
+                    $parsedData[$field] = match ($config['type']) {
+                        'N' => (int)ltrim(trim($value), '0') ?: 0,
+                        'D' => $this->parseAmount($value),
+                        default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
+                    };
+                }
+            }
 
-    //         // Procesar cada campo según la estructura definida
-    //         foreach ($structure as $field => $config) {
-    //             $value = mb_substr($line, $config['start'], $config['length'], '8bit');
-
-    //             // Aseguramos que el valor mantiene su longitud original
-    //             if (mb_strlen($value, '8bit') !== $config['length']) {
-    //                 $value = str_pad($value, $config['length'], ' ');
-    //             }
-
-    //             $parsedData[$field] = match ($config['type']) {
-    //                 'N' => (int)ltrim(trim($value), '0') ?: 0,
-    //                 'D' => $this->parseAmount($value),
-    //                 'C' => trim($value),
-    //                 default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-    //             };
-    //         }
-
-
-    //         $this->validateParsedData($parsedData);
-
-    //         return [
-    //             'success' => true,
-    //             'data' => $parsedData
-    //         ];
-    //     } catch (\Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'error' => "Error en línea {$lineNumber}: " . $e->getMessage()
-    //         ];
-    //     }
-    // }
+            return [
+                'success' => true,
+                'data' => $parsedData
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => "Error en línea {$lineNumber}: " . $e->getMessage()
+            ];
+        }
+    }
 
     /**
      * Crea o actualiza un registro en la base de datos
@@ -1043,120 +1050,68 @@ class AfipMapucheSicossImportService
     }
 
     /**
- * Parsea una línea del archivo según especificación SICOSS
- * con manejo mejorado de caracteres especiales
- *
- * @param string $line Línea a parsear
- * @param int $lineNumber Número de línea (para logging)
- * @return array Resultado del parseo
- */
-public function parseLine(string $line, int $lineNumber = 0): array
-{
-    try {
-        // Normalizar eliminando saltos de línea
-        $line = rtrim($line, "\r\n");
+     * Maneja específicamente caracteres problemáticos en archivos AFIP
+     *
+     * @param string $text Texto a procesar
+     * @return string Texto con caracteres corregidos
+     */
+    public function corregirCaracteresEspeciales(string $text): string
+    {
+        // Mapeo directo de caracteres problemáticos específicos
+        $char_map = [
+            // Vocales con acento
+            "\xCD" => "Í", // I con acento
+            "\xC1" => "Á", // A con acento
+            "\xC9" => "É", // E con acento
+            "\xD3" => "Ó", // O con acento
+            "\xDA" => "Ú", // U con acento
 
-        // Verificar longitud correcta
-        if (strlen($line) !== 499) {
-            Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
-            $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
+            // Letra Ñ
+            "\xD1" => "Ñ", // Ñ
+
+            // Vocales con diéresis
+            "\xDC" => "Ü", // U con diéresis
+            "\xC4" => "Ä", // A con diéresis
+            "\xCB" => "Ë", // E con diéresis
+            "\xCF" => "Ï", // I con diéresis
+            "\xD6" => "Ö", // O con diéresis
+
+            // Versiones minúsculas - acentos
+            "\xED" => "í",
+            "\xE1" => "á",
+            "\xE9" => "é",
+            "\xF3" => "ó",
+            "\xFA" => "ú",
+
+            // Versión minúscula - ñ
+            "\xF1" => "ñ",
+
+            // Versiones minúsculas - diéresis
+            "\xFC" => "ü",
+            "\xE4" => "ä",
+            "\xEB" => "ë",
+            "\xEF" => "ï",
+            "\xF6" => "ö"
+        ];
+
+        // Aplicar mapeo directo
+        $result = strtr($text, $char_map);
+
+        // Estrategia adicional: corrección contextual para apellidos específicos
+        $apellidosComunes = [
+            "PI?EIRO" => "PIÑEIRO",
+            "MU?OZ" => "MUÑOZ",
+            "CASTA?ARES" => "CASTAÑARES",
+            "PE?A" => "PEÑA",
+            "ORDO?EZ" => "ORDOÑEZ"
+        ];
+
+        foreach ($apellidosComunes as $mal => $bien) {
+            $result = str_replace($mal, $bien, $result);
         }
 
-        $structure = $this->getFileStructure();
-        $parsedData = [];
-
-        foreach ($structure as $field => $config) {
-            $value = substr($line, $config['start'], $config['length']);
-
-            // Tratamiento especial para campos de texto como nombres y provincias
-            if ($config['type'] === 'C') {
-                // Aplicar tratamiento especial de caracteres
-                $value = $this->corregirCaracteresEspeciales($value);
-                $parsedData[$field] = trim($value);
-            } else {
-                $parsedData[$field] = match ($config['type']) {
-                    'N' => (int)ltrim(trim($value), '0') ?: 0,
-                    'D' => $this->parseAmount($value),
-                    default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-                };
-            }
-        }
-
-        return [
-            'success' => true,
-            'data' => $parsedData
-        ];
-    } catch (\Exception $e) {
-        return [
-            'success' => false,
-            'error' => "Error en línea {$lineNumber}: " . $e->getMessage()
-        ];
+        return $result;
     }
-}
-
-/**
- * Maneja específicamente caracteres problemáticos en archivos AFIP
- *
- * @param string $text Texto a procesar
- * @return string Texto con caracteres corregidos
- */
-public function corregirCaracteresEspeciales(string $text): string
-{
-    // Mapeo directo de caracteres problemáticos específicos
-    $char_map = [
-        // Vocales con acento
-        "\xCD" => "Í", // I con acento
-        "\xC1" => "Á", // A con acento
-        "\xC9" => "É", // E con acento
-        "\xD3" => "Ó", // O con acento
-        "\xDA" => "Ú", // U con acento
-
-        // Letra Ñ
-        "\xD1" => "Ñ", // Ñ
-
-        // Vocales con diéresis
-        "\xDC" => "Ü", // U con diéresis
-        "\xC4" => "Ä", // A con diéresis
-        "\xCB" => "Ë", // E con diéresis
-        "\xCF" => "Ï", // I con diéresis
-        "\xD6" => "Ö", // O con diéresis
-
-        // Versiones minúsculas - acentos
-        "\xED" => "í",
-        "\xE1" => "á",
-        "\xE9" => "é",
-        "\xF3" => "ó",
-        "\xFA" => "ú",
-
-        // Versión minúscula - ñ
-        "\xF1" => "ñ",
-
-        // Versiones minúsculas - diéresis
-        "\xFC" => "ü",
-        "\xE4" => "ä",
-        "\xEB" => "ë",
-        "\xEF" => "ï",
-        "\xF6" => "ö"
-    ];
-
-    // Aplicar mapeo directo
-    $result = strtr($text, $char_map);
-
-    // Estrategia adicional: corrección contextual para apellidos específicos
-    $apellidosComunes = [
-        "PI?EIRO" => "PIÑEIRO",
-        "MU?OZ" => "MUÑOZ",
-        "CASTA?ARES" => "CASTAÑARES",
-        "PE?A" => "PEÑA",
-        "ORDO?EZ" => "ORDOÑEZ"
-    ];
-
-    foreach ($apellidosComunes as $mal => $bien) {
-        $result = str_replace($mal, $bien, $result);
-    }
-
-    return $result;
-}
 
 
     /**
@@ -1173,7 +1128,7 @@ public function corregirCaracteresEspeciales(string $text): string
     //         // Normalizar eliminando saltos de línea
     //         $line = rtrim($line, "\r\n");
 
-    //         // Verificar longitud correcta (ahora 499)
+    //         // Verificar longitud correcta
     //         if (strlen($line) !== 499) {
     //             Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
     //             $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
@@ -1521,7 +1476,7 @@ public function corregirCaracteresEspeciales(string $text): string
                     'posición' => $i,
                     'byte' => $byte,
                     'hex' => sprintf('0x%02X', $byte),
-                    'contexto' => substr($texto, max(0, $i-5), 10)
+                    'contexto' => substr($texto, max(0, $i - 5), 10)
                 ];
             }
         }

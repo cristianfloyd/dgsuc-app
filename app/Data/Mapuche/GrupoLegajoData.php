@@ -4,6 +4,7 @@ namespace App\Data\Mapuche;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class GrupoLegajoData extends Data
 {
@@ -15,7 +16,7 @@ class GrupoLegajoData extends Data
         public readonly int $nroLegajo,
     ) {}
 
-    public static function rules(): array
+    public static function rules(ValidationContext $context): array
     {
         return [
             'id_grupo' => ['required', 'integer', 'exists:mapuche.grupo,id_grupo'],

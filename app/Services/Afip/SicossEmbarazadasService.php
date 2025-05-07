@@ -36,11 +36,15 @@ class SicossEmbarazadasService
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
         $year = $params['year'] ?? $periodoFiscal['year'];
         $month = $params['month'] ?? $periodoFiscal['month'];
-        
+
+        // Asegurar que month y year sean enteros
+        $year = (int)$year;
+        $month = (int)$month;
+
         // Calcular fechas de inicio y fin del mes
         $fechaDesde = $params['fecha_desde'] ?? date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
         $fechaHasta = $params['fecha_hasta'] ?? date("Y-m-t", mktime(0, 0, 0, $month, 1, $year));
-        
+
         // Obtener liquidaciones si no se proporcionan
         $liquidaciones = $params['liquidaciones'] ?? null;
         if (!$liquidaciones) {
@@ -53,12 +57,12 @@ class SicossEmbarazadasService
                 ];
             }
         }
-        
+
         // Usar la primera liquidación (o la especificada)
         $nroLiqui = $params['nro_liqui'] ?? $liquidaciones[0];
         $codnConce = $params['codn_conce'] ?? 830;
         $nroVarLicencia = $params['nrovar_licencia'] ?? 7;
-        
+
         Log::info('Iniciando actualización de embarazadas en SICOSS', [
             'fecha_desde' => $fechaDesde,
             'fecha_hasta' => $fechaHasta,
@@ -66,17 +70,17 @@ class SicossEmbarazadasService
             'codn_conce' => $codnConce,
             'nrovar_licencia' => $nroVarLicencia
         ]);
-        
+
         try {
             // Variable para capturar el ID del log
             $logId = null;
-            
+
             // Llamar al procedimiento almacenado
             DB::connection($this->getConnectionName())->statement(
                 "CALL suc.sicoss_mapuche_update_embarazadas(?, ?, ?, ?, ?, ?)",
                 [$fechaDesde, $fechaHasta, $nroLiqui, $codnConce, $nroVarLicencia, &$logId]
             );
-            
+
             // Obtener detalles del log si está disponible
             $logDetails = null;
             if ($logId) {
@@ -85,7 +89,7 @@ class SicossEmbarazadasService
                     ->where('id', $logId)
                     ->first();
             }
-            
+
             // Si no tenemos detalles del log, intentar obtener el último registro
             if (!$logDetails) {
                 $logDetails = DB::connection($this->getConnectionName())
@@ -94,15 +98,15 @@ class SicossEmbarazadasService
                     ->orderBy('id', 'desc')
                     ->first();
             }
-            
+
             $registrosAfectados = $logDetails->registros_afectados ?? 0;
             $duracionMs = $logDetails->duracion_ms ?? 0;
-            
+
             Log::info('Actualización de embarazadas completada', [
                 'registros_afectados' => $registrosAfectados,
                 'duracion_ms' => $duracionMs
             ]);
-            
+
             return [
                 'status' => 'success',
                 'message' => "Actualización completada: {$registrosAfectados} registros actualizados",
@@ -118,7 +122,7 @@ class SicossEmbarazadasService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return [
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage(),
@@ -126,7 +130,7 @@ class SicossEmbarazadasService
             ];
         }
     }
-    
+
     /**
      * Obtiene las liquidaciones disponibles para un período fiscal
      *

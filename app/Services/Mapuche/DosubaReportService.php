@@ -15,29 +15,80 @@ use App\ValueObjects\PeriodoLiquidacion;
 class DosubaReportService
 {
     use MapucheConnectionTrait;
+
+    /**
+     * Constructor del servicio
+     * 
+     * @param PeriodoFiscalService $periodoFiscalService Servicio para obtener información del período fiscal
+     */
     public function __construct(
         private readonly PeriodoFiscalService $periodoFiscalService,
     ) {}
 
     /**
      * Obtiene el reporte DOSUBA para un período específico
-     * @param string|null $year Año del período fiscal
-     * @param string|null $month Mes del período fiscal
-     * @return Collection
-     * @throws \Exception
+     * 
+     * Este método identifica legajos que estaban activos en un período anterior
+     * pero que ya no aparecen en los períodos más recientes, lo que podría indicar
+     * bajas o cambios en la situación laboral.
+     *
+     * @param string|null $year Año del período fiscal (formato: YYYY)
+     * @param string|null $month Mes del período fiscal (formato: MM)
+     * @return Collection Colección con los datos del reporte
+     * @throws \Exception Si ocurre un error durante la generación del reporte
      */
     public function getDosubaReport(string $year = null, string $month = null): Collection
+    {
+        try {
+            // Inicialización de fechas
+            $periodo = $this->inicializarPeriodo($year, $month);
+            $fechas = $this->calcularFechasReferencia($periodo);
+            
+            // Obtención y procesamiento de legajos
+            $legajosPorMes = $this->obtenerLegajosPorMes($fechas);
+            $legajosCombinados = $this->combinarLegajosPrimerYSegundoMes($legajosPorMes);
+
+
+
+            // Realizamos el cruce de información entre los legajos combinados y los del tercer mes
+            return $this->cruzarLegajos($legajosPorMes['tercerMes'], $legajosCombinados);
+        } catch (\Exception $e) {
+            Log::error('Error en DosubaReportService: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'year' => $year,
+                'month' => $month
+            ]);
+            throw new \Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Inicializa el objeto PeriodoLiquidacion con el año y mes proporcionados
+     * 
+     * @param string|null $year Año del período
+     * @param string|null $month Mes del período
+     * @return PeriodoLiquidacion Objeto con el período inicializado
+     */
+    private function inicializarPeriodo(?string $year, ?string $month): PeriodoLiquidacion
     {
         // Si no se especifica año o mes, usamos el período fiscal actual
         if ($year === null || $month === null) {
             $year = $this->periodoFiscalService->getYear();
             $month = $this->periodoFiscalService->getMonth();
         }
+        
+        return new PeriodoLiquidacion($year, $month);
+    }
 
-        // Creamos el objeto PeriodoLiquidacion
-        $periodo = new PeriodoLiquidacion($year, $month);
 
-        // Calculamos las fechas de referencia
+    /**
+     * Calcula las fechas de referencia para el reporte
+     * 
+     * @param PeriodoLiquidacion $periodo Período de liquidación
+     * @return array Arreglo con las fechas de referencia
+     */
+    private function calcularFechasReferencia(PeriodoLiquidacion $periodo): array
+    {
         $fechaReferencia = $periodo->getFechaReferencia();
         $fechaPrimerMes = $fechaReferencia;
         $fechaSegundoMes = $fechaReferencia->copy()->subMonth();
@@ -50,29 +101,61 @@ class DosubaReportService
             'fechaTercerMes' => $fechaTercerMes->format('Y-m')
         ]);
 
-        try {
-            // Obtener legajos de cada mes usando el método unificado
-            $legajosPrimerMes = $this->legajosMes($fechaPrimerMes);
-            $legajosSegundoMes = $this->legajosMes($fechaSegundoMes);
-            $legajosTercerMes = $this->legajosMes($fechaTercerMes);
-
-            // Combinamos los legajos del primer y segundo mes
-            $legajosCombinados = $legajosPrimerMes->concat($legajosSegundoMes)->unique('nro_legaj');
-
-            Log::info('Legajos obtenidos por mes:', [
-                'primer_mes' => $legajosPrimerMes->count(),
-                'segundo_mes' => $legajosSegundoMes->count(),
-                'tercer_mes' => $legajosTercerMes->count(),
-                'combinados' => $legajosCombinados->count()
-            ]);
-
-            // Realizamos el cruce de información entre los legajos combinados y los del tercer mes
-            return $this->cruzarLegajos($legajosTercerMes, $legajosCombinados);
-        } catch (\Exception $e) {
-            Log::error('Error en DosubaReportService: ' . $e->getMessage());
-            throw new \Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage());
-        }
+        return [
+            'primerMes' => $fechaPrimerMes,
+            'segundoMes' => $fechaSegundoMes,
+            'tercerMes' => $fechaTercerMes
+        ];
     }
+
+    /**
+     * Obtiene los legajos para cada mes de referencia
+     * 
+     * @param array $fechas Arreglo con las fechas de referencia
+     * @return array Arreglo con los legajos por mes
+     */
+    private function obtenerLegajosPorMes(array $fechas): array
+    {
+        $legajosPrimerMes = $this->legajosMes($fechas['primerMes']);
+        $legajosSegundoMes = $this->legajosMes($fechas['segundoMes']);
+        $legajosTercerMes = $this->legajosMes($fechas['tercerMes']);
+
+        Log::info('Legajos obtenidos por mes:', [
+            'primer_mes' => $legajosPrimerMes->count(),
+            'segundo_mes' => $legajosSegundoMes->count(),
+            'tercer_mes' => $legajosTercerMes->count()
+        ]);
+
+        return [
+            'primerMes' => $legajosPrimerMes,
+            'segundoMes' => $legajosSegundoMes,
+            'tercerMes' => $legajosTercerMes
+        ];
+    }
+
+    /**
+     * Combina los legajos del primer y segundo mes eliminando duplicados
+     * 
+     * @param array $legajosPorMes Arreglo con los legajos por mes
+     * @return Collection Colección con los legajos combinados
+     */
+    private function combinarLegajosPrimerYSegundoMes(array $legajosPorMes): Collection
+    {
+        $legajosCombinados = $legajosPorMes['primerMes']
+            ->concat($legajosPorMes['segundoMes'])
+            ->unique('nro_legaj');
+
+        Log::info('Legajos combinados:', [
+            'total' => $legajosCombinados->count()
+        ]);
+
+        return $legajosCombinados;
+    }
+
+
+
+
+
 
     /**
      * Método unificado para obtener legajos de un mes específico
@@ -109,6 +192,8 @@ class DosubaReportService
         return $query->get();
     }
 
+
+    
     /**
      * Cruza los legajos entre dos colecciones para encontrar diferencias
      * @param Collection $legajosTercerMes Legajos del tercer mes
@@ -135,6 +220,17 @@ class DosubaReportService
         $resultados = collect();
         $chunkSize = 1000;
 
+        // Obtenemos el año y mes del tercer mes para filtrar
+        $fechaTercerMes = $legajosTercerMes->first();
+        $anioTercerMes = $fechaTercerMes ? $fechaTercerMes->anio : null;
+        $mesTercerMes = $fechaTercerMes ? $fechaTercerMes->mes : null;
+
+        if (!$anioTercerMes || !$mesTercerMes) {
+            Log::error('No se pudo determinar el período del tercer mes');
+            return collect();
+        }
+
+        
         // Procesamos solo los legajos que están en la diferencia
         foreach (array_chunk($legajosDiferencia, $chunkSize) as $chunk) {
             $query = Dh03::query()
@@ -163,6 +259,8 @@ class DosubaReportService
                 ->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
                 ->leftJoin('dh09', 'dh03.nro_legaj', '=', 'dh09.nro_legaj')
                 ->whereIn('dh03.nro_legaj', $chunk)
+                ->where('dh22.per_liano', $anioTercerMes)
+                ->where('dh22.per_limes', $mesTercerMes)
                 ->orderBy('dh03.nro_legaj');
 
             Log::info('Query chunk procesado:', [
