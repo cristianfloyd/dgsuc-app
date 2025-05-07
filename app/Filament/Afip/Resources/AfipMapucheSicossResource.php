@@ -50,18 +50,28 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('periodo_fiscal')
                     ->label('Período Fiscal')
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                TextColumn::make('dh01.nro_legaj')
+                    ->label('Legajo')
                     ->searchable(),
                 TextColumn::make('cuil')
                     ->label('CUIL')
-                    ->sortable()
-                    ->searchable(),
+                    // ->searchable()
+                    ->sortable(),
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
-                    })
+                    // ->searchable(query: function (Builder $query, string $search): Builder {
+                    //     return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
+                    // })
                     ->formatStateUsing(fn(string $state): string => strtoupper($state))
+                    ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('cod_cond')
+                    ->label('Condición')
+                    ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('cod_act')
+                    ->label('Cod. Act.')
                     ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('conyuge')
                     ->label('Cónyuge')
@@ -74,14 +84,18 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('cod_situacion')
                     ->label('Situación')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('cod_cond')
-                    ->label('Condición')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rem_impo1')
+                    ->label('Rem impo 1')
+                    ->money('ARS'),
                 TextColumn::make('rem_total')
                     ->label('Rem Total')
-                    ->money('ARS'),
+                    ->money('ARS')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rem_impo6')
                     ->label('Rem impo 6')
+                    ->money('ARS'),
+                TextColumn::make('rem_imp7')
+                    ->label('Rem impo 7')
                     ->money('ARS'),
                 TextColumn::make('diferencia_rem')
                     ->label('Diferencia Rem')

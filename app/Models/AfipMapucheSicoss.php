@@ -37,7 +37,7 @@ class AfipMapucheSicoss extends Model
 
     protected $primaryKey = 'id';
 
-    protected $appends = ['diferencia_rem'];
+
 
     public $incrementing = true;
     // No necesitas usar timestamps
@@ -167,6 +167,25 @@ class AfipMapucheSicoss extends Model
 
     protected $encodedFields = ['apnom', 'prov'];
 
+    protected $appends = [
+        'nro_cuil',
+        'diferencia_rem'
+    ];
+
+    public function nroCuil(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
+                if ($this->cuil) {
+                    // Extrae los 8 dígitos del medio de `cuil`
+                    return intval(substr($this->cuil, 2, 8));
+                }
+            return null;
+            }
+        );
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -214,10 +233,7 @@ class AfipMapucheSicoss extends Model
 
     public function dh01()
     {
-        return $this->belongsTo(Dh01::class, 'cuil', 'nro_cuil')
-            ->where(function ($query) {
-                $query->whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil]);
-            });
+        return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
     }
 
     /**
