@@ -2,6 +2,7 @@
 
 namespace App\Services\Reports;
 
+use Exception;
 use App\Traits\ReportCacheTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -32,15 +33,19 @@ class SicossReporteService
      */
     public function getReporteData(string $anio, string $mes): Collection
     {
-        return $this->rememberReportCache(
-            self::REPORT_NAME,
-            'data',
-            [$anio, $mes],
-            fn() => MapucheSicossReporte::query()
-                ->getReporte($anio, $mes)
-                ->get()
-                ->map(fn($item) => SicossReporteData::fromModel($item))
-        );
+        // return $this->rememberReportCache(
+        //     self::REPORT_NAME,
+        //     'data',
+        //     [$anio, $mes],
+        //     fn() => MapucheSicossReporte::query()
+        //         ->getReporte($anio, $mes)
+        //         ->get()
+        //         ->map(fn($item) => SicossReporteData::fromModel($item))
+        // );
+        return MapucheSicossReporte::query()
+            ->getReporte($anio, $mes)
+            ->get()
+            ->map(fn($item) => SicossReporteData::fromModel($item));
     }
 
     /**
@@ -52,15 +57,44 @@ class SicossReporteService
      */
     public function getTotales(string $anio, string $mes): SicossTotalesData
     {
-        return $this->rememberReportCache(
-            self::REPORT_NAME,
-            'totals',
-            [$anio, $mes],
-            function () use ($anio, $mes) {
-                $totales = MapucheSicossReporte::query()->getTotales($anio, $mes);
-                return SicossTotalesData::fromArray($totales->toArray())->toArray();
+        try {
+            // Descomentar para usar caché si es necesario
+            // return $this->rememberReportCache(
+            //     self::REPORT_NAME,
+            //     'totals',
+            //     [$anio, $mes],
+            //     function () use ($anio, $mes) {
+            //         $totales = MapucheSicossReporte::query()->getTotales($anio, $mes);
+            //         return SicossTotalesData::fromArray($totales->toArray());
+            //     }
+            // );
+            
+            $totales = MapucheSicossReporte::query()->getTotales($anio, $mes);
+            
+            // Verificar si $totales es un objeto Collection o un array
+            if (is_array($totales)) {
+                return SicossTotalesData::fromArray($totales);
+            } else {
+                return SicossTotalesData::fromArray($totales->toArray());
             }
-        );
+        } catch (Exception $e) {
+            Log::error('Error al obtener totales del reporte SICOSS', [
+                'error' => $e->getMessage(),
+                'anio' => $anio,
+                'mes' => $mes,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Devolver valores por defecto en caso de error
+            return SicossTotalesData::fromArray([
+                'total_aportes' => 0,
+                'total_contribuciones' => 0,
+                'total_remunerativo' => 0,
+                'total_no_remunerativo' => 0,
+                'total_c305' => 0,
+                'total_c306' => 0,
+            ]);
+        }
     }
 
     /**

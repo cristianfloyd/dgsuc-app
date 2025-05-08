@@ -19,6 +19,9 @@ class SicossTotalesData extends Data
 
         #[MapName('total_no_remunerativo')]
         public readonly float $totalNoRemunerativo,
+        
+        // #[MapName('total_c305')]
+        // public readonly float $totalC305,
     ) {}
 
     public static function fromArray(array $data): self
@@ -28,6 +31,7 @@ class SicossTotalesData extends Data
             totalContribuciones: $data['total_contribuciones'],
             totalRemunerativo: $data['total_remunerativo'],
             totalNoRemunerativo: $data['total_no_remunerativo'],
+            // totalC305: $data['total_c305'],
         );
     }
 
