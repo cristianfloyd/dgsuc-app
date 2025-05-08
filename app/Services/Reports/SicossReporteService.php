@@ -4,6 +4,7 @@ namespace App\Services\Reports;
 
 use App\Traits\ReportCacheTrait;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Models\Mapuche\MapucheSicossReporte;
@@ -57,7 +58,7 @@ class SicossReporteService
             [$anio, $mes],
             function () use ($anio, $mes) {
                 $totales = MapucheSicossReporte::query()->getTotales($anio, $mes);
-                return SicossTotalesData::fromArray($totales);
+                return SicossTotalesData::fromArray($totales->toArray())->toArray();
             }
         );
     }

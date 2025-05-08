@@ -6,8 +6,8 @@ use App\Models\Dh01;
 use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\Mapuche\PeriodoFiscalService;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Mapuche\PeriodoFiscalService;
 
 class MapucheSicossReporte extends Model
 {
@@ -74,6 +74,8 @@ class MapucheSicossReporte extends Model
             ->select([
                 $tablaPeriodo . '.nro_liqui',
                 'dh22.desc_liqui',
+                DB::raw('SUM(CASE WHEN codn_conce IN (305) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c305'),
+                DB::raw('SUM(CASE WHEN codn_conce IN (306,308) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c306'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS aportesijpdh21'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (247) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS aporteinssjpdh21'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucionsijpdh21'),
@@ -112,6 +114,8 @@ class MapucheSicossReporte extends Model
 
         $result = $query->from($tablaPeriodo)
             ->select([
+                DB::raw('SUM(CASE WHEN codn_conce IN (305) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c305'),
+                DB::raw('SUM(CASE WHEN codn_conce IN (306) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c306'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_aportes_sijp'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (247) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_aportes_inssjp'),
                 DB::raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_contribuciones_sijp'),
