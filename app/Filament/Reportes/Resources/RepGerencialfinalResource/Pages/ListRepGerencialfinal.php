@@ -19,7 +19,7 @@ use Filament\Resources\Pages\ListRecords;
 use App\Models\Reportes\RepGerencialFinal;
 use App\Services\RepGerencialFinalService;
 use App\Filament\Widgets\MultipleIdLiquiSelector;
-use App\Filament\Reportes\Resources\RepGerencialfinalResource;
+use App\Filament\Reportes\Resources\RepGerencialFinalResource;
 use App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets\RepGerencialFinalStats;
 
 class ListRepGerencialFinal extends ListRecords

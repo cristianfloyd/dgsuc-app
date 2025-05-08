@@ -57,7 +57,7 @@ class AfipMapucheSicossResource extends Resource
                     ->searchable(),
                 TextColumn::make('cuil')
                     ->label('CUIL')
-                    // ->searchable()
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
@@ -67,11 +67,11 @@ class AfipMapucheSicossResource extends Resource
                     // })
                     ->formatStateUsing(fn(string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('cod_act')
+                        ->label('Cod. Act.')
+                        ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('cod_cond')
                     ->label('Condición')
-                    ->toggleable(isToggledHiddenByDefault: false),
-                TextColumn::make('cod_act')
-                    ->label('Cod. Act.')
                     ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('conyuge')
                     ->label('Cónyuge')
