@@ -16,6 +16,7 @@ use App\Repositories\RepOrdenPagoRepository;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Repositories\Mapuche\Dh21hRepository;
+use App\Repositories\SicossReporteRepository;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
@@ -23,6 +24,7 @@ use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
+use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -50,6 +52,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             Dh90RepositoryInterface::class,
             Dh90Repository::class
+        );
+        $this->app->bind(
+            SicossReporteRepositoryInterface::class,
+            SicossReporteRepository::class
         );
     }
 

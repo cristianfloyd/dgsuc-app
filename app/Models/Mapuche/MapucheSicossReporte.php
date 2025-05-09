@@ -27,7 +27,7 @@ class MapucheSicossReporte extends Model
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
-    
+
 
     /**
      * Scope para obtener el reporte SICOSS.
@@ -82,7 +82,7 @@ class MapucheSicossReporte extends Model
     {
         try {
             $tablaPeriodo = $this->determinarTablaPeriodo($anio, $mes);
-            $subconsultaLiquidaciones = $this->getSubconsultaLiquidaciones($anio, $mes);
+            $subconsultaLiquidaciones = $this->generarSubconsultaLiquidaciones($anio, $mes);
 
             $result = $query->from($tablaPeriodo)
                 ->select([
@@ -140,7 +140,7 @@ class MapucheSicossReporte extends Model
 
     /**
      * Determina la tabla de período a utilizar basada en el año y mes proporcionados
-     * 
+     *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
      * @return string Nombre de la tabla a utilizar
@@ -167,7 +167,7 @@ class MapucheSicossReporte extends Model
 
     /**
      * Genera la subconsulta para filtrar por liquidaciones del período especificado
-     * 
+     *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
      * @return \Closure Función que genera la subconsulta

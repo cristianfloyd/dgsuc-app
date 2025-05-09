@@ -94,8 +94,8 @@ class SicossReporteExport implements WithMultipleSheets
                     return [
                         'Nro Liquidación',
                         'Descripción',
-                        'c305',
-                        'c306',
+                        'Seguro',
+                        'ART',
                         'Remunerativo',
                         'No Remunerativo',
                         'Aportes SIJP',
@@ -218,6 +218,14 @@ class SicossReporteExport implements WithMultipleSheets
                             'concepto' => 'Total No Remunerativo Imponible',
                             'monto' => $this->totales->totalNoRemunerativo,
                         ],
+                        [
+                            'concepto' => 'Total Seguro',
+                            'monto' => $this->totales->totalC305,
+                        ],
+                        [
+                            'concepto' => 'Total ART',
+                            'monto' => $this->totales->totalC306,
+                        ]
                     ]);
                 }
 

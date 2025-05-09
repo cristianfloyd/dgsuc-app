@@ -44,14 +44,15 @@ trait ReportCacheTrait
      * @param string $type Tipo de datos (data|totals)
      * @param array $params Parámetros adicionales
      * @param \Closure $callback Función que genera los datos
+     * @param int|null $customTtl TTL personalizado en segundos (opcional)
      * @return mixed
      */
-    protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback)
+    protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback, ?int $customTtl = null)
     {
         $key = $this->getCacheKey($report, $type, $params);
-        $ttl = $this->getCacheTTL($report, $type);
+        $ttl = $customTtl ?? $this->getCacheTTL($report, $type);
 
-        return Cache::remember($key, now()->addSeconds($ttl), $callback);
+        return Cache::remember($key, $ttl, $callback);
     }
 
     /**
