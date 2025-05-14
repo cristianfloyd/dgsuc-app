@@ -2,6 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\LicenciaVigenteResource\Pages;
 
+use Illuminate\Support\Facades\Log;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,55 @@ use App\Filament\Reportes\Resources\LicenciaVigenteResource;
 class ListLicenciaVigentes extends ListRecords
 {
     protected static string $resource = LicenciaVigenteResource::class;
+
+    /**
+     * Hook que se ejecuta cuando el componente se monta
+     */
+    public function mount(): void
+    {
+        parent::mount();
+        
+        // Verificar si hay legajos en la sesión
+        $legajos = session('licencias_vigentes_legajos', []);
+        
+        if (!empty($legajos)) {
+            Log::info('Montando componente con legajos en sesión', [
+                'legajos_count' => count($legajos)
+            ]);
+        } else {
+            Log::info('Montando componente sin legajos en sesión');
+        }
+    }
+    
+    // /**
+    //  * Hook que se ejecuta después de que el componente se ha actualizado
+    //  */
+    // public function updated($property, $value): void
+    // {
+    //     parent::updated($property);
+        
+    //     // Si se actualiza alguna propiedad relacionada con la tabla, verificamos los legajos
+    //     if (str_starts_with($property, 'tableFilters') || 
+    //         str_starts_with($property, 'tableSortColumn') || 
+    //         str_starts_with($property, 'tableSearchQuery')) {
+            
+    //         $legajos = session('licencias_vigentes_legajos', []);
+            
+    //         if (empty($legajos)) {
+    //             Log::info('No hay legajos en sesión después de actualizar: ' . $property);
+    //         }
+    //     }
+    // }
+
+    /**
+     * Método para refrescar la tabla manteniendo los legajos en sesión
+     */
+    public function refreshTable(): void
+    {
+        $this->resetTable();
+    }
+
+
 
     public function getTitle(): string|Htmlable
     {

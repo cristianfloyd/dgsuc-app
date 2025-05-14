@@ -5,6 +5,8 @@ namespace App\Services\Mapuche;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use App\Traits\MapucheConnectionTrait;
 use Spatie\LaravelData\DataCollection;
 use App\Data\Responses\LicenciaVigenteData;
@@ -21,20 +23,40 @@ class LicenciaService
     protected string $esquema;
 
     /**
+     * Tiempo de expiración del caché en segundos (por defecto 1 hora)
+     *
+     * @var int
+     */
+    protected int $cacheExpirationTime;
+
+    /**
+     * Prefijo para las claves de caché
+     *
+     * @var string
+     */
+    protected string $cachePrefix;
+
+    /**
      * Create a new class instance.
      */
     public function __construct()
     {
         $this->esquema = 'mapuche';
+        // Tiempo de caché configurable (1 hora por defecto)
+        $this->cacheExpirationTime = config('cache.licencias_expiration', 3600);
+        // Prefijo para las claves de caché
+        $this->cachePrefix = config('cache.prefix', 'laravel_') . 'licencias:';
     }
 
     /**
      * Obtiene las licencias vigentes para los legajos indicados.
+     * Implementa caché Redis para mejorar el rendimiento.
      *
      * @param array $legajos Array de números de legajo
+     * @param bool $useCache Indica si se debe usar caché o forzar consulta fresca
      * @return DataCollection
      */
-    public function getLicenciasVigentes(array $legajos): DataCollection
+    public function getLicenciasVigentes(array $legajos, bool $useCache = true): DataCollection
     {
         try {
             // Validar que existan legajos para consultar
@@ -43,22 +65,65 @@ class LicenciaService
                 return new DataCollection(LicenciaVigenteData::class, []);
             }
 
-            // Obtener parámetros de fecha desde la configuración
-            $fechaInicio = MapucheConfig::getFechaInicioPeriodoCorriente();
-            $fechaFin = MapucheConfig::getFechaFinPeriodoCorriente();
+            // Ordenar legajos para consistencia en la clave de caché
+            sort($legajos);
 
-            // Construir la consulta SQL
-            $sql = $this->buildLicenciasQuery($legajos);
+            // Generar clave de caché única basada en los legajos y el período actual
+            $periodoActual = MapucheConfig::getPeriodoFiscal();
+            $cacheKey = $this->cachePrefix . "vigentes:{$periodoActual}:" . md5(json_encode($legajos));
 
-            // Parámetros para la consulta
-            $params = $this->getQueryParams($fechaInicio, $fechaFin);
+            // Si no se debe usar caché o hay demasiados legajos, ejecutar consulta directamente
+            if (!$useCache || count($legajos) > 100) {
+                return $this->fetchLicenciasFromDatabase($legajos);
+            }
 
-            // Ejecutar la consulta
-            $resultados = DB::connection($this->getConnectionName())
-                ->select($sql, $params);
+            // Verificar si los datos están en caché
+            if (Redis::exists($cacheKey)) {
+                Log::info('Obteniendo licencias desde caché Redis', ['legajos_count' => count($legajos)]);
+                $cachedData = json_decode(Redis::get($cacheKey), true);
 
-            // Convertir resultados a DTO
-            return LicenciaVigenteData::fromResultados($resultados);
+                // Si los datos cacheados están vacíos, verificar directamente en la base de datos para confirmar
+                if (empty($cachedData)) {
+                    Log::warning('Caché Redis devolvió datos vacíos, verificando directamente en base de datos', [
+                        'legajos' => $legajos
+                    ]);
+                    $licenciasFrescas = $this->fetchLicenciasFromDatabase($legajos);
+
+                    // Si encontramos datos en la BD pero no en caché, actualizamos la caché
+                    if ($licenciasFrescas->count() > 0) {
+                        $licenciasArray = $licenciasFrescas->toArray();
+                        Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($licenciasArray));
+                        Log::info('Caché actualizado con datos encontrados en la base de datos', [
+                            'legajos' => $legajos,
+                            'count' => $licenciasFrescas->count()
+                        ]);
+                        return $licenciasFrescas;
+                    }
+                }
+
+                return new DataCollection(LicenciaVigenteData::class, $cachedData);
+            }
+
+            // Si no está en caché, obtener de la base de datos
+            Log::info('Cargando licencias desde la base de datos para caché', ['legajos_count' => count($legajos)]);
+            $licencias = $this->fetchLicenciasFromDatabase($legajos);
+
+            // Guardar en caché si hay resultados
+            if ($licencias->count() > 0) {
+                // Convertir a array para almacenar en Redis
+                $licenciasArray = $licencias->toArray();
+                Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($licenciasArray));
+                Log::info('Licencias encontradas y guardadas en caché', [
+                    'legajos' => $legajos,
+                    'count' => $licencias->count()
+                ]);
+            } else {
+                Log::warning('No se encontraron licencias en la base de datos para los legajos consultados', [
+                    'legajos' => $legajos
+                ]);
+            }
+
+            return $licencias;
         } catch (\Exception $e) {
             Log::error('Error al obtener licencias vigentes: ' . $e->getMessage(), [
                 'legajos' => $legajos,
@@ -69,18 +134,42 @@ class LicenciaService
             return new DataCollection(LicenciaVigenteData::class, []);
         }
     }
-
     /**
      * Obtiene las licencias vigentes para un legajo específico.
+     * Implementa caché individual por legajo con Redis.
      *
      * @param int $legajo Número de legajo
+     * @param bool $useCache Indica si se debe usar caché o forzar consulta fresca
      * @return DataCollection
      */
-    public function getLicenciasVigentesPorLegajo(int $legajo): DataCollection
+    public function getLicenciasVigentesPorLegajo(int $legajo, bool $useCache = true): DataCollection
     {
-        return $this->getLicenciasVigentes([$legajo]);
-    }
+        $periodoActual = MapucheConfig::getPeriodoFiscal();
+        $cacheKey = $this->cachePrefix . "vigentes:legajo:{$periodoActual}:{$legajo}";
 
+        if (!$useCache) {
+            return $this->getLicenciasVigentes([$legajo], false);
+        }
+
+        // Verificar si los datos están en caché
+        if (Redis::exists($cacheKey)) {
+            Log::info('Obteniendo licencias para legajo individual desde caché Redis', ['legajo' => $legajo]);
+            $cachedData = json_decode(Redis::get($cacheKey), true);
+            return new DataCollection(LicenciaVigenteData::class, $cachedData);
+        }
+
+        // Si no está en caché, obtener de la base de datos
+        Log::info('Cargando licencias para legajo individual desde la base de datos', ['legajo' => $legajo]);
+        $licencias = $this->getLicenciasVigentes([$legajo], false);
+
+        // Guardar en caché si hay resultados
+        if ($licencias->count() > 0) {
+            $licenciasArray = $licencias->toArray();
+            Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($licenciasArray));
+        }
+
+        return $licencias;
+    }
     /**
      * Construye la consulta SQL para obtener licencias vigentes.
      *
@@ -297,54 +386,86 @@ class LicenciaService
     }
 
     /**
-     * Obtiene los números de legajo que tienen licencias vigentes en el período actual.
+     * Ejecuta la consulta a la base de datos para obtener licencias.
+     * Método interno utilizado por el sistema de caché.
      *
+     * @param array $legajos Array de números de legajo
+     * @return DataCollection
+     */
+    private function fetchLicenciasFromDatabase(array $legajos): DataCollection
+    {
+        // Obtener parámetros de fecha desde la configuración
+        $fechaInicio = MapucheConfig::getFechaInicioPeriodoCorriente();
+        $fechaFin = MapucheConfig::getFechaFinPeriodoCorriente();
+
+        // Construir la consulta SQL
+        $sql = $this->buildLicenciasQuery($legajos);
+
+        // Parámetros para la consulta
+        $params = $this->getQueryParams($fechaInicio, $fechaFin);
+
+        // Registrar la consulta para depuración
+        Log::debug('Consulta SQL de licencias vigentes', [
+            'sql' => $sql,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin,
+            'legajos' => $legajos
+        ]);
+
+        try {
+            // Ejecutar la consulta
+            $resultados = DB::connection($this->getConnectionName())
+                ->select($sql, $params);
+
+            Log::info('Consulta SQL ejecutada correctamente', [
+                'filas_encontradas' => count($resultados)
+            ]);
+
+            // Convertir resultados a DTO
+            return LicenciaVigenteData::fromResultados($resultados);
+        } catch (\Exception $e) {
+            Log::error('Error al ejecutar consulta SQL de licencias', [
+                'error' => $e->getMessage(),
+                'legajos' => $legajos
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Obtiene los números de legajo que tienen licencias vigentes en el período actual.
+     * Implementa caché Redis para esta consulta frecuente.
+     *
+     * @param bool $useCache Indica si se debe usar caché o forzar consulta fresca
      * @return array Array con los números de legajo que tienen licencias vigentes
      */
-    public function getLegajosConLicenciasVigentes(): array
+    public function getLegajosConLicenciasVigentes(bool $useCache = true): array
     {
         try {
-            // Obtener parámetros de fecha desde la configuración
-            $fechaInicio = MapucheConfig::getFechaInicioPeriodoCorriente();
-            $fechaFin = MapucheConfig::getFechaFinPeriodoCorriente();
+            $periodoActual = MapucheConfig::getPeriodoFiscal();
+            $cacheKey = $this->cachePrefix . "legajos:{$periodoActual}";
 
-            // Preparar condiciones para tipos de licencias
-            $variantesConfig = $this->getVariantesLicencias();
-            $condicionesLicencias = $this->buildLicenciasConditions($variantesConfig);
-            $whereNorem = $this->buildNoRemuneradasCondition($condicionesLicencias['sqlIlt']);
+            if (!$useCache) {
+                return $this->fetchLegajosConLicenciasFromDatabase();
+            }
 
-            // Consulta SQL para obtener todos los legajos con licencias vigentes
-            $sql = "
-                SELECT DISTINCT dh01.nro_legaj
-                FROM {$this->esquema}.dh05
-                LEFT OUTER JOIN {$this->esquema}.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
-                LEFT OUTER JOIN {$this->esquema}.dh01 ON (dh05.nro_legaj = dh01.nro_legaj)
-                WHERE dh05.nro_legaj IS NOT NULL
-                AND (fec_desde <= ?::date AND (fec_hasta is null OR fec_hasta >= ?::date))
-                AND suc.map_es_licencia_vigente(dh05.nro_licencia)
-                AND $whereNorem
+            // Verificar si los datos están en caché
+            if (Redis::exists($cacheKey)) {
+                Log::info('Obteniendo legajos con licencias desde caché Redis');
+                return json_decode(Redis::get($cacheKey), true);
+            }
 
-                UNION
+            // Si no está en caché, obtener de la base de datos
+            Log::info('Cargando legajos con licencias desde la base de datos para caché');
+            $legajos = $this->fetchLegajosConLicenciasFromDatabase();
 
-                SELECT DISTINCT dh01.nro_legaj
-                FROM {$this->esquema}.dh05
-                LEFT OUTER JOIN {$this->esquema}.dh03 ON (dh03.nro_cargo = dh05.nro_cargo)
-                LEFT OUTER JOIN {$this->esquema}.dh01 ON (dh03.nro_legaj = dh01.nro_legaj)
-                LEFT OUTER JOIN {$this->esquema}.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
-                WHERE dh05.nro_cargo IS NOT NULL
-                AND (fec_desde <= ?::date AND (fec_hasta is null OR fec_hasta >= ?::date))
-                AND {$this->esquema}.map_es_cargo_activo(dh05.nro_cargo)
-                AND suc.map_es_licencia_vigente(dh05.nro_licencia)
-                AND $whereNorem
-            ";
+            // Guardar en caché
+            if (!empty($legajos)) {
+                Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($legajos));
+            }
 
-            // Ejecutar consulta
-            $params = [$fechaInicio, $fechaInicio, $fechaInicio, $fechaInicio];
-            $resultados = DB::connection($this->getConnectionName())->select($sql, $params);
-
-            // Extraer y devolver solo los números de legajo
-            return collect($resultados)->pluck('nro_legaj')->toArray();
-
+            return $legajos;
         } catch (\Exception $e) {
             Log::error('Error al obtener legajos con licencias vigentes: ' . $e->getMessage(), [
                 'exception' => $e
@@ -352,6 +473,112 @@ class LicenciaService
 
             // Retornar array vacío en caso de error
             return [];
+        }
+    }
+
+    /**
+     * Ejecuta la consulta a la base de datos para obtener legajos con licencias.
+     * Método interno utilizado por el sistema de caché.
+     *
+     * @return array
+     */
+    private function fetchLegajosConLicenciasFromDatabase(): array
+    {
+        // Obtener parámetros de fecha desde la configuración
+        $fechaInicio = MapucheConfig::getFechaInicioPeriodoCorriente();
+        $fechaFin = MapucheConfig::getFechaFinPeriodoCorriente();
+
+        // Preparar condiciones para tipos de licencias
+        $variantesConfig = $this->getVariantesLicencias();
+        $condicionesLicencias = $this->buildLicenciasConditions($variantesConfig);
+        $whereNorem = $this->buildNoRemuneradasCondition($condicionesLicencias['sqlIlt']);
+
+        // Consulta SQL para obtener todos los legajos con licencias vigentes
+        $sql = "
+            SELECT DISTINCT dh01.nro_legaj
+            FROM {$this->esquema}.dh05
+            LEFT OUTER JOIN {$this->esquema}.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
+            LEFT OUTER JOIN {$this->esquema}.dh01 ON (dh05.nro_legaj = dh01.nro_legaj)
+            WHERE dh05.nro_legaj IS NOT NULL
+            AND (fec_desde <= ?::date AND (fec_hasta is null OR fec_hasta >= ?::date))
+            AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+            AND $whereNorem
+
+            UNION
+
+            SELECT DISTINCT dh01.nro_legaj
+            FROM {$this->esquema}.dh05
+            LEFT OUTER JOIN {$this->esquema}.dh03 ON (dh03.nro_cargo = dh05.nro_cargo)
+            LEFT OUTER JOIN {$this->esquema}.dh01 ON (dh03.nro_legaj = dh01.nro_legaj)
+            LEFT OUTER JOIN {$this->esquema}.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
+            WHERE dh05.nro_cargo IS NOT NULL
+            AND (fec_desde <= ?::date AND (fec_hasta is null OR fec_hasta >= ?::date))
+            AND {$this->esquema}.map_es_cargo_activo(dh05.nro_cargo)
+            AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+            AND $whereNorem
+        ";
+
+        // Ejecutar consulta
+        $params = [$fechaInicio, $fechaInicio, $fechaInicio, $fechaInicio];
+        $resultados = DB::connection($this->getConnectionName())->select($sql, $params);
+
+        // Extraer y devolver solo los números de legajo
+        return collect($resultados)->pluck('nro_legaj')->toArray();
+    }
+
+    /**
+     * Invalida el caché de licencias para los legajos especificados.
+     * Utiliza patrones de Redis para una invalidación más eficiente.
+     *
+     * @param array|null $legajos Legajos específicos o null para invalidar todo
+     * @return void
+     */
+    public function invalidateCache(?array $legajos = null): void
+    {
+        $periodoActual = MapucheConfig::getPeriodoFiscal();
+
+        if ($legajos === null) {
+            // Invalidar todo el caché de licencias usando patrones de Redis
+            $pattern = $this->cachePrefix . "*:{$periodoActual}:*";
+            $this->deleteKeysByPattern($pattern);
+
+            // También invalidar la lista de legajos con licencias
+            Redis::del($this->cachePrefix . "legajos:{$periodoActual}");
+
+            Log::info('Caché global de licencias invalidado');
+        } else {
+            // Invalidar caché para legajos específicos
+            foreach ($legajos as $legajo) {
+                Redis::del($this->cachePrefix . "vigentes:legajo:{$periodoActual}:{$legajo}");
+            }
+
+            // Si hay varios legajos, también invalidar su caché conjunto
+            if (count($legajos) > 1) {
+                sort($legajos);
+                $cacheKey = $this->cachePrefix . "vigentes:{$periodoActual}:" . md5(json_encode($legajos));
+                Redis::del($cacheKey);
+            }
+
+            Log::info('Caché de licencias invalidado para legajos específicos', ['legajos' => $legajos]);
+        }
+    }
+
+    /**
+     * Elimina claves de Redis que coinciden con un patrón.
+     * Útil para invalidación de caché por patrones.
+     *
+     * @param string $pattern Patrón de claves a eliminar
+     * @return void
+     */
+    private function deleteKeysByPattern(string $pattern): void
+    {
+        $keys = Redis::keys($pattern);
+        if (!empty($keys)) {
+            foreach ($keys as $key) {
+                // Extraer el nombre real de la clave (Redis::keys devuelve claves con prefijo)
+                $realKey = str_replace(Redis::connection()->getPrefix(), '', $key);
+                Redis::del($realKey);
+            }
         }
     }
 }

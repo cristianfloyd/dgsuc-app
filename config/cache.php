@@ -74,6 +74,7 @@ return [
             'driver' => 'redis',
             'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
             'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
+            'licencias_expiration' => env('LICENCIAS_CACHE_EXPIRATION', 3600),
         ],
 
         'dynamodb' => [
@@ -88,7 +89,6 @@ return [
         'octane' => [
             'driver' => 'octane',
         ],
-
     ],
 
     /*

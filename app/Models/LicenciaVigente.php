@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +22,7 @@ class LicenciaVigente extends Model
     /**
      * Nombre de la tabla temporal
      */
-    protected $table = 'suc.temp_licencias_vigentes';
+    protected $table = 'licencias_vigentes_temp';
 
     /**
      * Indicar que no usamos timestamps para evitar errores
@@ -43,6 +45,7 @@ class LicenciaVigente extends Model
         'fecha_hasta',
         'es_legajo',
         'nro_cargo',
+        'session_id',
     ];
 
     /**
@@ -73,7 +76,7 @@ class LicenciaVigente extends Model
     {
         return EncodingService::toUtf8($value);
     }
-    
+
     // ########################################################
 
     /**
@@ -102,27 +105,52 @@ class LicenciaVigente extends Model
      */
     public static function crearTablaTemporal(): void
     {
-        if (!Schema::connection(self::getMapucheConnection())->hasTable('suc.temp_licencias_vigentes')) {
-            Schema::connection(self::getMapucheConnection())->create('suc.temp_licencias_vigentes', function (Blueprint $table) {
-                $table->uuid('id')->primary();
+        if (!self::tablaExiste()) {
+            Schema::connection(self::getMapucheConnection())->create('licencias_vigentes_temp', function (Blueprint $table) {
+                $table->id();
                 $table->integer('nro_legaj');
-                $table->string('descripcion_licencia')->nullable();
-                $table->integer('condicion');
                 $table->integer('inicio');
                 $table->integer('final');
-                $table->integer('dias_totales');
+                $table->boolean('es_legajo');
+                $table->integer('condicion');
+                $table->text('descripcion_licencia')->nullable();
                 $table->date('fecha_desde');
                 $table->date('fecha_hasta')->nullable();
-                $table->boolean('es_legajo');
                 $table->integer('nro_cargo')->nullable();
-                $table->string('session_id', 100)->index();
-
-                // Índices para mejorar rendimiento
+                $table->string('session_id');
+                $table->integer('dias_totales');
+                $table->index('session_id');
                 $table->index('nro_legaj');
-                $table->index('condicion');
             });
         }
     }
+
+    /**
+     * Verifica si la tabla temporal existe.
+     *
+     * @return bool
+     */
+    private static function tablaExiste(): bool
+    {
+        return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
+    }
+
+
+    /**
+     * Limpia los registros antiguos de la tabla temporal.
+     * Este método puede ser llamado desde un comando programado.
+     */
+    public static function limpiarRegistrosAntiguos(): void
+    {
+        // Eliminar registros de sesiones que tienen más de 24 horas
+        $fechaLimite = now()->subHours(24);
+
+        $count = self::where('created_at', '<', $fechaLimite)->delete();
+
+        Log::info("Se eliminaron {$count} registros antiguos de licencias vigentes temporales");
+    }
+
+
 
     /**
      * Pobla la tabla temporal con los resultados de la consulta
@@ -133,39 +161,92 @@ class LicenciaVigente extends Model
      */
     public static function cargarLicenciasVigentes(array $legajos, string $sessionId): \Illuminate\Database\Eloquent\Builder
     {
+        try {
         // Limpiar registros anteriores de esta sesión
-        self::where('session_id', $sessionId)->delete();
+        //self::where('session_id', $sessionId)->delete();
 
         if (empty($legajos)) {
-            return self::where('session_id', $sessionId);
+            return self::query()->where('session_id', $sessionId);
         }
 
-        // Obtener licencias a través del servicio
-        $licenciaService = app(LicenciaService::class);
-        $licenciasDto = $licenciaService->getLicenciasVigentes($legajos);
+        // Verificar si ya existen registros para esta sesión
+        $existingCount = self::where('session_id', $sessionId)->count();
 
-        // Convertir DTOs a modelos y guardarlos en la tabla temporal
-        foreach ($licenciasDto->all() as $dto) {
-            if ($dto instanceof LicenciaVigenteData) {
-                $model = new self();
-                $model->id = Str::uuid()->toString();
-                $model->nro_legaj = $dto->nro_legaj;
-                $model->descripcion_licencia = $dto->descripcion_licencia ?? '';
-                $model->condicion = $dto->condicion;
-                $model->inicio = $dto->inicio;
-                $model->final = $dto->final;
-                $model->dias_totales = $dto->dias_totales;
-                $model->fecha_desde = $dto->fecha_desde;
-                $model->fecha_hasta = $dto->fecha_hasta;
-                $model->es_legajo = $dto->es_legajo;
-                $model->nro_cargo = $dto->nro_cargo;
-                $model->session_id = $sessionId;
-                $model->save();
+        // Si ya hay registros para esta sesión y son los mismos legajos, no recargar
+        if ($existingCount > 0) {
+            $cachedLegajos = Cache::get("licencias_legajos_{$sessionId}", []);
+            sort($legajos);
+            sort($cachedLegajos);
+
+            if ($cachedLegajos == $legajos) {
+                Log::info('Usando licencias ya cargadas en la base de datos temporal', [
+                    'session_id' => $sessionId,
+                    'count' => $existingCount
+                ]);
+                return self::query()->where('session_id', $sessionId);
             }
+
+            // Si son diferentes legajos, eliminar los registros anteriores
+            self::where('session_id', $sessionId)->delete();
+            Log::info('Eliminando licencias anteriores para cargar nuevas', [
+                'session_id' => $sessionId
+            ]);
         }
 
-        // Devolver una consulta filtrada por la sesión actual
-        return self::where('session_id', $sessionId);
+        // Guardar los legajos actuales en caché
+        Cache::put("licencias_legajos_{$sessionId}", $legajos, 3600);
+
+        // Obtener las licencias vigentes desde el servicio
+            $licenciaService = app(LicenciaService::class);
+            $licencias = $licenciaService->getLicenciasVigentes($legajos);
+
+            if ($licencias->count() === 0) {
+                Log::info('No se encontraron licencias vigentes para los legajos consultados', [
+                    'legajos' => $legajos
+                ]);
+                return self::query()->where('session_id', $sessionId);
+            }
+
+            // Preparar los datos para inserción masiva
+            $licenciasData = [];
+            foreach ($licencias as $licencia) {
+                $diasTotales = ($licencia->final - $licencia->inicio) + 1;
+
+                $licenciasData[] = [
+                    'nro_legaj' => $licencia->nro_legaj,
+                    'inicio' => $licencia->inicio,
+                    'final' => $licencia->final,
+                    'es_legajo' => $licencia->es_legajo,
+                    'condicion' => $licencia->condicion,
+                    'descripcion_licencia' => $licencia->descripcion_licencia,
+                    'fecha_desde' => $licencia->fecha_desde,
+                    'fecha_hasta' => $licencia->fecha_hasta,
+                    'nro_cargo' => $licencia->nro_cargo,
+                    'session_id' => $sessionId,
+                    'dias_totales' => $diasTotales
+                ];
+            }
+
+            // Insertar los datos en la tabla temporal
+            self::insert($licenciasData);
+
+            Log::info('Licencias vigentes cargadas correctamente en la base de datos temporal', [
+                'session_id' => $sessionId,
+                'count' => count($licenciasData)
+            ]);
+
+            // Devolver una consulta que filtra por la sesión actual
+            return self::query()->where('session_id', $sessionId);
+        } catch (\Exception $e) {
+            Log::error('Error al cargar licencias vigentes: ' . $e->getMessage(), [
+                'legajos' => $legajos,
+                'session_id' => $sessionId,
+                'exception' => $e
+            ]);
+
+            // En caso de error, devolver una consulta vacía
+            return self::query()->where('session_id', $sessionId);
+        }
     }
 
     /**

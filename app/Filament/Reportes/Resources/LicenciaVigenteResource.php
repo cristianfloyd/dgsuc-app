@@ -11,12 +11,14 @@ use App\Models\LicenciaVigente;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\DateFormatterService;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use App\Services\Mapuche\LicenciaService;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +42,17 @@ class LicenciaVigenteResource extends Resource
     {
         $legajos = session('licencias_vigentes_legajos', []);
         $sessionId = session()->getId();
+
+        // Verificar si hay legajos en la sesión
+        if (empty($legajos)) {
+            // Si no hay legajos, registrar para depuración
+            Log::info('No hay legajos en la sesión para consultar licencias');
+        } else {
+            Log::info('Consultando licencias para legajos', [
+                'legajos' => $legajos,
+                'session_id' => $sessionId
+            ]);
+        }
 
         // Cargar licencias y obtener una query que filtra por la sesión actual
         return LicenciaVigente::cargarLicenciasVigentes($legajos, $sessionId);
@@ -162,20 +175,50 @@ class LicenciaVigenteResource extends Resource
                     ->icon('heroicon-o-document-check')
                     ->color('success')
                     ->tooltip('Consulta todas las licencias vigentes en el período actual')
-                    ->action(function (Tables\Actions\Action $action): void {
-                        // Obtener todos los legajos con licencias vigentes desde el servicio
-                        $licenciaService = app(LicenciaService::class);
-                        $legajos = $licenciaService->getLegajosConLicenciasVigentes();
+                    ->form([
+                        Forms\Components\Toggle::make('forzar_recarga')
+                            ->label('Forzar recarga desde base de datos')
+                            ->helperText('Omite la caché y consulta directamente la base de datos')
+                            ->default(false),
+                    ])
+                    ->action(function (array $data, Tables\Actions\Action $action): void {
+                        try {
+                            $forzarRecarga = $data['forzar_recarga'] ?? false;
 
-                        if (empty($legajos)) {
-                            $action->failure('No se encontraron licencias vigentes en el período actual');
-                            return;
+                            // Obtener todos los legajos con licencias vigentes desde el servicio
+                            $licenciaService = app(LicenciaService::class);
+
+                            // Si se solicitó forzar recarga, invalidamos la caché primero
+                            if ($forzarRecarga) {
+                                $licenciaService->invalidateCache(null); // Invalida toda la caché
+                                Log::info('Forzando recarga de todas las licencias desde base de datos');
+                            }
+
+                            $legajos = $licenciaService->getLegajosConLicenciasVigentes(!$forzarRecarga);
+
+                            if (empty($legajos)) {
+                                $action->failure('No se encontraron licencias vigentes en el período actual');
+                                return;
+                            }
+
+                            // Guardar en sesión para poder utilizarlo en el método getEloquentQuery
+                            session(['licencias_vigentes_legajos' => $legajos]);
+
+                            // Registrar para depuración
+                            \Illuminate\Support\Facades\Log::info('Legajos con licencias cargados en sesión', [
+                                'count' => count($legajos)
+                            ]);
+
+                            $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
+
+                            // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
+                            // No es necesario llamar a refreshTable manualmente
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Error al consultar todas las licencias', [
+                                'error' => $e->getMessage()
+                            ]);
+                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
                         }
-
-                        // Guardar en sesión para poder utilizarlo en el método getEloquentQuery
-                        session(['licencias_vigentes_legajos' => $legajos]);
-
-                        $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
                     }),
 
                 Action::make('consultar_legajos')
@@ -186,14 +229,65 @@ class LicenciaVigenteResource extends Resource
                             ->label('Legajos (separados por coma)')
                             ->placeholder('Ej: 1234,5678')
                             ->required(),
+                        Forms\Components\Toggle::make('forzar_recarga')
+                            ->label('Forzar recarga desde base de datos')
+                            ->helperText('Omite la caché y consulta directamente la base de datos')
+                            ->default(false),
                     ])
                     ->action(function (array $data, Tables\Actions\Action $action): void {
-                        $legajos = array_map('trim', explode(',', $data['legajos']));
+                        try {
+                            $legajos = array_map('trim', explode(',', $data['legajos']));
+                            $forzarRecarga = $data['forzar_recarga'] ?? false;
 
-                        // Guardar en sesión para poder utilizarlo en el método getEloquentQuery
-                        session(['licencias_vigentes_legajos' => $legajos]);
+                            // Validar que los legajos sean numéricos
+                            foreach ($legajos as $legajo) {
+                                if (!is_numeric($legajo)) {
+                                    $action->failure('El legajo "' . $legajo . '" no es válido. Todos los legajos deben ser numéricos.');
+                                    return;
+                                }
+                            }
 
-                        $action->success('Licencias consultadas correctamente');
+                            // Guardar en sesión para poder utilizarlo en el método getEloquentQuery
+                            session(['licencias_vigentes_legajos' => $legajos]);
+
+                            // Registrar para depuración
+                            \Illuminate\Support\Facades\Log::info('Legajos específicos cargados en sesión', [
+                                'legajos' => $legajos
+                            ]);
+
+                            // Verificar si hay licencias para estos legajos
+                            $licenciaService = app(LicenciaService::class);
+
+                            // Si se solicitó forzar recarga, invalidamos la caché primero
+                            if ($forzarRecarga) {
+                                $licenciaService->invalidateCache($legajos);
+                                Log::info('Forzando recarga desde base de datos para legajos', [
+                                    'legajos' => $legajos
+                                ]);
+                            }
+
+                            $licencias = $licenciaService->getLicenciasVigentes($legajos, !$forzarRecarga);
+
+                            if ($licencias->count() === 0) {
+                                // Mostrar notificación pero mantener los legajos en sesión
+                                Notification::make()
+                                    ->warning()
+                                    ->title('Sin resultados')
+                                    ->body('No se encontraron licencias vigentes para los legajos consultados.')
+                                    ->send();
+                            } else {
+                                $action->success('Se encontraron ' . $licencias->count() . ' licencias para los legajos consultados');
+                            }
+
+                            // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
+                            // No es necesario llamar a refreshTable manualmente
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Error al consultar legajos específicos', [
+                                'error' => $e->getMessage(),
+                                'legajos' => $data['legajos'] ?? 'no proporcionados'
+                            ]);
+                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
+                        }
                     }),
 
                 Tables\Actions\Action::make('exportar_excel')
@@ -226,7 +320,19 @@ class LicenciaVigenteResource extends Resource
                 // No necesitamos acciones masivas
             ])
             ->paginated([5,10, 25, 50, 100])
-            ->defaultPaginationPageOption(5);
+            ->defaultPaginationPageOption(10)
+            ->persistFiltersInSession()
+            ->persistSortInSession()
+            ->deferLoading();
+    }
+
+    /**
+     * Método para forzar la recarga de la tabla
+     */
+    protected function refreshTable()
+    {
+        // Este método ya no es necesario en Filament 3 con Livewire 3
+        // Las tablas se actualizan automáticamente cuando cambian los datos
     }
 
     public static function getRelations(): array
