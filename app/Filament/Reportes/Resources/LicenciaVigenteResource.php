@@ -82,6 +82,8 @@ class LicenciaVigenteResource extends Resource
 
                 TextColumn::make('descripcion_licencia')
                     ->label('Descripción')
+                    ->limit(50)
+                    ->tooltip(fn(?LicenciaVigente $record) => $record?->descripcion_licencia ?? '')
                     ->sortable(),
 
                 TextColumn::make('condicion')
@@ -155,6 +157,27 @@ class LicenciaVigenteResource extends Resource
                     ]),
             ])
             ->headerActions([
+                Action::make('consultar_todas_licencias')
+                    ->label('Consultar Todas Las Licencias')
+                    ->icon('heroicon-o-document-check')
+                    ->color('success')
+                    ->tooltip('Consulta todas las licencias vigentes en el período actual')
+                    ->action(function (Tables\Actions\Action $action): void {
+                        // Obtener todos los legajos con licencias vigentes desde el servicio
+                        $licenciaService = app(LicenciaService::class);
+                        $legajos = $licenciaService->getLegajosConLicenciasVigentes();
+
+                        if (empty($legajos)) {
+                            $action->failure('No se encontraron licencias vigentes en el período actual');
+                            return;
+                        }
+
+                        // Guardar en sesión para poder utilizarlo en el método getEloquentQuery
+                        session(['licencias_vigentes_legajos' => $legajos]);
+
+                        $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
+                    }),
+
                 Action::make('consultar_legajos')
                     ->label('Consultar Legajos')
                     ->icon('heroicon-o-magnifying-glass')
@@ -202,8 +225,8 @@ class LicenciaVigenteResource extends Resource
             ->bulkActions([
                 // No necesitamos acciones masivas
             ])
-            ->paginated([10, 25, 50, 100, 'all'])
-            ->defaultPaginationPageOption(25);
+            ->paginated([5,10, 25, 50, 100])
+            ->defaultPaginationPageOption(5);
     }
 
     public static function getRelations(): array
