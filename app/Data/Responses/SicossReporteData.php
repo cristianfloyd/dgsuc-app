@@ -33,8 +33,20 @@ class SicossReporteData extends Data
 
         #[MapName('contribucioninssjpdh21')]
         public readonly float $contribucionesInssjp,
+
+        #[MapName('c305')]
+        public readonly float $c305,
+
+        #[MapName('c306')]
+        public readonly float $c306,
     ) {}
 
+    /**
+     * Crea una instancia de SicossReporteData a partir de un modelo.
+     * 
+     * @param mixed $model El modelo desde el cual crear la instancia
+     * @return self Nueva instancia de SicossReporteData
+     */
     public static function fromModel($model): self
     {
         return new self(
@@ -46,6 +58,8 @@ class SicossReporteData extends Data
             aportesInssjp: $model->aporteinssjpdh21,
             contribucionesSijp: $model->contribucionsijpdh21,
             contribucionesInssjp: $model->contribucioninssjpdh21,
+            c305: $model->c305 ?? 0, // Valor por defecto en caso de null
+            c306: $model->c306 ?? 0,
         );
     }
 }

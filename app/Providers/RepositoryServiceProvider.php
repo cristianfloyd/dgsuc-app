@@ -16,13 +16,16 @@ use App\Repositories\RepOrdenPagoRepository;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Repositories\Mapuche\Dh21hRepository;
+use App\Repositories\SicossReporteRepository;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Interfaces\FallecidoRepositoryInterface;
+use App\Repositories\Decorators\CachingSicossReporteRepository;
 use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
+use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -51,6 +54,31 @@ class RepositoryServiceProvider extends ServiceProvider
             Dh90RepositoryInterface::class,
             Dh90Repository::class
         );
+        $this->app->bind(
+            SicossReporteRepositoryInterface::class,
+            SicossReporteRepository::class
+        );
+
+        // Registrar la implementación concreta primero
+        $this->app->bind(
+            SicossReporteRepository::class, 
+            function ($app) {
+            // Aquí puedes inyectar dependencias específicas de SicossReporteRepository si las tuviera
+            // Por ejemplo, si necesitara PeriodoFiscalService directamente:
+            // return new SicossReporteRepository($app->make(PeriodoFiscalService::class));
+            return new SicossReporteRepository(
+                $app->make(\App\Services\Mapuche\PeriodoFiscalService::class) // Asumiendo que SicossReporteRepository lo necesita
+            );
+        });
+
+        // Registrar el decorador para la interfaz
+        $this->app->bind(SicossReporteRepositoryInterface::class, function ($app) {
+            // Crear la instancia real del repositorio
+            $actualRepository = $app->make(SicossReporteRepository::class);
+            
+            // Envolverla con el decorador de caché
+            return new CachingSicossReporteRepository($actualRepository);
+        });
     }
 
     /**

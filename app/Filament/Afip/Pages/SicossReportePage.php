@@ -161,13 +161,21 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         }
     }
 
-    public function getTotales()
+    /**
+     * Obtiene los totales del reporte SICOSS para un año y mes específicos.
+     *
+     * Recupera los totales del reporte utilizando el servicio SicossReporteService.
+     * Si no se proporciona el año o el mes, registra un mensaje informativo y devuelve un array vacío.
+     *
+     * @return array Los totales del reporte SICOSS, o un array vacío si faltan datos.
+     */
+    public function getTotales(): array
     {
         if (!$this->anio || !$this->mes) {
             Log::info('SicossReportePage:: No se pudo obtener los totales', ['anio' => $this->anio, 'mes' => $this->mes]);
             return [];
         }
-
+        
         return $this->sicossReporteService->getTotales($this->anio, $this->mes)->toArray();
     }
 
@@ -192,6 +200,8 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             ->columns([
                 TextColumn::make('nro_liqui')->label('N° Liq')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
                 TextColumn::make('desc_liqui')->label('Descripción')->alignment(Alignment::Left)->size(TextColumn\TextColumnSize::ExtraSmall),
+                TextColumn::make('c305')->label('305')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
+                TextColumn::make('c306')->label('306')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
                 TextColumn::make('remunerativo')->label('Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
                 TextColumn::make('no_remunerativo')->label('No Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
                 TextColumn::make('aportesijpdh21')->label('Aportes SIJP')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),

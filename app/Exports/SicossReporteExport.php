@@ -2,24 +2,27 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Exception;
+use App\Helpers\MoneyFormatter;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Data\Responses\SicossReporteData;
+use App\Data\Responses\SicossTotalesData;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use App\Services\Reports\SicossReporteService;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithBackgroundColor;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use App\Services\Reports\SicossReporteService;
-use App\Data\Responses\SicossReporteData;
-use App\Data\Responses\SicossTotalesData;
-use Illuminate\Support\Collection;
 
 class SicossReporteExport implements WithMultipleSheets
 {
@@ -59,13 +62,31 @@ class SicossReporteExport implements WithMultipleSheets
                     $this->sicossReporteService = $sicossReporteService;
                 }
 
+                /**
+                 * Obtiene la colección de datos para el reporte SICOSS.
+                 *
+                 * Si se proporcionan registros previamente, los transforma utilizando SicossReporteData.
+                 * De lo contrario, recupera los datos del reporte a través del servicio SicossReporteService.
+                 *
+                 * @return Collection Colección de datos del reporte SICOSS
+                 */
                 public function collection(): Collection
                 {
-                    if ($this->records) {
-                        return $this->records->map(fn($item) => SicossReporteData::fromModel($item));
-                    }
+                    try {
+                        if ($this->records) {
+                            $records = $this->records->map(fn($item) => SicossReporteData::fromModel($item));
+                            return $records;
+                        }
 
-                    return $this->sicossReporteService->getReporteData($this->anio, $this->mes);
+                        return $this->sicossReporteService->getReporteData($this->anio, $this->mes);
+                    } catch (Exception $e) {
+                        Log::error('Error al obtener datos para el reporte SICOSS', [
+                            'error' => $e->getMessage(),
+                            'anio' => $this->anio,
+                            'mes' => $this->mes
+                        ]);
+                        return new Collection(); // Devolver colección vacía en caso de error
+                    }
                 }
 
                 public function headings(): array
@@ -73,6 +94,8 @@ class SicossReporteExport implements WithMultipleSheets
                     return [
                         'Nro Liquidación',
                         'Descripción',
+                        'Seguro',
+                        'ART',
                         'Remunerativo',
                         'No Remunerativo',
                         'Aportes SIJP',
@@ -82,18 +105,38 @@ class SicossReporteExport implements WithMultipleSheets
                     ];
                 }
 
+                /**
+                 * Mapea una fila de datos para el reporte SICOSS, transformando los valores de la fila en un array.
+                 *
+                 * Este método convierte cada registro en un array con los campos necesarios para el reporte,
+                 * proporcionando valores predeterminados en caso de que algún campo sea nulo.
+                 *
+                 * @param mixed $row Fila de datos a mapear
+                 * @return array Array con los valores mapeados de la fila
+                 */
                 public function map($row): array
                 {
-                    return [
-                        $row->numeroLiquidacion,
-                        $row->descripcionLiquidacion,
-                        $row->remunerativo,
-                        $row->noRemunerativo,
-                        $row->aportesSijp,
-                        $row->aportesInssjp,
-                        $row->contribucionesSijp,
-                        $row->contribucionesInssjp,
-                    ];
+                    try {
+                        return [
+                            $row->numeroLiquidacion ?? '',
+                            $row->descripcionLiquidacion ?? '',
+                            $row->c305 ?? 0,
+                            $row->c306 ?? 0,
+                            $row->remunerativo ?? 0,
+                            $row->noRemunerativo ?? 0,
+                            $row->aportesSijp ?? 0,
+                            $row->aportesInssjp ?? 0,
+                            $row->contribucionesSijp ?? 0,
+                            $row->contribucionesInssjp ?? 0,
+                        ];
+                    } catch (Exception $e) {
+                        Log::error('Error al mapear fila para el reporte SICOSS', [
+                            'error' => $e->getMessage(),
+                            'row' => json_encode($row)
+                        ]);
+                        // Devolver valores por defecto en caso de error
+                        return ['', '', 0, 0, 0, 0, 0, 0, 0];
+                    }
                 }
 
                 public function columnFormats(): array
@@ -101,12 +144,14 @@ class SicossReporteExport implements WithMultipleSheets
                     return [
                         'A' => NumberFormat::FORMAT_GENERAL,
                         'B' => '@',
-                        'C' => '#,##0.00',
+                        'C' => NumberFormat::FORMAT_CURRENCY_USD,
                         'D' => '#,##0.00',
                         'E' => '#,##0.00',
                         'F' => '#,##0.00',
                         'G' => '#,##0.00',
                         'H' => '#,##0.00',
+                        'I' => '#,##0.00',
+                        'J' => '#,##0.00',
                     ];
                 }
 
@@ -173,6 +218,14 @@ class SicossReporteExport implements WithMultipleSheets
                             'concepto' => 'Total No Remunerativo Imponible',
                             'monto' => $this->totales->totalNoRemunerativo,
                         ],
+                        [
+                            'concepto' => 'Total Seguro',
+                            'monto' => $this->totales->totalC305,
+                        ],
+                        [
+                            'concepto' => 'Total ART',
+                            'monto' => $this->totales->totalC306,
+                        ]
                     ]);
                 }
 
