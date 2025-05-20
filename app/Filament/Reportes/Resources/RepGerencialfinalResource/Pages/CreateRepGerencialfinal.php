@@ -6,7 +6,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Reportes\Resources\RepGerencialFinalResource;
 
-class CreateRepGerencialfinal extends CreateRecord
+class CreateRepGerencialFinal extends CreateRecord
 {
     protected static string $resource = RepGerencialFinalResource::class;
 }

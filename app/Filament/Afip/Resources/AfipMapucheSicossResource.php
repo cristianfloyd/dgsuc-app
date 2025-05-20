@@ -130,6 +130,7 @@ class AfipMapucheSicossResource extends Resource
                             // Obtener liquidaciones válidas
                             $liquidaciones = Dh22::filterByYearMonth($year, $month)
                                 ->generaImpositivo()
+                                ->definitiva()
                                 ->pluck('nro_liqui')
                                 ->toArray();
 
