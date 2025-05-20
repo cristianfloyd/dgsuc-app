@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources;
+namespace App\Filament\Bloqueos\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -28,11 +28,11 @@ use App\Repositories\BloqueosRepositoryInterface;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
-use App\Filament\Reportes\Resources\BloqueosResource\Pages\ImportData;
-use App\Filament\Reportes\Resources\BloqueosResource\Pages\ViewBloqueo;
-use App\Filament\Reportes\Resources\BloqueosResource\Pages\EditImportData;
-use App\Filament\Reportes\Resources\BloqueosResource\Pages\ListImportData;
-use App\Filament\Reportes\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
+use App\Filament\Bloqueos\Resources\BloqueosResource\Pages\ImportData;
+use App\Filament\Bloqueos\Resources\BloqueosResource\Pages\ViewBloqueo;
+use App\Filament\Bloqueos\Resources\BloqueosResource\Pages\EditImportData;
+use App\Filament\Bloqueos\Resources\BloqueosResource\Pages\ListImportData;
+use App\Filament\Bloqueos\Resources\BloqueosResource\RelationManagers\CargosRelationManager;
 
 class BloqueosResource extends Resource
 {
@@ -81,13 +81,13 @@ class BloqueosResource extends Resource
     protected static function getResultados(): Collection
     {
         $cacheKey = 'bloqueos_resultados_' . auth()->guard('web')->id();
-    
+
         // Invalidar caché cuando sea necesario
         if (session()->has('invalidate_bloqueos_cache')) {
             Cache::forget($cacheKey);
             session()->forget('invalidate_bloqueos_cache');
         }
-        
+
         return Cache::remember($cacheKey, 3600, function () {
             $service = app(BloqueosProcessService::class);
             return $service->procesarBloqueos();
@@ -127,7 +127,7 @@ class BloqueosResource extends Resource
             $service = app(BloqueosProcessService::class);
             $repository = app(BloqueosRepositoryInterface::class);
             $resultados = $service->procesarBloqueos();
-            
+
             return view('filament.resources.bloqueos.bulk-results', [
                 'resultados' => $resultados,
                 'exitosos' => $resultados->where('estado', 'Procesado')->count(),
@@ -139,13 +139,13 @@ class BloqueosResource extends Resource
             Log::error('Error al procesar bloqueos: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             Notification::make()
                 ->title('Error al procesar bloqueos')
                 ->body('Se ha producido un error inesperado. Por favor, contacte al administrador.')
                 ->danger()
                 ->send();
-                
+
             return view('filament.resources.bloqueos.error', [
                 'mensaje' => 'Error al procesar los bloqueos'
             ]);
@@ -321,7 +321,7 @@ class BloqueosResource extends Resource
                         // Usamos el servicio de validación
                         $validationService = app(BloqueosValidationService::class);
                         $resultado = $validationService->validarRegistro($record);
-                        
+
                         // Mostramos la notificación con el resultado
                         Notification::make()
                             ->title($resultado['mensaje'])
@@ -401,17 +401,17 @@ class BloqueosResource extends Resource
                         // Usamos el servicio de validación para procesar múltiples registros
                         $validationService = app(BloqueosValidationService::class);
                         $estadisticas = $validationService->validarMultiplesRegistros($records);
-                        
+
                         // Generamos el mensaje de resumen
                         $mensajeResumen = $validationService->generarMensajeResumen($estadisticas);
-                        
+
                         // Mostramos la notificación con el resultado
                         Notification::make()
                             ->title('Validación completada')
                             ->body($mensajeResumen)
                             ->success()
                             ->send();
-                            
+
                         // Si hubo errores generales, mostramos una notificación adicional
                         if (isset($estadisticas['error_general'])) {
                             Notification::make()

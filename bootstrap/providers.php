@@ -19,6 +19,7 @@ return [
     App\Providers\FilamentServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
     App\Providers\Filament\AfipPanelProvider::class,
+    App\Providers\Filament\BloqueosPanelProvider::class,
     App\Providers\Filament\EmbargosPanelProvider::class,
     App\Providers\Filament\LiquidacionesPanelProvider::class,
     App\Providers\Filament\MapuchePanelProvider::class,

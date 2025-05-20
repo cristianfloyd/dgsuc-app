@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
 use App\Models\Dh01;
 use Filament\Actions;
@@ -20,7 +20,7 @@ use Filament\Forms\Components\DatePicker;
 use App\Models\Reportes\BloqueosDataModel;
 use Filament\Forms\Components\Placeholder;
 use App\Services\Mapuche\VerificacionMapucheService;
-use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 
 class EditImportData extends EditRecord
 {
