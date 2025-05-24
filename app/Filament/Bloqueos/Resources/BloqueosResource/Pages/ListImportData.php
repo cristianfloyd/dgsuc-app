@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
 use Filament\Actions;
 use Filament\Actions\Action;
 use App\Enums\BloqueosTipoEnum;
 use App\Enums\BloqueosEstadoEnum;
+use App\Models\BloqueosDataModel;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Log;
 use Filament\Resources\Components\Tab;
@@ -14,17 +15,16 @@ use Filament\Notifications\Notification;
 use League\CommonMark\MarkdownConverter;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\BloqueosDataService;
 use League\CommonMark\Environment\Environment;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
-use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
-use App\Filament\Reportes\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
+use App\Filament\Bloqueos\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
 
 class ListImportData extends ListRecords
 {

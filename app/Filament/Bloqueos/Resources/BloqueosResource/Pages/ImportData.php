@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
 use Filament\Forms\Form;
 use Livewire\WithFileUploads;
 use App\Imports\BloqueosImport;
 use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\Mapuche\Dh22Service;
@@ -14,17 +13,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use App\Traits\MapucheConnectionTrait;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Checkbox;
 use App\Services\ImportDataTableService;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
-use App\Services\Reportes\BloqueosService;
 use App\Services\Imports\BloqueosImportService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Imports\ImportNotificationService;
 use App\Services\Imports\DuplicateValidationService;
-use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Services\Validation\ExcelRowValidationService;
 use App\Services\Reportes\BloqueosImportOrchestratorService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;

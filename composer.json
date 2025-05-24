@@ -21,7 +21,7 @@
         "livewire/livewire": "^3.5",
         "maatwebsite/excel": "^3.1",
         "openspout/openspout": "^4.29",
-        "predis/predis": "^2.3",
+        "predis/predis": "2.0",
         "reedware/laravel-composite-relations": "^4.0",
         "robsontenorio/mary": "^1.32",
         "socialiteproviders/microsoft": "^4.6",

@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Carbon\Carbon;
 use App\Services\Mapuche\PeriodoFiscalService;
 
 /**
@@ -162,5 +163,91 @@ class MapucheConfig
         $periodoService = app(PeriodoFiscalService::class);
 
         return $periodoService->getYear() . $periodoService->getMonth();
+    }
+
+    /**
+     * Obtener la fecha de inicio del periodo fiscal corriente.
+     *
+     * @return string La fecha en formato Y-m-d
+     */
+    public static function getFechaInicioPeriodoCorriente(): string
+    {
+        $anio = self::getAnioFiscal();
+        $mes = self::getMesFiscal();
+
+        return Carbon::createFromDate($anio, $mes, 1)->format('Y-m-d');
+    }
+
+    /**
+     * Obtener la fecha de fin del periodo fiscal corriente.
+     *
+     * @return string La fecha en formato Y-m-d
+     */
+    public static function getFechaFinPeriodoCorriente(): string
+    {
+        $anio = self::getAnioFiscal();
+        $mes = self::getMesFiscal();
+
+        return Carbon::createFromDate($anio, $mes, 1)->endOfMonth()->format('Y-m-d');
+    }
+
+    /**
+     * Obtener las variantes de licencias de 10 días.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicencias10Dias(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesILTPrimerTramo', '');
+    }
+
+    /**
+     * Obtener las variantes de licencias de 11 días siguientes.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicencias11DiasSiguientes(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesILTSegundoTramo', '');
+    }
+
+    /**
+     * Obtener las variantes de licencias de maternidad down.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicenciasMaternidadDown(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesMaternidadDown', '');
+    }
+
+    /**
+     * Obtener las variantes de licencias de excedencia.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicenciaExcedencia(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesExcedencia', '');
+    }
+
+    /**
+     * Obtener las variantes de licencias de vacaciones.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicenciaVacaciones(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesVacaciones', '');
+    }
+
+    /**
+     * Obtener las variantes de licencias de protección integral.
+     *
+     * @return string Lista de IDs separados por comas
+     */
+    public static function getVarLicenciaProtecIntegral(): string
+    {
+        return self::getParametroRrhh('Licencias', 'VariantesProtecIntegral', '');
     }
 }

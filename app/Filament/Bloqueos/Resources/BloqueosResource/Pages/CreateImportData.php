@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
 use Filament\Actions;
 use Livewire\WithFileUploads;
@@ -8,7 +8,7 @@ use App\Imports\BloqueosImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 
 class CreateImportData extends CreateRecord
 {

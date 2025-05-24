@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eeedb1973f86866f6b30ee86c4af10d0",
+    "content-hash": "7e6b36ecfac0d5d24dd724aae7dcb8f1",
     "packages": [
         {
             "name": "amphp/amp",
@@ -7923,31 +7923,34 @@
         },
         {
             "name": "predis/predis",
-            "version": "v2.4.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/predis/predis.git",
-                "reference": "f49e13ee3a2a825631562aa0223ac922ec5d058b"
+                "reference": "99c253733dee9447d26257dc669d33d5ac84713d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/predis/predis/zipball/f49e13ee3a2a825631562aa0223ac922ec5d058b",
-                "reference": "f49e13ee3a2a825631562aa0223ac922ec5d058b",
+                "url": "https://api.github.com/repos/predis/predis/zipball/99c253733dee9447d26257dc669d33d5ac84713d",
+                "reference": "99c253733dee9447d26257dc669d33d5ac84713d",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.3",
-                "phpstan/phpstan": "^1.9",
-                "phpunit/phpcov": "^6.0 || ^8.0",
-                "phpunit/phpunit": "^8.0 || ^9.4"
+                "phpunit/phpunit": "^8.0 || ~9.4.4"
             },
             "suggest": {
-                "ext-relay": "Faster connection with in-memory caching (>=0.6.2)"
+                "ext-curl": "Allows access to Webdis when paired with phpiredis",
+                "ext-phpiredis": "Allows faster serialization and deserialization of the Redis protocol"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.0-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Predis\\": "src/"
@@ -7959,12 +7962,18 @@
             ],
             "authors": [
                 {
+                    "name": "Daniele Alessandri",
+                    "email": "suppakilla@gmail.com",
+                    "homepage": "http://clorophilla.net",
+                    "role": "Creator & Maintainer"
+                },
+                {
                     "name": "Till Krüss",
                     "homepage": "https://till.im",
                     "role": "Maintainer"
                 }
             ],
-            "description": "A flexible and feature-complete Redis/Valkey client for PHP.",
+            "description": "A flexible and feature-complete Redis client for PHP.",
             "homepage": "http://github.com/predis/predis",
             "keywords": [
                 "nosql",
@@ -7973,7 +7982,7 @@
             ],
             "support": {
                 "issues": "https://github.com/predis/predis/issues",
-                "source": "https://github.com/predis/predis/tree/v2.4.0"
+                "source": "https://github.com/predis/predis/tree/v2.0.0"
             },
             "funding": [
                 {
@@ -7981,7 +7990,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-04-30T15:16:02+00:00"
+            "time": "2022-06-08T13:14:56+00:00"
         },
         {
             "name": "psr/cache",
@@ -13157,16 +13166,16 @@
         },
         {
             "name": "laravel-lang/lang",
-            "version": "15.20.1",
+            "version": "15.20.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/lang.git",
-                "reference": "843f0d0b45dd0e567080959868733dba678a56b9"
+                "reference": "8924339c9da25aac3191031f2a1470c7e8a0bfac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/843f0d0b45dd0e567080959868733dba678a56b9",
-                "reference": "843f0d0b45dd0e567080959868733dba678a56b9",
+                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/8924339c9da25aac3191031f2a1470c7e8a0bfac",
+                "reference": "8924339c9da25aac3191031f2a1470c7e8a0bfac",
                 "shasum": ""
             },
             "require": {
@@ -13216,7 +13225,7 @@
                 "issues": "https://github.com/Laravel-Lang/lang/issues",
                 "source": "https://github.com/Laravel-Lang/lang"
             },
-            "time": "2025-04-22T13:34:51+00:00"
+            "time": "2025-05-11T00:06:09+00:00"
         },
         {
             "name": "laravel-lang/models",
@@ -13303,16 +13312,16 @@
         },
         {
             "name": "laravel-lang/moonshine",
-            "version": "1.3.6",
+            "version": "1.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/moonshine.git",
-                "reference": "4781c391bd92a360fb3035cbba80ad1d2e382104"
+                "reference": "d0d52b9932b48feb765f1a3394f12a8a8a78eefe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/moonshine/zipball/4781c391bd92a360fb3035cbba80ad1d2e382104",
-                "reference": "4781c391bd92a360fb3035cbba80ad1d2e382104",
+                "url": "https://api.github.com/repos/Laravel-Lang/moonshine/zipball/d0d52b9932b48feb765f1a3394f12a8a8a78eefe",
+                "reference": "d0d52b9932b48feb765f1a3394f12a8a8a78eefe",
                 "shasum": ""
             },
             "require": {
@@ -13365,9 +13374,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Laravel-Lang/moonshine/issues",
-                "source": "https://github.com/Laravel-Lang/moonshine/tree/1.3.6"
+                "source": "https://github.com/Laravel-Lang/moonshine/tree/1.3.7"
             },
-            "time": "2025-03-13T14:55:59+00:00"
+            "time": "2025-05-01T05:27:46+00:00"
         },
         {
             "name": "laravel-lang/routes",
@@ -13448,16 +13457,16 @@
         },
         {
             "name": "laravel-lang/starter-kits",
-            "version": "1.3.7",
+            "version": "1.3.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/starter-kits.git",
-                "reference": "4efa1b63529c7732e41693a27e4d55c254121b8c"
+                "reference": "37884af8f9bdaf3cbc40716ddbe1b9e543bef615"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/starter-kits/zipball/4efa1b63529c7732e41693a27e4d55c254121b8c",
-                "reference": "4efa1b63529c7732e41693a27e4d55c254121b8c",
+                "url": "https://api.github.com/repos/Laravel-Lang/starter-kits/zipball/37884af8f9bdaf3cbc40716ddbe1b9e543bef615",
+                "reference": "37884af8f9bdaf3cbc40716ddbe1b9e543bef615",
                 "shasum": ""
             },
             "require": {
@@ -13509,9 +13518,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Laravel-Lang/starter-kits/issues",
-                "source": "https://github.com/Laravel-Lang/starter-kits/tree/1.3.7"
+                "source": "https://github.com/Laravel-Lang/starter-kits/tree/1.3.8"
             },
-            "time": "2025-05-01T08:03:05+00:00"
+            "time": "2025-05-11T00:05:02+00:00"
         },
         {
             "name": "laravel/pint",
@@ -13581,16 +13590,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.42.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "2edaaf77f3c07a4099965bb3d7dfee16e801c0f6"
+                "reference": "71a509b14b2621ce58574274a74290f933c687f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/2edaaf77f3c07a4099965bb3d7dfee16e801c0f6",
-                "reference": "2edaaf77f3c07a4099965bb3d7dfee16e801c0f6",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/71a509b14b2621ce58574274a74290f933c687f7",
+                "reference": "71a509b14b2621ce58574274a74290f933c687f7",
                 "shasum": ""
             },
             "require": {
@@ -13640,7 +13649,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2025-04-29T14:26:46+00:00"
+            "time": "2025-05-13T13:34:34+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -14327,16 +14336,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.5.19",
+            "version": "11.5.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "0da1ebcdbc4d5bd2d189cfe02846a89936d8dda5"
+                "reference": "e6bdea63ecb7a8287d2cdab25bdde3126e0cfe6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0da1ebcdbc4d5bd2d189cfe02846a89936d8dda5",
-                "reference": "0da1ebcdbc4d5bd2d189cfe02846a89936d8dda5",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e6bdea63ecb7a8287d2cdab25bdde3126e0cfe6f",
+                "reference": "e6bdea63ecb7a8287d2cdab25bdde3126e0cfe6f",
                 "shasum": ""
             },
             "require": {
@@ -14408,7 +14417,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.19"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.20"
             },
             "funding": [
                 {
@@ -14432,7 +14441,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-05-02T06:56:52+00:00"
+            "time": "2025-05-11T06:39:52+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -15362,16 +15371,16 @@
         },
         {
             "name": "spatie/backtrace",
-            "version": "1.7.3",
+            "version": "1.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/backtrace.git",
-                "reference": "80ae5fabe2a1e3bc7df5c7ca5d91b094dc314b20"
+                "reference": "cd37a49fce7137359ac30ecc44ef3e16404cccbe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/backtrace/zipball/80ae5fabe2a1e3bc7df5c7ca5d91b094dc314b20",
-                "reference": "80ae5fabe2a1e3bc7df5c7ca5d91b094dc314b20",
+                "url": "https://api.github.com/repos/spatie/backtrace/zipball/cd37a49fce7137359ac30ecc44ef3e16404cccbe",
+                "reference": "cd37a49fce7137359ac30ecc44ef3e16404cccbe",
                 "shasum": ""
             },
             "require": {
@@ -15409,7 +15418,7 @@
                 "spatie"
             ],
             "support": {
-                "source": "https://github.com/spatie/backtrace/tree/1.7.3"
+                "source": "https://github.com/spatie/backtrace/tree/1.7.4"
             },
             "funding": [
                 {
@@ -15421,7 +15430,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-05-07T07:20:00+00:00"
+            "time": "2025-05-08T15:41:09+00:00"
         },
         {
             "name": "spatie/error-solutions",
@@ -15917,12 +15926,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }

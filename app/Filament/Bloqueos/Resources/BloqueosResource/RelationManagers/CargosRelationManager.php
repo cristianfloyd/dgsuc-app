@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\RelationManagers;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Tables;

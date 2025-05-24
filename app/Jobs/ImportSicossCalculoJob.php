@@ -1,6 +1,7 @@
 <?php
 
-use App\Events\ImportProgressUpdated;
+namespace App\Jobs;
+
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -19,8 +20,6 @@ class ImportSicossCalculoJob implements ShouldQueue
 
     public function handle(AfipMapucheSicossCalculoImportService $service): void
     {
-        $service->streamImport($this->filePath, $this->periodoFiscal, function($progress) {
-            event(new ImportProgressUpdated($progress));
-        });
+        //
     }
 }

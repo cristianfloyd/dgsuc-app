@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\BloqueosResource\Pages;
+namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use App\Filament\Reportes\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 
 class ViewBloqueo extends ViewRecord
 {
