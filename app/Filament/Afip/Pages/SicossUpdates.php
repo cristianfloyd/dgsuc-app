@@ -78,13 +78,49 @@ class SicossUpdates extends Page
         ];
     }
 
+    protected function executeServiceMethod(callable $serviceMethod, string $successTitle): void
+    {
+        $this->isProcessing = true;
+        try {
+            $this->updateResults = $serviceMethod();
+
+            if ($this->updateResults['status'] === 'success') {
+                Notification::make()
+                    ->title($successTitle)
+                    ->success()
+                    ->body($this->updateResults['message'])
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($this->updateResults['message'])
+                    ->send();
+            }
+        } catch (\Throwable $th) {
+            Log::error('Error en actualización SICOSS', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString()
+            ]);
+
+            Notification::make()
+                ->title('Error')
+                ->danger()
+                ->body($th->getMessage())
+                ->send();
+        } finally {
+            $this->isProcessing = false;
+        }
+    }
+
+
     #[On('fiscalPeriodUpdated')]
     public function handlePeriodoFiscalUpdated(): void
     {
         // Obtener el período fiscal de la sesión
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
-        $this->year = $periodoFiscal['year'];
-        $this->month = $periodoFiscal['month'];
+        $this->year = (int)$periodoFiscal['year'];
+        $this->month = (int)$periodoFiscal['month'];
 
         // Limpiar resultados anteriores
         $this->updateResults = [];
