@@ -10,6 +10,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Services\SicossFileProcessors\SicossFileProcessor;
+use App\Services\EncodingService;
 
 class AfipMapucheSicossImportService
 {
@@ -399,13 +400,21 @@ class AfipMapucheSicossImportService
 
     private function logMetrics(array $stats): void
     {
+        $executionTime = $this->formatExecutionTime();
+        $memoryPeak = $this->formatMemoryUsage(memory_get_peak_usage(true));
+        $recordsPerSecond = $stats['processed'] > 0 ? 
+            round($stats['processed'] / ($this->endTime - $this->startTime), 2) : 0;
+
+        // Sanitizar datos antes del logging para evitar problemas de codificación
+        $cleanStats = EncodingService::sanitizeForJson($stats);
+
         Log::info('Métricas de importación SICOSS', [
-            'tiempo_total' => $this->formatExecutionTime(),
-            'registros_procesados' => $stats['imported'],
-            'registros_por_segundo' => round($stats['imported'] / $this->getExecutionTime(), 2),
-            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
-            'errores' => count($stats['errors']),
-            'duplicados' => $stats['duplicates']
+            'tiempo_total' => $executionTime,
+            'registros_procesados' => $cleanStats['processed'],
+            'registros_por_segundo' => $recordsPerSecond,
+            'memoria_pico' => $memoryPeak,
+            'errores' => count($cleanStats['errors']),
+            'duplicados' => $cleanStats['duplicates'] ?? 0,
         ]);
     }
 
@@ -476,11 +485,14 @@ class AfipMapucheSicossImportService
         try {
             // Normalizar eliminando saltos de línea
             $line = rtrim($line, "\r\n");
+            
+            // Limpiar caracteres UTF-8 malformados antes del procesamiento
+            $line = $this->sanitizeLineEncoding($line);
 
             // Verificar longitud correcta
-            if (strlen($line) !== 499) {
+            if (strlen($line) !== 500) {
                 Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
-                $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
+                $line = strlen($line) > 500 ? substr($line, 0, 500) : str_pad($line, 500, ' ');
             }
 
             $structure = $this->getFileStructure();
@@ -1115,59 +1127,6 @@ class AfipMapucheSicossImportService
 
 
     /**
-     * Parsea una línea del archivo según especificación SICOSS
-     * con manejo mejorado de caracteres especiales
-     *
-     * @param string $line Línea a parsear
-     * @param int $lineNumber Número de línea (para logging)
-     * @return array Resultado del parseo
-     */
-    // public function parseLine(string $line, int $lineNumber = 0): array
-    // {
-    //     try {
-    //         // Normalizar eliminando saltos de línea
-    //         $line = rtrim($line, "\r\n");
-
-    //         // Verificar longitud correcta
-    //         if (strlen($line) !== 499) {
-    //             Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
-    //             $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
-    //         }
-
-    //         $structure = $this->getFileStructure();
-    //         $parsedData = [];
-
-    //         foreach ($structure as $field => $config) {
-    //             $value = substr($line, $config['start'], $config['length']);
-
-    //             // Tratamiento especial para el campo nombre
-    //             if ($field === 'apnom') {
-    //                 $value = $this->corregirCaracteresEspeciales($value);
-    //                 // $value = mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
-    //                 $parsedData[$field] = trim($value);
-    //             } else {
-    //                 $parsedData[$field] = match ($config['type']) {
-    //                     'N' => (int)ltrim(trim($value), '0') ?: 0,
-    //                     'D' => $this->parseAmount($value),
-    //                     'C' => trim($value),
-    //                     default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-    //                 };
-    //             }
-    //         }
-
-    //         return [
-    //             'success' => true,
-    //             'data' => $parsedData
-    //         ];
-    //     } catch (\Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'error' => "Error en línea {$lineNumber}: " . $e->getMessage()
-    //         ];
-    //     }
-    // }
-
-    /**
      * Corrige problemas de encoding para caracteres especiales
      * Utiliza múltiples estrategias para garantizar conversión correcta
      *
@@ -1380,85 +1339,27 @@ class AfipMapucheSicossImportService
     }
 
     /**
-     * Maneja específicamente caracteres problemáticos en archivos AFIP
-     *
-     * @param string $text Texto a procesar
-     * @return string Texto con caracteres corregidos
+     * Limpia la línea de caracteres UTF-8 malformados
+     * 
+     * @param string $line Línea a limpiar
+     * @return string Línea limpia
      */
-    // public function corregirCaracteresEspeciales(string $text): string
-    // {
-    //     // Análisis de bytes para identificar patrones específicos
-    //     $bytes = [];
-    //     $problematicos = [];
+    private function sanitizeLineEncoding(string $line): string
+    {
+        // 1. Verificar si la línea tiene caracteres válidos UTF-8
+        if (mb_check_encoding($line, 'UTF-8')) {
+            return $line;
+        }
 
-    //     // Recopilar información sobre bytes problemáticos
-    //     for ($i = 0; $i < strlen($text); $i++) {
-    //         $char = $text[$i];
-    //         $ord = ord($char);
+        // 2. Intentar convertir desde ISO-8859-1 a UTF-8
+        $converted = mb_convert_encoding($line, 'UTF-8', 'ISO-8859-1');
+        if (mb_check_encoding($converted, 'UTF-8')) {
+            return $converted;
+        }
 
-    //         // Identificar bytes no ASCII que podrían ser parte de caracteres especiales
-    //         if ($ord > 127) {
-    //             $bytes[] = [
-    //                 'pos' => $i,
-    //                 'byte' => $ord,
-    //                 'hex' => bin2hex($char),
-    //                 'contexto' => substr($text, max(0, $i - 2), 5)
-    //             ];
-    //             $problematicos[] = $i;
-    //         }
-    //     }
-
-    //     // Si no hay caracteres problemáticos, devolver el texto original
-    //     if (empty($problematicos)) {
-    //         return $text;
-    //     }
-
-    //     // Estrategia 1: Reemplazar secuencias específicas de bytes
-    //     // Mapeo basado en patrones identificados en el archivo dgi202502.txt
-    //     $result = $text;
-
-    //     // Buscar patrones específicos que representan la Ñ
-    //     // (estos patrones pueden variar según el archivo)
-    //     $patronesÑ = [
-    //         "\xC3\xAF\xC2\xBF\xC2\xBD" => "Ñ", // Patrón Ã¯Â¿Â½
-    //         "\xC3\xB1" => "ñ",                // ñ en UTF-8
-    //         "\xC3\x91" => "Ñ",                // Ñ en UTF-8
-    //         "\xF1" => "ñ",                    // ñ en Latin1/Windows-1252
-    //         "\xD1" => "Ñ",                    // Ñ en Latin1/Windows-1252
-    //         "?" => "Ñ"                        // Signo de interrogación que reemplaza a Ñ
-    //     ];
-
-    //     // Reemplazar patrones conocidos
-    //     foreach ($patronesÑ as $patron => $reemplazo) {
-    //         $result = str_replace($patron, $reemplazo, $result);
-    //     }
-
-    //     // Estrategia 2: Reemplazo contextual
-    //     // Si sabemos que en la posición específica debería haber una Ñ
-    //     if (strpos($text, "PI") !== false && strpos($text, "EIRO") !== false) {
-    //         // Reemplazar cualquier carácter entre "PI" y "EIRO" por "Ñ"
-    //         $result = preg_replace('/PI(.)EIRO/u', 'PIÑEIRO', $result);
-    //     }
-
-    //     // Estrategia 3: Detección por posición conocida
-    //     // Si sabemos por el formato que ciertos apellidos contienen Ñ
-    //     $apellidosConÑ = [
-    //         "PI?EIRO" => "PIÑEIRO",
-    //         "MU?OZ" => "MUÑOZ",
-    //         "CASTA?ARES" => "CASTAÑARES",
-    //         "PE?A" => "PEÑA",
-    //         "ARDI?O" => "ARDIÑO",
-    //         "MARI?O" => "MARIÑO",
-    //         "ORDO?EZ" => "ORDOÑEZ",
-    //         "ESPA?A" => "ESPAÑA"
-    //     ];
-
-    //     foreach ($apellidosConÑ as $mal => $bien) {
-    //         $result = str_replace($mal, $bien, $result);
-    //     }
-
-    //     return $result;
-    // }
+        // 3. Como último recurso, limpiar caracteres no válidos
+        return mb_convert_encoding($line, 'UTF-8', 'UTF-8');
+    }
 
     /**
      * Registra información sobre bytes potencialmente problemáticos para diagnóstico

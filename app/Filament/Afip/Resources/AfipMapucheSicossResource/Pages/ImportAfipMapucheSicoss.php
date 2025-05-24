@@ -209,23 +209,61 @@ class ImportAfipMapucheSicoss extends Page
 
     protected function handleImportResult(array $result): void
     {
-        if (empty($result['errors'])) {
+        $totalErrors = count($result['errors']);
+        $totalWarnings = count($result['warnings'] ?? []);
+        
+        // Sanitizar mensajes de error antes de mostrarlos
+        $cleanErrors = array_map(function($error) {
+            return mb_convert_encoding($error, 'UTF-8', 'UTF-8');
+        }, $result['errors']);
+
+        if ($result['imported'] > 0) {
             Notification::make()
                 ->success()
-                ->title('Importación exitosa')
-                ->body("Se importaron {$result['imported']} registros correctamente")
-                ->actions([
-                    \Filament\Notifications\Actions\Action::make('view')
-                        ->label('Ver registros')
-                        ->url(AfipMapucheSicossResource::getUrl('index'))
-                ])
+                ->title('✅ Importación Completada')
+                ->body($this->formatSuccessMessage($result))
                 ->persistent()
                 ->send();
-        } else {
-            $this->showErrorNotification(
-                'Importación con errores: ' . implode("\n", $result['errors'])
-            );
         }
+
+        if ($totalErrors > 0) {
+            $this->showErrorsNotification($cleanErrors, $totalErrors);
+        }
+
+        if ($totalWarnings > 0) {
+            $this->showWarningsNotification($result['warnings'], $totalWarnings);
+        }
+    }
+
+    private function formatSuccessMessage(array $result): string
+    {
+        $message = "Registros importados: {$result['imported']}";
+        
+        if (!empty($result['duplicates'])) {
+            $message .= "\nDuplicados omitidos: {$result['duplicates']}";
+        }
+        
+        return $message;
+    }
+
+    private function showErrorsNotification(array $errors, int $totalErrors): void
+    {
+        Notification::make()
+            ->danger()
+            ->title('Errores')
+            ->body(implode("\n", $errors))
+            ->persistent()
+            ->send();
+    }
+
+    private function showWarningsNotification(array $warnings, int $totalWarnings): void
+    {
+        Notification::make()
+            ->warning()
+            ->title('Advertencias')
+            ->body(implode("\n", $warnings))
+            ->persistent()
+            ->send();
     }
 
     protected function showErrorNotification(string $message): void

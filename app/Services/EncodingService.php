@@ -226,4 +226,47 @@ class EncodingService
             return $value;
         }
     }
+
+    /**
+     * Sanitiza datos para ser seguros en JSON encode
+     * Especialmente útil antes de mostrar notificaciones en Filament
+     * 
+     * @param mixed $data Datos a sanitizar
+     * @return mixed Datos sanitizados
+     */
+    public static function sanitizeForJson($data)
+    {
+        if (is_string($data)) {
+            // Convertir a UTF-8 válido si no lo es
+            if (!mb_check_encoding($data, 'UTF-8')) {
+                $data = self::toUtf8($data);
+            }
+            
+            // Limpiar caracteres que pueden causar problemas en JSON
+            return mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+        }
+        
+        if (is_array($data)) {
+            return array_map([self::class, 'sanitizeForJson'], $data);
+        }
+        
+        if (is_object($data)) {
+            foreach (get_object_vars($data) as $property => $value) {
+                $data->$property = self::sanitizeForJson($value);
+            }
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Valida que una cadena sea JSON-safe
+     * 
+     * @param string $string Cadena a validar
+     * @return bool
+     */
+    public static function isJsonSafe(string $string): bool
+    {
+        return json_encode($string, JSON_UNESCAPED_UNICODE) !== false;
+    }
 }

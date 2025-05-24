@@ -57,11 +57,10 @@ class SicossUpdates extends Page
     public function mount()
     {
         // Obtener el período fiscal actual
-        $periodoFiscalData = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
-        $this->periodoFiscal = new PeriodoFiscalData(
-            year: $periodoFiscalData['year'],
-            month: $periodoFiscalData['month']
-        );
+        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
+
+        $this->year = $periodoFiscal['year'];
+        $this->month = $periodoFiscal['month'];
 
         // Simulación de resultado de actualización
         // $this->updateResults = [
@@ -82,27 +81,44 @@ class SicossUpdates extends Page
         ];
     }
 
-    protected function executeServiceMethod(callable $serviceMethod, string $successTitle): void
+    protected function executeServiceMethod(callable $serviceMethod, string $successTitle, string $logContext = 'actualización SICOSS'): void
     {
         $this->isProcessing = true;
+        
         try {
             $this->updateResults = $serviceMethod();
 
-            if ($this->updateResults['status'] === 'success') {
-                Notification::make()
-                    ->title($successTitle)
-                    ->success()
-                    ->body($this->updateResults['message'])
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Error en la actualización')
-                    ->danger()
-                    ->body($this->updateResults['message'])
-                    ->send();
+            // Manejo flexible de diferentes tipos de respuesta
+            $status = $this->updateResults['status'] ?? 'error';
+            $message = $this->updateResults['message'] ?? 'Sin mensaje';
+
+            switch ($status) {
+                case 'success':
+                    Notification::make()
+                        ->title($successTitle)
+                        ->success()
+                        ->body($message)
+                        ->send();
+                    break;
+                
+                case 'warning':
+                    Notification::make()
+                        ->title('Advertencia')
+                        ->warning()
+                        ->body($message)
+                        ->send();
+                    break;
+                
+                default:
+                    Notification::make()
+                        ->title('Error en la actualización')
+                        ->danger()
+                        ->body($message)
+                        ->send();
+                    break;
             }
         } catch (\Throwable $th) {
-            Log::error('Error en actualización SICOSS', [
+            Log::error("Error en {$logContext}", [
                 'error' => $th->getMessage(),
                 'trace' => $th->getTraceAsString()
             ]);
@@ -117,23 +133,20 @@ class SicossUpdates extends Page
         }
     }
 
-
     #[On('fiscalPeriodUpdated')]
     public function handlePeriodoFiscalUpdated(): void
     {
         // Obtener el período fiscal de la sesión
         $periodoFiscalData = $this->periodoFiscalService->getPeriodoFiscal();
 
-        $this->periodoFiscal = new PeriodoFiscalData(
-            year: $periodoFiscalData['year'],
-            month: $periodoFiscalData['month']
-        );
+        $this->year = (int)$periodoFiscalData['year'];
+        $this->month = (int)$periodoFiscalData['month'];
 
         // Limpiar resultados anteriores
         $this->updateResults = [];
 
         // Obtener las liquidaciones para el nuevo período fiscal
-        $liquidaciones = Dh22::FilterByYearMonth($this->periodoFiscal->year, $this->periodoFiscal->month)
+        $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
             ->generaImpositivo()
             ->pluck('nro_liqui', 'desc_liqui')
             ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
@@ -143,7 +156,7 @@ class SicossUpdates extends Page
         $this->selectedIdLiqui = $liquidaciones;
 
         // Determinar la liquidación definitiva (ejemplo: la última liquidación)
-        $this->selectedliquiDefinitiva = Dh22::FilterByYearMonth($this->periodoFiscal->year, $this->periodoFiscal->month)
+        $this->selectedliquiDefinitiva = Dh22::FilterByYearMonth($this->year, $this->month)
             ->generaImpositivo()
             ->definitiva()
             ->pluck('nro_liqui', 'desc_liqui')
@@ -153,64 +166,36 @@ class SicossUpdates extends Page
         // Notificar al usuario
         Notification::make()
             ->title('Período fiscal actualizado')
-            ->body("Período actual: {$this->periodoFiscal->year}-{$this->periodoFiscal->month}")
+            ->body("Período actual: {$this->year}-{$this->month}")
             ->success()
             ->send();
     }
 
     public function runUpdates(): void
     {
-        $this->isProcessing = true;
+        $this->executeServiceMethod(
+            serviceMethod: function () {
+                // Obtener las liquidaciones con sino_genimp = true para el período fiscal seleccionado
+                $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
+                    ->generaImpositivo()
+                    ->pluck('nro_liqui')
+                    ->toArray();
 
-        try {
-            // Obtener las liquidaciones con sino_genimp = true para el período fiscal seleccionado
-            // usando los scopes definidos en el modelo Dh22
-            $liquidaciones = Dh22::FilterByYearMonth($this->periodoFiscal->year, $this->periodoFiscal->month)
-                ->generaImpositivo()
-                ->pluck('nro_liqui')
-                ->toArray();
+                if (empty($liquidaciones)) {
+                    Notification::make()
+                        ->title('Sin liquidaciones')
+                        ->warning()
+                        ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                        ->send();
+                    return ['status' => 'warning', 'message' => 'Sin liquidaciones'];
+                }
 
-            if (empty($liquidaciones)) {
-                Notification::make()
-                    ->title('Sin liquidaciones')
-                    ->warning()
-                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->periodoFiscal->year}-{$this->periodoFiscal->month}")
-                    ->send();
-                $this->isProcessing = false;
-                return;
-            }
-
-            $service = app()->make(SicossUpdateService::class);
-            // Pasar las liquidaciones encontradas al servicio
-            $this->updateResults = $service->executeUpdates($liquidaciones);
-
-            if ($this->updateResults['status'] === 'success') {
-                Notification::make()
-                    ->title('Actualización completada')
-                    ->success()
-                    ->body("Se procesaron " . count($liquidaciones) . " liquidaciones para el período {$this->periodoFiscal->year}-{$this->periodoFiscal->month}")
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Error en la actualización')
-                    ->danger()
-                    ->body($this->updateResults['message'])
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Log::error('Error en actualización SICOSS', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            Notification::make()
-                ->title('Error')
-                ->danger()
-                ->body($e->getMessage())
-                ->send();
-        } finally {
-            $this->isProcessing = false;
-        }
+                $service = app()->make(SicossUpdateService::class);
+                return $service->executeUpdates($liquidaciones);
+            },
+            successTitle: 'Actualización DHA8 completada',
+            logContext: 'actualización SICOSS DHA8'
+        );
     }
 
     /**
@@ -218,104 +203,41 @@ class SicossUpdates extends Page
      */
     public function runEmbarazadasUpdate(): void
     {
-        $this->isProcessing = true;
+        $this->executeServiceMethod(
+            serviceMethod: function () {
+                // Obtener las liquidaciones para el período fiscal seleccionado
+                $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
+                    ->generaImpositivo()
+                    ->definitiva()
+                    ->pluck('nro_liqui')
+                    ->toArray();
 
-        try {
-            // Obtener las liquidaciones para el período fiscal seleccionado
-            $liquidaciones = Dh22::FilterByYearMonth($this->periodoFiscal->year, $this->periodoFiscal->month)
-                ->generaImpositivo()
-                ->definitiva()
-                ->pluck('nro_liqui')
-                ->toArray();
+                if (empty($liquidaciones)) {
+                    return [
+                        'status' => 'warning', 
+                        'message' => "No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}"
+                    ];
+                }
 
-            if (empty($liquidaciones)) {
-                Notification::make()
-                    ->title('Sin liquidaciones')
-                    ->warning()
-                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->periodoFiscal->year}-{$this->periodoFiscal->month}")
-                    ->send();
-                $this->isProcessing = false;
-                return;
-            }
-
-
-            // Ejecutar la actualización de embarazadas
-            $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas([
-                'year' => $this->periodoFiscal->year,
-                'month' => $this->periodoFiscal->month,
-                'liquidaciones' => $liquidaciones,
-                'nro_liqui' => $liquidaciones[0] // Usar la primera liquidación
-            ]);
-
-            // Guardar resultados para mostrar en la vista
-            $this->updateResults = $resultado;
-
-            // Mostrar notificación según el resultado
-            if ($resultado['status'] === 'success') {
-                Notification::make()
-                    ->title('Actualización de embarazadas completada')
-                    ->success()
-                    ->body($resultado['message'])
-                    ->send();
-            } elseif ($resultado['status'] === 'warning') {
-                Notification::make()
-                    ->title('Advertencia')
-                    ->warning()
-                    ->body($resultado['message'])
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Error en la actualización')
-                    ->danger()
-                    ->body($resultado['message'])
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Log::error('Error en actualización de embarazadas', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            Notification::make()
-                ->title('Error')
-                ->danger()
-                ->body($e->getMessage())
-                ->send();
-        } finally {
-            $this->isProcessing = false;
-        }
+                return $this->sicossEmbarazadasService->actualizarEmbarazadas([
+                    'year' => $this->year,
+                    'month' => $this->month,
+                    'liquidaciones' => $liquidaciones,
+                    'nro_liqui' => $liquidaciones[0]
+                ]);
+            },
+            successTitle: 'Actualización de embarazadas completada',
+            logContext: 'actualización de embarazadas'
+        );
     }
 
     public function runActividadUpdate(): void
     {
-        $this->isProcessing = true;
-
-        try {
-            $resultado = $this->sicossActividadUpdateService->actualizarCodAct();
-            $this->updateResults = $resultado;
-
-            if ($resultado['status'] === 'success') {
-                Notification::make()
-                    ->title('Actualización de Actividad completada')
-                    ->success()
-                    ->body($resultado['message'])
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Error en la actualización')
-                    ->danger()
-                    ->body($resultado['message'])
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Error')
-                ->danger()
-                ->body($e->getMessage())
-                ->send();
-        } finally {
-            $this->isProcessing = false;
-        }
+        $this->executeServiceMethod(
+            serviceMethod: fn() => $this->sicossActividadUpdateService->actualizarCodAct(),
+            successTitle: 'Actualización de Actividad completada',
+            logContext: 'actualización de actividad'
+        );
     }
 
     /**
@@ -323,42 +245,11 @@ class SicossUpdates extends Page
      */
     public function runConcepto205Update(): void
     {
-        $this->isProcessing = true;
-
-        try {
-            // Ejecutar la actualización de concepto 205
-            // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
-            $resultado = $this->sicossCpto205Service->actualizarCpto205();
-            $this->updateResults = $resultado;
-
-            // Mostrar notificación según el resultado
-            if ($resultado['status'] === 'success') {
-                Notification::make()
-                    ->title('Actualización de concepto 205 completada')
-                    ->success()
-                    ->body($resultado['message'])
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Error en la actualización')
-                    ->danger()
-                    ->body($resultado['message'])
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Log::error('Error en actualización de concepto 205', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            Notification::make()
-                ->title('Error')
-                ->danger()
-                ->body($e->getMessage())
-                ->send();
-        } finally {
-            $this->isProcessing = false;
-        }
+        $this->executeServiceMethod(
+            serviceMethod: fn() => $this->sicossCpto205Service->actualizarCpto205(),
+            successTitle: 'Actualización de concepto 205 completada',
+            logContext: 'actualización de concepto 205'
+        );
     }
 
     protected function getActions(): array
@@ -377,7 +268,7 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalDescription('¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->periodoFiscal->year . '-' . str_pad((string)$this->periodoFiscal->month, 2, '0', STR_PAD_LEFT) .
+                    $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
                     '? Este proceso puede tomar varios minutos.'),
 
             Action::make('run_embarazadas_update')
@@ -389,7 +280,7 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Situación de Embarazadas')
                 ->modalDescription('¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->periodoFiscal->year . '-' . str_pad((string)$this->periodoFiscal->month, 2, '0', STR_PAD_LEFT) .
+                    $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
                     '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'),
 
             Action::make('run_actividad_update')
