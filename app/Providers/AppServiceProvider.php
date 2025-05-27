@@ -24,13 +24,19 @@ use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
 use App\Contracts\RepEmbarazadaServiceInterface;
 use App\Repositories\BloqueosRepositoryInterface;
+use App\Services\Reportes\BloqueosCleanupService;
 use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Reportes\BloqueosHistorialService;
 use App\Repositories\Mapuche\Dh16RepositoryInterface;
 use App\Repositories\Mapuche\ConceptosTotalesRepository;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
+use App\Services\Reportes\BloqueosArchiveOrchestratorService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
 use App\Repositories\Interfaces\ConceptosTotalesRepositoryInterface;
+use App\Services\Reportes\Interfaces\BloqueosCleanupServiceInterface;
+use App\Services\Reportes\Interfaces\BloqueosHistorialServiceInterface;
+use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -80,6 +86,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BloqueosRepositoryInterface::class, BloqueosRepository::class);
         $this->app->bind(ConceptosTotalesRepositoryInterface::class,ConceptosTotalesRepository::class
         );
+
+        // Servicios de archivado de bloqueos
+        $this->app->bind(BloqueosHistorialServiceInterface::class, BloqueosHistorialService::class);
+        $this->app->bind(BloqueosCleanupServiceInterface::class, BloqueosCleanupService::class);
+        $this->app->bind(BloqueosArchiveOrchestratorInterface::class, BloqueosArchiveOrchestratorService::class);
     }
 
     /**

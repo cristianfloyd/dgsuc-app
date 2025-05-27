@@ -20,10 +20,10 @@ Este documento describe el proceso de implementación para importar archivos Exc
 
 Ejecutar los siguientes comandos en la terminal del proyecto:
 
-```bash
-composer require maatwebsite/excel
-composer require filament/spatie-laravel-media-library-plugin
-```
+    ```bash
+    composer require maatwebsite/excel
+    composer require filament/spatie-laravel-media-library-plugin
+    ```
 
 ## 2. Estructura del Proyecto
 
