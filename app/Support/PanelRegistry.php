@@ -93,6 +93,18 @@ class PanelRegistry
                 'bgColor' => 'bg-slate-700',
                 'sortOrder' => 70,
             ],
+            [
+                'id' => 'bloqueos',
+                'name' => 'Panel Bloqueos',
+                'url' => '/bloqueos',
+                'icon' => 'heroicon-o-user-group',
+                'category' => 'rrhh',
+                'description' => 'Bloqueos de agentes',
+                'color' => 'blue',
+                'badge' => 'SUC',
+                'bgColor' => 'bg-slate-700',
+                'sortOrder' => 80,
+            ]
         ]);
     }
 
