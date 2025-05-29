@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
+use App\Repositories\Afip\SicossCpto205Repository;
 
 class SicossCpto205Service
 {
-    use MapucheConnectionTrait;
+    protected SicossCpto205Repository $repository;
+    
+    /**
+     * Constructor
+     * 
+     * @param SicossCpto205Repository $repository Repositorio para operaciones de datos
+     */
+    public function __construct(SicossCpto205Repository $repository)
+    {
+        $this->repository = $repository;
+    }
 
     /**
      * Actualiza datos relacionados con el concepto 205 en SICOSS
@@ -26,44 +35,27 @@ class SicossCpto205Service
     public function actualizarCpto205(array $params = []): array
     {
         // Liquidaciones por defecto: definidas en la consulta original
-        $liquidaciones = $params['liquidaciones'] ?? [21, 24, 25, 26, 27];
+        $liquidaciones = $params['liquidaciones'] ?? [];
+        if (empty($liquidaciones)) {
+            return [
+                'status' => 'error',
+                'message' => 'No se encontraron liquidaciones para actualizar el concepto 205',
+                'data' => null
+            ];
+        }
 
         try {
-            DB::connection($this->getConnectionName())->beginTransaction();
-
-            // Limpiar tabla temporal si existe
-            DB::connection($this->getConnectionName())->statement("DROP TABLE IF EXISTS tcpto205");
-
-            // Crear tabla temporal con los datos calculados
-            $query = "
-                SELECT d21.nro_legaj, c.cuil, ((SUM(d21.impp_conce) * 100) / 2)::NUMERIC(10, 2) AS monto
-                INTO TEMP tcpto205
-                FROM mapuche.dh21 d21,
-                    mapuche.vdh01 c
-                WHERE d21.nro_liqui IN (" . implode(',', $liquidaciones) . ")
-                    AND d21.nro_legaj = c.nro_legaj
-                    AND d21.codn_conce = 789
-                    AND d21.nro_legaj IN
-                        (SELECT DISTINCT nro_legaj FROM mapuche.dh21 WHERE nro_liqui IN (" . implode(',', $liquidaciones) . ") AND codn_conce = '205')
-                    AND d21.nro_legaj IN (SELECT b.nro_legaj
-                                            FROM suc.control_aportes_diferencias a,
-                                                mapuche.vdh01 b
-                                            WHERE a.cuil = b.cuil)
-                GROUP BY d21.nro_legaj, c.cuil
-                ORDER BY nro_legaj
-            ";
-
-            DB::connection($this->getConnectionName())->statement($query);
-
-            // Obtener cantidad de registros afectados
-            $registrosCount = DB::connection($this->getConnectionName())->selectOne("SELECT COUNT(*) as total FROM tcpto205");
-            $totalRegistros = $registrosCount->total;
-
+            // Iniciar transacción
+            $this->repository->iniciarTransaccion();
+            
+            // Crear tabla temporal y obtener número de registros
+            $totalRegistros = $this->repository->crearTablaTemporal($liquidaciones);
+            
             // Puedes agregar aquí cualquier actualización adicional usando esta tabla temporal
             // Por ejemplo, actualizar alguna tabla de SICOSS con estos datos
 
-            // DB::commit();
-            DB::connection($this->getConnectionName())->rollBack();  // Descomentar para probar
+            // $this->repository->confirmarTransaccion();
+            $this->repository->revertirTransaccion();  // Descomentar para probar
 
             return [
                 'status' => 'success',
@@ -75,7 +67,7 @@ class SicossCpto205Service
             ];
 
         } catch (\Exception $e) {
-            DB::connection($this->getConnectionName())->rollBack();
+            $this->repository->revertirTransaccion();
 
             Log::error('Error en actualización de concepto 205', [
                 'error' => $e->getMessage(),
