@@ -4,9 +4,13 @@ namespace App\Services\Afip;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 
 class SicossActividadUpdateService
 {
+    use MapucheConnectionTrait;
+
+    
     /**
      * Create a new class instance.
      */
@@ -31,7 +35,7 @@ class SicossActividadUpdateService
     public function actualizarCodAct(): array
     {
         try {
-            DB::beginTransaction();
+            DB::connection($this->getConnectionName())->beginTransaction();
 
             $sql = "
                 UPDATE suc.afip_mapuche_sicoss
@@ -42,16 +46,16 @@ class SicossActividadUpdateService
                   AND a.codigoactividad <> suc.afip_mapuche_sicoss.cod_act
             ";
 
-            $affected = DB::update($sql);
+            $affected = DB::connection($this->getConnectionName())->update($sql);
 
-            DB::commit();
+            DB::connection($this->getConnectionName())->commit();
 
             return [
                 'status' => 'success',
                 'message' => "Se actualizaron $affected registros de cod_act.",
             ];
         } catch (\Throwable $e) {
-            DB::rollBack();
+            DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en actualización de cod_act', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

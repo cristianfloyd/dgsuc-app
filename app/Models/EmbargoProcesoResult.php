@@ -30,6 +30,7 @@ class EmbargoProcesoResult extends Model
     // Definir los atributos rellenables basados en las columnas del resultado de la consulta
     protected $fillable = [
         'nro_liqui',
+        'nros_liqui_json',
         'tipo_noved',
         'vig_noano',
         'vig_nomes',
@@ -46,6 +47,7 @@ class EmbargoProcesoResult extends Model
     // Definir la conversión de atributos para los tipos de datos apropiados
     protected $casts = [
         'nro_liqui' => 'integer',
+        'nros_liqui_json' => 'json',
         'tipo_noved' => 'string',
         'vig_noano' => 'integer',
         'vig_nomes' => 'integer',
@@ -346,5 +348,19 @@ class EmbargoProcesoResult extends Model
 
             throw new \Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
         }
+    }
+
+    // #########################################################
+    // ############## accesors y mutators #####################
+    // #########################################################
+
+    public function setNrosLiquiJsonAttribute($value)
+    {
+        $this->attributes['nros_liqui_json'] = json_encode($value);
+    }
+
+    public function getNrosLiquiJsonAttribute($value)
+    {
+        return json_decode($value, true);
     }
 }
