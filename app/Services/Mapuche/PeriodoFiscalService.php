@@ -51,24 +51,31 @@ class PeriodoFiscalService
         Log::debug("Período fiscal establecido en la sesión: $formattedYear-$formattedMonth");
     }
 
+
     /**
-     * Obtiene el período fiscal actual almacenado en la sesión.
+     * Obtiene el período fiscal actual.
      *
-     * @return array Devuelve un array con las claves 'year' y 'month' que contienen el año y mes del período fiscal actual.
+     * Primero intenta obtener el período fiscal de la sesión. Si no está disponible,
+     * obtiene el período fiscal almacenado en la base de datos dh99.
+     *
+     * @return array Un array con el año y mes del período fiscal en el formato ['year' => 'YYYY', 'month' => 'MM']
      */
     public function getPeriodoFiscal(): array
     {
+        $periodoFiscal = [];
+
         if (session()->has(['year', 'month'])) {
             log::debug("Período fiscal obtenido de la sesión: " . session('year') . "-" . session('month'));
-            return [
+            $periodoFiscal = [
                 'year' => session('year'),
                 'month' => session('month'),
             ];
         } else {
             // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
-            return $this->getPeriodoFiscalFromDatabase();
+            $periodoFiscal = $this->getPeriodoFiscalFromDatabase();
 
         }
+        return $periodoFiscal;
     }
 
     /**
@@ -179,5 +186,15 @@ class PeriodoFiscalService
             // ->definitiva()  // Si necesitas mantener este scope
             ->pluck('desc_liqui', 'nro_liqui')
             ->toArray();
+    }
+
+    public function getLiquidacionDefinitiva(string $year, string $month): Dh22|null
+    {
+        return Dh22::query()
+            ->where('per_liano', $year)
+            ->where('per_limes', $month)
+            ->definitiva()
+            ->orderByDesc('nro_liqui')
+            ->first();
     }
 }

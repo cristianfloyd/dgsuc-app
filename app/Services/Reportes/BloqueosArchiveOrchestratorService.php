@@ -29,7 +29,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Archiva un período fiscal completo (transferencia + limpieza)
      */
-    public function archivarPeriodoCompleto(string $periodoFiscal): ArchiveProcessData
+    public function archivarPeriodoCompleto(array $periodoFiscal): ArchiveProcessData
     {
         $startTime = microtime(true);
 
@@ -149,7 +149,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Valida que se pueda realizar el archivado completo
      */
-    public function validarArchivado(string $periodoFiscal): bool
+    public function validarArchivado(array $periodoFiscal): bool
     {
         try {
             Log::info('Validando archivado para período fiscal', [
@@ -222,7 +222,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Obtiene un resumen del estado actual para archivado
      */
-    public function getResumenEstadoArchivado(string $periodoFiscal): array
+    public function getResumenEstadoArchivado(array $periodoFiscal): array
     {
         try {
             $totalRegistros = BloqueosDataModel::where('nro_liqui', $periodoFiscal)->count();
@@ -268,7 +268,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Verifica si un período ya fue archivado
      */
-    public function periodoYaArchivado(string $periodoFiscal): bool
+    public function periodoYaArchivado(array $periodoFiscal): bool
     {
         try {
             // Un período se considera archivado si:
@@ -294,9 +294,20 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Obtiene los registros que están listos para ser procesados
      */
-    private function obtenerRegistrosParaProcesar(string $periodoFiscal): \Illuminate\Support\Collection
+    private function obtenerRegistrosParaProcesar(array $periodoFiscal): \Illuminate\Support\Collection
     {
-        return BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+        // Usar el servicio para obtener la liquidación definitiva del período
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+
+        if (!$liquidacion) {
+            // No hay liquidación definitiva para ese período
+            return collect();
+        }
+
+        $nroLiqui = $liquidacion->nro_liqui;
+
+        return BloqueosDataModel::where('nro_liqui', $nroLiqui)
             ->where('esta_procesado', true)
             ->whereIn('estado', [
                 \App\Enums\BloqueosEstadoEnum::PROCESADO,

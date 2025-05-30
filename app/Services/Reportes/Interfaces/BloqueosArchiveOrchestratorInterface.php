@@ -14,32 +14,32 @@ interface BloqueosArchiveOrchestratorInterface
     /**
      * Archiva un período fiscal completo (transferencia + limpieza)
      *
-     * @param string $periodoFiscal Período fiscal en formato YYYYMM
+     * @param array $periodoFiscal Período fiscal en formato ['year' => 'YYYY', 'month' => 'MM']
      * @return ArchiveProcessData Resultado del proceso completo
      */
-    public function archivarPeriodoCompleto(string $periodoFiscal): ArchiveProcessData;
+    public function archivarPeriodoCompleto(array $periodoFiscal): ArchiveProcessData;
 
     /**
      * Valida que se pueda realizar el archivado completo
      *
-     * @param string $periodoFiscal Período fiscal a validar
+     * @param array $periodoFiscal Período fiscal en formato ['year' => 'YYYY', 'month' => 'MM']
      * @return bool True si se puede archivar
      */
-    public function validarArchivado(string $periodoFiscal): bool;
+    public function validarArchivado(array $periodoFiscal): bool;
 
     /**
      * Obtiene un resumen del estado actual para archivado
      *
-     * @param string $periodoFiscal Período fiscal
+     * @param array $periodoFiscal Período fiscal en formato ['year' => 'YYYY', 'month' => 'MM']
      * @return array Resumen del estado
      */
-    public function getResumenEstadoArchivado(string $periodoFiscal): array;
+    public function getResumenEstadoArchivado(array $periodoFiscal): array;
 
     /**
      * Verifica si un período ya fue archivado
      *
-     * @param string $periodoFiscal Período fiscal
+     * @param array $periodoFiscal Período fiscal en formato ['year' => 'YYYY', 'month' => 'MM']
      * @return bool True si ya fue archivado
      */
-    public function periodoYaArchivado(string $periodoFiscal): bool;
+    public function periodoYaArchivado(array $periodoFiscal): bool;
 }

@@ -31,16 +31,16 @@ interface BloqueosHistorialServiceInterface
     /**
      * Obtiene estadísticas del historial para un período fiscal
      *
-     * @param string $periodoFiscal Período fiscal en formato YYYYMM
+     * @param array $periodoFiscal Período fiscal ['year' => ..., 'month' => ...]
      * @return array Estadísticas del historial
      */
-    public function getEstadisticasHistorial(string $periodoFiscal): array;
+    public function getEstadisticasHistorial(array $periodoFiscal): array;
 
     /**
      * Obtiene bloqueos ya transferidos al historial por período
      *
-     * @param string $periodoFiscal Período fiscal
+     * @param array $periodoFiscal Período fiscal ['year' => ..., 'month' => ...]
      * @return Collection Bloqueos en el historial
      */
-    public function getBloqueosEnHistorial(string $periodoFiscal): Collection;
+    public function getBloqueosEnHistorial(array $periodoFiscal): Collection;
 }

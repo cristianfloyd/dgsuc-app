@@ -2,19 +2,22 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
+use App\Traits\MapucheSchemaSuc;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RepBloqueo extends Model
 {
     use SoftDeletes;
+    use MapucheConnectionTrait;
 
     /**
      * La tabla asociada con el modelo.
      *
      * @var string
      */
-    protected $table = 'rep_bloqueos';
+    protected $table = 'suc.rep_bloqueos';
 
     /**
      * Los atributos que son asignables en masa.

@@ -28,7 +28,7 @@
 
 ```php
 // Limpieza síncrona
-public function limpiarTablaWork(string $periodoFiscal): CleanupResultData
+public function limpiarTablaWork(array $periodoFiscal): CleanupResultData
 {
     // Eliminación directa con validaciones
 }
@@ -44,7 +44,7 @@ public function limpiarTablaWork(string $periodoFiscal): CleanupResultData
 
 ```php
     // Orquestación síncrona
-    public function archivarPeriodoCompleto(string $periodoFiscal): ArchiveProcessData
+    public function archivarPeriodoCompleto(array $periodoFiscal): ArchiveProcessData
     {
         // Ejecuta transferencia + limpieza en una sola transacción
         // Respuesta inmediata al usuario
@@ -58,29 +58,29 @@ public function limpiarTablaWork(string $periodoFiscal): CleanupResultData
     {
         public function transferirAlHistorial(Collection $bloqueos): TransferResultData;
         public function validarTransferencia(Collection $bloqueos): bool;
-        public function getEstadisticasHistorial(string $periodoFiscal): array;
+        public function getEstadisticasHistorial(array $periodoFiscal): array;
     }
 
     interface BloqueosCleanupServiceInterface  
     {
-        public function limpiarTablaWork(string $periodoFiscal): CleanupResultData;
-        public function validarLimpieza(string $periodoFiscal): bool;
-        public function getRegistrosPendientes(): Collection;
+        public function limpiarTablaWork(array $periodoFiscal): CleanupResultData;
+        public function validarLimpieza(array $periodoFiscal): bool;
+        public function getRegistrosPendientes(?array $periodoFiscal = null): Collection;
     }
 
     interface BloqueosArchiveOrchestratorInterface
     {
-        public function archivarPeriodoCompleto(string $periodoFiscal): ArchiveProcessData;
-        public function validarArchivado(string $periodoFiscal): bool;
+        public function archivarPeriodoCompleto(array $periodoFiscal): ArchiveProcessData;
+        public function validarArchivado(array $periodoFiscal): bool;
     }
 ```
 
 ## 3. DATA TRANSFER OBJECTS
 
 ```php
-    TransferResultData   // Resultado de transferencia al historial
-    CleanupResultData    // Resultado de limpieza  
-    ArchiveProcessData   // Proceso completo de archivado
+    TransferResultData   // Resultado de transferencia al historial (usa array periodoFiscal)
+    CleanupResultData    // Resultado de limpieza  (usa array periodoFiscal)
+    ArchiveProcessData   // Proceso completo de archivado (usa array periodoFiscal)
 ```
 
 ## 4. INTEGRACIÓN CON FILAMENT
@@ -97,7 +97,15 @@ public function limpiarTablaWork(string $periodoFiscal): CleanupResultData
         ])
         ->requiresConfirmation()
         ->modalHeading('¿Archivar período fiscal completo?')
-        ->action(fn($data) => $this->archivarPeriodo($data))
+        ->action(function ($data) {
+            // Si el select retorna un string 'YYYYMM', convertirlo a array:
+            $periodoFiscal = $data['periodo_fiscal'];
+            $periodoFiscalArray = [
+                'year' => (int) substr($periodoFiscal, 0, 4),
+                'month' => (int) substr($periodoFiscal, 4, 2),
+            ];
+            $this->archivarPeriodo($periodoFiscalArray);
+        })
 
     Action::make('limpiar_procesados')  
         ->label('Limpiar Procesados')

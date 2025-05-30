@@ -25,13 +25,14 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     /**
      * Limpia la tabla de trabajo eliminando registros ya transferidos al historial
      */
-    public function limpiarTablaWork(string $periodoFiscal): CleanupResultData
+    public function limpiarTablaWork(array $periodoFiscal): CleanupResultData
     {
         $startTime = microtime(true);
         $eliminados = 0;
         $noEliminados = 0;
         $idsEliminados = [];
         $idsNoEliminados = [];
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
 
         Log::info('Iniciando limpieza de tabla de trabajo', [
             'periodo_fiscal' => $periodoFiscal
@@ -54,7 +55,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
 
             if ($registrosParaEliminar->isEmpty()) {
                 Log::info('No hay registros para limpiar', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoString
                 ]);
                 return CleanupResultData::nothingToClean($periodoFiscal);
             }
@@ -116,7 +117,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 'eliminados' => $eliminados,
                 'no_eliminados' => $noEliminados,
                 'duracion_segundos' => $duration,
-                'periodo_fiscal' => $periodoFiscal
+                'periodo_fiscal' => $periodoString
             ]);
 
             // Retornar resultado apropiado
@@ -155,14 +156,26 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     /**
      * Valida que se pueda realizar la limpieza de forma segura
      */
-    public function validarLimpieza(string $periodoFiscal): bool
+    public function validarLimpieza(array $periodoFiscal): bool
     {
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         try {
+            // Obtener nro_liqui definitivo
+            $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+            $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+            if (!$liquidacion) {
+                Log::info('No existe liquidación definitiva para el período fiscal', [
+                    'periodo_fiscal' => $periodoString
+                ]);
+                return false;
+            }
+            $nroLiqui = $liquidacion->nro_liqui;
+
             // Verificar que existan registros para el período
-            $totalRegistros = BloqueosDataModel::where('nro_liqui', $periodoFiscal)->count();
+            $totalRegistros = BloqueosDataModel::where('nro_liqui', $nroLiqui)->count();
             if ($totalRegistros === 0) {
                 Log::info('No existen registros para el período fiscal', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoString
                 ]);
                 return true; // No hay nada que limpiar, es válido
             }
@@ -171,7 +184,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             $registrosPendientes = $this->getRegistrosPendientes($periodoFiscal);
             if ($registrosPendientes->isNotEmpty()) {
                 Log::warning('Existen registros pendientes que no pueden ser eliminados', [
-                    'periodo_fiscal' => $periodoFiscal,
+                    'periodo_fiscal' => $periodoString,
                     'cantidad_pendientes' => $registrosPendientes->count(),
                     'ids_pendientes' => $registrosPendientes->pluck('id')->toArray()
                 ]);
@@ -179,10 +192,10 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             }
 
             // Verificar que exista el historial correspondiente
-            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
+            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $nroLiqui)->count();
             if ($registrosEnHistorial === 0) {
                 Log::error('No existen registros en el historial para este período', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoString
                 ]);
                 return false;
             }
@@ -191,7 +204,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
 
         } catch (Exception $e) {
             Log::error('Error al validar limpieza', [
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'error' => $e->getMessage()
             ]);
             return false;
@@ -201,14 +214,18 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     /**
      * Obtiene registros pendientes que no pueden ser eliminados
      */
-    public function getRegistrosPendientes(?string $periodoFiscal = null): Collection
+    public function getRegistrosPendientes(?array $periodoFiscal = null): Collection
     {
         $query = BloqueosDataModel::query();
-
+        $nroLiqui = null;
         if ($periodoFiscal) {
-            $query->where('nro_liqui', $periodoFiscal);
+            $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+            $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+            if ($liquidacion) {
+                $nroLiqui = $liquidacion->nro_liqui;
+                $query->where('nro_liqui', $nroLiqui);
+            }
         }
-
         // Registros que no están procesados o tienen errores críticos
         return $query->where(function ($q) {
             $q->where('esta_procesado', false)
@@ -223,9 +240,15 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     /**
      * Obtiene registros listos para ser eliminados
      */
-    public function getRegistrosListosParaEliminar(string $periodoFiscal): Collection
+    public function getRegistrosListosParaEliminar(array $periodoFiscal): Collection
     {
-        return BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+        if (!$liquidacion) {
+            return collect();
+        }
+        $nroLiqui = $liquidacion->nro_liqui;
+        return BloqueosDataModel::where('nro_liqui', $nroLiqui)
             ->where('esta_procesado', true)
             ->whereIn('estado', [
                 BloqueosEstadoEnum::PROCESADO,
@@ -241,10 +264,21 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     /**
      * Cuenta registros por estado para un período
      */
-    public function contarRegistrosPorEstado(string $periodoFiscal): array
+    public function contarRegistrosPorEstado(array $periodoFiscal): array
     {
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
+        if (!$liquidacion) {
+            return [
+                'error' => true,
+                'mensaje' => 'No existe liquidación definitiva para el período fiscal',
+                'periodo_fiscal' => $periodoString
+            ];
+        }
+        $nroLiqui = $liquidacion->nro_liqui;
         try {
-            $conteos = BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+            $conteos = BloqueosDataModel::where('nro_liqui', $nroLiqui)
                 ->selectRaw('estado, COUNT(*) as total')
                 ->groupBy('estado')
                 ->pluck('total', 'estado')
@@ -260,24 +294,24 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             return [
                 'por_estado' => $resultado,
                 'total_registros' => array_sum($resultado),
-                'procesados' => BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+                'procesados' => BloqueosDataModel::where('nro_liqui', $nroLiqui)
                     ->where('esta_procesado', true)->count(),
-                'pendientes' => BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+                'pendientes' => BloqueosDataModel::where('nro_liqui', $nroLiqui)
                     ->where('esta_procesado', false)->count(),
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'timestamp' => now()->toISOString()
             ];
 
         } catch (Exception $e) {
             Log::error('Error al contar registros por estado', [
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'error' => $e->getMessage()
             ]);
 
             return [
                 'error' => true,
                 'mensaje' => $e->getMessage(),
-                'periodo_fiscal' => $periodoFiscal
+                'periodo_fiscal' => $periodoString
             ];
         }
     }

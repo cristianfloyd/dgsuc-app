@@ -22,8 +22,8 @@ class TransferResultData extends Data
         /** @var int Número de registros que fallaron */
         public readonly int $fallidos,
 
-        /** @var string Período fiscal procesado */
-        public readonly string $periodoFiscal,
+        /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
+        public readonly array $periodoFiscal,
 
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
@@ -47,7 +47,7 @@ class TransferResultData extends Data
      */
     public static function success(
         int $transferidos,
-        string $periodoFiscal,
+        array $periodoFiscal,
         array $idsTransferidos = [],
         array $detalles = []
     ): self {
@@ -69,7 +69,7 @@ class TransferResultData extends Data
     public static function partial(
         int $transferidos,
         int $fallidos,
-        string $periodoFiscal,
+        array $periodoFiscal,
         array $idsTransferidos = [],
         array $idsFallidos = []
     ): self {
@@ -88,7 +88,7 @@ class TransferResultData extends Data
     /**
      * Crea una instancia de error completo
      */
-    public static function error(string $mensaje, string $periodoFiscal): self
+    public static function error(string $mensaje, array $periodoFiscal): self
     {
         return new self(
             success: false,
@@ -115,5 +115,13 @@ class TransferResultData extends Data
     {
         $total = $this->getTotalProcesados();
         return $total > 0 ? ($this->transferidos / $total) * 100 : 0;
+    }
+
+    /**
+     * Devuelve el período fiscal como string (YYYY-MM)
+     */
+    public function getPeriodoFiscalString(): string
+    {
+        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
     }
 }

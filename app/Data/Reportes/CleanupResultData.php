@@ -22,8 +22,8 @@ class CleanupResultData extends Data
         /** @var int Número de registros que no pudieron ser eliminados */
         public readonly int $noEliminados,
 
-        /** @var string Período fiscal procesado */
-        public readonly string $periodoFiscal,
+        /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
+        public readonly array $periodoFiscal,
 
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
@@ -53,7 +53,7 @@ class CleanupResultData extends Data
      */
     public static function success(
         int $eliminados,
-        string $periodoFiscal,
+        array $periodoFiscal,
         array $idsEliminados = [],
         array $estadisticasAntes = [],
         array $estadisticasDespues = []
@@ -77,7 +77,7 @@ class CleanupResultData extends Data
     public static function partial(
         int $eliminados,
         int $noEliminados,
-        string $periodoFiscal,
+        array $periodoFiscal,
         array $idsEliminados = [],
         array $idsNoEliminados = []
     ): self {
@@ -96,7 +96,7 @@ class CleanupResultData extends Data
     /**
      * Crea una instancia de error
      */
-    public static function error(string $mensaje, string $periodoFiscal): self
+    public static function error(string $mensaje, array $periodoFiscal): self
     {
         return new self(
             success: false,
@@ -111,15 +111,16 @@ class CleanupResultData extends Data
     /**
      * Crea una instancia cuando no hay registros para limpiar
      */
-    public static function nothingToClean(string $periodoFiscal): self
+    public static function nothingToClean(array $periodoFiscal): self
     {
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         return new self(
             success: true,
             eliminados: 0,
             noEliminados: 0,
             periodoFiscal: $periodoFiscal,
             timestamp: now(),
-            mensaje: "No hay registros para limpiar en el período {$periodoFiscal}"
+            mensaje: "No hay registros para limpiar en el período {$periodoString}"
         );
     }
 
@@ -146,5 +147,13 @@ class CleanupResultData extends Data
     public function esLimpiezaCompleta(): bool
     {
         return $this->success && $this->noEliminados === 0;
+    }
+
+    /**
+     * Devuelve el período fiscal como string (YYYY-MM)
+     */
+    public function getPeriodoFiscalString(): string
+    {
+        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
     }
 }

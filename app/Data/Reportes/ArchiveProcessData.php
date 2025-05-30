@@ -16,8 +16,8 @@ class ArchiveProcessData extends Data
         /** @var bool Indica si el proceso completo fue exitoso */
         public readonly bool $success,
 
-        /** @var string Período fiscal procesado */
-        public readonly string $periodoFiscal,
+        /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
+        public readonly array $periodoFiscal,
 
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
@@ -46,13 +46,14 @@ class ArchiveProcessData extends Data
      * Crea una instancia exitosa
      */
     public static function success(
-        string $periodoFiscal,
+        array $periodoFiscal,
         TransferResultData $transferResult,
         CleanupResultData $cleanupResult,
         float $duracionSegundos = 0.0
     ): self {
         $totalTransferidos = $transferResult->transferidos;
         $totalEliminados = $cleanupResult->eliminados;
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
 
         return new self(
             success: true,
@@ -60,9 +61,9 @@ class ArchiveProcessData extends Data
             timestamp: now(),
             transferResult: $transferResult,
             cleanupResult: $cleanupResult,
-            mensaje: "Período {$periodoFiscal} archivado exitosamente. Transferidos: {$totalTransferidos}, Eliminados: {$totalEliminados}",
+            mensaje: "Período {$periodoString} archivado exitosamente. Transferidos: {$totalTransferidos}, Eliminados: {$totalEliminados}",
             resumen: [
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'registros_transferidos' => $totalTransferidos,
                 'registros_eliminados' => $totalEliminados,
                 'proceso_completo' => true,
@@ -76,11 +77,12 @@ class ArchiveProcessData extends Data
      * Crea una instancia con errores parciales
      */
     public static function partial(
-        string $periodoFiscal,
+        array $periodoFiscal,
         TransferResultData $transferResult,
         CleanupResultData $cleanupResult,
         ?string $mensaje = null
     ): self {
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         return new self(
             success: false,
             periodoFiscal: $periodoFiscal,
@@ -89,7 +91,7 @@ class ArchiveProcessData extends Data
             cleanupResult: $cleanupResult,
             mensaje: $mensaje ?? 'El proceso de archivado se completó con errores parciales',
             resumen: [
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'registros_transferidos' => $transferResult->transferidos,
                 'registros_fallidos_transferencia' => $transferResult->fallidos,
                 'registros_eliminados' => $cleanupResult->eliminados,
@@ -103,11 +105,12 @@ class ArchiveProcessData extends Data
      * Crea una instancia de error completo
      */
     public static function error(
-        string $periodoFiscal,
+        array $periodoFiscal,
         string $mensaje,
         ?TransferResultData $transferResult = null,
         ?CleanupResultData $cleanupResult = null
     ): self {
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         return new self(
             success: false,
             periodoFiscal: $periodoFiscal,
@@ -116,7 +119,7 @@ class ArchiveProcessData extends Data
             cleanupResult: $cleanupResult ?? CleanupResultData::error($mensaje, $periodoFiscal),
             mensaje: $mensaje,
             resumen: [
-                'periodo_fiscal' => $periodoFiscal,
+                'periodo_fiscal' => $periodoString,
                 'error' => true,
                 'mensaje_error' => $mensaje
             ]
@@ -146,15 +149,16 @@ class ArchiveProcessData extends Data
      */
     public function getResumenTextual(): string
     {
+        $periodoString = $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         if (!$this->success) {
-            return "Error en el archivado del período {$this->periodoFiscal}: {$this->mensaje}";
+            return "Error en el archivado del período {$periodoString}: {$this->mensaje}";
         }
 
         $transferidos = $this->transferResult->transferidos;
         $eliminados = $this->cleanupResult->eliminados;
         $duracion = number_format($this->duracionSegundos, 2);
 
-        return "Período {$this->periodoFiscal} archivado exitosamente en {$duracion}s. " .
+        return "Período {$periodoString} archivado exitosamente en {$duracion}s. " .
                "Transferidos al historial: {$transferidos}, Eliminados de trabajo: {$eliminados}";
     }
 

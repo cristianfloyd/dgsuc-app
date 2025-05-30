@@ -35,6 +35,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         $idsTransferidos = [];
         $idsFallidos = [];
         $periodoFiscal = $this->extraerPeriodoFiscal($bloqueos);
+        $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
 
         Log::info('Iniciando transferencia al historial', [
             'total_registros' => $bloqueos->count(),
@@ -186,10 +187,11 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
     /**
      * Obtiene estadísticas del historial para un período fiscal
      */
-    public function getEstadisticasHistorial(string $periodoFiscal): array
+    public function getEstadisticasHistorial(array $periodoFiscal): array
     {
+        $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
         try {
-            $query = RepBloqueo::where('nro_liqui', $periodoFiscal);
+            $query = RepBloqueo::where('nro_liqui', $nroLiqui);
 
             return [
                 'total_registros' => $query->count(),
@@ -218,10 +220,11 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
     /**
      * Obtiene bloqueos ya transferidos al historial por período
      */
-    public function getBloqueosEnHistorial(string $periodoFiscal): Collection
+    public function getBloqueosEnHistorial(array $periodoFiscal): Collection
     {
+        $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
         try {
-            return RepBloqueo::where('nro_liqui', $periodoFiscal)
+            return RepBloqueo::where('nro_liqui', $nroLiqui)
                 ->orderBy('created_at', 'desc')
                 ->get();
         } catch (Exception $e) {
@@ -281,14 +284,49 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
     /**
      * Extrae el período fiscal de una colección de bloqueos
      */
-    private function extraerPeriodoFiscal(Collection $bloqueos): string
+    private function extraerPeriodoFiscal(Collection $bloqueos): array
     {
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
         if ($bloqueos->isEmpty()) {
-            return now()->format('Ym');
+            return $periodoService->getPeriodoFiscal();
         }
 
-        // Tomar el período del primer registro
+        // Tomar el nro_liqui del primer registro y obtener el período fiscal real
         $primerBloqueo = $bloqueos->first();
-        return (string) $primerBloqueo->nro_liqui;
+        $nroLiqui = (int) $primerBloqueo->nro_liqui;
+        $periodo = $this->getPeriodoFiscalFromNroLiqui($nroLiqui);
+        return $periodo ?? $periodoService->getPeriodoFiscal();
+    }
+
+    /**
+     * Obtiene el número de liquidación definitiva para un período fiscal
+     *
+     * @param array $periodoFiscal Período fiscal en formato ['year' => int, 'month' => int]
+     * @return int|null Número de liquidación o null si no existe liquidación definitiva
+     */
+    private function getNroLiquiFromPeriodoFiscal(array $periodoFiscal): ?int
+    {
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+        return $liquidacion?->nro_liqui;
+    }
+
+    /**
+     * Obtiene el período fiscal (['year' => ..., 'month' => ...]) a partir de un nro_liqui usando PeriodoFiscalService
+     *
+     * @param int $nroLiqui Número de liquidación
+     * @return array|null Período fiscal ['year' => int, 'month' => int] o null si no existe
+     */
+    private function getPeriodoFiscalFromNroLiqui(int $nroLiqui): ?array
+    {
+        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodo = $periodoService->getPeriodoFiscalFromLiqui($nroLiqui);
+        if (!$periodo || !isset($periodo['year'], $periodo['month'])) {
+            return null;
+        }
+        return [
+            'year' => (int) $periodo['year'],
+            'month' => (int) $periodo['month'],
+        ];
     }
 }

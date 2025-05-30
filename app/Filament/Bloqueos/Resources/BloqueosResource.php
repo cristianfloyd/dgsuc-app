@@ -488,7 +488,61 @@ class BloqueosResource extends Resource
                         ),
                         'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx'
                     );
-                })
+                }),
+
+            Action::make('archivar_periodo')
+                ->label('Archivar Período Fiscal')
+                ->icon('heroicon-o-archive-box')
+                ->form([
+                    Forms\Components\Select::make('periodo_fiscal')
+                        ->label('Período Fiscal')
+                        ->options(app(\App\Services\Mapuche\PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                        ->required(),
+                    Forms\Components\Checkbox::make('confirmar_archivado')
+                        ->label('Confirmo que deseo archivar este período')
+                        ->required()
+                ])
+                ->requiresConfirmation()
+                ->modalHeading('¿Archivar período fiscal completo?')
+                ->modalDescription('Esta acción moverá todos los bloqueos procesados al historial y limpiará la tabla de trabajo.')
+                ->action(function (array $data) {
+                    $periodoFiscal = $data['periodo_fiscal'];
+                    $confirmado = $data['confirmar_archivado'] ?? false;
+                    if (!$confirmado) {
+                        Notification::make()
+                            ->title('Debes confirmar el archivado')
+                            ->warning()
+                            ->send();
+                        return;
+                    }
+                    try {
+                        $orchestrator = app(\App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface::class);
+                        $periodoFiscalArray = [
+                            'year' => (int) substr($periodoFiscal, 0, 4),
+                            'month' => (int) substr($periodoFiscal, 5, 2),
+                        ];
+                        $resultado = $orchestrator->archivarPeriodoCompleto($periodoFiscalArray);
+                        if ($resultado->success) {
+                            Notification::make()
+                                ->title('Período archivado exitosamente')
+                                ->body($resultado->getResumenTextual())
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('El proceso de archivado tuvo errores')
+                                ->body($resultado->getResumenTextual())
+                                ->danger()
+                                ->send();
+                        }
+                    } catch (\Throwable $e) {
+                        Notification::make()
+                            ->title('Error al archivar período')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
         ];
     }
 }
