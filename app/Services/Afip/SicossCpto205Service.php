@@ -10,10 +10,10 @@ use App\Repositories\Afip\SicossCpto205Repository;
 class SicossCpto205Service
 {
     protected SicossCpto205Repository $repository;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param SicossCpto205Repository $repository Repositorio para operaciones de datos
      */
     public function __construct(SicossCpto205Repository $repository)
@@ -45,17 +45,9 @@ class SicossCpto205Service
         }
 
         try {
-            // Iniciar transacción
-            $this->repository->iniciarTransaccion();
-            
-            // Crear tabla temporal y obtener número de registros
-            $totalRegistros = $this->repository->crearTablaTemporal($liquidaciones);
-            
-            // Puedes agregar aquí cualquier actualización adicional usando esta tabla temporal
-            // Por ejemplo, actualizar alguna tabla de SICOSS con estos datos
 
-            // $this->repository->confirmarTransaccion();
-            $this->repository->revertirTransaccion();  // Descomentar para probar
+            // Crear tabla temporal y obtener número de registros
+            $totalRegistros = $this->repository->procesarConceptos($liquidaciones);
 
             return [
                 'status' => 'success',
@@ -67,8 +59,6 @@ class SicossCpto205Service
             ];
 
         } catch (\Exception $e) {
-            $this->repository->revertirTransaccion();
-
             Log::error('Error en actualización de concepto 205', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()

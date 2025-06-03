@@ -292,6 +292,22 @@ class EmbargoProcesoResult extends Model
                 // Filtrar solo los campos válidos según $fillable
                 $registroFiltrado = array_intersect_key($registro, $fillableSet);
 
+                // --- NUEVO: poblar nros_liqui_json ---
+                // Si ya viene un array de liquis, úsalo; si no, crea uno con el nro_liqui simple
+                if (isset($registro['nros_liqui_json'])) {
+                    // Si ya viene, úsalo tal cual
+                    $registroFiltrado['nros_liqui_json'] = is_array($registro['nros_liqui_json'])
+                        ? $registro['nros_liqui_json']
+                        : json_decode($registro['nros_liqui_json'], true);
+                } elseif (isset($registro['nro_liqui'])) {
+                    // Si solo hay uno, lo guardamos como array de uno
+                    $registroFiltrado['nros_liqui_json'] = [$registro['nro_liqui']];
+                } else {
+                    // Si no hay ninguno, lo dejamos como array vacío
+                    $registroFiltrado['nros_liqui_json'] = [];
+                }
+                // --- FIN NUEVO ---
+
                 // Verificar que tengamos todos los campos requeridos
                 if (count($registroFiltrado) < count($fillable)) {
                     Log::warning("El registro {$index} no contiene todos los campos esperados", [

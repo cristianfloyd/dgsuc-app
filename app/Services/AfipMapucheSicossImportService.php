@@ -1344,10 +1344,10 @@ class AfipMapucheSicossImportService
         // Normalizar eliminando saltos de línea
         $firstLine = rtrim($firstLine, "\r\n");
 
-        // Verificar longitud - ajustado a 499 caracteres según análisis
-        if (strlen($firstLine) !== 499) {
+        // Verificar longitud - ajustado a 500 caracteres según análisis
+        if (strlen($firstLine) !== 500) {
             Log::error("Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: " . strlen($firstLine));
-            throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 499 caracteres pero se recibieron: " . strlen($firstLine));
+            throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: " . strlen($firstLine));
         }
     }
 

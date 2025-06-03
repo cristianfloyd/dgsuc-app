@@ -154,6 +154,9 @@ class SicossUpdates extends Page
             ->send();
     }
 
+    /*
+    *   Método para ejecutar las actualizaciones Dha8
+    */
     public function runUpdates(): void
     {
         $this->isProcessing = true;
@@ -322,9 +325,28 @@ class SicossUpdates extends Page
         $this->isProcessing = true;
 
         try {
-            // Ejecutar la actualización de concepto 205
+            // Obtener las liquidaciones para el período fiscal seleccionado
+            $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
+                ->generaImpositivo()
+                ->definitiva()
+                ->pluck('nro_liqui')
+                ->toArray();
+
+            if (empty($liquidaciones)) {
+                Notification::make()
+                    ->title('Sin liquidaciones')
+                    ->warning()
+                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                    ->send();
+                $this->isProcessing = false;
+                return;
+            }
+
+            // Ejecutar la actualización de concepto 205 con las liquidaciones del período
             // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
-            $resultado = $this->sicossCpto205Service->actualizarCpto205();
+            $resultado = $this->sicossCpto205Service->actualizarCpto205([
+                'liquidaciones' => $liquidaciones
+                ]);
             $this->updateResults = $resultado;
 
             // Mostrar notificación según el resultado
@@ -407,7 +429,7 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Concepto 205')
                 ->modalDescription('Accion en modo de prueba. No se realizará la actualización.')
-                // ->modalDescription('¿Está seguro que desea actualizar los datos del concepto 205? Este proceso creará una tabla temporal con los montos calculados para los agentes que tienen el concepto 789 y 205.')
+            // ->modalDescription('¿Está seguro que desea actualizar los datos del concepto 205? Este proceso creará una tabla temporal con los montos calculados para los agentes que tienen el concepto 789 y 205.')
         ];
     }
 }
