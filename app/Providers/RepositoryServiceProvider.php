@@ -26,6 +26,7 @@ use App\Repositories\Sicoss\LicenciaRepository;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
+use App\Repositories\Sicoss\SicossEstadoRepository;
 use App\Repositories\Sicoss\SicossCalculoRepository;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
@@ -36,6 +37,7 @@ use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -73,6 +75,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(LicenciaRepositoryInterface::class, LicenciaRepository::class);
         $this->app->bind(Dh03RepositoryInterface::class, Dh03Repository::class);
         $this->app->bind(SicossCalculoRepositoryInterface::class, SicossCalculoRepository::class);
+        $this->app->bind(SicossEstadoRepositoryInterface::class, SicossEstadoRepository::class);
 
         // Registrar la implementación concreta primero
         $this->app->bind(

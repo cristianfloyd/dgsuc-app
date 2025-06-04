@@ -46,7 +46,18 @@
 * ✅ calcular_remuner_grupo() → calcularRemunerGrupo()
 * 🔄 calcularSACInvestigador() → convertido a instance method
 
-### 6. PeriodoFiscalRepository ✅ COMPLETADO (migrado a Dh21Repository)
+### 6. SicossEstadoRepository ✅ COMPLETADO
+
+* Responsabilidad: Lógica de estados y situaciones de SICOSS
+* Métodos migrados:
+* ✅ inicializar_estado_situacion() → inicializarEstadoSituacion()
+* ✅ evaluar_condicion_licencia() → evaluarCondicionLicencia()
+* ✅ calcular_cambios_estado() → calcularCambiosEstado()
+* ✅ calcular_dias_trabajados() → calcularDiasTrabajados()
+* ✅ calcular_revista_legajo() → calcularRevistaLegajo()
+* ✅ VerificarAgenteImportesCERO() → verificarAgenteImportesCero()
+
+### 7. PeriodoFiscalRepository ✅ COMPLETADO (migrado a Dh21Repository)
 
 * Responsabilidad: Gestión de períodos fiscales y retroactivos
 * Métodos migrados:
@@ -70,4 +81,3 @@ app/Repositories/Sicoss/
     ├── SicossCalculoRepositoryInterface.php
     └── PeriodoFiscalRepositoryInterface.php
 ```
-

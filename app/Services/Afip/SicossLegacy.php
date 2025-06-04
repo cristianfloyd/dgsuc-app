@@ -14,6 +14,7 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use App\Repositories\Sicoss\LicenciaRepository;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 
 class SicossLegacy
@@ -42,7 +43,8 @@ class SicossLegacy
         protected Dh03RepositoryInterface $dh03Repository,
         protected Dh21RepositoryInterface $dh21Repository,
         protected Dh01RepositoryInterface $dh01Repository,
-        protected SicossCalculoRepositoryInterface $sicossCalculoRepository
+        protected SicossCalculoRepositoryInterface $sicossCalculoRepository,
+        protected SicossEstadoRepositoryInterface $sicossEstadoRepository
     ) {}
 
 
@@ -229,8 +231,8 @@ class SicossLegacy
             $sql     =  "DROP TABLE IF EXISTS conceptos_liquidados";
             DB::connection($this->getConnectionName())->execute($sql);
         } else {
-        // Si tengo tildada la opcion lo que se genera es un archivo por cada periodo retro y uno para los que tiene a�o y mes retro en cero,
-        // o sea, se particiona la tabla temporal que se obtiene en obtener_conceptos_liquidados
+            // Si tengo tildada la opcion lo que se genera es un archivo por cada periodo retro y uno para los que tiene a�o y mes retro en cero,
+            // o sea, se particiona la tabla temporal que se obtiene en obtener_conceptos_liquidados
             // Periodos retro y el periodo 0-0 que va ser el periodo actual
             $periodos_retro = $dh21Repository->obtenerPeriodosRetro($datos['check_lic'], $datos['check_retro']);
 
@@ -276,114 +278,15 @@ class SicossLegacy
         }
     }
 
-    static function inicializar_estado_situacion($codigo, $min, $max)
-    {
-        $periodo = MapucheConfig::getPeriodoFiscal();
-        $estado_situacion = [];
-        for ($i = $min; $i <= $max; $i++) {
-            $estado_situacion[$i] = $codigo;
-        }
-        return $estado_situacion;
-    }
 
-    /**
-     * Se le pasa la condici�n actual y se compara con la condici�n
-     * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT)
-     *
-     * @param integer $c1 : condici�n actual
-     * @param integer $c2 : condici�n tipo de licencia
-     *
-     * @return integer $c1
-     */
-    public static function evaluar_condicion_licencia($c1, $c2)
-    {
-        // Maternidad primero
-        if ($c1 == 5 || $c2 == 5) {
-            return 5;
-        } else if ($c1 == 11 || $c2 == 11) {
-            return 11;
-        } else if ($c1 == 10 || $c2 == 10) {
-            return 10;
-        } elseif ($c1 == 18 || $c2 == 18) {
-            return 18;
-        } else if ($c1 == 19 || $c2 == 19) {
-            return 19;
-        } else if ($c1 == 13 || $c2 == 13) {
-            return 13;
-        } else if ($c1 == 12 || $c2 == 12) {
-            return 12;
-        } else if ($c1 == 51 || $c2 == 51) {
-            return 51;
-        }
 
-        return $c1; // Por defecto se retorna la condici�n actual
-    }
 
-    public static function calcular_cambios_estado($estado_situacion)
-    {
-        $cambios = [];
 
-        foreach ($estado_situacion as $dia => $codigo) {
-            if (!isset($anterior) || $anterior != $codigo) {
-                $cambios[$dia] = $codigo;
-            }
-            $anterior = $codigo;
-        }
 
-        return $cambios;
-    }
 
-    public static function calcular_dias_trabajados($estado_situacion)
-    {
-        $dias_trabajados = 0;
-        foreach ($estado_situacion as $codigo) {
-            // Se suman solo los dias trabajados, codigo 1
-            // Los dias de Licencia por Maternidad tmb cuentan como trabajados
-            if ($codigo === 1 || $codigo === 5 || $codigo === 12 || $codigo === 51) {
-                $dias_trabajados += 1;
-            }
-        }
 
-        return $dias_trabajados;
-    }
 
-    public static function calcular_revista_legajo($cambios_estado)
-    {
-        $controlar_maternidad = false;
-        $revista_legajo = array();
-        $cantidad_cambios = count($cambios_estado);
-        $dias = array_keys($cambios_estado);
 
-        $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];
-        $revista_legajo[2] = ['codigo' => 0, 'dia' => 0];
-        $revista_legajo[3] = ['codigo' => 0, 'dia' => 0];
-
-        $primer_dia = 0;
-
-        if ($cantidad_cambios > 3) {
-            $primer_dia = $cantidad_cambios - 3;
-            $controlar_maternidad = true;
-        }
-
-        $revista = 1;
-        for ($i = $primer_dia; $i < $cantidad_cambios; $i++) {
-            $dia = $dias[$i];
-            $revista_legajo[$revista] = ['codigo' => $cambios_estado[$dia], 'dia' => $dia];
-            $revista++;
-        }
-
-        if ($controlar_maternidad) {
-            $dia_revista = $revista_legajo[1]['dia'];
-            foreach ($cambios_estado as $dia => $situacion) {
-                if (($situacion == 5) && ($dia < $dia_revista)) {
-                    $revista_legajo[1]['dia']        = $dia;
-                    $revista_legajo[1]['codigo']     = $situacion;
-                }
-            }
-        }
-
-        return $revista_legajo;
-    }
 
     public function procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias = NULL, $retro = FALSE, $check_sin_activo = FALSE, $retornar_datos = FALSE)
     {
@@ -454,7 +357,7 @@ class SicossLegacy
                         $limites[0]['maximo'] = substr($fecha_fin, 9, 2);
                     }
                 }
-                $estado_situacion = self::inicializar_estado_situacion($legajos[$i]['codigosituacion'], $limites[0]['minimo'], $limites[0]['maximo']);
+                $estado_situacion = $this->sicossEstadoRepository->inicializarEstadoSituacion($legajos[$i]['codigosituacion'], $limites[0]['minimo'], $limites[0]['maximo']);
                 $cargos_legajo = $dh03Repository->getCargosActivosSinLicencia($legajo);
                 $cargos_legajo2 = $dh03Repository->getCargosActivosConLicenciaVigente($legajo);
                 $cargos_legajo = array_merge($cargos_legajo, $cargos_legajo2);
@@ -471,7 +374,7 @@ class SicossLegacy
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
                                 if (!in_array($dia, $dias_lic_legajo)) { // Los d�as con licencia de legajo no se tocan
                                     if ($limites[0]['maximo'] >= $dia)
-                                        $estado_situacion[$dia] = self::evaluar_condicion_licencia($estado_situacion[$dia], $licencia['condicion']);
+                                        $estado_situacion[$dia] = $this->sicossEstadoRepository->evaluarCondicionLicencia($estado_situacion[$dia], $licencia['condicion']);
                                     if ($licencia['es_legajo']) {
                                         $dias_lic_legajo[] = $dia; // En este d�a cuenta con licencia de legajo
                                     }
@@ -506,9 +409,9 @@ class SicossLegacy
                     }
                 }
 
-                $cambios_estado = self::calcular_cambios_estado($estado_situacion);
-                $dias_trabajados = self::calcular_dias_trabajados($estado_situacion);
-                $revista_legajo = self::calcular_revista_legajo($cambios_estado);
+                $cambios_estado = $this->sicossEstadoRepository->calcularCambiosEstado($estado_situacion);
+                $dias_trabajados = $this->sicossEstadoRepository->calcularDiasTrabajados($estado_situacion);
+                $revista_legajo = $this->sicossEstadoRepository->calcularRevistaLegajo($cambios_estado);
 
 
                 // Como c�digo de situaci�n general se toma el �ltimo (?)
@@ -607,7 +510,7 @@ class SicossLegacy
                 $legajos[$i]['Remuner78805']             += $legajos[$i]['ImporteImponibleBecario'];
             }
 
-            if (self::VerificarAgenteImportesCERO($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
+            if ($this->sicossEstadoRepository->verificarAgenteImportesCero($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
             {
                 $legajos[$i]['PorcAporteDiferencialJubilacion'] = self::$porc_aporte_adicional_jubilacion;
                 $legajos[$i]['ImporteImponible_4']              = $legajos[$i]['IMPORTE_IMPON'];
@@ -1186,20 +1089,6 @@ class SicossLegacy
 
 
 
-
-
-
-    // Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss
-    public static function VerificarAgenteImportesCERO($leg)
-    {
-        $VerificarAgenteImportesCERO = 1;
-        if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0)
-            $VerificarAgenteImportesCERO = 0;
-        return $VerificarAgenteImportesCERO;
-    }
-
-
-
     // --- Funciones auxiliares para dar formato a campos ---
 
     static function llena_importes($valor, $longitud)
@@ -1269,7 +1158,8 @@ class SicossLegacy
             app(Dh03RepositoryInterface::class),
             app(Dh21RepositoryInterface::class),
             app(Dh01RepositoryInterface::class),
-            app(SicossCalculoRepositoryInterface::class)
+            app(SicossCalculoRepositoryInterface::class),
+            app(SicossEstadoRepositoryInterface::class)
         );
         return $instance->getConnectionName();
     }
