@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Models\SpuDisc;
 use App\Enums\LegajoCargo;
 use App\Models\Mapuche\Dh05;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
+use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,20 +25,79 @@ class Dh03 extends Model
     protected $primaryKey = 'nro_cargo';
 
     protected $fillable = [
-        'nro_cargo', 'rama', 'disciplina', 'area', 'porcdedicdocente', 'porcdedicinvestig',
-        'porcdedicagestion', 'porcdedicaextens', 'codigocontrato', 'horassemanales',
-        'duracioncontrato', 'incisoimputacion', 'montocontrato', 'nro_legaj', 'fec_alta',
-        'fec_baja', 'codc_carac', 'codc_categ', 'codc_agrup', 'tipo_norma', 'tipo_emite',
-        'fec_norma', 'nro_norma', 'codc_secex', 'nro_exped', 'nro_exped_baja', 'fec_exped_baja',
-        'ano_exped_baja', 'codc_secex_baja', 'ano_exped', 'fec_exped', 'nro_tab13', 'codc_uacad',
-        'nro_tab18', 'codc_regio', 'codc_grado', 'vig_caano', 'vig_cames', 'chk_proye',
-        'tipo_incen', 'dedi_incen', 'cic_con', 'fec_limite', 'porc_aplic', 'hs_dedic',
-        'tipo_norma_baja', 'tipoemitenormabaja', 'fecha_norma_baja', 'fechanotificacion',
-        'coddependesemp', 'chkfirmaencargado', 'chkfirmaautoridad', 'chkestadoafip',
-        'chkestadotitulo', 'chkestadocv', 'objetocontrato', 'nro_norma_baja', 'fechagrado',
-        'fechapermanencia', 'fecaltadesig', 'fecbajadesig', 'motivoaltadesig', 'motivobajadesig',
-        'renovacion', 'idtareacargo', 'chktrayectoria', 'chkfuncionejec', 'chkretroactivo',
-        'chkstopliq', 'nro_cargo_ant', 'transito', 'cod_clasif_cargo', 'cod_licencia',
+        'nro_cargo',
+        'rama',
+        'disciplina',
+        'area',
+        'porcdedicdocente',
+        'porcdedicinvestig',
+        'porcdedicagestion',
+        'porcdedicaextens',
+        'codigocontrato',
+        'horassemanales',
+        'duracioncontrato',
+        'incisoimputacion',
+        'montocontrato',
+        'nro_legaj',
+        'fec_alta',
+        'fec_baja',
+        'codc_carac',
+        'codc_categ',
+        'codc_agrup',
+        'tipo_norma',
+        'tipo_emite',
+        'fec_norma',
+        'nro_norma',
+        'codc_secex',
+        'nro_exped',
+        'nro_exped_baja',
+        'fec_exped_baja',
+        'ano_exped_baja',
+        'codc_secex_baja',
+        'ano_exped',
+        'fec_exped',
+        'nro_tab13',
+        'codc_uacad',
+        'nro_tab18',
+        'codc_regio',
+        'codc_grado',
+        'vig_caano',
+        'vig_cames',
+        'chk_proye',
+        'tipo_incen',
+        'dedi_incen',
+        'cic_con',
+        'fec_limite',
+        'porc_aplic',
+        'hs_dedic',
+        'tipo_norma_baja',
+        'tipoemitenormabaja',
+        'fecha_norma_baja',
+        'fechanotificacion',
+        'coddependesemp',
+        'chkfirmaencargado',
+        'chkfirmaautoridad',
+        'chkestadoafip',
+        'chkestadotitulo',
+        'chkestadocv',
+        'objetocontrato',
+        'nro_norma_baja',
+        'fechagrado',
+        'fechapermanencia',
+        'fecaltadesig',
+        'fecbajadesig',
+        'motivoaltadesig',
+        'motivobajadesig',
+        'renovacion',
+        'idtareacargo',
+        'chktrayectoria',
+        'chkfuncionejec',
+        'chkretroactivo',
+        'chkstopliq',
+        'nro_cargo_ant',
+        'transito',
+        'cod_clasif_cargo',
+        'cod_licencia',
         'cargo_concursado'
     ];
 
@@ -87,14 +148,18 @@ class Dh03 extends Model
 
         static::saving(function ($model) {
             // Validar porcentajes
-            if ($model->porcdedicdocente + $model->porcdedicinvestig +
-                $model->porcdedicagestion + $model->porcdedicaextens > 100) {
+            if (
+                $model->porcdedicdocente + $model->porcdedicinvestig +
+                $model->porcdedicagestion + $model->porcdedicaextens > 100
+            ) {
                 throw new \Exception('La suma de porcentajes de dedicación no puede superar 100%');
             }
 
             // Validar fechas coherentes
-            if ($model->fec_baja && $model->fec_alta &&
-                $model->fec_baja < $model->fec_alta) {
+            if (
+                $model->fec_baja && $model->fec_alta &&
+                $model->fec_baja < $model->fec_alta
+            ) {
                 throw new \Exception('La fecha de baja no puede ser anterior a la fecha de alta');
             }
         });
@@ -111,7 +176,7 @@ class Dh03 extends Model
     }
 
     /* ############################### GETTERS ############################## */
-    public static function getCargoCount()
+    public static function getCargoCount(): int
     {
         return Dh03::count();
     }
@@ -138,28 +203,84 @@ class Dh03 extends Model
         ];
     }
 
+
+    /**
+     * Obtiene los cargos activos de un legajo
+     *
+     * @param int $nroLegajo
+     * @return array
+     */
+    public static function getCargosActivos(int $nroLegajo): array
+    {
+        return static::cargosActivos($nroLegajo)->get()->toArray();
+    }
+
+    /**
+     * Verifica si existe una categoría diferencial para un legajo
+     *
+     * @param int $nroLegajo
+     * @param string $catDiferencial
+     * @return bool
+     */
+    public static function existeCategoriaDiferencial(int $nroLegajo, string $catDiferencial): bool
+    {
+        return static::query()
+            ->where('codc_categ', $catDiferencial)
+            ->where('nro_legaj', $nroLegajo)
+            ->whereRaw('map_es_cargo_activo(nro_cargo)')
+            ->exists();
+    }
+
     /** ############################## SCOPES ############################## */
 
     public function scopeEmpleadosActivos($query)
     {
         return $query->where('chkstopliq', '=', 0)
-                     ->where('codc_uacad', '!=', '')
-                     ->whereNull('fec_baja');
+            ->where('codc_uacad', '!=', '')
+            ->whereNull('fec_baja');
     }
 
     /**
-    * Scope para validar la combinación legajo-cargo
-    *
-    * @param \Illuminate\Database\Eloquent\Builder $query
-    * @param int $nroLegaj
-    * @param int $nroCargo
-    * @return \Illuminate\Database\Eloquent\Builder
-    */
-    public function scopeValidarLegajoCargo($query,int $nro_legaj, int $nro_cargo)
+     * Scope para validar la combinación legajo-cargo
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $nroLegaj
+     * @param int $nroCargo
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeValidarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
     {
         return $query->where('nro_legaj', $nro_legaj)
             ->where('nro_cargo', $nro_cargo);
     }
+
+    /**
+     * Scope para obtener cargos activos de un legajo
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $nroLegajo
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeCargosActivos($query, int $nroLegajo)
+    {
+        $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
+
+        return $query->select([
+            'nro_cargo',
+            DB::raw("CASE
+                WHEN (codc_categ = '' OR codc_categ IS NULL)
+                THEN nro_cargo::TEXT
+                ELSE codc_categ
+            END AS codc_categ")
+        ])
+            ->where(function ($query) use ($fecha) {
+                $query->whereNull('fec_baja')
+                    ->orWhere('fec_baja', '>=', $fecha);
+            })
+            ->where('nro_legaj', $nroLegajo);
+    }
+
+
 
     /* ############################## RELACIONES ############################## */
 
@@ -192,8 +313,8 @@ class Dh03 extends Model
     public function spuDisc(): BelongsTo
     {
         return $this->belongsTo(SpuDisc::class, 'rama', 'rama')
-                ->where('disciplina', $this->disciplina)
-                ->where('area', $this->area);
+            ->where('disciplina', $this->disciplina)
+            ->where('area', $this->area);
     }
 
     public function dh05(): BelongsTo
@@ -232,7 +353,7 @@ class Dh03 extends Model
     protected function legajoCargo(): Attribute
     {
         return Attribute::make(
-            get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
 
@@ -254,5 +375,4 @@ class Dh03 extends Model
         return static::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_cargo', $nroCargo);
     }
-
 }

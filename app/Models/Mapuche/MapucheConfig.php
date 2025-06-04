@@ -3,6 +3,8 @@
 namespace App\Models\Mapuche;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\PeriodoFiscalService;
 
 /**
@@ -10,6 +12,7 @@ use App\Services\Mapuche\PeriodoFiscalService;
  */
 class MapucheConfig
 {
+    use MapucheConnectionTrait;
     /**
      * Obtener el valor de un parámetro de RRHH.
      *
@@ -172,10 +175,8 @@ class MapucheConfig
      */
     public static function getFechaInicioPeriodoCorriente(): string
     {
-        $anio = self::getAnioFiscal();
-        $mes = self::getMesFiscal();
-
-        return Carbon::createFromDate($anio, $mes, 1)->format('Y-m-d');
+        return DB::connection(self::getStaticConnectionName())
+        ->select('SELECT map_get_fecha_inicio_periodo() as fecha_inicio')[0]->fecha_inicio;
     }
 
     /**
@@ -185,10 +186,8 @@ class MapucheConfig
      */
     public static function getFechaFinPeriodoCorriente(): string
     {
-        $anio = self::getAnioFiscal();
-        $mes = self::getMesFiscal();
-
-        return Carbon::createFromDate($anio, $mes, 1)->endOfMonth()->format('Y-m-d');
+        return DB::connection(self::getStaticConnectionName())
+        ->select('SELECT map_get_fecha_fin_periodo() as fecha_fin')[0]->fecha_fin;
     }
 
     /**
@@ -250,4 +249,100 @@ class MapucheConfig
     {
         return self::getParametroRrhh('Licencias', 'VariantesProtecIntegral', '');
     }
+
+    public static function getCategoriasDiferencial(): string
+    {
+		return self::getParametroRrhh('Sicoss', 'CategoriaDiferencial');
+	}
+
+
+
+    /**
+     * Obtiene el nombre de la conexión de base de datos de forma estática.
+     *
+     * Este método crea una instancia de la clase actual y utiliza el trait MapucheConnectionTrait
+     * para obtener el nombre de la conexión configurada.
+     *
+     * @return string El nombre de la conexión de base de datos configurada
+     */
+    public static function getStaticConnectionName(): string
+    {
+        $instance = new static();
+        return $instance->getConnectionName();
+    }
+
+    public static function getDefaultsObraSocial()
+	{
+		return self::getParametroRrhh('Defaults', 'ObraSocial');
+	}
+
+    public static function getConceptosObraSocialAporteAdicional()
+	{
+		return self::getParametroRrhh('Conceptos', 'ObraSocialAporteAdicional');
+	}
+
+    public static function getConceptosObraSocialAporte()
+	{
+		return self::getParametroRrhh('Conceptos', 'ObraSocialAporte');
+	}
+
+    public static function getConceptosObraSocialRetro()
+	{
+		return self::getParametroRrhh('Conceptos', 'ObraSocialRetro');
+	}
+
+    public static function getConceptosObraSocial()
+	{
+		return self::getParametroRrhh('Conceptos', 'ObraSocial');
+	}
+
+    public static function getTopesJubilacionVoluntario()
+	{
+		return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
+	}
+    public static function getConceptosObraSocialFliarAdherente()
+	{
+		return self::getParametroRrhh('Conceptos', 'ObraSocialFliarAdherente');
+	}
+
+    public static function getDatosUniversidadCuit()
+	{
+		return self::getParametroRrhh('Datos Universidad', 'CUIT');
+	}
+
+    public static function getDatosUniversidadDireccion()
+	{
+		return self::getParametroRrhh('Datos Universidad', 'Direccion');
+	}
+
+    public static function getDatosCodcReparto()
+	{
+		return self::getParametroRrhh('Datos Universidad', 'Cod.R�gimen de Reparto');
+	}
+
+    public static function getDatosUniversidadCiudad()
+	{
+		return self::getParametroRrhh('Datos Universidad', 'Ciudad');
+	}
+
+    public static function getDatosUniversidadSigla() {
+		return self::getParametroRrhh('Datos Universidad', 'Sigla');
+	}
+
+    public static function getDatosUniversidadTipoEmpresa() {
+		return self::getParametroRrhh('Datos Universidad', 'TipoEmpresa');
+	}
+
+    public static function getDatosUniversidadTrabajadorConvencionado() {
+		return self::getParametroRrhh('Datos Universidad', 'TrabajadorConvencionado');
+	}
+
+    public static function getConceptosInformarAdherentesSicoss()
+	{
+		return self::getParametroRrhh('Conceptos', 'AdherenteSicossDesdeH09',0);
+	}
+    public static function getConceptosAcumularAsigFamiliar()
+	{
+		return self::getParametroRrhh('Conceptos', 'AcumularAsigFamiliar',1);
+	}
 }

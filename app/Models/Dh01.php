@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\EncodingService;
+use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\MapucheGrupo;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
@@ -112,6 +113,45 @@ class Dh01 extends Model
             ->orWhere('desc_nombr', 'like', '%' . strtoupper($searchTerm) . '%');
     }
 
+
+
+    /**
+     * Scope para obtener legajos activos sin cargos vigentes en el periodo actual.
+     *
+     * Este scope consulta la base de datos para encontrar legajos que:
+     * - Tienen estado 'A' (Activo)
+     * - No tienen cargos activos en dh03
+     * - Cumplen con la condición adicional especificada en $where
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query Query builder instance
+     * @param string $where Condición SQL adicional para filtrar los resultados (default: '1=1')
+     * @return \Illuminate\Database\Eloquent\Builder Query builder con los siguientes campos:
+     *         - nro_legaj: Número de legajo
+     *         - nro_docum: Número de documento formateado (tipo + número con separadores)
+     *         - cuil: CUIL formateado con guiones (XX-XXXXXXXX-X)
+     *         - tipo_estad: Estado del legajo
+     *         - agente: Nombre completo del agente (apellido, nombre)
+     */
+    public function scopeLegajosActivosSinCargosVigentes($query, $where = '1=1')
+    {
+        return $query->select([
+            'nro_legaj',
+            DB::raw("tipo_docum || ' ' || to_char(nro_docum::numeric(11,0),'9G999G999G999') AS nro_docum"),
+            DB::raw("LPAD(nro_cuil1::varchar, 2, '0') || '-' || LPAD(nro_cuil::varchar, 8, '0') || '-' || nro_cuil2 AS cuil"),
+            'tipo_estad',
+            DB::raw("desc_appat ||', '|| desc_nombr as agente")
+        ])
+            ->where('tipo_estad', 'A')
+            ->whereNotExists(function ($subquery) {
+                $subquery->select(DB::raw(1))
+                    ->from('mapuche.dh03 as car')
+                    ->whereRaw('car.nro_legaj = dh01.nro_legaj')
+                    ->whereRaw('mapuche.map_es_cargo_activo(car.nro_cargo)');
+            })
+            ->whereRaw($where)
+            ->orderBy('nro_legaj');
+    }
+
     public function scopeByCuil($query, $cuil)
     {
         return $query->whereRaw("(
@@ -131,7 +171,13 @@ class Dh01 extends Model
         return $cuil1 . $cuil . $cuil2;
     }
 
-
+	public static function esJubilado($nro_legajo): bool
+	{
+		return static::query()
+            ->where('nro_legaj', $nro_legajo)
+            ->where('tipo_estad', 'J')
+            ->exists();
+	}
 
     // ###############################################
     // ###########  Mutadores y Accesores  ###########
@@ -177,5 +223,19 @@ class Dh01 extends Model
                 return "$cuil1$cuil$cuil2";
             }
         );
+    }
+
+    // ####################################################################################
+    // ######################################  FUNCIONES  ####################################
+
+    /**
+     * Obtiene legajos activos sin cargos vigentes como array
+     *
+     * @param string $where Condición adicional WHERE
+     * @return array
+     */
+    public function getLegajosActivosSinCargosVigentes($where)
+    {
+        return $this->legajosActivosSinCargosVigentes($where)->get()->toArray();
     }
 }

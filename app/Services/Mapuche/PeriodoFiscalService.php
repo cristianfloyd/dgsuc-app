@@ -5,6 +5,7 @@ namespace App\Services\Mapuche;
 use App\Models\Dh61;
 use App\Models\Dh99;
 use App\Models\Mapuche\Dh22;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -21,6 +22,33 @@ use Illuminate\Support\Facades\Log;
  */
 class PeriodoFiscalService
 {
+
+    public function getFechaInicioPeriodoCorriente(): string
+    {
+        $sql = "SELECT map_get_fecha_inicio_periodo();";
+        $rs = DB::select($sql);
+        return $rs[0]->map_get_fecha_inicio_periodo;
+    }
+
+
+    /**
+     * Obtiene la fecha de fin del período fiscal actual.
+     *
+     * Esta función consulta la base de datos para obtener la fecha de fin del período fiscal
+     * utilizando la función map_get_fecha_fin_periodo().
+     *
+     * @return string La fecha de fin del período fiscal en formato YYYY-MM-DD
+     */
+    public function getFechaFinPeriodoCorriente(): string
+    {
+        $sql = "SELECT map_get_fecha_fin_periodo();";
+        $rs = DB::select($sql);
+        return $rs['map_get_fecha_fin_periodo'];
+    }
+
+
+
+
     /**
     * Determina si una liquidación corresponde al período actual
      */

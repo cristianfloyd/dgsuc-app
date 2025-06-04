@@ -380,8 +380,18 @@ class LicenciaService
     private function getQueryParams(string $fechaInicio, string $fechaFin): array
     {
         return [
-            $fechaInicio, $fechaInicio, $fechaFin, $fechaFin, $fechaFin, $fechaInicio,
-            $fechaInicio, $fechaInicio, $fechaFin, $fechaFin, $fechaFin, $fechaInicio
+            $fechaInicio,
+            $fechaInicio,
+            $fechaFin,
+            $fechaFin,
+            $fechaFin,
+            $fechaInicio,
+            $fechaInicio,
+            $fechaInicio,
+            $fechaFin,
+            $fechaFin,
+            $fechaFin,
+            $fechaInicio
         ];
     }
 
@@ -580,5 +590,170 @@ class LicenciaService
                 Redis::del($realKey);
             }
         }
+    }
+
+    public static function tieneLicenciaMaternidadActiva($nro_legajo)
+    {
+        //-- Armo la fecha inicial para la consulta.
+        $fecha_inicio = MapucheConfig::getFechaInicioPeriodoCorriente();
+        //-- Armo la fecha tope para la consulta.
+        $mes_final = MapucheConfig::getMesFiscal() + 1;
+        $anio_final = MapucheConfig::getAnioFiscal();
+        if ($mes_final > 12) {
+            $mes_final = 1;
+            $anio_final++;
+        }
+        $fecha_final = $anio_final . "-" . $mes_final . "-01";
+        if (self::tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)) {
+            return true;
+        }
+        if (self::tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static function tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)
+    {
+
+        $sql = "SELECT
+				COUNT(*) as cantidad
+			FROM
+				mapuche.dh05 dh05,
+				mapuche.dl02 dl02
+			WHERE
+					dh05.NroVarLicencia = dl02.NroVarLicencia
+				AND	dL02.Es_Maternidad <> FALSE
+				AND	dh05.nro_legaj = $nro_legajo
+                                AND     (dh05.fec_desde, COALESCE(dh05.fec_hasta,'31-12-2999'::date))
+                                OVERLAPS ($fecha_inicio::date, $fecha_final::date);
+			";
+
+        $rs = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return $rs['cantidad'] > 0;
+    }
+
+    private static function tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)
+    {
+
+
+        $sql = "SELECT
+				COUNT(*) as cantidad
+			FROM
+				mapuche.dh05 dh05,
+				mapuche.dl02 dl02,
+				mapuche.dh03 dh03
+			WHERE
+					dh05.NroVarLicencia = dl02.NroVarLicencia
+				AND	dh05.nro_cargo = dh03.nro_cargo
+				AND 	dh03.nro_legaj = $nro_legajo
+				AND	dL02.Es_Maternidad <> FALSE
+				AND	dh05.nro_legaj is NULL
+                                AND     (dh05.fec_desde, COALESCE(dh05.fec_hasta,'31-12-2999'::date))
+                                OVERLAPS ($fecha_inicio::date, $fecha_final::date);
+			";
+
+        $rs = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return $rs['cantidad'] > 0;
+    }
+
+    private static function getStaticConnectionName()
+    {
+        $instance = new static();
+        return $instance->getConnectionName();
+    }
+
+    /**
+     * Obtiene los legajos con licencias sin goce
+     *
+     * @param string $whereLegajo Condición adicional para filtrar legajos
+     * @return array Array con un objeto que contiene la propiedad licencias_sin_goce en formato PostgreSQL array
+     */
+    public static function getLegajosLicenciasSinGoce(string $whereLegajo): array
+    {
+        $subquery1 = self::getSubqueryLicenciasPorLegajo($whereLegajo);
+        $subquery2 = self::getSubqueryLicenciasPorCargo($whereLegajo);
+
+        $sql = "SELECT array({$subquery1} UNION {$subquery2}) AS licencias_sin_goce";
+
+        return DB::connection(self::getStaticConnectionName())->select($sql);
+    }
+
+    /**
+     * Obtiene la subconsulta para licencias por legajo
+     *
+     * @param string $whereLegajo
+     * @return string
+     */
+    private static function getSubqueryLicenciasPorLegajo(string $whereLegajo): string
+    {
+        return "
+        SELECT dh01.nro_legaj
+        FROM mapuche.dh05
+        LEFT JOIN mapuche.dl02 ON dh05.nrovarlicencia = dl02.nrovarlicencia
+        LEFT JOIN mapuche.dh01 ON dh05.nro_legaj = dh01.nro_legaj
+        WHERE dh05.nro_legaj IS NOT NULL
+        AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+        AND (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = 0))
+        AND {$whereLegajo}";
+    }
+
+    /**
+     * Obtiene la subconsulta para licencias por cargo
+     *
+     * @param string $whereLegajo
+     * @return string
+     */
+    private static function getSubqueryLicenciasPorCargo(string $whereLegajo): string
+    {
+        return "
+        SELECT DISTINCT dh01.nro_legaj
+        FROM mapuche.dh05
+        LEFT JOIN mapuche.dh03 ON dh03.nro_cargo = dh05.nro_cargo
+        LEFT JOIN mapuche.dh01 ON dh03.nro_legaj = dh01.nro_legaj
+        LEFT JOIN mapuche.dl02 ON dh05.nrovarlicencia = dl02.nrovarlicencia
+        WHERE dh05.nro_cargo IS NOT NULL
+        AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
+        AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+        AND (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = 0))
+        AND {$whereLegajo}";
+    }
+
+    /**
+     * Método original para obtener legajos con licencias sin goce
+     *
+     * @param string $whereLegajo Condición adicional para filtrar legajos
+     * @return array
+     */
+    public static function getLegajosLicenciasSinGoceOriginal(string $whereLegajo): array
+    {
+        $sql = "
+        SELECT array(
+            SELECT dh01.nro_legaj
+            FROM mapuche.dh05
+            LEFT JOIN mapuche.dl02 ON dh05.nrovarlicencia = dl02.nrovarlicencia
+            LEFT JOIN mapuche.dh01 ON dh05.nro_legaj = dh01.nro_legaj
+            WHERE dh05.nro_legaj IS NOT NULL
+            AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+            AND (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = 0))
+            AND {$whereLegajo}
+
+            UNION
+
+            SELECT DISTINCT dh01.nro_legaj
+            FROM mapuche.dh05
+            LEFT JOIN mapuche.dh03 ON dh03.nro_cargo = dh05.nro_cargo
+            LEFT JOIN mapuche.dh01 ON dh03.nro_legaj = dh01.nro_legaj
+            LEFT JOIN mapuche.dl02 ON dh05.nrovarlicencia = dl02.nrovarlicencia
+            WHERE dh05.nro_cargo IS NOT NULL
+            AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
+            AND suc.map_es_licencia_vigente(dh05.nro_licencia)
+            AND (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = 0))
+            AND {$whereLegajo}
+        ) AS licencias_sin_goce";
+
+        return DB::connection(self::getStaticConnectionName())->select($sql);
     }
 }
