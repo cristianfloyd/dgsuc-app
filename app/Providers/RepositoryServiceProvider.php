@@ -29,6 +29,7 @@ use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Repositories\Sicoss\SicossEstadoRepository;
 use App\Repositories\Sicoss\SicossCalculoRepository;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
+use App\Repositories\Sicoss\SicossFormateadorRepository;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
@@ -39,6 +40,7 @@ use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -76,6 +78,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(Dh03RepositoryInterface::class, Dh03Repository::class);
         $this->app->bind(SicossCalculoRepositoryInterface::class, SicossCalculoRepository::class);
         $this->app->bind(SicossEstadoRepositoryInterface::class, SicossEstadoRepository::class);
+        $this->app->bind(SicossFormateadorRepositoryInterface::class, SicossFormateadorRepository::class);
 
         // Registrar la implementación concreta primero
         $this->app->bind(

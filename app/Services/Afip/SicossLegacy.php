@@ -16,6 +16,7 @@ use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
 
 class SicossLegacy
 {
@@ -44,7 +45,8 @@ class SicossLegacy
         protected Dh21RepositoryInterface $dh21Repository,
         protected Dh01RepositoryInterface $dh01Repository,
         protected SicossCalculoRepositoryInterface $sicossCalculoRepository,
-        protected SicossEstadoRepositoryInterface $sicossEstadoRepository
+        protected SicossEstadoRepositoryInterface $sicossEstadoRepository,
+        protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository
     ) {}
 
 
@@ -274,7 +276,7 @@ class SicossLegacy
         if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
             copy(storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt'), $testeo_directorio_salida . '/' . $testeo_prefijo_archivos);
         } else {
-            return self::transformar_a_recordset($totales);
+            return $this->sicossFormateadorRepository->transformarARecordset($totales);
         }
     }
 
@@ -730,7 +732,7 @@ class SicossLegacy
         if (!empty($legajos_validos)) {
             if ($retornar_datos === TRUE)
                 return $legajos_validos;
-            self::grabarEnTxt($legajos_validos, $nombre_arch);
+            $this->grabarEnTxt($legajos_validos, $nombre_arch);
         }
 
 
@@ -739,7 +741,7 @@ class SicossLegacy
 
 
     // Dado un arreglo, doy formato y agrego a archivo
-    public static function grabarEnTxt($legajos, $nombre_arch)
+    public function grabarEnTxt($legajos, $nombre_arch)
     {
         //Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
         $archivo = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
@@ -749,67 +751,67 @@ class SicossLegacy
             fwrite(
                 $fh,
                 $legajos[$i]['cuit'] .                                                                // Campo 1
-                    self::llena_blancos_mod($legajos[$i]['apyno'], 30) .                                             // Campo 2
+                    $this->sicossFormateadorRepository->llenaBlancosModificado($legajos[$i]['apyno'], 30) .          // Campo 2
                     $legajos[$i]['conyugue'] .                                                                        // Campo 3
-                    self::llena_importes($legajos[$i]['hijos'], 2) .                                                 // Campo 4
-                    self::llena_importes($legajos[$i]['codigosituacion'], 2) .                                       // Campo 5 TODO: Preguntar �es el que viene de dha8?
-                    self::llena_importes($legajos[$i]['codigocondicion'], 2) .                                       // Campo 6
-                    self::llena_importes($legajos[$i]['TipoDeActividad'], 3) .                                       // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
-                    self::llena_importes($legajos[$i]['codigozona'], 2) .                                            // Campo 8
-                    self::llena_blancos_izq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5) .            // Campo 9 - Porcentaje de Aporte Adicional Obra Social
-                    self::llena_importes($legajos[$i]['codigocontratacion'], 3) .                                    // Campo 10
-                    self::llena_importes($legajos[$i]['codigo_os'], 6) .
-                    self::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Seg�n este chequeado en configuraci�n informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
-                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
-                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14
-                    self::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
-                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
-                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
-                    self::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9) .      //exedAportesSS
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['hijos'], 2) .                    // Campo 4
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigosituacion'], 2) .          // Campo 5 TODO: Preguntar �es el que viene de dha8?
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigocondicion'], 2) .          // Campo 6
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['TipoDeActividad'], 3) .          // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigozona'], 2) .               // Campo 8
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5) .  // Campo 9 - Porcentaje de Aporte Adicional Obra Social
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigocontratacion'], 3) .       // Campo 10
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigo_os'], 6) .
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Seg�n este chequeado en configuraci�n informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9) .      //exedAportesSS
                     '     0,00' .                                                                                     //exedAportesOS
-                    self::llena_blancos($legajos[$i]['provincialocalidad'], 50) .                                    //Campo 20
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 21 - Imponible 2
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 22 - Imponible 3
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12) .        // Campo 23 - Imponible 4
+                    $this->sicossFormateadorRepository->llenaBlancos($legajos[$i]['provincialocalidad'], 50) .                                    //Campo 20
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 21 - Imponible 2
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 22 - Imponible 3
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12) .        // Campo 23 - Imponible 4
                     '00' .                                                                                            // campo 24 - codigo siniestrado
                     '0' .                                                                                             // Campo 25 - marca de corresponde reduccion
                     '000000,00' .                                                                                     // Campo 26 -  capital de recomposicion
                     self::$tipoEmpresa .
-                    self::llena_blancos_izq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9) .                                                                                     // Campo 28 - aporte adicional obra social
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9) .                                                                                     // Campo 28 - aporte adicional obra social
                     $legajos[$i]['regimen'] .
-                    self::llena_importes($legajos[$i]['codigorevista1'], 2) .                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
-                    self::llena_importes($legajos[$i]['fecharevista1'], 2) .                                        // campo 31 - Dia inicio Situaci�n de Revista 1
-                    self::llena_importes($legajos[$i]['codigorevista2'], 2) .                                       // Situaci�n de Revista 2
-                    self::llena_importes($legajos[$i]['fecharevista2'], 2) .                                        // Dia inicio Situaci�n de Revista 2
-                    self::llena_importes($legajos[$i]['codigorevista3'], 2) .                                       // Situaci�n de Revista 3
-                    self::llena_importes($legajos[$i]['fecharevista3'], 2) .                                        // Dia inicio Situaci�n de Revista 3
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 36
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12) .                // Campo 37
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12) .        // Campo 38
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12) .   // Campo 39
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12) .         // Campo 40
-                    '0000000' . self::llena_importes($legajos[$i]['dias_trabajados'], 2) .                            // Campo 41 - D�as trabajados
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12) .        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigorevista1'], 2) .                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['fecharevista1'], 2) .                                        // campo 31 - Dia inicio Situaci�n de Revista 1
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigorevista2'], 2) .                                       // Situaci�n de Revista 2
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['fecharevista2'], 2) .                                        // Dia inicio Situaci�n de Revista 2
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['codigorevista3'], 2) .                                       // Situaci�n de Revista 3
+                    $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['fecharevista3'], 2) .                                        // Dia inicio Situaci�n de Revista 3
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 36
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12) .                // Campo 37
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12) .        // Campo 38
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12) .   // Campo 39
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12) .         // Campo 40
+                    '0000000' . $this->sicossFormateadorRepository->llenaImportes($legajos[$i]['dias_trabajados'], 2) .                            // Campo 41 - D�as trabajados
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12) .        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
                     $legajos[$i]['trabajadorconvencionado'] .
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 44 - Imponible 6
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 44 - Imponible 6
                     $legajos[$i]['TipoDeOperacion'] .                                                                 // Campo 45 - Segun se redondee o no importe imponible 6
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 46
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12) .            // Campo 47
-                    self::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12) .              // Campo 48
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 49 - Imponible7 = Imponible6
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 46
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12) .            // Campo 47
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12) .              // Campo 48
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 49 - Imponible7 = Imponible6
                     //redondeo las HS extras, si vienen por ejemplo 10.5 en sicoss informo 11. Esto es porque el
                     //campo de sicoss es de 3 caracteres y los 10.5 los informaria como 0.5
-                    self::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3) .                                   // Campo 50
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12) .            // Campo 51
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12) .         // Campo 52
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9) .  // Campo 53
-                    self::llena_blancos_izq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12) .        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
-                    self::llena_blancos_izq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9) .            // Campo 55 - Contribuci�n Tarea Diferencial
+                    $this->sicossFormateadorRepository->llenaImportes(ceil($legajos[$i]['CantidadHorasExtras']), 3) .                                   // Campo 50
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12) .            // Campo 51
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12) .         // Campo 52
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9) .  // Campo 53
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12) .        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9) .            // Campo 55 - Contribuci�n Tarea Diferencial
                     '000' .                                                                                             // Campo 56 - Horas Trabajadas
                     $legajos[$i]['SeguroVidaObligatorio'] .                                                           // Campo 57 - Seguro  de Vida Obligatorio
-                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12) .         // Campo 58 - Importe a detraer Ley 27430
-                    self::llena_blancos_izq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) . // Campo 59 - Incremento Solidario para empresas del sector privado y p�blico (D. 14/2020 y 56/2020)
-                    self::llena_blancos_izq(number_format(0, 2, ',', ''), 12) .                                          // Campo 60 - Remuneraci�n 11
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12) .         // Campo 58 - Importe a detraer Ley 27430
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) . // Campo 59 - Incremento Solidario para empresas del sector privado y p�blico (D. 14/2020 y 56/2020)
+                    $this->sicossFormateadorRepository->llenaBancosIzq(number_format(0, 2, ',', ''), 12) .                                          // Campo 60 - Remuneraci�n 11
                     "\r\n"
             );
         }
@@ -1089,67 +1091,7 @@ class SicossLegacy
 
 
 
-    // --- Funciones auxiliares para dar formato a campos ---
 
-    static function llena_importes($valor, $longitud)
-    {
-        if ($valor === null) {
-            $valor = '';
-        }
-        if (strlen(trim($valor)) > $longitud) {
-            return substr($valor, - ($longitud));
-        } else {
-            return str_pad($valor, $longitud, "0", STR_PAD_LEFT);
-        }
-    }
-
-    static function llena_blancos_izq($texto, $longitud)
-    {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, - ($longitud));
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_LEFT);
-        }
-    }
-
-    // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
-    static function llena_blancos_mod($texto, $longitud)
-    {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, 0, ($longitud));
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_RIGHT);
-        }
-    }
-
-    static function llena_blancos($texto, $longitud)
-    {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, - ($longitud));
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_RIGHT);
-        }
-    }
-
-    static function transformar_a_recordset($totales_periodo)
-    {
-        // Devuelvo importes totales con formato adecuado para un cuadro toba
-        $totales = [];
-        $i = 0;
-        foreach ($totales_periodo as $clave => $valor) {
-            $totales[$i++] = array('variable' => 'BRUTO',        'valor' => $valor['bruto'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 1',    'valor' => $valor['imponible_1'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 2',    'valor' => $valor['imponible_2'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 3',    'valor' => $valor['imponible_2'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 4',    'valor' => $valor['imponible_4'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 5',    'valor' => $valor['imponible_5'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 6',    'valor' => $valor['imponible_6'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 7',    'valor' => $valor['imponible_6'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 8',    'valor' => $valor['imponible_8'], 'periodo' => $clave);
-            $totales[$i++] = array('variable' => 'IMPONIBLE 9',    'valor' => $valor['imponible_9'], 'periodo' => $clave);
-        }
-        return $totales;
-    }
 
     private static function getStaticConnectionName()
     {
@@ -1159,7 +1101,8 @@ class SicossLegacy
             app(Dh21RepositoryInterface::class),
             app(Dh01RepositoryInterface::class),
             app(SicossCalculoRepositoryInterface::class),
-            app(SicossEstadoRepositoryInterface::class)
+            app(SicossEstadoRepositoryInterface::class),
+            app(SicossFormateadorRepositoryInterface::class)
         );
         return $instance->getConnectionName();
     }
