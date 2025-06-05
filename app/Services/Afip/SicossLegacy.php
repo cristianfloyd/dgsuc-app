@@ -17,6 +17,8 @@ use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
 
 class SicossLegacy
 {
@@ -46,161 +48,29 @@ class SicossLegacy
         protected Dh01RepositoryInterface $dh01Repository,
         protected SicossCalculoRepositoryInterface $sicossCalculoRepository,
         protected SicossEstadoRepositoryInterface $sicossEstadoRepository,
-        protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository
+        protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository,
+        protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository,
+        protected SicossLegajoFilterRepositoryInterface $sicossLegajoFilterRepository
     ) {}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public function obtener_legajos($codc_reparto, $where_periodo_retro, $where_legajo = ' true ', $check_lic = false, $check_sin_activo = false)
-    {
-        // Si la opcion no tiene en cuenta los retroactivos el proceso es como se venia haciendo, se toma de la tabla anterior y se vuelca sobre un unico archivo
-        // Si hay que tener en cuenta los retros se toma la tabla anterior y se segmenta por periodo retro, se genera un archivo por cada segmento
-
-        $sql_conceptos_liq_filtrados = "
-                                            SELECT
-                                                    *
-                                            INTO TEMP
-                                                    conceptos_liquidados
-                                            FROM
-                                                pre_conceptos_liquidados t
-                                            WHERE
-                                            $where_periodo_retro
-            ";
-
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_conceptos_liq_filtrados);
-
-
-        $sql_ix = "CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);";
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
-        $sql_ix = "CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);";
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
-
-        // Se obtienen datos por legajo, de los numeros de legajos liquidados en la tabla anterior conceptos_liquidados
-        // si en los datos del legajo licencia es igual a cero es que el legajo no tenia licencias o no algun concepto liquidado
-        $dh01Repository = app(Dh01RepositoryInterface::class);
-        $sql_datos_legajo = $dh01Repository->getSqlLegajos('conceptos_liquidados', 0, 'true', $codc_reparto);
-
-        // Si tengo el check de licencias agrego a la cantidad de agentes a procesar a los agentes sin licencias sin goce
-        // Si tengo el check de licencias y ademas tengo el check de retros, debo tener en cuenta las licencias solo en el archivo generado con mes y a�o 0 (son del periodo vigente)
-        // tendre en cuenta licencias en el caso general (true) y cuando tenga retros y el where tenga 0-0 (vigente)
-        if ($check_lic && ($where_periodo_retro == ' true ' || $where_periodo_retro == 't.ano_retro=0 AND t.mes_retro=00')) {
-            // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
-            $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
-            // Preparo arreglo para usar en sql IN
-            $legajos_lic = trim($legajos_lic['licencias_sin_goce'], "{,}");
-
-            // Agrego a la consulta anterior la union, para reutilizar el sql y como necesito los mismos datos parametrizo el string
-            $tabla = 'dh01';
-            $where = ' true ';
-            if (isset($legajos_lic) && !empty($legajos_lic)) {
-                $where  = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
-                if (!$check_lic)
-                    $where .=  ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
-                else
-                    $where .= ' )';
-                // si tengo licencias consulto la union de legajos. Ordeno por agente, luego de obtener todos los legajos
-                $sql_datos_lic = ' UNION (' . $dh01Repository->getSqlLegajos("mapuche.dh01", 1, $where, $codc_reparto) . ' ORDER BY apyno';
-
-                $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo . $sql_datos_lic);
-            } else {
-                $sql_datos_legajo .= ' ORDER BY apyno';
-                // Si no hay licencias sin goce que cumpaln con las restricciones hago el proceso comun
-                $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo);
-            }
-        } else {
-            $sql_datos_legajo .= ' ORDER BY apyno';
-            // Si no tengo el check licencias se consulta solo contra conceptos liquidados
-            $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo);
-        }
-
-        //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidaci�n para Reserva de Puesto"
-        if ($check_sin_activo) {
-            $where_no_liquidado = "
-                                    NOT EXISTS (SELECT 1
-                                                FROM
-                                                    mapuche.dh21
-                                                WHERE
-                                                    dh21.nro_legaj = dh01.nro_legaj
-                                                )
-                                    AND
-                                    dh01.tipo_estad = 'A' AND NOT EXISTS 	(  	SELECT
-                                                                            1
-                                                                    FROM
-                                                                            mapuche.dh03 car
-                                                                    WHERE
-                                                                            car.nro_legaj = dh01.nro_legaj AND  mapuche.map_es_cargo_activo(car.nro_cargo) )
-                ";
-
-            $sql_legajos_no_liquidados = $dh01Repository->getSqlLegajos("mapuche.dh01", 0, $where_no_liquidado, $codc_reparto);
-            $legajos_t = DB::connection($this->getConnectionName())->select($sql_legajos_no_liquidados);
-            $legajos = array_merge($legajos, $legajos_t);
-        }
-
-        // Elimino legajos repetidos
-        $legajos_sin_repetidos = array();
-        foreach ($legajos as $legajo) {
-            if (isset($legajos_sin_repetidos[$legajo['nro_legaj']])) {
-                if ($legajos_sin_repetidos[$legajo['nro_legaj']]['licencia'] == 1)
-                    $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
-            } else
-                $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
-        }
-        $legajos = array();
-        foreach ($legajos_sin_repetidos as $legajo)
-            $legajos[] = $legajo;
-
-        return $legajos;
-    }
-
-
-
+    
     public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
     {
-        // Se necesita filtrar datos del periodo vigente
+        // Cargar configuraciones usando el nuevo repositorio
+        $this->sicossConfigurationRepository->cargarConfiguraciones();
 
-        $per_mesct     = MapucheConfig::getMesFiscal();
-        $per_anoct     = MapucheConfig::getAnioFiscal();
+        // Obtener período fiscal usando el nuevo repositorio
+        $periodo_fiscal = $this->sicossConfigurationRepository->obtenerPeriodoFiscal();
+        $per_mesct = $periodo_fiscal['mes'];
+        $per_anoct = $periodo_fiscal['ano'];
 
-        // Seteo valores de rrhhini
-        self::$codigo_obra_social_default = MapucheConfig::getDefaultsObraSocial();
-        self::$aportes_voluntarios        = MapucheConfig::getTopesJubilacionVoluntario();
-        self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
-        self::$codigo_obrasocial_fc       = MapucheConfig::getConceptosObraSocialFliarAdherente();                   // concepto seteado en rrhhini bajo el cual se liquida el familiar a cargo
-        self::$tipoEmpresa                = MapucheConfig::getDatosUniversidadTipoEmpresa();
-        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Seg�n sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
-        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneraci�n Total (importe Bruto no imponible)
-        self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
-        self::$codc_reparto                     = MapucheConfig::getDatosCodcReparto();
-        self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
-        self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
-        self::$categoria_diferencial       = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
-
-        $opcion_retro  = $datos['check_retro'];
-        if (isset($datos['nro_legaj'])) {
-            $filtro_legajo = $datos['nro_legaj'];
-        }
-        self::$codc_reparto  = MapucheConfig::getDatosCodcReparto();
-
-
-        // Si no filtro por n�mero de legajo => obtengo todos los legajos
-        $where = ' true ';
-        if (!empty($filtro_legajo))
-            $where = 'dh01.nro_legaj= ' . $filtro_legajo . ' ';
-
-        $where_periodo = ' true ';
+        // Generar filtros básicos usando el nuevo repositorio
+        $filtros = $this->sicossConfigurationRepository->generarFiltrosBasicos($datos);
+        $opcion_retro = $filtros['opcion_retro'];
+        $filtro_legajo = $filtros['filtro_legajo'];
+        $where = $filtros['where'];
+        $where_periodo = $filtros['where_periodo'];
 
         //si se envia nro_liqui desde la generacion de libro de sueldo
         $dh21Repository = app(Dh21RepositoryInterface::class);
@@ -211,9 +81,10 @@ class SicossLegacy
             $dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where);
         }
 
-        $path = storage_path('app/comunicacion/sicoss/');
-        self::$archivos = array();
-        $totales = array();
+        // Inicializar configuración de archivos usando el nuevo repositorio
+        $config_archivos = $this->sicossConfigurationRepository->inicializarConfiguracionArchivos();
+        $path = $config_archivos['path'];
+        $totales = $config_archivos['totales'];
 
         $licenciaRepository = app(LicenciaRepositoryInterface::class);
         $licencias_agentes_no_remunem = $licenciaRepository->getLicenciasVigentes($where);
@@ -225,7 +96,7 @@ class SicossLegacy
             $nombre_arch              = 'sicoss';
             $periodo                  = 'Vigente_sin_retro';
             self::$archivos[$periodo] = $path . $nombre_arch;
-            $legajos            = $this->obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
+            $legajos            = $this->sicossLegajoFilterRepository->obtenerLegajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
             $periodo            = $per_mesct . '/' . $per_anoct . ' (Vigente)';
             if ($retornar_datos === TRUE)
                 return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
@@ -243,7 +114,7 @@ class SicossLegacy
                 $mes           = str_pad($p['mes_retro'], 2, "0", STR_PAD_LEFT);
                 //agrego cero adelante a meses
                 $where_periodo = "t.ano_retro=" . $p['ano_retro'] . " AND t.mes_retro=" . $mes;
-                $legajos = $this->obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
+                $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
 
                 if ($p['ano_retro'] == 0 && $p['mes_retro'] == 0) {
                     $nombre_arch  = 'sicoss_retro_periodo_vigente';
@@ -279,14 +150,6 @@ class SicossLegacy
             return $this->sicossFormateadorRepository->transformarARecordset($totales);
         }
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -1102,7 +965,9 @@ class SicossLegacy
             app(Dh01RepositoryInterface::class),
             app(SicossCalculoRepositoryInterface::class),
             app(SicossEstadoRepositoryInterface::class),
-            app(SicossFormateadorRepositoryInterface::class)
+            app(SicossFormateadorRepositoryInterface::class),
+            app(SicossConfigurationRepositoryInterface::class),
+            app(SicossLegajoFilterRepositoryInterface::class)
         );
         return $instance->getConnectionName();
     }
