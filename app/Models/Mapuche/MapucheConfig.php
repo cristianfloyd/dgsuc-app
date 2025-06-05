@@ -168,6 +168,13 @@ class MapucheConfig
         return $periodoService->getYear() . $periodoService->getMonth();
     }
 
+    public static function getPeriodoCorriente()
+	{
+        $periodoService = app(PeriodoFiscalService::class);
+
+		return $periodoService->getPeriodoFiscal();
+	}
+
     /**
      * Obtener la fecha de inicio del periodo fiscal corriente.
      *

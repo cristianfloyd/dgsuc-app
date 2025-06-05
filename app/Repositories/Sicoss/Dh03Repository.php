@@ -49,7 +49,7 @@ class Dh03Repository implements Dh03RepositoryInterface
                                                 )
                 ;";
 
-        return DB::select($sql);
+        return DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
     }
 
     /**
@@ -112,7 +112,7 @@ class Dh03Repository implements Dh03RepositoryInterface
                                             )
                 ;";
 
-        return DB::select($sql);
+        return DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
     }
 
     /**
@@ -143,6 +143,45 @@ class Dh03Repository implements Dh03RepositoryInterface
                     nro_legaj = $legajo
                 ;";
 
-        return DB::connection($this->getConnectionName())->select($sql);
+        return DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
+    }
+
+    /**
+     * Verifica si un vínculo es válido para una fecha específica.
+     *
+     * Un vínculo se considera válido si:
+     * - Existe en la tabla dh03
+     * - La fecha proporcionada coincide con el día siguiente a la fecha de baja
+     * - No existe más de un registro relacionado en la tabla dh10
+     *
+     * @param string $fecha Fecha a verificar en formato compatible con PostgreSQL
+     * @param int $vinculo Número de vínculo a validar
+     * @return bool True si el vínculo es válido, False en caso contrario
+     */
+    public static function esVinculoValido(string $fecha, int $vinculo): bool
+    {
+        $sql = "
+            SELECT
+                COUNT(*) as cantidad
+            FROM
+                mapuche.dh03 vinculo
+            WHERE
+                vinculo.nro_cargo = $vinculo AND
+                $fecha = vinculo.fec_baja+1 AND
+                NOT EXISTS (
+                    SELECT
+                        vinculo.vcl_cargo
+                    FROM
+                        mapuche.dh10 vinculo
+                    WHERE
+                        vinculo.vcl_cargo = $vinculo AND
+                        vinculo.nro_cargo != vinculo.vcl_cargo
+                    GROUP BY
+                        vinculo.vcl_cargo
+                    HAVING count(*) > 1
+                )
+        ";
+        $rs = DB::connection(MapucheConfig::getStaticConnectionName())->selectOne($sql);
+        return $rs->cantidad > 0;
     }
 }
