@@ -77,12 +77,7 @@ class SicossLegacy
 
             //si se envia nro_liqui desde la generacion de libro de sueldo
             $this->procesarConceptosLiquidados($datos, $per_anoct, $per_mesct, $where);
-            // if (isset($datos['nro_liqui'])) {
-            //     $where_liqui = $where . ' AND dh21.nro_liqui = ' . $datos['nro_liqui'];
-            //     $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where_liqui);
-            // } else {
-            //     $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where);
-            // }
+
 
             // Inicializar configuración de archivos usando el nuevo repositorio
             $config_archivos = $this->sicossConfigurationRepository->inicializarConfiguracionArchivos();
@@ -91,9 +86,7 @@ class SicossLegacy
 
             // Obtener licencias de agentes usando el nuevo repositorio
             $licencias_agentes = $this->licenciaRepository->getLicenciasVigentes($where);
-            // $licencias_agentes_no_remunem = $this->licenciaRepository->getLicenciasVigentes($where);
-            // $licencias_agentes_remunem = $this->licenciaRepository->getLicenciasProtecintegralVacaciones($where);
-            // $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
+
 
             // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta a�o y mes retro
             if ($opcion_retro == 0) {
@@ -107,16 +100,6 @@ class SicossLegacy
                     $licencias_agentes,
                     $retornar_datos
                 );
-                // $nombre_arch              = 'sicoss';
-                // $periodo                  = 'Vigente_sin_retro';
-                // self::$archivos[$periodo] = $path . $nombre_arch;
-                // $legajos            = $this->sicossLegajoFilterRepository->obtenerLegajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
-                // $periodo            = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-                // if ($retornar_datos === TRUE)
-                //     return $this->sicossLegajoProcessorRepository->procesarSicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                // $totales[$periodo] = $this->sicossLegajoProcessorRepository->procesarSicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                // $sql     =  "DROP TABLE IF EXISTS conceptos_liquidados";
-                // DB::connection($this->getConnectionName())->execute($sql);
             } else {
                 $totales = $this->procesarConRetro(
                     $datos,
@@ -127,46 +110,10 @@ class SicossLegacy
                     $licencias_agentes,
                     $retornar_datos
                 );
-                // Si tengo tildada la opcion lo que se genera es un archivo por cada periodo retro y uno para los que tiene a�o y mes retro en cero,
-                // o sea, se particiona la tabla temporal que se obtiene en obtener_conceptos_liquidados
-                // Periodos retro y el periodo 0-0 que va ser el periodo actual
-                // $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro($datos['check_lic'], $datos['check_retro']);
-
-                // for ($i = 0; $i < count($periodos_retro); $i++) {
-                //     $p             = $periodos_retro[$i];
-                //     $mes           = str_pad($p['mes_retro'], 2, "0", STR_PAD_LEFT);
-                //     //agrego cero adelante a meses
-                //     $where_periodo = "t.ano_retro=" . $p['ano_retro'] . " AND t.mes_retro=" . $mes;
-                //     $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
-
-                //     if ($p['ano_retro'] == 0 && $p['mes_retro'] == 0) {
-                //         $nombre_arch  = 'sicoss_retro_periodo_vigente';
-                //         $periodo      = $per_mesct . '/' . $per_anoct;
-                //         $item         = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-                //         if ($retornar_datos === TRUE)
-                //             return   $this->sicossLegajoProcessorRepository->procesarSicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                //         $subtotal  = $this->sicossLegajoProcessorRepository->procesarSicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                //     } else {
-                //         $nombre_arch = 'sicoss_retro_' . $p['ano_retro'] . '_' . $p['mes_retro'];
-                //         $periodo     = $p['ano_retro'] . $p['mes_retro'];
-                //         $item        = $p['mes_retro'] . "/" . $p['ano_retro'];
-                //         $subtotal  = $this->sicossLegajoProcessorRepository->procesarSicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, NULL, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                //     }
-
-                //     self::$archivos[$periodo] = $path . $nombre_arch;
-
-                //     // Elimino tabla temporal
-                //     $sql  =  "DROP TABLE IF EXISTS conceptos_liquidados";
-                //     DB::connection($this->getConnectionName())->execute($sql);
-
-                //     $totales[$item] = $subtotal;
-                // }
             }
 
             // Limpiar tablas temporales
             $this->limpiarTablasTemporales();
-            // $sql = "DROP TABLE IF EXISTS pre_conceptos_liquidados";
-            // DB::connection($this->getConnectionName())->execute($sql);
 
             // Procesar resultado final
             return $this->procesarResultadoFinal(
@@ -174,11 +121,6 @@ class SicossLegacy
                 $testeo_directorio_salida,
                 $testeo_prefijo_archivos
             );
-            // if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
-            //     copy(storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt'), $testeo_directorio_salida . '/' . $testeo_prefijo_archivos);
-            // } else {
-            //     return $this->sicossFormateadorRepository->transformarARecordset($totales);
-            // }
         } catch (\Exception $e) {
             Log::error('Error en generación de SICOSS', [
                 'error' => $e->getMessage(),
@@ -235,7 +177,7 @@ class SicossLegacy
         try {
             $licencias_agentes_no_remunem = $this->licenciaRepository->getLicenciasVigentes($where);
             $licencias_agentes_remunem = $this->licenciaRepository->getLicenciasProtecintegralVacaciones($where);
-            
+
             $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
 
             Log::info('Licencias de agentes obtenidas', [
@@ -276,23 +218,23 @@ class SicossLegacy
             $nombre_arch = 'sicoss';
             $periodo = 'Vigente_sin_retro';
             self::$archivos[$periodo] = $path . $nombre_arch;
-            
+
             $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                self::$codc_reparto, $where_periodo, $where, 
+                self::$codc_reparto, $where_periodo, $where,
                 $datos['check_lic'], $datos['check_sin_activo']
             );
-            
+
             $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-            
+
             if ($retornar_datos === true) {
                 return $this->sicossLegajoProcessorRepository->procesarSicoss(
-                    $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, 
+                    $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
                     $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
                 );
             }
-            
+
             $totales[$periodo_display] = $this->sicossLegajoProcessorRepository->procesarSicoss(
-                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, 
+                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
                 $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
             );
 
@@ -333,7 +275,7 @@ class SicossLegacy
     ): array {
         try {
             $totales = [];
-            
+
             // Obtener períodos retro y el período 0-0 que será el período actual
             $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro(
                 $datos['check_lic'], $datos['check_retro']
@@ -345,7 +287,7 @@ class SicossLegacy
 
             foreach ($periodos_retro as $periodo_data) {
                 $totales = array_merge($totales, $this->procesarPeriodoRetro(
-                    $periodo_data, $datos, $per_anoct, $per_mesct, 
+                    $periodo_data, $datos, $per_anoct, $per_mesct,
                     $where, $path, $licencias_agentes, $retornar_datos
                 ));
             }
@@ -381,20 +323,20 @@ class SicossLegacy
         try {
             $mes = str_pad($periodo_data['mes_retro'], 2, "0", STR_PAD_LEFT);
             $where_periodo = "t.ano_retro=" . $periodo_data['ano_retro'] . " AND t.mes_retro=" . $mes;
-            
+
             $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                self::$codc_reparto, $where_periodo, $where, 
+                self::$codc_reparto, $where_periodo, $where,
                 $datos['check_lic'], $datos['check_sin_activo']
             );
 
             if ($periodo_data['ano_retro'] == 0 && $periodo_data['mes_retro'] == 0) {
                 $resultado = $this->procesarPeriodoVigente(
-                    $datos, $per_anoct, $per_mesct, $legajos, $path, 
+                    $datos, $per_anoct, $per_mesct, $legajos, $path,
                     $licencias_agentes, $retornar_datos
                 );
             } else {
                 $resultado = $this->procesarPeriodoHistorico(
-                    $periodo_data, $datos, $per_anoct, $per_mesct, 
+                    $periodo_data, $datos, $per_anoct, $per_mesct,
                     $legajos, $path, $retornar_datos
                 );
             }
@@ -433,18 +375,18 @@ class SicossLegacy
         $nombre_arch = 'sicoss_retro_periodo_vigente';
         $periodo = $per_mesct . '/' . $per_anoct;
         $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-        
+
         self::$archivos[$periodo] = $path . $nombre_arch;
 
         if ($retornar_datos === true) {
             return $this->sicossLegajoProcessorRepository->procesarSicoss(
-                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, 
+                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
                 $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
             );
         }
 
         $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
-            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, 
+            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
             $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
         );
 
@@ -470,11 +412,11 @@ class SicossLegacy
         $nombre_arch = 'sicoss_retro_' . $periodo_data['ano_retro'] . '_' . $periodo_data['mes_retro'];
         $periodo = $periodo_data['ano_retro'] . $periodo_data['mes_retro'];
         $item = $periodo_data['mes_retro'] . "/" . $periodo_data['ano_retro'];
-        
+
         self::$archivos[$periodo] = $path . $nombre_arch;
 
         $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
-            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, 
+            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
             null, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
         );
 
@@ -497,7 +439,7 @@ class SicossLegacy
 
             foreach ($tablas_temporales as $tabla) {
                 $resultado = $this->databaseOperation->dropTemporaryTable($tabla);
-                
+
                 if (!$resultado) {
                     Log::warning("No se pudo eliminar la tabla temporal: {$tabla}");
                 }
@@ -522,8 +464,8 @@ class SicossLegacy
      * @return mixed
      */
     protected function procesarResultadoFinal(
-        array $totales, 
-        string $testeo_directorio_salida = '', 
+        array $totales,
+        string $testeo_directorio_salida = '',
         string $testeo_prefijo_archivos = ''
     ) {
         try {
@@ -532,21 +474,21 @@ class SicossLegacy
                 $nombre_arch = array_key_last(self::$archivos);
                 $origen = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
                 $destino = $testeo_directorio_salida . '/' . $testeo_prefijo_archivos;
-                
+
                 if (!file_exists($origen)) {
                     Log::error('Archivo de origen no encontrado', [
                         'origen' => $origen
                     ]);
                     throw new \Exception("Archivo de origen no encontrado: {$origen}");
                 }
-                
+
                 if (!is_dir($testeo_directorio_salida)) {
                     Log::error('Directorio de destino no encontrado', [
                         'destino' => $testeo_directorio_salida
                     ]);
                     throw new \Exception("Directorio de destino no encontrado: {$testeo_directorio_salida}");
                 }
-                
+
                 if (!copy($origen, $destino)) {
                     Log::error('Error al copiar archivo', [
                         'origen' => $origen,
@@ -554,19 +496,19 @@ class SicossLegacy
                     ]);
                     throw new \Exception("Error al copiar archivo de {$origen} a {$destino}");
                 }
-                
+
                 Log::info('Archivo copiado exitosamente para testing', [
                     'origen' => $origen,
                     'destino' => $destino
                 ]);
-                
+
                 return true;
             } else {
                 // Transformar los totales a formato recordset
                 Log::info('Transformando totales a recordset', [
                     'cantidad_totales' => count($totales)
                 ]);
-                
+
                 return $this->sicossFormateadorRepository->transformarARecordset($totales);
             }
         } catch (\Exception $e) {
