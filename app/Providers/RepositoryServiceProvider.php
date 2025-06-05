@@ -33,6 +33,7 @@ use App\Repositories\Sicoss\SicossFormateadorRepository;
 use App\Repositories\Sicoss\SicossLegajoFilterRepository;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Sicoss\SicossConfigurationRepository;
+use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
 use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Decorators\CachingSicossReporteRepository;
@@ -45,6 +46,7 @@ use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -85,6 +87,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SicossFormateadorRepositoryInterface::class, SicossFormateadorRepository::class);
         $this->app->bind(SicossConfigurationRepositoryInterface::class, SicossConfigurationRepository::class);
         $this->app->bind(SicossLegajoFilterRepositoryInterface::class, SicossLegajoFilterRepository::class);
+        $this->app->bind(SicossLegajoProcessorRepositoryInterface::class, SicossLegajoProcessorRepository::class);
 
         // Registrar la implementación concreta primero
         $this->app->bind(

@@ -100,4 +100,68 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
             'totales' => $totales
         ];
     }
+
+    /**
+     * Obtiene el porcentaje de aporte adicional de jubilación
+     */
+    public function getPorcentajeAporteAdicionalJubilacion(): float
+    {
+        return self::$porc_aporte_adicional_jubilacion;
+    }
+
+    /**
+     * Obtiene si el trabajador es convencionado
+     */
+    public function getTrabajadorConvencionado(): int
+    {
+        return self::$trabajadorConvencionado;
+    }
+
+    /**
+     * Obtiene si se deben considerar asignaciones familiares
+     */
+    public function getAsignacionFamiliar(): bool
+    {
+        return self::$asignacion_familiar;
+    }
+
+    /**
+     * Obtiene la cantidad de adherentes SICOSS
+     */
+    public function getCantidadAdherentesSicoss(): int
+    {
+        return self::$cantidad_adherentes_sicoss;
+    }
+
+    /**
+     * Obtiene si las horas extras son por novedad
+     */
+    public function getHorasExtrasPorNovedad(): int
+    {
+        return self::$hs_extras_por_novedad;
+    }
+
+    /**
+     * Obtiene el código de obra social aporte adicional
+     */
+    public function getCodigoObraSocialAporteAdicional(): int
+    {
+        return self::$codigo_os_aporte_adicional;
+    }
+
+    /**
+     * Obtiene el código de aportes voluntarios
+     */
+    public function getAportesVoluntarios(): int
+    {
+        return self::$aportes_voluntarios;
+    }
+
+    /**
+     * Obtiene el código de obra social familiar a cargo
+     */
+    public function getCodigoObraSocialFamiliarCargo(): int
+    {
+        return self::$codigo_obrasocial_fc;
+    }
 }

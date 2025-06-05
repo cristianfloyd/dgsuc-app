@@ -27,4 +27,44 @@ interface SicossConfigurationRepositoryInterface
      * Extrae el código del método genera_sicoss() tal como está
      */
     public function inicializarConfiguracionArchivos(): array;
+
+    /**
+     * Obtiene el porcentaje de aporte adicional de jubilación
+     */
+    public function getPorcentajeAporteAdicionalJubilacion(): float;
+
+    /**
+     * Obtiene si el trabajador es convencionado
+     */
+    public function getTrabajadorConvencionado(): int;
+
+    /**
+     * Obtiene si se deben considerar asignaciones familiares
+     */
+    public function getAsignacionFamiliar(): bool;
+
+    /**
+     * Obtiene la cantidad de adherentes SICOSS
+     */
+    public function getCantidadAdherentesSicoss(): int;
+
+    /**
+     * Obtiene si las horas extras son por novedad
+     */
+    public function getHorasExtrasPorNovedad(): int;
+
+    /**
+     * Obtiene el código de obra social aporte adicional
+     */
+    public function getCodigoObraSocialAporteAdicional(): int;
+
+    /**
+     * Obtiene el código de aportes voluntarios
+     */
+    public function getAportesVoluntarios(): int;
+
+    /**
+     * Obtiene el código de obra social familiar a cargo
+     */
+    public function getCodigoObraSocialFamiliarCargo(): int;
 }
