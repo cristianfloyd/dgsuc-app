@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\WorkflowService;
+use App\Services\Afip\SicossLegacy;
 use App\Listeners\JobFailedListener;
 use App\Services\SicossExportService;
 use Illuminate\Support\Facades\Event;
@@ -18,12 +19,14 @@ use App\Services\AfipMapucheExportService;
 use App\Services\Reportes\BloqueosService;
 use App\Contracts\WorkflowServiceInterface;
 use App\Repositories\Mapuche\Dh16Repository;
+use App\Contracts\DatabaseOperationInterface;
 use App\Services\AfipRelacionesActivasService;
 use App\Services\OrdenesDescuentoTableService;
 use App\Jobs\Middleware\InspectJobDependencies;
 use App\Services\Imports\BloqueosImportService;
 use App\Contracts\RepEmbarazadaServiceInterface;
 use App\Repositories\BloqueosRepositoryInterface;
+use App\Repositories\DatabaseOperationRepository;
 use App\Services\Reportes\BloqueosCleanupService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosHistorialService;
@@ -91,6 +94,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BloqueosHistorialServiceInterface::class, BloqueosHistorialService::class);
         $this->app->bind(BloqueosCleanupServiceInterface::class, BloqueosCleanupService::class);
         $this->app->bind(BloqueosArchiveOrchestratorInterface::class, BloqueosArchiveOrchestratorService::class);
+
+        // Registrar la implementación específica para SicossLegacy
+        $this->app->when(SicossLegacy::class)
+            ->needs(DatabaseOperationInterface::class)
+            ->give(function ($app) {
+                // Usar la conexión de Mapuche para SicossLegacy
+                return new DatabaseOperationRepository('mapuche');
+            });
     }
 
     /**
