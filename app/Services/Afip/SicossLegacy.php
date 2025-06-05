@@ -2,18 +2,11 @@
 
 namespace App\Services\Afip;
 
-use App\Models\Dh01;
-use App\Models\Dh03;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
-use App\Services\Mapuche\LicenciaService;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
 use App\Contracts\DatabaseOperationInterface;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Repositories\Sicoss\LicenciaRepository;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
@@ -27,8 +20,8 @@ class SicossLegacy
 {
     use MapucheConnectionTrait;
 
-    protected static $codc_reparto;
-    protected static $archivos;
+    protected string $codc_reparto;
+    protected array $archivos = [];
 
 
     /**
@@ -217,10 +210,10 @@ class SicossLegacy
         try {
             $nombre_arch = 'sicoss';
             $periodo = 'Vigente_sin_retro';
-            self::$archivos[$periodo] = $path . $nombre_arch;
+            $this->archivos[$periodo] = $path . $nombre_arch;
 
             $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                self::$codc_reparto, $where_periodo, $where,
+                $this->codc_reparto, $where_periodo, $where,
                 $datos['check_lic'], $datos['check_sin_activo']
             );
 
@@ -325,7 +318,7 @@ class SicossLegacy
             $where_periodo = "t.ano_retro=" . $periodo_data['ano_retro'] . " AND t.mes_retro=" . $mes;
 
             $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                self::$codc_reparto, $where_periodo, $where,
+                $this->codc_reparto, $where_periodo, $where,
                 $datos['check_lic'], $datos['check_sin_activo']
             );
 
@@ -376,7 +369,7 @@ class SicossLegacy
         $periodo = $per_mesct . '/' . $per_anoct;
         $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
 
-        self::$archivos[$periodo] = $path . $nombre_arch;
+        $this->archivos[$periodo] = $path . $nombre_arch;
 
         if ($retornar_datos === true) {
             return $this->sicossLegajoProcessorRepository->procesarSicoss(
@@ -413,7 +406,7 @@ class SicossLegacy
         $periodo = $periodo_data['ano_retro'] . $periodo_data['mes_retro'];
         $item = $periodo_data['mes_retro'] . "/" . $periodo_data['ano_retro'];
 
-        self::$archivos[$periodo] = $path . $nombre_arch;
+        $this->archivos[$periodo] = $path . $nombre_arch;
 
         $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
             $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
@@ -471,7 +464,7 @@ class SicossLegacy
         try {
             // Si estamos en modo de testeo, copiar el archivo al directorio especificado
             if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
-                $nombre_arch = array_key_last(self::$archivos);
+                $nombre_arch = array_key_last($this->archivos);
                 $origen = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
                 $destino = $testeo_directorio_salida . '/' . $testeo_prefijo_archivos;
 
