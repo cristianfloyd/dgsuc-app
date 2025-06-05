@@ -12,6 +12,7 @@ use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
@@ -38,6 +39,7 @@ class SicossLegacy
         protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository,
         protected SicossLegajoFilterRepositoryInterface $sicossLegajoFilterRepository,
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
+        protected SicossOrchestatorRepositoryInterface $sicossOrchestatorRepository,
         protected DatabaseOperationInterface $databaseOperation
     ) {}
 
@@ -56,6 +58,9 @@ class SicossLegacy
             // Cargar configuraciones usando el nuevo repositorio
             $this->sicossConfigurationRepository->cargarConfiguraciones();
 
+            // Obtener código de reparto desde configuración
+            $this->codc_reparto = $this->sicossConfigurationRepository->getCodigoReparto();
+
             // Obtener período fiscal usando el nuevo repositorio
             $periodo_fiscal = $this->sicossConfigurationRepository->obtenerPeriodoFiscal();
             $per_mesct = $periodo_fiscal['mes'];
@@ -67,6 +72,9 @@ class SicossLegacy
             $filtro_legajo  = $filtros['filtro_legajo'];
             $where          = $filtros['where'];
             $where_periodo  = $filtros['where_periodo'];
+
+            // Limpiar tablas temporales previas antes de iniciar el proceso
+            $this->limpiarTablasTemporales();
 
             //si se envia nro_liqui desde la generacion de libro de sueldo
             $this->procesarConceptosLiquidados($datos, $per_anoct, $per_mesct, $where);
@@ -80,36 +88,24 @@ class SicossLegacy
             // Obtener licencias de agentes usando el nuevo repositorio
             $licencias_agentes = $this->licenciaRepository->getLicenciasVigentes($where);
 
+            // Configurar el orquestador con el código de reparto
+            $this->sicossOrchestatorRepository->setCodigoReparto($this->codc_reparto);
 
-            // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta a�o y mes retro
-            if ($opcion_retro == 0) {
-                $totales = $this->procesarSinRetro(
-                    $datos,
-                    $per_anoct,
-                    $per_mesct,
-                    $where_periodo,
-                    $where,
-                    $path,
-                    $licencias_agentes,
-                    $retornar_datos
-                );
-            } else {
-                $totales = $this->procesarConRetro(
-                    $datos,
-                    $per_anoct,
-                    $per_mesct,
-                    $where,
-                    $path,
-                    $licencias_agentes,
-                    $retornar_datos
-                );
-            }
+            // Ejecutar proceso completo usando el orquestrador
+            $totales = $this->sicossOrchestatorRepository->ejecutarProcesoCompleto(
+                $datos,
+                $periodo_fiscal,
+                $filtros,
+                $path,
+                $licencias_agentes,
+                $retornar_datos
+            );
 
             // Limpiar tablas temporales
             $this->limpiarTablasTemporales();
 
-            // Procesar resultado final
-            return $this->procesarResultadoFinal(
+            // Procesar resultado final usando el orquestador
+            return $this->sicossOrchestatorRepository->procesarResultadoFinal(
                 $totales,
                 $testeo_directorio_salida,
                 $testeo_prefijo_archivos
@@ -190,231 +186,7 @@ class SicossLegacy
     }
 
 
-    /**
-     * Procesa SICOSS sin períodos retro
-     *
-     * @param array $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param string $where_periodo Condición WHERE del período
-     * @param string $where Condición WHERE base
-     * @param string $path Ruta de archivos
-     * @param array $licencias_agentes Licencias de agentes
-     * @param bool $retornar_datos Si debe retornar datos
-     * @return mixed
-     */
-    protected function procesarSinRetro(
-        array $datos, int $per_anoct, int $per_mesct, string $where_periodo,
-        string $where, string $path, array $licencias_agentes, bool $retornar_datos
-    ) {
-        try {
-            $nombre_arch = 'sicoss';
-            $periodo = 'Vigente_sin_retro';
-            $this->archivos[$periodo] = $path . $nombre_arch;
 
-            $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                $this->codc_reparto, $where_periodo, $where,
-                $datos['check_lic'], $datos['check_sin_activo']
-            );
-
-            $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-
-            if ($retornar_datos === true) {
-                return $this->sicossLegajoProcessorRepository->procesarSicoss(
-                    $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
-                    $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
-                );
-            }
-
-            $totales[$periodo_display] = $this->sicossLegajoProcessorRepository->procesarSicoss(
-                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
-                $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
-            );
-
-            // Limpiar tabla temporal usando la nueva abstracción
-            $this->databaseOperation->dropTemporaryTable('conceptos_liquidados');
-
-            Log::info('Procesamiento sin retro completado', [
-                'archivo' => $nombre_arch,
-                'legajos_procesados' => count($legajos)
-            ]);
-
-            return $totales;
-
-        } catch (\Exception $e) {
-            Log::error('Error en procesamiento sin retro', [
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-
-    /**
-     * Procesa SICOSS con períodos retro
-     *
-     * @param array $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param string $where Condición WHERE base
-     * @param string $path Ruta de archivos
-     * @param array $licencias_agentes Licencias de agentes
-     * @param bool $retornar_datos Si debe retornar datos
-     * @return array
-     */
-    protected function procesarConRetro(
-        array $datos, int $per_anoct, int $per_mesct, string $where,
-        string $path, array $licencias_agentes, bool $retornar_datos
-    ): array {
-        try {
-            $totales = [];
-
-            // Obtener períodos retro y el período 0-0 que será el período actual
-            $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro(
-                $datos['check_lic'], $datos['check_retro']
-            );
-
-            Log::info('Procesando períodos retro', [
-                'cantidad_periodos' => count($periodos_retro)
-            ]);
-
-            foreach ($periodos_retro as $periodo_data) {
-                $totales = array_merge($totales, $this->procesarPeriodoRetro(
-                    $periodo_data, $datos, $per_anoct, $per_mesct,
-                    $where, $path, $licencias_agentes, $retornar_datos
-                ));
-            }
-
-            return $totales;
-
-        } catch (\Exception $e) {
-            Log::error('Error en procesamiento con retro', [
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-
-    /**
-     * Procesa un período retro específico
-     *
-     * @param array $periodo_data Datos del período
-     * @param array $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param string $where Condición WHERE base
-     * @param string $path Ruta de archivos
-     * @param array $licencias_agentes Licencias de agentes
-     * @param bool $retornar_datos Si debe retornar datos
-     * @return array
-     */
-    protected function procesarPeriodoRetro(
-        array $periodo_data, array $datos, int $per_anoct, int $per_mesct,
-        string $where, string $path, array $licencias_agentes, bool $retornar_datos
-    ): array {
-        try {
-            $mes = str_pad($periodo_data['mes_retro'], 2, "0", STR_PAD_LEFT);
-            $where_periodo = "t.ano_retro=" . $periodo_data['ano_retro'] . " AND t.mes_retro=" . $mes;
-
-            $legajos = $this->sicossLegajoFilterRepository->obtenerLegajos(
-                $this->codc_reparto, $where_periodo, $where,
-                $datos['check_lic'], $datos['check_sin_activo']
-            );
-
-            if ($periodo_data['ano_retro'] == 0 && $periodo_data['mes_retro'] == 0) {
-                $resultado = $this->procesarPeriodoVigente(
-                    $datos, $per_anoct, $per_mesct, $legajos, $path,
-                    $licencias_agentes, $retornar_datos
-                );
-            } else {
-                $resultado = $this->procesarPeriodoHistorico(
-                    $periodo_data, $datos, $per_anoct, $per_mesct,
-                    $legajos, $path, $retornar_datos
-                );
-            }
-
-            // Limpiar tabla temporal usando la nueva abstracción
-            $this->databaseOperation->dropTemporaryTable('conceptos_liquidados');
-
-            return $resultado;
-
-        } catch (\Exception $e) {
-            Log::error('Error al procesar período retro', [
-                'periodo' => $periodo_data,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-
-    /**
-     * Procesa el período vigente en el contexto de retro
-     *
-     * @param array $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param array $legajos Legajos a procesar
-     * @param string $path Ruta de archivos
-     * @param array $licencias_agentes Licencias de agentes
-     * @param bool $retornar_datos Si debe retornar datos
-     * @return array
-     */
-    protected function procesarPeriodoVigente(
-        array $datos, int $per_anoct, int $per_mesct, array $legajos,
-        string $path, array $licencias_agentes, bool $retornar_datos
-    ): array {
-        $nombre_arch = 'sicoss_retro_periodo_vigente';
-        $periodo = $per_mesct . '/' . $per_anoct;
-        $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-
-        $this->archivos[$periodo] = $path . $nombre_arch;
-
-        if ($retornar_datos === true) {
-            return $this->sicossLegajoProcessorRepository->procesarSicoss(
-                $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
-                $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
-            );
-        }
-
-        $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
-            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
-            $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
-        );
-
-        return [$item => $subtotal];
-    }
-
-    /**
-     * Procesa un período histórico
-     *
-     * @param array $periodo_data Datos del período
-     * @param array $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param array $legajos Legajos a procesar
-     * @param string $path Ruta de archivos
-     * @param bool $retornar_datos Si debe retornar datos
-     * @return array
-     */
-    protected function procesarPeriodoHistorico(
-        array $periodo_data, array $datos, int $per_anoct, int $per_mesct,
-        array $legajos, string $path, bool $retornar_datos
-    ): array {
-        $nombre_arch = 'sicoss_retro_' . $periodo_data['ano_retro'] . '_' . $periodo_data['mes_retro'];
-        $periodo = $periodo_data['ano_retro'] . $periodo_data['mes_retro'];
-        $item = $periodo_data['mes_retro'] . "/" . $periodo_data['ano_retro'];
-
-        $this->archivos[$periodo] = $path . $nombre_arch;
-
-        $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
-            $datos, $per_anoct, $per_mesct, $legajos, $nombre_arch,
-            null, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos
-        );
-
-        return [$item => $subtotal];
-    }
 
     /**
      * Limpia todas las tablas temporales utilizadas en el proceso
@@ -426,22 +198,26 @@ class SicossLegacy
         try {
             // Lista de tablas temporales a limpiar
             $tablas_temporales = [
-                'conceptos_liquidados',
-                'pre_conceptos_liquidados'
+                'pre_conceptos_liquidados',
+                'conceptos_liquidados'
             ];
 
             foreach ($tablas_temporales as $tabla) {
-                $resultado = $this->databaseOperation->dropTemporaryTable($tabla);
-
-                if (!$resultado) {
-                    Log::warning("No se pudo eliminar la tabla temporal: {$tabla}");
+                try {
+                    $resultado = $this->databaseOperation->dropTemporaryTable($tabla);
+                    Log::debug("Tabla temporal eliminada: {$tabla}", ['resultado' => $resultado]);
+                } catch (\Exception $e) {
+                    // Ignorar errores si la tabla no existe
+                    Log::debug("Tabla temporal no existía o no se pudo eliminar: {$tabla}", [
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
 
             Log::info('Limpieza de tablas temporales completada');
 
         } catch (\Exception $e) {
-            Log::error('Error al limpiar tablas temporales', [
+            Log::error('Error general al limpiar tablas temporales', [
                 'error' => $e->getMessage()
             ]);
             // No relanzamos la excepción para no interrumpir el flujo principal

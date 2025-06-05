@@ -30,6 +30,7 @@ use App\Repositories\Sicoss\SicossEstadoRepository;
 use App\Repositories\Sicoss\SicossCalculoRepository;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use App\Repositories\Sicoss\SicossFormateadorRepository;
+use App\Repositories\Sicoss\SicossOrchestatorRepository;
 use App\Repositories\Sicoss\SicossLegajoFilterRepository;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Sicoss\SicossConfigurationRepository;
@@ -44,6 +45,7 @@ use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
@@ -88,6 +90,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SicossConfigurationRepositoryInterface::class, SicossConfigurationRepository::class);
         $this->app->bind(SicossLegajoFilterRepositoryInterface::class, SicossLegajoFilterRepository::class);
         $this->app->bind(SicossLegajoProcessorRepositoryInterface::class, SicossLegajoProcessorRepository::class);
+        $this->app->bind(SicossOrchestatorRepositoryInterface::class, SicossOrchestatorRepository::class);
 
         // Registrar la implementación concreta primero
         $this->app->bind(

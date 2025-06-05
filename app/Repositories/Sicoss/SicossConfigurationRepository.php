@@ -36,7 +36,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
         self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Según sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
         self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneración Total (importe Bruto no imponible)
         self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
-        self::$codc_reparto                     = MapucheConfig::getDatosCodcReparto();
+        self::$codc_reparto                     = MapucheConfig::getDatosCodcReparto() ?? '1'; // Valor por defecto
         self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
         self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
         self::$categoria_diferencial       = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
@@ -163,5 +163,13 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
     public function getCodigoObraSocialFamiliarCargo(): int
     {
         return self::$codigo_obrasocial_fc;
+    }
+
+    /**
+     * Obtiene el código de reparto
+     */
+    public function getCodigoReparto(): string
+    {
+        return self::$codc_reparto ?? '1'; // Valor por defecto '1' si no está configurado
     }
 }

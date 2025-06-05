@@ -103,7 +103,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     AND $where_legajos
                 ;";
 
-        return DB::select($sql);
+        return DB::connection($this->getConnectionName())->select($sql);
     }
 
     /**
@@ -236,6 +236,6 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     AND $where_legajos
                 ;";
 
-        return DB::select($sql);
+        return DB::connection($this->getConnectionName())->select($sql);
     }
 }

@@ -5,10 +5,13 @@ namespace App\Repositories;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use App\Contracts\DatabaseOperationInterface;
 
 class DatabaseOperationRepository implements DatabaseOperationInterface
 {
+    use MapucheConnectionTrait;
+
     /**
      * Constructor del repositorio
      *
@@ -25,9 +28,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
      */
     protected function getConnection()
     {
-        return $this->connectionName 
-            ? DB::connection($this->connectionName)
-            : DB::connection();
+        return DB::connection($this->getConnectionName());
     }
 
     /**

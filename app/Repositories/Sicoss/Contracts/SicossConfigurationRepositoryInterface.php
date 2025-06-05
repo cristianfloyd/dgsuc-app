@@ -67,4 +67,9 @@ interface SicossConfigurationRepositoryInterface
      * Obtiene el código de obra social familiar a cargo
      */
     public function getCodigoObraSocialFamiliarCargo(): int;
+
+    /**
+     * Obtiene el código de reparto
+     */
+    public function getCodigoReparto(): string;
 }
