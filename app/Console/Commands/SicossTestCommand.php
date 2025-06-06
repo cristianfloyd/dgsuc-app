@@ -23,6 +23,8 @@ class SicossTestCommand extends Command
                             {--licencias : Incluir procesamiento de licencias}
                             {--inactivos : Incluir agentes sin cargo activo}
                             {--seguro-vida : Incluir seguro de vida patronal}
+                            {--no-topes : No aplicar truncamiento de topes jubilatorios}
+                            {--liqui= : Filtrar por número de liquidación específica}
                             {--export= : Exportar resultado a archivo JSON}
                             {--detailed : Mostrar información detallada}
                             {--clean-only : Solo limpiar tablas temporales y salir}
@@ -178,6 +180,8 @@ class SicossTestCommand extends Command
                 ['Licencias', $this->option('licencias') ? 'SÍ' : 'NO'],
                 ['Agentes Inactivos', $this->option('inactivos') ? 'SÍ' : 'NO'],
                 ['Seguro Vida', $this->option('seguro-vida') ? 'SÍ' : 'NO'],
+                ['Truncar Topes', !$this->option('no-topes') ? 'SÍ' : 'NO'],
+                ['Núm. Liquidación', $this->option('liqui') ? $this->option('liqui') : 'TODAS'],
             ]
         );
         $this->newLine();
@@ -222,12 +226,19 @@ class SicossTestCommand extends Command
      */
     protected function prepararDatos(int $legajo): array
     {
-        return [
+                return [
             'nro_legaj' => $legajo,
             'check_retro' => $this->option('retro') ? 1 : 0,
             'check_lic' => $this->option('licencias') ? 1 : 0,
             'check_sin_activo' => $this->option('inactivos') ? 1 : 0,
             'seguro_vida_patronal' => $this->option('seguro-vida') ? 1 : 0,
+            // Campos adicionales con valores por defecto
+            'truncaTope' => !$this->option('no-topes'), // Usar topes jubilatorios por defecto, excepto si se especifica lo contrario
+            // Los topes se obtendrán automáticamente desde configuración si no se especifican
+            'TopeJubilatorioPatronal' => null,
+            'TopeJubilatorioPersonal' => null,
+            'TopeOtrosAportesPersonal' => null,
+            'nro_liqui' => $this->option('liqui') ? (int)$this->option('liqui') : null, // Filtrar por liquidación específica si se especifica
         ];
     }
 
@@ -237,6 +248,15 @@ class SicossTestCommand extends Command
     protected function ejecutarSicoss(array $datos): array
     {
         $this->info('⚙️  Ejecutando proceso SICOSS...');
+
+        if ($this->option('detailed')) {
+            $this->info('📋 Datos enviados al procesador:');
+            foreach ($datos as $key => $value) {
+                $valorMostrar = is_bool($value) ? ($value ? 'true' : 'false') : ($value ?? 'null');
+                $this->line("   {$key}: {$valorMostrar}");
+            }
+            $this->newLine();
+        }
 
         $sicoss = app(SicossLegacy::class);
 
@@ -251,6 +271,21 @@ class SicossTestCommand extends Command
         $this->newLine();
         $this->info('📊 Resultados del procesamiento:');
 
+        // Debug: mostrar estructura del resultado si está en modo detallado
+        if ($this->option('detailed')) {
+            $this->info('🔍 Estructura del resultado:');
+            $this->line('   Tipo: ' . gettype($resultado));
+            $this->line('   Es array: ' . (is_array($resultado) ? 'SÍ' : 'NO'));
+            $this->line('   Elementos: ' . (is_countable($resultado) ? count($resultado) : 'N/A'));
+            if (is_array($resultado) && !empty($resultado)) {
+                $this->line('   Claves: ' . implode(', ', array_keys($resultado)));
+                if (isset($resultado[0])) {
+                    $this->line('   Primer elemento es array: ' . (is_array($resultado[0]) ? 'SÍ' : 'NO'));
+                }
+            }
+            $this->newLine();
+        }
+
         if (empty($resultado)) {
             $this->warn("⚠️  No se encontraron datos para el legajo {$legajo}");
             $this->line('Posibles causas:');
@@ -260,10 +295,44 @@ class SicossTestCommand extends Command
             return;
         }
 
+        // Verificar la estructura del resultado
+        if (isset($resultado['totales']) && isset($resultado['status'])) {
+            // Es la estructura del procesarResultadoFinal
+            $this->info("✅ Resultado: Estructura completa del procesamiento");
+            $this->mostrarResultadoCompleto($resultado, $legajo);
+            return;
+        }
+
+        // Verificar si el resultado es un array de totales o un array de legajos
+        if (isset($resultado['bruto']) || isset($resultado['imponible_1'])) {
+            // Es un array de totales, no de legajos individuales
+            $this->info("✅ Resultado: Totales de procesamiento");
+            $this->mostrarTotales($resultado);
+            return;
+        }
+
+        // Es un array de legajos
         $this->info("✅ Legajos procesados: " . count($resultado));
         $this->newLine();
 
-        $legajo_data = $resultado[0];
+        // Buscar el legajo específico solicitado
+        $legajo_data = null;
+        foreach ($resultado as $legajo_procesado) {
+            if (isset($legajo_procesado['nro_legaj']) && $legajo_procesado['nro_legaj'] == $legajo) {
+                $legajo_data = $legajo_procesado;
+                break;
+            }
+        }
+
+        // Si no encontramos el legajo específico, tomar el primero
+        if ($legajo_data === null && isset($resultado[0])) {
+            $legajo_data = $resultado[0];
+        }
+
+        if ($legajo_data === null) {
+            $this->error("❌ No se pudo encontrar datos específicos del legajo {$legajo}");
+            return;
+        }
 
         // Información básica
         $this->info('👤 Información del Legajo:');
@@ -297,6 +366,100 @@ class SicossTestCommand extends Command
         if ($this->option('detailed')) {
             $this->mostrarDetallesAdicionales($legajo_data);
         }
+    }
+
+    /**
+     * Muestra el resultado completo del procesamiento
+     */
+    protected function mostrarResultadoCompleto(array $resultado, int $legajo): void
+    {
+        $this->info('📊 Estado del procesamiento: ' . ($resultado['status'] ?? 'desconocido'));
+
+        if (isset($resultado['archivos']) && !empty($resultado['archivos'])) {
+            $this->info('📁 Archivos generados:');
+            foreach ($resultado['archivos'] as $periodo => $archivo) {
+                $this->line("   {$periodo}: {$archivo}.txt");
+            }
+            $this->newLine();
+        }
+
+        if (isset($resultado['totales']) && !empty($resultado['totales'])) {
+            foreach ($resultado['totales'] as $periodo => $totales) {
+                $this->info("📊 Totales para {$periodo}:");
+                $this->mostrarTotales($totales);
+                $this->newLine();
+            }
+        }
+
+        // Buscar datos específicos del legajo en los archivos generados si existen
+        $this->intentarMostrarDatosLegajo($legajo, $resultado['archivos'] ?? []);
+    }
+
+    /**
+     * Intenta mostrar datos específicos del legajo desde los archivos generados
+     */
+    protected function intentarMostrarDatosLegajo(int $legajo, array $archivos): void
+    {
+        if (empty($archivos)) {
+            $this->warn("⚠️  No se generaron archivos para revisar datos específicos del legajo {$legajo}");
+            return;
+        }
+
+        $this->info("🔍 Buscando datos específicos del legajo {$legajo} en archivos generados...");
+
+        $encontrado = false;
+        foreach ($archivos as $periodo => $archivo_path) {
+            $archivo_completo = $archivo_path . '.txt';
+
+            if (file_exists($archivo_completo)) {
+                $contenido = file_get_contents($archivo_completo);
+                $lineas = explode("\n", $contenido);
+
+                foreach ($lineas as $numero_linea => $linea) {
+                    if (strlen($linea) >= 11) {
+                        // Extraer CUIL de los primeros 11 caracteres
+                        $cuil_archivo = substr($linea, 0, 11);
+
+                        // Buscar por patrón de legajo en la línea (aproximado)
+                        if (strpos($linea, (string)$legajo) !== false) {
+                            $this->info("✅ Legajo encontrado en {$periodo} (línea " . ($numero_linea + 1) . ")");
+
+                            if ($this->option('detailed')) {
+                                $this->line("   CUIL: {$cuil_archivo}");
+                                $this->line("   Línea SICOSS (primeros 100 chars): " . substr($linea, 0, 100) . "...");
+                            }
+
+                            $encontrado = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$encontrado) {
+            $this->warn("⚠️  No se encontraron datos específicos del legajo {$legajo} en los archivos generados");
+        }
+    }
+
+    /**
+     * Muestra los totales de procesamiento
+     */
+    protected function mostrarTotales(array $totales): void
+    {
+        $this->table(
+            ['Concepto', 'Total'],
+            [
+                ['Bruto Total', '$' . number_format($totales['bruto'] ?? 0, 2)],
+                ['Imponible 1', '$' . number_format($totales['OtroImporteImponibleSinSAC'] ?? 0, 2)],
+                ['Imponible 2', '$' . number_format($totales['imponible_2'] ?? 0, 2)],
+                ['Imponible 4', '$' . number_format($totales['ImporteImponible_4'] ?? 0, 2)],
+                ['Imponible 5', '$' . number_format($totales['imponible_5'] ?? 0, 2)],
+                ['Imponible 6', '$' . number_format($totales['ImporteImponible_6'] ?? 0, 2)],
+                ['Imponible 8', '$' . number_format($totales['imponible_8'] ?? 0, 2)],
+                ['Imponible 9', '$' . number_format($totales['importeimponible_9'] ?? 0, 2)],
+            ]
+        );
     }
 
     /**

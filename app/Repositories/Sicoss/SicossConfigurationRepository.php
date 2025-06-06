@@ -90,9 +90,9 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function inicializarConfiguracionArchivos(): array
     {
-        $path = storage_path('app/comunicacion/sicoss/');
-        self::$archivos = array();
-        $totales = array();
+        $path = storage_path('comunicacion/sicoss/');
+        self::$archivos = [];
+        $totales = [];
 
         return [
             'path' => $path,
@@ -146,7 +146,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getCodigoObraSocialAporteAdicional(): int
     {
-        return self::$codigo_os_aporte_adicional;
+        return (int) self::$codigo_os_aporte_adicional;
     }
 
     /**
@@ -154,7 +154,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getAportesVoluntarios(): int
     {
-        return self::$aportes_voluntarios;
+        return (int) self::$aportes_voluntarios;
     }
 
     /**
@@ -162,7 +162,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getCodigoObraSocialFamiliarCargo(): int
     {
-        return self::$codigo_obrasocial_fc;
+        return (int) self::$codigo_obrasocial_fc;
     }
 
     /**

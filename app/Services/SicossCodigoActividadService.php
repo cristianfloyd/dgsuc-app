@@ -120,7 +120,7 @@ class SicossCodigoActividadService
     public function obtenerConceptosLiquidados(int $nroLegajo, string $condicion = 'true'): array
     {
         // Utilizamos Query Builder de Laravel para la consulta
-        return DB::connection($this->getConnectionName())->table('conceptos_liquidados')
+        $resultados = DB::connection($this->getConnectionName())->table('conceptos_liquidados')
             ->select([
                 'impp_conce',
                 'nov1_conce',
@@ -130,8 +130,20 @@ class SicossCodigoActividadService
                 'codigoescalafon'
             ])
             ->whereRaw("nro_legaj = ? AND tipos_grupos IS NOT NULL AND {$condicion}", [$nroLegajo])
-            ->get()
-            ->toArray();
+            ->get();
+
+
+        // Convertir explícitamente cada objeto stdClass a un array asociativo
+        return array_map(function ($item) {
+            return [
+                'impp_conce' => $item->impp_conce,
+                'nov1_conce' => $item->nov1_conce,
+                'codn_conce' => $item->codn_conce,
+                'tipos_grupos' => $item->tipos_grupos,
+                'nro_cargo' => $item->nro_cargo,
+                'codigoescalafon' => $item->codigoescalafon
+            ];
+        }, $resultados->all());
 
         // Alternativa con SQL directo si es necesario:
         /*
@@ -236,7 +248,8 @@ class SicossCodigoActividadService
         if ($prioridadTipoActividad == 38 || $prioridadTipoActividad == 0) {
             return $codigoActividadDefault ?? 0;
         } elseif (($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37) ||
-                 $prioridadTipoActividad == 87 || $prioridadTipoActividad == 88) {
+            $prioridadTipoActividad == 87 || $prioridadTipoActividad == 88
+        ) {
             return $prioridadTipoActividad;
         }
 

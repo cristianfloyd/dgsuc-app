@@ -29,8 +29,21 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository
     ) {}
 
+
     /**
-     * Procesa los legajos filtrados para generar datos SICOSS
+     * Procesa los legajos para el cálculo de SICOSS
+     *
+     * @param SicossProcessData $datos Datos de configuración para el procesamiento
+     * @param int $per_anoct Año de la liquidación
+     * @param int $per_mesct Mes de la liquidación
+     * @param array $legajos Array con los legajos a procesar
+     * @param string $nombre_arch Nombre del archivo de salida
+     * @param array|null $licencias Array de licencias (opcional)
+     * @param bool $retro Indica si es una liquidación retroactiva
+     * @param bool $check_sin_activo Verifica legajos sin activos
+     * @param bool $retornar_datos Indica si debe retornar los datos procesados
+     *
+     * @return array Array con los resultados del procesamiento
      */
     public function procesarSicoss(
         SicossProcessData $datos,
@@ -44,6 +57,11 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         bool $retornar_datos = false
     ): array
     {
+        // Convertir objetos stdClass a arrays si es necesario
+        $legajos = array_map(function($legajo) {
+            return is_object($legajo) ? (array) $legajo : $legajo;
+        }, $legajos);
+
         // Usar los valores del DTO directamente
         $TopeJubilatorioPatronal = $datos->TopeJubilatorioPatronal;
         $TopeJubilatorioPersonal = $datos->TopeJubilatorioPersonal;
@@ -69,7 +87,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $j = 0;
 
         // En este for se completan los campos necesarios para cada uno de los legajos liquidados
-        for ($i = 0; $i < count($legajos); $i++) {
+        for ($i = 0; $i < count(array_values($legajos)); $i++)
+        {
             $legajo = $legajos[$i]['nro_legaj'];
 
             $legajos[$i]['ImporteSACOtroAporte'] = 0;
@@ -83,27 +102,25 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             $legajos[$i]['codigo_os'] = $this->sicossCalculoRepository->codigoOs($legajo);
 
             //#44909 Incorporar a la salida de SICOSS el código de situación Reserva de Puesto (14)
-            if ($check_sin_activo) {
-                $where_not_dh21 = "
-                                        NOT EXISTS (SELECT 1
-                                                                FROM
-                                                                    mapuche.dh21
-                                                                WHERE
-                                                                    dh21.nro_legaj = l.nro_legaj
-                                                                )
-                                        AND l.nro_legaj = $legajo
-                        ";
-                $legajo_sin_liquidar = Dh01::getLegajosActivosSinCargosVigentes($where_not_dh21);
+            if ($check_sin_activo)
+            {
+                $legajo_sin_liquidar = Dh01::getLegajoSinLiquidarYSinDh21($legajo);
 
-                if (isset($legajo_sin_liquidar[0])) {
-                    if ($legajo_sin_liquidar[0]['nro_legaj'] == $legajo)
-                        $legajos[$i]['codigosituacion'] = 14;
+                if ($legajo_sin_liquidar) {
+                    $legajos[$i]['codigosituacion'] = 14;
                 }
             }
 
-            if (!$retro) {
+            if (!$retro)
+            {
                 $dh03Repository = app(Dh03RepositoryInterface::class);
                 $limites = $dh03Repository->getLimitesCargos($legajo);
+
+                // Convertir objetos stdClass a arrays si es necesario
+                $limites = array_map(function($limite) {
+                    return is_object($limite) ? (array) $limite : $limite;
+                }, $limites);
+
                 //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
                 if (!isset($limites[0]['maximo'])) {
                     $cargos_activos_agente = Dh03::getCargosActivos($legajo);
@@ -116,6 +133,11 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $cargos_legajo = $dh03Repository->getCargosActivosSinLicencia($legajo);
                 $cargos_legajo2 = $dh03Repository->getCargosActivosConLicenciaVigente($legajo);
                 $cargos_legajo = array_merge($cargos_legajo, $cargos_legajo2);
+
+                // Convertir objetos stdClass a arrays si es necesario
+                $cargos_legajo = array_map(function($cargo) {
+                    return is_object($cargo) ? (array) $cargo : $cargo;
+                }, $cargos_legajo);
                 // En el caso de las licencias de legajo, se mantiene el código de condición en esos días
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
                 // Se considera que no se puede superponer con otra licencia
@@ -201,7 +223,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 }
 
                 // Si tengo chequeado el tilde de licencias cambio el codigo de situacion y la cantidad de dias trabajados se vuelve 0
-                if ($datos['check_lic'] && ($legajos[$i]['licencia'] == 1)) {
+                if ($datos->check_lic && ($legajos[$i]['licencia'] == 1)) {
                     $legajos[$i]['codigosituacion'] = 13;
                     $legajos[$i]['dias_trabajados'] = '00';
                 } else {
@@ -219,6 +241,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             // Se informa solo si tiene conyugue o no; no la cantidad
             if ($legajos[$i]['conyugue'] > 0)
                 $legajos[$i]['conyugue'] = 1;
+
 
             // --- Obtengo la sumarización según concepto o tipo de grupo de un concepto ---
             $this->sumarizarConceptosPorTiposGrupos($legajo, $legajos[$i]);
@@ -464,14 +487,14 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $j++;
             } // fin else que verifica que los importes sean distintos de 0
             // Si los importes son cero el legajo no se agrega al archivo sicoss; pero cuando tengo el check de licencias por interface y ademas el legajo tiene licencias entonces si va
-            elseif ($datos['check_lic'] && ($legajos[$i]['licencia'] == 1)) {
+            elseif ($datos->check_lic && ($legajos[$i]['licencia'] == 1)) {
                 // Inicializo variables faltantes en cero
                 $legajos[$i]['ImporteSueldoMasAdicionales'] = 0;
                 if (is_null($legajos[$i]['trabajadorconvencionado'])) {
                     $legajos[$i]['trabajadorconvencionado'] = $this->sicossConfigurationRepository->getTrabajadorConvencionado();
                 }
 
-                if ($datos['seguro_vida_patronal'] == 1 && $datos['check_lic'] == 1) {
+                if ($datos->seguro_vida_patronal == 1 && $datos->check_lic == 1) {
                     $legajos[$i]['SeguroVidaObligatorio'] = 1;
                 }
                 $legajos_validos[$j] = $legajos[$i];
@@ -488,7 +511,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             $this->grabarEnTxt($legajos_validos, $nombre_arch);
         }
 
-
+        dd($total);
         return $total;
     }
 
@@ -762,9 +785,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
 
         $informar_becarios                = MapucheConfig::getSicossInformarBecarios();
+        $cargoInvestigador                = []; // Voy a guardar en esta variable los numeros de cargos que son investigador
 
-        // Voy a guardar en esta variable los numeros de cargos que son investigador
-        $cargoInvestigador                = [];
         // En el caso de que en check 'Toma en cuenta Familiares a Cargo para informar SICOSS?' en configuración -> impositivos -> parametros sicoss sea false
         // voy a fijarme si se liquido un concepto igual al configurado como obra social familiar a cargo. Informo 0 o 1 (no se liquido o se liquido algun concepto igual al definido)
         if ($this->sicossConfigurationRepository->getCantidadAdherentesSicoss() == 0)
@@ -774,7 +796,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
         // Sumarizo donde corresponda para cada concepto liquidado
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
-        $conce_hs_extr = array();
+        $conce_hs_extr = [];
         $cont = 0;
         for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
             $importe            = $conceptos_liq_por_leg[$i]['impp_conce'];
@@ -976,7 +998,10 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
         $conceptos_filtrados = DB::connection($this->getConnectionName())->select($sql_conceptos_fltrados);
 
-        return $conceptos_filtrados;
+        // Convertir objetos stdClass a arrays
+        return array_map(function($concepto) {
+            return (array) $concepto;
+        }, $conceptos_filtrados);
     }
 
     /**

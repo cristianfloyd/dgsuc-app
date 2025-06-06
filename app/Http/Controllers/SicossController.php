@@ -38,7 +38,7 @@ class SicossController extends Controller
 
         // 5. Obtener conceptos liquidados del legajo
         $conceptosLiquidados = $this->sicossService->obtenerConceptosLiquidados($nroLegajo);
-
+        
         // 6. Calcular tipo de actividad usando esos conceptos
         $tipoActividad = $this->sicossService->calcularTipoActividad($conceptosLiquidados, $codigoActividad);
 

@@ -49,59 +49,58 @@ class SicossLegacy
     public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
     {
         try {
-            //code...
 
             Log::info('Iniciando generación de SICOSS', [
                 'datos' => $datos,
                 'retornar_datos' => $retornar_datos
             ]);
 
-            // Crear el DTO con los datos recibidos
+            // 1. Crear el DTO con los datos recibidos
             $datosProcess = SicossProcessData::fromArray($datos);
 
-            // Cargar configuraciones usando el nuevo repositorio
+            // 2. Cargar configuraciones usando el nuevo repositorio
             $this->sicossConfigurationRepository->cargarConfiguraciones();
 
-            // Obtener código de reparto desde configuración
+            // 3. Obtener código de reparto desde configuración
             $this->codc_reparto = $this->sicossConfigurationRepository->getCodigoReparto();
 
-            // Obtener período fiscal usando el nuevo repositorio
+            // 4. Obtener período fiscal usando el nuevo repositorio
             $periodo_fiscal = $this->sicossConfigurationRepository->obtenerPeriodoFiscal();
             $per_mesct = $periodo_fiscal['mes'];
             $per_anoct = $periodo_fiscal['ano'];
 
-            // Si los topes no están definidos, obtenerlos de la configuración
+            // 5. Si los topes no están definidos, obtenerlos de la configuración
             if (!$datosProcess->TopeJubilatorioPatronal) {
                 $topes = $this->sicossConfigurationRepository->getTopes();
                 $datosProcess = $datosProcess->withDefaultTopes($topes);
             }
 
-            // Generar filtros básicos usando el nuevo repositorio
+            // 6. Generar filtros básicos usando el nuevo repositorio
             $filtros = $this->sicossConfigurationRepository->generarFiltrosBasicos($datos);
             $opcion_retro   = $filtros['opcion_retro'];
             $filtro_legajo  = $filtros['filtro_legajo'];
             $where          = $filtros['where'];
             $where_periodo  = $filtros['where_periodo'];
 
-            // Limpiar tablas temporales previas antes de iniciar el proceso
+            // 7. Limpiar tablas temporales previas antes de iniciar el proceso
             $this->limpiarTablasTemporales();
 
-            //si se envia nro_liqui desde la generacion de libro de sueldo
+            // 8.si se envia nro_liqui desde la generacion de libro de sueldo
             $this->procesarConceptosLiquidados($datosProcess, $per_anoct, $per_mesct, $where);
 
 
-            // Inicializar configuración de archivos usando el nuevo repositorio
+            // 9. Inicializar configuración de archivos usando el nuevo repositorio
             $config_archivos = $this->sicossConfigurationRepository->inicializarConfiguracionArchivos();
             $path = $config_archivos['path'];
             $totales = $config_archivos['totales'];
 
-            // Obtener licencias de agentes usando el nuevo repositorio
+            // 10. Obtener licencias de agentes  usando el nuevo repositorio
             $licencias_agentes = $this->licenciaRepository->getLicenciasVigentes($where);
 
-            // Configurar el orquestador con el código de reparto
+            // 11. Configurar el orquestador con el código de reparto
             $this->sicossOrchestatorRepository->setCodigoReparto($this->codc_reparto);
 
-            // Ejecutar proceso completo usando el orquestrador
+            // 12. Ejecutar proceso completo usando el orquestrador
             $totales = $this->sicossOrchestatorRepository->ejecutarProcesoCompleto(
                 $datosProcess,
                 $periodo_fiscal,
@@ -111,15 +110,18 @@ class SicossLegacy
                 $retornar_datos
             );
 
-            // Limpiar tablas temporales
+            // dd($totales); // Hasta aca se comprobaron los totales y salen correctos
+            // 13. Limpiar tablas temporales
             $this->limpiarTablasTemporales();
 
-            // Procesar resultado final usando el orquestador
-            return $this->sicossOrchestatorRepository->procesarResultadoFinal(
+            // 14. Procesar resultado final usando el orquestador
+            $resultado = $this->sicossOrchestatorRepository->procesarResultadoFinal(
                 $totales,
                 $testeo_directorio_salida,
                 $testeo_prefijo_archivos
             );
+
+            return $resultado;
         } catch (\Exception $e) {
             Log::error('Error en generación de SICOSS', [
                 'error' => $e->getMessage(),
@@ -152,6 +154,7 @@ class SicossLegacy
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where_liqui);
             } else {
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where);
+                // dd($resultados);
             }
 
             Log::info('Conceptos liquidados procesados exitosamente');

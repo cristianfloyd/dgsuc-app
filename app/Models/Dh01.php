@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheGrupo;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
@@ -134,7 +135,7 @@ class Dh01 extends Model
      */
     public function scopeLegajosActivosSinCargosVigentes($query, $where = '1=1')
     {
-        return $query->select([
+        $query = $query->select([
             'nro_legaj',
             DB::raw("tipo_docum || ' ' || to_char(nro_docum::numeric(11,0),'9G999G999G999') AS nro_docum"),
             DB::raw("LPAD(nro_cuil1::varchar, 2, '0') || '-' || LPAD(nro_cuil::varchar, 8, '0') || '-' || nro_cuil2 AS cuil"),
@@ -150,6 +151,7 @@ class Dh01 extends Model
             })
             ->whereRaw($where)
             ->orderBy('nro_legaj');
+        return $query;
     }
 
     public function scopeByCuil($query, $cuil)
@@ -171,13 +173,13 @@ class Dh01 extends Model
         return $cuil1 . $cuil . $cuil2;
     }
 
-	public static function esJubilado($nro_legajo): bool
-	{
-		return static::query()
+    public static function esJubilado($nro_legajo): bool
+    {
+        return static::query()
             ->where('nro_legaj', $nro_legajo)
             ->where('tipo_estad', 'J')
             ->exists();
-	}
+    }
 
     // ###############################################
     // ###########  Mutadores y Accesores  ###########
@@ -234,8 +236,28 @@ class Dh01 extends Model
      * @param string $where Condición adicional WHERE
      * @return array
      */
-    public function getLegajosActivosSinCargosVigentes($where)
+    public static function getLegajosActivosSinCargosVigentes($where)
     {
-        return $this->legajosActivosSinCargosVigentes($where)->get()->toArray();
+        return self::legajosActivosSinCargosVigentes($where)->get()->toArray();
+    }
+
+    /**
+     * Obtiene un legajo activo sin cargos vigentes y sin registros en dh21
+     *
+     * @param int $nro_legajo Número de legajo a buscar
+     * @return array|null Retorna el legajo si cumple las condiciones o null si no existe
+     */
+    public static function getLegajoSinLiquidarYSinDh21(int $nro_legajo): ?array
+    {
+        $where_not_dh21 = "
+        NOT EXISTS (SELECT 1
+                    FROM mapuche.dh21
+                    WHERE dh21.nro_legaj = dh01.nro_legaj)
+        AND dh01.nro_legaj = $nro_legajo
+    ";
+
+        $resultado = static::legajosActivosSinCargosVigentes($where_not_dh21)->first();
+
+        return $resultado ? $resultado->toArray() : null;
     }
 }

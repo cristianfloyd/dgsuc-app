@@ -236,6 +236,17 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     AND $where_legajos
                 ;";
 
-        return DB::connection($this->getConnectionName())->select($sql);
+        $resultados = DB::connection($this->getConnectionName())->select($sql);
+
+        // Convertir los resultados a array
+        return array_map(function ($item) {
+            return [
+                'nro_legaj' => $item->nro_legaj,
+                'inicio' => $item->inicio,
+                'final' => $item->final,
+                'es_legajo' => $item->es_legajo,
+                'condicion' => $item->condicion
+            ];
+        }, $resultados);
     }
 }

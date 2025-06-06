@@ -27,7 +27,8 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         string $where_legajo = ' true ',
         bool $check_lic = false,
         bool $check_sin_activo = false
-    ): array {
+    ): array
+    {
         // Si la opcion no tiene en cuenta los retroactivos el proceso es como se venia haciendo, se toma de la tabla anterior y se vuelca sobre un unico archivo
         // Si hay que tener en cuenta los retros se toma la tabla anterior y se segmenta por periodo retro, se genera un archivo por cada segmento
 
@@ -110,14 +111,19 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
             $legajos = array_merge($legajos, $legajos_t);
         }
 
+        // Convertir objetos stdClass a arrays
+        $legajos = array_map(function($legajo) {
+            return (array) $legajo;
+        }, $legajos);
+
         // Elimino legajos repetidos
         $legajos_sin_repetidos = [];
         foreach ($legajos as $legajo) {
-            if (isset($legajos_sin_repetidos[$legajo->nro_legaj])) {
-                if ($legajos_sin_repetidos[$legajo->nro_legaj]->licencia == 1)
-                    $legajos_sin_repetidos[$legajo->nro_legaj] = $legajo;
+            if (isset($legajos_sin_repetidos[$legajo['nro_legaj']])) {
+                if ($legajos_sin_repetidos[$legajo['nro_legaj']]['licencia'] == 1)
+                    $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
             } else
-                $legajos_sin_repetidos[$legajo->nro_legaj] = $legajo;
+                $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
         }
         $legajos = [];
         foreach ($legajos_sin_repetidos as $legajo)

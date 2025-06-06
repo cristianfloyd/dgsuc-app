@@ -25,9 +25,19 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         protected DatabaseOperationInterface $databaseOperation
     ) {}
 
+
     /**
      * Ejecuta el proceso completo de generación SICOSS
      * Orquesta todo el flujo principal según configuración
+     *
+     * @param SicossProcessData $datos Datos de configuración del proceso
+     * @param array $periodo_fiscal Período fiscal con formato ['mes' => int, 'ano' => int]
+     * @param array $filtros Filtros de procesamiento con formato ['opcion_retro' => int, 'where' => string, 'where_periodo' => string]
+     * @param string $path Ruta donde se guardarán los archivos generados
+     * @param array $licencias_agentes Lista de agentes con licencias
+     * @param bool $retornar_datos Indica si se deben retornar los datos procesados
+     * @return array Resultado del proceso según el flujo ejecutado
+     * @throws \Exception Si ocurre un error durante el proceso
      */
     public function ejecutarProcesoCompleto(
         SicossProcessData $datos,
@@ -77,9 +87,21 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         }
     }
 
+
     /**
      * Procesa SICOSS sin períodos retro
      * Flujo simplificado para período vigente únicamente
+     *
+     * @param SicossProcessData $datos Datos de configuración del proceso
+     * @param int $per_anoct Año del período
+     * @param int $per_mesct Mes del período
+     * @param string $where_periodo Condición WHERE del período
+     * @param string $where Condición WHERE base
+     * @param string $path Ruta de archivos
+     * @param array $licencias_agentes Licencias de agentes
+     * @param bool $retornar_datos Indica si se deben retornar los datos procesados
+     * @return array Resultado del proceso según el flujo ejecutado
+     * @throws \Exception Si ocurre un error durante el proceso
      */
     public function procesarSinRetro(
         SicossProcessData $datos,
@@ -154,6 +176,16 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
     /**
      * Procesa SICOSS con períodos retro
      * Flujo complejo que incluye períodos históricos
+     *
+     * @param SicossProcessData $datos Datos de configuración del proceso
+     * @param int $per_anoct Año del período
+     * @param int $per_mesct Mes del período
+     * @param string $where Condición WHERE base
+     * @param string $path Ruta de archivos
+     * @param array $licencias_agentes Licencias de agentes
+     * @param bool $retornar_datos Indica si se deben retornar los datos procesados
+     * @return array Resultado del proceso según el flujo ejecutado
+     * @throws \Exception Si ocurre un error durante el proceso
      */
     public function procesarConRetro(
         SicossProcessData $datos,
@@ -243,8 +275,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             $this->archivos[$periodo] = $path . $nombre_arch;
 
             // Obtener conceptos liquidados para el período específico
-            $where_periodo_retro = " per_anoct = " . $periodo_data['ano_retro'] .
-                                 " AND per_mesct = " . $periodo_data['mes_retro'];
+            $where_periodo_retro = " ano_retro = " . $periodo_data['ano_retro'] .
+                                 " AND mes_retro = " . $periodo_data['mes_retro'];
 
             $this->dh21Repository->obtenerConceptosLiquidadosSicoss(
                 $periodo_data['ano_retro'],

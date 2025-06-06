@@ -34,7 +34,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         ";
 
         $suma = DB::connection($this->getConnectionName())->select($sql);
-        return (float)($suma[0]['suma'] ?? 0);
+        return (float)($suma[0]->suma ?? 0);
     }
 
     /**
@@ -137,11 +137,11 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         $siglas = DB::connection($this->getConnectionName())->select($sql);
 
         $sigla = '';
-        if (empty($siglas[0]['codc_obsoc'])) {
+        if (empty($siglas[0]->codc_obsoc)) {
             // Si campo dh09 está vacío asigno la obra social por defecto
             $sigla = app(\App\Models\Mapuche\MapucheConfig::class)::getDefaultsObraSocial();
         } else {
-            $sigla = $siglas[0]['codc_obsoc'];
+            $sigla = $siglas[0]->codc_obsoc;
         }
 
         // Obtengo el código DGI con esa sigla
@@ -156,10 +156,10 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
 
         $coddgi = DB::connection($this->getConnectionName())->select($sql2);
 
-        if (empty($coddgi[0]['codn_osdgi'])) {
+        if (empty($coddgi[0]->codn_osdgi)) {
             return '000000';
         }
 
-        return $coddgi[0]['codn_osdgi'];
+        return $coddgi[0]->codn_osdgi;
     }
 }

@@ -553,9 +553,10 @@ class AfipMapucheSicoss extends Model
                 )
             )) as tipos_grupos
         FROM mapuche.dh21
+        INNER JOIN mapuche.dh22 ON dh22.nro_liqui = dh21.nro_liqui
         WHERE dh21.nro_legaj = :nro_legaj
-        AND dh21.per_mesct = :mes
-        AND dh21.per_anoct = :anio
+        AND dh22.per_limes = :mes
+        AND dh22.per_liano = :anio
     )
     SELECT
         SUM(CASE WHEN :any(tipos_grupos, '{9}') THEN impp_conce ELSE 0 END) as importe_sac,

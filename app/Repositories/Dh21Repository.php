@@ -160,18 +160,29 @@ class Dh21Repository implements Dh21RepositoryInterface
                         LEFT OUTER JOIN mapuche.dh22 ON (liquidaciones.nro_liqui  = dh22.nro_liqui)      -- Par�metros de Liquidaciones
                 WHERE
                         -- liquidaciones del periodo vigente y que generen impuestos
-                        dh22.per_liano = {$per_anoct} AND  dh22.per_limes = {$per_mesct}
+                        dh22.per_liano = ? AND  dh22.per_limes = ?
                         AND dh22.sino_genimp
+                        -- AND dh22.nro_liqui = 31
                         AND liquidaciones.codn_conce > 0
                         --AND liquidaciones.nro_orimp > 0
                         AND {$where}
             ";
-        $rs = DB::connection($this->getConnectionName())->select($sql_conceptos_liq);
+        // Ejecutar la creación de la tabla temporal
+        DB::connection($this->getConnectionName())->statement($sql_conceptos_liq, [$per_anoct, $per_mesct]);
 
-        $sql_ix = "CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion);";
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
+        // Crear índice en la tabla temporal
+        DB::connection($this->getConnectionName())->statement(
+            "CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion);"
+        );
 
-        return $rs;
+        // Obtener los datos de la tabla temporal
+        $resultados = DB::connection($this->getConnectionName())
+            ->select("SELECT * FROM pre_conceptos_liquidados");
+
+        // Convertir los resultados a array
+        return array_map(function ($item) {
+            return (array) $item;
+        }, $resultados);
     }
 
     /**
@@ -219,5 +230,4 @@ class Dh21Repository implements Dh21RepositoryInterface
 
         return $rs_periodos_retro;
     }
-
 }
