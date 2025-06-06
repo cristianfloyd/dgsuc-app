@@ -3,6 +3,7 @@
 namespace App\Repositories\Sicoss;
 
 use Illuminate\Support\Facades\Log;
+use App\Data\Sicoss\SicossProcessData;
 use App\Traits\MapucheConnectionTrait;
 use App\Contracts\Dh21RepositoryInterface;
 use App\Contracts\DatabaseOperationInterface;
@@ -29,7 +30,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * Orquesta todo el flujo principal según configuración
      */
     public function ejecutarProcesoCompleto(
-        array $datos,
+        SicossProcessData $datos,
         array $periodo_fiscal,
         array $filtros,
         string $path,
@@ -81,7 +82,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * Flujo simplificado para período vigente únicamente
      */
     public function procesarSinRetro(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         string $where_periodo,
@@ -99,8 +100,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 $where_periodo,
                 $where,
-                $datos['check_lic'],
-                $datos['check_sin_activo']
+                $datos->check_lic,
+                $datos->check_sin_activo
             );
 
             $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
@@ -113,8 +114,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $legajos,
                     $nombre_arch,
                     $licencias_agentes,
-                    $datos['check_retro'],
-                    $datos['check_sin_activo'],
+                    $datos->check_retro,
+                    $datos->check_sin_activo,
                     $retornar_datos
                 );
             }
@@ -126,8 +127,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 $licencias_agentes,
-                $datos['check_retro'],
-                $datos['check_sin_activo'],
+                $datos->check_retro,
+                $datos->check_sin_activo,
                 $retornar_datos
             );
 
@@ -155,7 +156,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * Flujo complejo que incluye períodos históricos
      */
     public function procesarConRetro(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         string $where,
@@ -167,7 +168,10 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             $totales = [];
 
             // Obtener períodos retroactivos
-            $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro($where);
+            $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro(
+                $datos->check_lic,
+                $datos->check_retro
+            );
 
             Log::info('Iniciando procesamiento con retro', [
                 'periodos_retro' => count($periodos_retro),
@@ -179,8 +183,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 ' true ',
                 $where,
-                $datos['check_lic'],
-                $datos['check_sin_activo']
+                $datos->check_lic,
+                $datos->check_sin_activo
             );
 
             // Procesar período vigente
@@ -229,7 +233,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         }
     }
 
-    protected function procesarPeriodoRetro(array $periodo_data, array $datos, int $per_anoct, int $per_mesct, string $where, string $path, array $licencias_agentes, bool $retornar_datos): array
+    protected function procesarPeriodoRetro(array $periodo_data, SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where, string $path, array $licencias_agentes, bool $retornar_datos): array
     {
         try {
             $nombre_arch = 'sicoss_retro_' . $periodo_data['ano_retro'] . '_' . $periodo_data['mes_retro'];
@@ -253,8 +257,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 $where_periodo_retro,
                 $where,
-                $datos['check_lic'],
-                $datos['check_sin_activo']
+                $datos->check_lic,
+                $datos->check_sin_activo
             );
 
             Log::info('Procesando período retro', [
@@ -270,8 +274,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 null,
-                $datos['check_retro'],
-                $datos['check_sin_activo'],
+                $datos->check_retro,
+                $datos->check_sin_activo,
                 $retornar_datos
             );
 
@@ -286,7 +290,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         }
     }
 
-    protected function procesarPeriodoVigente(array $datos, int $per_anoct, int $per_mesct, array $legajos, string $path, array $licencias_agentes, bool $retornar_datos): array
+    protected function procesarPeriodoVigente(SicossProcessData $datos, int $per_anoct, int $per_mesct, array $legajos, string $path, array $licencias_agentes, bool $retornar_datos): array
     {
         try {
             $nombre_arch = 'sicoss';
@@ -308,8 +312,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 $licencias_agentes,
-                $datos['check_retro'],
-                $datos['check_sin_activo'],
+                $datos->check_retro,
+                $datos->check_sin_activo,
                 $retornar_datos
             );
 

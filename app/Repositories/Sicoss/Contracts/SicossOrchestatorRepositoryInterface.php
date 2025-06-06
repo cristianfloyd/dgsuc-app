@@ -2,13 +2,15 @@
 
 namespace App\Repositories\Sicoss\Contracts;
 
+use App\Data\Sicoss\SicossProcessData;
+
 interface SicossOrchestatorRepositoryInterface
 {
     /**
      * Ejecuta el proceso completo de generación SICOSS
      * Orquesta todo el flujo principal según configuración
      *
-     * @param array $datos Datos de configuración
+     * @param SicossProcessData $datos Datos de configuración
      * @param array $periodo_fiscal Período fiscal
      * @param array $filtros Filtros básicos
      * @param string $path Ruta de archivos
@@ -17,7 +19,7 @@ interface SicossOrchestatorRepositoryInterface
      * @return array
      */
     public function ejecutarProcesoCompleto(
-        array $datos,
+        SicossProcessData $datos,
         array $periodo_fiscal,
         array $filtros,
         string $path,
@@ -29,7 +31,7 @@ interface SicossOrchestatorRepositoryInterface
      * Procesa SICOSS sin períodos retro
      * Flujo simplificado para período vigente únicamente
      *
-     * @param array $datos Datos de configuración
+     * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
      * @param int $per_mesct Mes del período
      * @param string $where_periodo Condición WHERE del período
@@ -40,7 +42,7 @@ interface SicossOrchestatorRepositoryInterface
      * @return mixed
      */
     public function procesarSinRetro(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         string $where_periodo,
@@ -54,7 +56,7 @@ interface SicossOrchestatorRepositoryInterface
      * Procesa SICOSS con períodos retro
      * Flujo complejo que incluye períodos históricos
      *
-     * @param array $datos Datos de configuración
+     * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
      * @param int $per_mesct Mes del período
      * @param string $where Condición WHERE base
@@ -64,7 +66,7 @@ interface SicossOrchestatorRepositoryInterface
      * @return array
      */
     public function procesarConRetro(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         string $where,

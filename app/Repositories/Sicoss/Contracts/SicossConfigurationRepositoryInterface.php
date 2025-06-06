@@ -72,4 +72,11 @@ interface SicossConfigurationRepositoryInterface
      * Obtiene el código de reparto
      */
     public function getCodigoReparto(): string;
+
+    /**
+     * Obtiene los topes jubilatorios configurados
+     *
+     * @return array Array con los topes jubilatorios y otros aportes
+     */
+    public function getTopes(): array;
 }

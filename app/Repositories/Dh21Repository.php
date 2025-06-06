@@ -184,7 +184,7 @@ class Dh21Repository implements Dh21RepositoryInterface
     public function obtenerPeriodosRetro(bool $check_lic = false, bool $check_retr = false): array
     {
         // Obtengo los año y mes retro disponibles del periodo de la tabla temporal que genero para hacer el join con la tabla de legajos
-        $rs_periodos_retro = array();
+        $rs_periodos_retro = [];
 
         if ($check_lic && $check_retr) {
             $sql_periodos_retro = "

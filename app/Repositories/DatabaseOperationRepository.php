@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use App\Contracts\DatabaseOperationInterface;
+use App\Services\EnhancedDatabaseConnectionService;
 
 class DatabaseOperationRepository implements DatabaseOperationInterface
 {
@@ -28,7 +29,43 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
      */
     protected function getConnection()
     {
-        return DB::connection($this->getConnectionName());
+        try {
+            $connectionName = $this->getConnectionName();
+
+            // Verificar que el nombre de conexión no sea null
+            if (empty($connectionName)) {
+                Log::warning('DatabaseOperationRepository: Nombre de conexión vacío, usando servicio de conexión');
+                $service = app(EnhancedDatabaseConnectionService::class);
+                $connectionName = $service->getCurrentConnection();
+            }
+
+            Log::debug('DatabaseOperationRepository: Usando conexión', [
+                'connection_name' => $connectionName,
+                'constructor_connection' => $this->connectionName
+            ]);
+
+            $connection = DB::connection($connectionName);
+
+            // Verificar que la conexión es válida
+            if (!$connection) {
+                throw new Exception("No se pudo obtener la conexión '{$connectionName}'");
+            }
+
+            return $connection;
+
+        } catch (Exception $e) {
+            Log::error('DatabaseOperationRepository: Error al obtener conexión', [
+                'error' => $e->getMessage(),
+                'connection_name' => $connectionName ?? 'null',
+                'constructor_connection' => $this->connectionName ?? 'null'
+            ]);
+
+            // Fallback: intentar con conexión por defecto
+            $fallbackConnection = EnhancedDatabaseConnectionService::DEFAULT_CONNECTION;
+            Log::warning("DatabaseOperationRepository: Usando conexión fallback: {$fallbackConnection}");
+
+            return DB::connection($fallbackConnection);
+        }
     }
 
     /**
@@ -212,7 +249,31 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
      */
     protected function escapeTableName(string $tableName): string
     {
-        // Usar el método de escape de Laravel para nombres de tabla
-        return $this->getConnection()->getSchemaGrammar()->wrapTable($tableName);
+        try {
+            $connection = $this->getConnection();
+
+            if (!$connection) {
+                Log::warning('DatabaseOperationRepository: Conexión null en escapeTableName, usando escape manual');
+                return '"' . str_replace('"', '""', $tableName) . '"';
+            }
+
+            $grammar = $connection->getSchemaGrammar();
+
+            if (!$grammar) {
+                Log::warning('DatabaseOperationRepository: SchemaGrammar null, usando escape manual');
+                return '"' . str_replace('"', '""', $tableName) . '"';
+            }
+
+            return $grammar->wrapTable($tableName);
+
+        } catch (Exception $e) {
+            Log::error('DatabaseOperationRepository: Error en escapeTableName', [
+                'table_name' => $tableName,
+                'error' => $e->getMessage()
+            ]);
+
+            // Fallback: escape manual para PostgreSQL
+            return '"' . str_replace('"', '""', $tableName) . '"';
+        }
     }
 }

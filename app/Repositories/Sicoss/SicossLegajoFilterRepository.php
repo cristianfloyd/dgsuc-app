@@ -111,15 +111,15 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         }
 
         // Elimino legajos repetidos
-        $legajos_sin_repetidos = array();
+        $legajos_sin_repetidos = [];
         foreach ($legajos as $legajo) {
-            if (isset($legajos_sin_repetidos[$legajo['nro_legaj']])) {
-                if ($legajos_sin_repetidos[$legajo['nro_legaj']]['licencia'] == 1)
-                    $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
+            if (isset($legajos_sin_repetidos[$legajo->nro_legaj])) {
+                if ($legajos_sin_repetidos[$legajo->nro_legaj]->licencia == 1)
+                    $legajos_sin_repetidos[$legajo->nro_legaj] = $legajo;
             } else
-                $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
+                $legajos_sin_repetidos[$legajo->nro_legaj] = $legajo;
         }
-        $legajos = array();
+        $legajos = [];
         foreach ($legajos_sin_repetidos as $legajo)
             $legajos[] = $legajo;
 

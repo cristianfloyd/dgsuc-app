@@ -49,7 +49,7 @@ class Dh01Repository implements Dh01RepositoryInterface
                         dha8.porcaporteadicss AS aporteAdicional,
                         dha8.trabajador_convencionado AS trabajadorconvencionado,
                         dha8.codigomodalcontrat AS codigocontratacion,
-                        CASE WHEN ((dh09.codc_bprev = {$codc_reparto} ) OR (dh09.fuerza_reparto) OR (({$codc_reparto} = '{$vacio}') AND (dh09.codc_bprev IS NULL)))THEN '1'
+                        CASE WHEN ((dh09.codc_bprev = '$codc_reparto' ) OR (dh09.fuerza_reparto) OR (('$codc_reparto' = '{$vacio}') AND (dh09.codc_bprev IS NULL)))THEN '1'
                         ELSE '0'
                         END AS regimen,
                         dh09.cant_cargo AS adherentes,

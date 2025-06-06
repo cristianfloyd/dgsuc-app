@@ -3,6 +3,7 @@
 namespace App\Services\Afip;
 
 use Illuminate\Support\Facades\Log;
+use App\Data\Sicoss\SicossProcessData;
 use App\Traits\MapucheConnectionTrait;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
@@ -55,6 +56,9 @@ class SicossLegacy
                 'retornar_datos' => $retornar_datos
             ]);
 
+            // Crear el DTO con los datos recibidos
+            $datosProcess = SicossProcessData::fromArray($datos);
+
             // Cargar configuraciones usando el nuevo repositorio
             $this->sicossConfigurationRepository->cargarConfiguraciones();
 
@@ -65,6 +69,12 @@ class SicossLegacy
             $periodo_fiscal = $this->sicossConfigurationRepository->obtenerPeriodoFiscal();
             $per_mesct = $periodo_fiscal['mes'];
             $per_anoct = $periodo_fiscal['ano'];
+
+            // Si los topes no están definidos, obtenerlos de la configuración
+            if (!$datosProcess->TopeJubilatorioPatronal) {
+                $topes = $this->sicossConfigurationRepository->getTopes();
+                $datosProcess = $datosProcess->withDefaultTopes($topes);
+            }
 
             // Generar filtros básicos usando el nuevo repositorio
             $filtros = $this->sicossConfigurationRepository->generarFiltrosBasicos($datos);
@@ -77,7 +87,7 @@ class SicossLegacy
             $this->limpiarTablasTemporales();
 
             //si se envia nro_liqui desde la generacion de libro de sueldo
-            $this->procesarConceptosLiquidados($datos, $per_anoct, $per_mesct, $where);
+            $this->procesarConceptosLiquidados($datosProcess, $per_anoct, $per_mesct, $where);
 
 
             // Inicializar configuración de archivos usando el nuevo repositorio
@@ -93,7 +103,7 @@ class SicossLegacy
 
             // Ejecutar proceso completo usando el orquestrador
             $totales = $this->sicossOrchestatorRepository->ejecutarProcesoCompleto(
-                $datos,
+                $datosProcess,
                 $periodo_fiscal,
                 $filtros,
                 $path,
@@ -127,18 +137,18 @@ class SicossLegacy
     /**
      * Procesa los conceptos liquidados según los parámetros
      *
-     * @param array $datos Datos de configuración
+     * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
      * @param int $per_mesct Mes del período
      * @param string $where Condición WHERE base
      * @return void
      */
-    protected function procesarConceptosLiquidados(array $datos, int $per_anoct, int $per_mesct, string $where): void
+    protected function procesarConceptosLiquidados(SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where): void
     {
         try {
             // Si se envía nro_liqui desde la generación de libro de sueldo
-            if (isset($datos['nro_liqui'])) {
-                $where_liqui = $where . ' AND dh21.nro_liqui = ' . $datos['nro_liqui'];
+            if ($datos->nro_liqui) {
+                $where_liqui = $where . ' AND dh21.nro_liqui = ' . $datos->nro_liqui;
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where_liqui);
             } else {
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where);

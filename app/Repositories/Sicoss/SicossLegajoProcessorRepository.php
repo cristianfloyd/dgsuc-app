@@ -7,6 +7,7 @@ use App\Models\Dh03;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
+use App\Data\Sicoss\SicossProcessData;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
@@ -30,10 +31,9 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
     /**
      * Procesa los legajos filtrados para generar datos SICOSS
-     * Código extraído tal como está del método procesa_sicoss() de SicossLegacy
      */
     public function procesarSicoss(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         array $legajos,
@@ -44,15 +44,16 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         bool $retornar_datos = false
     ): array
     {
-        // Valores obtenidos del form (que se obtienen de rrhhini)
-        // Topes
-        $TopeJubilatorioPatronal   = $datos['TopeJubilatorioPatronal'];
-        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'];
-        $TopeOtrosAportesPersonales = $datos['TopeOtrosAportesPersonal'];
-        $trunca_tope                = $datos['truncaTope'];
-        $TopeSACJubilatorioPers     = $TopeJubilatorioPersonal / 2;
-        $TopeSACJubilatorioPatr     = $TopeJubilatorioPatronal / 2;
-        $TopeSACJubilatorioOtroAp   = $TopeOtrosAportesPersonales / 2;
+        // Usar los valores del DTO directamente
+        $TopeJubilatorioPatronal = $datos->TopeJubilatorioPatronal;
+        $TopeJubilatorioPersonal = $datos->TopeJubilatorioPersonal;
+        $TopeOtrosAportesPersonales = $datos->TopeOtrosAportesPersonal;
+        $trunca_tope = $datos->truncaTope;
+
+        // Calcular los topes SAC
+        $TopeSACJubilatorioPers = $TopeJubilatorioPersonal / 2;
+        $TopeSACJubilatorioPatr = $TopeJubilatorioPatronal / 2;
+        $TopeSACJubilatorioOtroAp = $TopeOtrosAportesPersonales / 2;
 
         // Inicializo para guardar el total de cada tipo de importe para luego mostrar en informe de control
         $total = [];

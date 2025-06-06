@@ -99,8 +99,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(SicossLegacy::class)
             ->needs(DatabaseOperationInterface::class)
             ->give(function ($app) {
-                // Usar la conexión de Mapuche para SicossLegacy
-                return new DatabaseOperationRepository('mapuche');
+                // Usar conexión dinámica que respeta el EnhancedDatabaseConnectionService
+                return new DatabaseOperationRepository();
             });
     }
 

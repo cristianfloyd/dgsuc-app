@@ -172,4 +172,33 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
     {
         return self::$codc_reparto ?? '1'; // Valor por defecto '1' si no está configurado
     }
+
+    /**
+     * Obtiene los topes jubilatorios configurados
+     *
+     * @return array Array con los topes jubilatorios y otros aportes
+     */
+    public function getTopes(): array
+    {
+        // Intentar obtener los topes desde la configuración de MapucheConfig
+        $topeJubilatorioPatronal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeJubilatorioPatronal');
+        $topeJubilatorioPersonal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeJubilatorioPersonal');
+        $topeOtrosAportesPersonal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeOtrosAportesPersonal');
+        $truncaTope = MapucheConfig::getParametroRrhh('Sicoss', 'TruncaTope', false);
+
+        // Valores por defecto basados en normativa AFIP vigente (estos valores deberían actualizarse según la normativa)
+        $defaults = [
+            'TopeJubilatorioPatronal' => 849120.00,  // Valor aproximado para 2025 (debe actualizarse)
+            'TopeJubilatorioPersonal' => 849120.00,  // Valor aproximado para 2025 (debe actualizarse)
+            'TopeOtrosAportesPersonal' => 849120.00, // Valor aproximado para 2025 (debe actualizarse)
+            'truncaTope' => false
+        ];
+
+        return [
+            'TopeJubilatorioPatronal' => (float) ($topeJubilatorioPatronal ?? $defaults['TopeJubilatorioPatronal']),
+            'TopeJubilatorioPersonal' => (float) ($topeJubilatorioPersonal ?? $defaults['TopeJubilatorioPersonal']),
+            'TopeOtrosAportesPersonal' => (float) ($topeOtrosAportesPersonal ?? $defaults['TopeOtrosAportesPersonal']),
+            'truncaTope' => (bool) ($truncaTope ?? $defaults['truncaTope'])
+        ];
+    }
 }

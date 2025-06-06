@@ -45,11 +45,11 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $sql = "SELECT
                     dh01.nro_legaj,
                     CASE
-                          WHEN dh05.fec_desde <= $fecha_inicio::date THEN date_part('day', timestamp $fecha_inicio)::integer
+                          WHEN dh05.fec_desde <= '$fecha_inicio'::date THEN date_part('day', timestamp '$fecha_inicio'::date)::integer
                           ELSE date_part('day', dh05.fec_desde::timestamp)
                     END AS inicio,
                     CASE
-                        WHEN dh05.fec_hasta > $fecha_fin::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp $fecha_fin)::integer
+                        WHEN dh05.fec_hasta > '$fecha_fin'::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp '$fecha_fin'::date)::integer
                           ELSE date_part('day', dh05.fec_hasta::timestamp)
                     END AS final,
                     TRUE AS es_legajo,
@@ -75,11 +75,11 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                 SELECT
                     dh01.nro_legaj,
                     CASE
-                          WHEN dh05.fec_desde <= $fecha_inicio::date THEN date_part('day', timestamp $fecha_inicio)::integer
+                          WHEN dh05.fec_desde <= '$fecha_inicio'::date THEN date_part('day', timestamp '$fecha_inicio'::date)::integer
                           ELSE date_part('day', dh05.fec_desde::timestamp)
                     END AS inicio,
                     CASE
-                        WHEN dh05.fec_hasta > $fecha_fin::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp $fecha_fin)::integer
+                        WHEN dh05.fec_hasta > '$fecha_fin'::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp '$fecha_fin'::date)::integer
                           ELSE date_part('day', dh05.fec_hasta::timestamp)
                     END AS final,
                     FALSE AS es_legajo,
@@ -96,7 +96,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     LEFT OUTER JOIN mapuche.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
                 WHERE
                     dh05.nro_cargo IS NOT NULL
-                    AND (fec_desde <= $fecha_fin::date AND (fec_hasta is null OR fec_hasta >= $fecha_inicio::date))
+                    AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
                     AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
                     AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
                     AND dl02.es_remunerada = TRUE
@@ -172,12 +172,12 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $sql = "SELECT
                     dh01.nro_legaj,
                     CASE
-                          WHEN dh05.fec_desde <= $fecha_inicio::date THEN date_part('day', timestamp $fecha_inicio)::integer
+                          WHEN dh05.fec_desde <= '$fecha_inicio'::date THEN date_part('day', timestamp '$fecha_inicio'::date)::integer
                           ELSE date_part('day', dh05.fec_desde::timestamp)
                     END AS inicio,
                     CASE
-                        WHEN dh05.fec_hasta > $fecha_fin::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp $fecha_fin)::integer
-                          ELSE date_part('day', dh05.fec_hasta::timestamp)
+                        WHEN dh05.fec_hasta > '$fecha_fin'::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp '$fecha_fin'::date)::integer
+                        ELSE date_part('day', dh05.fec_hasta::timestamp)
                     END AS final,
                     TRUE AS es_legajo,
                     CASE
@@ -195,7 +195,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     LEFT OUTER JOIN mapuche.dh01 ON (dh05.nro_legaj = dh01.nro_legaj)
                 WHERE
                     dh05.nro_legaj IS NOT NULL
-                    AND (fec_desde <= $fecha_fin::date AND (fec_hasta is null OR fec_hasta >= $fecha_inicio::date))
+                    AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
                     AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
                     AND $where_norem
                     AND $where_legajos
@@ -205,11 +205,11 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                 SELECT
                     dh01.nro_legaj,
                     CASE
-                          WHEN dh05.fec_desde <= $fecha_inicio::date THEN date_part('day', timestamp $fecha_inicio)::integer
+                          WHEN dh05.fec_desde <= '$fecha_inicio'::date THEN date_part('day', timestamp '$fecha_inicio'::date)::integer
                           ELSE date_part('day', dh05.fec_desde::timestamp)
                     END AS inicio,
                     CASE
-                        WHEN dh05.fec_hasta > $fecha_fin::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp $fecha_fin)::integer
+                        WHEN dh05.fec_hasta > '$fecha_fin'::date OR dh05.fec_hasta IS NULL THEN date_part('day', timestamp '$fecha_fin'::date)::integer
                           ELSE date_part('day', dh05.fec_hasta::timestamp)
                     END AS final,
                     FALSE AS es_legajo,
@@ -229,7 +229,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     LEFT OUTER JOIN mapuche.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
                 WHERE
                     dh05.nro_cargo IS NOT NULL
-                    AND (fec_desde <= $fecha_fin::date AND (fec_hasta is null OR fec_hasta >= $fecha_inicio::date))
+                    AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
                     AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
                     AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
                     AND $where_norem

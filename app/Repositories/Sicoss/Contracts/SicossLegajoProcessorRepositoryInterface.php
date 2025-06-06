@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Sicoss\Contracts;
 
+use App\Data\Sicoss\SicossProcessData;
+
 interface SicossLegajoProcessorRepositoryInterface
 {
     /**
@@ -11,7 +13,7 @@ interface SicossLegajoProcessorRepositoryInterface
      * Extraído del método procesa_sicoss() de SicossLegacy tal como está
      */
     public function procesarSicoss(
-        array $datos,
+        SicossProcessData $datos,
         int $per_anoct,
         int $per_mesct,
         array $legajos,
