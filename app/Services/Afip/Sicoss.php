@@ -9,9 +9,11 @@ use App\Services\Afip\Config;
 use App\Services\Afip\Fechas;
 use App\Services\Afip\Mapuche;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
+use App\Repositories\Sicoss\Dh03Repository;
 
 class sicoss
 {
@@ -30,6 +32,127 @@ class sicoss
     static protected $cantidad_adherentes_sicoss;
     static protected $archivos;
     static protected $categoria_diferencial;
+
+
+    public static function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
+    {
+        // Se necesita filtrar datos del periodo vigente
+        $periodo       = MapucheConfig::getPeriodoCorriente();
+        $per_mesct     = $periodo['month'];
+        $per_anoct     = $periodo['year'];
+        $hayNroLegajo = isset($datos['nro_legaj']);
+        
+        // Seteo valores de rrhhini
+        self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
+        self::$aportes_voluntarios        = MapucheConfig::getTopesJubilacionVoluntario();
+        self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
+        self::$codigo_obrasocial_fc       = MapucheConfig::getConceptosObraSocialFliarAdherente();                   // concepto seteado en rrhhini bajo el cual se liquida el familiar a cargo
+        self::$tipoEmpresa                = MapucheConfig::getDatosUniversidadTipoEmpresa();
+        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Seg�n sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
+        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneraci�n Total (importe Bruto no imponible)
+        self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
+        self::$codc_reparto                     = self::quote(MapucheConfig::getDatosCodcReparto());
+        self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
+        self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
+        self::$categoria_diferencial       = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
+
+        $opcion_retro  = $datos['check_retro'];
+        if ($hayNroLegajo) {
+            $filtro_legajo = $datos['nro_legaj'];
+        }
+        self::$codc_reparto  = self::quote(MapucheConfig::getDatosCodcReparto());
+
+
+        // Si no filtro por n�mero de legajo => obtengo todos los legajos
+        $where = ' true ';
+        if (!empty($filtro_legajo))
+            $where = "dh01.nro_legaj= $filtro_legajo ";
+
+        $where_periodo = ' true ';
+
+        //si se envia nro_liqui desde la generacion de libro de sueldo
+        if (isset($datos['nro_liqui'])) {
+            $where_liqui = $where . ' AND dh21.nro_liqui = ' . self::quote($datos['nro_liqui']);
+            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where_liqui);
+        } else {
+            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
+        }
+        $path = storage_path('comunicacion/sicoss/');
+        self::$archivos = [];
+        $totales = [];
+
+        $licencias_agentes_no_remunem = self::get_licencias_vigentes($where);
+        $licencias_agentes_remunem = self::get_licencias_protecintegral_vacaciones($where);
+        $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
+        
+        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta a�o y mes retro
+        $nombre_arch = 'sicoss';
+        switch ($opcion_retro) {
+            case 0:
+                $periodo = 'Vigente_sin_retro';
+                self::$archivos[$periodo] = "$path$nombre_arch";
+
+
+                $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
+                
+                
+                $periodo = $per_mesct . '/' . $per_anoct . ' (Vigente)';
+                if ($retornar_datos === TRUE)
+                    return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                
+                $totales[$periodo] = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                $sql = "DROP TABLE IF EXISTS conceptos_liquidados";
+                DB::connection(self::getStaticConnectionName())->statement($sql);
+                break;
+            default:
+                $periodos_retro = sicoss::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
+                $total = [];
+
+                for ($i = 0; $i < count($periodos_retro); $i++) {
+                    $p = $periodos_retro[$i];
+                    $mes = str_pad($p['mes_retro'], 2, "0", STR_PAD_LEFT);
+                    //agrego cero adelante a meses
+                    $where_periodo = "t.ano_retro=" . $p['ano_retro'] . " AND t.mes_retro=" . $mes;
+                    $legajos = sicoss::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
+
+                    if ($p['ano_retro'] == 0 && $p['mes_retro'] == 0) {
+                        $nombre_arch = 'sicoss_retro_periodo_vigente';
+                        $periodo = $per_mesct . '/' . $per_anoct;
+                        $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
+                        if ($retornar_datos === TRUE)
+                            return sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                        $subtotal = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                    } else {
+                        $nombre_arch = 'sicoss_retro_' . $p['ano_retro'] . '_' . $p['mes_retro'];
+                        $periodo = $p['ano_retro'] . $p['mes_retro'];
+                        $item = $p['mes_retro'] . "/" . $p['ano_retro'];
+                        $subtotal = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, NULL, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                    }
+
+                    self::$archivos[$periodo] = $path . $nombre_arch;
+
+                    // Elimino tabla temporal
+                    $sql = "DROP TABLE IF EXISTS conceptos_liquidados";
+                    DB::connection(self::getStaticConnectionName())->statement($sql);
+
+                    $totales[$item] = $subtotal;
+                }
+                break;
+        }
+
+        // Elimino tabla temporal
+        $sql = "DROP TABLE IF EXISTS pre_conceptos_liquidados";
+        DB::connection(self::getStaticConnectionName())->statement($sql);
+
+        if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
+            copy(storage_path('comunicacion/sicoss/' . $nombre_arch . '.txt'), $testeo_directorio_salida . '/' . $testeo_prefijo_archivos);
+        } else {
+            sicoss::armar_zip();
+            return sicoss::transformar_a_recordset($totales);
+        }
+    }
+
+
 
     public static function get_licencias_protecintegral_vacaciones($where_legajos)
     {
@@ -247,7 +370,7 @@ class sicoss
         return DB::connection(self::getStaticConnectionName())->select($sql);
     }
 
-    static function get_cargos_activos_sin_licencia($legajo)
+    public static function get_cargos_activos_sin_licencia($legajo): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
@@ -280,10 +403,14 @@ class sicoss
 			    								(dl02.es_maternidad IS TRUE OR (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = '0')))
 			    								)
     			;";
-        return DB::connection(self::getStaticConnectionName())->select($sql);
+        $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return array_map(function ($item) {
+            return (array) $item;
+        }, $resultado);
     }
 
-    static function get_cargos_activos_con_licencia_vigente($legajo)
+    static function get_cargos_activos_con_licencia_vigente($legajo): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
@@ -338,10 +465,23 @@ class sicoss
 						    					(dl02.es_maternidad IS TRUE OR (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = '0')))
 						    				)
     			;";
-        return DB::connection(self::getStaticConnectionName())->select($sql);;
+        $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return array_map(function ($item) {
+            return (array) $item;
+        }, $resultado);
     }
 
-    static function get_limites_cargos($legajo)
+    /**
+     * Obtiene los límites de días de los cargos para un legajo específico en el período corriente.
+     *
+     * Calcula el día mínimo de inicio y el día máximo de fin de los cargos de un legajo,
+     * considerando el período corriente y las fechas de alta y baja de los cargos.
+     *
+     * @param int $legajo Número de legajo del empleado
+     * @return array Arreglo con los días mínimo y máximo de los cargos
+     */
+    public static function get_limites_cargos($legajo): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
@@ -365,10 +505,15 @@ class sicoss
 					nro_legaj = $legajo
     			;";
 
-        return DB::connection(self::getStaticConnectionName())->select($sql);
+        $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
+        
+        return [
+            'minimo' => (int) $resultado[0]->minimo,
+            'maximo' => (int) $resultado[0]->maximo
+        ];
     }
 
-    static function obtener_conceptos_liquidados($per_anoct, $per_mesct, $where)
+    public static function obtener_conceptos_liquidados($per_anoct, $per_mesct, $where)
     {
         // Se hace una consulta de todos los conceptos liquidados del periodo vigente, que generen impuestos cuyos conceptos sean mayores a cero
         // Se arma una columna tipos_grupos que va tener todos los numeros tipo de grupo a los cuales pertenece el concepto
@@ -413,7 +558,16 @@ class sicoss
                 INTO TEMP
                          pre_conceptos_liquidados
                 FROM
-                        mapuche.dh21
+                        (
+                            -- UNION de liquidaciones actuales e históricas
+                            SELECT id_liquidacion, impp_conce, ano_retro, mes_retro, nro_legaj,
+                                   codn_conce, tipo_conce, nro_cargo, nov1_conce, nro_liqui, codigoescalafon
+                            FROM mapuche.dh21
+                            UNION ALL
+                            SELECT id_liquidacion, impp_conce, ano_retro, mes_retro, nro_legaj,
+                                   codn_conce, tipo_conce, nro_cargo, nov1_conce, nro_liqui, codigoescalafon
+                            FROM mapuche.dh21h
+                        ) as dh21
                         LEFT OUTER JOIN mapuche.dh01 ON (dh01.nro_legaj  = dh21.nro_legaj)       -- Agentes
                         LEFT OUTER JOIN mapuche.dh12 ON (dh21.codn_conce = dh12.codn_conce)      -- Conceptos de Liquidaci�n
                         LEFT OUTER JOIN mapuche.dh16 ON (dh16.codn_conce = dh12.codn_conce)      -- Grupo al que pertenecen los conceptos
@@ -427,7 +581,7 @@ class sicoss
 						AND $where
 			";
         $rs = DB::connection(self::getStaticConnectionName())->select($sql_conceptos_liq);
-        dd("rs: ", $rs);
+
         $sql_ix = "CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion);";
         $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_ix);
     }
@@ -469,9 +623,29 @@ class sicoss
         return $rs_periodos_retro;
     }
 
+    /**
+     * Obtiene los legajos de empleados para un período específico con múltiples opciones de filtrado.
+     *
+     * Esta función recupera los legajos de empleados basándose en varios parámetros de filtrado, 
+     * permitiendo incluir o excluir legajos con licencias, agentes activos sin cargo, y aplicando 
+     * filtros por período retroactivo.
+     *
+     * @param string $codc_reparto Código de reparto para filtrar legajos
+     * @param string $where_periodo_retro Condición para filtrar el período retroactivo
+     * @param string $where_legajo Condición adicional para filtrar legajos (por defecto 'true')
+     * @param bool $check_lic Indica si se deben incluir legajos con licencias sin goce
+     * @param bool $check_sin_activo Indica si se deben incluir agentes activos sin cargo y sin liquidación
+     * @return array Arreglo de legajos filtrados con sus respectivos datos
+     */
     public static function obtener_legajos($codc_reparto, $where_periodo_retro, $where_legajo = ' true ', $check_lic = false, $check_sin_activo = false)
     {
-
+        Log::debug('Obtener legajos:', [
+            'where_periodo_retro' => $where_periodo_retro, 
+            'where_legajo' => $where_legajo,
+            'check_lic' => $check_lic,
+            'check_sin_activo' => $check_sin_activo
+        ]);        
+        
         // Si la opcion no tiene en cuenta los retroactivos el proceso es como se venia haciendo, se toma de la tabla anterior y se vuelca sobre un unico archivo
         // Si hay que tener en cuenta los retros se toma la tabla anterior y se segmenta por periodo retro, se genera un archivo por cada segmento
 
@@ -485,8 +659,10 @@ class sicoss
 										WHERE
 										$where_periodo_retro
 		";
-
+        
         $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_conceptos_liq_filtrados);
+      
+
 
 
         $sql_ix = "CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);";
@@ -494,16 +670,20 @@ class sicoss
         $sql_ix = "CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);";
         $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_ix);
 
-        // Se obtienen datos por legajo, de los numeros de legajos liquidados en la tabla anterior conceptos_liquidados
-        // si en los datos del legajo licencia es igual a cero es que el legajo no tenia licencias o no algun concepto liquidado
+        
+        
         $sql_datos_legajo = self::get_sql_legajos('conceptos_liquidados', 0);
-
+        
+        
         // Si tengo el check de licencias agrego a la cantidad de agentes a procesar a los agentes sin licencias sin goce
         // Si tengo el check de licencias y ademas tengo el check de retros, debo tener en cuenta las licencias solo en el archivo generado con mes y a�o 0 (son del periodo vigente)
         // tendre en cuenta licencias en el caso general (true) y cuando tenga retros y el where tenga 0-0 (vigente)
         if ($check_lic && ($where_periodo_retro == ' true ' || $where_periodo_retro == 't.ano_retro=0 AND t.mes_retro=00')) {
+            
             // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
             $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
+
+            
             // Preparo arreglo para usar en sql IN
             $legajos_lic = implode(',', $legajos_lic);
 
@@ -512,24 +692,30 @@ class sicoss
             $where = ' true ';
             if (isset($legajos_lic) && !empty($legajos_lic)) {
                 $where  = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
+                
                 if (!$check_lic)
                     $where .=  ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
                 else
                     $where .= ' )';
                 // si tengo licencias consulto la union de legajos. Ordeno por agente, luego de obtener todos los legajos
-                $sql_datos_lic = ' UNION (' . self::get_sql_legajos("mapuche.dh01", 1, $where) . ' ORDER BY apyno';
+                $sql_datos_lic = ' UNION (' . self::get_sql_legajos("mapuche.dh01", 1, $where) . ' ORDER BY apyno  LIMIT 10';
 
                 $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo . $sql_datos_lic);
-
             } else {
-                $sql_datos_legajo .= ' ORDER BY apyno';
+                $sql_datos_legajo .= ' ORDER BY apyno   LIMIT 10';
                 // Si no hay licencias sin goce que cumpaln con las restricciones hago el proceso comun
                 $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
             }
         } else {
-            $sql_datos_legajo .= ' ORDER BY apyno';
+            $sql_datos_legajo .= ' ORDER BY apyno  LIMIT 10';
+
             // Si no tengo el check licencias se consulta solo contra conceptos liquidados
             $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
+            
+            $legajos = array_map(function ($item) {
+                return (array)$item;
+            }, $legajos);
+
         }
 
         //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidaci�n para Reserva de Puesto"
@@ -564,10 +750,10 @@ class sicoss
             } else
                 $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
         }
-        $legajos = array();
+        $legajos = [];
         foreach ($legajos_sin_repetidos as $legajo)
             $legajos[] = $legajo;
-
+        
         return $legajos;
     }
 
@@ -582,7 +768,7 @@ class sicoss
      * @param string $where La cláusula WHERE adicional para filtrar los resultados.
      * @return string La consulta SQL construida.
      */
-    public static function get_sql_legajos($tabla, $valor, $where = ' true ')
+    public static function get_sql_legajos($tabla, $valor, $where = ' true ') : string
     {
         $vacio = self::quote("");
         $sql = "
@@ -631,124 +817,11 @@ class sicoss
             $sql .= " LEFT OUTER JOIN mapuche.dh01 ON $tabla.nro_legaj = dh01.nro_legaj ";
 
         $sql .= " WHERE  $where";
+        
         return $sql;
     }
 
-    public static function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
-    {
-        // Se necesita filtrar datos del periodo vigente
-        $periodo       = MapucheConfig::getPeriodoCorriente();
-        $per_mesct     = $periodo['year'];
-        $per_anoct     = $periodo['month'];
 
-        // Seteo valores de rrhhini
-        self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
-        self::$aportes_voluntarios        = MapucheConfig::getTopesJubilacionVoluntario();
-        self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
-        self::$codigo_obrasocial_fc       = MapucheConfig::getConceptosObraSocialFliarAdherente();                   // concepto seteado en rrhhini bajo el cual se liquida el familiar a cargo
-        self::$tipoEmpresa                = MapucheConfig::getDatosUniversidadTipoEmpresa();
-        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Seg�n sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
-        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneraci�n Total (importe Bruto no imponible)
-        self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
-        self::$codc_reparto                     = self::quote(MapucheConfig::getDatosCodcReparto());
-        self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
-        self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
-        self::$categoria_diferencial       = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
-
-        $opcion_retro  = $datos['check_retro'];
-        if (isset($datos['nro_legaj'])) {
-            $filtro_legajo = $datos['nro_legaj'];
-        }
-        self::$codc_reparto  = self::quote(MapucheConfig::getDatosCodcReparto());
-
-
-        // Si no filtro por n�mero de legajo => obtengo todos los legajos
-        $where = ' true ';
-        if (!empty($filtro_legajo))
-            $where = 'dh01.nro_legaj= ' . $filtro_legajo . ' ';
-
-        $where_periodo = ' true ';
-
-        //si se envia nro_liqui desde la generacion de libro de sueldo
-        if (isset($datos['nro_liqui'])) {
-            $where_liqui = $where . ' AND dh21.nro_liqui = ' . self::quote($datos['nro_liqui']);
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where_liqui);
-        } else {
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
-        }
-
-        $path = storage_path('comunicacion/sicoss/');
-        self::$archivos = [];
-        $totales = array();
-
-        $licencias_agentes_no_remunem = self::get_licencias_vigentes($where);
-        $licencias_agentes_remunem = self::get_licencias_protecintegral_vacaciones($where);
-        $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
-
-        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta a�o y mes retro
-        if ($opcion_retro == 0) {
-            $nombre_arch              = 'sicoss';
-            $periodo                  = 'Vigente_sin_retro';
-            self::$archivos[$periodo] = $path . $nombre_arch;
-            $legajos            = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
-
-            $periodo            = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-            if ($retornar_datos === TRUE)
-                dd("array: ",[$datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos]);
-                return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-            $totales[$periodo] = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-            $sql     =  "DROP TABLE IF EXISTS conceptos_liquidados";
-            DB::connection(self::getStaticConnectionName())->execute($sql);
-        } else {
-            // Si tengo tildada la opcion lo que se genera es un archivo por cada periodo retro y uno para los que tiene a�o y mes retro en cero,
-            // o sea, se particiona la tabla temporal que se obtiene en obtener_conceptos_liquidados
-
-            // Periodos retro y el periodo 0-0 que va ser el periodo actual
-            $periodos_retro = sicoss::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
-            $total = array();
-
-            for ($i = 0; $i < count($periodos_retro); $i++) {
-                $p             = $periodos_retro[$i];
-                $mes           = str_pad($p['mes_retro'], 2, "0", STR_PAD_LEFT);
-                //agrego cero adelante a meses
-                $where_periodo = "t.ano_retro=" . $p['ano_retro'] . " AND t.mes_retro=" . $mes;
-                $legajos = sicoss::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
-
-                if ($p['ano_retro'] == 0 && $p['mes_retro'] == 0) {
-                    $nombre_arch  = 'sicoss_retro_periodo_vigente';
-                    $periodo      = $per_mesct . '/' . $per_anoct;
-                    $item         = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-                    if ($retornar_datos === TRUE)
-                        return sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                    $subtotal  = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                } else {
-                    $nombre_arch = 'sicoss_retro_' . $p['ano_retro'] . '_' . $p['mes_retro'];
-                    $periodo     = $p['ano_retro'] . $p['mes_retro'];
-                    $item        = $p['mes_retro'] . "/" . $p['ano_retro'];
-                    $subtotal  = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, NULL, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                }
-
-                self::$archivos[$periodo] = $path . $nombre_arch;
-
-                // Elimino tabla temporal
-                $sql  =  "DROP TABLE IF EXISTS conceptos_liquidados";
-                DB::connection(self::getStaticConnectionName())->execute($sql);
-
-                $totales[$item] = $subtotal;
-            }
-        }
-
-        // Elimino tabla temporal
-        $sql = "DROP TABLE IF EXISTS pre_conceptos_liquidados";
-        DB::connection(self::getStaticConnectionName())->execute($sql);
-
-        if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
-            copy(storage_path('comunicacion/sicoss/' . $nombre_arch . '.txt'), $testeo_directorio_salida . '/' . $testeo_prefijo_archivos);
-        } else {
-            sicoss::armar_zip();
-            return sicoss::transformar_a_recordset($totales);
-        }
-    }
 
     static function inicializar_estado_situacion($codigo, $min, $max)
     {
@@ -769,7 +842,7 @@ class sicoss
      *
      * @return integer $c1
      */
-    static function evaluar_condicion_licencia($c1, $c2)
+    public static function evaluar_condicion_licencia($c1, $c2)
     {
         // Maternidad primero
         if ($c1 == 5 || $c2 == 5) {
@@ -793,9 +866,18 @@ class sicoss
         return $c1; // Por defecto se retorna la condici�n actual
     }
 
-    static function calcular_cambios_estado($estado_situacion)
+    /**
+     * Calcula los cambios de estado en una situación de empleado.
+     *
+     * Este método identifica y registra los cambios de estado en un array de estado de situación,
+     * devolviendo un nuevo array que solo contiene los días donde hay un cambio de código.
+     *
+     * @param array $estado_situacion Array que representa el estado de situación por día
+     * @return array Array de cambios de estado, donde las claves son los días y los valores son los códigos de estado
+     */
+    public static function calcular_cambios_estado($estado_situacion): array
     {
-        $cambios = array();
+        $cambios = [];
 
         foreach ($estado_situacion as $dia => $codigo) {
             if (!isset($anterior) || $anterior != $codigo) {
@@ -807,7 +889,17 @@ class sicoss
         return $cambios;
     }
 
-    static function calcular_dias_trabajados($estado_situacion)
+    /**
+         * Calcula la cantidad de días trabajados en un período.
+         *
+         * Este método cuenta los días trabajados en un estado de situación, considerando
+         * como días trabajados los códigos 1 (trabajo normal), 5 (licencia por maternidad),
+         * 12 (otra licencia) y 51 (otro estado especial).
+         *
+         * @param array $estado_situacion Array que representa el estado de situación por día
+         * @return int Número total de días trabajados
+         */
+    public static function calcular_dias_trabajados($estado_situacion): int
     {
         $dias_trabajados = 0;
         foreach ($estado_situacion as $codigo) {
@@ -821,16 +913,25 @@ class sicoss
         return $dias_trabajados;
     }
 
-    static function calcular_revista_legajo($cambios_estado)
+    /**
+     * Calcula la revista de un legajo basado en los cambios de estado.
+     *
+     * Este método determina los últimos tres cambios de estado de un legajo,
+     * con una lógica especial para manejar situaciones de licencia por maternidad.
+     *
+     * @param array $cambios_estado Array de cambios de estado, donde las claves son los días y los valores son los códigos de situación
+     * @return array Array con los últimos tres cambios de estado, cada uno con su código y día correspondiente
+     */
+    public static function calcular_revista_legajo($cambios_estado): array
     {
         $controlar_maternidad = false;
-        $revista_legajo = array();
+        $revista_legajo = [];
         $cantidad_cambios = count($cambios_estado);
         $dias = array_keys($cambios_estado);
 
-        $revista_legajo[1] = array('codigo' => 0, 'dia' => 0);
-        $revista_legajo[2] = array('codigo' => 0, 'dia' => 0);
-        $revista_legajo[3] = array('codigo' => 0, 'dia' => 0);
+        $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];
+        $revista_legajo[2] = ['codigo' => 0, 'dia' => 0];
+        $revista_legajo[3] = ['codigo' => 0, 'dia' => 0];
 
         $primer_dia = 0;
 
@@ -842,7 +943,7 @@ class sicoss
         $revista = 1;
         for ($i = $primer_dia; $i < $cantidad_cambios; $i++) {
             $dia = $dias[$i];
-            $revista_legajo[$revista] = array('codigo' => $cambios_estado[$dia], 'dia' => $dia);
+            $revista_legajo[$revista] = ['codigo' => $cambios_estado[$dia], 'dia' => $dia];
             $revista++;
         }
 
@@ -859,8 +960,10 @@ class sicoss
         return $revista_legajo;
     }
 
+
     public static function procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias = NULL, $retro = FALSE, $check_sin_activo = FALSE, $retornar_datos = FALSE)
     {
+        
         // Valores obtenidos del form (que se obtienen de rrhhini)
         // Topes
 
@@ -872,8 +975,11 @@ class sicoss
         $TopeSACJubilatorioPatr     = $TopeJubilatorioPatronal / 2;
         $TopeSACJubilatorioOtroAp   = $TopeOtrosAportesPersonales / 2;
 
+
+        $artContTope = MapucheConfig::getParametroRrhh('Sicoss', 'ARTconTope', '1');
+
         // Inicializo para guardar el total de cada tipo de importe para luego mostrar en informe de control
-        $total = array();
+        $total = [];
         $total['bruto']       = 0;
         $total['imponible_1'] = 0;
         $total['imponible_2'] = 0;
@@ -882,22 +988,24 @@ class sicoss
         $total['imponible_6'] = 0; //bruto + sac docente
         $total['imponible_8'] = 0;
         $total['imponible_9'] = 0;
-        $legajos_validos = array();
+        $legajos_validos = [];
         $j = 0;
+        $total_legajos = count($legajos);
 
         // En este for se completan los campos necesarios para cada uno de los legajos liquidados
-        for ($i = 0; $i < count($legajos); $i++) {
+        for ($i = 0; $i < $total_legajos; $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
+            $legajoActual = &$legajos[$i];
 
-            $legajos[$i]['ImporteSACOtroAporte'] = 0;
-            $legajos[$i]['TipoDeOperacion']      = 0;
-            $legajos[$i]['ImporteImponible_4']   = 0;
-            $legajos[$i]['ImporteSACNoDocente']  = 0;
+            $legajoActual['ImporteSACOtroAporte'] = 0;
+            $legajoActual['TipoDeOperacion']      = 0;
+            $legajoActual['ImporteImponible_4']   = 0;
+            $legajoActual['ImporteSACNoDocente']  = 0;
 
-            $legajos[$i]['ImporteSACDoce']  = 0;
-            $legajos[$i]['ImporteSACAuto']  = 0;
+            $legajoActual['ImporteSACDoce']  = 0;
+            $legajoActual['ImporteSACAuto']  = 0;
 
-            $legajos[$i]['codigo_os'] = sicoss::codigo_os($legajo);
+            $legajoActual['codigo_os'] = self::codigo_os($legajo);
 
             //#44909 Incorporar a la salida de SICOSS el c�digo de situaci�n Reserva de Puesto (14)
             if ($check_sin_activo) {
@@ -914,7 +1022,7 @@ class sicoss
 
                 if (isset($legajo_sin_liquidar[0])) {
                     if ($legajo_sin_liquidar[0]['nro_legaj'] == $legajo)
-                        $legajos[$i]['codigosituacion'] = 14;
+                        $legajoActual['codigosituacion'] = 14;
                 }
             }
 
@@ -923,20 +1031,21 @@ class sicoss
                 //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
                 if (!isset($limites['maximo'])) {
                     $cargos_activos_agente = Dh03::getCargosActivos($legajo);
+
                     if (empty($cargos_activos_agente)) {
                         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
                         $limites['maximo'] = substr($fecha_fin, 9, 2);
                     }
                 }
                 $estado_situacion = self::inicializar_estado_situacion($legajos[$i]['codigosituacion'], $limites['minimo'], $limites['maximo']);
-
+                
                 $cargos_legajo = self::get_cargos_activos_sin_licencia($legajo);
                 $cargos_legajo2 = self::get_cargos_activos_con_licencia_vigente($legajo);
                 $cargos_legajo = array_merge($cargos_legajo, $cargos_legajo2);
                 // En el caso de las licencias de legajo, se mantiene el c�digo de condici�n en esos d�as
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
                 // Se considera que no se puede superponer con otra licencia
-                $dias_lic_legajo = array();
+                $dias_lic_legajo = [];
 
                 // Se evaluan las licencias
                 if ($licencias != NULL) {
@@ -956,7 +1065,7 @@ class sicoss
                     }
                 }
 
-                $licencias_cargos = array();
+                $licencias_cargos = [];
                 foreach ($cargos_legajo as $cargo) {
                     $fin_mes = $day = date("d", mktime(0, 0, 0, MapucheConfig::getMesFiscal() + 1, 0, date("Y")));
                     for ($ini_mes = 1; $ini_mes <= $fin_mes; $ini_mes++) {
@@ -992,19 +1101,11 @@ class sicoss
                 $legajos[$i]['codigorevista1'] = $revista_legajo[1]['codigo'];
                 $legajos[$i]['fecharevista1'] = $revista_legajo[1]['dia'];
                 // Revista 2
-                if ($revista_legajo[2]['codigo'] == 0) {
-                    $legajos[$i]['codigorevista2'] = $revista_legajo[1]['codigo'];
-                } else {
-                    $legajos[$i]['codigorevista2'] = $revista_legajo[2]['codigo'];
-                }
+                $legajos[$i]['codigorevista2'] = ($revista_legajo[2]['codigo'] == 0) ? $revista_legajo[1]['codigo'] : $revista_legajo[2]['codigo'];
                 $legajos[$i]['fecharevista2'] = $revista_legajo[2]['dia'];
 
                 // Revista 3
-                if ($revista_legajo[3]['codigo'] == 0) {
-                    $legajos[$i]['codigorevista3'] = $legajos[$i]['codigorevista2'];
-                } else {
-                    $legajos[$i]['codigorevista3'] = $revista_legajo[3]['codigo'];
-                }
+                $legajos[$i]['codigorevista3'] = ($revista_legajo[3]['codigo'] == 0) ? $legajos[$i]['codigorevista2'] : $revista_legajo[3]['codigo'];
                 $legajos[$i]['fecharevista3'] = $revista_legajo[3]['dia'];
 
                 // Como d�as trabajados se toman aquellos d�as de cargo menos los d�as de licencia sin goce (?)
@@ -1153,7 +1254,8 @@ class sicoss
 
                 $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
                 $implode = implode("','", $explode); //vulve a String y agrega comillas
-                if (Dh11::existeCategoriaDiferencial($legajos[$i]['nro_legaj'], $implode)) {
+                $dh03Repository = new Dh03Repository();
+                if ($dh03Repository->existeCategoriaDiferencial($legajos[$i]['nro_legaj'], $implode)) {
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
                 }
 
@@ -1161,10 +1263,8 @@ class sicoss
 
 
                 $tope_jubil_personal = $TopeJubilatorioPersonal;
-                if ($legajos[$i]['ImporteSAC'] > 0)
-                    $tope_jubil_personal = $TopeJubilatorioPersonal + $TopeSACJubilatorioPers;
-                else
-                    $tope_jubil_personal = $TopeJubilatorioPersonal;
+
+                $tope_jubil_personal = ($legajos[$i]['ImporteSAC'] > 0) ? $TopeJubilatorioPersonal + $TopeSACJubilatorioPers : $TopeJubilatorioPersonal;
 
                 if ($legajos[$i]['ImporteImponibleSinSAC']  > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
@@ -1174,7 +1274,7 @@ class sicoss
                 }
 
 
-                $otra_actividad = sicoss::otra_actividad($legajo);
+                $otra_actividad = self::otra_actividad($legajo);
                 $legajos[$i]['ImporteBrutoOtraActividad']  = $otra_actividad['importebrutootraactividad'];
                 $legajos[$i]['ImporteSACOtraActividad']    = $otra_actividad['importesacotraactividad'];
 
@@ -1236,7 +1336,7 @@ class sicoss
                     $legajos[$i]['ImporteSueldoMasAdicionales'] -= $legajos[$i]['IncrementoSolidario'];
                 }
 
-                if (is_null($legajos[$i]['trabajadorconvencionado'])) {
+                if ($legajos[$i]['trabajadorconvencionado'] === null) {
                     $legajos[$i]['trabajadorconvencionado'] = self::$trabajadorConvencionado;
                 }
 
@@ -1247,13 +1347,7 @@ class sicoss
                 }
 
                 // Por ticket #3947. Check "Generar ART con tope"
-                if (MapucheConfig::getParametroRrhh('Sicoss', 'ARTconTope', '1') === '0') // Sin tope
-                {
-                    $legajos[$i]['importeimponible_9'] = $legajos[$i]['Remuner78805'];
-                } else // Con tope
-                {
-                    $legajos[$i]['importeimponible_9'] = $legajos[$i]['ImporteImponible_4'];
-                }
+                $legajos[$i]['importeimponible_9'] = ($artContTope === '0') ? $legajos[$i]['Remuner78805'] : $legajos[$i]['ImporteImponible_4'];
 
                 // Por ticket #3947. Check "Considerar conceptos no remunerativos en c�lculo de ART?"
                 if (MapucheConfig::getParametroRrhh('Sicoss', 'ConceptosNoRemuEnART', '0') === '1') // Considerar conceptos no remunerativos
@@ -1261,7 +1355,7 @@ class sicoss
                     $legajos[$i]['importeimponible_9'] += $legajos[$i]['ImporteNoRemun'];
                 }
 
-                // por GDS #5913 Incorporaci�n de conceptos no remunerativos a las remuneraciones 4 y 8 de SICOSS
+                // por GDS #5913 Incorporacion de conceptos no remunerativos a las remuneraciones 4 y 8 de SICOSS
                 $legajos[$i]['Remuner78805'] += $legajos[$i]['NoRemun4y8'];
                 $legajos[$i]['ImporteImponible_5'] = $legajos[$i]['ImporteImponible_4'];
                 $legajos[$i]['ImporteImponible_4'] += $legajos[$i]['NoRemun4y8'];
@@ -1284,7 +1378,7 @@ class sicoss
             elseif ($datos['check_lic'] && ($legajos[$i]['licencia'] == 1)) {
                 // Inicializo variables faltantes en cero
                 $legajos[$i]['ImporteSueldoMasAdicionales'] = 0;
-                if (is_null($legajos[$i]['trabajadorconvencionado'])) {
+                if ($legajos[$i]['trabajadorconvencionado'] === null) {
                     $legajos[$i]['trabajadorconvencionado'] = self::$trabajadorConvencionado;
                 }
 
@@ -1302,9 +1396,8 @@ class sicoss
         if (!empty($legajos_validos)) {
             if ($retornar_datos === TRUE)
                 return $legajos_validos;
-            sicoss::grabar_en_txt($legajos_validos, $nombre_arch);
+            self::grabar_en_txt($legajos_validos, $nombre_arch);
         }
-
 
         return $total;
     }

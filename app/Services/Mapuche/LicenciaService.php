@@ -602,8 +602,9 @@ class LicenciaService
      * @param int $nro_legajo El número de legajo a verificar.
      * @return bool Verdadero si el legajo tiene una licencia de maternidad activa, falso de lo contrario.
      */
-    public static function tieneLicenciaMaternidadActiva($nro_legajo)
+    public static function tieneLicenciaMaternidadActiva($nro_legajo): bool
     {
+        $restultado = false;
         //-- Armo la fecha inicial para la consulta.
         $fecha_inicio = MapucheConfig::getFechaInicioPeriodoCorriente();
         //-- Armo la fecha tope para la consulta.
@@ -615,12 +616,12 @@ class LicenciaService
         }
         $fecha_final = $anio_final . "-" . $mes_final . "-01";
         if (self::tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)) {
-            return true;
+            $restultado = true;
         }
         if (self::tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)) {
-            return true;
+            $restultado = true;
         }
-        return false;
+        return $restultado;
     }
 
     private static function tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)
@@ -687,7 +688,7 @@ class LicenciaService
         $subquery2 = self::getSubqueryLicenciasPorCargo($whereLegajo);
 
         $sql = "SELECT unnest(array({$subquery1} UNION {$subquery2})) AS nro_legaj";
-
+        
         $resultados = DB::connection(self::getStaticConnectionName())->select($sql);
         return collect($resultados)->pluck('nro_legaj')->toArray();
     }

@@ -2,7 +2,9 @@
 
 namespace App\Repositories\Sicoss;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
@@ -160,28 +162,87 @@ class Dh03Repository implements Dh03RepositoryInterface
      */
     public static function esVinculoValido(string $fecha, int $vinculo): bool
     {
-        $sql = "
-            SELECT
-                COUNT(*) as cantidad
-            FROM
-                mapuche.dh03 vinculo
-            WHERE
-                vinculo.nro_cargo = $vinculo AND
-                $fecha = vinculo.fec_baja+1 AND
-                NOT EXISTS (
-                    SELECT
-                        vinculo.vcl_cargo
-                    FROM
-                        mapuche.dh10 vinculo
-                    WHERE
-                        vinculo.vcl_cargo = $vinculo AND
-                        vinculo.nro_cargo != vinculo.vcl_cargo
-                    GROUP BY
-                        vinculo.vcl_cargo
-                    HAVING count(*) > 1
-                )
-        ";
-        $rs = DB::connection(MapucheConfig::getStaticConnectionName())->selectOne($sql);
-        return $rs->cantidad > 0;
+        try {
+            $sql = "
+                SELECT
+                    COUNT(*) as cantidad
+                FROM
+                    mapuche.dh03 vinculo
+                WHERE
+                    vinculo.nro_cargo = ? AND
+                    ? = vinculo.fec_baja+1 AND
+                    NOT EXISTS (
+                        SELECT
+                            vinculo.vcl_cargo
+                        FROM
+                            mapuche.dh10 vinculo
+                        WHERE
+                            vinculo.vcl_cargo = ? AND
+                            vinculo.nro_cargo != vinculo.vcl_cargo
+                        GROUP BY
+                            vinculo.vcl_cargo
+                        HAVING count(*) > 1
+                    )
+            ";
+            
+            $result = DB::connection(MapucheConfig::getStaticConnectionName())
+                       ->selectOne($sql, [$vinculo, $fecha, $vinculo]);
+                       
+            return $result->cantidad > 0;
+        } catch (Exception $e) {
+            Log::error('Error al verificar vínculo válido: ' . $e->getMessage(), [
+                'fecha' => $fecha,
+                'vinculo' => $vinculo
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si existe una categoría diferencial activa para un legajo específico.
+     * 
+     * Consulta la tabla dh03 para determinar si un legajo tiene asignada alguna de las 
+     * categorías diferenciales especificadas y si el cargo está activo según la función
+     * map_es_cargo_activo de PostgreSQL.
+     *
+     * @param int $nroLegajo Número de legajo a consultar
+     * @param string|array $catDiferencial Categorías diferenciales (string separado por comas o array)
+     * @return bool True si existe al menos una categoría diferencial activa, false en caso contrario
+     */
+    public function existeCategoriaDiferencial(int $nroLegajo, string|array $catDiferencial): bool
+    {
+        try {
+            // Procesamiento de categorías: convertir string a array si es necesario
+            if (is_string($catDiferencial)) {
+                $categorias = array_map('trim', explode("','", trim($catDiferencial, "'")));
+            } else {
+                $categorias = $catDiferencial;
+            }
+
+            // Construcción de la consulta SQL con parámetros seguros
+            $placeholders = str_repeat('?,', count($categorias) - 1) . '?';
+            
+            $sql = "SELECT COUNT(*) as total 
+                    FROM mapuche.dh03 
+                    WHERE codc_categ IN ($placeholders) 
+                    AND nro_legaj = ? 
+                    AND map_es_cargo_activo(nro_cargo)";
+
+            // Preparación de parámetros para la consulta
+            $params = array_merge($categorias, [$nroLegajo]);
+
+            // Ejecución de la consulta
+            $result = DB::connection(MapucheConfig::getStaticConnectionName())
+                       ->selectOne($sql, $params);
+
+            return $result->total > 0;
+
+        } catch (Exception $e) {
+            Log::error('Error al verificar categoría diferencial: ' . $e->getMessage(), [
+                'legajo' => $nroLegajo,
+                'categorias' => $catDiferencial
+            ]);
+            return false;
+        }
     }
 }
