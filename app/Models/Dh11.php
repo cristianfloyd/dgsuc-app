@@ -300,4 +300,20 @@ class Dh11 extends Model
         $this->attributes['impp_basic'] = $value;
         $this->attributes['impp_asign'] = $value;
     }
+
+    /**
+     * Verifica si existe una categoría diferencial para un legajo
+     *
+     * @param int $nroLegajo
+     * @param string $catDiferencial
+     * @return bool
+     */
+    public static function existeCategoriaDiferencial(int $nroLegajo, string $catDiferencial): bool
+    {
+        return static::query()
+            ->where('codc_categ', $catDiferencial)
+            ->where('nro_legaj', $nroLegajo)
+            ->whereRaw('map_es_cargo_activo(nro_cargo)')
+            ->exists();
+    }
 }

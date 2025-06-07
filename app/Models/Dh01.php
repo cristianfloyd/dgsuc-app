@@ -173,6 +173,12 @@ class Dh01 extends Model
         return $cuil1 . $cuil . $cuil2;
     }
 
+    /**
+     * Verifica si un legajo específico está jubilado.
+     *
+     * @param string $nro_legajo Número de legajo a verificar.
+     * @return bool Retorna verdadero si el legajo está jubilado, falso de lo contrario.
+     */
     public static function esJubilado($nro_legajo): bool
     {
         return static::query()

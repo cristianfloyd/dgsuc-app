@@ -62,7 +62,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
             // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
             $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
             // Preparo arreglo para usar en sql IN
-            $legajos_lic = trim($legajos_lic['licencias_sin_goce'], "{,}");
+            $legajos_lic = implode(',', $legajos_lic);
 
             // Agrego a la consulta anterior la union, para reutilizar el sql y como necesito los mismos datos parametrizo el string
             $tabla = 'dh01';

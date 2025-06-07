@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Data\Sicoss\SicossProcessData;
+use App\Models\Dh11;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
@@ -359,7 +360,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
                 $implode = implode("','", $explode); //vulve a String y agrega comillas
-                if (Dh03::existeCategoriaDiferencial($legajos[$i]['nro_legaj'], $implode)) {
+                if (Dh11::existeCategoriaDiferencial($legajos[$i]['nro_legaj'], $implode)) {
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
                 }
 

@@ -592,6 +592,16 @@ class LicenciaService
         }
     }
 
+    /**
+     * Verifica si un legajo tiene una licencia de maternidad activa.
+     *
+     * Esta función determina si un legajo específico tiene una licencia de maternidad activa dentro del período fiscal actual.
+     * Para esto, calcula el rango de fechas del período fiscal actual y consulta las licencias de maternidad asociadas al legajo,
+     * tanto en el contexto del legajo como del cargo. Si se encuentra una licencia activa, devuelve true; de lo contrario, devuelve false.
+     *
+     * @param int $nro_legajo El número de legajo a verificar.
+     * @return bool Verdadero si el legajo tiene una licencia de maternidad activa, falso de lo contrario.
+     */
     public static function tieneLicenciaMaternidadActiva($nro_legajo)
     {
         //-- Armo la fecha inicial para la consulta.
@@ -669,16 +679,17 @@ class LicenciaService
      * Obtiene los legajos con licencias sin goce
      *
      * @param string $whereLegajo Condición adicional para filtrar legajos
-     * @return array Array con un objeto que contiene la propiedad licencias_sin_goce en formato PostgreSQL array
+     * @return array Array con los números de legajo que tienen licencias sin goce
      */
     public static function getLegajosLicenciasSinGoce(string $whereLegajo): array
     {
         $subquery1 = self::getSubqueryLicenciasPorLegajo($whereLegajo);
         $subquery2 = self::getSubqueryLicenciasPorCargo($whereLegajo);
 
-        $sql = "SELECT array({$subquery1} UNION {$subquery2}) AS licencias_sin_goce";
+        $sql = "SELECT unnest(array({$subquery1} UNION {$subquery2})) AS nro_legaj";
 
-        return DB::connection(self::getStaticConnectionName())->select($sql);
+        $resultados = DB::connection(self::getStaticConnectionName())->select($sql);
+        return collect($resultados)->pluck('nro_legaj')->toArray();
     }
 
     /**
