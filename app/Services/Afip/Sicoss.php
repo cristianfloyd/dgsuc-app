@@ -240,7 +240,11 @@ class sicoss
     				AND $where_legajos
     			;";
 
-        return DB::connection(self::getStaticConnectionName())->select($sql);
+        $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return array_map(function ($item) {
+            return (array) $item;
+        }, $licencias);
     }
 
     public static function get_licencias_vigentes($where_legajos)
@@ -367,7 +371,11 @@ class sicoss
     				AND $where_legajos
     			;";
 
-        return DB::connection(self::getStaticConnectionName())->select($sql);
+        $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
+
+        return array_map(function ($item) {
+            return (array) $item;
+        }, $licencias);
     }
 
     public static function get_cargos_activos_sin_licencia($legajo): array
