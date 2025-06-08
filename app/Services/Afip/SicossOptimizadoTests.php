@@ -64,16 +64,23 @@ class SicossOptimizadoTests
     }
 
     /**
-     * Método base para ejecutar pruebas con diferentes cantidades de legajos
-     * 
-     * @param int|null $limite_legajos Cantidad máxima de legajos (null = todos)
-     * @param string $nombre_test Nombre descriptivo del test
-     * @param array|null $datos Configuración de datos del test
-     * @return array Resultados del test
+     * Método base para ejecutar pruebas con diferentes cantidades de legajos - VERSIÓN MEJORADA
      */
     private static function ejecutar_prueba_con_legajos($limite_legajos, $nombre_test, $datos = null)
     {
         Log::info("=== 🧪 INICIANDO $nombre_test ===");
+        
+        // ✅ 0. DIAGNÓSTICO PREVIO
+        $diagnostico = self::diagnosticar_sistema_y_conexiones();
+        if (!$diagnostico['exito']) {
+            return [
+                'exito' => false,
+                'nombre_test' => $nombre_test,
+                'error' => 'Falló el diagnóstico previo: ' . $diagnostico['error']
+            ];
+        }
+        
+        Log::info("✅ Diagnóstico previo completado - Legajos disponibles: {$diagnostico['legajos']['legajos_con_liquidacion_periodo']}");
         
         // ✅ 1. INICIALIZAR TODAS LAS VARIABLES ESTÁTICAS
         self::inicializar_variables_estaticas();
@@ -453,5 +460,246 @@ class SicossOptimizadoTests
             'consultas_sql_previas' => $cantidad_inicial,
             'limite_esperado_consultas' => 10
         ]);
+    }
+
+    /**
+     * 🔍 Diagnóstica y muestra información detallada del sistema y conexiones
+     */
+    public static function diagnosticar_sistema_y_conexiones()
+    {
+        Log::info('=== 🔍 DIAGNÓSTICO DEL SISTEMA ===');
+        
+        try {
+            // ✅ 1. INFORMACIÓN DE CONEXIONES
+            $conexion_principal = SicossOptimizado::getStaticConnectionName();
+            $config_conexion = config("database.connections.{$conexion_principal}");
+            
+            Log::info('📡 CONEXIÓN PRINCIPAL', [
+                'nombre_conexion' => $conexion_principal,
+                'host' => $config_conexion['host'] ?? 'No configurado',
+                'puerto' => $config_conexion['port'] ?? 'No configurado', 
+                'base_datos' => $config_conexion['database'] ?? 'No configurado',
+                'usuario' => $config_conexion['username'] ?? 'No configurado',
+                'driver' => $config_conexion['driver'] ?? 'No configurado'
+            ]);
+
+            // ✅ 2. PROBAR CONECTIVIDAD
+            $inicio_conexion = microtime(true);
+            $resultado_conexion = DB::connection($conexion_principal)->select('SELECT NOW() as servidor_tiempo, version() as version_db');
+            $tiempo_conexion = round((microtime(true) - $inicio_conexion) * 1000, 2);
+            
+            Log::info('✅ CONECTIVIDAD EXITOSA', [
+                'tiempo_respuesta_ms' => $tiempo_conexion,
+                'servidor_tiempo' => $resultado_conexion[0]->servidor_tiempo ?? 'No disponible',
+                'version_db' => substr($resultado_conexion[0]->version_db ?? 'No disponible', 0, 50)
+            ]);
+
+            // ✅ 3. INICIALIZAR VARIABLES PARA OBTENER DATOS
+            self::inicializar_variables_estaticas();
+            
+            // ✅ 4. INFORMACIÓN DE TABLAS PRINCIPALES
+            $tablas_info = self::obtener_informacion_tablas_principales($conexion_principal);
+            Log::info('📊 INFORMACIÓN DE TABLAS', $tablas_info);
+
+            // ✅ 5. CONTAR LEGAJOS DISPONIBLES
+            $codc_reparto = SicossOptimizado::getCodcReparto();
+            $info_legajos = self::contar_legajos_disponibles($conexion_principal, $codc_reparto);
+            Log::info('👥 LEGAJOS DISPONIBLES', $info_legajos);
+
+            // ✅ 6. INFORMACIÓN DEL PERÍODO ACTUAL
+            $periodo_info = self::obtener_informacion_periodo();
+            Log::info('📅 PERÍODO ACTUAL', $periodo_info);
+
+            // ✅ 7. INFORMACIÓN DEL SISTEMA
+            $sistema_info = self::obtener_informacion_sistema();
+            Log::info('💻 INFORMACIÓN DEL SISTEMA', $sistema_info);
+
+            // ✅ 8. PROYECCIONES DE RENDIMIENTO
+            $proyecciones = self::calcular_proyecciones_rendimiento($info_legajos['total_legajos']);
+            Log::info('🚀 PROYECCIONES DE RENDIMIENTO', $proyecciones);
+
+            return [
+                'exito' => true,
+                'conexion' => $conexion_principal,
+                'conectividad_ms' => $tiempo_conexion,
+                'tablas' => $tablas_info,
+                'legajos' => $info_legajos,
+                'periodo' => $periodo_info,
+                'sistema' => $sistema_info,
+                'proyecciones' => $proyecciones
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('❌ ERROR EN DIAGNÓSTICO', [
+                'error' => $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => basename($e->getFile())
+            ]);
+            
+            return [
+                'exito' => false,
+                'error' => $e->getMessage(),
+                'detalles' => [
+                    'linea' => $e->getLine(),
+                    'archivo' => basename($e->getFile())
+                ]
+            ];
+        }
+    }
+
+    /**
+     * Obtiene información detallada de las tablas principales
+     */
+    private static function obtener_informacion_tablas_principales($conexion): array
+    {
+        $tablas = ['dh01', 'dh21', 'dh21h', 'dh22', 'dh12', 'dh15', 'dh16'];
+        $info_tablas = [];
+        
+        foreach ($tablas as $tabla) {
+            try {
+                $count_result = DB::connection($conexion)->select("SELECT COUNT(*) as total FROM mapuche.{$tabla}");
+                $size_result = DB::connection($conexion)->select("
+                    SELECT pg_size_pretty(pg_total_relation_size('mapuche.{$tabla}')) as tamaño
+                ");
+                
+                $info_tablas[$tabla] = [
+                    'registros' => $count_result[0]->total ?? 0,
+                    'tamaño' => $size_result[0]->tamaño ?? 'No disponible'
+                ];
+            } catch (\Exception $e) {
+                $info_tablas[$tabla] = [
+                    'registros' => 'Error: ' . $e->getMessage(),
+                    'tamaño' => 'No disponible'
+                ];
+            }
+        }
+        
+        return $info_tablas;
+    }
+
+    /**
+     * Cuenta los legajos disponibles con diferentes filtros
+     */
+    private static function contar_legajos_disponibles($conexion, $codc_reparto): array
+    {
+        try {
+            // Total de legajos en dh01
+            $total_legajos = DB::connection($conexion)->select("
+                SELECT COUNT(*) as total FROM mapuche.dh01
+            ")[0]->total ?? 0;
+
+            // Legajos con liquidaciones en el período
+            $periodo = MapucheConfig::getPeriodoCorriente();
+            $legajos_con_liquidacion = DB::connection($conexion)->select("
+                SELECT COUNT(DISTINCT dh21.nro_legaj) as total 
+                FROM mapuche.dh21
+                INNER JOIN mapuche.dh22 ON dh22.nro_liqui = dh21.nro_liqui
+                WHERE dh22.per_liano = ? AND dh22.per_limes = ? AND dh22.sino_genimp = true
+            ", [$periodo['year'], $periodo['month']])[0]->total ?? 0;
+
+            // Legajos activos
+            $legajos_activos = DB::connection($conexion)->select("
+                SELECT COUNT(*) as total FROM mapuche.dh01 WHERE tipo_estad = 'A'
+            ")[0]->total ?? 0;
+
+            // Legajos del reparto específico
+            $legajos_reparto = 0;
+            if ($codc_reparto && $codc_reparto !== 'NULL') {
+                $legajos_reparto = DB::connection($conexion)->select("
+                    SELECT COUNT(*) as total FROM mapuche.dh01 WHERE codc_reparto = ?
+                ", [trim($codc_reparto, "'")])[0]->total ?? 0;
+            }
+
+            return [
+                'total_legajos' => $total_legajos,
+                'legajos_con_liquidacion_periodo' => $legajos_con_liquidacion,
+                'legajos_activos' => $legajos_activos,
+                'legajos_reparto_especifico' => $legajos_reparto,
+                'codc_reparto_utilizado' => $codc_reparto,
+                'periodo_consultado' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT)
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Error al contar legajos: ' . $e->getMessage(),
+                'total_legajos' => 0,
+                'legajos_con_liquidacion_periodo' => 0,
+                'legajos_activos' => 0,
+                'legajos_reparto_especifico' => 0
+            ];
+        }
+    }
+
+    /**
+     * Obtiene información del período actual
+     */
+    private static function obtener_informacion_periodo(): array
+    {
+        try {
+            $periodo = MapucheConfig::getPeriodoCorriente();
+            return [
+                'año_actual' => $periodo['year'],
+                'mes_actual' => $periodo['month'],
+                'periodo_formato' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT),
+                'nombre_mes' => date('F', mktime(0, 0, 0, $periodo['month'], 1)),
+                'timestamp_consulta' => now()->toDateTimeString()
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Error al obtener período: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Obtiene información del sistema
+     */
+    private static function obtener_informacion_sistema(): array
+    {
+        return [
+            'memoria_actual_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
+            'memoria_pico_mb' => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
+            'limite_memoria' => ini_get('memory_limit'),
+            'limite_tiempo_ejecucion' => ini_get('max_execution_time'),
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'timezone' => config('app.timezone'),
+            'environment' => app()->environment()
+        ];
+    }
+
+    /**
+     * Calcula proyecciones de rendimiento basadas en tests anteriores
+     */
+    private static function calcular_proyecciones_rendimiento($total_legajos): array
+    {
+        // Basado en los resultados de los tests anteriores
+        $tiempo_por_legajo_ms = 21; // Promedio optimista basado en 10K test
+        $tiempo_overhead_s = 23; // Overhead inicial observado
+        
+        $tiempo_procesamiento_s = ($total_legajos * $tiempo_por_legajo_ms) / 1000;
+        $tiempo_total_s = $tiempo_procesamiento_s + $tiempo_overhead_s;
+        
+        return [
+            'legajos_totales' => $total_legajos,
+            'tiempo_estimado_por_legajo_ms' => $tiempo_por_legajo_ms,
+            'tiempo_overhead_segundos' => $tiempo_overhead_s,
+            'tiempo_procesamiento_estimado_min' => round($tiempo_procesamiento_s / 60, 2),
+            'tiempo_total_estimado_min' => round($tiempo_total_s / 60, 2),
+            'tiempo_total_estimado_horas' => round($tiempo_total_s / 3600, 2),
+            'velocidad_estimada_legajos_por_segundo' => round($total_legajos / $tiempo_total_s, 2),
+            'memoria_estimada_mb' => round($total_legajos * 0.05, 2), // ~50KB por legajo observado
+            'consultas_n1_eliminadas' => $total_legajos,
+            'mejora_vs_original_estimada' => '85-90%'
+        ];
+    }
+
+    /**
+     * Ejecuta diagnóstico completo antes de cualquier test
+     */
+    public static function pre_test_diagnostico()
+    {
+        Log::info('🚀 Ejecutando diagnóstico pre-test...');
+        return self::diagnosticar_sistema_y_conexiones();
     }
 }
