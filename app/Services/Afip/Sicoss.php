@@ -14,6 +14,7 @@ use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Dh03Repository;
+use Illuminate\Support\Facades\File;
 
 class sicoss
 {
@@ -145,7 +146,7 @@ class sicoss
         DB::connection(self::getStaticConnectionName())->statement($sql);
 
         if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
-            copy(storage_path('comunicacion/sicoss/' . $nombre_arch . '.txt'), $testeo_directorio_salida . '/' . $testeo_prefijo_archivos);
+            copy(storage_path("comunicacion/sicoss/$nombre_arch.txt"), "$testeo_directorio_salida/$testeo_prefijo_archivos");
         } else {
             sicoss::armar_zip();
             return sicoss::transformar_a_recordset($totales);
@@ -1412,11 +1413,22 @@ class sicoss
 
 
     // Dado un arreglo, doy formato y agrego a archivo
-    static function grabar_en_txt($legajos, $nombre_arch)
+    public static function grabar_en_txt($legajos, $nombre_arch)
     {
         //Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
-        $archivo = storage_path('comunicacion/sicoss/' . $nombre_arch . '.txt');
-        $fh = fopen($archivo, 'w') or die("Error!!");
+        $directorio = storage_path('comunicacion/sicoss');
+        // Crea el directorio si no existe
+        if (!File::exists($directorio)) {
+            File::makeDirectory($directorio, 0775, true);
+        }
+
+        $archivo = $directorio . '/' . $nombre_arch . '.txt';
+        Log::info('Intentando guardar archivo en: ' . $archivo);
+        $fh = @fopen($archivo, 'w');
+        if (!$fh) {
+            $error = error_get_last();
+            Log::error('No se pudo abrir el archivo: ' . $archivo . ' - Error: ' . $error['message']);
+        }
         // Proceso la tabla, le agrego las longitudes correpondientes
         for ($i = 0; $i < count($legajos); $i++) {
             fwrite(
@@ -1434,7 +1446,7 @@ class sicoss
                     sicoss::llena_importes($legajos[$i]['codigo_os'], 6) .
                     sicoss::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Seg�n este chequeado en configuraci�n informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14
+                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14 
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
@@ -1486,6 +1498,8 @@ class sicoss
                     "\r\n"
             );
         }
+        // Ejemplo de escritura
+    fwrite($fh, "Contenido de prueba\n");
         fclose($fh);
     }
 

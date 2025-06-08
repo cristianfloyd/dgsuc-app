@@ -275,7 +275,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 $configuracion,
                 '', // directorio de salida para testing
                 '', // prefijo de archivos para testing
-                true // retornar datos para verificación
+                false // retornar datos para verificación
             );
             
         } catch (\Exception $e) {

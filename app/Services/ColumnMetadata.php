@@ -15,7 +15,7 @@ class ColumnMetadata
     /**
      * @var array<string, int> Mapeo de nombres de columnas a índices
      */
-    private const COLUMN_MAP = [
+    private const array COLUMN_MAP = [
         'PERIODO_FISCAL' => 0,
         'CODIGO_MOVIMIENTO' => 1,
         'TIPO_REGISTRO' => 2,

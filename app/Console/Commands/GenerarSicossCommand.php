@@ -111,13 +111,13 @@ class GenerarSicossCommand extends Command
         
         // Solo mostrar imponibles que no sean 0
         $imponiblesRelevantes = [
-            'IMPONIBLE 1' => $importes['Remuner78805'],
-            'IMPONIBLE 2' => $importes['Remuner78805'],
-            'IMPONIBLE 3' => $importes['Remuner78805'],
-            'IMPONIBLE 4' => $importes['Remuner78805'],
-            'IMPONIBLE 5' => $importes['Remuner78805'],
+            'IMPONIBLE 1' => $importes['IMPORTE_IMPON'],
+            'IMPONIBLE 2' => $importes['ImporteImponiblePatronal'],
+            'IMPONIBLE 3' => $importes['ImporteImponiblePatronal'],
+            'IMPONIBLE 4' => $importes['ImporteImponible_4'],
+            'IMPONIBLE 5' => $importes['ImporteImponible_4'] - $importes['ImporteTipo91'],
             'IMPONIBLE 6' => $importes['ImporteImponible_6'],
-            'IMPONIBLE 7' => $importes['ImporteImponible_5'],
+            'IMPONIBLE 7' => $importes['ImporteImponible_6'],
             'IMPONIBLE 8' => $importes['Remuner78805'],
             'IMPONIBLE 9' => $importes['importeimponible_9'],
         ];
