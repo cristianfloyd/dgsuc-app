@@ -102,8 +102,6 @@ class SicossOptimizado
                     return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
 
                 $totales[$periodo] = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                // $sql = "DROP TABLE IF EXISTS conceptos_liquidados";
-                // DB::connection(self::getStaticConnectionName())->statement($sql);
                 break;
             default:
                 $periodos_retro = sicoss::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
@@ -763,16 +761,17 @@ class SicossOptimizado
                 else
                     $where .= ' )';
                 // si tengo licencias consulto la union de legajos. Ordeno por agente, luego de obtener todos los legajos
-                $sql_datos_lic = ' UNION (' . self::get_sql_legajos("mapuche.dh01", 1, $where) . ' ORDER BY apyno  LIMIT 10';
+                $sql_datos_lic = ' UNION (' . self::get_sql_legajos("mapuche.dh01", 1, $where) . ' ORDER BY apyno';
 
                 $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo . $sql_datos_lic);
             } else {
-                $sql_datos_legajo .= ' ORDER BY apyno   LIMIT 10';
+                $sql_datos_legajo .= ' ORDER BY apyno';
                 // Si no hay licencias sin goce que cumpaln con las restricciones hago el proceso comun
                 $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
             }
         } else {
-            $sql_datos_legajo .= ' ORDER BY apyno  LIMIT 10';
+            $sql_datos_legajo .= ' ORDER BY apyno';
+            // $sql_datos_legajo .= ' ORDER BY apyno  LIMIT 1000';
 
             // Si no tengo el check licencias se consulta solo contra conceptos liquidados
             $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
@@ -782,14 +781,14 @@ class SicossOptimizado
             }, $legajos);
         }
 
-        //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidaci�n para Reserva de Puesto"
+        //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidación para Reserva de Puesto"
         if ($check_sin_activo) {
             $where_no_liquidado = "
 								NOT EXISTS (SELECT 1
 											FROM
-												mapuche.dh21
+													mapuche.dh21
 											WHERE
-												dh21.nro_legaj = dh01.nro_legaj
+													dh21.nro_legaj = dh01.nro_legaj
 											)
 								AND
 								dh01.tipo_estad = 'A' AND NOT EXISTS 	(  	SELECT
@@ -1058,7 +1057,31 @@ class SicossOptimizado
         $j = 0;
         $total_legajos = count($legajos);
 
-        // En este for se completan los campos necesarios para cada uno de los legajos liquidados
+        // ✅ PASO 1: Pre-carga masiva de conceptos
+        Log::info('=== INICIANDO OPTIMIZACIÓN COMPLETA ===', [
+            'total_legajos' => $total_legajos
+        ]);
+        
+        $inicio_total = microtime(true);
+        
+        // Pre-carga masiva
+        $inicio_precarga = microtime(true);
+        $todos_conceptos = self::precargar_conceptos_todos_legajos($legajos);
+        $fin_precarga = microtime(true);
+
+        // ✅ PASO 2: Agrupación por legajo
+        $conceptos_por_legajo = self::agrupar_conceptos_por_legajo($todos_conceptos);
+        $fin_agrupacion = microtime(true);
+
+        $stats = self::obtener_estadisticas_precarga($todos_conceptos, $legajos);
+
+        Log::info('=== OPTIMIZACIÓN PREPARADA ===', [
+            'tiempo_precarga_ms' => round(($fin_precarga - $inicio_precarga) * 1000, 2),
+            'tiempo_agrupacion_ms' => round(($fin_agrupacion - $fin_precarga) * 1000, 2),
+            'estadisticas' => $stats
+        ]);
+
+        // ✅ BUCLE OPTIMIZADO: Sin consultas SQL individuales
         for ($i = 0; $i < $total_legajos; $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
             $legajoActual = &$legajos[$i];
@@ -1204,18 +1227,28 @@ class SicossOptimizado
             if ($legajos[$i]['conyugue'] > 0)
                 $legajos[$i]['conyugue'] = 1;
 
-            // --- Obtengo la sumarizaci�n seg�n concepto � tipo de grupo de un concepto ---
-            self::sumarizar_conceptos_por_tipos_grupos($legajo, $legajos[$i]);
+            // --- Obtengo la sumarización según concepto ó tipo de grupo de un concepto ---
+            $conceptos_legajo = $conceptos_por_legajo[$legajo] ?? [];
+            self::sumarizar_conceptos_optimizado($conceptos_legajo, $legajos[$i]);
 
-            // --- Otros datos remunerativos ---
+            // --- Otros datos remunerativos - OPTIMIZADO ---
 
-            // Sumarizar conceptos segun tipo de concepto
-            $suma_conceptos_tipoC = self::calcular_remuner_grupo($legajo, 'C', 'nro_orimp >0 AND codn_conce > 0');
-            $suma_conceptos_tipoF = self::calcular_remuner_grupo($legajo, 'F', 'true');
+            // ✅ Sumarizar conceptos segun tipo de concepto - SIN MÁS CONSULTAS SQL
+            $suma_conceptos_tipoC = self::calcular_remuner_grupo_optimizado($conceptos_legajo, 'C', 'nro_orimp >0 AND codn_conce > 0');
+            $suma_conceptos_tipoF = self::calcular_remuner_grupo_optimizado($conceptos_legajo, 'F', 'true');
 
             $legajos[$i]['Remuner78805']               = $suma_conceptos_tipoC;
             $legajos[$i]['AsignacionesFliaresPagadas'] = $suma_conceptos_tipoF;
             $legajos[$i]['ImporteImponiblePatronal']   = $suma_conceptos_tipoC;
+
+            // Log de progreso cada 1000 legajos o al final
+            if (($i + 1) % 1000 == 0 || ($i + 1) == $total_legajos) {
+                Log::info("✅ Procesados legajos optimizados: " . ($i + 1) . "/$total_legajos", [
+                    'porcentaje' => round((($i + 1) / $total_legajos) * 100, 1),
+                    'memoria_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
+                    'tiempo_promedio_por_legajo_ms' => round((microtime(true) - $inicio_total) * 1000 / ($i + 1), 2)
+                ]);
+            }
 
             // Para calcular Remuneracion total= IMPORTE_BRUTO
             $legajos[$i]['DiferenciaSACImponibleConTope'] = 0;
@@ -1459,6 +1492,19 @@ class SicossOptimizado
             }
         }
 
+        // ✅ LOG FINAL DE OPTIMIZACIÓN
+        $fin_total = microtime(true);
+        $tiempo_total = ($fin_total - $inicio_total) * 1000;
+        
+        Log::info('=== ✅ OPTIMIZACIÓN COMPLETADA ===', [
+            'total_legajos_procesados' => $total_legajos,
+            'tiempo_total_ms' => round($tiempo_total, 2),
+            'tiempo_promedio_por_legajo_ms' => round($tiempo_total / max($total_legajos, 1), 2),
+            'legajos_validos_generados' => count($legajos_validos),
+            'memoria_final_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
+            'mejora_estimada' => 'Eliminadas ' . $total_legajos . ' consultas N+1 individuales'
+        ]);
+
         if (!empty($legajos_validos)) {
             if ($retornar_datos === TRUE)
                 return $legajos_validos;
@@ -1560,11 +1606,32 @@ class SicossOptimizado
         fclose($fh);
     }
 
-    // Similar a VerificarConceptosRemuneratorios en pampa.
-    // Dado un legajo hace la sumarizaci�n de conceptos liquidados seg�n corresponda:
-    // por tipo de grupo al que pertenece un concepto o codigo de concepto
+    /**
+     * ⚠️ MÉTODO ORIGINAL - DEPRECADO POR PROBLEMA N+1
+     * 
+     * Este método fue reemplazado por sumarizar_conceptos_optimizado()
+     * Se mantiene solo para referencia y posible rollback.
+     * 
+     * @deprecated Usar sumarizar_conceptos_optimizado() en su lugar
+     */
     public static function sumarizar_conceptos_por_tipos_grupos($nro_leg, &$leg)
     {
+        Log::warning('⚠️ USANDO MÉTODO DEPRECADO: sumarizar_conceptos_por_tipos_grupos', [
+            'legajo' => $nro_leg,
+            'recomendacion' => 'Usar sumarizar_conceptos_optimizado() en su lugar'
+        ]);
+
+        // 📊 Log para monitorear problema N+1
+        static $contador_consultas = 0;
+        $contador_consultas++;
+        
+        if ($contador_consultas <= 5 || $contador_consultas % 1000 == 0) {
+            Log::info("sumarizar_conceptos_por_tipos_grupos: Consulta N+1 #{$contador_consultas}", [
+                'legajo' => $nro_leg,
+                'memoria_actual' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB'
+            ]);
+        }
+
         $leg['ImporteSAC']                = 0;
         $leg['SACPorCargo']               = 0;
         $leg['ImporteHorasExtras']        = 0;
@@ -1762,17 +1829,17 @@ class SicossOptimizado
 
             }*/
 
-            // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneraci�n 11"
+            // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneración 11"
             if (preg_match('/[^\d]+86[^\d]+/', $grupos_concepto)) {
                 $leg['IncrementoSolidario'] += $importe;
             }
 
-            // Tipo 91- AFIP Base de C�lculo Diferencial Aportes OS y FSR
+            // Tipo 91- AFIP Base de Cálculo Diferencial Aportes OS y FSR
             if (preg_match('/[^\d]+91[^\d]+/', $grupos_concepto)) {
                 $leg['ImporteTipo91'] += $importe;
             }
 
-            // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneraci�n bruta total
+            // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneración bruta total
             if (preg_match('/[^\d]+96[^\d]+/', $grupos_concepto))
                 $leg['ImporteNoRemun96']  += $importe;
         }
@@ -2166,7 +2233,7 @@ class SicossOptimizado
      *
      * @return string El nombre de la conexión estática.
      */
-    private static function getStaticConnectionName()
+    public static function getStaticConnectionName()
     {
         $instance = new static();
         return $instance->getConnectionName();
@@ -2197,25 +2264,28 @@ class SicossOptimizado
 
         Log::info('precargar_conceptos_todos_legajos: Iniciando pre-carga', [
             'cantidad_legajos' => count($nros_legajos),
-            'memoria_antes' => memory_get_usage(true) / 1024 / 1024 . ' MB'
+            'memoria_antes' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB'
         ]);
 
         $inicio = microtime(true);
 
-        // ✅ UNA SOLA CONSULTA para todos los legajos
+        // ✅ UNA SOLA CONSULTA para todos los legajos - INCLUIR CAMPOS ADICIONALES
         $sql = "
             SELECT 
-                nro_legaj,              -- ⚠️ IMPORTANTE: Incluir para agrupación posterior
-                impp_conce,
-                nov1_conce,
-                codn_conce,
-                tipos_grupos,
-                nro_cargo,
-                codigoescalafon
-            FROM conceptos_liquidados
-            WHERE nro_legaj IN ($legajos_in)
-              AND tipos_grupos IS NOT NULL
-            ORDER BY nro_legaj, codn_conce  -- Ordenar para optimizar agrupación posterior
+                cl.nro_legaj,
+                cl.impp_conce,
+                cl.nov1_conce,
+                cl.codn_conce,
+                cl.tipos_grupos,
+                cl.nro_cargo,
+                cl.codigoescalafon,
+                cl.tipo_conce,              -- ✅ NUEVO: Para calcular_remuner_grupo
+                dh12.nro_orimp              -- ✅ NUEVO: Para filtros de calcular_remuner_grupo
+            FROM conceptos_liquidados cl
+            LEFT JOIN mapuche.dh12 ON dh12.codn_conce = cl.codn_conce
+            WHERE cl.nro_legaj IN ($legajos_in)
+              AND cl.tipos_grupos IS NOT NULL
+            ORDER BY cl.nro_legaj, cl.codn_conce
         ";
 
         try {
@@ -2227,8 +2297,8 @@ class SicossOptimizado
             Log::info('precargar_conceptos_todos_legajos: Pre-carga completada', [
                 'conceptos_cargados' => count($resultado),
                 'tiempo_consulta_ms' => round($tiempo_consulta, 2),
-                'memoria_despues' => memory_get_usage(true) / 1024 / 1024 . ' MB',
-                'promedio_conceptos_por_legajo' => round(count($resultado) / count($nros_legajos), 2)
+                'memoria_despues' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
+                'promedio_conceptos_por_legajo' => count($nros_legajos) > 0 ? round(count($resultado) / count($nros_legajos), 2) : 0
             ]);
 
             // Convertir objetos stdClass a arrays para consistencia
@@ -2297,84 +2367,378 @@ class SicossOptimizado
     }
 
     /**
-     * Agrupa los conceptos liquidados por legajo para acceso rápido
+     * Agrupa los conceptos liquidados por legajo para acceso rápido O(1)
+     * 
+     * @param array $todos_conceptos Array resultado de precargar_conceptos_todos_legajos
+     * @return array Array asociativo [nro_legaj => [conceptos...]]
      */
     public static function agrupar_conceptos_por_legajo($todos_conceptos): array
     {
+        $inicio = microtime(true);
         $conceptos_por_legajo = [];
-
+        
         foreach ($todos_conceptos as $concepto) {
             $nro_legaj = $concepto['nro_legaj'];
-
+            
             if (!isset($conceptos_por_legajo[$nro_legaj])) {
                 $conceptos_por_legajo[$nro_legaj] = [];
             }
-
+            
             $conceptos_por_legajo[$nro_legaj][] = $concepto;
         }
-
+        
+        $fin = microtime(true);
+        $tiempo_agrupacion = ($fin - $inicio) * 1000;
+        
+        Log::info('agrupar_conceptos_por_legajo: Agrupación completada', [
+            'total_conceptos' => count($todos_conceptos),
+            'legajos_agrupados' => count($conceptos_por_legajo),
+            'tiempo_agrupacion_ms' => round($tiempo_agrupacion, 2),
+            'memoria_utilizada_mb' => round(memory_get_usage(true) / 1024 / 1024, 2)
+        ]);
+        
         return $conceptos_por_legajo;
     }
 
     /**
-     * Versión optimizada que no hace consultas SQL
+     * Versión optimizada de sumarizar_conceptos_por_tipos_grupos que NO hace consultas SQL
+     * 
+     * @param array $conceptos_legajo Conceptos pre-cargados para este legajo
+     * @param array $leg Referencia al array del legajo para modificar
      */
     public static function sumarizar_conceptos_optimizado($conceptos_legajo, &$leg)
     {
-        // Inicializar todas las variables como antes
-        $leg['ImporteSAC'] = 0;
-        $leg['SACPorCargo'] = 0;
-        // ... resto de inicializaciones ...
+        // Inicializar todas las variables igual que antes
+        $leg['ImporteSAC']                = 0;
+        $leg['SACPorCargo']               = 0;
+        $leg['ImporteHorasExtras']        = 0;
+        $leg['ImporteVacaciones']         = 0;
+        $leg['ImporteRectificacionRemun'] = 0;
+        $leg['ImporteAdicionales']        = 0;
+        $leg['ImportePremios']            = 0;
+        $leg['ImporteNoRemun']            = 0;
+        $leg['ImporteMaternidad']         = 0;
+        $leg['ImporteZonaDesfavorable']   = 0;
+        $leg['PrioridadTipoDeActividad']  = 0;
+        $leg['IMPORTE_VOLUN']             = 0;
+        $leg['IMPORTE_ADICI']             = 0;
+        $leg['TipoDeActividad']           = 0;
+        $leg['ImporteImponible_6']        = 0;
+        $leg['SACInvestigador']           = 0;
+        $leg['CantidadHorasExtras']       = 0;
+        $leg['SeguroVidaObligatorio']     = 0;
+        $leg['ImporteImponibleBecario']   = 0;
+        $leg['AporteAdicionalObraSocial'] = 0;
+        $leg['ImporteSICOSS27430']        = 0;
+        $leg['ImporteSICOSSDec56119']     = 0;
+        $leg['ImporteSACDoce']            = 0;
+        $leg['ImporteSACAuto']            = 0;
+        $leg['ImporteSACNodo']            = 0;
+        $leg['ContribTareaDif']           = 0;
+        $leg['NoRemun4y8']                = 0;
+        $leg['IncrementoSolidario']       = 0;
+        $leg['ImporteNoRemun96']          = 0;
+        $leg['ImporteTipo91']             = 0;
 
+        $informar_becarios = MapucheConfig::getSicossInformarBecarios();
         $cargoInvestigador = [];
         $conce_hs_extr = [];
 
-        // ✅ Procesar conceptos pre-cargados (NO MÁS CONSULTAS SQL)
+        // En el caso de que en check 'Toma en cuenta Familiares a Cargo para informar SICOSS?' en configuración -> impositivos -> parametros sicoss sea false
+        // voy a fijarme si se liquido un concepto igual al configurado como obra social familiar a cargo. Informo 0 o 1 (no se liquido o se liquido algun concepto igual al definido)
+        if (self::$cantidad_adherentes_sicoss == 0)
+            $leg['adherentes'] = 0;
+
+        // ✅ PROCESAR CONCEPTOS PRE-CARGADOS (NO MÁS CONSULTAS SQL)
         foreach ($conceptos_legajo as $concepto) {
-            $importe = $concepto['impp_conce'];
-            $importe_novedad = $concepto['nov1_conce'];
-            $grupos_concepto = $concepto['tipos_grupos'];
-            $codn_concepto = $concepto['codn_conce'];
-            $nro_cargo = $concepto['nro_cargo'];
+            $importe            = $concepto['impp_conce'];
+            $importe_novedad    = $concepto['nov1_conce'];
+            $grupos_concepto    = $concepto['tipos_grupos'];
+            $codn_concepto      = $concepto['codn_conce'];
+            $nro_cargo          = $concepto['nro_cargo'];
+            $codigo_obra_social = $leg['codigo_os'];
 
-            // ... misma lógica de procesamiento que antes ...
-
+            // *** MISMA LÓGICA QUE ANTES - Solo sin consultas SQL ***
+            
             if (preg_match('/[^\d]+6[^\d]+/', $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
-                // ... resto del procesamiento ...
+                // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
+                if (self::$hs_extras_por_novedad == 1) {
+                    $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
+                    //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
+                    if (!in_array($codn_concepto, $conce_hs_extr)) {
+                        $conce_hs_extr[] = $codn_concepto;
+                        $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
+                    }
+                }
             }
 
-            // ... resto de condiciones igual que antes ...
-        }
+            if (preg_match('/[^\d]+7[^\d]+/', $grupos_concepto))
+                $leg['ImporteZonaDesfavorable'] += $importe;
 
-        // ✅ Calcular SAC Investigador optimizado
-        $leg['SACInvestigador'] = self::calcularSACInvestigadorOptimizado(
-            $conceptos_legajo,
-            $cargoInvestigador
-        );
+            if (preg_match('/[^\d]+8[^\d]+/', $grupos_concepto))
+                $leg['ImporteVacaciones'] += $importe;
+
+            if (preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteSAC']  += $importe;
+
+                if ($concepto['codigoescalafon'] == 'NODO')
+                    $leg['ImporteSACNodo'] += $importe;
+                if ($concepto['codigoescalafon'] == 'AUTO')
+                    $leg['ImporteSACAuto'] += $importe;
+                if ($concepto['codigoescalafon'] == 'DOCE')
+                    $leg['ImporteSACDoce'] += $importe;
+            }
+
+            if (preg_match('/[^\d]+11[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 38)
+                    $leg['PrioridadTipoDeActividad'] = 38;
+                if (($leg['PrioridadTipoDeActividad'] == 87) || ($leg['PrioridadTipoDeActividad'] == 88))
+                    $leg['PrioridadTipoDeActividad'] = 38;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+12[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 34)
+                    $leg['PrioridadTipoDeActividad'] = 34;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+13[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 35)
+                    $leg['PrioridadTipoDeActividad'] = 35;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+14[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 36)
+                    $leg['PrioridadTipoDeActividad'] = 36;
+                if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88)
+                    $leg['PrioridadTipoDeActividad'] = 36;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+15[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 37)
+                    $leg['PrioridadTipoDeActividad'] = 37;
+                if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88)
+                    $leg['PrioridadTipoDeActividad'] = 37;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+16[^\d]+/', $grupos_concepto)) {
+                $leg['AporteAdicionalObraSocial'] += $importe;
+            }
+
+            if (preg_match('/[^\d]+21[^\d]+/', $grupos_concepto))
+                $leg['ImporteAdicionales'] += $importe;
+
+            if (preg_match('/[^\d]+22[^\d]+/', $grupos_concepto))
+                $leg['ImportePremios'] += $importe;
+
+            // conceptos no remunerativos
+            if (preg_match('/[^\d]+45[^\d]+/', $grupos_concepto))
+                $leg['ImporteNoRemun']  += $importe;
+
+            if (preg_match('/[^\d]+46[^\d]+/', $grupos_concepto))
+                $leg['ImporteRectificacionRemun'] += $importe;
+
+            if (preg_match('/[^\d]+47[^\d]+/', $grupos_concepto))
+                $leg['ImporteMaternidad'] += $importe;
+
+            if (preg_match('/[^\d]+48[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 36 || $leg['PrioridadTipoDeActividad'] == 88)
+                    $leg['PrioridadTipoDeActividad'] = 87;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+
+            if (preg_match('/[^\d]+49[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteImponible_6'] += $importe;
+                if ($leg['PrioridadTipoDeActividad'] < 36)
+                    $leg['PrioridadTipoDeActividad'] = 88;
+                array_push($cargoInvestigador, $nro_cargo);
+            }
+            if (preg_match('/[^\d]+58[^\d]+/', $grupos_concepto))
+                $leg['SeguroVidaObligatorio'] = 1;
+
+            if (self::$codigo_os_aporte_adicional == $codn_concepto)
+                $leg['IMPORTE_ADICI'] += $importe;
+
+            if (self::$aportes_voluntarios == $codn_concepto)
+                $leg['IMPORTE_VOLUN'] += $importe;
+
+            if (self::$cantidad_adherentes_sicoss == 0 && self::$codigo_obrasocial_fc == $codn_concepto)
+                $leg['adherentes'] = 1;
+
+            if (preg_match('/[^\d]+24[^\d]+/', $grupos_concepto) && self::$hs_extras_por_novedad == 0) {
+                $leg['CantidadHorasExtras'] += $importe;
+            }
+
+            if (preg_match('/[^\d]+67[^\d]+/', $grupos_concepto) && $informar_becarios == 1) {
+                $leg['ImporteImponibleBecario'] += $importe;
+            }
+
+            if (preg_match('/[^\d]+81[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteSICOSS27430'] += $importe;
+            }
+            if (preg_match('/[^\d]+83[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteSICOSSDec56119'] += $importe;
+            }
+
+            if (preg_match('/[^\d]+84[^\d]+/', $grupos_concepto)) {
+                $leg['NoRemun4y8'] += $importe;
+            }
+
+            // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneración 11"
+            if (preg_match('/[^\d]+86[^\d]+/', $grupos_concepto)) {
+                $leg['IncrementoSolidario'] += $importe;
+            }
+
+            // Tipo 91- AFIP Base de Cálculo Diferencial Aportes OS y FSR
+            if (preg_match('/[^\d]+91[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteTipo91'] += $importe;
+            }
+
+            // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneración bruta total
+            if (preg_match('/[^\d]+96[^\d]+/', $grupos_concepto))
+                $leg['ImporteNoRemun96']  += $importe;
+        }
+        
+        // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
+        if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0)
+            $leg['TipoDeActividad'] = $leg['codigoactividad'];
+        elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
+            $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
+        )
+            $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
+
+        // ✅ Calcular SAC Investigador optimizado (sin consultas SQL adicionales)
+        $leg['SACInvestigador'] = self::calcularSACInvestigadorOptimizado($conceptos_legajo, $cargoInvestigador);
     }
 
     /**
-     * Versión optimizada que no hace consultas SQL
+     * Versión optimizada de calcularSACInvestigador que NO hace consultas SQL
      */
     public static function calcularSACInvestigadorOptimizado($conceptos_legajo, $cargos): int
     {
         $sacInvestigador = 0;
         $cargos = array_unique($cargos);
-
+        
         foreach ($conceptos_legajo as $concepto) {
             $nro_cargo = $concepto['nro_cargo'];
             $grupos_concepto = $concepto['tipos_grupos'];
-
+            
             // Verificar si el cargo está en la lista Y tiene tipo de grupo 9
-            if (
-                in_array($nro_cargo, $cargos) &&
-                preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)
-            ) {
+            if (in_array($nro_cargo, $cargos) && 
+                preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)) {
                 $sacInvestigador += $concepto['impp_conce'];
             }
         }
-
+        
         return $sacInvestigador;
+    }
+
+    /**
+     * Versión optimizada de calcular_remuner_grupo que NO hace consultas SQL
+     * 
+     * @param array $conceptos_legajo Conceptos pre-cargados para este legajo
+     * @param string $tipo Tipo de concepto a considerar
+     * @param string $where_condition Condición adicional para filtrar
+     * @return float La remuneración total del grupo
+     */
+    public static function calcular_remuner_grupo_optimizado($conceptos_legajo, $tipo, $where_condition): float
+    {
+        $suma = 0.0;
+        
+        foreach ($conceptos_legajo as $concepto) {
+            // Verificar que el concepto sea del tipo solicitado
+            if (!isset($concepto['tipo_conce']) || $concepto['tipo_conce'] !== $tipo) {
+                continue;
+            }
+            
+            // Aplicar filtros según la condición
+            if ($where_condition === 'nro_orimp >0 AND codn_conce > 0') {
+                // Verificar que nro_orimp > 0 y codn_conce > 0
+                if (!isset($concepto['nro_orimp']) || $concepto['nro_orimp'] <= 0 || 
+                    !isset($concepto['codn_conce']) || $concepto['codn_conce'] <= 0) {
+                    continue;
+                }
+            }
+            // Para $where_condition === 'true' no hay filtros adicionales
+            
+            $suma += (float)$concepto['impp_conce'];
+        }
+        
+        return $suma;
+    }
+
+
+
+    // Agregar método para inicializar variables estáticas desde tests
+    public static function inicializarVariablesEstaticasParaTests()
+    {
+        self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
+        self::$aportes_voluntarios        = MapucheConfig::getTopesJubilacionVoluntario();
+        self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
+        self::$codigo_obrasocial_fc       = MapucheConfig::getConceptosObraSocialFliarAdherente();
+        self::$tipoEmpresa                = MapucheConfig::getDatosUniversidadTipoEmpresa();
+        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();
+        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();
+        self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
+        self::$codc_reparto               = self::quote(MapucheConfig::getDatosCodcReparto());
+        self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
+        self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();
+        self::$categoria_diferencial      = MapucheConfig::getCategoriasDiferencial();
+    }
+
+    /**
+     * Obtiene el código de reparto para tests
+     */
+    public static function getCodcReparto()
+    {
+        return self::$codc_reparto;
+    }
+
+
+
+    /**
+     * Limpia las tablas temporales - Método público para tests
+     */
+    public static function limpiarTablasTemporalesParaTests()
+    {
+        try {
+            $sql = "DROP TABLE IF EXISTS pre_conceptos_liquidados CASCADE";
+            DB::connection(self::getStaticConnectionName())->statement($sql);
+            
+            $sql2 = "DROP VIEW IF EXISTS conceptos_liquidados CASCADE";
+            DB::connection(self::getStaticConnectionName())->statement($sql2);
+            
+            Log::info('✅ Tablas temporales limpiadas');
+        } catch (\Exception $e) {
+            Log::warning('⚠️ Error limpiando tablas temporales: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verifica el estado de las variables estáticas - Para debugging
+     */
+    public static function verificarEstadoVariablesEstaticas()
+    {
+        return [
+            'codc_reparto' => self::$codc_reparto,
+            'codigo_obra_social_default' => self::$codigo_obra_social_default,
+            'tipoEmpresa' => self::$tipoEmpresa,
+            'trabajadorConvencionado' => self::$trabajadorConvencionado,
+            'cantidad_adherentes_sicoss' => self::$cantidad_adherentes_sicoss,
+            'asignacion_familiar' => self::$asignacion_familiar,
+            'hs_extras_por_novedad' => self::$hs_extras_por_novedad,
+            'categoria_diferencial' => self::$categoria_diferencial
+        ];
     }
 }

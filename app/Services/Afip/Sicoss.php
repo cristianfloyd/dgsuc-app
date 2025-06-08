@@ -4,17 +4,13 @@ namespace App\Services\Afip;
 
 use App\Models\Dh01;
 use App\Models\Dh03;
-use App\Models\Dh11;
-use App\Services\Afip\Config;
-use App\Services\Afip\Fechas;
-use App\Services\Afip\Mapuche;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Dh03Repository;
-use Illuminate\Support\Facades\File;
 
 class sicoss
 {

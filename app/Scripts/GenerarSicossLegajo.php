@@ -16,7 +16,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     /**
      * Configuración por defecto para la generación de SICOSS
      */
-    private const DEFAULT_CONFIG = [
+    private const array DEFAULT_CONFIG = [
         'check_retro' => 0,
         'check_lic' => false,
         'check_sin_activo' => false,
@@ -30,7 +30,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     /**
      * Rutas de archivos de salida
      */
-    private const OUTPUT_PATHS = [
+    private const array OUTPUT_PATHS = [
         'directory' => 'comunicacion/sicoss',
         'file' => 'sicoss.txt',
         'zip' => 'sicoss.zip',

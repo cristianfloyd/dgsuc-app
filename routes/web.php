@@ -34,9 +34,12 @@ use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\Auth\Office365Controller;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
 use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
+
 
 
 
