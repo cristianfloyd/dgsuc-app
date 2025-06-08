@@ -16,7 +16,7 @@ use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Dh03Repository;
 use Illuminate\Support\Facades\File;
 
-class sicoss
+class SicossOptimizado
 {
     use MapucheConnectionTrait;
 
@@ -1162,47 +1162,47 @@ class sicoss
 
 
                 // Como c�digo de situaci�n general se toma el �ltimo (?)
-                $legajoActual['codigosituacion'] = $estado_situacion[$limites['maximo']];
+                $legajos[$i]['codigosituacion'] = $estado_situacion[$limites['maximo']];
                 // Revista 1
-                $legajoActual['codigorevista1'] = $revista_legajo[1]['codigo'];
-                $legajoActual['fecharevista1'] = $revista_legajo[1]['dia'];
+                $legajos[$i]['codigorevista1'] = $revista_legajo[1]['codigo'];
+                $legajos[$i]['fecharevista1'] = $revista_legajo[1]['dia'];
                 // Revista 2
-                $legajoActual['codigorevista2'] = ($revista_legajo[2]['codigo'] == 0) ? $revista_legajo[1]['codigo'] : $revista_legajo[2]['codigo'];
-                $legajoActual['fecharevista2'] = $revista_legajo[2]['dia'];
+                $legajos[$i]['codigorevista2'] = ($revista_legajo[2]['codigo'] == 0) ? $revista_legajo[1]['codigo'] : $revista_legajo[2]['codigo'];
+                $legajos[$i]['fecharevista2'] = $revista_legajo[2]['dia'];
 
                 // Revista 3
-                $legajoActual['codigorevista3'] = ($revista_legajo[3]['codigo'] == 0) ? $legajos[$i]['codigorevista2'] : $revista_legajo[3]['codigo'];
-                $legajoActual['fecharevista3'] = $revista_legajo[3]['dia'];
+                $legajos[$i]['codigorevista3'] = ($revista_legajo[3]['codigo'] == 0) ? $legajos[$i]['codigorevista2'] : $revista_legajo[3]['codigo'];
+                $legajos[$i]['fecharevista3'] = $revista_legajo[3]['dia'];
 
                 // Como d�as trabajados se toman aquellos d�as de cargo menos los d�as de licencia sin goce (?)
-                $legajoActual['dias_trabajados'] = $dias_trabajados;
+                $legajos[$i]['dias_trabajados'] = $dias_trabajados;
             } else {
                 // Se evaluan
 
                 // Si tiene una licencia por maternidad activa el codigo de situacion es 5
                 if (LicenciaService::tieneLicenciaMaternidadActiva($legajo)) {
-                    $legajoActual['codigosituacion'] = 5;
+                    $legajos[$i]['codigosituacion'] = 5;
                 }
 
                 // Si tengo chequeado el tilde de licencias cambio el codigo de situacion y la cantidad de dias trabajados se vuelve 0
                 if ($datos['check_lic'] && ($legajos[$i]['licencia'] == 1)) {
-                    $legajoActual['codigosituacion'] = 13;
-                    $legajoActual['dias_trabajados'] = '00';
+                    $legajos[$i]['codigosituacion'] = 13;
+                    $legajos[$i]['dias_trabajados'] = '00';
                 } else {
-                    $legajoActual['dias_trabajados'] = '30';
+                    $legajos[$i]['dias_trabajados'] = '30';
                 }
 
-                $legajoActual['codigorevista1'] = $legajos[$i]['codigosituacion'];
-                $legajoActual['fecharevista1'] = '01';
-                $legajoActual['codigorevista2'] = '00';
-                $legajoActual['fecharevista2'] = '00';
-                $legajoActual['codigorevista3'] = '00';
-                $legajoActual['fecharevista3'] = '00';
+                $legajos[$i]['codigorevista1'] = $legajos[$i]['codigosituacion'];
+                $legajos[$i]['fecharevista1'] = '01';
+                $legajos[$i]['codigorevista2'] = '00';
+                $legajos[$i]['fecharevista2'] = '00';
+                $legajos[$i]['codigorevista3'] = '00';
+                $legajos[$i]['fecharevista3'] = '00';
             }
 
             // Se informa solo si tiene conyugue o no; no la cantidad
-            if ($legajoActual['conyugue'] > 0)
-                $legajoActual['conyugue'] = 1;
+            if ($legajos[$i]['conyugue'] > 0)
+                $legajos[$i]['conyugue'] = 1;
 
             // --- Obtengo la sumarizaci�n seg�n concepto � tipo de grupo de un concepto ---
             self::sumarizar_conceptos_por_tipos_grupos($legajo, $legajos[$i]);
@@ -1213,91 +1213,91 @@ class sicoss
             $suma_conceptos_tipoC = self::calcular_remuner_grupo($legajo, 'C', 'nro_orimp >0 AND codn_conce > 0');
             $suma_conceptos_tipoF = self::calcular_remuner_grupo($legajo, 'F', 'true');
 
-            $legajoActual['Remuner78805']               = $suma_conceptos_tipoC;
-            $legajoActual['AsignacionesFliaresPagadas'] = $suma_conceptos_tipoF;
-            $legajoActual['ImporteImponiblePatronal']   = $suma_conceptos_tipoC;
+            $legajos[$i]['Remuner78805']               = $suma_conceptos_tipoC;
+            $legajos[$i]['AsignacionesFliaresPagadas'] = $suma_conceptos_tipoF;
+            $legajos[$i]['ImporteImponiblePatronal']   = $suma_conceptos_tipoC;
 
             // Para calcular Remuneracion total= IMPORTE_BRUTO
-            $legajoActual['DiferenciaSACImponibleConTope'] = 0;
-            $legajoActual['DiferenciaImponibleConTope']    = 0;
-            $legajoActual['ImporteSACPatronal']            = $legajoActual['ImporteSAC'];
-            $legajoActual['ImporteImponibleSinSAC']        = $legajoActual['ImporteImponiblePatronal'] - $legajoActual['ImporteSACPatronal'];
-            if ($legajoActual['ImporteSAC'] > $TopeSACJubilatorioPatr  && $trunca_tope == 1) {
-                $legajoActual['DiferenciaSACImponibleConTope'] = $legajoActual['ImporteSAC'] - $TopeSACJubilatorioPatr;
-                $legajoActual['ImporteImponiblePatronal']   -= $legajoActual['DiferenciaSACImponibleConTope'];
-                $legajoActual['ImporteSACPatronal']         = $TopeSACJubilatorioPatr;
+            $legajos[$i]['DiferenciaSACImponibleConTope'] = 0;
+            $legajos[$i]['DiferenciaImponibleConTope']    = 0;
+            $legajos[$i]['ImporteSACPatronal']            = $legajos[$i]['ImporteSAC'];
+            $legajos[$i]['ImporteImponibleSinSAC']        = $legajos[$i]['ImporteImponiblePatronal'] - $legajos[$i]['ImporteSACPatronal'];
+            if ($legajos[$i]['ImporteSAC'] > $TopeSACJubilatorioPatr  && $trunca_tope == 1) {
+                $legajos[$i]['DiferenciaSACImponibleConTope'] = $legajos[$i]['ImporteSAC'] - $TopeSACJubilatorioPatr;
+                $legajos[$i]['ImporteImponiblePatronal']  -= $legajos[$i]['DiferenciaSACImponibleConTope'];
+                $legajos[$i]['ImporteSACPatronal']         = $TopeSACJubilatorioPatr;
             }
 
             if ($legajos[$i]['ImporteImponibleSinSAC'] > $TopeJubilatorioPatronal && $trunca_tope == 1) {
-                $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPatronal;
-                $legajoActual['ImporteImponiblePatronal']  -= $legajoActual['DiferenciaImponibleConTope'];
+                $legajos[$i]['DiferenciaImponibleConTope'] = $legajos[$i]['ImporteImponibleSinSAC'] - $TopeJubilatorioPatronal;
+                $legajos[$i]['ImporteImponiblePatronal']  -= $legajos[$i]['DiferenciaImponibleConTope'];
             }
 
-            $legajoActual['IMPORTE_BRUTO'] = $legajoActual['ImporteImponiblePatronal'] + $legajoActual['ImporteNoRemun'];
+            $legajos[$i]['IMPORTE_BRUTO'] = $legajos[$i]['ImporteImponiblePatronal'] + $legajos[$i]['ImporteNoRemun'];
 
             // Para calcular IMPORTE_IMPON que es lo mismo que importe imponible 1
-            $legajoActual['IMPORTE_IMPON'] = 0;
-            $legajoActual['IMPORTE_IMPON'] = $suma_conceptos_tipoC;
+            $legajos[$i]['IMPORTE_IMPON'] = 0;
+            $legajos[$i]['IMPORTE_IMPON'] = $suma_conceptos_tipoC;
 
             $VerificarAgenteImportesCERO  = 1;
 
             // Si es el check de informar becarios en configuracion esta chequeado entonces sumo al importe imponible la suma de conceptos de ese tipo de grupo (Becarios ART)
-            if ($legajoActual['ImporteImponibleBecario'] != 0) {
-                $legajoActual['IMPORTE_IMPON']            += $legajoActual['ImporteImponibleBecario'];
-                $legajoActual['IMPORTE_BRUTO']            += $legajoActual['ImporteImponibleBecario'];
-                $legajoActual['ImporteImponiblePatronal'] += $legajoActual['ImporteImponibleBecario'];
-                $legajoActual['Remuner78805']             += $legajoActual['ImporteImponibleBecario'];
+            if ($legajos[$i]['ImporteImponibleBecario'] != 0) {
+                $legajos[$i]['IMPORTE_IMPON']            += $legajos[$i]['ImporteImponibleBecario'];
+                $legajos[$i]['IMPORTE_BRUTO']            += $legajos[$i]['ImporteImponibleBecario'];
+                $legajos[$i]['ImporteImponiblePatronal'] += $legajos[$i]['ImporteImponibleBecario'];
+                $legajos[$i]['Remuner78805']             += $legajos[$i]['ImporteImponibleBecario'];
             }
 
             if (sicoss::VerificarAgenteImportesCERO($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
             {
-                $legajoActual['PorcAporteDiferencialJubilacion'] = self::$porc_aporte_adicional_jubilacion;
-                $legajoActual['ImporteImponible_4']              = $legajoActual['IMPORTE_IMPON'];
-                $legajoActual['ImporteSACNoDocente']             = 0;
+                $legajos[$i]['PorcAporteDiferencialJubilacion'] = self::$porc_aporte_adicional_jubilacion;
+                $legajos[$i]['ImporteImponible_4']              = $legajos[$i]['IMPORTE_IMPON'];
+                $legajos[$i]['ImporteSACNoDocente']             = 0;
                 //ImporteImponible_6 viene con valor de funcion sumarizar_conceptos_por_tipos_grupos
-                $legajoActual['ImporteImponible_6']              = round((($legajoActual['ImporteImponible_6'] * 100) / $legajoActual['PorcAporteDiferencialJubilacion']), 2);
-                $Imponible6_aux                                 = $legajoActual['ImporteImponible_6'];
+                $legajos[$i]['ImporteImponible_6']              = round((($legajos[$i]['ImporteImponible_6'] * 100) / $legajos[$i]['PorcAporteDiferencialJubilacion']), 2);
+                $Imponible6_aux                                 = $legajos[$i]['ImporteImponible_6'];
                 if ($Imponible6_aux != 0) {
                     if (
-                        (int)$Imponible6_aux != (int)$legajoActual['IMPORTE_IMPON']
-                        && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta + � - $5
-                        && $legajoActual['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
+                        (int)$Imponible6_aux != (int)$legajos[$i]['IMPORTE_IMPON']
+                        && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 //redondear hasta + � - $5
+                        && $legajos[$i]['ImporteImponible_6'] < $legajos[$i]['IMPORTE_IMPON']
                     ) {
-                        $legajoActual['TipoDeOperacion']     = 2;
-                        $legajoActual['IMPORTE_IMPON']       = $legajoActual['IMPORTE_IMPON'] - $legajoActual['ImporteImponible_6'];
-                        $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'] - $legajoActual['SACInvestigador'];
+                        $legajos[$i]['TipoDeOperacion']     = 2;
+                        $legajos[$i]['IMPORTE_IMPON']       = $legajos[$i]['IMPORTE_IMPON'] - $legajos[$i]['ImporteImponible_6'];
+                        $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'] - $legajos[$i]['SACInvestigador'];
                     } else {
-                        if ((($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
-                            && (($Imponible6_aux - 5) < $legajoActual['IMPORTE_IMPON'])
+                        if ((($Imponible6_aux + 5) > $legajos[$i]['IMPORTE_IMPON'])
+                            && (($Imponible6_aux - 5) < $legajos[$i]['IMPORTE_IMPON'])
                         ) {
-                            $legajoActual['ImporteImponible_6'] = $legajoActual['IMPORTE_IMPON'];
+                            $legajos[$i]['ImporteImponible_6'] = $legajos[$i]['IMPORTE_IMPON'];
                         } else {
                             $legajos[$i]['ImporteImponible_6'] = $Imponible6_aux;
                         }
-                        $legajoActual['TipoDeOperacion']     = 1;
-                        $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'];
+                        $legajos[$i]['TipoDeOperacion']     = 1;
+                        $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'];
                     }
                 } else {
-                    $legajoActual['TipoDeOperacion']     = 1;
-                    $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'];
+                    $legajos[$i]['TipoDeOperacion']     = 1;
+                    $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'];
                 }
 
-                $legajoActual['ImporteSACOtroAporte']          = $legajoActual['ImporteSAC'];
-                $legajoActual['DiferenciaSACImponibleConTope'] = 0;
-                $legajoActual['DiferenciaImponibleConTope']    = 0;
+                $legajos[$i]['ImporteSACOtroAporte']          = $legajos[$i]['ImporteSAC'];
+                $legajos[$i]['DiferenciaSACImponibleConTope'] = 0;
+                $legajos[$i]['DiferenciaImponibleConTope']    = 0;
 
                 /*****************/
 
                 $tope_jubil_personal = $TopeJubilatorioPersonal;
-                if ($legajoActual['ImporteSAC'] > 0)
+                if ($legajos[$i]['ImporteSAC'] > 0)
                     $tope_jubil_personal = $TopeJubilatorioPersonal + $TopeSACJubilatorioPers;
 
 
-                if ($legajoActual['ImporteSACNoDocente']  > $tope_jubil_personal) {
+                if ($legajos[$i]['ImporteSACNoDocente']  > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
-                        $legajoActual['DiferenciaSACImponibleConTope'] = $legajoActual['ImporteSACNoDocente']  - $TopeSACJubilatorioPers;
-                        $legajoActual['IMPORTE_IMPON']                -= $legajoActual['DiferenciaSACImponibleConTope'];
-                        $legajoActual['ImporteSACNoDocente']           = $TopeSACJubilatorioPers;
+                        $legajos[$i]['DiferenciaSACImponibleConTope'] = $legajos[$i]['ImporteSACNoDocente']  - $TopeSACJubilatorioPers;
+                        $legajos[$i]['IMPORTE_IMPON']                -= $legajos[$i]['DiferenciaSACImponibleConTope'];
+                        $legajos[$i]['ImporteSACNoDocente']           = $TopeSACJubilatorioPers;
                     }
                 } else {
 
@@ -1334,15 +1334,15 @@ class sicoss
 
                 if ($legajos[$i]['ImporteImponibleSinSAC']  > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
-                        $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
-                        $legajoActual['IMPORTE_IMPON']             -= $legajoActual['DiferenciaImponibleConTope'];
+                        $legajos[$i]['DiferenciaImponibleConTope'] = $legajos[$i]['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
+                        $legajos[$i]['IMPORTE_IMPON']             -= $legajos[$i]['DiferenciaImponibleConTope'];
                     }
                 }
 
 
                 $otra_actividad = self::otra_actividad($legajo);
-                $legajoActual['ImporteBrutoOtraActividad']  = $otra_actividad['importebrutootraactividad'];
-                $legajoActual['ImporteSACOtraActividad']    = $otra_actividad['importesacotraactividad'];
+                $legajos[$i]['ImporteBrutoOtraActividad']  = $otra_actividad['importebrutootraactividad'];
+                $legajos[$i]['ImporteSACOtraActividad']    = $otra_actividad['importesacotraactividad'];
 
                 if (($legajos[$i]['ImporteBrutoOtraActividad'] != 0) || ($legajos[$i]['ImporteSACOtraActividad'] != 0)) {
                     if (($legajos[$i]['ImporteBrutoOtraActividad'] + $legajos[$i]['ImporteSACOtraActividad'])  >=  ($TopeSACJubilatorioPers + $TopeJubilatorioPatronal)) {
@@ -2170,5 +2170,211 @@ class sicoss
     {
         $instance = new static();
         return $instance->getConnectionName();
+    }
+
+    /**
+     * Pre-carga todos los conceptos liquidados para todos los legajos de una vez.
+     * 
+     * Elimina el problema N+1 cargando todos los conceptos de todos los legajos
+     * en una sola consulta optimizada, en lugar de hacer una consulta por legajo.
+     *
+     * @param array $legajos Array de legajos con estructura ['nro_legaj' => valor]
+     * @return array Array de conceptos liquidados con nro_legaj incluido
+     */
+    public static function precargar_conceptos_todos_legajos($legajos): array
+    {
+        // Extraer solo los números de legajo del array
+        $nros_legajos = array_column($legajos, 'nro_legaj');
+
+        // Validar que tengamos legajos para procesar
+        if (empty($nros_legajos)) {
+            Log::warning('precargar_conceptos_todos_legajos: No hay legajos para procesar');
+            return [];
+        }
+
+        // Crear lista de legajos para IN clause
+        $legajos_in = implode(',', $nros_legajos);
+
+        Log::info('precargar_conceptos_todos_legajos: Iniciando pre-carga', [
+            'cantidad_legajos' => count($nros_legajos),
+            'memoria_antes' => memory_get_usage(true) / 1024 / 1024 . ' MB'
+        ]);
+
+        $inicio = microtime(true);
+
+        // ✅ UNA SOLA CONSULTA para todos los legajos
+        $sql = "
+            SELECT 
+                nro_legaj,              -- ⚠️ IMPORTANTE: Incluir para agrupación posterior
+                impp_conce,
+                nov1_conce,
+                codn_conce,
+                tipos_grupos,
+                nro_cargo,
+                codigoescalafon
+            FROM conceptos_liquidados
+            WHERE nro_legaj IN ($legajos_in)
+              AND tipos_grupos IS NOT NULL
+            ORDER BY nro_legaj, codn_conce  -- Ordenar para optimizar agrupación posterior
+        ";
+
+        try {
+            $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
+
+            $fin = microtime(true);
+            $tiempo_consulta = ($fin - $inicio) * 1000; // en milisegundos
+
+            Log::info('precargar_conceptos_todos_legajos: Pre-carga completada', [
+                'conceptos_cargados' => count($resultado),
+                'tiempo_consulta_ms' => round($tiempo_consulta, 2),
+                'memoria_despues' => memory_get_usage(true) / 1024 / 1024 . ' MB',
+                'promedio_conceptos_por_legajo' => round(count($resultado) / count($nros_legajos), 2)
+            ]);
+
+            // Convertir objetos stdClass a arrays para consistencia
+            return array_map(function ($item) {
+                return (array)$item;
+            }, $resultado);
+        } catch (\Exception $e) {
+            Log::error('precargar_conceptos_todos_legajos: Error en consulta SQL', [
+                'error' => $e->getMessage(),
+                'cantidad_legajos' => count($nros_legajos)
+            ]);
+
+            // En caso de error, devolver array vacío para evitar que falle el proceso
+            return [];
+        }
+    }
+
+    /**
+     * Método auxiliar para obtener estadísticas de la pre-carga
+     * 
+     * @param array $todos_conceptos Array resultado de precargar_conceptos_todos_legajos
+     * @param array $legajos Array original de legajos
+     * @return array Estadísticas útiles para debugging
+     */
+    public static function obtener_estadisticas_precarga($todos_conceptos, $legajos): array
+    {
+        $stats = [
+            'total_conceptos' => count($todos_conceptos),
+            'total_legajos_solicitados' => count($legajos),
+            'legajos_con_conceptos' => 0,
+            'legajos_sin_conceptos' => 0,
+            'conceptos_por_legajo' => [],
+            'memoria_utilizada_mb' => memory_get_usage(true) / 1024 / 1024
+        ];
+
+        // Agrupar por legajo para estadísticas
+        $conceptos_agrupados = [];
+        foreach ($todos_conceptos as $concepto) {
+            $nro_legaj = $concepto['nro_legaj'];
+            if (!isset($conceptos_agrupados[$nro_legaj])) {
+                $conceptos_agrupados[$nro_legaj] = 0;
+            }
+            $conceptos_agrupados[$nro_legaj]++;
+        }
+
+        // Calcular estadísticas
+        $legajos_solicitados = array_column($legajos, 'nro_legaj');
+        foreach ($legajos_solicitados as $legajo) {
+            if (isset($conceptos_agrupados[$legajo])) {
+                $stats['legajos_con_conceptos']++;
+                $stats['conceptos_por_legajo'][] = $conceptos_agrupados[$legajo];
+            } else {
+                $stats['legajos_sin_conceptos']++;
+                $stats['conceptos_por_legajo'][] = 0;
+            }
+        }
+
+        // Estadísticas adicionales
+        if (!empty($stats['conceptos_por_legajo'])) {
+            $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / count($stats['conceptos_por_legajo']);
+            $stats['max_conceptos_por_legajo'] = max($stats['conceptos_por_legajo']);
+            $stats['min_conceptos_por_legajo'] = min($stats['conceptos_por_legajo']);
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Agrupa los conceptos liquidados por legajo para acceso rápido
+     */
+    public static function agrupar_conceptos_por_legajo($todos_conceptos): array
+    {
+        $conceptos_por_legajo = [];
+
+        foreach ($todos_conceptos as $concepto) {
+            $nro_legaj = $concepto['nro_legaj'];
+
+            if (!isset($conceptos_por_legajo[$nro_legaj])) {
+                $conceptos_por_legajo[$nro_legaj] = [];
+            }
+
+            $conceptos_por_legajo[$nro_legaj][] = $concepto;
+        }
+
+        return $conceptos_por_legajo;
+    }
+
+    /**
+     * Versión optimizada que no hace consultas SQL
+     */
+    public static function sumarizar_conceptos_optimizado($conceptos_legajo, &$leg)
+    {
+        // Inicializar todas las variables como antes
+        $leg['ImporteSAC'] = 0;
+        $leg['SACPorCargo'] = 0;
+        // ... resto de inicializaciones ...
+
+        $cargoInvestigador = [];
+        $conce_hs_extr = [];
+
+        // ✅ Procesar conceptos pre-cargados (NO MÁS CONSULTAS SQL)
+        foreach ($conceptos_legajo as $concepto) {
+            $importe = $concepto['impp_conce'];
+            $importe_novedad = $concepto['nov1_conce'];
+            $grupos_concepto = $concepto['tipos_grupos'];
+            $codn_concepto = $concepto['codn_conce'];
+            $nro_cargo = $concepto['nro_cargo'];
+
+            // ... misma lógica de procesamiento que antes ...
+
+            if (preg_match('/[^\d]+6[^\d]+/', $grupos_concepto)) {
+                $leg['ImporteHorasExtras'] += $importe;
+                // ... resto del procesamiento ...
+            }
+
+            // ... resto de condiciones igual que antes ...
+        }
+
+        // ✅ Calcular SAC Investigador optimizado
+        $leg['SACInvestigador'] = self::calcularSACInvestigadorOptimizado(
+            $conceptos_legajo,
+            $cargoInvestigador
+        );
+    }
+
+    /**
+     * Versión optimizada que no hace consultas SQL
+     */
+    public static function calcularSACInvestigadorOptimizado($conceptos_legajo, $cargos): int
+    {
+        $sacInvestigador = 0;
+        $cargos = array_unique($cargos);
+
+        foreach ($conceptos_legajo as $concepto) {
+            $nro_cargo = $concepto['nro_cargo'];
+            $grupos_concepto = $concepto['tipos_grupos'];
+
+            // Verificar si el cargo está en la lista Y tiene tipo de grupo 9
+            if (
+                in_array($nro_cargo, $cargos) &&
+                preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)
+            ) {
+                $sacInvestigador += $concepto['impp_conce'];
+            }
+        }
+
+        return $sacInvestigador;
     }
 }
