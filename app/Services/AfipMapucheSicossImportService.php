@@ -1012,10 +1012,10 @@ class AfipMapucheSicossImportService
             $line = rtrim($line, "\r\n");
 
             // 2. Verificar longitud (debe ser 500 caracteres exactamente)
-            if (strlen($line) != 500) {
+            if (strlen($line) != 499) {
                 Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
                 // Ajustar longitud si es necesario
-                $line = strlen($line) > 500 ? substr($line, 0, 500) : str_pad($line, 500, ' ');
+                $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
             }
 
             // 3. Convertir encoding (de ISO-8859-1 o Windows-1252 a UTF-8)
@@ -1345,7 +1345,7 @@ class AfipMapucheSicossImportService
         $firstLine = rtrim($firstLine, "\r\n");
 
         // Verificar longitud - ajustado a 500 caracteres según análisis
-        if (strlen($firstLine) !== 500) {
+        if (strlen($firstLine) !== 499) {
             Log::error("Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: " . strlen($firstLine));
             throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: " . strlen($firstLine));
         }

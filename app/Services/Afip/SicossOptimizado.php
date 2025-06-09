@@ -5,9 +5,6 @@ namespace App\Services\Afip;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Dh11;
-use App\Services\Afip\Config;
-use App\Services\Afip\Fechas;
-use App\Services\Afip\Mapuche;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
@@ -36,13 +33,20 @@ class SicossOptimizado
     static protected $categoria_diferencial;
     static protected $periodo_actual;
 
-    public static function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
-    {
+    public static function genera_sicoss(
+        array $datos,
+        string $testeo_directorio_salida = '',
+        string $testeo_prefijo_archivos = '',
+        bool $retornar_datos = FALSE,
+        bool $guardar_en_bd = FALSE,
+        ?PeriodoFiscal $periodo_fiscal = null
+    ) {
         // Se necesita filtrar datos del periodo vigente
         $periodo       = MapucheConfig::getPeriodoCorriente();
         $per_mesct     = $periodo['month'];
         $per_anoct     = $periodo['year'];
         $hayNroLegajo = isset($datos['nro_legaj']);
+        $periodo_fiscal = $periodo_fiscal ?? new PeriodoFiscal($per_anoct, $per_mesct);
 
         // Seteo valores de rrhhini
         self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
@@ -100,9 +104,33 @@ class SicossOptimizado
 
                 $periodo = $per_mesct . '/' . $per_anoct . ' (Vigente)';
                 if ($retornar_datos === TRUE)
-                    return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                    return self::procesa_sicoss(
+                        $datos, 
+                        $per_anoct, 
+                        $per_mesct, 
+                        $legajos, 
+                        $nombre_arch, 
+                        $licencias_agentes, 
+                        $datos['check_retro'], 
+                        $datos['check_sin_activo'], 
+                        $retornar_datos,
+                        $guardar_en_bd,
+                        $periodo_fiscal
+                    );
 
-                $totales[$periodo] = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                $totales[$periodo] = self::procesa_sicoss(
+                    $datos, 
+                    $per_anoct, 
+                    $per_mesct, 
+                    $legajos, 
+                    $nombre_arch, 
+                    $licencias_agentes, 
+                    $datos['check_retro'], 
+                    $datos['check_sin_activo'], 
+                    $retornar_datos,
+                    $guardar_en_bd,
+                    $periodo_fiscal
+                );
                 break;
             default:
                 $periodos_retro = sicoss::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
@@ -1002,24 +1030,24 @@ class SicossOptimizado
 
 
     public static function procesa_sicoss(
-        $datos,
-        $per_anoct,
-        $per_mesct,
-        $legajos,
-        $nombre_arch,
-        $licencias = NULL,
-        $retro = FALSE,
-        $check_sin_activo = FALSE,
-        $retornar_datos = FALSE,
-        $guardar_en_bd = FALSE,
-        $periodo_fiscal = null
+        array $datos,
+        int $per_anoct,
+        int $per_mesct,
+        array $legajos,
+        string $nombre_arch,
+        ?array $licencias = NULL,
+        bool $retro = FALSE,
+        bool $check_sin_activo = FALSE,
+        bool $retornar_datos = FALSE,
+        bool $guardar_en_bd = FALSE,
+        ?PeriodoFiscal $periodo_fiscal = null
     ) {
 
         // Valores obtenidos del form (que se obtienen de rrhhini)
         // Topes
 
-        $TopeJubilatorioPatronal   = $datos['TopeJubilatorioPatronal'];
-        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'];
+        $TopeJubilatorioPatronal    = $datos['TopeJubilatorioPatronal'] ;
+        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'] ;
         $TopeOtrosAportesPersonales = $datos['TopeOtrosAportesPersonal'];
         $trunca_tope                = $datos['truncaTope'];
         $TopeSACJubilatorioPers     = $TopeJubilatorioPersonal / 2;
@@ -1496,7 +1524,7 @@ class SicossOptimizado
 
             // NUEVA FUNCIONALIDAD: Guardar en BD en lugar de TXT
             if ($guardar_en_bd === TRUE && $periodo_fiscal !== null) {
-                return self::guardar_en_bd($legajos_validos, $periodo_fiscal);
+                self::guardar_en_bd($legajos_validos, $periodo_fiscal);
             }
 
             // Comportamiento original: grabar en TXT
@@ -2140,7 +2168,7 @@ class SicossOptimizado
         $totales = array();
         $i = 0;
         foreach ($totales_periodo as $clave => $valor) {
-            $totales[$i++] = array('variable' => 'BRUTO',        'valor' => $valor['bruto'], 'periodo' => $clave);
+            $totales[$i++] = array('variable' => 'BRUTO',          'valor' => $valor['bruto'],       'periodo' => $clave);
             $totales[$i++] = array('variable' => 'IMPONIBLE 1',    'valor' => $valor['imponible_1'], 'periodo' => $clave);
             $totales[$i++] = array('variable' => 'IMPONIBLE 2',    'valor' => $valor['imponible_2'], 'periodo' => $clave);
             $totales[$i++] = array('variable' => 'IMPONIBLE 3',    'valor' => $valor['imponible_2'], 'periodo' => $clave);
@@ -3080,10 +3108,10 @@ class SicossOptimizado
             NULL as nro_cargo,
             lc.minimo as inicio,
             lc.maximo as final,
-            NULL as inicio_lic,
-            NULL as final_lic,
-            NULL as condicion,
-            NULL as sin_licencia
+            NULL::integer as inicio_lic,
+            NULL::integer as final_lic,
+            NULL::integer as condicion,
+            NULL::boolean as sin_licencia
         FROM limites_cargos lc
         
         UNION ALL
@@ -3094,9 +3122,9 @@ class SicossOptimizado
             cb.nro_cargo,
             cb.inicio_cargo as inicio,
             cb.final_cargo as final,
-            NULL as inicio_lic,
-            NULL as final_lic,
-            NULL as condicion,
+            NULL::integer as inicio_lic,
+            NULL::integer as final_lic,
+            NULL::integer as condicion,
             cb.sin_licencia
         FROM cargos_base cb
         WHERE cb.sin_licencia = true
@@ -3112,7 +3140,7 @@ class SicossOptimizado
             ccl.inicio_lic,
             ccl.final_lic,
             ccl.condicion,
-            NULL as sin_licencia
+            NULL::boolean as sin_licencia
         FROM cargos_con_licencias ccl
         
         ORDER BY nro_legaj, tipo_dato, nro_cargo
@@ -3775,10 +3803,11 @@ class SicossOptimizado
                 'check_sin_activo' => $incluir_inactivos,
                 'codc_reparto' => self::getCodcReparto(),
             ], $datos);
-    
+
             // Obtener legajos con el WHERE apropiado
             $where_periodo = " dh22.per_liano = {$anio} and dh22.per_limes = {$mes} ";
-            
+
+
             $legajos = self::obtener_legajos(
                 $datos_completos['codc_reparto'],
                 $where_periodo,
@@ -3786,14 +3815,14 @@ class SicossOptimizado
                 $datos_completos['check_lic'],
                 $datos_completos['check_sin_activo']
             );
-    
+
             Log::info("Legajos obtenidos para procesamiento", ['cantidad' => count($legajos)]);
-    
+
             // Procesar SICOSS y guardar en BD
             return self::procesa_sicoss_bd(
                 $datos_completos,
                 $anio,
-                $mes, 
+                $mes,
                 $legajos,
                 $periodo_fiscal
             );
@@ -3936,7 +3965,7 @@ class SicossOptimizado
         return self::guardar_en_bd($legajos_procesados, $periodo_fiscal);
     }
 
-    
+
     /**
      * Determina si un legajo es válido para ser incluido en el archivo SICOSS
      * 
@@ -3963,5 +3992,155 @@ class SicossOptimizado
         $es_sin_activo = ($datos_config['check_sin_activo'] ?? false) && ($legajo['codigosituacion'] ?? 0) == 14;
 
         return $tiene_importes || $es_licencia_especial || $es_sin_activo;
+    }
+
+    /**
+     * Método de prueba para generar SICOSS con un número limitado de legajos
+     * Ideal para testing y validación
+     *
+     * @param PeriodoFiscal $periodo_fiscal Período en formato YYYYMM
+     * @param int $limite Número máximo de legajos a procesar
+     * @param bool $incluir_inactivos Si incluir empleados inactivos
+     * @return array Estadísticas del procesamiento + datos de muestra
+     */
+    public static function generar_sicoss_bd_prueba(PeriodoFiscal $periodo_fiscal, int $limite = 10, bool $incluir_inactivos = false): array
+    {
+        $mes = $periodo_fiscal->month();
+        $anio = $periodo_fiscal->year();
+
+        Log::info("🧪 Iniciando generación SICOSS BD - MODO PRUEBA", [
+            'periodo' => $periodo_fiscal->toString(),
+            'limite_legajos' => $limite,
+            'incluir_inactivos' => $incluir_inactivos
+        ]);
+
+        try {
+            // Configurar datos para prueba
+            $datos_completos = [
+                'check_lic' => false,
+                'check_retr' => false,
+                'check_sin_activo' => $incluir_inactivos,
+                'codc_reparto' => self::getCodcReparto(),
+            ];
+
+            // Obtener legajos LIMITADOS para prueba
+            $where_periodo = " dh22.per_liano = {$anio} and dh22.per_limes = {$mes} ";
+
+            $todos_legajos = self::obtener_legajos(
+                $datos_completos['codc_reparto'],
+                $where_periodo,
+                ' true ',
+                $datos_completos['check_lic'],
+                $datos_completos['check_sin_activo']
+            );
+
+            // 🔍 LIMITAR para prueba
+            $legajos_prueba = array_slice($todos_legajos, 0, $limite);
+
+            Log::info("Legajos para prueba seleccionados", [
+                'total_disponibles' => count($todos_legajos),
+                'seleccionados_para_prueba' => count($legajos_prueba)
+            ]);
+
+            // Procesar con el conjunto limitado
+            $resultado = self::procesar_periodo_optimizado(
+                mes: $mes,
+                anio: $anio,
+                periodo_fiscal: $periodo_fiscal,
+                legajos: $legajos_prueba,
+                datos_config: $datos_completos
+            );
+
+            // 📋 Agregar información de muestra para debugging
+            $resultado['info_prueba'] = [
+                'total_disponibles' => count($todos_legajos),
+                'procesados_en_prueba' => count($legajos_prueba),
+                'primer_legajo_ejemplo' => $legajos_prueba[0] ?? null,
+                'periodo_fiscal' => $periodo_fiscal
+            ];
+
+            return $resultado;
+        } catch (\Exception $e) {
+            Log::error("Error en generación SICOSS BD - PRUEBA", [
+                'periodo' => $periodo_fiscal->toString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Método para verificar la estructura de datos antes del procesamiento masivo
+     * Útil para debugging y validación
+     */
+    public static function verificar_estructura_datos(string $periodo_fiscal, int $muestra = 3): array
+    {
+        $mes = substr($periodo_fiscal, -2);
+        $anio = substr($periodo_fiscal, 0, 4);
+
+        Log::info("🔍 Verificando estructura de datos", ['periodo' => $periodo_fiscal]);
+
+        try {
+            // Obtener una pequeña muestra
+            $where_periodo = " dh22.per_liano = {$anio} and dh22.per_limes = {$mes} ";
+            $legajos = self::obtener_legajos(
+                self::getCodcReparto(),
+                $where_periodo,
+                ' true ',
+                false,
+                false
+            );
+
+            $muestra_legajos = array_slice($legajos, 0, $muestra);
+
+            // Verificar estructura de un legajo sin procesamiento
+            $verificacion = [
+                'total_legajos_disponibles' => count($legajos),
+                'estructura_legajo_crudo' => $muestra_legajos[0] ?? null,
+                'campos_disponibles' => array_keys($muestra_legajos[0] ?? []),
+            ];
+
+            // Procesar uno para ver la estructura final
+            if (!empty($muestra_legajos)) {
+                $legajo_test = $muestra_legajos[0];
+                $conceptos_por_legajo = self::precargar_conceptos_todos_legajos([$legajo_test]);
+                $conceptos_legajo = $conceptos_por_legajo[$legajo_test['nro_legaj']] ?? [];
+
+                self::sumarizar_conceptos_optimizado($conceptos_legajo, $legajo_test);
+
+                $verificacion['estructura_legajo_procesado'] = $legajo_test;
+                $verificacion['campos_procesados'] = array_keys($legajo_test);
+
+                // Ver cómo queda mapeado
+                $datos_mapeados = self::mapear_legajo_a_modelo($legajo_test, $periodo_fiscal);
+                $verificacion['estructura_mapeada_bd'] = $datos_mapeados;
+                $verificacion['campos_bd'] = array_keys($datos_mapeados);
+            }
+
+            return $verificacion;
+        } catch (\Exception $e) {
+            Log::error("Error verificando estructura", ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Método público para generar SICOSS y guardar en BD
+     * Wrapper del método original genera_sicoss()
+     */
+    public static function generar_sicoss_bd_simple(array $datos, string $periodo_fiscal): array
+    {
+        $mes = substr($periodo_fiscal, -2);
+        $anio = substr($periodo_fiscal, 0, 4);
+        $periodoFiscal = new PeriodoFiscal($anio, $mes);
+        return self::genera_sicoss(
+            datos: $datos,
+            testeo_directorio_salida: '',
+            testeo_prefijo_archivos: '',
+            retornar_datos: false,
+            guardar_en_bd: true,        // ⭐ Activar BD
+            periodo_fiscal: $periodoFiscal // ⭐ Pasar período
+        );
     }
 }
