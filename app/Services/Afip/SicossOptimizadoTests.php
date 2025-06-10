@@ -55,6 +55,11 @@ class SicossOptimizadoTests
         return self::ejecutar_prueba_con_legajos(10000, 'TEST CARGA COMPLETA 10K LEGAJOS', $datos);
     }
 
+    public static function test_carga_completa_20000_legajos($datos = null)
+    {
+        return self::ejecutar_prueba_con_legajos(20000, 'TEST CARGA COMPLETA 20K LEGAJOS', $datos);
+    }
+    
     /**
      * Test de producción simulada con todos los legajos disponibles
      */
