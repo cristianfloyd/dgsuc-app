@@ -1,72 +1,65 @@
-1,260,859 rows affected in 2 m 16 s 967 ms
-
-
-Unique  (cost=311665.18..5981190.29 rows=603633 width=83) (actual time=3447.585..164614.811 rows=1260859 loops=1)
-  ->  Incremental Sort  (cost=311665.18..5963081.30 rows=603633 width=83) (actual time=3447.584..162004.738 rows=3666488 loops=1)
-"        Sort Key: dh21h.id_liquidacion, dh21h.impp_conce, dh21h.ano_retro, dh21h.mes_retro, dh01.nro_legaj, dh21h.codn_conce, dh21h.tipo_conce, dh21h.nro_cargo, dh21h.nov1_conce, dh12.nro_orimp, ((SubPlan 3)), dh21h.codigoescalafon"
-"        Presorted Key: dh21h.id_liquidacion, dh21h.impp_conce, dh21h.ano_retro, dh21h.mes_retro, dh01.nro_legaj, dh21h.codn_conce, dh21h.tipo_conce, dh21h.nro_cargo, dh21h.nov1_conce, dh12.nro_orimp"
+Unique  (cost=56998.17..5383435.17 rows=567104 width=83) (actual time=1009.274..232967.643 rows=1260859 loops=1)
+  ->  Incremental Sort  (cost=56998.17..5366422.05 rows=567104 width=83) (actual time=1009.273..229031.328 rows=3666488 loops=1)
+"        Sort Key: dh21.id_liquidacion, dh21.impp_conce, dh21.ano_retro, dh21.mes_retro, dh01.nro_legaj, dh21.codn_conce, dh21.tipo_conce, dh21.nro_cargo, dh21.nov1_conce, dh12.nro_orimp, ((SubPlan 3)), dh21.codigoescalafon"
+"        Presorted Key: dh21.id_liquidacion, dh21.impp_conce, dh21.ano_retro, dh21.mes_retro, dh01.nro_legaj, dh21.codn_conce, dh21.tipo_conce, dh21.nro_cargo, dh21.nov1_conce, dh12.nro_orimp"
         Full-sort Groups: 110235  Sort Method: quicksort  Average Memory: 28kB  Peak Memory: 28kB
-        ->  Nested Loop Left Join  (cost=311655.85..5935917.82 rows=603633 width=83) (actual time=3445.985..157161.921 rows=3666488 loops=1)
-              ->  Gather Merge  (cost=311655.57..339244.71 rows=230419 width=55) (actual time=3445.613..4176.821 rows=1260859 loops=1)
+        ->  Nested Loop Left Join  (cost=56988.84..5340902.37 rows=567104 width=83) (actual time=1007.898..221299.031 rows=3666488 loops=1)
+              ->  Gather Merge  (cost=56988.55..82908.11 rows=216475 width=55) (actual time=1007.653..2086.613 rows=1260859 loops=1)
                     Workers Planned: 4
                     Workers Launched: 4
-                    ->  Sort  (cost=310655.51..310799.52 rows=57605 width=55) (actual time=3269.094..3357.521 rows=252172 loops=5)
-"                          Sort Key: dh21h.id_liquidacion, dh21h.impp_conce, dh21h.ano_retro, dh21h.mes_retro, dh01.nro_legaj, dh21h.codn_conce, dh21h.tipo_conce, dh21h.nro_cargo, dh21h.nov1_conce, dh12.nro_orimp"
-                          Sort Method: external merge  Disk: 33960kB
-                          Worker 0:  Sort Method: external merge  Disk: 30640kB
-                          Worker 1:  Sort Method: quicksort  Memory: 25kB
-                          Worker 2:  Sort Method: quicksort  Memory: 25kB
-                          Worker 3:  Sort Method: external merge  Disk: 31568kB
-                          ->  Hash Left Join  (cost=2870.61..306100.71 rows=57605 width=55) (actual time=1303.101..2999.374 rows=252172 loops=5)
-                                Hash Cond: (dh21h.codn_conce = dh12.codn_conce)
-                                ->  Parallel Hash Left Join  (cost=2856.81..305932.70 rows=57605 width=47) (actual time=1302.573..2897.827 rows=252172 loops=5)
-                                      Hash Cond: (dh21h.nro_legaj = dh01.nro_legaj)
-                                      ->  Hash Join  (cost=1.60..302926.26 rows=57605 width=47) (actual time=1279.668..2762.407 rows=252172 loops=5)
-                                            Hash Cond: (dh21h.nro_liqui = dh22.nro_liqui)
-                                            ->  Parallel Append  (cost=0.00..297777.43 rows=1920161 width=51) (actual time=1.033..2475.334 rows=1539689 loops=5)
-                                                  ->  Parallel Seq Scan on dh21h  (cost=0.00..240529.47 rows=1604465 width=51) (actual time=1.186..1992.102 rows=1287507 loops=5)
-                                                        Filter: (codn_conce > 0)
-                                                        Rows Removed by Filter: 536009
-                                                  ->  Parallel Seq Scan on dh21 dh21_1  (cost=0.00..47647.15 rows=315696 width=51) (actual time=0.654..505.878 rows=420304 loops=3)
-                                                        Filter: (codn_conce > 0)
-                                                        Rows Removed by Filter: 181734
-                                            ->  Hash  (cost=1.52..1.52 rows=6 width=4) (actual time=0.578..0.579 rows=5 loops=5)
+                    ->  Sort  (cost=55988.50..56123.79 rows=54119 width=55) (actual time=888.646..967.721 rows=252172 loops=5)
+"                          Sort Key: dh21.id_liquidacion, dh21.impp_conce, dh21.ano_retro, dh21.mes_retro, dh01.nro_legaj, dh21.codn_conce, dh21.tipo_conce, dh21.nro_cargo, dh21.nov1_conce, dh12.nro_orimp"
+                          Sort Method: external merge  Disk: 15312kB
+                          Worker 0:  Sort Method: external merge  Disk: 20528kB
+                          Worker 1:  Sort Method: external merge  Disk: 20712kB
+                          Worker 2:  Sort Method: external merge  Disk: 20032kB
+                          Worker 3:  Sort Method: external merge  Disk: 19592kB
+                          ->  Hash Left Join  (cost=2870.61..51733.70 rows=54119 width=55) (actual time=21.985..616.528 rows=252172 loops=5)
+                                Hash Cond: (dh21.codn_conce = dh12.codn_conce)
+                                ->  Parallel Hash Left Join  (cost=2856.81..51575.02 rows=54119 width=47) (actual time=19.183..509.002 rows=252172 loops=5)
+                                      Hash Cond: (dh21.nro_legaj = dh01.nro_legaj)
+                                      ->  Hash Join  (cost=1.60..48577.74 rows=54119 width=47) (actual time=2.223..381.107 rows=252172 loops=5)
+                                            Hash Cond: (dh21.nro_liqui = dh22.nro_liqui)
+                                            ->  Parallel Seq Scan on dh21  (cost=0.00..47647.10 rows=315693 width=51) (actual time=1.492..217.017 rows=252182 loops=5)
+                                                  Filter: (codn_conce > 0)
+                                                  Rows Removed by Filter: 109040
+                                            ->  Hash  (cost=1.52..1.52 rows=6 width=4) (actual time=0.693..0.695 rows=5 loops=5)
                                                   Buckets: 1024  Batches: 1  Memory Usage: 9kB
-                                                  ->  Seq Scan on dh22  (cost=0.00..1.52 rows=6 width=4) (actual time=0.546..0.553 rows=5 loops=5)
+                                                  ->  Seq Scan on dh22  (cost=0.00..1.52 rows=6 width=4) (actual time=0.658..0.666 rows=5 loops=5)
                                                         Filter: (sino_genimp AND (per_liano = 2025) AND (per_limes = 5))
                                                         Rows Removed by Filter: 30
-                                      ->  Parallel Hash  (cost=2271.59..2271.59 rows=46690 width=4) (actual time=21.240..21.241 rows=22411 loops=5)
+                                      ->  Parallel Hash  (cost=2271.59..2271.59 rows=46690 width=4) (actual time=16.477..16.478 rows=22411 loops=5)
                                             Buckets: 131072  Batches: 1  Memory Usage: 5408kB
-                                            ->  Parallel Index Only Scan using dh01_pkey on dh01  (cost=0.42..2271.59 rows=46690 width=4) (actual time=0.122..30.011 rows=112055 loops=1)
+                                            ->  Parallel Index Only Scan using dh01_pkey on dh01  (cost=0.42..2271.59 rows=46690 width=4) (actual time=0.022..30.495 rows=112055 loops=1)
                                                   Heap Fetches: 0
-                                ->  Hash  (cost=11.13..11.13 rows=213 width=8) (actual time=0.818..0.820 rows=213 loops=3)
+                                ->  Hash  (cost=11.13..11.13 rows=213 width=8) (actual time=2.759..2.760 rows=213 loops=5)
                                       Buckets: 1024  Batches: 1  Memory Usage: 17kB
-                                      ->  Seq Scan on dh12  (cost=0.00..11.13 rows=213 width=8) (actual time=0.514..0.708 rows=213 loops=3)
-              ->  Memoize  (cost=0.29..0.41 rows=3 width=4) (actual time=0.000..0.001 rows=3 loops=1260859)
+                                      ->  Seq Scan on dh12  (cost=0.00..11.13 rows=213 width=8) (actual time=2.455..2.664 rows=213 loops=5)
+              ->  Memoize  (cost=0.29..0.41 rows=3 width=4) (actual time=0.001..0.001 rows=3 loops=1260859)
                     Cache Key: dh12.codn_conce
                     Cache Mode: logical
                     Hits: 1260708  Misses: 151  Evictions: 0  Overflows: 0  Memory Usage: 26kB
-                    ->  Index Only Scan using ix_dh16_key_codn_conce on dh16  (cost=0.28..0.40 rows=3 width=4) (actual time=0.003..0.004 rows=3 loops=151)
+                    ->  Index Only Scan using ix_dh16_key_codn_conce on dh16  (cost=0.28..0.40 rows=3 width=4) (actual time=0.004..0.006 rows=3 loops=151)
                           Index Cond: (codn_conce = dh12.codn_conce)
                           Heap Fetches: 0
               SubPlan 3
-                ->  Result  (cost=9.24..9.25 rows=1 width=32) (actual time=0.040..0.040 rows=1 loops=3666488)
+                ->  Result  (cost=9.24..9.25 rows=1 width=32) (actual time=0.058..0.058 rows=1 loops=3666488)
                       InitPlan 2 (returns $2)
-                        ->  Result  (cost=9.23..9.24 rows=1 width=32) (actual time=0.040..0.040 rows=1 loops=3666488)
+                        ->  Result  (cost=9.23..9.24 rows=1 width=32) (actual time=0.057..0.057 rows=1 loops=3666488)
                               InitPlan 1 (returns $1)
-                                ->  Unique  (cost=9.22..9.23 rows=3 width=4) (actual time=0.038..0.039 rows=2 loops=3666488)
-                                      ->  Sort  (cost=9.22..9.22 rows=3 width=4) (actual time=0.037..0.037 rows=3 loops=3666488)
+                                ->  Unique  (cost=9.22..9.23 rows=3 width=4) (actual time=0.054..0.055 rows=2 loops=3666488)
+                                      ->  Sort  (cost=9.22..9.22 rows=3 width=4) (actual time=0.053..0.053 rows=3 loops=3666488)
                                             Sort Key: dh15.codn_tipogrupo
                                             Sort Method: quicksort  Memory: 25kB
-                                            ->  Hash Join  (cost=7.47..9.19 rows=3 width=4) (actual time=0.016..0.028 rows=3 loops=3666488)
+                                            ->  Hash Join  (cost=7.47..9.19 rows=3 width=4) (actual time=0.023..0.040 rows=3 loops=3666488)
                                                   Hash Cond: (dh15.codn_grupo = dh16_1.codn_grupo)
-                                                  ->  Seq Scan on dh15  (cost=0.00..1.56 rows=56 width=8) (actual time=0.001..0.006 rows=56 loops=3666488)
-                                                  ->  Hash  (cost=7.44..7.44 rows=3 width=4) (actual time=0.013..0.013 rows=3 loops=3666488)
+                                                  ->  Seq Scan on dh15  (cost=0.00..1.56 rows=56 width=8) (actual time=0.002..0.008 rows=56 loops=3666488)
+                                                  ->  Hash  (cost=7.44..7.44 rows=3 width=4) (actual time=0.019..0.019 rows=3 loops=3666488)
                                                         Buckets: 1024  Batches: 1  Memory Usage: 9kB
-                                                        ->  Bitmap Heap Scan on dh16 dh16_1  (cost=4.30..7.44 rows=3 width=4) (actual time=0.004..0.005 rows=3 loops=3666488)
-                                                              Recheck Cond: (codn_conce = dh21h.codn_conce)
+                                                        ->  Bitmap Heap Scan on dh16 dh16_1  (cost=4.30..7.44 rows=3 width=4) (actual time=0.007..0.009 rows=3 loops=3666488)
+                                                              Recheck Cond: (codn_conce = dh21.codn_conce)
                                                               Heap Blocks: exact=7464102
-                                                              ->  Bitmap Index Scan on ix_dh16_key_codn_conce  (cost=0.00..4.30 rows=3 width=0) (actual time=0.003..0.003 rows=3 loops=3666488)
-                                                                    Index Cond: (codn_conce = dh21h.codn_conce)
-Planning Time: 5.316 ms
-Execution Time: 164724.442 ms
+                                                              ->  Bitmap Index Scan on ix_dh16_key_codn_conce  (cost=0.00..4.30 rows=3 width=0) (actual time=0.004..0.004 rows=3 loops=3666488)
+                                                                    Index Cond: (codn_conce = dh21.codn_conce)
+Planning Time: 2.207 ms
+Execution Time: 233149.703 ms
