@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\EstadoCierre;
 use Filament\Actions\Action;
 use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Services\Mapuche\LiquidacionService;
+use App\Services\MapucheMiSimplificacionService;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
@@ -90,10 +92,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('sino_cerra')
-                    ->options([
-                        'S' => 'Cerrado',
-                        'N' => 'Abierto',
-                    ]),
+                        ->options(EstadoCierre::asSelectArray()),
                 Tables\Filters\Filter::make('periodo_fiscal')
                     ->form([
                         TextInput::make('periodo_fiscal')
@@ -147,54 +146,36 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->searchable()
                             ->reactive()
                     ])
-                    ->action(function (array $data, CuilRepository $cuilRepository) {
+                    ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService) {
                         try {
-                            // Iniciar una transacción para asegurar la integridad de los datos
-                            DB::connection(self::getStaticConnectionName())->beginTransaction();
-
-                            // Obtener CUILs que no están en RelacionesActivas
-                            $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
-
-                            if ($cuils->isEmpty()) {
-                                Notification::make()
-                                    ->warning()
-                                    ->title('No hay CUILs para procesar')
-                                    ->send();
-                                DB::rollBack();
-                                return;
-                            }
-
-                            // Utilizar el método del modelo para ejecutar la función almacenada
-                            $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
-                                $data['nro_liqui'],
-                                $data['periodo_fiscal']
+                            $processedCount = $mapucheMiSimplificacionService->poblarMiSimplificacion(
+                                (int)$data['periodo_fiscal'],
+                                (int)$data['nro_liqui']
                             );
 
-                            if (!$resultado) {
-                                throw new \Exception('Error al ejecutar la función almacenada');
+                            if ($processedCount > 0) {
+                                Notification::make()
+                                    ->title('Proceso completado')
+                                    ->body("Se han procesado {$processedCount} registros.")
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('No se encontraron CUILs para procesar.')
+                                    ->body('No se encontraron CUILs para procesar.')
+                                    ->danger()
+                                    ->send();
                             }
-
-                            DB::connection(self::getStaticConnectionName())->commit();
-
-                            Notification::make()
-                                ->success()
-                                ->title('Proceso completado')
-                                ->body('Se han procesado ' . $cuils->count() . ' registros.')
-                                ->send();
-
                         } catch (\Exception $e) {
-                            DB::connection(self::getStaticConnectionName())->rollBack();
-
-                            // Registrar el error para diagnóstico
                             Log::error('Error al poblar Mi Simplificación', [
                                 'mensaje' => $e->getMessage(),
                                 'traza' => $e->getTraceAsString(),
-                                'datos' => $data
+                                'datos' => $data,
                             ]);
 
                             Notification::make()
                                 ->danger()
-                                ->title('Error')
+                                ->title('Error en el proceso')
                                 ->body($e->getMessage())
                                 ->send();
                         }

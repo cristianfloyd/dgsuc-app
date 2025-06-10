@@ -11,20 +11,27 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use App\Contracts\CuilRepositoryInterface;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceInterface
 {
     use MapucheConnectionTrait;
-    private $afipMapucheMiSimplificacion;
-    private $tablaTempCuils;
 
-    public function __construct(AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion, TablaTempCuils $tablaTempCuils)
-    {
-        $this->afipMapucheMiSimplificacion = $afipMapucheMiSimplificacion;
-        $this->tablaTempCuils = $tablaTempCuils;
-    }
+    /**
+     * Constructor de la clase MapucheMiSimplificacionService.
+     *
+     * @param AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion Modelo para la tabla afip_mapuche_mi_simplificacion
+     * @param TablaTempCuils $tablaTempCuils Modelo para la tabla tabla_temp_cuils
+     * @param CuilRepositoryInterface $cuilRepository Repositorio para operaciones relacionadas con CUILs
+     */
+    public function __construct(
+        private AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion,
+        private TablaTempCuils $tablaTempCuils,
+        private CuilRepositoryInterface $cuilRepository
+        )
+    {}
 
 
     /**
@@ -54,6 +61,60 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         $this->verificarYVaciarTabla();
 
         return $this->ejecutarFuncionAlmacenada($nroLiqui->value(), $periodoFiscal);
+    }
+
+
+    /**
+     * Orquesta el proceso de poblar "Mi Simplificación" desde una acción de la interfaz.
+     *
+     * Este método se encarga de:
+     * 1. Iniciar una transacción.
+     * 2. Obtener los CUILs que necesitan ser procesados.
+     * 3. Ejecutar la función almacenada principal si hay CUILs.
+     * 4. Confirmar o revertir la transacción.
+     *
+     * @param int $periodoFiscal El período fiscal en formato YYYYMM.
+     * @param int $nroLiqui El número de liquidación.
+     * @return int La cantidad de registros procesados.
+     * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada.
+     */
+    public function poblarMiSimplificacion(string $periodoFiscal, int $nroLiqui): int
+    {
+        DB::connection($this->getConnectionName())->beginTransaction();
+
+        try {
+            // Se trunca la tabla para asegurar que esté vacía antes de poblarla.
+            $this->verificarYVaciarTabla();
+
+            $cuils = $this->cuilRepository->getCuilsNotInAfip($periodoFiscal);
+            $cuilsCount = $cuils->count();
+
+            if ($cuilsCount === 0) {
+                DB::connection($this->getConnectionName())->rollBack();
+                return 0; // Indica que no había nada que procesar.
+            }
+
+            // Usamos el método estático del modelo, igual que en el Resource original,
+            // para mantener consistencia.
+            $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
+                $nroLiqui,
+                $periodoFiscal
+            );
+
+            if (!$resultado) {
+                // Si la función almacenada devuelve false o un error.
+                throw new \Exception('Error al ejecutar la función almacenada `mapucheMiSimplificacion`.');
+            }
+
+            DB::connection($this->getConnectionName())->commit();
+
+            return $cuilsCount;
+        } catch (\Exception $e) {
+            DB::connection($this->getConnectionName())->rollBack();
+            // Relanzamos la excepción para que el controlador (Resource) la maneje.
+            // Esto permite que el controlador se encargue de la notificación al usuario y el log.
+            throw $e;
+        }
     }
 
     /**
