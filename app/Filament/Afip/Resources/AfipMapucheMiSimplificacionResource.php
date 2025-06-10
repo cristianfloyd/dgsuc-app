@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\CuilRepository;
 use App\Models\AfipRelacionesActivas;
 use Filament\Forms\Components\Select;
+use App\Traits\MapucheConnectionTrait;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -28,6 +29,7 @@ use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\RelationMana
 
 class AfipMapucheMiSimplificacionResource extends Resource
 {
+    use MapucheConnectionTrait;
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
     protected static ?string $navigationGroup = 'AFIP';
     protected static ?string $navigationLabel = 'Mi Simplificación';
@@ -205,7 +207,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->label('Número de Liquidación')
                             ->options(function () {
                                 // Obtener los números de liquidación disponibles
-                                return DB::connection('pgsql-prod')
+                                return DB::connection(self::getStaticConnectionName())
                                     ->table('mapuche.dh22')
                                     ->distinct()
                                     ->pluck('nro_liqui', 'nro_liqui')
@@ -217,7 +219,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->action(function (array $data, CuilRepository $cuilRepository) {
                         try {
                             // Iniciar una transacción para asegurar la integridad de los datos
-                            DB::connection('pgsql-prod')->beginTransaction();
+                            DB::connection(self::getStaticConnectionName())->beginTransaction();
 
                             // Obtener CUILs que no están en RelacionesActivas
                             $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
@@ -241,7 +243,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 throw new \Exception('Error al ejecutar la función almacenada');
                             }
 
-                            DB::connection('pgsql-prod')->commit();
+                            DB::connection(self::getStaticConnectionName())->commit();
 
                             Notification::make()
                                 ->success()
@@ -250,7 +252,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 ->send();
 
                         } catch (\Exception $e) {
-                            DB::connection('pgsql-prod')->rollBack();
+                            DB::connection(self::getStaticConnectionName())->rollBack();
 
                             // Registrar el error para diagnóstico
                             Log::error('Error al poblar Mi Simplificación', [
@@ -281,6 +283,11 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ->defaultSort('periodo_fiscal', 'desc');
     }
 
+    public static function getStaticConnectionName(): string
+    {
+        $instance = new static;
+        return $instance->getConnectionName();
+    }
 
     public static function getRelations(): array
     {
