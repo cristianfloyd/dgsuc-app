@@ -303,10 +303,29 @@ class MapucheConfig
 		return self::getParametroRrhh('Conceptos', 'ObraSocial');
 	}
 
+
+
     public static function getTopesJubilacionVoluntario()
 	{
 		return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
 	}
+
+
+    public static function getTopesJubilatorioPatronal()
+	{
+		return self::getParametroRrhh('Topes', 'TopeJubilatorioPatronal');
+	}
+
+    public static function getTopesJubilatorioPersonal()
+	{
+		return self::getParametroRrhh('Topes', 'TopeJubilatorioPersonal');
+	}
+
+    public static function getTopesOtrosAportesPersonales()
+	{
+		return self::getParametroRrhh('Topes', 'TopeOtrosAportesPersonales');
+	}
+
     public static function getConceptosObraSocialFliarAdherente()
 	{
 		return self::getParametroRrhh('Conceptos', 'ObraSocialFliarAdherente');

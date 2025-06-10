@@ -22,33 +22,7 @@ SELECT
 	         codigoescalafon                                                                               AS codigoescalafon
 
 -- INTO TEMP pre_conceptos_liquidados
-FROM (
-	     -- UNION de liquidaciones actuales e históricas
-	     SELECT id_liquidacion,
-	            impp_conce,
-	            ano_retro,
-	            mes_retro,
-	            nro_legaj,
-	            codn_conce,
-	            tipo_conce,
-	            nro_cargo,
-	            nov1_conce,
-	            nro_liqui,
-	            codigoescalafon
-	     FROM mapuche.dh21
-	     UNION ALL
-	     SELECT id_liquidacion,
-	            impp_conce,
-	            ano_retro,
-	            mes_retro,
-	            nro_legaj,
-	            codn_conce,
-	            tipo_conce,
-	            nro_cargo,
-	            nov1_conce,
-	            nro_liqui,
-	            codigoescalafon
-	     FROM mapuche.dh21h) AS dh21
+FROM mapuche.dh21 AS dh21
 	     LEFT OUTER JOIN mapuche.dh01 ON (dh01.nro_legaj = dh21.nro_legaj) -- Agentes
 	     LEFT OUTER JOIN mapuche.dh12 ON (dh21.codn_conce = dh12.codn_conce) -- Conceptos de Liquidaci n
 	     LEFT OUTER JOIN mapuche.dh16 ON (dh16.codn_conce = dh12.codn_conce) -- Grupo al que pertenecen los conceptos
