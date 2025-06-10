@@ -98,9 +98,9 @@ class ControlConceptosPeriodo extends Model
     public function scopeTipoConcepto($query, string $tipo)
     {
         if ($tipo === 'aportes') {
-            return $query->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248']);
+            return $query->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248', '403']);
         } elseif ($tipo === 'contribuciones') {
-            return $query->whereIn('codn_conce', ['301', '302', '303', '304', '305', '306', '307', '308', '347', '348']);
+            return $query->whereIn('codn_conce', ['301', '302', '303', '304', '305', '306', '307', '308', '347', '348', '447']);
         }
 
         return $query;

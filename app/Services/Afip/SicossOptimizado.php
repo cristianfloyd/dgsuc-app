@@ -6,13 +6,13 @@ use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Dh11;
 use Illuminate\Support\Facades\DB;
+use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\LicenciaService;
 use App\Repositories\Sicoss\Dh03Repository;
-use App\ValueObjects\PeriodoFiscal;
-use Illuminate\Support\Facades\File;
 
 class SicossOptimizado
 {
@@ -2230,7 +2230,7 @@ class SicossOptimizado
      */
     public static function quote(mixed $dato): string|array
     {
-        if (is_null($dato)) {
+        if ($dato === null) {
             return 'NULL';
         }
 

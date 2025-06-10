@@ -747,7 +747,9 @@ class SicossControles extends Page implements HasTable
                 '307',
                 '308',
                 '347',
-                '348'
+                '348',
+                '403',
+                '447'
             ];
 
             Log::info('Ejecutando control de conceptos', [
@@ -774,7 +776,7 @@ class SicossControles extends Page implements HasTable
                 ->orderBy('h21.codn_conce')
                 ->select('h21.codn_conce', 'h12.desc_conce', DB::raw('SUM(impp_conce)::numeric(15, 2) as importe'))
                 ->get();
-
+            
             // Eliminar registros anteriores para este período
             ControlConceptosPeriodo::where('year', $this->year)
                 ->where('month', $this->month)
@@ -794,10 +796,10 @@ class SicossControles extends Page implements HasTable
             }
 
             // Calcular totales para la notificación
-            $totalAportes = $resultados->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248'])
+            $totalAportes = $resultados->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248','403'])
                 ->sum('importe');
 
-            $totalContribuciones = $resultados->whereIn('codn_conce', ['301', '302', '303', '304', '305', '306', '307', '308', '347', '348'])
+            $totalContribuciones = $resultados->whereIn('codn_conce', ['301', '302', '303', '304', '305', '306', '307', '308', '347', '348','447'])
                 ->sum('importe');
 
             // Crear vista para la notificación
