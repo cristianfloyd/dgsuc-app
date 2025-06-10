@@ -110,6 +110,16 @@ class AfipMapucheMiSimplificacion extends Model
         );
     }
 
+    /**
+     * Accesor para obtener el valor RAW del puesto antes del casting.
+     */
+    protected function puestoRaw(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => $attributes['puesto'],
+        );
+    }
+    
 
     protected function puesto(): Attribute
     {

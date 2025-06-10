@@ -43,4 +43,17 @@ class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterfac
     {
         AfipMapucheSicoss::truncate();
     }
+
+    /**
+     * Obtiene los períodos fiscales distintos para ser usados en un select.
+     *
+     * @return array
+     */
+    public function getDistinctPeriodosFiscales(): array
+    {
+        return AfipMapucheSicoss::distinct()
+            ->orderBy('periodo_fiscal', 'desc')
+            ->pluck('periodo_fiscal', 'periodo_fiscal')
+            ->toArray();
+    }
 }

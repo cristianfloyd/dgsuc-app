@@ -22,6 +22,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
+use App\Services\AfipMapucheSicossService;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Services\Mapuche\LiquidacionService;
 use App\Services\MapucheMiSimplificacionService;
@@ -32,7 +33,6 @@ use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\RelationMana
 
 class AfipMapucheMiSimplificacionResource extends Resource
 {
-    use MapucheConnectionTrait;
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
     protected static ?string $navigationGroup = 'AFIP';
     protected static ?string $navigationLabel = 'Mi Simplificación';
@@ -121,11 +121,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->form([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(function () {
-                                return AfipMapucheSicoss::distinct()
-                                    ->pluck('periodo_fiscal', 'periodo_fiscal')
-                                    ->toArray();
-                            })
+                            ->options(fn (AfipMapucheSicossService $afipMapucheSicossService) => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
                             ->required()
                             ->searchable(),
                         Select::make('nro_liqui')
@@ -195,11 +191,6 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ->defaultSort('periodo_fiscal', 'desc');
     }
 
-    public static function getStaticConnectionName(): string
-    {
-        $instance = new static;
-        return $instance->getConnectionName();
-    }
 
     public static function getRelations(): array
     {
@@ -215,13 +206,5 @@ class AfipMapucheMiSimplificacionResource extends Resource
             'create' => Pages\CreateAfipMapucheMiSimplificacion::route('/create'),
             'edit' => Pages\EditAfipMapucheMiSimplificacion::route('/{record}/edit'),
         ];
-    }
-
-    // Agregar este método para manejar la consulta
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->select('*')
-            ->addSelect(DB::raw('puesto as puesto_raw')); // Agregamos el campo puesto sin cast
     }
 }

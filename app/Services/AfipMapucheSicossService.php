@@ -51,4 +51,14 @@ class AfipMapucheSicossService
 
         return $record;
     }
+
+    /**
+     * Obtiene una lista de períodos fiscales para usar en componentes select.
+     *
+     * @return array
+     */
+    public function getPeriodosFiscalesForSelect(): array
+    {
+        return $this->repository->getDistinctPeriodosFiscales();
+    }
 }
