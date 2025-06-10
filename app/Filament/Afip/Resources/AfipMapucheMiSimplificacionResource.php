@@ -22,6 +22,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
 use App\Models\AfipMapucheMiSimplificacion;
+use App\Services\Mapuche\LiquidacionService;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
@@ -45,82 +46,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nro_legaj')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('nro_liqui')
-                    ->required()
-                    ->maxLength(6),
-                TextInput::make('sino_cerra')
-                    ->required()
-                    ->maxLength(1),
-                TextInput::make('desc_estado_liquidacion')
-                    ->required()
-                    ->maxLength(50),
-                TextInput::make('nro_cargo')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('periodo_fiscal')
-                    ->required()
-                    ->maxLength(6),
-                TextInput::make('tipo_registro')
-                    ->required()
-                    ->maxLength(2)
-                    ->default(01),
-                TextInput::make('codigo_movimiento')
-                    ->required()
-                    ->maxLength(2)
-                    ->default('AT'),
-                TextInput::make('cuil')
-                    ->required()
-                    ->maxLength(11),
-                TextInput::make('trabajador_agropecuario')
-                    ->required()
-                    ->maxLength(1)
-                    ->default('N'),
-                TextInput::make('modalidad_contrato')
-                    ->maxLength(3)
-                    ->default('008'),
-                TextInput::make('inicio_rel_laboral')
-                    ->required()
-                    ->maxLength(10),
-                TextInput::make('fin_rel_laboral')
-                    ->maxLength(10),
-                TextInput::make('obra_social')
-                    ->maxLength(6)
-                    ->default('000000'),
-                TextInput::make('codigo_situacion_baja')
-                    ->maxLength(2),
-                TextInput::make('fecha_tel_renuncia')
-                    ->maxLength(10),
-                TextInput::make('retribucion_pactada')
-                    ->maxLength(15),
-                TextInput::make('modalidad_liquidacion')
-                    ->required()
-                    ->maxLength(1)
-                    ->default(1),
-                TextInput::make('domicilio')
-                    ->maxLength(5),
-                TextInput::make('actividad')
-                    ->maxLength(6),
-                Select::make('puesto')
-                    ->options(PuestoDesempenado::class)
-                    ->nullable()
-                    ->columnSpanFull(),
-                TextInput::make('rectificacion')
-                    ->maxLength(2),
-                TextInput::make('ccct')
-                    ->maxLength(10),
-                TextInput::make('tipo_servicio')
-                    ->maxLength(3),
-                TextInput::make('categoria')
-                    ->maxLength(6),
-                TextInput::make('fecha_susp_serv_temp')
-                    ->maxLength(10),
-                TextInput::make('nro_form_agro')
-                    ->maxLength(10),
-                TextInput::make('covid')
-                    ->maxLength(1),
+                //// TextInput::make('periodo_fiscal')
             ]);
     }
 
@@ -205,16 +131,21 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->searchable(),
                         Select::make('nro_liqui')
                             ->label('Número de Liquidación')
-                            ->options(function () {
-                                // Obtener los números de liquidación disponibles
-                                return DB::connection(self::getStaticConnectionName())
-                                    ->table('mapuche.dh22')
-                                    ->distinct()
-                                    ->pluck('nro_liqui', 'nro_liqui')
-                                    ->toArray();
+                            ->options(function (callable $get, LiquidacionService $liquidacionService): array {
+                                $periodoFiscal = $get('periodo_fiscal');
+                                if (!$periodoFiscal){ return [];}
+                                $year = substr($periodoFiscal, 0, 4);
+                                $month = substr($periodoFiscal, 4, 2);
+                                $liquidaciones = $liquidacionService->getLiquidacionesForSelect($year, $month);
+
+                                // Formatear el array para la vista
+                                return collect($liquidaciones)->mapWithKeys(function ($descripcion, $nro_liqui) {
+                                    return [$nro_liqui => "# {$nro_liqui} - {$descripcion}"];
+                                })->toArray();
                             })
                             ->required()
                             ->searchable()
+                            ->reactive()
                     ])
                     ->action(function (array $data, CuilRepository $cuilRepository) {
                         try {
