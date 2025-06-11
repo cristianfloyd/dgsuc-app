@@ -46,7 +46,18 @@ class SicossOptimizado
         $per_mesct     = $periodo['month'];
         $per_anoct     = $periodo['year'];
         $hayNroLegajo = isset($datos['nro_legaj']);
-        $periodo_fiscal = $periodo_fiscal ?? new PeriodoFiscal($per_anoct, $per_mesct);
+        $periodo_fiscal ??= new PeriodoFiscal($per_anoct, $per_mesct);
+        $nombre_arch = 'sicoss';
+        $opcion_retro  = $datos['check_retro'];
+        $where = ' true ';
+        $where_periodo = ' true ';
+        $filtro_legajo = $datos['nro_legaj'] ?? null;
+        
+        // Si no filtro por numero de legajo => obtengo todos los legajos
+        if (!empty($filtro_legajo))
+            $where = "dh01.nro_legaj= $filtro_legajo ";
+
+        
 
         // Seteo valores de rrhhini
         self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
@@ -54,27 +65,20 @@ class SicossOptimizado
         self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
         self::$codigo_obrasocial_fc       = MapucheConfig::getConceptosObraSocialFliarAdherente();                   // concepto seteado en rrhhini bajo el cual se liquida el familiar a cargo
         self::$tipoEmpresa                = MapucheConfig::getDatosUniversidadTipoEmpresa();
-        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Seg�n sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
-        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneraci�n Total (importe Bruto no imponible)
+        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Segun sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
+        self::$asignacion_familiar        = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneracion Total (importe Bruto no imponible)
         self::$trabajadorConvencionado    = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
         self::$codc_reparto                     = self::quote(MapucheConfig::getDatosCodcReparto());
         self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
         self::$hs_extras_por_novedad      = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
         self::$categoria_diferencial       = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
-
-        $opcion_retro  = $datos['check_retro'];
-        if ($hayNroLegajo) {
-            $filtro_legajo = $datos['nro_legaj'];
-        }
         self::$codc_reparto  = self::quote(MapucheConfig::getDatosCodcReparto());
 
 
-        // Si no filtro por n�mero de legajo => obtengo todos los legajos
-        $where = ' true ';
-        if (!empty($filtro_legajo))
-            $where = "dh01.nro_legaj= $filtro_legajo ";
+        
 
-        $where_periodo = ' true ';
+
+
 
         //si se envia nro_liqui desde la generacion de libro de sueldo
         if (isset($datos['nro_liqui'])) {
@@ -91,8 +95,8 @@ class SicossOptimizado
         $licencias_agentes_remunem = self::get_licencias_protecintegral_vacaciones($where);
         $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
 
-        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta a�o y mes retro
-        $nombre_arch = 'sicoss';
+        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta año y mes retro
+
         switch ($opcion_retro) {
             case 0:
                 $periodo = 'Vigente_sin_retro';
@@ -177,6 +181,8 @@ class SicossOptimizado
         }
     }
 
+
+    
 
 
     public static function get_licencias_protecintegral_vacaciones($where_legajos)
@@ -1046,8 +1052,8 @@ class SicossOptimizado
         // Valores obtenidos del form (que se obtienen de rrhhini)
         // Topes
 
-        $TopeJubilatorioPatronal    = $datos['TopeJubilatorioPatronal'] ;
-        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'] ;
+        $TopeJubilatorioPatronal    = $datos['TopeJubilatorioPatronal'];
+        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'];
         $TopeOtrosAportesPersonales = $datos['TopeOtrosAportesPersonal'];
         $trunca_tope                = $datos['truncaTope'];
         $TopeSACJubilatorioPers     = $TopeJubilatorioPersonal / 2;
