@@ -18,20 +18,20 @@ class SicossOptimizado
 {
     use MapucheConnectionTrait;
 
-    static protected $aportes_voluntarios;
-    static protected $codigo_os_aporte_adicional;
-    static protected $codigo_obrasocial_fc;
-    static protected $codigo_obra_social_default;
-    static protected $hs_extras_por_novedad;
-    static protected $tipoEmpresa;
-    static protected $asignacion_familiar;
-    static protected $trabajadorConvencionado;
-    static protected $codc_reparto;
-    static protected $porc_aporte_adicional_jubilacion;
-    static protected $cantidad_adherentes_sicoss;
-    static protected $archivos;
-    static protected $categoria_diferencial;
-    static protected $periodo_actual;
+    protected static $aportes_voluntarios;
+    protected static $codigo_os_aporte_adicional;
+    protected static $codigo_obrasocial_fc;
+    protected static $codigo_obra_social_default;
+    protected static $hs_extras_por_novedad;
+    protected static $tipoEmpresa;
+    protected static $asignacion_familiar;
+    protected static $trabajadorConvencionado;
+    protected static $codc_reparto;
+    protected static $porc_aporte_adicional_jubilacion;
+    protected static $cantidad_adherentes_sicoss;
+    protected static $archivos;
+    protected static $categoria_diferencial;
+    protected static $periodo_actual;
 
     public static function genera_sicoss(
         array $datos,
@@ -105,28 +105,28 @@ class SicossOptimizado
                 $periodo = $per_mesct . '/' . $per_anoct . ' (Vigente)';
                 if ($retornar_datos === TRUE)
                     return self::procesa_sicoss(
-                        $datos, 
-                        $per_anoct, 
-                        $per_mesct, 
-                        $legajos, 
-                        $nombre_arch, 
-                        $licencias_agentes, 
-                        $datos['check_retro'], 
-                        $datos['check_sin_activo'], 
+                        $datos,
+                        $per_anoct,
+                        $per_mesct,
+                        $legajos,
+                        $nombre_arch,
+                        $licencias_agentes,
+                        $datos['check_retro'],
+                        $datos['check_sin_activo'],
                         $retornar_datos,
                         $guardar_en_bd,
                         $periodo_fiscal
                     );
 
                 $totales[$periodo] = self::procesa_sicoss(
-                    $datos, 
-                    $per_anoct, 
-                    $per_mesct, 
-                    $legajos, 
-                    $nombre_arch, 
-                    $licencias_agentes, 
-                    $datos['check_retro'], 
-                    $datos['check_sin_activo'], 
+                    $datos,
+                    $per_anoct,
+                    $per_mesct,
+                    $legajos,
+                    $nombre_arch,
+                    $licencias_agentes,
+                    $datos['check_retro'],
+                    $datos['check_sin_activo'],
                     $retornar_datos,
                     $guardar_en_bd,
                     $periodo_fiscal
@@ -576,7 +576,7 @@ class SicossOptimizado
         LEFT JOIN mapuche.dh01 ON dh01.nro_legaj = dh21.nro_legaj
         LEFT JOIN mapuche.dh12 ON dh12.codn_conce = dh21.codn_conce
         LEFT JOIN tipos_grupos_conceptos tgc ON tgc.codn_conce = dh21.codn_conce
-        WHERE dh22.per_liano = " . $per_anoct . " 
+        WHERE dh22.per_liano = " . $per_anoct . "
         AND dh22.per_limes = " . $per_mesct . "
         AND dh22.sino_genimp = true
         AND dh21.codn_conce > 0
@@ -605,14 +605,14 @@ class SicossOptimizado
 
         return "
         WITH tipos_grupos_conceptos AS (
-            SELECT 
+            SELECT
                 dh16.codn_conce,
                 array_agg(DISTINCT dh15.codn_tipogrupo) AS tipos_grupos
             FROM mapuche.dh16
             INNER JOIN mapuche.dh15 ON dh15.codn_grupo = dh16.codn_grupo
             GROUP BY dh16.codn_conce
         )
-        SELECT DISTINCT 
+        SELECT DISTINCT
             dh21.id_liquidacion,
             dh21.impp_conce,
             dh21.ano_retro,
@@ -708,8 +708,8 @@ class SicossOptimizado
     /**
      * Obtiene los legajos de empleados para un período específico con múltiples opciones de filtrado.
      *
-     * Esta función recupera los legajos de empleados basándose en varios parámetros de filtrado, 
-     * permitiendo incluir o excluir legajos con licencias, agentes activos sin cargo, y aplicando 
+     * Esta función recupera los legajos de empleados basándose en varios parámetros de filtrado,
+     * permitiendo incluir o excluir legajos con licencias, agentes activos sin cargo, y aplicando
      * filtros por período retroactivo.
      *
      * @param string $codc_reparto Código de reparto para filtrar legajos
@@ -847,11 +847,11 @@ class SicossOptimizado
             (dh01.nro_cuil1::char(2)||LPAD(dh01.nro_cuil::char(8),8,'0')||dh01.nro_cuil2::char(1))::float8 AS cuit,
             dh01.desc_appat||' '||dh01.desc_nombr AS apyno,
             dh01.tipo_estad AS estado,
-            
+
             -- Optimización: reemplazar subconsultas con JOIN agregado
             COALESCE(familiares.conyugue, 0) AS conyugue,
             COALESCE(familiares.hijos, 0) AS hijos,
-            
+
             dha8.ProvinciaLocalidad,
             dha8.codigosituacion,
             dha8.CodigoCondicion,
@@ -860,23 +860,23 @@ class SicossOptimizado
             dha8.porcaporteadicss AS aporteAdicional,
             dha8.trabajador_convencionado AS trabajadorconvencionado,
             dha8.codigomodalcontrat AS codigocontratacion,
-            
+
             CASE WHEN ((dh09.codc_bprev = " . self::$codc_reparto . ") OR (dh09.fuerza_reparto) OR ((" . self::$codc_reparto . " = '') AND (dh09.codc_bprev IS NULL)))
                  THEN '1' ELSE '0' END AS regimen,
-            
+
             dh09.cant_cargo AS adherentes,
             $valor AS licencia,
             0 AS importeimponible_9
 
         FROM $tabla
-        
+
         -- JOIN optimizado para contar familiares una sola vez
         LEFT JOIN (
-            SELECT 
+            SELECT
                 nro_legaj,
                 COUNT(CASE WHEN codc_paren = 'CONY' THEN 1 END) AS conyugue,
                 COUNT(CASE WHEN codc_paren IN ('HIJO', 'HIJN', 'HINC', 'HINN') THEN 1 END) AS hijos
-            FROM mapuche.dh02 
+            FROM mapuche.dh02
             WHERE sino_cargo != 'N'
             GROUP BY nro_legaj
         ) familiares ON familiares.nro_legaj = $tabla.nro_legaj
@@ -885,7 +885,7 @@ class SicossOptimizado
         LEFT OUTER JOIN mapuche.dh09 ON dh09.nro_legaj = $tabla.nro_legaj
         LEFT OUTER JOIN mapuche.dhe9 ON dhe9.nro_legaj = $tabla.nro_legaj
         $join_dh01
-        
+
         WHERE $where";
     }
 
@@ -1569,7 +1569,7 @@ class SicossOptimizado
                     sicoss::llena_importes($legajos[$i]['codigo_os'], 6) .
                     sicoss::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Segn este chequeado en configuracin informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14 
+                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
                     sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
@@ -1628,10 +1628,10 @@ class SicossOptimizado
 
     /**
      * ⚠️ MÉTODO ORIGINAL - DEPRECADO POR PROBLEMA N+1
-     * 
+     *
      * Este método fue reemplazado por sumarizar_conceptos_optimizado()
      * Se mantiene solo para referencia y posible rollback.
-     * 
+     *
      * @deprecated Usar sumarizar_conceptos_optimizado() en su lugar
      */
     public static function sumarizar_conceptos_por_tipos_grupos($nro_leg, &$leg)
@@ -2261,7 +2261,7 @@ class SicossOptimizado
 
     /**
      * Pre-carga todos los conceptos liquidados para todos los legajos de una vez.
-     * 
+     *
      * Elimina el problema N+1 cargando todos los conceptos de todos los legajos
      * en una sola consulta optimizada, en lugar de hacer una consulta por legajo.
      *
@@ -2291,7 +2291,7 @@ class SicossOptimizado
 
         // ✅ UNA SOLA CONSULTA para todos los legajos - INCLUIR CAMPOS ADICIONALES
         $sql = "
-            SELECT 
+            SELECT
                 cl.nro_legaj,
                 cl.impp_conce,
                 cl.nov1_conce,
@@ -2338,7 +2338,7 @@ class SicossOptimizado
 
     /**
      * Método auxiliar para obtener estadísticas de la pre-carga
-     * 
+     *
      * @param array $todos_conceptos Array resultado de precargar_conceptos_todos_legajos
      * @param array $legajos Array original de legajos
      * @return array Estadísticas útiles para debugging
@@ -2388,7 +2388,7 @@ class SicossOptimizado
 
     /**
      * Agrupa los conceptos liquidados por legajo para acceso rápido O(1)
-     * 
+     *
      * @param array $todos_conceptos Array resultado de precargar_conceptos_todos_legajos
      * @return array Array asociativo [nro_legaj => [conceptos...]]
      */
@@ -2422,7 +2422,7 @@ class SicossOptimizado
 
     /**
      * Versión optimizada de sumarizar_conceptos_por_tipos_grupos que NO hace consultas SQL
-     * 
+     *
      * @param array $conceptos_legajo Conceptos pre-cargados para este legajo
      * @param array $leg Referencia al array del legajo para modificar
      */
@@ -2668,7 +2668,7 @@ class SicossOptimizado
 
     /**
      * Versión optimizada de calcular_remuner_grupo que NO hace consultas SQL
-     * 
+     *
      * @param array $conceptos_legajo Conceptos pre-cargados para este legajo
      * @param string $tipo Tipo de concepto a considerar
      * @param string $where_condition Condición adicional para filtrar
@@ -2768,7 +2768,7 @@ class SicossOptimizado
 
     /**
      * Calcula la memoria estimada necesaria para pre-cargar todos los conceptos
-     * 
+     *
      * @param array $legajos Array de legajos a procesar
      * @return array Información detallada sobre memoria necesaria
      */
@@ -2795,7 +2795,7 @@ class SicossOptimizado
 
         // PASO 3: Consulta de muestra
         $sql_muestra = "
-            SELECT 
+            SELECT
                 cl.nro_legaj,
                 cl.impp_conce,
                 cl.nov1_conce,
@@ -2966,7 +2966,7 @@ class SicossOptimizado
 
     /**
      * Pre-carga todos los datos de cargos para todos los legajos de una vez.
-     * 
+     *
      * Elimina 114,000 consultas individuales reemplazándolas por 1 sola consulta masiva.
      * Incluye límites, cargos sin licencia y cargos con licencia.
      *
@@ -2995,84 +2995,84 @@ class SicossOptimizado
 
         // ✅ UNA SOLA CONSULTA MASIVA que obtiene TODOS los datos de cargos
         $sql = "
-        WITH 
+        WITH
         -- CTE 1: Límites de cargos por legajo
         limites_cargos AS (
-            SELECT 
+            SELECT
                 nro_legaj,
-                CASE 
-                    WHEN MIN(fec_alta) > $fecha_inicio::date 
+                CASE
+                    WHEN MIN(fec_alta) > $fecha_inicio::date
                     THEN date_part('day', MIN(fec_alta)::timestamp)
                     ELSE date_part('day', timestamp $fecha_inicio)::integer
                 END AS minimo,
                 MAX(CASE
-                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL 
+                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL
                     THEN date_part('day', timestamp $fecha_fin)::integer
                     ELSE date_part('day', fec_baja::timestamp)
                 END) AS maximo
             FROM mapuche.dh03
-            WHERE (fec_baja IS NULL OR fec_baja >= $fecha_inicio::date) 
+            WHERE (fec_baja IS NULL OR fec_baja >= $fecha_inicio::date)
               AND nro_legaj IN ($legajos_in)
             GROUP BY nro_legaj
         ),
-        
+
         -- CTE 2: Cargos con licencias vigentes (problemas)
         cargos_con_licencia_problematica AS (
             SELECT DISTINCT dh05.nro_cargo
             FROM mapuche.dh05
             JOIN mapuche.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
             WHERE mapuche.map_es_licencia_vigente(dh05.nro_licencia)
-              AND (dl02.es_maternidad IS TRUE OR 
-                   (NOT dl02.es_remunerada OR 
+              AND (dl02.es_maternidad IS TRUE OR
+                   (NOT dl02.es_remunerada OR
                     (dl02.es_remunerada AND dl02.porcremuneracion = '0')))
         ),
-        
+
         -- CTE 3: Todos los cargos activos básicos
         cargos_base AS (
-            SELECT 
+            SELECT
                 dh03.nro_legaj,
                 dh03.nro_cargo,
                 CASE
-                    WHEN fec_alta <= $fecha_inicio::date 
+                    WHEN fec_alta <= $fecha_inicio::date
                     THEN date_part('day', timestamp $fecha_inicio)::integer
                     ELSE date_part('day', fec_alta::timestamp)
                 END AS inicio_cargo,
                 CASE
-                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL 
+                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL
                     THEN date_part('day', timestamp $fecha_fin)::integer
                     ELSE date_part('day', fec_baja::timestamp)
                 END AS final_cargo,
-                CASE 
+                CASE
                     WHEN dh03.nro_cargo IN (SELECT nro_cargo FROM cargos_con_licencia_problematica)
-                    THEN false ELSE true 
+                    THEN false ELSE true
                 END AS sin_licencia
             FROM mapuche.dh03
-            WHERE (fec_baja IS NULL OR fec_baja >= $fecha_inicio::date) 
+            WHERE (fec_baja IS NULL OR fec_baja >= $fecha_inicio::date)
               AND nro_legaj IN ($legajos_in)
         ),
-        
+
         -- CTE 4: Cargos con licencias vigentes detalladas
         cargos_con_licencias AS (
-            SELECT 
+            SELECT
                 dh03.nro_legaj,
                 dh03.nro_cargo,
                 CASE
-                    WHEN fec_alta <= $fecha_inicio::date 
+                    WHEN fec_alta <= $fecha_inicio::date
                     THEN date_part('day', timestamp $fecha_inicio)::integer
                     ELSE date_part('day', fec_alta::timestamp)
                 END AS inicio_cargo,
                 CASE
-                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL 
+                    WHEN fec_baja > $fecha_fin::date OR fec_baja IS NULL
                     THEN date_part('day', timestamp $fecha_fin)::integer
                     ELSE date_part('day', fec_baja::timestamp)
                 END AS final_cargo,
                 CASE
-                    WHEN fec_desde <= $fecha_inicio::date 
+                    WHEN fec_desde <= $fecha_inicio::date
                     THEN date_part('day', timestamp $fecha_inicio)::integer
                     ELSE date_part('day', fec_desde::timestamp)
                 END AS inicio_lic,
                 CASE
-                    WHEN fec_hasta > $fecha_fin::date OR fec_hasta IS NULL 
+                    WHEN fec_hasta > $fecha_fin::date OR fec_hasta IS NULL
                     THEN date_part('day', timestamp $fecha_fin)::integer
                     ELSE date_part('day', fec_hasta::timestamp)
                 END AS final_lic,
@@ -3092,17 +3092,17 @@ class SicossOptimizado
               AND dh03.nro_cargo NOT IN (
                   SELECT nro_cargo FROM mapuche.dh05 dh05_sub
                   JOIN mapuche.dl02 dl02_sub ON (dh05_sub.nrovarlicencia = dl02_sub.nrovarlicencia)
-                  WHERE dh05_sub.nro_cargo = dh03.nro_cargo 
+                  WHERE dh05_sub.nro_cargo = dh03.nro_cargo
                     AND mapuche.map_es_licencia_vigente(dh05_sub.nro_licencia)
-                    AND (dh05_sub.fec_desde < mapuche.map_get_fecha_inicio_periodo() - 1)  
-                    AND (dl02_sub.es_maternidad IS TRUE OR 
-                         (NOT dl02_sub.es_remunerada OR 
+                    AND (dh05_sub.fec_desde < mapuche.map_get_fecha_inicio_periodo() - 1)
+                    AND (dl02_sub.es_maternidad IS TRUE OR
+                         (NOT dl02_sub.es_remunerada OR
                           (dl02_sub.es_remunerada AND dl02_sub.porcremuneracion = '0')))
               )
         )
-        
+
         -- Resultado final: Todo combinado
-        SELECT 
+        SELECT
             'limites' as tipo_dato,
             lc.nro_legaj,
             NULL as nro_cargo,
@@ -3113,10 +3113,10 @@ class SicossOptimizado
             NULL::integer as condicion,
             NULL::boolean as sin_licencia
         FROM limites_cargos lc
-        
+
         UNION ALL
-        
-        SELECT 
+
+        SELECT
             'cargo_sin_licencia' as tipo_dato,
             cb.nro_legaj,
             cb.nro_cargo,
@@ -3128,10 +3128,10 @@ class SicossOptimizado
             cb.sin_licencia
         FROM cargos_base cb
         WHERE cb.sin_licencia = true
-        
+
         UNION ALL
-        
-        SELECT 
+
+        SELECT
             'cargo_con_licencia' as tipo_dato,
             ccl.nro_legaj,
             ccl.nro_cargo,
@@ -3142,7 +3142,7 @@ class SicossOptimizado
             ccl.condicion,
             NULL::boolean as sin_licencia
         FROM cargos_con_licencias ccl
-        
+
         ORDER BY nro_legaj, tipo_dato, nro_cargo
         ";
 
@@ -3279,7 +3279,7 @@ class SicossOptimizado
 
     /**
      * Pre-carga todos los datos de otra actividad para todos los legajos de una vez.
-     * 
+     *
      * Elimina 38,000 consultas individuales reemplazándolas por 1 sola consulta masiva.
      * Obtiene solo el registro más reciente por legajo (igual lógica que original).
      *
@@ -3307,20 +3307,20 @@ class SicossOptimizado
         // ✅ UNA SOLA CONSULTA MASIVA que obtiene el registro más reciente por legajo
         $sql = "
         WITH otra_actividad_reciente AS (
-            SELECT 
+            SELECT
                 nro_legaj,
                 importe as ImporteBrutoOtraActividad,
                 importe_sac as ImporteSACOtraActividad,
                 vig_ano,
                 vig_mes,
                 ROW_NUMBER() OVER (
-                    PARTITION BY nro_legaj 
+                    PARTITION BY nro_legaj
                     ORDER BY vig_ano DESC, vig_mes DESC
                 ) as rn
             FROM mapuche.dhe9
             WHERE nro_legaj IN ($legajos_in)
         )
-        SELECT 
+        SELECT
             nro_legaj,
             ImporteBrutoOtraActividad,
             ImporteSACOtraActividad,
@@ -3403,7 +3403,7 @@ class SicossOptimizado
 
     /**
      * Versión optimizada de otra_actividad que NO hace consultas SQL
-     * 
+     *
      * @param string $nro_legajo Número de legajo
      * @param array $datos_otra_actividad_por_legajo Datos pre-cargados
      * @return array Array con importes de otra actividad
@@ -3430,7 +3430,7 @@ class SicossOptimizado
 
     /**
      * Pre-carga todos los códigos de obra social para todos los legajos de una vez.
-     * 
+     *
      * Elimina 76,000 consultas individuales reemplazándolas por 2 consultas masivas.
      * Incluye la conversión a códigos DGI y manejo de jubilados.
      *
@@ -3457,7 +3457,7 @@ class SicossOptimizado
 
         // ✅ CONSULTA MASIVA 1: Obtener todos los códigos de obra social de dh09
         $sql_obra_social = "
-        SELECT 
+        SELECT
             dh09.nro_legaj,
             COALESCE(NULLIF(dh09.codc_obsoc, ''), " . self::$codigo_obra_social_default . ") as codc_obsoc
         FROM mapuche.dh09
@@ -3492,7 +3492,7 @@ class SicossOptimizado
             $codigos_in = implode(',', $codigos_quoted);
 
             $sql_codigos_dgi = "
-            SELECT 
+            SELECT
                 dh37.codc_obsoc,
                 COALESCE(dh37.codn_osdgi, '000000') as codn_osdgi
             FROM mapuche.dh37
@@ -3580,7 +3580,7 @@ class SicossOptimizado
 
     /**
      * Versión optimizada de codigo_os que NO hace consultas SQL
-     * 
+     *
      * @param string $nro_legajo Número de legajo
      * @param array $codigos_dgi_por_legajo Códigos DGI pre-cargados
      * @return string Código DGI de la obra social
@@ -3596,7 +3596,7 @@ class SicossOptimizado
     /**
      * Guarda los legajos procesados en la base de datos usando inserción masiva
      * Optimizado para grandes volúmenes (40K+ registros)
-     * 
+     *
      * @param array $legajos Legajos procesados con todos los cálculos
      * @param PeriodoFiscal $periodo_fiscal Período fiscal en formato YYYYMM
      * @return array Estadísticas del guardado
@@ -3841,7 +3841,7 @@ class SicossOptimizado
      *
      * @param array $datos Configuración
      * @param int $per_anoct Año
-     * @param int $per_mesct Mes  
+     * @param int $per_mesct Mes
      * @param array $legajos Legajos a procesar
      * @param PeriodoFiscal $periodo_fiscal Período fiscal
      * @return array Estadísticas del procesamiento
@@ -3968,12 +3968,12 @@ class SicossOptimizado
 
     /**
      * Determina si un legajo es válido para ser incluido en el archivo SICOSS
-     * 
+     *
      * Un legajo se considera válido si cumple alguna de las siguientes condiciones:
      * - Tiene importes brutos, imponibles o imponibles tipo 6 mayores a cero
      * - Es una licencia especial (cuando check_lic está habilitado y el legajo tiene licencia)
      * - Es un empleado sin activo (cuando check_sin_activo está habilitado y código situación es 14)
-     * 
+     *
      * @param array $legajo Datos del legajo procesado con todos los cálculos
      * @param array $datos_config Configuración del procesamiento con flags de control
      * @return bool True si el legajo debe incluirse en SICOSS, false en caso contrario
