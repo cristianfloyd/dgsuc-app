@@ -45,19 +45,22 @@ class SicossOptimizado
         $periodo       = MapucheConfig::getPeriodoCorriente();
         $per_mesct     = $periodo['month'];
         $per_anoct     = $periodo['year'];
-        $hayNroLegajo = isset($datos['nro_legaj']);
+        $totales = [];
         $periodo_fiscal ??= new PeriodoFiscal($per_anoct, $per_mesct);
         $nombre_arch = 'sicoss';
         $opcion_retro  = $datos['check_retro'];
         $where = ' true ';
         $where_periodo = ' true ';
         $filtro_legajo = $datos['nro_legaj'] ?? null;
-        
+        $path = storage_path('comunicacion/sicoss/');
+        self::$archivos = [];
+
+
         // Si no filtro por numero de legajo => obtengo todos los legajos
         if (!empty($filtro_legajo))
             $where = "dh01.nro_legaj= $filtro_legajo ";
 
-        
+
 
         // Seteo valores de rrhhini
         self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
@@ -75,28 +78,23 @@ class SicossOptimizado
         self::$codc_reparto  = self::quote(MapucheConfig::getDatosCodcReparto());
 
 
-        
 
 
 
 
-        //si se envia nro_liqui desde la generacion de libro de sueldo
-        if (isset($datos['nro_liqui'])) {
-            $where_liqui = $where . ' AND dh21.nro_liqui = ' . self::quote($datos['nro_liqui']);
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where_liqui);
-        } else {
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
-        }
-        $path = storage_path('comunicacion/sicoss/');
-        self::$archivos = [];
-        $totales = [];
 
+        sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
+
+
+        // LICENCIAS
         $licencias_agentes_no_remunem = self::get_licencias_vigentes($where);
         $licencias_agentes_remunem = self::get_licencias_protecintegral_vacaciones($where);
         $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
 
-        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta año y mes retro
 
+
+
+        // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta año y mes retro
         switch ($opcion_retro) {
             case 0:
                 $periodo = 'Vigente_sin_retro';
@@ -182,7 +180,7 @@ class SicossOptimizado
     }
 
 
-    
+
 
 
     public static function get_licencias_protecintegral_vacaciones($where_legajos)
