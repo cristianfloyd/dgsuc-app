@@ -6,6 +6,7 @@ use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\EstadoCierre;
 use Filament\Actions\Action;
 use App\Enums\PuestoDesempenado;
 use Filament\Resources\Resource;
@@ -15,12 +16,16 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\CuilRepository;
 use App\Models\AfipRelacionesActivas;
 use Filament\Forms\Components\Select;
+use App\Traits\MapucheConnectionTrait;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use App\Services\AfipMapucheExportService;
+use App\Services\AfipMapucheSicossService;
 use App\Models\AfipMapucheMiSimplificacion;
+use App\Services\Mapuche\LiquidacionService;
+use App\Services\MapucheMiSimplificacionService;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
@@ -43,82 +48,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nro_legaj')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('nro_liqui')
-                    ->required()
-                    ->maxLength(6),
-                TextInput::make('sino_cerra')
-                    ->required()
-                    ->maxLength(1),
-                TextInput::make('desc_estado_liquidacion')
-                    ->required()
-                    ->maxLength(50),
-                TextInput::make('nro_cargo')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('periodo_fiscal')
-                    ->required()
-                    ->maxLength(6),
-                TextInput::make('tipo_registro')
-                    ->required()
-                    ->maxLength(2)
-                    ->default(01),
-                TextInput::make('codigo_movimiento')
-                    ->required()
-                    ->maxLength(2)
-                    ->default('AT'),
-                TextInput::make('cuil')
-                    ->required()
-                    ->maxLength(11),
-                TextInput::make('trabajador_agropecuario')
-                    ->required()
-                    ->maxLength(1)
-                    ->default('N'),
-                TextInput::make('modalidad_contrato')
-                    ->maxLength(3)
-                    ->default('008'),
-                TextInput::make('inicio_rel_laboral')
-                    ->required()
-                    ->maxLength(10),
-                TextInput::make('fin_rel_laboral')
-                    ->maxLength(10),
-                TextInput::make('obra_social')
-                    ->maxLength(6)
-                    ->default('000000'),
-                TextInput::make('codigo_situacion_baja')
-                    ->maxLength(2),
-                TextInput::make('fecha_tel_renuncia')
-                    ->maxLength(10),
-                TextInput::make('retribucion_pactada')
-                    ->maxLength(15),
-                TextInput::make('modalidad_liquidacion')
-                    ->required()
-                    ->maxLength(1)
-                    ->default(1),
-                TextInput::make('domicilio')
-                    ->maxLength(5),
-                TextInput::make('actividad')
-                    ->maxLength(6),
-                Select::make('puesto')
-                    ->options(PuestoDesempenado::class)
-                    ->nullable()
-                    ->columnSpanFull(),
-                TextInput::make('rectificacion')
-                    ->maxLength(2),
-                TextInput::make('ccct')
-                    ->maxLength(10),
-                TextInput::make('tipo_servicio')
-                    ->maxLength(3),
-                TextInput::make('categoria')
-                    ->maxLength(6),
-                TextInput::make('fecha_susp_serv_temp')
-                    ->maxLength(10),
-                TextInput::make('nro_form_agro')
-                    ->maxLength(10),
-                TextInput::make('covid')
-                    ->maxLength(1),
+                //// TextInput::make('periodo_fiscal')
             ]);
     }
 
@@ -162,10 +92,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('sino_cerra')
-                    ->options([
-                        'S' => 'Cerrado',
-                        'N' => 'Abierto',
-                    ]),
+                        ->options(EstadoCierre::asSelectArray()),
                 Tables\Filters\Filter::make('periodo_fiscal')
                     ->form([
                         TextInput::make('periodo_fiscal')
@@ -194,74 +121,57 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->form([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(function () {
-                                return AfipMapucheSicoss::distinct()
-                                    ->pluck('periodo_fiscal', 'periodo_fiscal')
-                                    ->toArray();
-                            })
+                            ->options(fn (AfipMapucheSicossService $afipMapucheSicossService) => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
                             ->required()
                             ->searchable(),
                         Select::make('nro_liqui')
                             ->label('Número de Liquidación')
-                            ->options(function () {
-                                // Obtener los números de liquidación disponibles
-                                return DB::connection('pgsql-prod')
-                                    ->table('mapuche.dh22')
-                                    ->distinct()
-                                    ->pluck('nro_liqui', 'nro_liqui')
-                                    ->toArray();
+                            ->options(function (callable $get, LiquidacionService $liquidacionService): array {
+                                $periodoFiscal = $get('periodo_fiscal');
+                                if (!$periodoFiscal){ return [];}
+                                $year = substr($periodoFiscal, 0, 4);
+                                $month = substr($periodoFiscal, 4, 2);
+                                $liquidaciones = $liquidacionService->getLiquidacionesForSelect($year, $month);
+
+                                // Formatear el array para la vista
+                                return collect($liquidaciones)->mapWithKeys(function ($descripcion, $nro_liqui) {
+                                    return [$nro_liqui => "# {$nro_liqui} - {$descripcion}"];
+                                })->toArray();
                             })
                             ->required()
                             ->searchable()
+                            ->reactive()
                     ])
-                    ->action(function (array $data, CuilRepository $cuilRepository) {
+                    ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService) {
                         try {
-                            // Iniciar una transacción para asegurar la integridad de los datos
-                            DB::connection('pgsql-prod')->beginTransaction();
-
-                            // Obtener CUILs que no están en RelacionesActivas
-                            $cuils = $cuilRepository->getCuilsNotInAfip($data['periodo_fiscal']);
-
-                            if ($cuils->isEmpty()) {
-                                Notification::make()
-                                    ->warning()
-                                    ->title('No hay CUILs para procesar')
-                                    ->send();
-                                DB::rollBack();
-                                return;
-                            }
-
-                            // Utilizar el método del modelo para ejecutar la función almacenada
-                            $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
-                                $data['nro_liqui'],
-                                $data['periodo_fiscal']
+                            $processedCount = $mapucheMiSimplificacionService->poblarMiSimplificacion(
+                                (int)$data['periodo_fiscal'],
+                                (int)$data['nro_liqui']
                             );
 
-                            if (!$resultado) {
-                                throw new \Exception('Error al ejecutar la función almacenada');
+                            if ($processedCount > 0) {
+                                Notification::make()
+                                    ->title('Proceso completado')
+                                    ->body("Se han procesado {$processedCount} registros.")
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('No se encontraron CUILs para procesar.')
+                                    ->body('No se encontraron CUILs para procesar.')
+                                    ->danger()
+                                    ->send();
                             }
-
-                            DB::connection('pgsql-prod')->commit();
-
-                            Notification::make()
-                                ->success()
-                                ->title('Proceso completado')
-                                ->body('Se han procesado ' . $cuils->count() . ' registros.')
-                                ->send();
-
                         } catch (\Exception $e) {
-                            DB::connection('pgsql-prod')->rollBack();
-
-                            // Registrar el error para diagnóstico
                             Log::error('Error al poblar Mi Simplificación', [
                                 'mensaje' => $e->getMessage(),
                                 'traza' => $e->getTraceAsString(),
-                                'datos' => $data
+                                'datos' => $data,
                             ]);
 
                             Notification::make()
                                 ->danger()
-                                ->title('Error')
+                                ->title('Error en el proceso')
                                 ->body($e->getMessage())
                                 ->send();
                         }
@@ -296,13 +206,5 @@ class AfipMapucheMiSimplificacionResource extends Resource
             'create' => Pages\CreateAfipMapucheMiSimplificacion::route('/create'),
             'edit' => Pages\EditAfipMapucheMiSimplificacion::route('/{record}/edit'),
         ];
-    }
-
-    // Agregar este método para manejar la consulta
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->select('*')
-            ->addSelect(DB::raw('puesto as puesto_raw')); // Agregamos el campo puesto sin cast
     }
 }

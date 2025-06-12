@@ -1,36 +1,36 @@
-HashAggregate  (cost=76274.15..78525.49 rows=225134 width=83) (actual time=3915.146..5700.001 rows=1260859 loops=1)
+HashAggregate  (cost=76274.15..78525.49 rows=225134 width=83) (actual time=5269.435..7554.814 rows=1260859 loops=1)
 "  Group Key: dh21.id_liquidacion, dh21.impp_conce, dh21.ano_retro, dh21.mes_retro, dh21.nro_legaj, dh21.codn_conce, dh21.tipo_conce, dh21.nro_cargo, dh21.nov1_conce, dh12.nro_orimp, COALESCE(tgc.tipos_grupos, '{}'::integer[]), dh21.codigoescalafon"
-  Batches: 21  Memory Usage: 41025kB  Disk Usage: 109992kB
-  ->  Hash Left Join  (cost=64.73..69520.13 rows=225134 width=83) (actual time=1.129..2273.581 rows=1260859 loops=1)
+  Batches: 21  Memory Usage: 41025kB  Disk Usage: 109976kB
+  ->  Hash Left Join  (cost=64.73..69520.13 rows=225134 width=83) (actual time=1.026..3010.277 rows=1260859 loops=1)
         Hash Cond: (dh21.codn_conce = tgc.codn_conce)
-        ->  Hash Left Join  (cost=15.39..68890.51 rows=216475 width=51) (actual time=0.298..1821.284 rows=1260859 loops=1)
+        ->  Hash Left Join  (cost=15.39..68890.51 rows=216475 width=51) (actual time=0.244..2448.084 rows=1260859 loops=1)
               Hash Cond: (dh21.codn_conce = dh12.codn_conce)
-              ->  Hash Join  (cost=1.60..68297.17 rows=216475 width=47) (actual time=0.131..1377.083 rows=1260859 loops=1)
+              ->  Hash Join  (cost=1.60..68297.17 rows=216475 width=47) (actual time=0.113..1931.498 rows=1260859 loops=1)
                     Hash Cond: (dh21.nro_liqui = dh22.nro_liqui)
-                    ->  Seq Scan on dh21  (cost=0.00..64579.41 rows=1262771 width=51) (actual time=0.068..734.767 rows=1260911 loops=1)
+                    ->  Seq Scan on dh21  (cost=0.00..64579.41 rows=1262771 width=51) (actual time=0.064..1067.903 rows=1260911 loops=1)
                           Filter: (codn_conce > 0)
                           Rows Removed by Filter: 545202
-                    ->  Hash  (cost=1.52..1.52 rows=6 width=4) (actual time=0.042..0.044 rows=5 loops=1)
+                    ->  Hash  (cost=1.52..1.52 rows=6 width=4) (actual time=0.037..0.039 rows=5 loops=1)
                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
-                          ->  Seq Scan on dh22  (cost=0.00..1.52 rows=6 width=4) (actual time=0.028..0.032 rows=5 loops=1)
+                          ->  Seq Scan on dh22  (cost=0.00..1.52 rows=6 width=4) (actual time=0.027..0.030 rows=5 loops=1)
                                 Filter: (sino_genimp AND (per_liano = 2025) AND (per_limes = 5))
                                 Rows Removed by Filter: 30
-              ->  Hash  (cost=11.13..11.13 rows=213 width=8) (actual time=0.149..0.149 rows=213 loops=1)
+              ->  Hash  (cost=11.13..11.13 rows=213 width=8) (actual time=0.126..0.127 rows=213 loops=1)
                     Buckets: 1024  Batches: 1  Memory Usage: 17kB
-                    ->  Seq Scan on dh12  (cost=0.00..11.13 rows=213 width=8) (actual time=0.017..0.112 rows=213 loops=1)
-        ->  Hash  (cost=46.74..46.74 rows=208 width=36) (actual time=0.808..0.813 rows=208 loops=1)
+                    ->  Seq Scan on dh12  (cost=0.00..11.13 rows=213 width=8) (actual time=0.012..0.088 rows=213 loops=1)
+        ->  Hash  (cost=46.74..46.74 rows=208 width=36) (actual time=0.775..0.779 rows=208 loops=1)
               Buckets: 1024  Batches: 1  Memory Usage: 22kB
-              ->  Subquery Scan on tgc  (cost=37.87..46.74 rows=208 width=36) (actual time=0.493..0.760 rows=208 loops=1)
-                    ->  GroupAggregate  (cost=37.87..44.66 rows=208 width=36) (actual time=0.492..0.730 rows=208 loops=1)
+              ->  Subquery Scan on tgc  (cost=37.87..46.74 rows=208 width=36) (actual time=0.449..0.715 rows=208 loops=1)
+                    ->  GroupAggregate  (cost=37.87..44.66 rows=208 width=36) (actual time=0.444..0.682 rows=208 loops=1)
                           Group Key: dh16.codn_conce
-                          ->  Sort  (cost=37.87..39.27 rows=558 width=8) (actual time=0.474..0.513 rows=558 loops=1)
+                          ->  Sort  (cost=37.87..39.27 rows=558 width=8) (actual time=0.420..0.460 rows=558 loops=1)
 "                                Sort Key: dh16.codn_conce, dh15.codn_tipogrupo"
                                 Sort Method: quicksort  Memory: 42kB
-                                ->  Hash Join  (cost=2.26..12.42 rows=558 width=8) (actual time=0.088..0.303 rows=558 loops=1)
+                                ->  Hash Join  (cost=2.26..12.42 rows=558 width=8) (actual time=0.052..0.260 rows=558 loops=1)
                                       Hash Cond: (dh16.codn_grupo = dh15.codn_grupo)
-                                      ->  Seq Scan on dh16  (cost=0.00..8.58 rows=558 width=8) (actual time=0.015..0.067 rows=558 loops=1)
-                                      ->  Hash  (cost=1.56..1.56 rows=56 width=8) (actual time=0.037..0.038 rows=56 loops=1)
+                                      ->  Seq Scan on dh16  (cost=0.00..8.58 rows=558 width=8) (actual time=0.016..0.066 rows=558 loops=1)
+                                      ->  Hash  (cost=1.56..1.56 rows=56 width=8) (actual time=0.030..0.031 rows=56 loops=1)
                                             Buckets: 1024  Batches: 1  Memory Usage: 11kB
-                                            ->  Seq Scan on dh15  (cost=0.00..1.56 rows=56 width=8) (actual time=0.015..0.023 rows=56 loops=1)
-Planning Time: 1.448 ms
-Execution Time: 5791.322 ms
+                                            ->  Seq Scan on dh15  (cost=0.00..1.56 rows=56 width=8) (actual time=0.012..0.020 rows=56 loops=1)
+Planning Time: 1.435 ms
+Execution Time: 7652.001 ms

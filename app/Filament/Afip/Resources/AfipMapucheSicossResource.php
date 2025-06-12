@@ -54,7 +54,7 @@ class AfipMapucheSicossResource extends Resource
                     ->searchable(),
                 TextColumn::make('dh01.nro_legaj')
                     ->label('Legajo')
-                    ->searchable(),
+                    ,
                 TextColumn::make('cuil')
                     ->label('CUIL')
                     ->searchable()
@@ -62,9 +62,6 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    // ->searchable(query: function (Builder $query, string $search): Builder {
-                    //     return $query->where('apnom', 'ilike', '%' . strtoupper($search) . '%');
-                    // })
                     ->formatStateUsing(fn(string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('cod_act')

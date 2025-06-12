@@ -47,4 +47,11 @@ interface AfipMapucheSicossRepositoryInterface
      * @return void
      */
     public function truncate(): void;
+
+    /**
+     * Obtiene los períodos fiscales únicos de la tabla AfipMapucheSicoss.
+     *
+     * @return array
+     */
+    public function getDistinctPeriodosFiscales(): array;
 }

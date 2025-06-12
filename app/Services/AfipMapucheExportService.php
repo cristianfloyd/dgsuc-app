@@ -79,6 +79,17 @@ class AfipMapucheExportService implements ExportServiceInterface
         ];
     }
 
+    /**
+     * Formatea una línea de registro para exportación según un orden de campos y anchos de columna específicos.
+     *
+     * Este método genera una línea de texto formateada concatenando los valores de campos
+     * transformados según un orden predefinido y con un ancho de columna establecido.
+     *
+     * @param mixed $record Registro a formatear
+     * @param array $fieldOrder Orden de los campos a incluir en la línea
+     * @param array $columnWidths Anchos de columna para cada campo
+     * @return string Línea formateada de texto
+     */
     private function formatLine($record, array $fieldOrder, array $columnWidths): string
     {
         $line = "";
@@ -91,6 +102,17 @@ class AfipMapucheExportService implements ExportServiceInterface
         return $line;
     }
 
+    /**
+     * Formatea un campo específico para la exportación según reglas predefinidas.
+     *
+     * Este método transforma un valor de campo para cumplir con requisitos específicos de exportación,
+     * incluyendo formateo de fechas, conversión de enums, tratamiento de campos numéricos y textuales.
+     *
+     * @param mixed $record El registro que contiene el campo a formatear
+     * @param string $field El nombre del campo a formatear
+     * @param int $width El ancho máximo permitido para el campo
+     * @return string El campo formateado según las reglas establecidas
+     */
     private function formatField($record, string $field, int $width): string
     {
         $value = $record->{$field} ?? '';
@@ -103,6 +125,10 @@ class AfipMapucheExportService implements ExportServiceInterface
         if ($field === 'inicio_rel_lab') {
             // Formateo de fechas
             $value = $this->formatDate($value);
+        }
+
+        if ($field === 'rectificacion') {
+            $value = '  ';
         }
 
         // Formateo de números: remover comas y decimales
