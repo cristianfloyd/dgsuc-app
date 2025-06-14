@@ -171,9 +171,9 @@ class SicossOptimizado
         DB::connection(self::getStaticConnectionName())->statement($sql);
 
         if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
-            copy(storage_path("comunicacion/sicoss/$nombre_arch.txt"), "$testeo_directorio_salida/$testeo_prefijo_archivos");
+            // copy(storage_path("comunicacion/sicoss/$nombre_arch.txt"), "$testeo_directorio_salida/$testeo_prefijo_archivos");
         } else {
-            self::armar_zip();
+            // self::armar_zip();
             return self::transformar_a_recordset($totales);
         }
     }
@@ -1049,9 +1049,9 @@ class SicossOptimizado
         // Valores obtenidos del form (que se obtienen de rrhhini)
         // Topes
 
-        $TopeJubilatorioPatronal    = $datos['TopeJubilatorioPatronal'];
-        $TopeJubilatorioPersonal    = $datos['TopeJubilatorioPersonal'];
-        $TopeOtrosAportesPersonales = $datos['TopeOtrosAportesPersonal'];
+        $TopeJubilatorioPatronal    = MapucheConfig::getTopesJubilatorioPatronal();
+        $TopeJubilatorioPersonal    = MapucheConfig::getTopesJubilatorioPersonal();
+        $TopeOtrosAportesPersonales = MapucheConfig::getTopesOtrosAportesPersonales();
         $trunca_tope                = $datos['truncaTope'];
         $TopeSACJubilatorioPers     = $TopeJubilatorioPersonal / 2;
         $TopeSACJubilatorioPatr     = $TopeJubilatorioPatronal / 2;
@@ -1103,7 +1103,7 @@ class SicossOptimizado
             'mejora_estimada' => '99%+ más rápido que versión original'
         ]);
 
-        // ✅ BUCLE FINAL OPTIMIZADO: SIN CONSULTAS SQL N+1
+        Log::debug('✅ BUCLE FINAL OPTIMIZADO: SIN CONSULTAS SQL N+1');
         for ($i = 0; $i < $total_legajos; $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
             $legajoActual = &$legajos[$i];
@@ -1282,7 +1282,8 @@ class SicossOptimizado
             // ✅ Sumarizar conceptos segun tipo de concepto - SIN MÁS CONSULTAS SQL
             $suma_conceptos_tipoC = self::calcular_remuner_grupo_optimizado($conceptos_legajo, 'C', 'nro_orimp >0 AND codn_conce > 0');
             $suma_conceptos_tipoF = self::calcular_remuner_grupo_optimizado($conceptos_legajo, 'F', 'true');
-
+            Log::debug('Suma conceptos tipo C: ', [$suma_conceptos_tipoC]);
+            Log::debug('Suma conceptos tipo F: ', [$suma_conceptos_tipoF]);
             $legajoActual['Remuner78805']               = $suma_conceptos_tipoC;
             $legajoActual['AsignacionesFliaresPagadas'] = $suma_conceptos_tipoF;
             $legajoActual['ImporteImponiblePatronal']   = $suma_conceptos_tipoC;
@@ -1324,9 +1325,10 @@ class SicossOptimizado
             }
             $legajoActual['IMPORTE_BRUTO'] = $legajoActual['ImporteImponiblePatronal'] + $legajoActual['ImporteNoRemun'];
 
-            // Para calcular IMPORTE_IMPON que es lo mismo que importe imponible 1
+            Log::debug('Para calcular IMPORTE_IMPON que es lo mismo que importe imponible 1');
             $legajoActual['IMPORTE_IMPON'] = 0;
             $legajoActual['IMPORTE_IMPON'] = $suma_conceptos_tipoC;
+            Log::debug('IMPORTE_IMPON: (primer asignacion)', [$legajoActual['IMPORTE_IMPON']]);
 
             $VerificarAgenteImportesCERO  = 1;
 
@@ -1371,23 +1373,28 @@ class SicossOptimizado
                 if ($Imponible6_aux != 0) {
                     Log::debug('✅ Importe Imponible 6 es distinto de 0');
                     if (
-                        (int)$Imponible6_aux != (int)$legajos[$i]['IMPORTE_IMPON']
-                        && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 //redondear hasta +  - $5
-                        && $legajos[$i]['ImporteImponible_6'] < $legajos[$i]['IMPORTE_IMPON']
+                        (int)$Imponible6_aux != (int)$legajoActual['IMPORTE_IMPON']
+                        && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta +  - $5
+                        && $legajos[$i]['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
                     ) {
-                        $legajos[$i]['TipoDeOperacion']     = 2;
-                        $legajos[$i]['IMPORTE_IMPON']       = $legajos[$i]['IMPORTE_IMPON'] - $legajos[$i]['ImporteImponible_6'];
-                        $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'] - $legajos[$i]['SACInvestigador'];
+                        $legajoActual['TipoDeOperacion']     = 2;
+                        $legajoActual['IMPORTE_IMPON'] -= $legajoActual['ImporteImponible_6'];
+                        $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'] - $legajoActual['SACInvestigador'];
+                        Log::debug('✅ IMPORTE_IMPON, bloque Imponible6_aux', [
+                            'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
+                            'ImporteImponible_6' => $legajoActual['ImporteImponible_6'],
+                            'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
+                        ]);
                     } else {
-                        if ((($Imponible6_aux + 5) > $legajos[$i]['IMPORTE_IMPON'])
-                            && (($Imponible6_aux - 5) < $legajos[$i]['IMPORTE_IMPON'])
+                        if ((($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
+                            && (($Imponible6_aux - 5) < $legajoActual['IMPORTE_IMPON'])
                         ) {
-                            $legajos[$i]['ImporteImponible_6'] = $legajos[$i]['IMPORTE_IMPON'];
+                            $legajoActual['ImporteImponible_6'] = $legajoActual['IMPORTE_IMPON'];
                         } else {
-                            $legajos[$i]['ImporteImponible_6'] = $Imponible6_aux;
+                            $legajoActual['ImporteImponible_6'] = $Imponible6_aux;
                         }
-                        $legajos[$i]['TipoDeOperacion']     = 1;
-                        $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'];
+                        $legajoActual['TipoDeOperacion']     = 1;
+                        $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'];
                     }
                 } else {
                     $legajoActual['TipoDeOperacion']     = 1;
@@ -1440,7 +1447,7 @@ class SicossOptimizado
 
                         $legajoActual['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
                         
-                        Log::debug('',[
+                        Log::debug('en el else',[
                             'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
                             'sac' => $sac,
                             'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
@@ -1452,10 +1459,11 @@ class SicossOptimizado
                 $implode = implode("','", $explode); //vulve a String y agrega comillas
                 $dh03Repository = new Dh03Repository();
                 if ($dh03Repository->existeCategoriaDiferencial($legajoActual['nro_legaj'], $implode)) {
+                    $legajoActual['IMPORTE_IMPON'] = 0;
                     Log::debug('✅ Existe categoria diferencial se resetea IMPORTE_IMPON a 0', [
                         'legajoActual' => $legajoActual,
+                        'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
                     ]);
-                    $legajoActual['IMPORTE_IMPON'] = 0;
                 }
 
                 $legajoActual['ImporteImponibleSinSAC'] = $legajoActual['IMPORTE_IMPON'] - $legajoActual['ImporteSACNoDocente'];
@@ -1498,6 +1506,7 @@ class SicossOptimizado
                             'ImporteSACOtraActividad' => $legajoActual['ImporteSACOtraActividad'],
                             'TopeSACJubilatorioPers' => $TopeSACJubilatorioPers,
                             'TopeJubilatorioPatronal' => $TopeJubilatorioPatronal,
+                            'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
                         ]);
                     } else {
                         $imp_1_tope = 0.0;
@@ -1558,6 +1567,9 @@ class SicossOptimizado
                 
                 if ($legajoActual['ImporteImponible_6'] != 0 && $legajoActual['TipoDeOperacion'] == 1) {
                     $legajoActual['IMPORTE_IMPON'] = 0;
+                    Log::debug('✅ ImporteImponible_6 es mayor a 0 y TipoDeOperacion es 1', [
+                        'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
+                    ]);
                 }
                 
                 // Calcular Sueldo mas Adicionales
@@ -1608,6 +1620,16 @@ class SicossOptimizado
                     ]);
 
                 $legajoActual['IMPORTE_BRUTO'] += $legajoActual['ImporteNoRemun96'];
+                Log::debug('Totales antes de la asignacion: ',[
+                    'bruto' => $total['bruto'],
+                    'imponible_1' => $total['imponible_1'],
+                    'imponible_2' => $total['imponible_2'],
+                    'imponible_4' => $total['imponible_4'],
+                    'imponible_5' => $total['imponible_5'],
+                    'imponible_8' => $total['imponible_8'],
+                    'imponible_6' => $total['imponible_6'],
+                    'imponible_9' => $total['imponible_9'],
+                ]);
                 $total['bruto']       += round($legajoActual['IMPORTE_BRUTO'], 2);
                 $total['imponible_1'] += round($legajoActual['IMPORTE_IMPON'], 2);
                 $total['imponible_2'] += round($legajoActual['ImporteImponiblePatronal'], 2);

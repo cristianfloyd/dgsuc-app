@@ -167,6 +167,8 @@ $legajoActual['IMPORTE_BRUTO'] = $legajoActual['ImporteImponiblePatronal'] + $le
 
 ```php
 $legajoActual['IMPORTE_IMPON'] = $suma_conceptos_tipoC;
+
+# Suma conceptos tipo C:  [5382827.51]
 ```
 
 ### check becarios
@@ -180,7 +182,7 @@ if ($legajoActual['ImporteImponibleBecario'] != 0) # en el legjo 110830 no se cu
 ```php
 Importes Imponibles {
   "PorcAporteDiferencialJubilacion":2.0,
-  "ImporteImponible_4":5382827.51,
+  "ImporteImponible_4":5382827.51, # IporteImponible_4 = IMPORTE_IMPON
   "ImporteSACNoDocente":0,
   "ImporteImponible_6":0,
   "Imponible6_aux":0.0
@@ -199,78 +201,7 @@ Importes Imponibles {
 ### checkpoint
 
 ```php
-array:70 [
-  "nro_legaj" => 110830
-  "cuit" => "20183035860"
-  "apyno" => "CES ROMERO RAMON"
-  "estado" => "A"
-  "conyugue" => 0
-  "hijos" => 0
-  "provincialocalidad" => null
-  "codigosituacion" => 1
-  "codigocondicion" => 1
-  "codigozona" => "1"
-  "codigoactividad" => 17
-  "aporteadicional" => null
-  "trabajadorconvencionado" => null
-  "codigocontratacion" => 8
-  "regimen" => "1"
-  "adherentes" => 0
-  "licencia" => 0
-  "importeimponible_9" => 0
-  "ImporteSACOtroAporte" => 2242844.8
-  "TipoDeOperacion" => 1
-  "ImporteImponible_4" => 5382827.51
-  "ImporteSACNoDocente" => 2242844.8
-  "ImporteSACDoce" => 0
-  "ImporteSACAuto" => 0
-  "codigo_os" => "000000"
-  "codigorevista1" => 1
-  "fecharevista1" => 1
-  "codigorevista2" => 1
-  "fecharevista2" => 0
-  "codigorevista3" => 1
-  "fecharevista3" => 0
-  "dias_trabajados" => 30
-  "ImporteSAC" => 2242844.8
-  "SACPorCargo" => 0
-  "ImporteHorasExtras" => 0
-  "ImporteVacaciones" => 0
-  "ImporteRectificacionRemun" => 0
-  "ImporteAdicionales" => 0
-  "ImportePremios" => 0
-  "ImporteNoRemun" => 410
-  "ImporteMaternidad" => 0
-  "ImporteZonaDesfavorable" => 0
-  "PrioridadTipoDeActividad" => 0
-  "IMPORTE_VOLUN" => 0
-  "IMPORTE_ADICI" => 0
-  "TipoDeActividad" => 17
-  "ImporteImponible_6" => 0
-  "SACInvestigador" => 0
-  "CantidadHorasExtras" => 0
-  "SeguroVidaObligatorio" => 1
-  "ImporteImponibleBecario" => 0
-  "AporteAdicionalObraSocial" => 0
-  "ImporteSICOSS27430" => 0
-  "ImporteSICOSSDec56119" => 0
-  "ImporteSACNodo" => 2242844.8
-  "ContribTareaDif" => 0
-  "NoRemun4y8" => 0
-  "IncrementoSolidario" => 0
-  "ImporteNoRemun96" => 0
-  "ImporteTipo91" => 0
-  "Remuner78805" => 5382827.51
-  "AsignacionesFliaresPagadas" => 0.0
-  "ImporteImponiblePatronal" => 1273680.0
-  "DiferenciaSACImponibleConTope" => 0
-  "DiferenciaImponibleConTope" => 0
-  "ImporteSACPatronal" => 424560.0
-  "ImporteImponibleSinSAC" => 3139982.71
-  "IMPORTE_BRUTO" => 1274090.0
-  "IMPORTE_IMPON" => 5382827.51
-  "PorcAporteDiferencialJubilacion" => 2.0
-] 
+// ...
 ```
 
 ### tope jubilatorio personal
@@ -283,10 +214,8 @@ array:70 [
 
 ```php
 {
-  "tope_jubil_personal":1273680.0,
-  "DiferenciaSACImponibleConTope":1818284.7999999998,
-  "IMPORTE_IMPON":3564542.71,
-  "ImporteSACNoDocente":424560.0} 
+  ...
+  } 
 ```
 
 ### categoria diferencial
@@ -304,10 +233,9 @@ array:70 [
 ### ImporteImponibleSinSAC es mayor al tope
 
 ```php
-  {"tope_jubil_personal":1273680.0,
-  "DiferenciaImponibleConTope":2290862.71,
-  "IMPORTE_IMPON":1273680.0,
-  "ImporteImponibleSinSAC":3139982.71} 
+  {
+    ...
+  } 
 ```
 
 ### Importe Bruto y SAC de otra actividad
@@ -322,23 +250,13 @@ array:70 [
 ### ImporteSACOtroAporte es mayor al tope
 
 ```php
-['DifSACImponibleConOtroTope'] = ['ImporteSACOtroAporte'] - $TopeSACJubilatorioOtroAp;
-['ImporteImponible_4']        -= ['DifSACImponibleConOtroTope'];
-['ImporteSACOtroAporte']       = $TopeSACJubilatorioOtroAp;
-
-  {"TopeSACJubilatorioOtroAp":424560.0,
-  "DifSACImponibleConOtroTope":1818284.7999999998,
-  "ImporteImponible_4":3564542.71,
-  "ImporteSACOtroAporte":424560.0} 
+...
 ```
 
 ### OtroImporteImponibleSinSAC es mayor al tope
 
 ```php
-  {"TopeOtrosAportesPersonales":849120.0,
-  "DifImponibleConOtroTope":2290862.71,
-  "ImporteImponible_4":1273680.0,
-  "OtroImporteImponibleSinSAC":3139982.71} 
+  ...
 ```
 
 ### SueldoMasAdicionales
@@ -362,22 +280,24 @@ if (MapucheConfig::getParametroRrhh('Sicoss', 'ConceptosNoRemuEnART', '0') === '
 ### GDS #5913
 
 ```php
-  {"Remuner78805":5382827.51,
-  "ImporteImponible_4":1273680.0,
-  "ImporteImponible_5":1273680.0} 
+  {
+
+  } 
 ```
 
 ## Totales
 
 ```php
-  "bruto":1274090.0,
-  "imponible_1":1273680.0,
-  "imponible_2":1273680.0,
-  "imponible_4":1273680.0,
-  "imponible_5":1273680.0,
-  "imponible_8":5382827.51,
-  "imponible_6":0.0,
-  "imponible_9":5383237.51
+  {
+    "bruto":5383237.51,
+    "imponible_1":5382827.51,
+    "imponible_2":5382827.51,
+    "imponible_4":5382827.51,
+    "imponible_5":5382827.51,
+    "imponible_8":5382827.51,
+    "imponible_6":0.0,
+    "imponible_9":5383237.51
+    } 
 ```
 
 ## RESULTADO
@@ -412,10 +332,10 @@ array:1 [
     "adherentes" => 0
     "licencia" => 0
     "importeimponible_9" => 5383237.51
-    "ImporteSACOtroAporte" => 424560.0
+    "ImporteSACOtroAporte" => 2242844.8
     "TipoDeOperacion" => 1
-    "ImporteImponible_4" => 1273680.0
-    "ImporteSACNoDocente" => 424560.0
+    "ImporteImponible_4" => 5382827.51
+    "ImporteSACNoDocente" => 2242844.8
     "ImporteSACDoce" => 0
     "ImporteSACAuto" => 0
     "codigo_os" => "000000"
@@ -456,21 +376,21 @@ array:1 [
     "ImporteTipo91" => 0
     "Remuner78805" => 5382827.51
     "AsignacionesFliaresPagadas" => 0.0
-    "ImporteImponiblePatronal" => 1273680.0
-    "DiferenciaSACImponibleConTope" => 1818284.8
-    "DiferenciaImponibleConTope" => 2290862.71
-    "ImporteSACPatronal" => 424560.0
+    "ImporteImponiblePatronal" => 5382827.51
+    "DiferenciaSACImponibleConTope" => 0
+    "DiferenciaImponibleConTope" => 0
+    "ImporteSACPatronal" => 2242844.8
     "ImporteImponibleSinSAC" => 3139982.71
-    "IMPORTE_BRUTO" => 1274090.0
-    "IMPORTE_IMPON" => 1273680.0
+    "IMPORTE_BRUTO" => 5383237.51
+    "IMPORTE_IMPON" => 5382827.51
     "PorcAporteDiferencialJubilacion" => 2.0
     "ImporteBrutoOtraActividad" => 0
     "ImporteSACOtraActividad" => 0
-    "DifSACImponibleConOtroTope" => 1818284.8
-    "DifImponibleConOtroTope" => 2290862.71
+    "DifSACImponibleConOtroTope" => 0
+    "DifImponibleConOtroTope" => 0
     "OtroImporteImponibleSinSAC" => 3139982.71
-    "ImporteSueldoMasAdicionales" => -969164.8
-    "ImporteImponible_5" => 1273680.0
+    "ImporteSueldoMasAdicionales" => 3139982.71
+    "ImporteImponible_5" => 5382827.51
   ]
-] 
+]
 ```

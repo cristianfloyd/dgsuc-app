@@ -57,9 +57,6 @@ class SicossDebugCommand extends Command
                 'check_lic' => false,
                 'check_sin_activo' => false,
                 'truncaTope' => false,
-                'TopeJubilatorioPatronal' => 849120.00,
-                'TopeJubilatorioPersonal' => 849120.00,
-                'TopeOtrosAportesPersonal' => 849120.00,
             ];
 
             // Obtener período fiscal
