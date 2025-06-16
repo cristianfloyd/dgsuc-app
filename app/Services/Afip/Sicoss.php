@@ -421,7 +421,7 @@ class Sicoss
 			    								JOIN mapuche.dl02 ON (dh05.nrovarlicencia = dl02.nrovarlicencia)
 			    							WHERE
 			    								dh05.nro_cargo = dh03.nro_cargo AND
-			    								mapuche.map_es_licencia_vigente(dh05.nro_licencia) AND
+			    								suc.map_es_licencia_vigente(dh05.nro_licencia) AND
 			    								(dl02.es_maternidad IS TRUE OR (NOT dl02.es_remunerada OR (dl02.es_remunerada AND dl02.porcremuneracion = '0')))
 			    								)
     			;";

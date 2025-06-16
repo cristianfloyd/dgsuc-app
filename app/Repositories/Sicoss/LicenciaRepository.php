@@ -66,7 +66,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                 WHERE
                     dh05.nro_legaj IS NOT NULL
                     AND (fec_desde <= $fecha_fin::date AND (fec_hasta is null OR fec_hasta >= $fecha_inicio::date))
-                    AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
+                    AND suc.map_es_licencia_vigente(dh05.nro_licencia)
                     AND dl02.es_remunerada = TRUE
                     AND $where_legajos
 
@@ -98,7 +98,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     dh05.nro_cargo IS NOT NULL
                     AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
                     AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
-                    AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
+                    AND suc.map_es_licencia_vigente(dh05.nro_licencia)
                     AND dl02.es_remunerada = TRUE
                     AND $where_legajos
                 ;";
@@ -196,7 +196,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                 WHERE
                     dh05.nro_legaj IS NOT NULL
                     AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
-                    AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
+                    AND suc.map_es_licencia_vigente(dh05.nro_licencia)
                     AND $where_norem
                     AND $where_legajos
 
@@ -231,7 +231,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                     dh05.nro_cargo IS NOT NULL
                     AND (fec_desde <= '$fecha_fin'::date AND (fec_hasta is null OR fec_hasta >= '$fecha_inicio'::date))
                     AND mapuche.map_es_cargo_activo(dh05.nro_cargo)
-                    AND mapuche.map_es_licencia_vigente(dh05.nro_licencia)
+                    AND suc.map_es_licencia_vigente(dh05.nro_licencia)
                     AND $where_norem
                     AND $where_legajos
                 ;";

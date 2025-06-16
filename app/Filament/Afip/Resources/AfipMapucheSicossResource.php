@@ -63,7 +63,7 @@ class AfipMapucheSicossResource extends Resource
                     ->label('Apellido y Nombre')
                     ->sortable()
                     ->formatStateUsing(fn(string $state): string => strtoupper($state))
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cod_act')
                         ->label('Cod. Act.')
                         ->toggleable(isToggledHiddenByDefault: false),
@@ -88,11 +88,18 @@ class AfipMapucheSicossResource extends Resource
                     ->label('Rem Total')
                     ->money('ARS')
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rem_impo4')
+                    ->label('Rem impo 4')
+                    ->money('ARS')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rem_impo6')
                     ->label('Rem impo 6')
                     ->money('ARS'),
                 TextColumn::make('rem_imp7')
                     ->label('Rem impo 7')
+                    ->money('ARS'),
+                TextColumn::make('sac')
+                    ->label('SAC')
                     ->money('ARS'),
                 TextColumn::make('diferencia_rem')
                     ->label('Diferencia Rem')

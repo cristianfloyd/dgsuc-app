@@ -768,4 +768,45 @@ class LicenciaService
 
         return DB::connection(self::getStaticConnectionName())->select($sql);
     }
+
+    /**
+     * Procesa las licencias para cada cargo del legajo
+     * 
+     * Este método recorre todos los cargos del legajo y para cada día del mes
+     * determina si el cargo está en licencia o activo, generando un mapa
+     * de estados por día para cada cargo.
+     * 
+     * @param array $cargos_legajo Array con los cargos del legajo
+     * @return array Mapa de licencias por cargo y día
+     */
+    public static function procesarLicenciasCargos(array $cargos_legajo): array
+    {
+        $licencias_cargos = [];
+        
+        foreach ($cargos_legajo as $cargo) {
+            // Obtener el último día del mes fiscal actual
+            $fin_mes = date("d", mktime(0, 0, 0, MapucheConfig::getMesFiscal() + 1, 0, date("Y")));
+            
+            // Recorrer todos los días del mes
+            for ($ini_mes = 1; $ini_mes <= $fin_mes; $ini_mes++) {
+                // Inicializar el estado del cargo para este día (1 = activo por defecto)
+                if (!isset($licencias_cargos[$cargo['nro_cargo']][$ini_mes])) {
+                    $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = 1;
+                }
+                
+                // Verificar si el día actual está dentro del período de licencia
+                if ((isset($cargo['inicio_lic']) && isset($cargo['final_lic'])) && 
+                    $ini_mes >= $cargo['inicio_lic'] && $ini_mes <= $cargo['final_lic']) {
+                    // Si está en licencia, usar el código de condición de la licencia
+                    $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = $cargo['condicion'];
+                } else {
+                    // Si no está en licencia, marcar como activo (1)
+                    $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = 1;
+                }
+            }
+        }
+        
+        return $licencias_cargos;
+    }
+
 }
