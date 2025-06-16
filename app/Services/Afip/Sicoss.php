@@ -16,22 +16,26 @@ class sicoss
 {
     use MapucheConnectionTrait;
 
-    static protected $aportes_voluntarios;
-    static protected $codigo_os_aporte_adicional;
-    static protected $codigo_obrasocial_fc;
-    static protected $codigo_obra_social_default;
-    static protected $hs_extras_por_novedad;
-    static protected $tipoEmpresa;
-    static protected $asignacion_familiar;
-    static protected $trabajadorConvencionado;
-    static protected $codc_reparto;
-    static protected $porc_aporte_adicional_jubilacion;
-    static protected $cantidad_adherentes_sicoss;
-    static protected $archivos;
-    static protected $categoria_diferencial;
-    static protected $periodo_actual;
+    protected static $aportes_voluntarios;
+    protected static $codigo_os_aporte_adicional;
+    protected static $codigo_obrasocial_fc;
+    protected static $codigo_obra_social_default;
+    protected static $hs_extras_por_novedad;
+    protected static $tipoEmpresa;
+    protected static $asignacion_familiar;
+    protected static $trabajadorConvencionado;
+    protected static $codc_reparto;
+    protected static $porc_aporte_adicional_jubilacion;
+    protected static $cantidad_adherentes_sicoss;
+    protected static $archivos;
+    protected static $categoria_diferencial;
+    protected static $periodo_actual;
 
-    public static function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
+    public static function genera_sicoss(
+        $datos, $testeo_directorio_salida = '',
+        $testeo_prefijo_archivos = '', 
+        $retornar_datos = FALSE
+        )
     {
         // Se necesita filtrar datos del periodo vigente
         $periodo       = MapucheConfig::getPeriodoCorriente();
@@ -70,9 +74,9 @@ class sicoss
         //si se envia nro_liqui desde la generacion de libro de sueldo
         if (isset($datos['nro_liqui'])) {
             $where_liqui = $where . ' AND dh21.nro_liqui = ' . self::quote($datos['nro_liqui']);
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where_liqui);
+            self::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where_liqui);
         } else {
-            sicoss::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
+            self::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
         }
         $path = storage_path('comunicacion/sicoss/');
         self::$archivos = [];
@@ -102,7 +106,7 @@ class sicoss
                 // DB::connection(self::getStaticConnectionName())->statement($sql);
                 break;
             default:
-                $periodos_retro = sicoss::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
+                $periodos_retro = self::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
                 $total = [];
 
                 for ($i = 0; $i < count($periodos_retro); $i++) {
@@ -110,20 +114,20 @@ class sicoss
                     $mes = str_pad($p['mes_retro'], 2, "0", STR_PAD_LEFT);
                     //agrego cero adelante a meses
                     $where_periodo = "t.ano_retro=" . $p['ano_retro'] . " AND t.mes_retro=" . $mes;
-                    $legajos = sicoss::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
+                    $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
 
                     if ($p['ano_retro'] == 0 && $p['mes_retro'] == 0) {
                         $nombre_arch = 'sicoss_retro_periodo_vigente';
                         $periodo = $per_mesct . '/' . $per_anoct;
                         $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
                         if ($retornar_datos === TRUE)
-                            return sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
-                        $subtotal = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                            return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                        $subtotal = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
                     } else {
                         $nombre_arch = 'sicoss_retro_' . $p['ano_retro'] . '_' . $p['mes_retro'];
                         $periodo = $p['ano_retro'] . $p['mes_retro'];
                         $item = $p['mes_retro'] . "/" . $p['ano_retro'];
-                        $subtotal = sicoss::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, NULL, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
+                        $subtotal = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, NULL, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
                     }
 
                     self::$archivos[$periodo] = $path . $nombre_arch;
@@ -144,8 +148,8 @@ class sicoss
         if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
             copy(storage_path("comunicacion/sicoss/$nombre_arch.txt"), "$testeo_directorio_salida/$testeo_prefijo_archivos");
         } else {
-            sicoss::armar_zip();
-            return sicoss::transformar_a_recordset($totales);
+            self::armar_zip();
+            return self::transformar_a_recordset($totales);
         }
     }
 
@@ -707,29 +711,7 @@ class sicoss
 
         DB::connection(self::getStaticConnectionName())->select($sql_crear_vista);
 
-        // Si la opcion no tiene en cuenta los retroactivos el proceso es como se venia haciendo, se toma de la tabla anterior y se vuelca sobre un unico archivo
-        // Si hay que tener en cuenta los retros se toma la tabla anterior y se segmenta por periodo retro, se genera un archivo por cada segmento
 
-        // $sql_conceptos_liq_filtrados = "
-        // 								SELECT
-        // 										*
-        // 								INTO TEMP
-        // 										conceptos_liquidados
-        // 								FROM
-        // 									pre_conceptos_liquidados t
-        // 								WHERE
-        // 								$where_periodo_retro
-        // ";
-
-        // $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_conceptos_liq_filtrados);
-
-
-
-
-        // $sql_ix = "CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);";
-        // $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_ix);
-        // $sql_ix = "CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);";
-        // $rs_filtrado = DB::connection(self::getStaticConnectionName())->select($sql_ix);
 
 
 
@@ -1245,7 +1227,7 @@ class sicoss
                 $legajoActual['Remuner78805']             += $legajoActual['ImporteImponibleBecario'];
             }
 
-            if (sicoss::VerificarAgenteImportesCERO($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
+            if (self::VerificarAgenteImportesCERO($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
             {
                 $legajoActual['PorcAporteDiferencialJubilacion'] = self::$porc_aporte_adicional_jubilacion;
                 $legajoActual['ImporteImponible_4']              = $legajoActual['IMPORTE_IMPON'];
@@ -1487,67 +1469,67 @@ class sicoss
             fwrite(
                 $fh,
                 $legajos[$i]['cuit'] .                                                                // Campo 1
-                    sicoss::llena_blancos_mod($legajos[$i]['apyno'], 30) .                                             // Campo 2
+                    self::llena_blancos_mod($legajos[$i]['apyno'], 30) .                                             // Campo 2
                     $legajos[$i]['conyugue'] .                                                                        // Campo 3
-                    sicoss::llena_importes($legajos[$i]['hijos'], 2) .                                                 // Campo 4
-                    sicoss::llena_importes($legajos[$i]['codigosituacion'], 2) .                                       // Campo 5 TODO: Preguntar �es el que viene de dha8?
-                    sicoss::llena_importes($legajos[$i]['codigocondicion'], 2) .                                       // Campo 6
-                    sicoss::llena_importes($legajos[$i]['TipoDeActividad'], 3) .                                       // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
-                    sicoss::llena_importes($legajos[$i]['codigozona'], 2) .                                            // Campo 8
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5) .            // Campo 9 - Porcentaje de Aporte Adicional Obra Social
-                    sicoss::llena_importes($legajos[$i]['codigocontratacion'], 3) .                                    // Campo 10
-                    sicoss::llena_importes($legajos[$i]['codigo_os'], 6) .
-                    sicoss::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Seg�n este chequeado en configuraci�n informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14 
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
-                    sicoss::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9) .      //exedAportesSS
+                    self::llena_importes($legajos[$i]['hijos'], 2) .                                                 // Campo 4
+                    self::llena_importes($legajos[$i]['codigosituacion'], 2) .                                       // Campo 5 TODO: Preguntar �es el que viene de dha8?
+                    self::llena_importes($legajos[$i]['codigocondicion'], 2) .                                       // Campo 6
+                    self::llena_importes($legajos[$i]['TipoDeActividad'], 3) .                                       // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
+                    self::llena_importes($legajos[$i]['codigozona'], 2) .                                            // Campo 8
+                    self::llena_blancos_izq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5) .            // Campo 9 - Porcentaje de Aporte Adicional Obra Social
+                    self::llena_importes($legajos[$i]['codigocontratacion'], 3) .                                    // Campo 10
+                    self::llena_importes($legajos[$i]['codigo_os'], 6) .
+                    self::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Seg�n este chequeado en configuraci�n informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
+                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
+                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14 
+                    self::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
+                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
+                    self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
+                    self::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9) .      //exedAportesSS
                     '     0,00' .                                                                                     //exedAportesOS
-                    sicoss::llena_blancos($legajos[$i]['provincialocalidad'], 50) .                                    //Campo 20
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 21 - Imponible 2
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 22 - Imponible 3
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12) .        // Campo 23 - Imponible 4
+                    self::llena_blancos($legajos[$i]['provincialocalidad'], 50) .                                    //Campo 20
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 21 - Imponible 2
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 22 - Imponible 3
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12) .        // Campo 23 - Imponible 4
                     '00' .                                                                                            // campo 24 - codigo siniestrado
                     '0' .                                                                                             // Campo 25 - marca de corresponde reduccion
                     '000000,00' .                                                                                     // Campo 26 -  capital de recomposicion
                     self::$tipoEmpresa .
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9) .                                                                                     // Campo 28 - aporte adicional obra social
+                    self::llena_blancos_izq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9) .                                                                                     // Campo 28 - aporte adicional obra social
                     $legajos[$i]['regimen'] .
-                    sicoss::llena_importes($legajos[$i]['codigorevista1'], 2) .                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
-                    sicoss::llena_importes($legajos[$i]['fecharevista1'], 2) .                                        // campo 31 - Dia inicio Situaci�n de Revista 1
-                    sicoss::llena_importes($legajos[$i]['codigorevista2'], 2) .                                       // Situaci�n de Revista 2
-                    sicoss::llena_importes($legajos[$i]['fecharevista2'], 2) .                                        // Dia inicio Situaci�n de Revista 2
-                    sicoss::llena_importes($legajos[$i]['codigorevista3'], 2) .                                       // Situaci�n de Revista 3
-                    sicoss::llena_importes($legajos[$i]['fecharevista3'], 2) .                                        // Dia inicio Situaci�n de Revista 3
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 36
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12) .                // Campo 37
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12) .        // Campo 38
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12) .   // Campo 39
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12) .         // Campo 40
-                    '0000000' . sicoss::llena_importes($legajos[$i]['dias_trabajados'], 2) .                            // Campo 41 - D�as trabajados
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12) .        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
+                    self::llena_importes($legajos[$i]['codigorevista1'], 2) .                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
+                    self::llena_importes($legajos[$i]['fecharevista1'], 2) .                                        // campo 31 - Dia inicio Situaci�n de Revista 1
+                    self::llena_importes($legajos[$i]['codigorevista2'], 2) .                                       // Situaci�n de Revista 2
+                    self::llena_importes($legajos[$i]['fecharevista2'], 2) .                                        // Dia inicio Situaci�n de Revista 2
+                    self::llena_importes($legajos[$i]['codigorevista3'], 2) .                                       // Situaci�n de Revista 3
+                    self::llena_importes($legajos[$i]['fecharevista3'], 2) .                                        // Dia inicio Situaci�n de Revista 3
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 36
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12) .                // Campo 37
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12) .        // Campo 38
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12) .   // Campo 39
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12) .         // Campo 40
+                    '0000000' . self::llena_importes($legajos[$i]['dias_trabajados'], 2) .                            // Campo 41 - D�as trabajados
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12) .        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
                     $legajos[$i]['trabajadorconvencionado'] .
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 44 - Imponible 6
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 44 - Imponible 6
                     $legajos[$i]['TipoDeOperacion'] .                                                                 // Campo 45 - Segun se redondee o no importe imponible 6
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 46
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12) .            // Campo 47
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12) .              // Campo 48
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 49 - Imponible7 = Imponible6
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 46
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12) .            // Campo 47
+                    self::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12) .              // Campo 48
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 49 - Imponible7 = Imponible6
                     //redondeo las HS extras, si vienen por ejemplo 10.5 en sicoss informo 11. Esto es porque el
                     //campo de sicoss es de 3 caracteres y los 10.5 los informaria como 0.5
-                    sicoss::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3) .                                   // Campo 50
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12) .            // Campo 51
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12) .         // Campo 52
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9) .  // Campo 53
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12) .        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9) .            // Campo 55 - Contribuci�n Tarea Diferencial
+                    self::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3) .                                   // Campo 50
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12) .            // Campo 51
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12) .         // Campo 52
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9) .  // Campo 53
+                    self::llena_blancos_izq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12) .        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
+                    self::llena_blancos_izq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9) .            // Campo 55 - Contribuci�n Tarea Diferencial
                     '000' .                                                                                             // Campo 56 - Horas Trabajadas
                     $legajos[$i]['SeguroVidaObligatorio'] .                                                           // Campo 57 - Seguro  de Vida Obligatorio
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12) .         // Campo 58 - Importe a detraer Ley 27430
-                    sicoss::llena_blancos_izq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) . // Campo 59 - Incremento Solidario para empresas del sector privado y p�blico (D. 14/2020 y 56/2020)
-                    sicoss::llena_blancos_izq(number_format(0, 2, ',', ''), 12) .                                          // Campo 60 - Remuneraci�n 11
+                    self::llena_blancos_izq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12) .         // Campo 58 - Importe a detraer Ley 27430
+                    self::llena_blancos_izq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) . // Campo 59 - Incremento Solidario para empresas del sector privado y p�blico (D. 14/2020 y 56/2020)
+                    self::llena_blancos_izq(number_format(0, 2, ',', ''), 12) .                                          // Campo 60 - Remuneraci�n 11
                     "\r\n"
             );
         }
