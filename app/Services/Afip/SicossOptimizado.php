@@ -182,7 +182,7 @@ class SicossOptimizado
 
 
 
-    public static function get_licencias_protecintegral_vacaciones($where_legajos)
+    public static function get_licencias_protecintegral_vacaciones($where_legajos): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
