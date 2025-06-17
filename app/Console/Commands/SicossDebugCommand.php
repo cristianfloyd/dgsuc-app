@@ -56,7 +56,7 @@ class SicossDebugCommand extends Command
                 'nro_legaj' => $legajo,
                 'check_lic' => false,
                 'check_sin_activo' => false,
-                'truncaTope' => false,
+                'truncaTope' => true,
             ];
 
             // Obtener período fiscal
