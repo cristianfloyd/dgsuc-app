@@ -33,7 +33,6 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
@@ -42,7 +41,7 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'informes_app',
+            'search_path' => 'suc_app,informes_app',
             'sslmode' => 'prefer',
         ],
 
@@ -271,10 +270,9 @@ return [
 
         'pgsql-prod' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB5_HOST', '127.0.0.1'),
+            'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB5_PORT', '5434'),
-            'database' => env('DB5_DATABASE', 'siu_mapuche'),
+            'database' => env('DB5_DATABASE', 'mapuche'),
             'username' => env('DB5_USERNAME', 'postgres'),
             'password' => env('DB5_PASSWORD', '1234'),
             'charset' => 'SQL_ASCII',
