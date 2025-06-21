@@ -1056,6 +1056,10 @@ class SicossOptimizado
         $TopeSACJubilatorioPers     = $TopeJubilatorioPersonal / 2;
         $TopeSACJubilatorioPatr     = $TopeJubilatorioPatronal / 2;
         $TopeSACJubilatorioOtroAp   = $TopeOtrosAportesPersonales / 2;
+        Log::debug("TopeJubilatorioPatronal: $TopeJubilatorioPatronal");
+        Log::debug("TopeJubilatorioPersonal: $TopeJubilatorioPersonal");
+        Log::debug("TopeOtrosAportesPersonales: $TopeOtrosAportesPersonales");
+        
         
 
         $artContTope = MapucheConfig::getParametroRrhh('Sicoss', 'ARTconTope', '1');
@@ -1102,12 +1106,12 @@ class SicossOptimizado
             'total_consultas_eliminadas' => (count($legajos) * 6) + 38000, // Estimación conservadora
             'mejora_estimada' => '99%+ más rápido que versión original'
         ]);
-
+        
         Log::debug('✅ BUCLE FINAL OPTIMIZADO: SIN CONSULTAS SQL N+1');
         for ($i = 0; $i < $total_legajos; $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
             $legajoActual = &$legajos[$i];
-
+            
             $legajoActual['ImporteSACOtroAporte'] = 0;
             $legajoActual['TipoDeOperacion']      = 0;
             $legajoActual['ImporteImponible_4']   = 0;
@@ -1275,6 +1279,8 @@ class SicossOptimizado
             // --- Obtengo la sumarizacin segn concepto o tipo de grupo de un concepto ---
             $conceptos_legajo = $conceptos_por_legajo[$legajo] ?? [];
             Log::debug('Conceptos legajo: ', $conceptos_legajo);
+
+            
             self::sumarizar_conceptos_optimizado($conceptos_legajo, $legajos[$i]);
 
             // --- Otros datos remunerativos - OPTIMIZADO ---
@@ -1305,6 +1311,7 @@ class SicossOptimizado
             $legajoActual['DiferenciaImponibleConTope']    = 0;
             $legajoActual['ImporteSACPatronal']            = $legajoActual['ImporteSAC'];
             $legajoActual['ImporteImponibleSinSAC']        = $legajoActual['ImporteImponiblePatronal'] - $legajoActual['ImporteSACPatronal'];
+            
             
             if ($legajoActual['ImporteSAC'] > $TopeSACJubilatorioPatr  && $trunca_tope == 1) {
                 Log::debug('✅ Trunca el tope de SAC');
@@ -1384,6 +1391,8 @@ class SicossOptimizado
                             'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
                             'ImporteImponible_6' => $legajoActual['ImporteImponible_6'],
                             'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
+                            'importeSAC' => $legajoActual['ImporteSAC'],
+                            'SACInvestigador' => $legajoActual['SACInvestigador'],
                         ]);
                     } else {
                         if ((($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
@@ -1395,6 +1404,10 @@ class SicossOptimizado
                         }
                         $legajoActual['TipoDeOperacion']     = 1;
                         $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'];
+                        Log::debug('✅ en el else, bloque Imponible6_aux', [
+                            'ImporteSAC' => $legajoActual['ImporteSAC'],
+                            'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
+                        ]);
                     }
                 } else {
                     $legajoActual['TipoDeOperacion']     = 1;
@@ -1416,8 +1429,8 @@ class SicossOptimizado
                 
                 if ($legajoActual['ImporteSAC'] > 0)
                     $tope_jubil_personal = $TopeJubilatorioPersonal + $TopeSACJubilatorioPers;
-
                 Log::debug('Tope Jubilatorio personal', ['tope_jubil_personal' => $tope_jubil_personal]);
+
                 if ($legajoActual['ImporteSACNoDocente']  > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
                         $legajoActual['DiferenciaSACImponibleConTope'] = $legajoActual['ImporteSACNoDocente']  - $TopeSACJubilatorioPers;
@@ -1435,6 +1448,11 @@ class SicossOptimizado
                     if ($trunca_tope == 1) {
 
                         $bruto_nodo_sin_sac = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'] - $legajoActual['ImporteSACNoDocente'];
+                        Log::debug('✅ Calculo bruto nodo sin sac', [
+                            'IMPORTE_BRUTO' => $legajoActual['IMPORTE_BRUTO'],
+                            'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
+                            'ImporteImponible_6' => $legajoActual['ImporteImponible_6'],
+                        ]);
 
                         $sac = $legajoActual['ImporteSACNoDocente'];
 
@@ -1446,7 +1464,14 @@ class SicossOptimizado
 
 
                         $legajoActual['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
-                        
+                        Log::debug("✅ ACA TOPEA:", [
+                            'sac' => $sac, 
+                            'tope_jubil_personal' => $tope_jubil_personal, 
+                            'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac, 
+                            'ImporteNoRemun' => $legajoActual['ImporteNoRemun'], 
+                            'tope_sueldo' => $tope_sueldo, 
+                            'tope_sac' => $tope_sac
+                        ]);
                         Log::debug('en el else',[
                             'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
                             'sac' => $sac,
@@ -1476,6 +1501,8 @@ class SicossOptimizado
 
                 $tope_jubil_personal = ($legajoActual['ImporteSAC'] > 0) ? $TopeJubilatorioPersonal + $TopeSACJubilatorioPers : $TopeJubilatorioPersonal;
                 Log::debug('Tope Jubilatorio personal', ['tope_jubil_personal' => $tope_jubil_personal]);
+
+                
                 if ($legajoActual['ImporteImponibleSinSAC']  > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
                         $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
