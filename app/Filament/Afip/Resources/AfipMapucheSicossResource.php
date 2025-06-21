@@ -81,7 +81,7 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('cod_situacion')
                     ->label('Situación')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('rem_impo1')
+                TextColumn::make('rem_impo1_decimal')
                     ->label('Rem impo 1')
                     ->money('ARS'),
                 TextColumn::make('rem_total')
@@ -174,15 +174,6 @@ class AfipMapucheSicossResource extends Resource
                                     ->send();
                             }
                         }),
-                    // Action::make('exportarSicossTxt')
-                    //     ->label('Exportar TXT SICOSS')
-                    //     ->icon('heroicon-o-document-arrow-down')
-                    //     ->action(function () {
-                    //         $exportService = Container::getInstance()->make(SicossExportService::class);
-                    //         $path = $exportService->generarArchivoTxt(static::getModel()::all());
-                    //         return response()->download($path)->deleteFileAfterSend();
-                    //     })
-                    //     ->color('success'),
                     Action::make('exportarSicossExcel')
                         ->label('Exportar Excel')
                         ->icon('heroicon-o-table-cells')

@@ -6,6 +6,7 @@ use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\MapucheBase;
 use Illuminate\Support\Facades\Log;
+use App\Traits\HasFixedWithImportes;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
@@ -25,23 +26,17 @@ class AfipMapucheSicoss extends Model
     use HasFactory;
     use HasCompositeRelations;
     use MapucheConnectionTrait;
+    use HasFixedWithImportes;
 
 
 
 
     // Especificar la tabla
     protected $table = 'suc.afip_mapuche_sicoss';
-
-    // Especificar la clave primaria compuesta de la tabla periodo_fiscal y cuil
-    //protected $primaryKey = ['periodo_fiscal', 'cuil'];
-
     protected $primaryKey = 'id';
-
-
-
     public $incrementing = true;
-    // No necesitas usar timestamps
     public $timestamps = false;
+
 
     // Agregar las columnas que pueden ser asignadas masivamente
     protected $fillable = [
@@ -119,11 +114,7 @@ class AfipMapucheSicoss extends Model
         'conyuge' => 'boolean',
         'cant_hijos' => 'integer',
         'rem_total' => 'decimal:2',
-        'rem_impo1' => 'decimal:2',
         'asig_fam_pag' => 'decimal:2',
-        'rem_Impo2' => 'decimal:2',
-        'rem_Impo3' => 'decimal:2',
-        'rem_Impo4' => 'decimal:2',
         'cod_siniestrado' => 'string',
         'marca_reduccion' => 'string',
         'recomp_lrt' => 'decimal:2',
@@ -137,24 +128,19 @@ class AfipMapucheSicoss extends Model
         'sit_rev3' => 'string',
         'dia_ini_sit_rev3' => 'integer',
         'sueldo_adicc' => 'decimal:2',
-        'sac' => 'decimal:2',
         'horas_extras' => 'decimal:2',
         'zona_desfav' => 'decimal:2',
         'vacaciones' => 'decimal:2',
         'cant_dias_trab' => 'integer',
-        'rem_impo5' => 'decimal:2',
         'convencionado' => 'boolean',
-        'rem_impo6' => 'decimal:2',
         'tipo_oper' => 'string',
         'adicionales' => 'decimal:2',
         'premios' => 'decimal:2',
         'rem_dec_788' => 'decimal:2',
-        'rem_imp7' => 'decimal:2',
         'nro_horas_ext' => 'integer',
         'cpto_no_remun' => 'decimal:2',
         'maternidad' => 'decimal:2',
         'rectificacion_remun' => 'decimal:2',
-        'rem_Imp9' => 'decimal:2',
         'contrib_dif' => 'decimal:2',
         'hstrab' => 'decimal:2',
         'seguro' => 'boolean',
@@ -181,7 +167,7 @@ class AfipMapucheSicoss extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return intval(substr($this->cuil, 2, 8));
                 }
-            return null;
+                return null;
             }
         );
     }
@@ -266,6 +252,254 @@ class AfipMapucheSicoss extends Model
     // ###########################################################################################
     // ################################ MUTADORES Y ACCESORES ####################################
 
+    // === BLOQUE DE ACCESSORS Y MUTATORS PARA CAMPOS DE ANCHO FIJO DECIMAL ===
+
+    protected function remTotalDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_total');
+    }
+    protected function remTotalFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_total');
+    }
+
+    protected function remImpo1Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_impo1');
+    }
+    protected function remImpo1Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_impo1');
+    }
+
+    protected function asigFamPagDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('asig_fam_pag');
+    }
+    protected function asigFamPagFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('asig_fam_pag');
+    }
+
+    protected function aporteVolDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('aporte_vol');
+    }
+    protected function aporteVolFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('aporte_vol');
+    }
+
+    protected function impAdicOsDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('imp_Adic_os');
+    }
+    protected function impAdicOsFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('imp_Adic_os');
+    }
+
+    protected function remImpo2Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_Impo2');
+    }
+    protected function remImpo2Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_Impo2');
+    }
+
+    protected function remImpo3Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_Impo3');
+    }
+    protected function remImpo3Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_Impo3');
+    }
+
+    protected function remImpo4Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_Impo4');
+    }
+    protected function remImpo4Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_Impo4');
+    }
+
+    protected function recompLrtDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('recomp_lrt');
+    }
+    protected function recompLrtFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('recomp_lrt');
+    }
+
+    protected function sueldoAdiccDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('sueldo_adicc');
+    }
+    protected function sueldoAdiccFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('sueldo_adicc');
+    }
+
+    protected function sacDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('sac');
+    }
+    protected function sacFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('sac');
+    }
+
+    protected function horasExtrasDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('horas_extras');
+    }
+    protected function horasExtrasFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('horas_extras');
+    }
+
+    protected function zonaDesfavDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('zona_desfav');
+    }
+    protected function zonaDesfavFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('zona_desfav');
+    }
+
+    protected function vacacionesDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('vacaciones');
+    }
+    protected function vacacionesFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('vacaciones');
+    }
+
+    protected function remImpo5Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_impo5');
+    }
+    protected function remImpo5Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_impo5');
+    }
+
+    protected function remImpo6Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_impo6');
+    }
+    protected function remImpo6Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_impo6');
+    }
+
+    protected function adicionalesDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('adicionales');
+    }
+    protected function adicionalesFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('adicionales');
+    }
+
+    protected function premiosDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('premios');
+    }
+    protected function premiosFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('premios');
+    }
+
+    protected function remDec788Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_dec_788');
+    }
+    protected function remDec788Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_dec_788');
+    }
+
+    protected function remImp7Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_imp7');
+    }
+    protected function remImp7Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_imp7');
+    }
+
+    protected function cptoNoRemunDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('cpto_no_remun');
+    }
+    protected function cptoNoRemunFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('cpto_no_remun');
+    }
+
+    protected function maternidadDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('maternidad');
+    }
+    protected function maternidadFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('maternidad');
+    }
+
+    protected function rectificacionRemunDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rectificacion_remun');
+    }
+    protected function rectificacionRemunFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rectificacion_remun');
+    }
+
+    protected function remImp9Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('rem_Imp9');
+    }
+    protected function remImp9Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('rem_Imp9');
+    }
+
+    protected function leyDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('ley');
+    }
+    protected function leyFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('ley');
+    }
+
+    protected function incsalarialDecimal(): Attribute
+    {
+        return $this->fixedWidthImporte('incsalarial');
+    }
+    protected function incsalarialFixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('incsalarial');
+    }
+
+    protected function remimp11Decimal(): Attribute
+    {
+        return $this->fixedWidthImporte('remimp11');
+    }
+    protected function remimp11Fixed(): Attribute
+    {
+        return $this->fixedWidthImporteFixed('remimp11');
+    }
+
+    // === FIN DEL BLOQUE DE CAMPOS DE ANCHO FIJO DECIMAL ===
+
+
     /**
      * Mutador y Accesor para el campo apnom
      */
@@ -315,7 +549,7 @@ class AfipMapucheSicoss extends Model
     protected function diferenciaRem(): Attribute
     {
         return Attribute::make(
-            get: function($value) {
+            get: function ($value) {
                 // Convertir a números y manejar valores nulos o vacíos
                 $remTotal = is_numeric($this->rem_total) ? (float)$this->rem_total : 0;
                 $remImpo6 = is_numeric($this->rem_impo6) ? (float)$this->rem_impo6 : 0;

@@ -19,3 +19,4 @@ yarn-error.log
 /.vscode
 app/Traits/SicossConnectionTrait.php
 app/Traits/MapucheConnectionTrait.php
+.env.example
