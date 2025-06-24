@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Resources\RelationManagers\RelationGroup;
 use App\Exports\Sicoss\ContribucionesDiferenciasExport;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
+use App\Filament\Afip\Actions\EjecutarControlAportesAction;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
 use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
@@ -52,7 +53,7 @@ class SicossControles extends Page implements HasTable
     use MapucheConnectionTrait {
         MapucheConnectionTrait::getTable as getMapucheTable;
     }
-    
+
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
     protected static ?string $navigationGroup = 'SICOSS';
@@ -466,16 +467,8 @@ class SicossControles extends Page implements HasTable
         // Acciones base según la pestaña activa
         $actions = match ($this->activeTab) {
             'diferencias_aportes' => [
-                Action::make('ejecutarControlAportes')
-                    ->label('Ejecutar Control de Aportes')
-                    ->icon('heroicon-o-calculator')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Ejecutar control de aportes?')
-                    ->modalDescription('Esta acción ejecutará el control específico de aportes.')
-                    ->action(function () {
-                        $this->ejecutarControlAportes();
-                    }),
+                EjecutarControlAportesAction::make()
+                    ->withPeriodBadge(),
             ],
             'diferencias_contribuciones' => [
                 Action::make('ejecutarControlContribuciones')
@@ -555,7 +548,6 @@ class SicossControles extends Page implements HasTable
 
         return $actions;
     }
-
 
     public function ejecutarControlAportes(): void
     {
@@ -759,7 +751,7 @@ class SicossControles extends Page implements HasTable
                 ->orderBy('h21.codn_conce')
                 ->select('h21.codn_conce', 'h12.desc_conce', DB::raw('SUM(impp_conce)::numeric(15, 2) as importe'))
                 ->get();
-            
+
             // Eliminar registros anteriores para este período
             ControlConceptosPeriodo::where('year', $this->year)
                 ->where('month', $this->month)
