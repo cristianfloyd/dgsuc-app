@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ConceptosSicossEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\ControlArtDiferencia;
@@ -21,6 +22,24 @@ class SicossControlService
 
     /** @var string Conexión de base de datos actual */
     protected string $connection;
+    protected array $conceptosAportesSijp;
+    protected array $conceptosAportesInssjp;
+    protected array $conceptosAportes;
+    protected array $conceptosContribuciones;
+    protected array $conceptosContribucionesSijp;
+    protected array $conceptosContribucionesInssjp;
+
+
+
+    public function __construct()
+    {
+        $this->conceptosAportesSijp = ConceptosSicossEnum::getAportesSijpCodes();
+        $this->conceptosAportesInssjp = ConceptosSicossEnum::getAportesInssjpCodes();
+        $this->conceptosContribucionesSijp = ConceptosSicossEnum::getContribucionesSijpCodes();
+        $this->conceptosContribucionesInssjp = ConceptosSicossEnum::getContribucionesInssjpCodes();
+        $this->conceptosAportes = ConceptosSicossEnum::getAllAportesCodes();
+        $this->conceptosContribuciones = ConceptosSicossEnum::getAllContribucionesCodes();
+    }
 
     /**
      * Establece la conexión de base de datos a utilizar
@@ -168,6 +187,14 @@ class SicossControlService
             $mes ??= $periodoFiscal['month'];
         }
 
+        // dd([
+        //     ConceptosSicossEnum::getSqlConditionAportesSijp(),
+        //     ConceptosSicossEnum::getSqlConditionAportesInssjp(),
+        //     ConceptosSicossEnum::getSqlConditionContribucionesSijp(),
+        //     ConceptosSicossEnum::getSqlConditionContribucionesInssjp()
+        // ]);
+
+
         // Determinar qué tabla usar basado en el período
         $periodoActual = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
         $tablaNovedad = ($anio == $periodoActual['year'] && $mes == $periodoActual['month'])
@@ -181,19 +208,19 @@ class SicossControlService
                 {$tablaNovedad}.nro_legaj,
                 (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
                 SUM(CASE
-                    WHEN codn_conce IN (201, 202, 203, 205, 204) THEN impp_conce * 1
+                    WHEN " . ConceptosSicossEnum::getSqlConditionAportesSijp() . " THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS aportesijpdh21,
                 SUM(CASE
-                    WHEN codn_conce IN (247) THEN impp_conce * 1
+                    WHEN " . ConceptosSicossEnum::getSqlConditionAportesInssjp() . " THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS aporteinssjpdh21,
                 SUM(CASE
-                    WHEN codn_conce IN (301, 302, 303, 304, 307) THEN impp_conce * 1
+                    WHEN " . ConceptosSicossEnum::getSqlConditionContribucionesSijp() . " THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS contribucionsijpdh21,
                 SUM(CASE
-                    WHEN codn_conce IN (347) THEN impp_conce * 1
+                    WHEN " . ConceptosSicossEnum::getSqlConditionContribucionesInssjp() . " THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS contribucioninssjpdh21
             INTO TEMP dh21aporte
@@ -209,7 +236,6 @@ class SicossControlService
             GROUP BY {$tablaNovedad}.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2;
         ");
     }
-
     /**
      * Obtiene las diferencias de aportes por CUIL
      *
@@ -451,7 +477,7 @@ class SicossControlService
             ->whereNotIn('a.nro_legaj', function (Builder $query) {
                 $query->select('nro_legaj')
                     ->from('mapuche.dh21')
-                    ->whereIn('codn_conce', [123, 248]);
+                    ->whereIn('codn_conce', ConceptosSicossEnum::getExclusionCodes());
             })
             ->select([
                 'a.nro_legaj',

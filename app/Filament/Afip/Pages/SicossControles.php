@@ -7,6 +7,7 @@ use App\Models\DH21Aporte;
 use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
+use App\Enums\ConceptosSicossEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
@@ -51,6 +52,7 @@ class SicossControles extends Page implements HasTable
     use MapucheConnectionTrait {
         MapucheConnectionTrait::getTable as getMapucheTable;
     }
+    
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
     protected static ?string $navigationGroup = 'SICOSS';
@@ -728,29 +730,10 @@ class SicossControles extends Page implements HasTable
             $connection = $this->getConnectionName();
 
             // Lista de conceptos a controlar
-            $conceptos = [
-                // Aportes
-                '201',
-                '202',
-                '203',
-                '204',
-                '205',
-                '247',
-                '248',
-                // Contribuciones
-                '301',
-                '302',
-                '303',
-                '304',
-                '305',
-                '306',
-                '307',
-                '308',
-                '347',
-                '348',
-                '403',
-                '447'
-            ];
+            $conceptosAportes = ConceptosSicossEnum::getAllAportesCodes();
+            $conceptosContribuciones = ConceptosSicossEnum::getAllContribucionesCodes();
+            $conceptos = array_merge($conceptosAportes, $conceptosContribuciones);
+
 
             Log::info('Ejecutando control de conceptos', [
                 'connection' => $connection,
@@ -796,10 +779,10 @@ class SicossControles extends Page implements HasTable
             }
 
             // Calcular totales para la notificación
-            $totalAportes = $resultados->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248','403'])
+            $totalAportes = $resultados->whereIn('codn_conce', $conceptosAportes)
                 ->sum('importe');
 
-            $totalContribuciones = $resultados->whereIn('codn_conce', ['301', '302', '303', '304', '305', '306', '307', '308', '347', '348','447'])
+            $totalContribuciones = $resultados->whereIn('codn_conce', $conceptosContribuciones)
                 ->sum('importe');
 
             // Crear vista para la notificación
