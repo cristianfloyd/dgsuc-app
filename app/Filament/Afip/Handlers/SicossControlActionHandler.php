@@ -21,7 +21,7 @@ class SicossControlActionHandler
         string $tipoControl,
         object $livewire,
         ?callable $customLogic = null
-    ): void {
+    ): array {
         try {
             // Estado de loading
             $livewire->loading = true;
@@ -48,8 +48,11 @@ class SicossControlActionHandler
             // Post-procesamiento común
             $this->postProcesamiento($livewire, $tipoControl, $year, $month, $resultados);
 
+            return $resultados;
+
         } catch (\Exception $e) {
             $this->manejarError($e, $tipoControl);
+            throw $e;
         } finally {
             $livewire->loading = false;
         }

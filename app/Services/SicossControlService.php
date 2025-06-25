@@ -9,6 +9,7 @@ use App\Models\ControlArtDiferencia;
 use App\Models\ControlCuilsDiferencia;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Query\Builder;
+use App\Models\ControlConceptosPeriodo;
 use App\Models\ControlAportesDiferencia;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Models\ControlContribucionesDiferencia;
@@ -639,6 +640,110 @@ class SicossControlService
             ];
         } catch (\Exception $e) {
             Log::error('Error en ejecutarControlCuils:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'anio' => $anio,
+                'mes' => $mes
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Ejecuta el control de conceptos por período fiscal
+     *
+     * @param int|null $anio Año de la liquidación
+     * @param int|null $mes Mes de la liquidación
+     * @return array{
+     *   registros_procesados: int,
+     *   conceptos_aportes: int,
+     *   conceptos_contribuciones: int,
+     *   total_aportes: float,
+     *   total_contribuciones: float,
+     *   fecha_proceso: string
+     * }
+     */
+    public function ejecutarControlConceptos(?int $anio = null, ?int $mes = null): array
+    {
+        try {
+            // Si no se proporcionan parámetros, usar el periodo fiscal actual
+            if ($anio === null || $mes === null) {
+                $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+                $anio ??= $periodoFiscal['year'];
+                $mes ??= $periodoFiscal['month'];
+            }
+
+            // Lista de conceptos a controlar
+            $conceptosAportes = ConceptosSicossEnum::getAllAportesCodes();
+            $conceptosContribuciones = ConceptosSicossEnum::getAllContribucionesCodes();
+            $conceptos = array_merge($conceptosAportes, $conceptosContribuciones);
+
+            Log::info('Ejecutando control de conceptos', [
+                'connection' => $this->connection,
+                'year' => $anio,
+                'month' => $mes,
+                'conceptos_count' => count($conceptos)
+            ]);
+
+            // Ejecutar la consulta
+            $resultados = DB::connection($this->connection)
+                ->table(DB::raw('(SELECT * FROM mapuche.dh21 UNION ALL SELECT * FROM mapuche.dh21h) as h21'))
+                ->join('mapuche.dh12 as h12', function ($join) {
+                    $join->on('h21.codn_conce', '=', 'h12.codn_conce');
+                })
+                ->whereIn('h21.codn_conce', $conceptos)
+                ->whereIn('h21.nro_liqui', function ($query) use ($anio, $mes) {
+                    $query->select('d22.nro_liqui')
+                        ->from('mapuche.dh22 as d22')
+                        ->where('d22.sino_genimp', true)
+                        ->where('d22.per_liano', $anio)
+                        ->where('d22.per_limes', $mes);
+                })
+                ->groupBy('h21.codn_conce', 'h12.desc_conce')
+                ->orderBy('h21.codn_conce')
+                ->select('h21.codn_conce', 'h12.desc_conce', DB::raw('SUM(impp_conce)::numeric(15, 2) as importe'))
+                ->get();
+
+            // Eliminar registros anteriores para este período
+            ControlConceptosPeriodo::where('year', $anio)
+                ->where('month', $mes)
+                ->where('connection_name', $this->connection)
+                ->delete();
+
+            // Guardar los nuevos resultados
+            $registrosInsertados = 0;
+            foreach ($resultados as $resultado) {
+                ControlConceptosPeriodo::create([
+                    'year' => $anio,
+                    'month' => $mes,
+                    'codn_conce' => $resultado->codn_conce,
+                    'desc_conce' => $resultado->desc_conce,
+                    'importe' => $resultado->importe,
+                    'connection_name' => $this->connection,
+                ]);
+                $registrosInsertados++;
+            }
+
+            // Calcular totales para el resumen
+            $totalAportes = $resultados->whereIn('codn_conce', $conceptosAportes)->sum('importe');
+            $totalContribuciones = $resultados->whereIn('codn_conce', $conceptosContribuciones)->sum('importe');
+
+            return [
+                'registros_procesados' => $registrosInsertados,
+                'conceptos_aportes' => $resultados->whereIn('codn_conce', $conceptosAportes)->count(),
+                'conceptos_contribuciones' => $resultados->whereIn('codn_conce', $conceptosContribuciones)->count(),
+                'total_aportes' => (float) $totalAportes,
+                'total_contribuciones' => (float) $totalContribuciones,
+                'fecha_proceso' => now()->toDateTimeString(),
+                'periodo' => [
+                    'anio' => $anio,
+                    'mes' => $mes
+                ],
+                'resultados' => $resultados // Para notificaciones detalladas
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error en ejecutarControlConceptos:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'anio' => $anio,

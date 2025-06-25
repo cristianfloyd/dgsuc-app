@@ -37,9 +37,12 @@ use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Resources\RelationManagers\RelationGroup;
 use App\Exports\Sicoss\ContribucionesDiferenciasExport;
+use App\Filament\Afip\Actions\EjecutarControlCuilsAction;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
 use App\Filament\Afip\Actions\EjecutarControlAportesAction;
+use App\Filament\Afip\Actions\EjecutarControlConceptosAction;
 use Filament\Notifications\Actions\Action as NotificationAction;
+use App\Filament\Afip\Actions\EjecutarControlContribucionesAction;
 use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
 use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
 
@@ -471,40 +474,13 @@ class SicossControles extends Page implements HasTable
                     ->withPeriodBadge(),
             ],
             'diferencias_contribuciones' => [
-                Action::make('ejecutarControlContribuciones')
-                    ->label('Ejecutar Control de Contribuciones')
-                    ->icon('heroicon-o-banknotes')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Ejecutar control de contribuciones?')
-                    ->modalDescription('Esta acción ejecutará el control específico de contribuciones.')
-                    ->action(function () {
-                        $this->ejecutarControlContribuciones();
-                    }),
+                EjecutarControlContribucionesAction::make()->withPeriodBadge(),
             ],
             'diferencias_cuils' => [
-                Action::make('ejecutarControlCuils')
-                    ->label('Ejecutar Control de CUILs')
-                    ->icon('heroicon-o-user-group')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Ejecutar control de CUILs?')
-                    ->modalDescription('Esta acción verificará los CUILs que existen en un sistema pero no en el otro.')
-                    ->action(function () {
-                        $this->ejecutarControlCuils();
-                    }),
+                EjecutarControlCuilsAction::make()->withPeriodBadge(),
             ],
             'conceptos' => [
-                Action::make('ejecutarControlConceptos')
-                    ->label('Ejecutar Control de Conceptos')
-                    ->icon('heroicon-o-document-text')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
-                    ->requiresConfirmation()
-                    ->modalHeading('¿Ejecutar control de conceptos?')
-                    ->modalDescription('Esta acción ejecutará el control de conceptos por período fiscal.')
-                    ->action(function () {
-                        $this->ejecutarControlConceptos();
-                    }),
+                EjecutarControlConceptosAction::make()->withPeriodBadge(),
             ],
             default => [
                 Action::make('ejecutarControles')
