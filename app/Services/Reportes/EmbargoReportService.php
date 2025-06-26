@@ -6,6 +6,7 @@ namespace App\Services\Reportes;
 use App\Models\Mapuche\Embargo;
 use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
+use App\Enums\ConceptosEmbargoEnum;
 use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\EmbargoReportModel;
@@ -82,7 +83,7 @@ class EmbargoReportService
             $importes861 = DB::connection($this->getConnectionName())
                 ->table('mapuche.dh21')
                 ->whereIn('nro_legaj', $embargos->pluck('nro_legaj'))
-                ->where('codn_conce', 861)
+                ->where('codn_conce', ConceptosEmbargoEnum::CONCEPTO_861->value)
                 ->where('nro_liqui', $nro_liqui)
                 ->pluck('impp_conce', 'nro_legaj');
 
@@ -92,9 +93,9 @@ class EmbargoReportService
                 ->select(
                     'nro_legaj',
                     'nro_cargo',
-                    DB::raw('SUM(CASE WHEN codn_conce = -51 THEN impp_conce ELSE 0 END) as remunerativo'),
-                    DB::raw('SUM(CASE WHEN codn_conce = 860 THEN impp_conce ELSE 0 END) as concepto_860'),
-                    DB::raw('SUM(CASE WHEN codn_conce = 861 THEN impp_conce ELSE 0 END) as concepto_861')
+                    DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::REMUNERATIVO->value . ' THEN impp_conce ELSE 0 END) as remunerativo'),
+                    DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::CONCEPTO_860->value . ' THEN impp_conce ELSE 0 END) as concepto_860'),
+                    DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::CONCEPTO_861->value . ' THEN impp_conce ELSE 0 END) as concepto_861')
                 )
                 ->whereIn('nro_legaj', $embargos->pluck('nro_legaj')->unique())
                 ->whereIn('nro_cargo', $embargos->pluck('nro_cargo')->unique())

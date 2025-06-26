@@ -21,6 +21,7 @@ use App\Models\Reportes\BloqueosDataModel;
 use Filament\Forms\Components\Placeholder;
 use App\Services\Mapuche\VerificacionMapucheService;
 use App\Filament\Bloqueos\Resources\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosHistorialResource;
 
 class EditImportData extends EditRecord
 {
@@ -166,12 +167,13 @@ class EditImportData extends EditRecord
                                Estado: {$datos['estado']}")
                         ->send();
                 }),
-
             Action::make('historial')
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
-                ->url(fn($record) => route('bloqueos.historial.index', $record)),
-            Actions\DeleteAction::make(),
+                ->url(fn($record) =>
+                    BloqueosHistorialResource::getUrl('index') .
+                    '?tableFilters[nro_legaj][value]=' . $record->nro_legaj
+            ),
         ];
     }
 
