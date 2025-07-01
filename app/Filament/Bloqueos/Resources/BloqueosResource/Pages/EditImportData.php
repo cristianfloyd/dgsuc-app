@@ -163,8 +163,8 @@ class EditImportData extends EditRecord
                         ->success()
                         ->title('Verificación exitosa')
                         ->body("Legajo: {$datos['legajo']} - Cargo: {$datos['cargo']}
-                               Nombre: {$datos['nombre']}
-                               Estado: {$datos['estado']}")
+                                Nombre: {$datos['nombre']}
+                                Estado: {$datos['estado']}")
                         ->send();
                 }),
             Action::make('historial')

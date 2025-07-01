@@ -81,7 +81,7 @@ class BloqueosProcessService
                 // Validar que todos los registros estén en estado correcto
                 $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
                     return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
-                        !is_null($bloqueo->mensaje_error) ||
+                        $bloqueo->mensaje_error !== null ||
                         $bloqueo->esta_procesado === true;
                 });
 
@@ -183,7 +183,7 @@ class BloqueosProcessService
         }
     }
 
-    public function procesarRegistro(BloqueosDataModel $bloqueo, Dh03 $cargo = null): BloqueoProcesadoData
+    public function procesarRegistro(BloqueosDataModel $bloqueo, ?Dh03 $cargo = null): BloqueoProcesadoData
     {
         try {
             // Validamos la existencia del par legajo-cargo

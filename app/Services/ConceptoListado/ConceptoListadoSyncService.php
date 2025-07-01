@@ -5,9 +5,9 @@ namespace App\Services\ConceptoListado;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\Mapuche\PeriodoFiscalService;
-use App\Traits\MapucheConnectionTrait;
 
 class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
 {
@@ -147,7 +147,7 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
             FROM $tablaOrigen d
             LEFT JOIN mapuche.dh01 ON d.nro_legaj = dh01.nro_legaj
             JOIN mapuche.dh22 ON d.nro_liqui = dh22.nro_liqui
-            WHERE d.codn_conce/100 IN (1,2,3)
+            WHERE d.codn_conce/100 IN (1,2,3,4)
             $condicionesPeriodo
         ";
     }
