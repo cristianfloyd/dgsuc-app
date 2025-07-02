@@ -38,7 +38,7 @@ class EjecutarControlAportesAction extends Action
     protected function ejecutarControl(): void
     {
         $livewire = $this->getLivewire();
-
+        
         try {
             // Establecer estado de loading
             $livewire->loading = true;

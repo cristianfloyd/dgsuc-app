@@ -676,7 +676,8 @@ class SicossControlService
             // Lista de conceptos a controlar
             $conceptosAportes = ConceptosSicossEnum::getAllAportesCodes();
             $conceptosContribuciones = ConceptosSicossEnum::getAllContribucionesCodes();
-            $conceptos = array_merge($conceptosAportes, $conceptosContribuciones);
+            $conceptosArt = ConceptosSicossEnum::getContribucionesArtCodes();
+            $conceptos = array_merge($conceptosAportes, $conceptosContribuciones, $conceptosArt);
 
             Log::info('Ejecutando control de conceptos', [
                 'connection' => $this->connection,
