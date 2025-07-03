@@ -78,7 +78,9 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                 Select::make('nroLiquiProxima')
                     ->required()
                     ->options(
-                        Dh22::getLiquidacionesByPeriodoFiscal($periodoFiscalActual)
+                        Dh22::getLiquidacionesForWidget($periodoFiscalActual)
+                            ->formateadoParaSelect()
+                            ->pluck('descripcion_completa', 'nro_liqui')
                     ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')

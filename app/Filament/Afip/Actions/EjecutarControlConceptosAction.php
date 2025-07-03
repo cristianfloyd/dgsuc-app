@@ -3,20 +3,49 @@
 namespace App\Filament\Afip\Actions;
 
 use Filament\Actions\Action;
+use App\Enums\ConceptosSicossEnum;
 use Illuminate\Support\Facades\Log;
 use App\Services\SicossControlService;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\CheckboxList;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Filament\Notifications\Actions\Action as NotificationAction;
 
 class EjecutarControlConceptosAction extends Action
 {
+
+
+
+    /**
+     * Obtiene el nombre por defecto de la acción
+     *
+     * Este método define el nombre por defecto de la acción, que se utiliza
+     * para identificarla en el sistema. En este caso, se define como
+     * 'ejecutar_control_conceptos', lo cual facilita su identificación y uso.
+     *
+     * @return string|null El nombre por defecto de la acción
+     */
     public static function getDefaultName(): ?string
     {
         return 'ejecutar_control_conceptos';
     }
 
+    /**
+     * Configura la acción de control de conceptos SICOSS
+     *
+     * Este método configura todos los aspectos visuales y funcionales de la acción:
+     * - Etiqueta e icono del botón
+     * - Colores y estilos visuales
+     * - Modal de confirmación con mensajes personalizados
+     * - Callback de ejecución que invoca el método de control
+     *
+     * La acción requiere confirmación del usuario antes de ejecutar el control
+     * de conceptos para el período fiscal actual, proporcionando una interfaz
+     * clara y segura para esta operación crítica.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,15 +60,52 @@ class EjecutarControlConceptosAction extends Action
             ->modalCancelActionLabel('Cancelar')
             ->action(function (): void {
                 $this->ejecutarControl();
-            });
+            })
+            ->form([
+                CheckboxList::make('conceptos')
+                    ->label('Conceptos a controlar')
+                    ->options(
+                        collect(ConceptosSicossEnum::cases())
+                            ->mapWithKeys(fn($case) => [$case->value => (string) $case->value])
+                            ->toArray()
+                    )
+                    ->default(array_merge(
+                        ConceptosSicossEnum::getAllAportesCodes(),
+                        ConceptosSicossEnum::getAllContribucionesCodes(),
+                        ConceptosSicossEnum::getContribucionesArtCodes()
+                    ))
+                    ->columns(3),
+            ]);
     }
 
+
     /**
-     * Ejecuta el control de conceptos
+     * Ejecuta el control de conceptos SICOSS para el período fiscal actual
+     *
+     * Este método realiza las siguientes operaciones:
+     * 1. Obtiene el período fiscal actual (año y mes)
+     * 2. Ejecuta el control de conceptos usando el servicio SicossControlService
+     * 3. Invalida el caché de estadísticas y actualiza el resumen
+     * 4. Muestra una notificación con los resultados del control
+     * 5. Maneja errores y establece el estado de loading apropiado
+     *
+     * El control verifica la consistencia de conceptos entre aportes y contribuciones
+     * para el período fiscal especificado, utilizando la conexión de base de datos
+     * configurada en el componente Livewire padre.
+     *
+     * @param array $data Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
+     * @return void
+     * @throws \Exception Cuando ocurre un error durante la ejecución del control
      */
-    protected function ejecutarControl(): void
+    protected function ejecutarControl(array $data = []): void
     {
         $livewire = $this->getLivewire();
+
+        $conceptos = $data['conceptos'] ?? array_merge(
+            ConceptosSicossEnum::getAllAportesCodes(),
+            ConceptosSicossEnum::getAllContribucionesCodes(),
+            ConceptosSicossEnum::getContribucionesArtCodes()
+        );
 
         try {
             // Establecer estado de loading
@@ -60,7 +126,7 @@ class EjecutarControlConceptosAction extends Action
             // Ejecutar control
             $service = app(SicossControlService::class);
             $service->setConnection($livewire->getConnectionName());
-            $resultados = $service->ejecutarControlConceptos($year, $month);
+            $resultados = $service->ejecutarControlConceptos($year, $month, $conceptos);
 
             // Invalidar caché y actualizar stats
             cache()->forget('sicoss_resumen_stats');

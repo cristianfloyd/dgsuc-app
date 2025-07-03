@@ -75,6 +75,7 @@ class SicossControles extends Page implements HasTable
     public $search = '';
     public $year;
     public $month;
+    public $conceptosSeleccionados = [];
 
     protected PeriodoFiscalService $periodoFiscalService;
 
@@ -100,6 +101,12 @@ class SicossControles extends Page implements HasTable
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
         $this->year = $periodoFiscal['year'];
         $this->month = $periodoFiscal['month'];
+
+        $this->conceptosSeleccionados = array_merge(
+            ConceptosSicossEnum::getAllAportesCodes(),
+            ConceptosSicossEnum::getAllContribucionesCodes(),
+            ConceptosSicossEnum::getContribucionesArtCodes()
+        );
     }
 
     #[On('fiscalPeriodUpdated')]
@@ -494,15 +501,15 @@ class SicossControles extends Page implements HasTable
         };
 
         // Agregar acciones comunes
-        if ($this->activeTab !== 'conceptos') {
-            $actions[] = Action::make('ejecutarControlConceptos')
-                ->label('Control de Conceptos')
-                ->icon('heroicon-o-document-text')
-                ->color('gray')
-                ->action(function () {
-                    $this->ejecutarControlConceptos();
-                });
-        }
+        // if ($this->activeTab !== 'conceptos') {
+        //     $actions[] = Action::make('ejecutarControlConceptos')
+        //         ->label('Control de Conceptos')
+        //         ->icon('heroicon-o-document-text')
+        //         ->color('gray')
+        //         ->action(function () {
+        //             $this->ejecutarControlConceptos();
+        //         });
+        // }
 
         // Agregar acción de conteo a todas las pestañas
         $actions[] = Action::make('ejecutarControlConteos')
@@ -689,8 +696,11 @@ class SicossControles extends Page implements HasTable
         }
     }
 
-    public function ejecutarControlConceptos(): void
+    public function ejecutarControlConceptos(?array $conceptos = null): void
     {
+        if ($conceptos !== null) {
+            $this->conceptosSeleccionados = $conceptos;
+        }
         try {
             $this->loading = true;
 
@@ -820,9 +830,15 @@ class SicossControles extends Page implements HasTable
 
     protected function getHeaderWidgets(): array
     {
-        return [
+        $widgets = [
             \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
         ];
+        if ($this->activeTab === 'conceptos') {
+            $widgets[] = \App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget::make([
+                'conceptosSeleccionados' => $this->conceptosSeleccionados ?? []
+            ]);
+        }
+        return $widgets;
     }
 
     protected function getConceptosColumns(): array

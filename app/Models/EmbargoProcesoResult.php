@@ -152,6 +152,7 @@ class EmbargoProcesoResult extends Model
                 throw new \Exception("La función 'suc.emb_proceso' no existe en la base de datos.");
             }
 
+            
             // Ejecutar la función almacenada con la conexión obtenida
             $results = $connection->select(
                 "SELECT * FROM suc.emb_proceso(
@@ -308,6 +309,8 @@ class EmbargoProcesoResult extends Model
                 }
                 // --- FIN NUEVO ---
 
+                
+                
                 // Verificar que tengamos todos los campos requeridos
                 if (count($registroFiltrado) < count($fillable)) {
                     Log::warning("El registro {$index} no contiene todos los campos esperados", [
@@ -315,7 +318,11 @@ class EmbargoProcesoResult extends Model
                         'recibidos' => array_keys($registroFiltrado)
                     ]);
                 }
-
+                // Convertir a JSON antes de insertar
+                if (isset($registroFiltrado['nros_liqui_json']) && is_array($registroFiltrado['nros_liqui_json'])) {
+                    $registroFiltrado['nros_liqui_json'] = json_encode($registroFiltrado['nros_liqui_json']);
+                }
+                
                 $registrosParaInsertar[] = $registroFiltrado;
             }
 
