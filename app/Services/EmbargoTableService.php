@@ -57,9 +57,9 @@ class EmbargoTableService
                 $table->integer('vig_nomes')->nullable();
                 $table->integer('tipo_embargo');
                 $table->integer('nro_legaj');
-                $table->decimal('remunerativo', 10, 2);
-                $table->decimal('no_remunerativo', 10, 2);
-                $table->decimal('total', 10, 2);
+                $table->decimal('remunerativo', 15, 2);
+                $table->decimal('no_remunerativo', 15, 2);
+                $table->decimal('total', 15, 2);
                 $table->integer('codn_conce');
                 $table->string('tipo_foran', 1)->nullable();
                 $table->string('clas_noved', 1)->nullable();

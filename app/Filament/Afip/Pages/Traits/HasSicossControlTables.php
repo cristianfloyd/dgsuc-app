@@ -98,7 +98,7 @@ trait HasSicossControlTables
                 ->label('Total Aportes SICOSS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->money('ARS')
-                ->state(fn ($record) => $record->aportesijp + $record->aporteinssjp)
+                ->state(fn ($record) => $record->aportesijp + $record->aporteinssjp + $record->sicossCalculo->aportediferencialsijp + $record->sicossCalculo->aportesres33_41re)
                 ->sortable(),
             TextColumn::make('diferencia')
                 ->money('ARS')
