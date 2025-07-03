@@ -1194,19 +1194,6 @@ class SicossOptimizado
                     }
                 }
 
-                // $licencias_cargos = [];
-                // foreach ($cargos_legajo as $cargo) {
-                //     $fin_mes = $day = date("d", mktime(0, 0, 0, MapucheConfig::getMesFiscal() + 1, 0, date("Y")));
-                //     for ($ini_mes = 1; $ini_mes <= $fin_mes; $ini_mes++) {
-                //         if (!isset($licencias_cargos[$cargo['nro_cargo']][$i]))
-                //             $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = 1;
-
-                //         if ((isset($cargo['inicio_lic']) && isset($cargo['final_lic'])) && $ini_mes >= $cargo['inicio_lic'] && $ini_mes <= $cargo['final_lic'])
-                //             $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = $cargo['condicion'];
-                //         else
-                //             $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = 1;
-                //     }
-                // }
 
                 $licencias_cargos = LicenciaService::procesarLicenciasCargos($cargos_legajo);
 

@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-use App\Services\EncodingService;
-use Illuminate\Support\Facades\DB;
-use App\Models\Mapuche\MapucheBase;
-use Illuminate\Support\Facades\Log;
-use App\Traits\HasFixedWithImportes;
 use App\Models\Mapuche\MapucheConfig;
-use App\Traits\HasCompositePrimaryKey;
+use App\Services\EncodingService;
+use App\Traits\HasFixedWithImportes;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Reedware\LaravelCompositeRelations\HasCompositeRelations;
+use Throwable;
 
 /**
  * Modelo AfipMapucheSicoss
@@ -151,7 +150,7 @@ class AfipMapucheSicoss extends Model
 
 
 
-    protected $encodedFields = ['apnom', 'prov'];
+    protected array $encodedFields = ['apnom', 'prov'];
 
     protected $appends = [
         'nro_cuil',
@@ -243,7 +242,7 @@ class AfipMapucheSicoss extends Model
     }
 
     // Agregar un nuevo método para obtener el periodo fiscal formateado si es necesario
-    public function getPeriodoFiscalFormateado()
+    public function getPeriodoFiscalFormateado(): string
     {
         $periodo = $this->attributes['periodo_fiscal'];
         return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
@@ -569,6 +568,7 @@ class AfipMapucheSicoss extends Model
      * @param bool $includeInactive Incluir empleados inactivos
      * @param callable|null $progressCallback Callback para progreso
      * @return array
+     * @throws Throwable
      */
     public static function poblarTablaSicoss(string $periodoFiscal, bool $includeInactive = false, ?callable $progressCallback = null): array
     {
@@ -710,12 +710,12 @@ class AfipMapucheSicoss extends Model
 
             $connection->commit();
             return ['status' => 'success', 'message' => 'Datos insertados correctamente.'];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("SICOSS: Error al poblar tabla: " . $e->getMessage());
             if (isset($connection)) {
                 $connection->rollBack();
             }
-            throw new \Exception("Error al poblar tabla SICOSS: " . $e->getMessage());
+            throw new Exception("Error al poblar tabla SICOSS: " . $e->getMessage());
         }
     }
 
