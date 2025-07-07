@@ -83,7 +83,7 @@ enum ConceptosSicossEnum: int
             self::CONTRIBUCION_SIJP_302->value,
             self::CONTRIBUCION_SIJP_303->value,
             self::CONTRIBUCION_SIJP_304->value,
-            self::CONTRIBUCION_SIJP_305->value,
+            // self::CONTRIBUCION_SIJP_305->value,
             self::CONTRIBUCION_SIJP_307->value,
         ];
     }

@@ -268,13 +268,29 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'pgsql-prod' => [
+        'pgsql-prod-old' => [
             'driver' => 'pgsql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB5_PORT', '5434'),
             'database' => env('DB5_DATABASE', 'mapuche'),
             'username' => env('DB5_USERNAME', 'postgres'),
             'password' => env('DB5_PASSWORD', '1234'),
+            'charset' => 'SQL_ASCII',
+            'collate' => 'UTF8',
+            'client_encoding' => 'UTF8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'mapuche,suc',
+            'sslmode' => 'prefer',
+        ],
+
+        'pgsql-prod' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB7_PORT', '5434'),
+            'database' => env('DB7_DATABASE', 'mapuche'),
+            'username' => env('DB7_USERNAME', 'postgres'),
+            'password' => env('DB7_PASSWORD', '1234'),
             'charset' => 'SQL_ASCII',
             'collate' => 'UTF8',
             'client_encoding' => 'UTF8',
