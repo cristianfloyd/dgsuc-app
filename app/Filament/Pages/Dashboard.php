@@ -14,7 +14,8 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    use HasFiltersForm, CategoriasConstantTrait;
+    use HasFiltersForm;
+    use CategoriasConstantTrait;
 
     protected ?string $heading = '';
     protected EscalafonService $escalafonService;
@@ -32,7 +33,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                 DatePicker::make('endDate')->label('Fin'),
                 Select::make('codigoescalafon')
                     ->label('Escalafon')
-                    ->options(function(){
+                    ->options(function () {
                         return collect(['TODO' => 'Todos'])
                         ->merge($this->escalafonService->getEscalafones())
                         ->merge([

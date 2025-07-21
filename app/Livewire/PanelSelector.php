@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Support\Collection;
-use Illuminate\Contracts\View\View;
 use App\Support\PanelRegistry;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class PanelSelector extends Component
 {
@@ -33,6 +33,12 @@ class PanelSelector extends Component
         ]);
     }
 
+    /**
+     * Obtiene una colección de paneles filtrados 
+     * según los criterios de búsqueda y categoría seleccionada.
+     *
+     * @return Collection Una colección de paneles filtrados.
+     */
     private function getFilteredPanels(): Collection
     {
         return PanelRegistry::getAllPanels()
@@ -42,7 +48,7 @@ class PanelSelector extends Component
                 $panels->filter(
                     fn($panel) =>
                     str_contains(strtolower($panel['name']), strtolower($this->search)) ||
-                        str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search))
+                    str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search))
                 )
             )
             ->when(

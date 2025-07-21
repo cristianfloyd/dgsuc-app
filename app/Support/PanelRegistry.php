@@ -104,6 +104,18 @@ class PanelRegistry
                 'badge' => 'SUC',
                 'bgColor' => 'bg-slate-700',
                 'sortOrder' => 80,
+            ],
+            [
+                'id' => 'procesos',
+                'name' => 'Panel Procesos',
+                'url' => '/procesos',
+                'icon' => 'heroicon-o-user-group',
+                'category' => 'rrhh',
+                'description' => 'Operaciones de copia',
+                'color' => 'blue',
+                'badge' => 'SUC',
+                'bgColor' => 'bg-slate-700',
+                'sortOrder' => 80,
             ]
         ]);
     }
