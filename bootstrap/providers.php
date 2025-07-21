@@ -23,6 +23,7 @@ return [
     App\Providers\Filament\EmbargosPanelProvider::class,
     App\Providers\Filament\LiquidacionesPanelProvider::class,
     App\Providers\Filament\MapuchePanelProvider::class,
+    App\Providers\Filament\ProcesosPanelProvider::class,
     App\Providers\Filament\ReportesPanelProvider::class,
     App\Providers\Filament\sucPanelProvider::class,
     App\Providers\FileProcessingServiceProvider::class,
@@ -40,5 +41,4 @@ return [
     App\Providers\ValidationServiceProvider::class,
     App\Providers\WorkflowServiceProvider::class,
     App\Services\TableManagementServiceProvider::class,
-    App\Providers\DatabaseServiceProvider::class,
 ];

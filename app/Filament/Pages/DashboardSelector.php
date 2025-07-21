@@ -3,8 +3,8 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Support\Enums\IconPosition;
 use App\Support\PanelRegistry;
+use Filament\Support\Enums\IconPosition;
 
 class DashboardSelector extends Page
 {

@@ -83,14 +83,14 @@ enum ConceptosSicossEnum: int
             self::CONTRIBUCION_SIJP_302->value,
             self::CONTRIBUCION_SIJP_303->value,
             self::CONTRIBUCION_SIJP_304->value,
-            self::CONTRIBUCION_SIJP_305->value,
             self::CONTRIBUCION_SIJP_307->value,
         ];
     }
-
+    
     public static function getContribucionesArtCodes(): array
     {
         return [
+            self::CONTRIBUCION_SIJP_305->value,
             self::CONTRIBUCION_SIJP_306->value,
             self::CONTRIBUCION_SIJP_308->value,
         ];

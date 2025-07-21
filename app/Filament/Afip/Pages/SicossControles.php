@@ -3,7 +3,6 @@
 namespace App\Filament\Afip\Pages;
 
 use Filament\Pages\Page;
-use App\Models\DH21Aporte;
 use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
@@ -11,12 +10,8 @@ use App\Enums\ConceptosSicossEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
-use App\Models\ControlArtDiferencia;
 use Filament\Support\Enums\MaxWidth;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Traits\SicossConnectionTrait;
-use Filament\Support\Enums\Alignment;
-use Illuminate\View\View as ViewView;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\SicossControlService;
 use App\Traits\MapucheConnectionTrait;
@@ -35,7 +30,6 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use App\Exports\Sicoss\ResumenDependenciasExport;
 use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Support\Facades\View as ViewFacade;
-use Filament\Resources\RelationManagers\RelationGroup;
 use App\Exports\Sicoss\ContribucionesDiferenciasExport;
 use App\Filament\Afip\Actions\EjecutarControlCuilsAction;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
@@ -43,8 +37,6 @@ use App\Filament\Afip\Actions\EjecutarControlAportesAction;
 use App\Filament\Afip\Actions\EjecutarControlConceptosAction;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use App\Filament\Afip\Actions\EjecutarControlContribucionesAction;
-use App\Filament\Afip\Resources\RelationManagers\SicossCalculoRelationManager;
-use App\Filament\Afip\Resources\RelationManagers\RelacionActivaRelationManager;
 
 class SicossControles extends Page implements HasTable
 {
@@ -84,16 +76,17 @@ class SicossControles extends Page implements HasTable
         $this->periodoFiscalService = $periodoFiscalService;
     }
 
+    private function conexionesDisponibles(): array
+    {
+        return collect(config('database.connections'))
+            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->mapWithKeys(fn($config, $name) => [$name => $name])
+            ->all();
+    }
+
     public function mount()
     {
-        $this->availableConnections = collect(config('database.connections'))
-            ->filter(function ($config, $name) {
-                return str_starts_with($name, 'pgsql-');
-            })
-            ->mapWithKeys(function ($config, $name) {
-                return [$name => $name];
-            })
-            ->all();
+        $this->availableConnections = $this->conexionesDisponibles();
 
         $this->selectedConnection ??= $this->getConnectionName();
 
@@ -394,13 +387,13 @@ class SicossControles extends Page implements HasTable
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
-                        return view('filament.afip.pages.partials.sicoss-detalle-aportes-modal', [
+                            return view('filament.afip.pages.partials.sicoss-detalle-aportes-modal', [
                             'record' => $record,
                             'sicossCalculo' => $record->sicossCalculo,
                             'relacionActiva' => $record->relacionActiva,
                             'dh01' => $record->dh01,
-                        ]);
-                    })
+                            ]);
+                        })
                     ->modalHeading(fn($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -409,13 +402,13 @@ class SicossControles extends Page implements HasTable
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
-                        return view('filament.afip.pages.partials.sicoss-detalle-contribuciones-modal', [
+                            return view('filament.afip.pages.partials.sicoss-detalle-contribuciones-modal', [
                             'record' => $record,
                             'sicossCalculo' => $record->sicossCalculo,
                             'relacionActiva' => $record->relacionActiva,
                             'dh01' => $record->dh01,
-                        ]);
-                    })
+                            ]);
+                        })
                     ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -424,10 +417,10 @@ class SicossControles extends Page implements HasTable
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
-                        return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
+                            return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
                             'record' => $record,
-                        ]);
-                    })
+                            ]);
+                        })
                     ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -436,10 +429,10 @@ class SicossControles extends Page implements HasTable
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
-                        return view('filament.afip.pages.partials.sicoss-detalle-conceptos-modal', [
+                            return view('filament.afip.pages.partials.sicoss-detalle-conceptos-modal', [
                             'record' => $record,
-                        ]);
-                    })
+                            ]);
+                        })
                     ->modalHeading(fn($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -495,8 +488,8 @@ class SicossControles extends Page implements HasTable
                     ->icon('heroicon-o-play')
                     ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function () {
-                        $this->ejecutarControles();
-                    })
+                            $this->ejecutarControles();
+                        })
             ],
         };
 
