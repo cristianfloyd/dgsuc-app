@@ -4,21 +4,29 @@ declare(strict_types=1);
 
 namespace App\Filament\Afip\Pages;
 
-use Filament\Pages\Page;
-use Livewire\Attributes\On;
-use App\Models\Mapuche\Dh22;
-use Filament\Actions\Action;
 use App\Data\PeriodoFiscalData;
+use App\Models\Mapuche\Dh22;
+use App\Services\Afip\SicossActividadUpdateService;
+use App\Services\Afip\SicossCpto205Service;
+use App\Services\Afip\SicossEmbarazadasService;
+use App\Services\Afip\SicossUpdateService;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Widgets\MultipleIdLiquiSelector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Filament\Notifications\Notification;
-use App\Services\Afip\SicossUpdateService;
-use App\Services\Afip\SicossCpto205Service;
-use Filament\Widgets\MultipleIdLiquiSelector;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Services\Afip\SicossEmbarazadasService;
-use App\Services\Afip\SicossActividadUpdateService;
+use Livewire\Attributes\On;
 
+
+/**
+ * Class SicossUpdates
+ *
+ * Página de Filament para gestionar y mostrar actualizaciones relacionadas con SICOSS de AFIP.
+ *
+ * @package App\Filament\Afip\Pages
+ */
 class SicossUpdates extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
@@ -42,6 +50,14 @@ class SicossUpdates extends Page
     protected SicossActividadUpdateService $sicossActividadUpdateService;
     protected SicossCpto205Service $sicossCpto205Service;
 
+    /**
+     * Inyecta los servicios necesarios en el componente.
+     *
+     * @param PeriodoFiscalService $periodoFiscalService
+     * @param SicossEmbarazadasService $sicossEmbarazadasService
+     * @param SicossActividadUpdateService $sicossActividadUpdateService
+     * @param SicossCpto205Service $sicossCpto205Service
+     */
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
         SicossEmbarazadasService $sicossEmbarazadasService,
@@ -100,10 +116,13 @@ class SicossUpdates extends Page
                     ->send();
             }
         } catch (\Throwable $th) {
-            Log::error('Error en actualización SICOSS', [
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
-            ]);
+            Log::error(
+                'Error en actualización SICOSS',
+                [
+                    'error' => $th->getMessage(),
+                    'trace' => $th->getTraceAsString()
+                ]
+            );
 
             Notification::make()
                 ->title('Error')
@@ -154,9 +173,7 @@ class SicossUpdates extends Page
             ->send();
     }
 
-    /*
-    *   Método para ejecutar las actualizaciones Dha8
-    */
+
     public function runUpdates(): void
     {
         $this->isProcessing = true;
@@ -197,10 +214,13 @@ class SicossUpdates extends Page
                     ->send();
             }
         } catch (\Exception $e) {
-            Log::error('Error en actualización SICOSS', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error(
+                'Error en actualización SICOSS',
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
 
             Notification::make()
                 ->title('Error')
@@ -239,12 +259,14 @@ class SicossUpdates extends Page
 
 
             // Ejecutar la actualización de embarazadas
-            $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas([
-                'year' => $this->year,
-                'month' => $this->month,
-                'liquidaciones' => $liquidaciones,
-                'nro_liqui' => $liquidaciones[0] // Usar la primera liquidación
-            ]);
+            $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas(
+                [
+                    'year' => $this->year,
+                    'month' => $this->month,
+                    'liquidaciones' => $liquidaciones,
+                    'nro_liqui' => $liquidaciones[0] // Usar la primera liquidación
+                ]
+            );
 
             // Guardar resultados para mostrar en la vista
             $this->updateResults = $resultado;
@@ -270,10 +292,13 @@ class SicossUpdates extends Page
                     ->send();
             }
         } catch (\Exception $e) {
-            Log::error('Error en actualización de embarazadas', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error(
+                'Error en actualización de embarazadas',
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
 
             Notification::make()
                 ->title('Error')
@@ -344,9 +369,11 @@ class SicossUpdates extends Page
 
             // Ejecutar la actualización de concepto 205 con las liquidaciones del período
             // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
-            $resultado = $this->sicossCpto205Service->actualizarCpto205([
-                'liquidaciones' => $liquidaciones
-                ]);
+            $resultado = $this->sicossCpto205Service->actualizarCpto205(
+                [
+                    'liquidaciones' => $liquidaciones
+                ]
+            );
             $this->updateResults = $resultado;
 
             // Mostrar notificación según el resultado
@@ -364,10 +391,13 @@ class SicossUpdates extends Page
                     ->send();
             }
         } catch (\Exception $e) {
-            Log::error('Error en actualización de concepto 205', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error(
+                'Error en actualización de concepto 205',
+                [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
 
             Notification::make()
                 ->title('Error')
@@ -385,18 +415,22 @@ class SicossUpdates extends Page
             Action::make('show_help')
                 ->label(fn() => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
                 ->icon(fn() => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
-                ->action(function () {
-                    $this->isHelpVisible = !$this->isHelpVisible;
-                }),
+                ->action(
+                    function () {
+                        $this->isHelpVisible = !$this->isHelpVisible;
+                    }
+                ),
 
             Action::make('run_updates')
                 ->label('Update Dha8')
                 ->action('runUpdates')
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
-                ->modalDescription('¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso puede tomar varios minutos.'),
+                ->modalDescription(
+                    '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
+                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
+                    '? Este proceso puede tomar varios minutos.'
+                ),
 
             Action::make('run_embarazadas_update')
                 ->label('Actualizar Embarazadas')
@@ -406,9 +440,11 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Situación de Embarazadas')
-                ->modalDescription('¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->year . '-' . str_pad((string)$this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'),
+                ->modalDescription(
+                    '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
+                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
+                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'
+                ),
 
             Action::make('run_actividad_update')
                 ->label('Actualizar Actividad')

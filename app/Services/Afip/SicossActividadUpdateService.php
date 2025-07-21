@@ -2,15 +2,15 @@
 
 namespace App\Services\Afip;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 
 class SicossActividadUpdateService
 {
     use MapucheConnectionTrait;
 
-    
+
     /**
      * Create a new class instance.
      */
