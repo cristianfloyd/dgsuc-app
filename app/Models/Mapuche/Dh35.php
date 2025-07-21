@@ -24,7 +24,8 @@ use App\Traits\Mapuche\Dh35Queries;
  */
 class Dh35 extends Model
 {
-    use HasFactory, Dh35Queries;
+    use HasFactory;
+    use Dh35Queries;
 
     protected $table = 'mapuche.dh35';
 

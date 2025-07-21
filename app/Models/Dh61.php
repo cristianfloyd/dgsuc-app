@@ -17,7 +17,9 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
  * */
 class Dh61 extends Model
 {
-    use MapucheConnectionTrait, HasCompositePrimaryKey;
+    use MapucheConnectionTrait;
+    use HasCompositePrimaryKey;
+
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'dh61';
@@ -136,7 +138,7 @@ class Dh61 extends Model
     {
         return Attribute::make(
             get: function () {
-                return (string) new CategoryIdentifier(
+                return (string)new CategoryIdentifier(
                     $this->codc_categ,
                     $this->vig_caano,
                     $this->vig_cames
@@ -178,10 +180,14 @@ class Dh61 extends Model
 
     public static function find($id): ?self
     {
-        if (!$id) return null;
+        if (!$id) {
+            return null;
+        }
 
         $parts = explode('-', $id);
-        if (count($parts) !== 3) return null;
+        if (count($parts) !== 3) {
+            return null;
+        }
 
         return static::query()
             ->where('codc_categ', str_pad(trim($parts[0]), 4))

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
@@ -20,7 +21,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Juzgado extends Model
 {
-    use HasFactory, MapucheConnectionTrait, EncodingTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
+    use EncodingTrait;
 
 
     protected $table = 'emb_juzgado';

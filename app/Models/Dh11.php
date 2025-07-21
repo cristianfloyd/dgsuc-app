@@ -28,7 +28,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Dh11 extends Model
 {
-    use MapucheConnectionTrait, CategoriasConstantTrait, PostgresqlTrait, HasLaboralStatus;
+    use MapucheConnectionTrait;
+    use CategoriasConstantTrait;
+    use PostgresqlTrait;
+    use HasLaboralStatus;
 
     public $timestamps = false;
     public $incrementing = false;
@@ -233,7 +236,6 @@ class Dh11 extends Model
             'DOCE' => array_merge(self::CATEGORIAS['DOCU'], self::CATEGORIAS['DOCS']),
             'AUTO' => array_merge(self::CATEGORIAS['AUTU'], self::CATEGORIAS['AUTS']),
             default => self::CATEGORIAS[$tipo] ?? [],
-
         };
     }
 
@@ -255,7 +257,7 @@ class Dh11 extends Model
 
     public function dh61(): HasMany
     {
-        return $this->hasMany(Dh61::class,'codc_categ','codc_categ')
+        return $this->hasMany(Dh61::class, 'codc_categ', 'codc_categ')
             ->where('dh61.vig_caano', '=', $this->vig_caano)
             ->where('dh61.vig_cames', '=', $this->vig_cames);
     }

@@ -44,7 +44,8 @@ class Dhe2 extends Model
     public function dh30(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'nro_tabla', 'nro_tabla')
-            ->where('nro_tabla', 'desc__abrev');;
+            ->where('nro_tabla', 'desc__abrev');
+        ;
     }
 
     /**
@@ -62,5 +63,4 @@ class Dhe2 extends Model
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
                     ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
-
 }

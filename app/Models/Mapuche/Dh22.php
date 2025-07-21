@@ -28,7 +28,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dh22 extends Model
 {
-    use MapucheConnectionTrait, HasFactory, EncodingTrait;
+    use MapucheConnectionTrait;
+    use HasFactory;
+    use EncodingTrait;
 
     /**
      * Indica el nombre de la tabla asociada al modelo.
@@ -227,13 +229,13 @@ class Dh22 extends Model
         return EncodingService::toUtf8(trim($value));
     }
 
-   public function descLiqui(): Attribute
-   {
-    return Attribute::make(
-        get: fn($value) => EncodingService::toUtf8($value),
-        set: fn($value) => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
-    );
-   }
+    public function descLiqui(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
+        );
+    }
 
     /**
      * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
@@ -242,7 +244,7 @@ class Dh22 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
+            get: fn() => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
         );
     }
 
@@ -266,8 +268,8 @@ class Dh22 extends Model
     protected function periodo(): Attribute
     {
         return Attribute::make(
-            get: fn() => "{$this->per_liano}".str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
-            set: function($value) {
+            get: fn() => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', STR_PAD_LEFT),
+            set: function ($value) {
                 if ($value instanceof PeriodoFiscal) {
                     return [
                         'per_liano' => $value->year(),

@@ -30,7 +30,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class RepGerencialFinal extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     /**
      * Nombre de la tabla en la base de datos

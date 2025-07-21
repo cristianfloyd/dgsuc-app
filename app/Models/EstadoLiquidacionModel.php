@@ -16,5 +16,4 @@ class EstadoLiquidacionModel extends Model
         'cod_estado_liquidacion',
         'desc_estado_liquidacion'
     ];
-
 }

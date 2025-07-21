@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
+
     private static $connectionInstance = null;
 
     protected $table = 'suc.rep_concepto_listado';
@@ -46,7 +47,7 @@ class ConceptoListado extends Model
     public static function boot()
     {
         parent::boot();
-        if(static::createTableIfNotExists()){
+        if (static::createTableIfNotExists()) {
             Log::info("Tabla suc.rep_concepto_listado creada exitosamente");
         };
     }
@@ -54,7 +55,7 @@ class ConceptoListado extends Model
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static;
+            $model = new static();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
         return self::$connectionInstance;
@@ -102,11 +103,13 @@ class ConceptoListado extends Model
 
 
 
-    public function getNombreCompletoAttribute() {
+    public function getNombreCompletoAttribute()
+    {
         return "{$this->apellido}, {$this->nombre}";
     }
 
-    public function getImporteFormateadoAttribute() {
+    public function getImporteFormateadoAttribute()
+    {
         return number_format($this->impp_conce, 2, ',', '.');
     }
 
@@ -124,11 +127,13 @@ class ConceptoListado extends Model
         );
     }
 
-    public function scopePeriodo($query, $periodo) {
+    public function scopePeriodo($query, $periodo)
+    {
         return $query->where('periodo_fiscal', $periodo);
     }
 
-    public function scopePorCuil($query, $cuil) {
+    public function scopePorCuil($query, $cuil)
+    {
         return $query->where('cuil', $cuil);
     }
 

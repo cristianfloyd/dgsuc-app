@@ -74,7 +74,7 @@ class Dh99 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: function() {
+            get: function () {
                 $periodoFiscalService = app(PeriodoFiscalService::class);
                 $periodo = $periodoFiscalService->getPeriodoFiscalFromDatabase();
                 return $periodo['year'] . $periodo['month'];
@@ -88,7 +88,7 @@ class Dh99 extends Model
     protected function periodoFiscalObject(): Attribute
     {
         return Attribute::make(
-            get: function() {
+            get: function () {
                 return new PeriodoFiscal($this->per_anoct, $this->per_mesct);
             }
         );

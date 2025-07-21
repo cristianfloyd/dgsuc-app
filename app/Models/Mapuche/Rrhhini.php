@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class Rrhhini extends Model
 {
     use MapucheConnectionTrait;
+
     protected $table = 'rrhhini';
     protected $schema = 'mapuche';
 

@@ -9,7 +9,6 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-
 /**
  * @method static hydrate(array $results)
  * @method static collection(array $array)
@@ -17,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class EmbargoProcesoResult extends Model
 {
     use MapucheConnectionTrait;
+
     protected $table = 'suc.embargo_proceso_results';
 
     protected $primaryKey = 'id';
@@ -152,7 +152,7 @@ class EmbargoProcesoResult extends Model
                 throw new \Exception("La función 'suc.emb_proceso' no existe en la base de datos.");
             }
 
-            
+
             // Ejecutar la función almacenada con la conexión obtenida
             $results = $connection->select(
                 "SELECT * FROM suc.emb_proceso(
@@ -288,7 +288,7 @@ class EmbargoProcesoResult extends Model
 
             foreach ($results as $index => $result) {
                 // Convertir a array
-                $registro = (array) $result;
+                $registro = (array)$result;
 
                 // Filtrar solo los campos válidos según $fillable
                 $registroFiltrado = array_intersect_key($registro, $fillableSet);
@@ -309,8 +309,8 @@ class EmbargoProcesoResult extends Model
                 }
                 // --- FIN NUEVO ---
 
-                
-                
+
+
                 // Verificar que tengamos todos los campos requeridos
                 if (count($registroFiltrado) < count($fillable)) {
                     Log::warning("El registro {$index} no contiene todos los campos esperados", [
@@ -322,7 +322,7 @@ class EmbargoProcesoResult extends Model
                 if (isset($registroFiltrado['nros_liqui_json']) && is_array($registroFiltrado['nros_liqui_json'])) {
                     $registroFiltrado['nros_liqui_json'] = json_encode($registroFiltrado['nros_liqui_json']);
                 }
-                
+
                 $registrosParaInsertar[] = $registroFiltrado;
             }
 

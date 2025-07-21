@@ -62,7 +62,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Embargo extends Model
 {
-    use HasFactory, EmbargoQueries, MapucheConnectionTrait, EncodingTrait;
+    use HasFactory;
+    use EmbargoQueries;
+    use MapucheConnectionTrait;
+    use EncodingTrait;
 
     /**
      * Nombre de la tabla en la base de datos

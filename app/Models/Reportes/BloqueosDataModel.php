@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BloqueosDataModel extends Model
 {
-    use MapucheConnectionTrait, HasFactory;
+    use MapucheConnectionTrait;
+    use HasFactory;
 
     protected $table = 'suc.rep_bloqueos_import';
     protected $primaryKey = 'id';

@@ -17,7 +17,8 @@ use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 
 class OrdenesDescuento extends Model implements HasLabel
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     private static $connectionInstance = null;
     protected $primaryKey = 'id';
@@ -92,7 +93,9 @@ class OrdenesDescuento extends Model implements HasLabel
 
     protected function handleEncodedField($value)
     {
-        if (empty($value)) return $value;
+        if (empty($value)) {
+            return $value;
+        }
         return iconv('UTF-8', 'UTF-8//TRANSLIT', $value);
     }
 
@@ -114,7 +117,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static;
+            $model = new static();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
         return self::$connectionInstance;
@@ -131,7 +134,7 @@ class OrdenesDescuento extends Model implements HasLabel
     public static function createTableIfNotExists(): bool
     {
         try {
-            $connection = (new static)->getConnectionName();
+            $connection = (new static())->getConnectionName();
 
             if (!Schema::connection($connection)->hasTable('suc.rep_ordenes_descuento')) {
                 Schema::connection($connection)->create('suc.rep_ordenes_descuento', function (Blueprint $table) {
@@ -219,7 +222,9 @@ class OrdenesDescuento extends Model implements HasLabel
         return Attribute::make(
             get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
-                if (empty($value)) return $value;
+                if (empty($value)) {
+                    return $value;
+                }
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
             }
         );
@@ -230,7 +235,9 @@ class OrdenesDescuento extends Model implements HasLabel
         return Attribute::make(
             get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
-                if (empty($value)) return $value;
+                if (empty($value)) {
+                    return $value;
+                }
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
             }
         );

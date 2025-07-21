@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrigenesModel extends Model implements OrigenRepositoryInterface
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
+
     protected $table = 'suc.origenes_models';
 
     protected $fillable = [
@@ -17,7 +19,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         'name',
     ];
 
-    
+
     public static function boot()
     {
         parent::boot();
@@ -26,7 +28,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
 
     public static function connectionName(): string
     {
-        return (new static)->getConnectionName();
+        return (new static())->getConnectionName();
     }
 
     /**

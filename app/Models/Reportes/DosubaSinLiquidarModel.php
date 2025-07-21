@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DosubaSinLiquidarModel extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     protected $table = 'suc.rep_dosuba_sin_liquidar';
     protected $primaryKey = 'id';
@@ -42,7 +43,7 @@ class DosubaSinLiquidarModel extends Model
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = (new static)->getConnectionFromTrait();
+        $connection = (new static())->getConnectionFromTrait();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
             $connection->statement('
@@ -70,7 +71,7 @@ class DosubaSinLiquidarModel extends Model
 
     public static function dropTableIfExists(): void
     {
-        $connection = (new static)->getConnectionFromTrait();
+        $connection = (new static())->getConnectionFromTrait();
         dump($connection);
         if ($connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
             $connection->statement('DROP TABLE IF EXISTS suc.rep_dosuba_sin_liquidar');
@@ -83,7 +84,7 @@ class DosubaSinLiquidarModel extends Model
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
-        $connection = (new static)->getConnection();
+        $connection = (new static())->getConnection();
 
         $connection->table('suc.rep_dosuba_sin_liquidar')
             ->where('session_id', $sessionId)
@@ -96,7 +97,7 @@ class DosubaSinLiquidarModel extends Model
     public static function cleanOldRecords(): void
     {
         $sessionLifetime = config('session.lifetime') * 60;
-        $connection = (new static)->getConnection();
+        $connection = (new static())->getConnection();
 
         $connection->statement("
             DELETE FROM suc.rep_dosuba_sin_liquidar

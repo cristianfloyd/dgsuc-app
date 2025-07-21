@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AfipRelacionesActivasCrudo extends Model
 {
     use HasFactory;
+
     protected $table = 'afip_relaciones_activas_crudo';
     public $timestamps = false;
     protected $fillable = [

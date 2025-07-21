@@ -13,6 +13,7 @@ use App\Services\Mapuche\PeriodoFiscalService;
 class MapucheConfig
 {
     use MapucheConnectionTrait;
+
     /**
      * Obtener el valor de un parámetro de RRHH.
      *
@@ -128,9 +129,9 @@ class MapucheConfig
      * @return string El valor del parámetro, que puede ser 'Habilitada' o 'Deshabilitada'.
      */
     public static function getParametrosAjustesImpContable(): string
-	{
-		return self::getParametroRrhh('Presupuesto', 'GestionAjustesImputacionesPresupuestarias','Deshabilitada');
-	}
+    {
+        return self::getParametroRrhh('Presupuesto', 'GestionAjustesImputacionesPresupuestarias', 'Deshabilitada');
+    }
 
     /**
      * Obtener el año fiscal actual.
@@ -169,11 +170,11 @@ class MapucheConfig
     }
 
     public static function getPeriodoCorriente()
-	{
+    {
         $periodoService = app(PeriodoFiscalService::class);
 
-		return $periodoService->getPeriodoFiscal();
-	}
+        return $periodoService->getPeriodoFiscal();
+    }
 
     /**
      * Obtener la fecha de inicio del periodo fiscal corriente.
@@ -259,8 +260,8 @@ class MapucheConfig
 
     public static function getCategoriasDiferencial(): string
     {
-		return self::getParametroRrhh('Sicoss', 'CategoriaDiferencial');
-	}
+        return self::getParametroRrhh('Sicoss', 'CategoriaDiferencial');
+    }
 
 
 
@@ -279,96 +280,99 @@ class MapucheConfig
     }
 
     public static function getDefaultsObraSocial()
-	{
-		return self::getParametroRrhh('Defaults', 'ObraSocial');
-	}
+    {
+        return self::getParametroRrhh('Defaults', 'ObraSocial');
+    }
 
     public static function getConceptosObraSocialAporteAdicional()
-	{
-		return self::getParametroRrhh('Conceptos', 'ObraSocialAporteAdicional');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'ObraSocialAporteAdicional');
+    }
 
     public static function getConceptosObraSocialAporte()
-	{
-		return self::getParametroRrhh('Conceptos', 'ObraSocialAporte');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'ObraSocialAporte');
+    }
 
     public static function getConceptosObraSocialRetro()
-	{
-		return self::getParametroRrhh('Conceptos', 'ObraSocialRetro');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'ObraSocialRetro');
+    }
 
     public static function getConceptosObraSocial()
-	{
-		return self::getParametroRrhh('Conceptos', 'ObraSocial');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'ObraSocial');
+    }
 
 
 
     public static function getTopesJubilacionVoluntario()
-	{
-		return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
+    }
 
 
     public static function getTopesJubilatorioPatronal()
-	{
-		return self::getParametroRrhh('Topes', 'TopeJubilatorioPatronal');
-	}
+    {
+        return self::getParametroRrhh('Topes', 'TopeJubilatorioPatronal');
+    }
 
     public static function getTopesJubilatorioPersonal()
-	{
-		return self::getParametroRrhh('Topes', 'TopeJubilatorioPersonal');
-	}
+    {
+        return self::getParametroRrhh('Topes', 'TopeJubilatorioPersonal');
+    }
 
     public static function getTopesOtrosAportesPersonales()
-	{
-		return self::getParametroRrhh('Topes', 'TopeOtrosAportesPersonales');
-	}
+    {
+        return self::getParametroRrhh('Topes', 'TopeOtrosAportesPersonales');
+    }
 
     public static function getConceptosObraSocialFliarAdherente()
-	{
-		return self::getParametroRrhh('Conceptos', 'ObraSocialFliarAdherente');
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'ObraSocialFliarAdherente');
+    }
 
     public static function getDatosUniversidadCuit()
-	{
-		return self::getParametroRrhh('Datos Universidad', 'CUIT');
-	}
+    {
+        return self::getParametroRrhh('Datos Universidad', 'CUIT');
+    }
 
     public static function getDatosUniversidadDireccion()
-	{
-		return self::getParametroRrhh('Datos Universidad', 'Direccion');
-	}
+    {
+        return self::getParametroRrhh('Datos Universidad', 'Direccion');
+    }
 
     public static function getDatosCodcReparto()
-	{
-		return self::getParametroRrhh('Datos Universidad', 'Cod.R�gimen de Reparto');
-	}
+    {
+        return self::getParametroRrhh('Datos Universidad', 'Cod.R�gimen de Reparto');
+    }
 
     public static function getDatosUniversidadCiudad()
-	{
-		return self::getParametroRrhh('Datos Universidad', 'Ciudad');
-	}
+    {
+        return self::getParametroRrhh('Datos Universidad', 'Ciudad');
+    }
 
-    public static function getDatosUniversidadSigla() {
-		return self::getParametroRrhh('Datos Universidad', 'Sigla');
-	}
+    public static function getDatosUniversidadSigla()
+    {
+        return self::getParametroRrhh('Datos Universidad', 'Sigla');
+    }
 
-    public static function getDatosUniversidadTipoEmpresa() {
-		return self::getParametroRrhh('Datos Universidad', 'TipoEmpresa');
-	}
+    public static function getDatosUniversidadTipoEmpresa()
+    {
+        return self::getParametroRrhh('Datos Universidad', 'TipoEmpresa');
+    }
 
-    public static function getDatosUniversidadTrabajadorConvencionado() {
-		return self::getParametroRrhh('Datos Universidad', 'TrabajadorConvencionado');
-	}
+    public static function getDatosUniversidadTrabajadorConvencionado()
+    {
+        return self::getParametroRrhh('Datos Universidad', 'TrabajadorConvencionado');
+    }
 
     public static function getConceptosInformarAdherentesSicoss()
-	{
-		return self::getParametroRrhh('Conceptos', 'AdherenteSicossDesdeH09',0);
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'AdherenteSicossDesdeH09', 0);
+    }
     public static function getConceptosAcumularAsigFamiliar()
-	{
-		return self::getParametroRrhh('Conceptos', 'AcumularAsigFamiliar',1);
-	}
+    {
+        return self::getParametroRrhh('Conceptos', 'AcumularAsigFamiliar', 1);
+    }
 }

@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
-
 class AfipImportacionCrudaModel extends Model
 {
     use MapucheConnectionTrait;
+
     protected $table = 'suc.afip_importacion_cruda';
     public $timestamps = false;
     protected $fillable = ['linea_completa'];
@@ -97,12 +97,11 @@ class AfipImportacionCrudaModel extends Model
     * Retorna los datos de la tabla afip_importacion_cruda.
     * @return \Illuminate\Support\Collection
     */
-public function getDatosImportados()
+    public function getDatosImportados()
     {
         return DB::connection($this->connection)
             ->table($this->table)
             ->get();
-
     }
     public function getQuery()
     {
@@ -120,5 +119,4 @@ public function getDatosImportados()
             }
         }
     }
-
 }

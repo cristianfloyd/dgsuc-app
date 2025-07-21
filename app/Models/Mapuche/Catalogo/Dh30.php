@@ -111,12 +111,16 @@ class Dh30 extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
+                if (!$value) {
+                    return null;
+                }
                 $value = $this->handleMixedEncoding($value);
                 return trim($value);
             },
             set: function ($value) {
-                if (!$value) return null;
+                if (!$value) {
+                    return null;
+                }
                 $value = EncodingService::toLatin1($value);
                 return trim($value);
             }
@@ -127,12 +131,16 @@ class Dh30 extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
+                if (!$value) {
+                    return null;
+                }
                 $value = $this->handleMixedEncoding($value);
                 return trim($value);
             },
             set: function ($value) {
-                if (!$value) return null;
+                if (!$value) {
+                    return null;
+                }
                 $value = EncodingService::toLatin1($value);
                 return trim($value);
             }
@@ -148,7 +156,7 @@ class Dh30 extends Model
 
     public function dh03(): HasMany
     {
-        return $this->hasMany(Dh03::class, 'codc_uacad',  'desc_abrev');
+        return $this->hasMany(Dh03::class, 'codc_uacad', 'desc_abrev');
     }
 
     public function dhe2(): HasMany

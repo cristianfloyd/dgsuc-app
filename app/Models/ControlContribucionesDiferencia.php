@@ -50,7 +50,7 @@ class ControlContribucionesDiferencia extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return intval(substr($this->cuil, 2, 8));
                 }
-            return null;
+                return null;
             }
         );
     }
@@ -76,10 +76,10 @@ class ControlContribucionesDiferencia extends Model
     // ################################################
     // ################## ACCESORES ##################
     // ################################################
-    
+
     /**
      * Calcula el total de contribuciones sumando los diferentes tipos de contribuciones.
-     * 
+     *
      * @return Attribute Atributo calculado con la suma total de contribuciones
      */
     public function totalContribuciones(): Attribute
@@ -91,4 +91,3 @@ class ControlContribucionesDiferencia extends Model
         );
     }
 }
-

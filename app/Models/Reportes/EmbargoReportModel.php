@@ -103,7 +103,7 @@ class EmbargoReportModel extends Model
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = (new static)->getConnection();
+        $connection = (new static())->getConnection();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.embargo_reports')) {
             $connection->statement('
@@ -143,7 +143,7 @@ class EmbargoReportModel extends Model
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
-        $connection = (new static)->getConnection();
+        $connection = (new static())->getConnection();
 
         $connection->table('suc.embargo_reports')->where('session_id', $sessionId)->delete();
     }
@@ -157,7 +157,7 @@ class EmbargoReportModel extends Model
     public static function cleanOldRecords(): void
     {
         $sessionLifetime = config('session.lifetime') * 60; // Convertir minutos a segundos
-        $connection = (new static)->getConnection();
+        $connection = (new static())->getConnection();
 
         $connection->statement("
             DELETE FROM suc.embargo_reports
@@ -251,5 +251,4 @@ class EmbargoReportModel extends Model
     }
 
     // ##################################### RELACIONES ##########################################
-
 }

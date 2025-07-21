@@ -37,6 +37,7 @@ class Dh24 extends Model
     use HasFactory;
     use MapucheConnectionTrait;
     use HasAsignacionPresupuestaria;
+
     /**
      * Indica si el modelo debe tener timestamps
      */

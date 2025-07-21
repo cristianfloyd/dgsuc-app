@@ -56,4 +56,3 @@ class Dh17 extends Model
         'nro_prove' => 'integer'
     ];
 }
-

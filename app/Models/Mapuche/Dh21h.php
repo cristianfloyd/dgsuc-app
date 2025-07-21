@@ -27,7 +27,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dh21h extends Model
 {
-    use MapucheConnectionTrait, Dh21hQueries, WithData, HasFactory;
+    use MapucheConnectionTrait;
+    use Dh21hQueries;
+    use WithData;
+    use HasFactory;
 
 
 
@@ -135,11 +138,11 @@ class Dh21h extends Model
     public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
-        ->where(function($q) use ($fechaInicio, $fechaFin) {
-            $q->where(function($inner) use ($fechaInicio, $fechaFin) {
+        ->where(function ($q) use ($fechaInicio, $fechaFin) {
+            $q->where(function ($inner) use ($fechaInicio, $fechaFin) {
                 $inner->where('dh22.per_liano', $fechaInicio->year)
                     ->whereBetween('dh22.per_limes', [$fechaInicio->month, $fechaFin->month]);
-            })->orWhere(function($inner) use ($fechaInicio, $fechaFin) {
+            })->orWhere(function ($inner) use ($fechaInicio, $fechaFin) {
                 $inner->whereBetween('dh22.per_liano', [$fechaInicio->year, $fechaFin->year])
                     ->where('dh22.per_limes', '>=', $fechaInicio->month)
                     ->where('dh22.per_limes', '<=', $fechaFin->month);
@@ -164,4 +167,3 @@ class Dh21h extends Model
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 }
-

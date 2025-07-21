@@ -11,7 +11,7 @@ class Dhe7 extends Model
     use HasFactory;
 
     use MapucheConnectionTrait;
-    
+
     protected $table = 'dhe7';
 
     // Especifica la clave primaria de la tabla

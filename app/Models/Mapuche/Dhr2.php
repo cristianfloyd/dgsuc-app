@@ -18,9 +18,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dhr2 extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
-    
+
     protected $table = 'mapuche.dhr2';
     public $timestamps = false;
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];
