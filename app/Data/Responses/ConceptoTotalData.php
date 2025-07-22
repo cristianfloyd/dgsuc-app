@@ -20,23 +20,19 @@ class ConceptoTotalData extends Data
     /**
      * Crea una instancia de ConceptoTotalData desde un array de datos.
      *
-     * @param array $data
      *
-     * @return static
      */
     public static function fromArray(array $data): static
     {
         return new self(
             idLiquidacion: $data['id_liquidacion'],
             codigoConcepto: $data['codn_conce'],
-            importeTotal: (float)$data['total_impp'],
+            importeTotal: (float) $data['total_impp'],
         );
     }
 
     /**
      * Convierte el DTO a un array para exportación.
-     *
-     * @return array
      */
     public function toExportArray(): array
     {

@@ -115,6 +115,6 @@ class TransferResultData extends Data
      */
     public function getPeriodoFiscalString(): string
     {
-        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        return $this->periodoFiscal['year'] . '-' . str_pad((string) $this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
     }
 }

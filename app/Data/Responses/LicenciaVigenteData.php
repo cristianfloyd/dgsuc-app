@@ -45,8 +45,6 @@ class LicenciaVigenteData extends Data
 
     /**
      * Obtiene la descripción legible del tipo de condición/licencia.
-     *
-     * @return string
      */
     public function getDescripcionCondicion(): string
     {
@@ -65,8 +63,6 @@ class LicenciaVigenteData extends Data
 
     /**
      * Determina si la licencia es de maternidad.
-     *
-     * @return bool
      */
     public function esLicenciaMaternidad(): bool
     {
@@ -75,8 +71,6 @@ class LicenciaVigenteData extends Data
 
     /**
      * Determina si la licencia es por enfermedad.
-     *
-     * @return bool
      */
     public function esLicenciaEnfermedad(): bool
     {
@@ -87,8 +81,6 @@ class LicenciaVigenteData extends Data
      * Crear una colección tipada desde un conjunto de resultados.
      *
      * @param Collection|array $resultados
-     *
-     * @return DataCollection
      */
     public static function fromResultados($resultados): DataCollection
     {
@@ -98,7 +90,7 @@ class LicenciaVigenteData extends Data
 
         return new DataCollection(
             LicenciaVigenteData::class,
-            $resultados->map(fn ($row) => self::fromRow($row)),
+            $resultados->map(fn ($row): \App\Data\Responses\LicenciaVigenteData => self::fromRow($row)),
         );
     }
 
@@ -106,12 +98,10 @@ class LicenciaVigenteData extends Data
      * Crear una instancia desde una fila de resultados.
      *
      * @param object|array $row
-     *
-     * @return self
      */
     public static function fromRow($row): self
     {
-        $row = (object)$row;
+        $row = (object) $row;
 
         return new self(
             nro_legaj: $row->nro_legaj,
@@ -128,8 +118,6 @@ class LicenciaVigenteData extends Data
 
     /**
      * Convierte el DTO a un array para exportación Excel.
-     *
-     * @return array
      */
     public function toExcelRow(): array
     {

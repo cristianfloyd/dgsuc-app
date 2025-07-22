@@ -9,6 +9,7 @@ use Spatie\LaravelData\Attributes\Validation\Size;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class AgenteData extends Data
 {
@@ -24,7 +25,7 @@ class AgenteData extends Data
     }
 
     // Validación integrada
-    public static function rules(): array
+    public static function rules(ValidationContext $context = null): array
     {
         return [
             'nombre' => ['required', 'string', 'max:255'],
@@ -50,7 +51,7 @@ class AgenteData extends Data
     // Método helper para crear una colección de agentes
     public static function collection(Collection $employees): Collection
     {
-        return $employees->map(fn (Dh01 $employee) => self::fromModel($employee));
+        return $employees->map(fn (Dh01 $employee): \App\Data\Mapuche\AgenteData => self::fromModel($employee));
     }
 
     // Método para obtener el nombre completo
@@ -62,6 +63,6 @@ class AgenteData extends Data
     // Método para verificar si el agente tiene fecha de inicio
     public function tieneInicio(): bool
     {
-        return $this->fechaInicio !== null;
+        return $this->fechaInicio instanceof Carbon;
     }
 }

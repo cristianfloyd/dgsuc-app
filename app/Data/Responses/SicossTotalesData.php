@@ -49,8 +49,6 @@ class SicossTotalesData extends Data
 
     /**
      * Obtiene los valores por defecto para los totales.
-     *
-     * @return array
      */
     public static function getDefaultValues(): array
     {

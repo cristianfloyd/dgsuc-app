@@ -20,23 +20,19 @@ class ConceptoTotalItemData extends Data
     /**
      * Crea una instancia desde los datos de BD.
      *
-     * @param object $rowData
      *
-     * @return static
      */
     public static function fromRowData(object $rowData): static
     {
         return new static(
             codigoConcepto: $rowData->codn_conce,
             descripcionConcepto: $rowData->desc_conce,
-            importe: (float)$rowData->importe,
+            importe: (float) $rowData->importe,
         );
     }
 
     /**
      * Convierte el DTO a un array para exportación.
-     *
-     * @return array
      */
     public function toExportArray(): array
     {

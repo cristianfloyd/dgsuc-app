@@ -87,8 +87,6 @@ class RepOrdenPagoDtoData extends Data
     /**
      * Convierte el DTO a un array con las claves en snake_case
      * para que coincidan con los nombres de columnas en la base de datos.
-     *
-     * @return array
      */
     public function toArray(): array
     {

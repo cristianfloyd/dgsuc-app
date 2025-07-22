@@ -64,17 +64,17 @@ class BloqueosData extends Data
 
     public static function fromExcelRow(array $row, int $nroLiqui): self
     {
-        $tipoMovimiento = strtolower($row['tipo_de_movimiento']);
+        $tipoMovimiento = strtolower((string) $row['tipo_de_movimiento']);
 
 
         return new self(
             fecha_registro: Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
-            email: strtolower(trim($row['correo_electronico'])),
-            nombre: ucwords(strtolower(trim($row['nombre']))),
-            usuario_mapuche: strtolower(trim($row['usuario_mapuche_solicitante'])),
-            dependencia: trim($row['dependencia']),
-            legajo: (int)$row['legajo'],
-            n_de_cargo: (int)$row['n_de_cargo'],
+            email: strtolower(trim((string) $row['correo_electronico'])),
+            nombre: ucwords(strtolower(trim((string) $row['nombre']))),
+            usuario_mapuche: strtolower(trim((string) $row['usuario_mapuche_solicitante'])),
+            dependencia: trim((string) $row['dependencia']),
+            legajo: (int) $row['legajo'],
+            n_de_cargo: (int) $row['n_de_cargo'],
             fecha_de_baja: self::processFechaBaja($row, $tipoMovimiento),
             tipo: $tipoMovimiento,
             observaciones: trim($row['observaciones'] ?? ''),
@@ -85,24 +85,22 @@ class BloqueosData extends Data
 
     public static function fromValidatedData(array $validatedData, int $nroLiqui): self
     {
-        $instance = new self(
+        return new self(
             fecha_registro: now(),
-            email: strtolower($validatedData['correo_electronico']),
-            nombre: ucwords(strtolower($validatedData['nombre'])),
-            usuario_mapuche: strtolower($validatedData['usuario_mapuche_solicitante']),
+            email: strtolower((string) $validatedData['correo_electronico']),
+            nombre: ucwords(strtolower((string) $validatedData['nombre'])),
+            usuario_mapuche: strtolower((string) $validatedData['usuario_mapuche_solicitante']),
             dependencia: $validatedData['dependencia'],
             legajo: $validatedData['legajo'],
             n_de_cargo: $validatedData['n_de_cargo'],
             fecha_de_baja: $validatedData['fecha_de_baja'],
-            tipo: strtolower($validatedData['tipo_de_movimiento']),
+            tipo: strtolower((string) $validatedData['tipo_de_movimiento']),
             observaciones: $validatedData['observaciones'] ?? '',
-            chkstopliq: strtolower($validatedData['tipo_de_movimiento']) === 'licencia',
+            chkstopliq: strtolower((string) $validatedData['tipo_de_movimiento']) === 'licencia',
             nro_liqui: $nroLiqui,
             estado: $validatedData['estado'],
             mensaje_error: $validatedData['mensaje_error'] ?? null,
         );
-
-        return $instance;
     }
 
     /**
