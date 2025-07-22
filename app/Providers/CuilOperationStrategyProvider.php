@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use App\PaginationConstants;
-use Illuminate\Support\ServiceProvider;
 use App\Contracts\CuilOperationStrategy;
-use App\Strategies\CompareCuilsStrategy;
 use App\Contracts\CuilRepositoryInterface;
 use App\Contracts\WorkflowServiceInterface;
+use App\PaginationConstants;
+use App\Strategies\CompareCuilsStrategy;
 use App\Strategies\LoadCuilsNotInAfipStrategy;
+use Illuminate\Support\ServiceProvider;
 
 class CuilOperationStrategyProvider extends ServiceProvider
 {
@@ -24,13 +24,14 @@ class CuilOperationStrategyProvider extends ServiceProvider
             if ($strategy === 'compare_cuils') {
                 return new CompareCuilsStrategy(
                     $app->make(CuilRepositoryInterface::class),
-                    PaginationConstants::PER_PAGE
+                    PaginationConstants::PER_PAGE,
                 );
-            } elseif ($strategy === 'load_cuils_not_in_afip') {
+            }
+            if ($strategy === 'load_cuils_not_in_afip') {
                 return new LoadCuilsNotInAfipStrategy(
                     $app->make(CuilRepositoryInterface::class),
                     $app->make(WorkflowServiceInterface::class),
-                    $app->make('processLog')
+                    $app->make('processLog'),
                 );
             }
         });
@@ -41,6 +42,6 @@ class CuilOperationStrategyProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

@@ -9,9 +9,9 @@ class ComprobanteNominaModel extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.comprobantes_nomina';
-
     public $timestamps = true;
+
+    protected $table = 'suc.comprobantes_nomina';
 
     protected $fillable = [
         'anio_periodo',
@@ -25,7 +25,7 @@ class ComprobanteNominaModel extends Model
         'numero_retencion',
         'descripcion_retencion',
         'requiere_cheque',
-        'codigo_grupo'
+        'codigo_grupo',
     ];
 
     protected $casts = [
@@ -34,6 +34,6 @@ class ComprobanteNominaModel extends Model
         'nro_liqui' => 'integer',
         'importe_neto' => 'decimal:2',
         'importe_retencion' => 'decimal:2',
-        'requiere_cheque' => 'boolean'
+        'requiere_cheque' => 'boolean',
     ];
 }

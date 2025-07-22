@@ -2,13 +2,12 @@
 
 namespace App\Models\Mapuche;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini
+ * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini.
  */
 class MapucheConfig
 {
@@ -20,6 +19,7 @@ class MapucheConfig
      * @param string $section Sección principal
      * @param string $parameter Nombre del parámetro
      * @param mixed $default Valor por defecto si el parámetro no se encuentra
+     *
      * @return mixed
      */
     public static function getParametroRrhh(string $section, string $parameter, $default = null)
@@ -34,6 +34,7 @@ class MapucheConfig
      * @param string $section Sección principal
      * @param string $parameter Nombre del parámetro
      * @param mixed $value Valor a establecer
+     *
      * @return bool
      */
     public static function setParametroRrhh(string $section, string $parameter, $value): bool
@@ -41,11 +42,11 @@ class MapucheConfig
         return Rrhhini::updateOrCreate(
             [
                 'nombre_seccion' => $section,
-                'nombre_parametro' => $parameter
+                'nombre_parametro' => $parameter,
             ],
             [
-                'dato_parametro' => $value
-            ]
+                'dato_parametro' => $value,
+            ],
         )->exists;
     }
 
@@ -58,7 +59,7 @@ class MapucheConfig
      */
     public static function getPorcentajeAporteDiferencialJubilacion(): float
     {
-        return floatval(self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
+        return (float)(self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
     }
 
     /**
@@ -184,7 +185,7 @@ class MapucheConfig
     public static function getFechaInicioPeriodoCorriente(): string
     {
         return DB::connection(self::getStaticConnectionName())
-        ->select('SELECT map_get_fecha_inicio_periodo() as fecha_inicio')[0]->fecha_inicio;
+            ->select('SELECT map_get_fecha_inicio_periodo() as fecha_inicio')[0]->fecha_inicio;
     }
 
     /**
@@ -195,7 +196,7 @@ class MapucheConfig
     public static function getFechaFinPeriodoCorriente(): string
     {
         return DB::connection(self::getStaticConnectionName())
-        ->select('SELECT map_get_fecha_fin_periodo() as fecha_fin')[0]->fecha_fin;
+            ->select('SELECT map_get_fecha_fin_periodo() as fecha_fin')[0]->fecha_fin;
     }
 
     /**
@@ -263,8 +264,6 @@ class MapucheConfig
         return self::getParametroRrhh('Sicoss', 'CategoriaDiferencial');
     }
 
-
-
     /**
      * Obtiene el nombre de la conexión de base de datos de forma estática.
      *
@@ -304,13 +303,10 @@ class MapucheConfig
         return self::getParametroRrhh('Conceptos', 'ObraSocial');
     }
 
-
-
     public static function getTopesJubilacionVoluntario()
     {
         return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
     }
-
 
     public static function getTopesJubilatorioPatronal()
     {
@@ -371,6 +367,7 @@ class MapucheConfig
     {
         return self::getParametroRrhh('Conceptos', 'AdherenteSicossDesdeH09', 0);
     }
+
     public static function getConceptosAcumularAsigFamiliar()
     {
         return self::getParametroRrhh('Conceptos', 'AcumularAsigFamiliar', 1);

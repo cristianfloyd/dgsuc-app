@@ -2,19 +2,21 @@
 
 namespace App\Repositories\Mapuche;
 
-use App\Models\Mapuche\Dh21h;
-use App\Data\Mapuche\Dh21hData;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
+use App\Data\Mapuche\Dh21hData;
+use App\Models\Mapuche\Dh21h;
 
 class Dh21hRepository implements Dh21hRepositoryInterface
 {
     /**
      * Create a new class instance.
      */
-    public function __construct( private readonly Dh21h $model){}
+    public function __construct(private readonly Dh21h $model)
+    {
+    }
 
     /**
-     * Obtener liquidación por ID
+     * Obtener liquidación por ID.
      */
     public function findById(int $id): ?Dh21hData
     {
@@ -22,12 +24,13 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     }
 
     /**
-     * Crear nueva liquidación
+     * Crear nueva liquidación.
      */
     public function create(Dh21hData $data): Dh21h
     {
         return $this->model->create($data->toArray());
     }
+
     /**
      * @inheritDoc
      */

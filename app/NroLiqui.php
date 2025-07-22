@@ -15,6 +15,12 @@ class NroLiqui
         $this->value = $value;
     }
 
+    // Método para representación en string
+    public function __toString(): string
+    {
+        return (string)$this->value;
+    }
+
     // Método getter para obtener el valor
     public function getValue(): int
     {
@@ -25,11 +31,5 @@ class NroLiqui
     public function equals(NroLiqui $other): bool
     {
         return $this->value === $other->getValue();
-    }
-
-    // Método para representación en string
-    public function __toString(): string
-    {
-        return (string) $this->value;
     }
 }

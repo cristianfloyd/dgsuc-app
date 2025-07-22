@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\ServiceProvider;
 use App\Contracts\TableManagementServiceInterface;
+use Illuminate\Support\ServiceProvider;
 
 class TableManagementServiceProvider extends ServiceProvider
 {
@@ -26,6 +26,6 @@ class TableManagementServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

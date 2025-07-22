@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Enums\SicossCodigoActividad;
 use App\Enums\SicossCodigoCondicion;
-use App\Enums\SicossCodigoSituacion;
-use App\Traits\MapucheConnectionTrait;
 use App\Enums\SicossCodigoModalContrat;
+use App\Enums\SicossCodigoSituacion;
 use App\Services\Mapuche\TableSelectorService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SicossUpdateService
 {
@@ -98,12 +98,12 @@ class SicossUpdateService
     public function dropTemporaryTables(): array
     {
         $connection = DB::connection($this->getConnectionName());
-        $connection->statement("DROP TABLE IF EXISTS tcargosliq");
-        $connection->statement("DROP TABLE IF EXISTS Tcodact");
+        $connection->statement('DROP TABLE IF EXISTS tcargosliq');
+        $connection->statement('DROP TABLE IF EXISTS Tcodact');
 
         return [
             'status' => 'success',
-            'message' => 'Tablas temporales eliminadas'
+            'message' => 'Tablas temporales eliminadas',
         ];
     }
 
@@ -122,13 +122,13 @@ class SicossUpdateService
     {
         $connection = DB::connection($this->getConnectionName());
 
-        $connection->statement("ALTER TABLE tcargosliq ADD codsit INTEGER DEFAULT 1");
+        $connection->statement('ALTER TABLE tcargosliq ADD codsit INTEGER DEFAULT 1');
         $connection->statement("ALTER TABLE tcargosliq ADD r21 CHAR(1) DEFAULT 'N'");
-        $connection->statement("ALTER TABLE tcargosliq ADD codact INTEGER NULL");
+        $connection->statement('ALTER TABLE tcargosliq ADD codact INTEGER NULL');
 
         return [
             'status' => 'success',
-            'alterations' => 3
+            'alterations' => 3,
         ];
     }
 
@@ -149,16 +149,16 @@ class SicossUpdateService
     public function createTcodact(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->statement("
+            ->statement('
                 SELECT nro_legaj, MIN(codact) AS codact, MAX(codsit) AS codsit
                 INTO TEMP Tcodact
                 FROM tcargosliq
                 GROUP BY nro_legaj
-            ");
+            ');
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -175,17 +175,17 @@ class SicossUpdateService
     public function updateSituacionCodsit(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update("
+            ->update('
                 UPDATE mapuche.dha8
                 SET codigosituacion = codsit
                 FROM tcodact
                 WHERE mapuche.dha8.nro_legajo = tcodact.nro_legaj
-                AND codsit = ". SicossCodigoSituacion::MATERNIDAD->value ."
-            ");
+                AND codsit = ' . SicossCodigoSituacion::MATERNIDAD->value . '
+            ');
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -205,10 +205,10 @@ class SicossUpdateService
     public function updateCondicionActividad(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update("
+            ->update('
                 UPDATE mapuche.dha8
-                SET codigocondicion =  ". SicossCodigoCondicion::JUBILADO->value .",
-                    codigoactividad = ". SicossCodigoActividad::DOCENTE_ADMINISTRATIVO->value ."
+                SET codigocondicion =  ' . SicossCodigoCondicion::JUBILADO->value . ',
+                    codigoactividad = ' . SicossCodigoActividad::DOCENTE_ADMINISTRATIVO->value . "
                 FROM tcargosliq
                 WHERE tipo_estad = 'J'
                 AND NOT ((codc_agrup IN ('AUXU', 'PROU')
@@ -222,7 +222,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -242,9 +242,9 @@ class SicossUpdateService
     public function updateCondicionEspecial(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update("
+            ->update('
                 UPDATE mapuche.dha8
-                SET codigocondicion =  ". SicossCodigoCondicion::JUBILADO_DOCENTES_UNIVERSITARIOS->value ."
+                SET codigocondicion =  ' . SicossCodigoCondicion::JUBILADO_DOCENTES_UNIVERSITARIOS->value . "
                 FROM tcargosliq
                 WHERE tipo_estad = 'J'
                 AND ((codc_agrup IN ('AUXU', 'PROU')
@@ -258,7 +258,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -282,22 +282,22 @@ class SicossUpdateService
     public function updateActividad(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update("
+            ->update('
                 UPDATE mapuche.dha8
                 SET codigoactividad = CASE
-                    WHEN codact = 1 THEN ". SicossCodigoActividad::fromCodact(1)->value ."
-                    WHEN codact = 2 THEN ". SicossCodigoActividad::fromCodact(2)->value ."
-                    WHEN codact = 3 THEN ". SicossCodigoActividad::fromCodact(3)->value ."
-                    WHEN codact = 4 THEN ". SicossCodigoActividad::fromCodact(4)->value ."
+                    WHEN codact = 1 THEN ' . SicossCodigoActividad::fromCodact(1)->value . '
+                    WHEN codact = 2 THEN ' . SicossCodigoActividad::fromCodact(2)->value . '
+                    WHEN codact = 3 THEN ' . SicossCodigoActividad::fromCodact(3)->value . '
+                    WHEN codact = 4 THEN ' . SicossCodigoActividad::fromCodact(4)->value . '
                 END
                 FROM Tcodact
                 WHERE codigoactividad ISNULL
                 AND mapuche.dha8.nro_legajo = Tcodact.nro_legaj
-            ");
+            ');
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -312,12 +312,13 @@ class SicossUpdateService
      * 2. Actualiza los registros que cumplen con los criterios establecidos
      *
      * @param array $liquidaciones Números de liquidación a procesar (por defecto [6])
+     *
      * @return array Resultado de la operación con estado y cantidad de filas afectadas
      */
     public function updateDocentesExclusivaHorasCatedra(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
-        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
 
         $query = "
@@ -377,13 +378,13 @@ class SicossUpdateService
             $liquidaciones,  // Para legajos_agx
             $liquidaciones,  // Para legajos_cxx
             $liquidaciones,  // Para resultado_agx
-            $liquidaciones   // Para resultados_cxx
+            $liquidaciones,   // Para resultados_cxx
         );
         $affected = $connection->update($query, $params);
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -395,6 +396,9 @@ class SicossUpdateService
      * 2. Agrega columnas adicionales necesarias para el procesamiento
      *
      * @param array $liquidaciones Array de IDs de liquidaciones a procesar. Por defecto [6]
+     *
+     * @throws \Exception Si ocurre un error durante la creación de las tablas
+     *
      * @return array{
      *     tables: array{
      *         base: int,
@@ -403,7 +407,6 @@ class SicossUpdateService
      *     total_affected: int,
      *     status: string
      * }
-     * @throws \Exception Si ocurre un error durante la creación de las tablas
      */
     public function createTemporaryTables(array $liquidaciones = [6]): array
     {
@@ -412,7 +415,7 @@ class SicossUpdateService
 
         try {
             // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-            $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+            $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
 
             // Determinar qué tabla usar según el período fiscal
             $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -458,12 +461,12 @@ class SicossUpdateService
 
             $affected = $connection->select($query, $liquidaciones);
 
-            $results['tables']['base'] = count($affected);
+            $results['tables']['base'] = \count($affected);
 
             // 2. Agregar columnas adicionales
-            $connection->statement("ALTER TABLE tcargosliq ADD codsit INTEGER DEFAULT 1");
+            $connection->statement('ALTER TABLE tcargosliq ADD codsit INTEGER DEFAULT 1');
             $connection->statement("ALTER TABLE tcargosliq ADD r21 CHAR(1) DEFAULT 'N'");
-            $connection->statement("ALTER TABLE tcargosliq ADD codact INTEGER NULL");
+            $connection->statement('ALTER TABLE tcargosliq ADD codact INTEGER NULL');
 
             $results['tables']['alterations'] = 3;
             $results['total_affected'] = $results['tables']['base'];
@@ -483,19 +486,21 @@ class SicossUpdateService
      * en la tabla DH21 correspondiente al período fiscal de las liquidaciones.
      *
      * @param array $liquidaciones Array de números de liquidación a procesar. Por defecto [6].
-     * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
+     *
      * @throws \Exception Si ocurre un error durante la actualización.
+     *
+     * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
      */
     public function updateCodsit(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
 
-        $query = "UPDATE tcargosliq SET codsit = ". SicossCodigoSituacion::MATERNIDAD->value ."
+        $query = 'UPDATE tcargosliq SET codsit = ' . SicossCodigoSituacion::MATERNIDAD->value . "
                 FROM mapuche.{$dh21Table}
                 WHERE mapuche.{$dh21Table}.nro_liqui IN ($placeholders)
                 AND tcargosliq.nro_cargo = mapuche.{$dh21Table}.nro_cargo
@@ -505,7 +510,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -515,8 +520,9 @@ class SicossUpdateService
      * Este método actualiza el campo r21 a 'S' para los registros que tienen un tipo adicional 18
      * en la tabla dhd2 y no tienen fecha de finalización (fechahasta ISNULL).
      *
-     * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
      * @throws \Exception Si ocurre un error durante la actualización.
+     *
+     * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
      */
     public function updateR21(): array
     {
@@ -529,7 +535,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -543,17 +549,19 @@ class SicossUpdateService
      * - Si codn_conce = 788, establece codact = 3
      *
      * @param array<int> $liquidaciones Array de números de liquidación a procesar. Por defecto [6]
+     *
+     * @throws \Exception Si ocurre un error durante la actualización
+     *
      * @return array{
      *     status: string,
      *     rows_affected: int
      * } Array con el estado de la operación y el número de filas afectadas
-     * @throws \Exception Si ocurre un error durante la actualización
      */
     public function updateCodact(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -575,7 +583,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -597,16 +605,16 @@ class SicossUpdateService
     public function updateDefaults(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update("UPDATE mapuche.dha8
-                    SET codigosituacion = ". SicossCodigoSituacion::ACTIVO->value .",
-                        codigocondicion =  ". SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value .",
+            ->update('UPDATE mapuche.dha8
+                    SET codigosituacion = ' . SicossCodigoSituacion::ACTIVO->value . ',
+                        codigocondicion =  ' . SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value . ',
                         codigoactividad = NULL,
                         codigozona = 1,
-                        codigomodalcontrat = ". SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value );
+                        codigomodalcontrat = ' . SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value);
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -624,6 +632,7 @@ class SicossUpdateService
      *    - provincialocalidad = NULL
      *
      * @param array<int> $liquidaciones Array de números de liquidación a procesar. Por defecto [6]
+     *
      * @return array{
      *     status: string,
      *     rows_affected: int
@@ -633,12 +642,12 @@ class SicossUpdateService
     {
         $connection = DB::connection($this->getConnectionName());
         // Ejemplo de generación de placeholders si es necesario parametrizar liquidaciones:
-        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
 
-        $query = "
+        $query = '
             INSERT INTO mapuche.dha8(nro_legajo,
                                     codigosituacion,
                                     codigocondicion,
@@ -646,10 +655,10 @@ class SicossUpdateService
                                     codigomodalcontrat,
                                     provincialocalidad)
             SELECT DISTINCT nro_legaj,
-                ". SicossCodigoSituacion::ACTIVO->value .",
-                ". SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value .",
+                ' . SicossCodigoSituacion::ACTIVO->value . ',
+                ' . SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value . ",
                 '1',
-                ". SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value .",
+                " . SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value . ",
                 NULL
             FROM mapuche.{$dh21Table}
             WHERE nro_liqui IN ($placeholders)
@@ -660,7 +669,7 @@ class SicossUpdateService
 
         return [
             'status' => 'success',
-            'rows_affected' => $affected
+            'rows_affected' => $affected,
         ];
     }
 
@@ -672,6 +681,7 @@ class SicossUpdateService
      * 2. Identifica los agentes que no tienen código de actividad asignado
      *
      * @param array<int> $liquidaciones Array de números de liquidación a verificar. Por defecto [6]
+     *
      * @return array{
      *     status: string,
      *     agentes_sin_actividad: array,
@@ -681,13 +691,13 @@ class SicossUpdateService
     public function verificarAgentesInactivos(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
-        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
 
         // Crear tabla temporal aaa
-        $connection->statement("DROP TABLE IF EXISTS aaa");
+        $connection->statement('DROP TABLE IF EXISTS aaa');
         $query = "
             SELECT DISTINCT nro_legaj
             INTO TEMP aaa
@@ -700,17 +710,17 @@ class SicossUpdateService
         $connection->statement($query, $liquidaciones);
 
         // Obtener agentes sin código de actividad
-        $agentes = $connection->select("
+        $agentes = $connection->select('
             SELECT A.*
             FROM mapuche.dha8 A
             JOIN aaa b ON A.nro_legajo = b.nro_legaj
             WHERE codigoactividad ISNULL
-        ");
+        ');
 
         return [
             'status' => 'success',
             'agentes_sin_actividad' => $agentes,
-            'total_agentes' => count($agentes)
+            'total_agentes' => \count($agentes),
         ];
     }
 }

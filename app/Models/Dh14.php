@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Modelo para la tabla de Acumuladores del sistema Mapuche
+ * Modelo para la tabla de Acumuladores del sistema Mapuche.
  *
  * @property int $nro_acumu Número de Acumulador (Primary Key)
  * @property string|null $observacion Observaciones del campo (200)
@@ -19,6 +19,13 @@ class Dh14 extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
+
+    /**
+     * Indica si el modelo debe ser timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Nombre de la tabla en la base de datos.
@@ -35,13 +42,6 @@ class Dh14 extends Model
     protected $primaryKey = 'nro_acumu';
 
     /**
-     * Indica si el modelo debe ser timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
      * Los atributos que son asignables en masa.
      *
      * @var array<string>
@@ -49,7 +49,7 @@ class Dh14 extends Model
     protected $fillable = [
         'nro_acumu',
         'observacion',
-        'desc_acumu'
+        'desc_acumu',
     ];
 
     /**
@@ -60,25 +60,25 @@ class Dh14 extends Model
     protected $casts = [
         'nro_acumu' => 'integer',
         'observacion' => 'string',
-        'desc_acumu' => 'string'
+        'desc_acumu' => 'string',
     ];
 
     /**
-     * Accessor para limpiar los espacios en blanco del campo desc_acumu
-     */
-    protected function descAcumu(): Attribute
-    {
-        return Attribute::make(
-            get: fn($value) => $value ? trim($value) : null,
-        );
-    }
-
-    /**
      * Obtiene los conceptos (Dh12) que utilizan este acumulador.
-     * La relación se establece a través del campo flag_acumu de Dh12
+     * La relación se establece a través del campo flag_acumu de Dh12.
      */
     public function conceptos()
     {
         return Dh12::where('flag_acumu', 'like', DB::raw("concat(repeat('_', ? - 1), 'S', '%')", [$this->nro_acumu]));
+    }
+
+    /**
+     * Accessor para limpiar los espacios en blanco del campo desc_acumu.
+     */
+    protected function descAcumu(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? trim($value) : null,
+        );
     }
 }

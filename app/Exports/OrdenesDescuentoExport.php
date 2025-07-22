@@ -2,19 +2,19 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithBackgroundColor;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithBackgroundColor;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles, WithCustomStartCell, WithBackgroundColor, WithTitle
 {
@@ -48,7 +48,7 @@ class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, Sh
             'Concepto',
             'Descripción Concepto',
             'Importe',
-            'Última Actualización'
+            'Última Actualización',
         ];
     }
 
@@ -68,7 +68,7 @@ class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, Sh
             $row->codn_conce,
             $row->desc_conce,
             $row->impp_conce,
-            $row->last_sync
+            $row->last_sync,
         ];
     }
 
@@ -89,7 +89,7 @@ class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, Sh
             'L' => '@',
             'M' => '#,##0.00',
             'N' => '#,##0.00',
-            'O' => NumberFormat::FORMAT_DATE_DDMMYYYY
+            'O' => NumberFormat::FORMAT_DATE_DDMMYYYY,
         ];
     }
 
@@ -148,4 +148,3 @@ class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, Sh
         return 'Orden Descuentos';
     }
 }
-

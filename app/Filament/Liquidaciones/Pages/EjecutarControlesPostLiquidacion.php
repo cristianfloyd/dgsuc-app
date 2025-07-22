@@ -8,11 +8,26 @@ use Filament\Pages\Page;
 
 class EjecutarControlesPostLiquidacion extends Page
 {
+    public $nroLiqui;
+
+    public $resultados = [];
+
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
+
     protected static ?string $title = 'Ejecutar Controles Post-Liquidación';
 
-    public $nroLiqui;
-    public $resultados = [];
+    public function ejecutarControles(): void
+    {
+        $service = new LiquidacionControlService();
+
+        foreach ($this->controles as $control) {
+            $this->resultados[$control] = match ($control) {
+                'cargos_liquidados' => $service->controlarCargosLiquidados($this->nroLiqui),
+                'negativos' => $service->controlarNegativos($this->nroLiqui),
+                // ... más controles
+            };
+        }
+    }
 
     protected function getFormSchema(): array
     {
@@ -33,18 +48,5 @@ class EjecutarControlesPostLiquidacion extends Page
                     // ... más controles
                 ]),
         ];
-    }
-
-    public function ejecutarControles()
-    {
-        $service = new LiquidacionControlService();
-
-        foreach ($this->controles as $control) {
-            $this->resultados[$control] = match ($control) {
-                'cargos_liquidados' => $service->controlarCargosLiquidados($this->nroLiqui),
-                'negativos' => $service->controlarNegativos($this->nroLiqui),
-                // ... más controles
-            };
-        }
     }
 }

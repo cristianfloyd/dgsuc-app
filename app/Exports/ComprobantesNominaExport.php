@@ -2,39 +2,30 @@
 
 namespace App\Exports;
 
-use NumberFormatter;
 use App\Models\ComprobanteNominaModel;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Events\BeforeSheet;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithDrawings;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithDrawings;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\BeforeSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitle, WithStyles, WithEvents, WithCustomStartCell, ShouldAutoSize, WithDrawings, WithColumnFormatting
 {
-
     protected $nroLiqui;
+
     protected $descLiqui;
+
     protected $totalImporte;
-
-
-
-    protected function formatMoneda(float $monto): string
-    {
-        $formatter = new NumberFormatter('es_AR', NumberFormatter::CURRENCY);
-        return $formatter->format($monto);
-    }
-
 
     public function __construct(int $nroLiqui, string $descLiqui)
     {
@@ -42,7 +33,6 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
         $this->descLiqui = $descLiqui;
         $this->totalImporte = ComprobanteNominaModel::where('nro_liqui', $nroLiqui)->sum('importe');
     }
-
 
     public function drawings()
     {
@@ -65,17 +55,10 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
         return $drawing;
     }
 
-    protected function getImporteEnLetras(): string
-    {
-        $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
-        return mb_strtoupper($formatter->format($this->totalImporte, 2));
-    }
-
-
     public function registerEvents(): array
     {
         return [
-            BeforeSheet::class => function (BeforeSheet $event) {
+            BeforeSheet::class => function (BeforeSheet $event): void {
                 // Configuración de página A4
                 $event->sheet->getPageSetup()
                     ->setPaperSize(PageSetup::PAPERSIZE_A4)
@@ -112,15 +95,16 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
                     'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, ' .
                         'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe ' .
                         'gerencial que se adjuntan a la presente, totalizando un importe de descuentos de PESOS ' .
-                        $this->getImporteEnLetras() . ' ($' . number_format($this->totalImporte, 2, ',', '.') . ')'
+                        $this->getImporteEnLetras() . ' ($' . number_format($this->totalImporte, 2, ',', '.') . ')',
                 );
 
                 // Texto final
                 $event->sheet->mergeCells('A9:B9');
                 $event->sheet->setCellValue('A9', 'Los mismos corresponden a los siguientes beneficiarios:');
-            }
+            },
         ];
     }
+
     public function startCell(): string
     {
         return 'A12'; // Posición inicial de la tabla
@@ -131,7 +115,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
         return ComprobanteNominaModel::where('nro_liqui', $this->nroLiqui)
             ->select(
                 'descripcion_retencion as Descripción',
-                'importe as Importe'
+                'importe as Importe',
             )
             ->get();
     }
@@ -140,7 +124,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
     {
         return [
             'Descripción',
-            'Importe'
+            'Importe',
         ];
     }
 
@@ -152,7 +136,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_CURRENCY_USD
+            'B' => NumberFormat::FORMAT_CURRENCY_USD,
         ];
     }
 
@@ -180,7 +164,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
         return [
             7 => [
                 'font' => ['bold' => true, 'size' => 14],
-                'alignment' => ['horizontal' => 'center']
+                'alignment' => ['horizontal' => 'center'],
             ],
             8 => [
                 'alignment' => [
@@ -188,11 +172,11 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
                     'horizontal' => Alignment::HORIZONTAL_RIGHT,
                     'vertical' => Alignment::VERTICAL_CENTER,
                 ],
-                'width' => 25
+                'width' => 25,
             ],
             9 => [
                 'alignment' => ['horizontal' => 'left'],
-                'font' => ['italic' => true]
+                'font' => ['italic' => true],
             ],
             // Estilo para los encabezados de columna
             11 => [
@@ -201,13 +185,25 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
             ],
             'A' => [
                 'alignment' => ['horizontal' => 'left'],
-                'width' => 60
+                'width' => 60,
             ],
             'B' => [
                 'alignment' => ['horizontal' => 'right'],
                 'numberFormat' => ['formatCode' => '[$$-es-AR] #,##0.00;[Red]([$$-es-AR] #,##0.00)'],
-                'width' => 25
-            ]
+                'width' => 25,
+            ],
         ];
+    }
+
+    protected function formatMoneda(float $monto): string
+    {
+        $formatter = new \NumberFormatter('es_AR', \NumberFormatter::CURRENCY);
+        return $formatter->format($monto);
+    }
+
+    protected function getImporteEnLetras(): string
+    {
+        $formatter = new \NumberFormatter('es', \NumberFormatter::SPELLOUT);
+        return mb_strtoupper($formatter->format($this->totalImporte, 2));
     }
 }

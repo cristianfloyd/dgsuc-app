@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 
 /**
  * Este servicio maneja la creación y eliminación de la tabla (temporal) de NovedadesCargoImport
@@ -20,7 +20,6 @@ use App\Traits\MapucheConnectionTrait;
 class NovedadesCargoImportTableService
 {
     use MapucheConnectionTrait;
-
 
     // -------------------------------------------------------------------------
     // Nombre de la tabla que se usará como temporal. Se aconseja un nombre único
@@ -92,7 +91,7 @@ class NovedadesCargoImportTableService
             DB::connection($this->getConnectionName())->statement($sql);
         } catch (\Throwable $th) {
             // Si la tabla ya existe o hay otro problema, lo registramos:
-            Log::error('Error al crear la tabla temporal: '.$th->getMessage());
+            Log::error('Error al crear la tabla temporal: ' . $th->getMessage());
             throw $th;
         }
     }
@@ -110,7 +109,7 @@ class NovedadesCargoImportTableService
 
         } catch (\Throwable $th) {
             // Registramos excepciones y volvemos a lanzar
-            Log::error('Error al eliminar la tabla temporal: '.$th->getMessage());
+            Log::error('Error al eliminar la tabla temporal: ' . $th->getMessage());
             throw $th;
         }
     }
@@ -124,7 +123,7 @@ class NovedadesCargoImportTableService
         try {
             DB::connection($this->getConnectionName())->table($this->TableName)->insert($data);
         } catch (\Throwable $th) {
-            Log::error('Error al insertar datos en la tabla temporal: '.$th->getMessage());
+            Log::error('Error al insertar datos en la tabla temporal: ' . $th->getMessage());
             throw $th;
         }
     }
@@ -137,7 +136,7 @@ class NovedadesCargoImportTableService
         try {
             return DB::connection($this->getConnectionName())->table($this->TableName)->get()->toArray();
         } catch (\Throwable $th) {
-            Log::error('Error al leer datos de la tabla temporal: '.$th->getMessage());
+            Log::error('Error al leer datos de la tabla temporal: ' . $th->getMessage());
             throw $th;
         }
     }

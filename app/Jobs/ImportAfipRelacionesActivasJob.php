@@ -2,34 +2,45 @@
 
 namespace App\Jobs;
 
+use App\Contracts\DatabaseServiceInterface;
+use App\Contracts\FileProcessorInterface;
+use App\Contracts\TableManagementServiceInterface;
+use App\Contracts\TransactionServiceInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use App\Contracts\FileProcessorInterface;
-use Illuminate\Foundation\Queue\Queueable;
-use App\Contracts\DatabaseServiceInterface;
-use App\Contracts\WorkflowServiceInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Contracts\TransactionServiceInterface;
-use App\Contracts\TableManagementServiceInterface;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ImportAfipRelacionesActivasJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     private static $tableName = 'afip_relaciones_activas';
+
     private $fileProcessor;
+
     private $employeeService;
+
     private $validationService;
+
     private $transactionService;
+
     private $workflowService;
+
     private $columnMetadata;
+
     private $databaseService;
+
     private $tableManagementService;
 
     public function __construct(
@@ -69,7 +80,6 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
         $step = $this->workflowService->getCurrentStep($processLog);
 
         return $this->transactionService->executeInTransaction(
-
             function () use ($uploadedFile, $system, $tableName, $step): array {
                 try {
                     // Verificar que el sistema sea afip
@@ -99,11 +109,11 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                             'success' => false,
                             'message' => 'Error al verificar y preparar la tabla: ' . $tableResult['message'],
                             'data' => array_merge(['file' => $uploadedFile->id, 'step' => $step], $tableResult['data']),
-                            'error' => $tableResult['error'] ?? null
+                            'error' => $tableResult['error'] ?? null,
                         ];
-                    } else {
-                        Log::info('Tabla preparada:', [$tableResult]);
                     }
+                    Log::info('Tabla preparada:', [$tableResult]);
+
 
                     // Almacenar los datos procesados en la base de datos
                     $insertResult = $this->databaseService->insertBulkData($mappedData, $tableName);
@@ -113,27 +123,27 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                     if ($insertResult['success']) {
                         return [
                             'success' => true,
-                            'message' => "Importación exitosa",
-                            'data' => ['linesProcessed' => $mappedData->count()]
-                        ];
-                    } else {
-                        return [
-                            'success' => false,
-                            'message' => "Error al almacenar las líneas procesadas",
-                            'data' => []
+                            'message' => 'Importación exitosa',
+                            'data' => ['linesProcessed' => $mappedData->count()],
                         ];
                     }
-
-                } catch (\Exception $e) {
-                    Log::error("Error durante la importación: " . $e->getMessage());
                     return [
                         'success' => false,
-                        'message' => "Error durante la importación: " . $e->getMessage(),
+                        'message' => 'Error al almacenar las líneas procesadas',
                         'data' => [],
-                        'error' => $e->getMessage()
+                    ];
+
+
+                } catch (\Exception $e) {
+                    Log::error('Error durante la importación: ' . $e->getMessage());
+                    return [
+                        'success' => false,
+                        'message' => 'Error durante la importación: ' . $e->getMessage(),
+                        'data' => [],
+                        'error' => $e->getMessage(),
                     ];
                 }
-            }
+            },
         );
     }
 }

@@ -2,22 +2,22 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Forms\ContactUsForm;
 use App\Models\Contact;
 use Livewire\Component;
-use Livewire\Attributes\Rule;
 use Livewire\WithFileUploads;
-use App\Livewire\Forms\ContactUsForm;
 
 class ContactUs extends Component
 {
     use WithFileUploads;
+
     public ContactUsForm $form;
 
-    public function submitForm()
+    public function submitForm(): void
     {
         $validated = $this->validate();
         // Save to database
-        if (is_array($this->form->images)) {
+        if (\is_array($this->form->images)) {
             foreach ($this->form->images as $image) {
                 $image->store('images', 'public');
             }
@@ -31,7 +31,7 @@ class ContactUs extends Component
         session()->flash('success', 'Your message has been sent successfully.');
     }
 
-    public function closeAlert()
+    public function closeAlert(): void
     {
         session()->forget('success');
     }

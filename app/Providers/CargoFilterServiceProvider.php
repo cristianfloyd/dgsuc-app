@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Services\Mapuche\CargoFilterService;
 use App\Contracts\CargoFilterServiceInterface;
+use App\Services\Mapuche\CargoFilterService;
+use Illuminate\Support\ServiceProvider;
 
 class CargoFilterServiceProvider extends ServiceProvider
 {
@@ -13,7 +13,7 @@ class CargoFilterServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind( CargoFilterServiceInterface::class, CargoFilterService::class );
+        $this->app->bind(CargoFilterServiceInterface::class, CargoFilterService::class);
     }
 
     /**
@@ -21,6 +21,6 @@ class CargoFilterServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

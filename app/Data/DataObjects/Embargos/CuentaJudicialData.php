@@ -15,5 +15,6 @@ class CuentaJudicialData extends Data
         public readonly int $nrovalorpago,
         public readonly int $nroentidadbancaria,
         public readonly ?string $cbu = null,
-    ) {}
+    ) {
+    }
 }

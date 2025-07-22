@@ -10,20 +10,21 @@ use Illuminate\Support\Collection;
 interface Dh16RepositoryInterface
 {
     /**
-     * Get all conceptos by grupo
+     * Get all conceptos by grupo.
      *
      * @param int $codn_grupo
+     *
      * @return Collection<int, Dh16Data>
      */
     public function getConceptosByGrupo(int $codn_grupo): Collection;
 
     /**
-     * Create new concepto grupo relation
+     * Create new concepto grupo relation.
      */
     public function create(Dh16Data $data): Dh16Data;
 
     /**
-     * Delete concepto grupo relation
+     * Delete concepto grupo relation.
      */
     public function delete(int $codn_grupo, int $codn_conce): bool;
 }

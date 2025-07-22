@@ -44,10 +44,11 @@ class ImportNotificationService
     }
 
     /**
-     * Construye el mensaje de resultados de la importación
+     * Construye el mensaje de resultados de la importación.
      *
      * @param int $processedCount Número total de registros procesados
      * @param int $duplicatesCount Número de registros duplicados encontrados
+     *
      * @return string Mensaje formateado con los resultados de la importación
      */
     private function buildImportResultMessage(int $processedCount, int $duplicatesCount): string

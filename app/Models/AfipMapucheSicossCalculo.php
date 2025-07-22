@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Models\Mapuche\MapucheBase;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use App\Data\AfipMapucheSicossCalculoData;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo para cálculos AFIP SICOSS Mapuche
+ * Modelo para cálculos AFIP SICOSS Mapuche.
  *
  * @property string $cuil CUIL del empleado
  * @property float $remtotal Remuneración total
@@ -32,7 +31,12 @@ class AfipMapucheSicossCalculo extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Schema y tabla
+     * Sin timestamps.
+     */
+    public $timestamps = false;
+
+    /**
+     * Schema y tabla.
      */
     protected $table = 'suc.afip_mapuche_sicoss_calculos';
 
@@ -40,12 +44,7 @@ class AfipMapucheSicossCalculo extends Model
     protected $primaryKey = 'id';
 
     /**
-     * Sin timestamps
-     */
-    public $timestamps = false;
-
-    /**
-     * Campos asignables masivamente
+     * Campos asignables masivamente.
      */
     protected $fillable = [
         'periodo_fiscal',
@@ -60,11 +59,11 @@ class AfipMapucheSicossCalculo extends Model
         'aportediferencialsijp', // posicion 166 longitud 15
         'aportesres33_41re', // posicion 1196 longitud 15
         'codc_uacad',
-        'caracter'
+        'caracter',
     ];
 
     /**
-     * Cast de atributos
+     * Cast de atributos.
      */
     protected $casts = [
         'remtotal' => 'decimal:2',
@@ -77,11 +76,11 @@ class AfipMapucheSicossCalculo extends Model
         'aportediferencialsijp' => 'decimal:2',
         'aportesres33_41re' => 'decimal:2',
         'codc_uacad' => 'string',
-        'caracter' => 'string'
+        'caracter' => 'string',
     ];
 
     /**
-     * Convierte el modelo a DTO
+     * Convierte el modelo a DTO.
      */
     public function toData(): AfipMapucheSicossCalculoData
     {

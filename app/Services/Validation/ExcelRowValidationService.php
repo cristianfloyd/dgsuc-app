@@ -5,7 +5,6 @@ namespace App\Services\Validation;
 use App\Enums\BloqueosEstadoEnum;
 use App\Exceptions\ValidationException;
 use App\Services\DateParserService;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
@@ -13,14 +12,13 @@ class ExcelRowValidationService
 {
     private array $errors = [];
 
-
     public function __construct(
-        private readonly DateParserService $dateParserService
+        private readonly DateParserService $dateParserService,
     ) {
     }
 
     /**
-     * Valida y normaliza una fila completa del Excel
+     * Valida y normaliza una fila completa del Excel.
      */
     public function validateRow(array $row): array
     {
@@ -47,7 +45,7 @@ class ExcelRowValidationService
                 'fecha_de_baja' => $fechaBaja ?? null,
                 'observaciones' => $row['observaciones'] ?? '',
                 'estado' => BloqueosEstadoEnum::DUPLICADO,
-                'mensaje_error' => "Cargo duplicado: {$row['n_de_cargo']}"
+                'mensaje_error' => "Cargo duplicado: {$row['n_de_cargo']}",
             ];
         }
 
@@ -93,15 +91,13 @@ class ExcelRowValidationService
         return $validatedData;
     }
 
-
-
     private function addError(string $field, string $message): void
     {
         $this->errors[] = "{$field}: {$message}";
     }
 
     /**
-     * Valida y normaliza el email
+     * Valida y normaliza el email.
      */
     private function validateEmail(?string $email): string
     {
@@ -113,7 +109,7 @@ class ExcelRowValidationService
 
         $email = strtolower(trim($email));
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
             throw (new ValidationException("Email inválido: {$email}"))
                 ->setField('email')
                 ->setContext(['input' => $email]);
@@ -123,7 +119,7 @@ class ExcelRowValidationService
     }
 
     /**
-     * Valida y normaliza el nombre
+     * Valida y normaliza el nombre.
      */
     private function validateNombre(?string $nombre): string
     {
@@ -133,7 +129,7 @@ class ExcelRowValidationService
 
         $nombre = trim($nombre);
 
-        if (strlen($nombre) < 2) {
+        if (\strlen($nombre) < 2) {
             throw new ValidationException('El nombre debe tener al menos 2 caracteres');
         }
 
@@ -141,7 +137,7 @@ class ExcelRowValidationService
     }
 
     /**
-     * Valida y normaliza el usuario Mapuche
+     * Valida y normaliza el usuario Mapuche.
      */
     private function validateUsuarioMapuche(?string $usuario): array
     {
@@ -149,7 +145,7 @@ class ExcelRowValidationService
             return [
                 'value' => null,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => 'El usuario Mapuche es requerido'
+                'mensaje_error' => 'El usuario Mapuche es requerido',
             ];
         }
 
@@ -159,19 +155,18 @@ class ExcelRowValidationService
             return [
                 'value' => $usuario,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Usuario Mapuche inválido: {$usuario}"
+                'mensaje_error' => "Usuario Mapuche inválido: {$usuario}",
             ];
         }
 
         return [
             'value' => $usuario,
-            'estado' => BloqueosEstadoEnum::VALIDADO
+            'estado' => BloqueosEstadoEnum::VALIDADO,
         ];
     }
 
-
     /**
-     * Valida y normaliza la dependencia
+     * Valida y normaliza la dependencia.
      */
     private function validateDependencia(?string $dependencia): string
     {
@@ -182,7 +177,6 @@ class ExcelRowValidationService
         return trim($dependencia);
     }
 
-
     /**
      * Valida y normaliza el legajo.
      *
@@ -191,6 +185,7 @@ class ExcelRowValidationService
      * Si el legajo es válido, devuelve un arreglo con el estado de validado.
      *
      * @param mixed $legajo El legajo a validar.
+     *
      * @return array Un arreglo con el valor del legajo, el estado de validación y un mensaje de error si corresponde.
      */
     private function validateLegajo($legajo): array
@@ -199,28 +194,28 @@ class ExcelRowValidationService
             return [
                 'value' => $legajo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Legajo debe ser numérico: {$legajo}"
+                'mensaje_error' => "Legajo debe ser numérico: {$legajo}",
             ];
         }
 
-        $legajo = (int) $legajo;
+        $legajo = (int)$legajo;
 
         if ($legajo < 1) {
             return [
                 'value' => $legajo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Legajo inválido: {$legajo}"
+                'mensaje_error' => "Legajo inválido: {$legajo}",
             ];
         }
 
         return [
             'value' => $legajo,
-            'estado' => BloqueosEstadoEnum::VALIDADO
+            'estado' => BloqueosEstadoEnum::VALIDADO,
         ];
     }
 
     /**
-     * Valida y normaliza el número de cargo
+     * Valida y normaliza el número de cargo.
      */
     private function validateCargo($cargo): array
     {
@@ -228,28 +223,28 @@ class ExcelRowValidationService
             return [
                 'value' => $cargo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Cargo debe ser numérico: {$cargo}"
+                'mensaje_error' => "Cargo debe ser numérico: {$cargo}",
             ];
         }
 
-        $cargo = (int) $cargo;
+        $cargo = (int)$cargo;
 
         if ($cargo < 1) {
             return [
                 'value' => $cargo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Cargo inválido: {$cargo}"
+                'mensaje_error' => "Cargo inválido: {$cargo}",
             ];
         }
 
         return [
             'value' => $cargo,
-            'estado' => BloqueosEstadoEnum::VALIDADO
+            'estado' => BloqueosEstadoEnum::VALIDADO,
         ];
     }
 
     /**
-     * Valida y normaliza el tipo de movimiento
+     * Valida y normaliza el tipo de movimiento.
      */
     private function validateTipoMovimiento(?string $tipo): array
     {
@@ -257,29 +252,29 @@ class ExcelRowValidationService
             return [
                 'value' => null,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => 'El tipo de movimiento es requerido'
+                'mensaje_error' => 'El tipo de movimiento es requerido',
             ];
         }
 
         $tipo = strtolower(trim($tipo));
         $tiposValidos = ['licencia', 'fallecido', 'renuncia'];
 
-        if (!in_array($tipo, $tiposValidos)) {
+        if (!\in_array($tipo, $tiposValidos)) {
             return [
                 'value' => $tipo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Tipo de movimiento inválido: {$tipo}"
+                'mensaje_error' => "Tipo de movimiento inválido: {$tipo}",
             ];
         }
 
         return [
             'value' => $tipo,
-            'estado' => BloqueosEstadoEnum::VALIDADO
+            'estado' => BloqueosEstadoEnum::VALIDADO,
         ];
     }
 
     /**
-     * Valida y normaliza la fecha de baja
+     * Valida y normaliza la fecha de baja.
      */
     private function validateFechaBaja($fecha, string $tipoMovimiento): array
     {
@@ -287,7 +282,7 @@ class ExcelRowValidationService
         if (strtolower($tipoMovimiento) === 'licencia') {
             return [
                 'value' => null,
-                'estado' => BloqueosEstadoEnum::VALIDADO
+                'estado' => BloqueosEstadoEnum::VALIDADO,
             ];
         }
 
@@ -296,7 +291,7 @@ class ExcelRowValidationService
             return [
                 'value' => null,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => 'La fecha de baja es requerida para este tipo de movimiento'
+                'mensaje_error' => 'La fecha de baja es requerida para este tipo de movimiento',
             ];
         }
 
@@ -313,7 +308,7 @@ class ExcelRowValidationService
                 return [
                     'value' => $fechaBaja,
                     'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                    'mensaje_error' => 'La fecha de baja no puede ser futura'
+                    'mensaje_error' => 'La fecha de baja no puede ser futura',
                 ];
             }
 
@@ -324,19 +319,19 @@ class ExcelRowValidationService
 
             return [
                 'value' => $fechaAjustada,
-                'estado' => BloqueosEstadoEnum::VALIDADO
+                'estado' => BloqueosEstadoEnum::VALIDADO,
             ];
         } catch (\Exception $e) {
             return [
                 'value' => $fecha,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
-                'mensaje_error' => "Error en fecha de baja: {$e->getMessage()}"
+                'mensaje_error' => "Error en fecha de baja: {$e->getMessage()}",
             ];
         }
     }
 
     /**
-     * Valida y normaliza las observaciones
+     * Valida y normaliza las observaciones.
      */
     private function validateObservaciones(?string $observaciones): string
     {

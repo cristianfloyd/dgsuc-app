@@ -2,22 +2,28 @@
 
 namespace App\Livewire\Reportes;
 
-use Livewire\Component;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
+use App\Services\ReportHeaderService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\Services\ReportHeaderService;
-use Illuminate\Contracts\Support\Htmlable;
-use App\Contracts\RepOrdenPagoRepositoryInterface;
+use Livewire\Component;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {
     public $reportData;
-    public $liquidacionId = null;
+
+    public $liquidacionId;
+
     public $totalGeneral;
+
     public array $totalesPorFormaPago = [];
+
     public $totalesPorFuncion; // propiedad para almacenar los totales por función
+
     public array $totalesPorFinanciamiento = [];
+
     public array $reportHeader;
 
     protected RepOrdenPagoRepositoryInterface $repOrdenPagoRepository;
@@ -35,19 +41,7 @@ class OrdenPagoReporte extends Component implements Htmlable
         ];
     }
 
-    /**
-     * Obtiene el número de liquidación.
-     *
-     * Este método privado devuelve el número de liquidación, que se obtiene a partir de la propiedad `$liquidacionId`. Si `$liquidacionId` es nulo, se devuelve el valor predeterminado de 1.
-     *
-     * @return int El número de liquidación.
-     */
-    private function getLiquidationNumber(): int
-    {
-        return $this->liquidacionId ?? 1;
-    }
-
-    public function mount(int $liquidacionId = null): void
+    public function mount(?int $liquidacionId = null): void
     {
         $this->liquidacionId = $liquidacionId;
         $this->loadReportData($this->liquidacionId);
@@ -62,6 +56,7 @@ class OrdenPagoReporte extends Component implements Htmlable
      * También calcula los totales acumulados para cada nivel de agrupación.
      *
      * @param array|int|null $liquidacionId El ID de la liquidación para la que se generará el reporte.
+     *
      * @return void
      */
     public function loadReportData(array|int|null $liquidacionId = null): void
@@ -100,114 +95,32 @@ class OrdenPagoReporte extends Component implements Htmlable
 
                                                     $retorno = [
                                                         'items' => $items,
-                                                        'totals' => $totals
+                                                        'totals' => $totals,
                                                     ];
                                                     // dd($retorno);
                                                     return $retorno;
                                                 });
                                             return [
                                                 'caracteres' => $caracteres,
-                                                'totalUacad' => $totalUacad
+                                                'totalUacad' => $totalUacad,
                                             ];
                                         });
                                     return [
                                         'unidades' => $unidades,
-                                        'totalFuente' => $totalFuente
+                                        'totalFuente' => $totalFuente,
                                     ];
                                 });
                             return [
                                 'fuentes' => $fuentes,
-                                'totalFuncion' => $totalFuncion
+                                'totalFuncion' => $totalFuncion,
                             ];
                         });
                     return [
                         'funciones' => $funciones,
-                        'totalBanco' => $totalBanco
+                        'totalBanco' => $totalBanco,
                     ];
-                })
+                }),
         );
-    }
-
-    /**
-     * Convierte una colección a una colección base.
-     *
-     * Este método privado toma una colección y convierte cada elemento a una colección base.
-     * Si el elemento es una instancia de \Illuminate\Database\Eloquent\Collection, se convierte a una colección base.
-     * Si el elemento es una instancia de \Illuminate\Support\Collection, se llama recursivamente a este método para convertir la colección.
-     *
-     * @param Collection $collection La colección a convertir.
-     * @return Collection La colección convertida a una colección base.
-     */
-    private function convertToBaseCollection(Collection $collection): Collection
-    {
-        return $collection->map(function ($item) {
-            if ($item instanceof Collection) {
-                $item = $item->toBase();
-            }
-            if ($item instanceof Collection) {
-                return $this->convertToBaseCollection($item);
-            }
-            return $item;
-        });
-    }
-
-    /**
-     * Inicializa un array con los totales acumulados a cero.
-     *
-     * Este método privado inicializa un array con los campos necesarios para
-     * almacenar los totales acumulados, con todos los valores establecidos a cero.
-     * Este array se utiliza posteriormente para ir acumulando los totales
-     * calculados para cada unidad académica y carácter.
-     *
-     * @return array Un array con los campos de totales inicializados a cero.
-     */
-    private function initializeTotals(): array
-    {
-        return [
-            'bruto' => 0,
-            'estipendio' => 0,
-            'productividad' => 0,
-            'med_resid' => 0,
-            'sal_fam' => 0,
-            'hs_extras' => 0,
-            'total' => 0 // Agrega el campo 'total'
-        ];
-    }
-
-    /**
-     * Calcula los totales acumulados para un conjunto de elementos.
-     *
-     * Este método privado toma un conjunto de elementos y calcula los totales
-     * acumulados para los siguientes campos: remunerativo, estipendio, productividad,
-     * med_resid, sal_fam, hs_extras y el total.
-     *
-     * @param Collection $items Conjunto de elementos para los que se calcularán los totales.
-     * @return array Un array asociativo con los totales calculados para cada campo.
-     */
-    private function calculateTotals(Collection $items): array
-    {
-        return [
-            'bruto' => $items->sum('sueldo'),
-            'estipendio' => $items->sum('estipendio'),
-            'productividad' => $items->sum('productividad'),
-            'med_resid' => $items->sum('med_resid'),
-            'sal_fam' => $items->sum('sal_fam'),
-            'hs_extras' => $items->sum('hs_extras'),
-            'total' => $items->sum('total')
-        ];
-    }
-
-    /**
-     * Suma los totales de un array a otro array de totales.
-     *
-     * @param array &$totalAcumulado Array donde se acumularán los totales
-     * @param array $totalsToAdd Array con los totales a sumar
-     */
-    private function addTotals(array &$totalAcumulado, array $totalsToAdd): void
-    {
-        foreach ($totalAcumulado as $key => $value) {
-            $totalAcumulado[$key] += $totalsToAdd[$key];
-        }
     }
 
     public function calculateTotalesGenerales(): void
@@ -242,7 +155,6 @@ class OrdenPagoReporte extends Component implements Htmlable
         }
     }
 
-
     public function descargarReportePDF(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $data = [
@@ -264,7 +176,7 @@ class OrdenPagoReporte extends Component implements Htmlable
 
         Log::info('PDF generado');
 
-        return response()->streamDownload(function () use ($pdfss) {
+        return response()->streamDownload(function () use ($pdfss): void {
             echo $pdfss->stream();
         }, 'users.pdf');
     }
@@ -282,6 +194,102 @@ class OrdenPagoReporte extends Component implements Htmlable
     public function toHtml()
     {
         return $this->render()->with($this->getPublicProperties());
+    }
+
+    /**
+     * Obtiene el número de liquidación.
+     *
+     * Este método privado devuelve el número de liquidación, que se obtiene a partir de la propiedad `$liquidacionId`. Si `$liquidacionId` es nulo, se devuelve el valor predeterminado de 1.
+     *
+     * @return int El número de liquidación.
+     */
+    private function getLiquidationNumber(): int
+    {
+        return $this->liquidacionId ?? 1;
+    }
+
+    /**
+     * Convierte una colección a una colección base.
+     *
+     * Este método privado toma una colección y convierte cada elemento a una colección base.
+     * Si el elemento es una instancia de \Illuminate\Database\Eloquent\Collection, se convierte a una colección base.
+     * Si el elemento es una instancia de \Illuminate\Support\Collection, se llama recursivamente a este método para convertir la colección.
+     *
+     * @param Collection $collection La colección a convertir.
+     *
+     * @return Collection La colección convertida a una colección base.
+     */
+    private function convertToBaseCollection(Collection $collection): Collection
+    {
+        return $collection->map(function ($item) {
+            if ($item instanceof Collection) {
+                $item = $item->toBase();
+            }
+            if ($item instanceof Collection) {
+                return $this->convertToBaseCollection($item);
+            }
+            return $item;
+        });
+    }
+
+    /**
+     * Inicializa un array con los totales acumulados a cero.
+     *
+     * Este método privado inicializa un array con los campos necesarios para
+     * almacenar los totales acumulados, con todos los valores establecidos a cero.
+     * Este array se utiliza posteriormente para ir acumulando los totales
+     * calculados para cada unidad académica y carácter.
+     *
+     * @return array Un array con los campos de totales inicializados a cero.
+     */
+    private function initializeTotals(): array
+    {
+        return [
+            'bruto' => 0,
+            'estipendio' => 0,
+            'productividad' => 0,
+            'med_resid' => 0,
+            'sal_fam' => 0,
+            'hs_extras' => 0,
+            'total' => 0, // Agrega el campo 'total'
+        ];
+    }
+
+    /**
+     * Calcula los totales acumulados para un conjunto de elementos.
+     *
+     * Este método privado toma un conjunto de elementos y calcula los totales
+     * acumulados para los siguientes campos: remunerativo, estipendio, productividad,
+     * med_resid, sal_fam, hs_extras y el total.
+     *
+     * @param Collection $items Conjunto de elementos para los que se calcularán los totales.
+     *
+     * @return array Un array asociativo con los totales calculados para cada campo.
+     */
+    private function calculateTotals(Collection $items): array
+    {
+        return [
+            'bruto' => $items->sum('sueldo'),
+            'estipendio' => $items->sum('estipendio'),
+            'productividad' => $items->sum('productividad'),
+            'med_resid' => $items->sum('med_resid'),
+            'sal_fam' => $items->sum('sal_fam'),
+            'hs_extras' => $items->sum('hs_extras'),
+            'total' => $items->sum('total'),
+        ];
+    }
+
+    /**
+     * Suma los totales de un array a otro array de totales.
+     *
+     * @param array &$totalAcumulado Array donde se acumularán los totales
+     * @param array $totalsToAdd Array con los totales a sumar
+     */
+    private function addTotals(array &$totalAcumulado, array $totalsToAdd): void
+    {
+        foreach ($totalAcumulado as $key => $value) {
+            $totalAcumulado[$key] += $totalsToAdd[$key];
+        }
     }
 
     private function getPublicProperties(): array

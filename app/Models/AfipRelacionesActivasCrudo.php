@@ -9,10 +9,12 @@ class AfipRelacionesActivasCrudo extends Model
 {
     use HasFactory;
 
-    protected $table = 'afip_relaciones_activas_crudo';
     public $timestamps = false;
+
+    protected $table = 'afip_relaciones_activas_crudo';
+
     protected $fillable = [
         'id',
-        'linea_completa'
+        'linea_completa',
     ];
 }

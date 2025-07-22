@@ -2,29 +2,32 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\UploadedFile;
 use App\Models\OrigenesModel;
-use Livewire\Attributes\Rule;
-use Livewire\WithFileUploads;
+use App\Models\UploadedFile;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class SubirArchivo extends Component
 {
     use WithFileUploads;
 
     public $user_id;
+
     public $username;
+
     #[Validate('max:28480')]
     public $archivo;
+
     public $periodo_fiscal;
 
     public $origenes;
+
     public $selectedOrigen;
 
     public $importaciones;
 
-    public function guardar()
+    public function guardar(): void
     {
         $archivoCargado = new UploadedFile();
 
@@ -36,8 +39,8 @@ class SubirArchivo extends Component
         $original_name = $file->getClientOriginalName();
         $user_name = $this->username;
         $user_id = $this->user_id;
-        $filename = pathinfo($original_name, PATHINFO_FILENAME); //nombre del archivo
-        $extension = pathinfo($original_name, PATHINFO_EXTENSION); //extension del archivo
+        $filename = pathinfo($original_name, \PATHINFO_FILENAME); //nombre del archivo
+        $extension = pathinfo($original_name, \PATHINFO_EXTENSION); //extension del archivo
         $filename = $filename . '_' . time() . '.' . $extension; //nombre del archivo con marca de tiempo
         $filepath = $file->storeAs('public/archivos', $filename); //guardar el archivo en la carpeta publica
 
@@ -51,7 +54,8 @@ class SubirArchivo extends Component
         $archivoCargado->save(); //guardar en la base de datos
         // return redirect()->route('home');
     }
-    public function mount()
+
+    public function mount(): void
     {
         $this->username = auth()->user()->name;
         $this->user_id = auth()->user()->id;
@@ -61,12 +65,13 @@ class SubirArchivo extends Component
         $this->importaciones = UploadedFile::all();
     }
 
-    public function eliminar($id)
+    public function eliminar($id): void
     {
         $archivo = UploadedFile::findOrFail($id);
         $archivo->delete();
     }
-    public function index()
+
+    public function index(): void
     {
         $this->importaciones = UploadedFile::all();
     }

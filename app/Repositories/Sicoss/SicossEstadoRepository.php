@@ -8,11 +8,12 @@ use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 {
     /**
-     * Inicializa el estado de situación para un rango de días
+     * Inicializa el estado de situación para un rango de días.
      *
      * @param int $codigo
      * @param int $min
      * @param int $max
+     *
      * @return array
      */
     public function inicializarEstadoSituacion(int $codigo, int $min, int $max): array
@@ -27,10 +28,11 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 
     /**
      * Se le pasa la condición actual y se compara con la condición
-     * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT)
+     * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT).
      *
      * @param int $c1 condición actual
      * @param int $c2 condición tipo de licencia
+     *
      * @return int
      */
     public function evaluarCondicionLicencia(int $c1, int $c2): int
@@ -38,19 +40,26 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
         // Maternidad primero
         if ($c1 == 5 || $c2 == 5) {
             return 5;
-        } else if ($c1 == 11 || $c2 == 11) {
+        }
+        if ($c1 == 11 || $c2 == 11) {
             return 11;
-        } else if ($c1 == 10 || $c2 == 10) {
+        }
+        if ($c1 == 10 || $c2 == 10) {
             return 10;
-        } elseif ($c1 == 18 || $c2 == 18) {
+        }
+        if ($c1 == 18 || $c2 == 18) {
             return 18;
-        } else if ($c1 == 19 || $c2 == 19) {
+        }
+        if ($c1 == 19 || $c2 == 19) {
             return 19;
-        } else if ($c1 == 13 || $c2 == 13) {
+        }
+        if ($c1 == 13 || $c2 == 13) {
             return 13;
-        } else if ($c1 == 12 || $c2 == 12) {
+        }
+        if ($c1 == 12 || $c2 == 12) {
             return 12;
-        } else if ($c1 == 51 || $c2 == 51) {
+        }
+        if ($c1 == 51 || $c2 == 51) {
             return 51;
         }
 
@@ -58,9 +67,10 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     }
 
     /**
-     * Calcula los cambios de estado en el período
+     * Calcula los cambios de estado en el período.
      *
      * @param array $estado_situacion
+     *
      * @return array
      */
     public function calcularCambiosEstado(array $estado_situacion): array
@@ -79,9 +89,10 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     }
 
     /**
-     * Calcula los días trabajados según códigos de situación
+     * Calcula los días trabajados según códigos de situación.
      *
      * @param array $estado_situacion
+     *
      * @return int
      */
     public function calcularDiasTrabajados(array $estado_situacion): int
@@ -99,16 +110,17 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     }
 
     /**
-     * Calcula la revista del legajo basada en los cambios de estado
+     * Calcula la revista del legajo basada en los cambios de estado.
      *
      * @param array $cambios_estado
+     *
      * @return array
      */
     public function calcularRevistaLegajo(array $cambios_estado): array
     {
         $controlar_maternidad = false;
-        $revista_legajo = array();
-        $cantidad_cambios = count($cambios_estado);
+        $revista_legajo = [];
+        $cantidad_cambios = \count($cambios_estado);
         $dias = array_keys($cambios_estado);
 
         $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];
@@ -133,8 +145,8 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
             $dia_revista = $revista_legajo[1]['dia'];
             foreach ($cambios_estado as $dia => $situacion) {
                 if (($situacion == 5) && ($dia < $dia_revista)) {
-                    $revista_legajo[1]['dia']        = $dia;
-                    $revista_legajo[1]['codigo']     = $situacion;
+                    $revista_legajo[1]['dia'] = $dia;
+                    $revista_legajo[1]['codigo'] = $situacion;
                 }
             }
         }
@@ -143,9 +155,10 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     }
 
     /**
-     * Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss
+     * Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss.
      *
      * @param array $leg
+     *
      * @return int
      */
     public function verificarAgenteImportesCero(array $leg): int

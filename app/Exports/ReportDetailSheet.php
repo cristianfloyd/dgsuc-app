@@ -2,18 +2,18 @@
 
 namespace App\Exports;
 
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportDetailSheet implements
     FromQuery,
@@ -25,6 +25,7 @@ class ReportDetailSheet implements
     WithTitle
 {
     protected $query;
+
     protected $columns;
 
     public function __construct(Builder $query)
@@ -40,7 +41,7 @@ class ReportDetailSheet implements
             'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe'
+            'impp_conce' => 'Importe',
         ];
     }
 
@@ -56,7 +57,7 @@ class ReportDetailSheet implements
             if ($column === 'cuil') {
                 // Procesar el CUIL: eliminar los primeros 2 dígitos y el último dígito
                 $fullCuil = $row->{$column} ?? '';
-                if (strlen($fullCuil) >= 3) {
+                if (\strlen($fullCuil) >= 3) {
                     // Extraer solo la parte central del CUIL
                     $mappedRow[] = substr($fullCuil, 2, -1);
                 } else {

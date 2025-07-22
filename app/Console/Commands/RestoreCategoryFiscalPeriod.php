@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\dh11RestoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use App\Services\CategoryRestoreService;
-use App\Services\dh11RestoreService;
 
 class RestoreCategoryFiscalPeriod extends Command
 {
@@ -83,11 +82,12 @@ class RestoreCategoryFiscalPeriod extends Command
      *
      * @param string $year
      * @param string $month
+     *
      * @return bool
      */
     private function validateArguments($year, $month): bool
     {
-        if (!is_numeric($year) || strlen($year) !== 4) {
+        if (!is_numeric($year) || \strlen($year) !== 4) {
             $this->error('El año debe ser un número de 4 dígitos.');
             return false;
         }

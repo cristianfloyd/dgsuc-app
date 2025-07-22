@@ -13,6 +13,7 @@ interface RetTablaBasicosConcespInterface
      * @param string $catId El ID de la categoría del concepto.
      * @param string $concLiqId El ID del concepto de liquidación.
      * @param int $anios Los años a considerar.
+     *
      * @return RetTablaBasicosConcespRepository|null El registro encontrado, o null si no se encuentra.
      */
     public function buscarRegistro(\DateTime $fecha, string $catId, string $concLiqId, int $anios): ?RetTablaBasicosConcespRepository;

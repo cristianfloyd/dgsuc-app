@@ -2,9 +2,8 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
-use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Embargos\Resources\EmbargoResource;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateEmbargo extends CreateRecord
 {

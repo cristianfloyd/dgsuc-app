@@ -2,19 +2,29 @@
 
 namespace App\Filament\Reportes\Resources\RepGerencialFinalResource\Widgets;
 
-
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RepGerencialFinalStats extends BaseWidget
 {
     use MapucheConnectionTrait;
 
     protected static ?string $pollingInterval = null;
+
     protected int | string | array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        $connection = (new static())->getConnectionName();
+
+        return Schema::connection($connection)->hasTable('suc.rep_ger_final')
+            && DB::connection($connection)
+                ->table('suc.rep_ger_final')
+                ->exists();
+    }
 
     protected function getStats(): array
     {
@@ -40,9 +50,9 @@ class RepGerencialFinalStats extends BaseWidget
 
         return [
             Stat::make('Total Liquidaciones', number_format($totales->total_liquidaciones))
-            ->description('Cantidad de liquidaciones procesadas')
-            ->descriptionIcon('heroicon-m-document-text')
-            ->color('info'),
+                ->description('Cantidad de liquidaciones procesadas')
+                ->descriptionIcon('heroicon-m-document-text')
+                ->color('info'),
 
             Stat::make('Total Agentes', number_format($totales->total_agentes))
                 ->description('Cantidad de agentes en la liquidación')
@@ -79,15 +89,5 @@ class RepGerencialFinalStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-information-circle')
                 ->color('gray'),
         ];
-    }
-
-    public static function canView(): bool
-    {
-        $connection = (new static)->getConnectionName();
-
-        return Schema::connection($connection)->hasTable('suc.rep_ger_final')
-            && DB::connection($connection)
-                ->table('suc.rep_ger_final')
-                ->exists();
     }
 }

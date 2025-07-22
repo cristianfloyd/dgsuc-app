@@ -4,18 +4,23 @@ namespace App\Jobs;
 
 use App\Models\CopyJob;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class CopyDh21ToConsultaJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     protected int $copyJobId;
+
     protected int $nroLiqui;
+
     protected int $chunkSize = 10000;
 
     /**
@@ -48,14 +53,14 @@ class CopyDh21ToConsultaJob implements ShouldQueue
             $copyJob->save();
 
             $query->orderBy('id_liquidacion')
-                ->chunk($this->chunkSize, function ($rows) use (&$copyJob) {
+                ->chunk($this->chunkSize, function ($rows) use (&$copyJob): void {
                     $insertData = [];
                     foreach ($rows as $row) {
-                        $insertData[] = (array) $row;
+                        $insertData[] = (array)$row;
                     }
                     if (!empty($insertData)) {
                         DB::connection('pgsql-consulta')->table('dh21')->insert($insertData);
-                        $copyJob->copied_records += count($insertData);
+                        $copyJob->copied_records += \count($insertData);
                         $copyJob->save();
                     }
                 });

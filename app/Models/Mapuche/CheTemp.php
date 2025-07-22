@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CheTemp extends Model
 {
-    protected $table = 'che';
     public $timestamps = false;
+
+    protected $table = 'che';
 
     protected $fillable = [
         'codn_area',
@@ -16,6 +17,6 @@ class CheTemp extends Model
         'codn_grupo',
         'desc_grupo',
         'sino_cheque',
-        'importe'
+        'importe',
     ];
 }

@@ -3,8 +3,8 @@
 namespace App\Filament\Afip\Widgets;
 
 use App\Models\AfipRelacionesActivas;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class AfipRelacionesActivasStats extends BaseWidget
 {
@@ -14,7 +14,7 @@ class AfipRelacionesActivasStats extends BaseWidget
             return [
                 Stat::make(
                     'Total Relaciones Activas',
-                    AfipRelacionesActivas::count()
+                    AfipRelacionesActivas::count(),
                 )
                     ->description('Total de registros')
                     ->descriptionIcon('heroicon-m-arrow-trending-up')
@@ -24,7 +24,7 @@ class AfipRelacionesActivasStats extends BaseWidget
                     'Altas del Mes',
                     AfipRelacionesActivas::where('codigo_movimiento', '00')
                         ->whereMonth('created_at', now()->month)
-                        ->count()
+                        ->count(),
                 )
                     ->description('Nuevas relaciones laborales')
                     ->descriptionIcon('heroicon-m-arrow-trending-up')
@@ -34,7 +34,7 @@ class AfipRelacionesActivasStats extends BaseWidget
                     'Bajas del Mes',
                     AfipRelacionesActivas::where('codigo_movimiento', '01')
                         ->whereMonth('created_at', now()->month)
-                        ->count()
+                        ->count(),
                 )
                     ->description('Relaciones finalizadas')
                     ->descriptionIcon('heroicon-m-arrow-trending-down')
@@ -43,7 +43,7 @@ class AfipRelacionesActivasStats extends BaseWidget
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error al obtener estadísticas de relaciones activas', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Retornar estadísticas vacías en caso de error

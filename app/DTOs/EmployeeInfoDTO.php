@@ -27,6 +27,7 @@ class EmployeeInfoDTO
         public string $apellido,
         public string $nroLegaj,
         public string $dni,
-        public ?string $fechaInicio
-    ) {}
+        public ?string $fechaInicio,
+    ) {
+    }
 }

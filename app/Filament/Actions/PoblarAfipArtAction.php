@@ -2,20 +2,15 @@
 
 namespace App\Filament\Actions;
 
-use Filament\Actions\Action;
 use App\Models\AfipMapucheArt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PoblarAfipArtAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'poblar_afip_art';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,7 +24,7 @@ class PoblarAfipArtAction extends Action
                     ->mask('999999')
                     ->minLength(6)
                     ->maxLength(6)
-                    ->helperText('Ingrese el período fiscal en formato YYYYMM (ejemplo: 202403)')
+                    ->helperText('Ingrese el período fiscal en formato YYYYMM (ejemplo: 202403)'),
             ])
             ->action(function (array $data): void {
                 $this->procesarDatos($data['periodo_fiscal']);
@@ -41,6 +36,11 @@ class PoblarAfipArtAction extends Action
             ->modalCancelActionLabel('No, cancelar')
             ->color('warning')
             ->icon('heroicon-o-arrow-down-tray');
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'poblar_afip_art';
     }
 
     protected function procesarDatos(string $periodoFiscal): void
@@ -110,7 +110,7 @@ class PoblarAfipArtAction extends Action
 
             Log::error('Error al poblar afip_art', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

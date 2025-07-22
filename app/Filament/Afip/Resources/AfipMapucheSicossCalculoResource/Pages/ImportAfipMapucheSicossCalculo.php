@@ -2,37 +2,46 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages;
 
-use Carbon\Carbon;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
-use Illuminate\Support\Facades\Storage;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use App\Services\Mapuche\PeriodoFiscalService;
-use Filament\Forms\Concerns\InteractsWithForms;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource;
 use App\Services\AfipMapucheSicossCalculoImportService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Carbon\Carbon;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ImportAfipMapucheSicossCalculo extends Page
 {
     use InteractsWithForms;
 
+    public $importProgress = 0;
+
+    public $totalRecords = 0;
+
+    public ?array $data = [];
+
+    public $file;
+
+    public $year;
+
+    public $month;
+
+    public $memoryUsage = 0;
+
+    public $processedRecords = 0;
+
     protected static string $resource = AfipMapucheSicossCalculoResource::class;
+
     protected static string $view = 'filament.resources.afip-mapuche-sicoss-calculo.pages.import';
 
     protected PeriodoFiscalService $periodoFiscalService;
-    public $importProgress = 0;
-    public $totalRecords = 0;
-    public ?array $data = [];
-    public $file = null;
-    public $year = null;
-    public $month = null;
-    public $memoryUsage = 0;
-    public $processedRecords = 0;
 
     public function mount(): void
     {
@@ -45,8 +54,45 @@ class ImportAfipMapucheSicossCalculo extends Page
         $this->form->fill([
             'year' => $this->year,
             'month' => $this->month,
-            'file' => null
+            'file' => null,
         ]);
+    }
+
+    public function import(): void
+    {
+        try {
+            $data = $this->form->getState();
+            $filePath = Storage::disk('public')->path($data['file']);
+
+            $service = app(AfipMapucheSicossCalculoImportService::class);
+            $periodoFiscal = $data['year'] . \sprintf('%02d', $data['month']);
+
+            $result = $service->streamImport(
+                $filePath,
+                $periodoFiscal,
+                fn ($progress) => $this->updateImportProgress($progress),
+            );
+
+            if ($result['imported'] > 0) {
+                $data = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
+            }
+
+            $this->handleImportResult($result);
+            Storage::delete($filePath);
+
+        } catch (\Exception $e) {
+            Log::error('Error en importación SICOSS Cálculo', [
+                'error' => $e->getMessage(),
+                'file' => $data['file'] ?? 'No file specified',
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Error')
+                ->body($e->getMessage())
+                ->persistent()
+                ->send();
+        }
     }
 
     protected function getFormSchema(): array
@@ -77,7 +123,7 @@ class ImportAfipMapucheSicossCalculo extends Page
                                 'text/csv',
                                 'application/txt',
                                 'text/x-csv',
-                                'application/x-txt'
+                                'application/x-txt',
                             ])
                             ->maxSize(50960)
                             ->disk('public')
@@ -87,46 +133,9 @@ class ImportAfipMapucheSicossCalculo extends Page
                             ->required()
                             ->preserveFilenames()
                             ->columnSpan(2),
-                    ])->columns(3)
-                ])
+                    ])->columns(3),
+                ]),
         ];
-    }
-
-    public function import()
-    {
-        try {
-            $data = $this->form->getState();
-            $filePath = Storage::disk('public')->path($data['file']);
-
-            $service = app(AfipMapucheSicossCalculoImportService::class);
-            $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
-
-            $result = $service->streamImport(
-                $filePath,
-                $periodoFiscal,
-                fn($progress) => $this->updateImportProgress($progress)
-            );
-
-            if ($result['imported'] > 0) {
-                $data = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
-            }
-
-            $this->handleImportResult($result);
-            Storage::delete($filePath);
-
-        } catch (\Exception $e) {
-            Log::error('Error en importación SICOSS Cálculo', [
-                'error' => $e->getMessage(),
-                'file' => $data['file'] ?? 'No file specified'
-            ]);
-
-            Notification::make()
-                ->danger()
-                ->title('Error')
-                ->body($e->getMessage())
-                ->persistent()
-                ->send();
-        }
     }
 
     private function updateImportProgress(array $progressData): void
@@ -138,7 +147,7 @@ class ImportAfipMapucheSicossCalculo extends Page
         $this->dispatch('import-progress-updated', [
             'progress' => $this->importProgress,
             'processed' => $this->processedRecords,
-            'memory' => $this->memoryUsage
+            'memory' => $this->memoryUsage,
         ]);
     }
 
@@ -168,7 +177,7 @@ class ImportAfipMapucheSicossCalculo extends Page
         $currentYear = Carbon::now()->year;
         return array_combine(
             range($currentYear - 5, $currentYear + 1),
-            range($currentYear - 5, $currentYear + 1)
+            range($currentYear - 5, $currentYear + 1),
         );
     }
 
@@ -186,7 +195,7 @@ class ImportAfipMapucheSicossCalculo extends Page
             9 => 'Septiembre',
             10 => 'Octubre',
             11 => 'Noviembre',
-            12 => 'Diciembre'
+            12 => 'Diciembre',
         ];
     }
 }

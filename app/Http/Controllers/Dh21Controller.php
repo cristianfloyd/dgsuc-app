@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\dh21;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class Dh21Controller extends Controller
 {
@@ -15,7 +13,7 @@ class Dh21Controller extends Controller
         return view('dh21', [
             'dh21s' => dh21::search('2510')
                 ->orderBy('nro_legaj')
-                ->paginate(10)
+                ->paginate(10),
         ]);
     }
 }

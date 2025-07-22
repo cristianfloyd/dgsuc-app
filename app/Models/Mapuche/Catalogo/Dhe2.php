@@ -11,9 +11,13 @@ class Dhe2 extends Model
     use MapucheConnectionTrait;
 
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $table = 'dhe2';
+
     protected $primaryKey = ['nro_tabla', 'desc_abrev'];
+
     protected $fillable = [
         'nro_tabla',
         'desc_abrev',
@@ -45,7 +49,7 @@ class Dhe2 extends Model
     {
         return $this->belongsTo(Dh30::class, 'nro_tabla', 'nro_tabla')
             ->where('nro_tabla', 'desc__abrev');
-        ;
+
     }
 
     /**
@@ -61,6 +65,6 @@ class Dhe2 extends Model
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
-                    ->where('desc_abrev', $this->getAttribute('desc_abrev'));
+            ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Data\Mapuche;
@@ -23,7 +24,8 @@ class Dh24Data extends Data
         public readonly int $codn_grupo_presup = 1,
         public readonly string $tipo_ejercicio = 'A',
         public readonly int $codn_subsubar = 0,
-    ) {}
+    ) {
+    }
 
     public static function rules($context): array
     {

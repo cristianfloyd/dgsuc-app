@@ -2,17 +2,16 @@
 
 namespace Tests\Feature\Filament\Resources;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\AfipRelacionesActivas;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Filament\Afip\Resources\AfipRelacionesActivasResource;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AfipRelacionesActivasResourceTest extends TestCase
 {
     // use RefreshDatabase;
 
-    public function test_can_view_index_page()
+    public function test_can_view_index_page(): void
     {
         $this->actingAs(User::factory()->create());
 
@@ -20,7 +19,7 @@ class AfipRelacionesActivasResourceTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_can_create_record()
+    public function test_can_create_record(): void
     {
         $this->actingAs(User::factory()->create());
 

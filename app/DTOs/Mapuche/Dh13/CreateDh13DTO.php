@@ -3,15 +3,12 @@
 namespace App\DTOs\Mapuche\Dh13;
 
 use Illuminate\Http\Request;
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 /**
- * DTO para la creación de registros Dh13
+ * DTO para la creación de registros Dh13.
  */
 class CreateDh13DTO extends Dh13DTO
 {
-
     public static function rules($context): array
     {
         return [
@@ -23,7 +20,7 @@ class CreateDh13DTO extends Dh13DTO
     }
 
     /**
-     * Define mensajes personalizados para las reglas de validación
+     * Define mensajes personalizados para las reglas de validación.
      *
      * @return array
      */
@@ -36,9 +33,10 @@ class CreateDh13DTO extends Dh13DTO
     }
 
     /**
-     * Crea una instancia desde una Request
+     * Crea una instancia desde una Request.
      *
      * @param Request $request Request HTTP
+     *
      * @return static Nueva instancia del DTO
      */
     public static function fromRequest(Request $request): self
@@ -47,7 +45,7 @@ class CreateDh13DTO extends Dh13DTO
             'codn_conce' => $request->integer('codn_conce'),
             'desc_calcu' => $request->string('desc_calcu'),
             'nro_orden_formula' => $request->integer('nro_orden_formula'),
-            'desc_condi' => $request->string('desc_condi')
+            'desc_condi' => $request->string('desc_condi'),
         ]);
     }
 }

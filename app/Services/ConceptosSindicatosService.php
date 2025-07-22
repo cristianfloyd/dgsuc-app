@@ -14,16 +14,16 @@ class ConceptosSindicatosService
     public static function getApubaCodigos(): array
     {
         return [
-            '258', //
-            '266', //
+            '258',
+            '266',
         ];
     }
 
     public static function getAdubaCodigos(): array
     {
         return [
-            '270', //
-            '271', //
+            '270',
+            '271',
         ];
     }
 }

@@ -2,15 +2,15 @@
 
 namespace App\Services\Excel\Exports;
 
-use Spatie\LaravelData\DataCollection;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use App\Data\Responses\LicenciaVigenteData;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Spatie\LaravelData\DataCollection;
 
 class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize
 {
@@ -62,6 +62,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
 
     /**
      * @param mixed $row
+     *
      * @return array
      */
     public function map($row): array
@@ -86,33 +87,13 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * Obtiene la descripción legible de la condición
-     *
-     * @param int $condicion
-     * @return string
-     */
-    protected function getDescripcionCondicion(int $condicion): string
-    {
-        return match($condicion) {
-            5 => 'Maternidad',
-            10 => 'Excedencia',
-            11 => 'Maternidad Down',
-            12 => 'Vacaciones',
-            13 => 'Licencia Sin Goce de Haberes',
-            18 => 'ILT Primer Tramo',
-            19 => 'ILT Segundo Tramo',
-            51 => 'Protección Integral',
-            default => 'Otra Licencia',
-        };
-    }
-
-    /**
-     * Aplica estilos a la hoja de Excel
+     * Aplica estilos a la hoja de Excel.
      *
      * @param Worksheet $sheet
+     *
      * @return void
      */
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): void
     {
         // Estilo para la cabecera
         $sheet->getStyle('A1:I1')->applyFromArray([
@@ -138,12 +119,34 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * Devuelve el título de la hoja
+     * Devuelve el título de la hoja.
      *
      * @return string
      */
     public function title(): string
     {
         return "Licencias Vigentes - Periodo {$this->periodo}";
+    }
+
+    /**
+     * Obtiene la descripción legible de la condición.
+     *
+     * @param int $condicion
+     *
+     * @return string
+     */
+    protected function getDescripcionCondicion(int $condicion): string
+    {
+        return match($condicion) {
+            5 => 'Maternidad',
+            10 => 'Excedencia',
+            11 => 'Maternidad Down',
+            12 => 'Vacaciones',
+            13 => 'Licencia Sin Goce de Haberes',
+            18 => 'ILT Primer Tramo',
+            19 => 'ILT Segundo Tramo',
+            51 => 'Protección Integral',
+            default => 'Otra Licencia',
+        };
     }
 }

@@ -2,15 +2,15 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DynamicPropertiesComponent extends Component
 {
     public array $properties = [];
-    protected $listeners = ['propertiesUpdated' => 'updateAllProperties'];
 
+    protected $listeners = ['propertiesUpdated' => 'updateAllProperties'];
 
     public function mount(array $initialProperties): void
     {
@@ -20,7 +20,7 @@ class DynamicPropertiesComponent extends Component
 
     public function updateProperty($key, $value): void
     {
-        if (array_key_exists($key, $this->properties)) {
+        if (\array_key_exists($key, $this->properties)) {
             $this->properties[$key] = $value;
         }
     }
@@ -36,7 +36,6 @@ class DynamicPropertiesComponent extends Component
     {
         $this->properties = $newProperties;
     }
-
 
     public function render(): \Illuminate\Contracts\View\View
     {

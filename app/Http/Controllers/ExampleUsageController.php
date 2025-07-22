@@ -12,13 +12,15 @@ class ExampleUsageController extends Controller
      * @param ConceptosTotalesService $conceptosTotalesService
      */
     public function __construct(
-        private readonly ConceptosTotalesService $conceptosTotalesService
-    ) {}
+        private readonly ConceptosTotalesService $conceptosTotalesService,
+    ) {
+    }
 
     /**
-     * Ejemplo de uso del servicio de conceptos totales
+     * Ejemplo de uso del servicio de conceptos totales.
      *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function getConceptosTotales(Request $request): JsonResponse
@@ -28,7 +30,7 @@ class ExampleUsageController extends Controller
             'year' => 'required|integer|min:2020|max:2030',
             'month' => 'required|integer|min:1|max:12',
             'conceptos' => 'nullable|array',
-            'conceptos.*' => 'string'
+            'conceptos.*' => 'string',
         ]);
 
         // Obtener parámetros
@@ -47,8 +49,8 @@ class ExampleUsageController extends Controller
                 'month' => $month,
                 'total_haberes' => $reporte->totalHaberes,
                 'total_descuentos' => $reporte->totalDescuentos,
-                'neto' => $reporte->neto
-            ]
+                'neto' => $reporte->neto,
+            ],
         ]);
     }
 }

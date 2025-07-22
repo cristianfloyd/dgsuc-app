@@ -2,9 +2,9 @@
 
 namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 
+use App\Filament\Reportes\Resources\OrdenDePagoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Reportes\Resources\OrdenDePagoResource;
 
 class EditReporte extends EditRecord
 {

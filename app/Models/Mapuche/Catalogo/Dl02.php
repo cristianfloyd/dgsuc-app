@@ -6,13 +6,13 @@ namespace App\Models\Mapuche\Catalogo;
 
 use App\Models\Mapuche\Dh05;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Modelo para la tabla de Variantes de Licencias (dl02)
+ * Modelo para la tabla de Variantes de Licencias (dl02).
  *
  * @property int $nrovarlicencia Número de variante de licencia
  * @property int|null $nrodefiniclicencia Número de definición de licencia
@@ -63,27 +63,27 @@ class Dl02 extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'dl02';
-
-    /**
-     * Clave primaria de la tabla
-     */
-    protected $primaryKey = 'nrovarlicencia';
-
-    /**
-     * Indica si el modelo debe tener timestamps
+     * Indica si el modelo debe tener timestamps.
      */
     public $timestamps = false;
 
     /**
-     * Indica si la clave primaria es auto-incrementable
+     * Indica si la clave primaria es auto-incrementable.
      */
     public $incrementing = false;
 
     /**
-     * Atributos que son asignables masivamente
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'dl02';
+
+    /**
+     * Clave primaria de la tabla.
+     */
+    protected $primaryKey = 'nrovarlicencia';
+
+    /**
+     * Atributos que son asignables masivamente.
      */
     protected $fillable = [
         'nrovarlicencia',
@@ -127,11 +127,11 @@ class Dl02 extends Model
         'seapacualcateg',
         'chkpresentismo',
         'chkaportalao',
-        'cantunidadesperiodo_sinusar'
+        'cantunidadesperiodo_sinusar',
     ];
 
     /**
-     * Casteos de atributos
+     * Casteos de atributos.
      */
     protected $casts = [
         'nrovarlicencia' => 'integer',
@@ -175,11 +175,11 @@ class Dl02 extends Model
         'seapacualcateg' => 'integer',
         'chkpresentismo' => 'integer',
         'chkaportalao' => 'integer',
-        'cantunidadesperiodo_sinusar' => 'integer'
+        'cantunidadesperiodo_sinusar' => 'integer',
     ];
 
     /**
-     * Relación con licencias (Dh05)
+     * Relación con licencias (Dh05).
      */
     public function licencias(): HasMany
     {
@@ -191,7 +191,7 @@ class Dl02 extends Model
     // ================================
 
     /**
-     * Scope para variantes remuneradas
+     * Scope para variantes remuneradas.
      */
     public function scopeRemuneradas(Builder $query): Builder
     {
@@ -199,7 +199,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para variantes no remuneradas
+     * Scope para variantes no remuneradas.
      */
     public function scopeNoRemuneradas(Builder $query): Builder
     {
@@ -207,7 +207,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para licencias por maternidad
+     * Scope para licencias por maternidad.
      */
     public function scopeMaternidad(Builder $query): Builder
     {
@@ -215,7 +215,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para licencias por absorción
+     * Scope para licencias por absorción.
      */
     public function scopeAbsorcion(Builder $query): Builder
     {
@@ -223,7 +223,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para licencias que generan vacante
+     * Scope para licencias que generan vacante.
      */
     public function scopeGeneraVacante(Builder $query): Builder
     {
@@ -231,7 +231,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para licencias que computan antigüedad
+     * Scope para licencias que computan antigüedad.
      */
     public function scopeComputaAntiguedad(Builder $query): Builder
     {
@@ -239,7 +239,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para filtrar por escalafón
+     * Scope para filtrar por escalafón.
      */
     public function scopePorEscalafon(Builder $query, string $escalafon): Builder
     {
@@ -247,7 +247,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para filtrar por sexo
+     * Scope para filtrar por sexo.
      */
     public function scopePorSexo(Builder $query, string $sexo): Builder
     {
@@ -255,7 +255,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para licencias con control de fechas
+     * Scope para licencias con control de fechas.
      */
     public function scopeConControlFechas(Builder $query): Builder
     {
@@ -263,7 +263,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para filtrar por tipo de días
+     * Scope para filtrar por tipo de días.
      */
     public function scopePorTipoDias(Builder $query, string $tipoDias): Builder
     {
@@ -271,7 +271,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Scope para ordenar por número de orden de aplicación
+     * Scope para ordenar por número de orden de aplicación.
      */
     public function scopeOrdenadoPorAplicacion(Builder $query): Builder
     {
@@ -283,7 +283,7 @@ class Dl02 extends Model
     // ================================
 
     /**
-     * Verifica si la licencia es remunerada con porcentaje específico
+     * Verifica si la licencia es remunerada con porcentaje específico.
      */
     public function esRemuneradaConPorcentaje(float $porcentaje = 100.0): bool
     {
@@ -293,7 +293,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Verifica si la licencia es completamente no remunerada
+     * Verifica si la licencia es completamente no remunerada.
      */
     public function esCompletamenteNoRemunerada(): bool
     {
@@ -302,7 +302,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Verifica si aplica para cualquier carácter
+     * Verifica si aplica para cualquier carácter.
      */
     public function aplicaACualquierCaracter(): bool
     {
@@ -310,7 +310,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Verifica si aplica para cualquier dedicación
+     * Verifica si aplica para cualquier dedicación.
      */
     public function aplicaACualquierDedicacion(): bool
     {
@@ -318,7 +318,7 @@ class Dl02 extends Model
     }
 
     /**
-     * Obtiene la descripción completa de la variante
+     * Obtiene la descripción completa de la variante.
      */
     public function getDescripcionCompleta(): string
     {
@@ -332,18 +332,18 @@ class Dl02 extends Model
             $porcentaje = $this->porcremuneracion ?? 100;
             $descripcion .= " (Remunerada {$porcentaje}%)";
         } else {
-            $descripcion .= " (No remunerada)";
+            $descripcion .= ' (No remunerada)';
         }
 
         if ($this->es_maternidad) {
-            $descripcion .= " [Maternidad]";
+            $descripcion .= ' [Maternidad]';
         }
 
         return $descripcion;
     }
 
     /**
-     * Verifica si la variante es aplicable según los criterios
+     * Verifica si la variante es aplicable según los criterios.
      */
     public function esAplicable(array $criterios = []): bool
     {
@@ -353,17 +353,15 @@ class Dl02 extends Model
         }
 
         // Verificar escalafón si está especificado
-        if (isset($criterios['escalafon']) && $this->escalafon && $this->escalafon !== $criterios['escalafon']) {
-            return false;
-        }
+        return !(isset($criterios['escalafon']) && $this->escalafon && $this->escalafon !== $criterios['escalafon']);
+
+
 
         // Agregar más validaciones según sea necesario
-
-        return true;
     }
 
     /**
-     * Calcula el importe a percibir basado en el sueldo base
+     * Calcula el importe a percibir basado en el sueldo base.
      */
     public function calcularImporteRemuneracion(float $sueldoBase): float
     {

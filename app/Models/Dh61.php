@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Traits\HasCompositePrimaryKey;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use App\ValueObjects\CategoryIdentifier;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /*
  * (D) HISTORICO-Tabla de Categorias de Empleados
@@ -21,15 +18,18 @@ class Dh61 extends Model
     use HasCompositePrimaryKey;
 
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $table = 'dh61';
-    private ?string $virtualId = null;
 
     /**
-     * primaryKey compuesta en formato array
+     * primaryKey compuesta en formato array.
+     *
      * @var array
      */
     protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
+
     protected $fillable = ['codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano', 'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos', 'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif', 'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon', 'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao'];
 
     protected $casts = [
@@ -55,9 +55,10 @@ class Dh61 extends Model
         'noinformasipuver' => 'integer',
         'noinformasirhu' => 'integer',
         'imppnooblig' => 'integer',
-        'aportalao' => 'integer'
+        'aportalao' => 'integer',
     ];
 
+    private ?string $virtualId = null;
 
     // Scope para filtrar por categoría
     public function scopeCategoria($query, $categoria)
@@ -69,7 +70,7 @@ class Dh61 extends Model
     public function scopeVigencia($query, $ano, $mes)
     {
         return $query->where('vig_caano', $ano)
-                    ->where('vig_cames', $mes);
+            ->where('vig_cames', $mes);
     }
 
     // Método para obtener categorías activas
@@ -113,60 +114,17 @@ class Dh61 extends Model
         return $query->where('codigoescalafon', $codigoEscalafon);
     }
 
-
-
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
             '*',
-            DB::connection($this->getConnectionName())->raw("CONCAT(codc_categ, '-', vig_caano, '-', vig_cames) as id")
+            DB::connection($this->getConnectionName())->raw("CONCAT(codc_categ, '-', vig_caano, '-', vig_cames) as id"),
         )->orderByRaw('codc_categ, vig_caano, vig_cames');
     }
 
-    // public function newQuery()
-    // {
-    //     $query = parent::newQuery();
-    //     $query->addSelect('*');
-    //     $query->addSelect(DB::raw("CONCAT(TRIM(codc_categ), '-', vig_caano, '-', vig_cames) as id"));
-    //     return $query;
-    // }
-
-    // ######################## Accesores y mutadores ########################
-    /* ###################################################################### */
-
-    protected function id(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                return (string)new CategoryIdentifier(
-                    $this->codc_categ,
-                    $this->vig_caano,
-                    $this->vig_cames
-                );
-            },
-            set: function ($value) {
-                $identifier = CategoryIdentifier::fromString($value);
-                $this->codc_categ = $identifier->getCategory();
-                $this->vig_caano = $identifier->getYear();
-                $this->vig_cames = $identifier->getMonth();
-                return $value;
-            }
-        );
-    }
-
-
-    protected function codcCateg(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => str_pad(trim($value), 4),
-            set: fn (string $value) => str_pad(trim($value), 4)
-        );
-    }
-
-
     // ########################## Métodos para Filamentphp ##################################
     /**
-     * Método para buscar por ID virtual
+     * Método para buscar por ID virtual.
      */
     public static function findByVirtualId(string $virtualId): ?self
     {
@@ -185,7 +143,7 @@ class Dh61 extends Model
         }
 
         $parts = explode('-', $id);
-        if (count($parts) !== 3) {
+        if (\count($parts) !== 3) {
             return null;
         }
 
@@ -196,7 +154,7 @@ class Dh61 extends Model
             ->first();
     }
     /**
-     * Método para búsqueda por ID virtual
+     * Método para búsqueda por ID virtual.
      */
     // public static function find($id): Dh61|null
     // {
@@ -219,6 +177,7 @@ class Dh61 extends Model
     /**
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
+     *
      * @return mixed
      */
     public function getKey(): string
@@ -226,13 +185,12 @@ class Dh61 extends Model
         return $this->id;
     }
 
-
-
     /**
      * Establece el nombre de la clave para el modelo.
+     *
      * @param string $key El valor de la clave a establecer.
      */
-    public function setKeyName($key)
+    public function setKeyName($key): void
     {
         $this->id = $key;
     }
@@ -247,15 +205,14 @@ class Dh61 extends Model
         return $this->id;
     }
 
-
     public function resolveRouteBinding($value, $field = null)
     {
         if ($field === null) {
             $identifier = CategoryIdentifier::fromString($value);
             return $this->where('codc_categ', $identifier->getCategory())
-                       ->where('vig_caano', $identifier->getYear())
-                       ->where('vig_cames', $identifier->getMonth())
-                       ->firstOrFail();
+                ->where('vig_caano', $identifier->getYear())
+                ->where('vig_cames', $identifier->getMonth())
+                ->firstOrFail();
         }
         return parent::resolveRouteBinding($value, $field);
     }
@@ -263,5 +220,44 @@ class Dh61 extends Model
     public static function resolveRecordRouteBinding(string $key): ?Model
     {
         return static::getModel()::find($key);
+    }
+
+    // public function newQuery()
+    // {
+    //     $query = parent::newQuery();
+    //     $query->addSelect('*');
+    //     $query->addSelect(DB::raw("CONCAT(TRIM(codc_categ), '-', vig_caano, '-', vig_cames) as id"));
+    //     return $query;
+    // }
+
+    // ######################## Accesores y mutadores ########################
+    /* ###################################################################### */
+
+    protected function id(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return (string)new CategoryIdentifier(
+                    $this->codc_categ,
+                    $this->vig_caano,
+                    $this->vig_cames,
+                );
+            },
+            set: function ($value) {
+                $identifier = CategoryIdentifier::fromString($value);
+                $this->codc_categ = $identifier->getCategory();
+                $this->vig_caano = $identifier->getYear();
+                $this->vig_cames = $identifier->getMonth();
+                return $value;
+            },
+        );
+    }
+
+    protected function codcCateg(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => str_pad(trim($value), 4),
+            set: fn (string $value) => str_pad(trim($value), 4),
+        );
     }
 }

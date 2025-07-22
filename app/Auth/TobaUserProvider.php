@@ -4,38 +4,38 @@ namespace App\Auth;
 
 use App\Models\User;
 use App\Services\TobaApiService;
-use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\UserProvider;
 
 class TobaUserProvider implements UserProvider
 {
     protected $tobaApi;
+
     protected $hasher;
+
     protected $model;
 
-    public function __construct(TobaApiService $tobaApi ,$hasher, $model)
+    public function __construct(TobaApiService $tobaApi, $hasher, $model)
     {
         $this->tobaApi = $tobaApi;
         $this->hasher = $hasher;
         $this->model = $model;
     }
 
-
-    public function retrieveById($identifier)
+    public function retrieveById($identifier): void
     {
         // Implementa la lógica para recuperar un usuario por ID desde Toba
     }
 
-    public function retrieveByToken($identifier, $token)
+    public function retrieveByToken($identifier, $token): void
     {
         // No es necesario implementar si no usas "remember me"
     }
 
-    public function updateRememberToken(Authenticatable $user, $token)
+    public function updateRememberToken(Authenticatable $user, $token): void
     {
         // No es necesario implementar si no usas "remember me"
     }
-
 
     public function retrieveByCredentials(array $credentials)
     {
@@ -62,9 +62,11 @@ class TobaUserProvider implements UserProvider
         // Implementa la lógica para validar las credenciales contra Toba
         return true;
     }
+
     /**
      * @inheritDoc
      */
-    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false) {
+    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false): void
+    {
     }
 }

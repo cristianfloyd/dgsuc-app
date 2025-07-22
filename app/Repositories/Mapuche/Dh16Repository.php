@@ -11,8 +11,9 @@ use Illuminate\Support\Collection;
 class Dh16Repository implements Dh16RepositoryInterface
 {
     public function __construct(
-        private readonly Dh16 $model
-    ) {}
+        private readonly Dh16 $model,
+    ) {
+    }
 
     public function getConceptosByGrupo(int $codn_grupo): Collection
     {
@@ -34,7 +35,7 @@ class Dh16Repository implements Dh16RepositoryInterface
 
     public function delete(int $codn_grupo, int $codn_conce): bool
     {
-        return (bool) $this->model
+        return (bool)$this->model
             ->where('codn_grupo', $codn_grupo)
             ->where('codn_conce', $codn_conce)
             ->delete();

@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Sushi\Sushi;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static hydrate(array $results)
@@ -17,15 +16,14 @@ class EmbargoProcesoResult extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.embargo_proceso_results';
-
-    protected $primaryKey = 'id';
     public $incrementing = true;
 
     // Deshabilitar timestamps ya que no son parte del resultado de la consulta
     public $timestamps = false;
 
+    protected $table = 'suc.embargo_proceso_results';
 
+    protected $primaryKey = 'id';
 
     // Definir los atributos rellenables basados en las columnas del resultado de la consulta
     protected $fillable = [
@@ -41,7 +39,7 @@ class EmbargoProcesoResult extends Model
         'total',
         'codn_conce',
         'tipo_foran',
-        'clas_noved'
+        'clas_noved',
     ];
 
     // Definir la conversión de atributos para los tipos de datos apropiados
@@ -58,13 +56,11 @@ class EmbargoProcesoResult extends Model
         'total' => 'decimal:2',
         'codn_conce' => 'integer',
         'tipo_foran' => 'string',
-        'clas_noved' => 'string'
+        'clas_noved' => 'string',
     ];
 
-
-
     /**
-     * Obtiene una consulta vacía
+     * Obtiene una consulta vacía.
      *
      * @return Builder
      */
@@ -74,7 +70,7 @@ class EmbargoProcesoResult extends Model
     }
 
     /**
-     * Obtiene el monto total
+     * Obtiene el monto total.
      *
      * @return float
      */
@@ -84,7 +80,7 @@ class EmbargoProcesoResult extends Model
     }
 
     /**
-     * Verifica si es embargo bruto
+     * Verifica si es embargo bruto.
      *
      * @return bool
      */
@@ -101,15 +97,17 @@ class EmbargoProcesoResult extends Model
      * @param int $liquidacionProxima Número de liquidación próxima
      * @param bool $insertIntoDh25 Indica si se debe insertar en la tabla DH25
      * @param int $periodoFiscal Periodo fiscal en formato AAAAMM
-     * @return array Resultados del proceso de embargo
+     *
      * @throws \Exception Si ocurre un error durante el proceso
+     *
+     * @return array Resultados del proceso de embargo
      */
     public static function ejecutarProcesoEmbargo(
         array $complementarias,
         int $liquidacionDefinitiva,
         int $liquidacionProxima,
         bool $insertIntoDh25,
-        int $periodoFiscal
+        int $periodoFiscal,
     ): array {
         try {
             // Obtener la conexión correcta para este modelo
@@ -120,18 +118,18 @@ class EmbargoProcesoResult extends Model
 
             // Verificar si el esquema existe USANDO LA MISMA CONEXIÓN
             $schemaExists = $connection->select(
-                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'suc'"
+                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'suc'",
             );
 
             if (empty($schemaExists)) {
                 // Verificar qué esquemas están disponibles para diagnóstico
                 $availableSchemas = $connection->select(
-                    "SELECT schema_name FROM information_schema.schemata ORDER BY schema_name"
+                    'SELECT schema_name FROM information_schema.schemata ORDER BY schema_name',
                 );
 
                 Log::error('Esquema "suc" no encontrado. Esquemas disponibles:', [
                     'connection' => $connectionName,
-                    'schemas' => array_column($availableSchemas, 'schema_name')
+                    'schemas' => array_column($availableSchemas, 'schema_name'),
                 ]);
 
                 throw new \Exception("El esquema 'suc' no existe en la base de datos '{$connectionName}'.");
@@ -145,7 +143,7 @@ class EmbargoProcesoResult extends Model
             // Verificar si la función existe
             $functionExists = $connection->select(
                 "SELECT routine_name FROM information_schema.routines
-                 WHERE routine_schema = 'suc' AND routine_name = 'emb_proceso'"
+                 WHERE routine_schema = 'suc' AND routine_name = 'emb_proceso'",
             );
 
             if (empty($functionExists)) {
@@ -155,35 +153,35 @@ class EmbargoProcesoResult extends Model
 
             // Ejecutar la función almacenada con la conexión obtenida
             $results = $connection->select(
-                "SELECT * FROM suc.emb_proceso(
+                'SELECT * FROM suc.emb_proceso(
                     ?::integer[],
                     ?::integer,
                     ?::integer,
                     ?::boolean,
                     ?::integer
-                )",
+                )',
                 [
                     $complementariasArray,
                     $liquidacionDefinitiva,
                     $liquidacionProxima,
                     $insertIntoDh25,
-                    $periodoFiscal
-                ]
+                    $periodoFiscal,
+                ],
             );
 
             // Guardar los resultados en la tabla
             $registrosInsertados = self::guardarResultadosProceso($results);
 
             Log::info('Proceso de embargo ejecutado y resultados guardados correctamente', [
-                'resultados_obtenidos' => count($results),
+                'resultados_obtenidos' => \count($results),
                 // 'resultados_insertados' => $registrosInsertados,
                 'parametros' => [
                     'complementarias' => $complementarias,
                     'liquidacionDefinitiva' => $liquidacionDefinitiva,
                     'liquidacionProxima' => $liquidacionProxima,
                     'insertIntoDh25' => $insertIntoDh25,
-                    'periodoFiscal' => $periodoFiscal
-                ]
+                    'periodoFiscal' => $periodoFiscal,
+                ],
             ]);
 
             return $results;
@@ -195,55 +193,12 @@ class EmbargoProcesoResult extends Model
                     'liquidacionDefinitiva' => $liquidacionDefinitiva,
                     'liquidacionProxima' => $liquidacionProxima,
                     'insertIntoDh25' => $insertIntoDh25,
-                    'periodoFiscal' => $periodoFiscal
-                ]
+                    'periodoFiscal' => $periodoFiscal,
+                ],
             ]);
 
             throw $e;
         }
-    }
-
-
-    /**
-    * Obtiene la conexión a la base de datos utilizada por este modelo.
-    *
-    * Este método estático proporciona acceso a la conexión configurada
-    * en el trait MapucheConnectionTrait, haciéndola accesible para métodos
-    * estáticos que necesitan ejecutar consultas directas a la base de datos.
-    *
-    * @return \Illuminate\Database\Connection
-    * @throws \Exception Si no se puede determinar la conexión
-    */
-    protected static function obtenerConexion()
-    {
-        // Crear una instancia temporal para acceder a los métodos de instancia
-        $instance = new static();
-
-        // Verificar si el trait implementa algún método específico para obtener la conexión
-        if (method_exists($instance, 'getMapucheConnection')) {
-            return $instance->getMapucheConnection();
-        }
-
-        // Si no hay método específico, usar el connectionName definido en el trait o el modelo
-        $connectionName = $instance->getConnectionName();
-
-        if (empty($connectionName)) {
-            // Si aún no hay nombre de conexión, intentar con la configuración predeterminada
-            $connectionName = config('database.default');
-
-            // Registrar advertencia
-            Log::warning('Se está utilizando la conexión predeterminada porque no se pudo determinar la conexión específica', [
-                'model' => get_class($instance),
-                'defaultConnection' => $connectionName
-            ]);
-        }
-
-        // Registrar información sobre la conexión utilizada
-        Log::info('Obteniendo conexión para ejecución de función almacenada', [
-            'connectionName' => $connectionName
-        ]);
-
-        return DB::connection($connectionName);
     }
 
     /**
@@ -251,13 +206,15 @@ class EmbargoProcesoResult extends Model
      *
      * @param array $results Resultados obtenidos de la función almacenada
      * @param bool $limpiarTabla Si se debe limpiar la tabla antes de insertar nuevos registros
-     * @return int Número de registros insertados
+     *
      * @throws \Exception Si ocurre un error durante el proceso de inserción
+     *
+     * @return int Número de registros insertados
      */
     public static function guardarResultadosProceso(array $results, bool $limpiarTabla = true): int
     {
         // Verificar si hay resultados para procesar
-        $cantidadRegistros = count($results);
+        $cantidadRegistros = \count($results);
         if ($cantidadRegistros === 0) {
             Log::warning('No hay registros para insertar en la tabla de resultados de embargo');
             return 0;
@@ -297,7 +254,7 @@ class EmbargoProcesoResult extends Model
                 // Si ya viene un array de liquis, úsalo; si no, crea uno con el nro_liqui simple
                 if (isset($registro['nros_liqui_json'])) {
                     // Si ya viene, úsalo tal cual
-                    $registroFiltrado['nros_liqui_json'] = is_array($registro['nros_liqui_json'])
+                    $registroFiltrado['nros_liqui_json'] = \is_array($registro['nros_liqui_json'])
                         ? $registro['nros_liqui_json']
                         : json_decode($registro['nros_liqui_json'], true);
                 } elseif (isset($registro['nro_liqui'])) {
@@ -312,14 +269,14 @@ class EmbargoProcesoResult extends Model
 
 
                 // Verificar que tengamos todos los campos requeridos
-                if (count($registroFiltrado) < count($fillable)) {
+                if (\count($registroFiltrado) < \count($fillable)) {
                     Log::warning("El registro {$index} no contiene todos los campos esperados", [
                         'esperados' => $fillable,
-                        'recibidos' => array_keys($registroFiltrado)
+                        'recibidos' => array_keys($registroFiltrado),
                     ]);
                 }
                 // Convertir a JSON antes de insertar
-                if (isset($registroFiltrado['nros_liqui_json']) && is_array($registroFiltrado['nros_liqui_json'])) {
+                if (isset($registroFiltrado['nros_liqui_json']) && \is_array($registroFiltrado['nros_liqui_json'])) {
                     $registroFiltrado['nros_liqui_json'] = json_encode($registroFiltrado['nros_liqui_json']);
                 }
 
@@ -328,18 +285,18 @@ class EmbargoProcesoResult extends Model
 
             // Definir tamaño de bloque basado en la cantidad de registros
             // Para pocos registros, bloques más pequeños; para muchos, bloques más grandes
-            $tamañoBloque = min(max(intval($cantidadRegistros / 10), 50), 1000);
+            $tamañoBloque = min(max((int)($cantidadRegistros / 10), 50), 1000);
 
             // Usar un contador para seguir los registros insertados correctamente
             $registrosInsertados = 0;
 
             // Insertar en bloques para optimizar rendimiento
             for ($i = 0; $i < $cantidadRegistros; $i += $tamañoBloque) {
-                $bloque = array_slice($registrosParaInsertar, $i, $tamañoBloque);
+                $bloque = \array_slice($registrosParaInsertar, $i, $tamañoBloque);
 
                 // Insertar usando la conexión obtenida, más eficiente que self::insert
                 $connection->table($tableName)->insert($bloque);
-                $registrosInsertados += count($bloque);
+                $registrosInsertados += \count($bloque);
 
                 // Log cada X bloques para no sobrecargar los logs
                 if ($i % ($tamañoBloque * 10) === 0 || $i + $tamañoBloque >= $cantidadRegistros) {
@@ -351,10 +308,10 @@ class EmbargoProcesoResult extends Model
             $connection->commit();
 
             // Registro detallado del resultado
-            Log::info("Proceso de embargo completado con éxito", [
+            Log::info('Proceso de embargo completado con éxito', [
                 'total_registros' => $cantidadRegistros,
                 'registros_insertados' => $registrosInsertados,
-                'tiempo_proceso' => number_format(microtime(true) - LARAVEL_START, 4) . 's'
+                'tiempo_proceso' => number_format(microtime(true) - LARAVEL_START, 4) . 's',
             ]);
 
             return $registrosInsertados;
@@ -366,7 +323,7 @@ class EmbargoProcesoResult extends Model
                 'mensaje' => $e->getMessage(),
                 'codigo' => $e->getCode(),
                 'total_resultados' => $cantidadRegistros,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw new \Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
@@ -377,7 +334,7 @@ class EmbargoProcesoResult extends Model
     // ############## accesors y mutators #####################
     // #########################################################
 
-    public function setNrosLiquiJsonAttribute($value)
+    public function setNrosLiquiJsonAttribute($value): void
     {
         $this->attributes['nros_liqui_json'] = json_encode($value);
     }
@@ -385,5 +342,48 @@ class EmbargoProcesoResult extends Model
     public function getNrosLiquiJsonAttribute($value)
     {
         return json_decode($value, true);
+    }
+
+    /**
+     * Obtiene la conexión a la base de datos utilizada por este modelo.
+     *
+     * Este método estático proporciona acceso a la conexión configurada
+     * en el trait MapucheConnectionTrait, haciéndola accesible para métodos
+     * estáticos que necesitan ejecutar consultas directas a la base de datos.
+     *
+     * @throws \Exception Si no se puede determinar la conexión
+     *
+     * @return \Illuminate\Database\Connection
+     */
+    protected static function obtenerConexion()
+    {
+        // Crear una instancia temporal para acceder a los métodos de instancia
+        $instance = new static();
+
+        // Verificar si el trait implementa algún método específico para obtener la conexión
+        if (method_exists($instance, 'getMapucheConnection')) {
+            return $instance->getMapucheConnection();
+        }
+
+        // Si no hay método específico, usar el connectionName definido en el trait o el modelo
+        $connectionName = $instance->getConnectionName();
+
+        if (empty($connectionName)) {
+            // Si aún no hay nombre de conexión, intentar con la configuración predeterminada
+            $connectionName = config('database.default');
+
+            // Registrar advertencia
+            Log::warning('Se está utilizando la conexión predeterminada porque no se pudo determinar la conexión específica', [
+                'model' => $instance::class,
+                'defaultConnection' => $connectionName,
+            ]);
+        }
+
+        // Registrar información sobre la conexión utilizada
+        Log::info('Obteniendo conexión para ejecución de función almacenada', [
+            'connectionName' => $connectionName,
+        ]);
+
+        return DB::connection($connectionName);
     }
 }

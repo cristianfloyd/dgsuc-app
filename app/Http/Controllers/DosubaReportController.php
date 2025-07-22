@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Services\Mapuche\DosubaReportService;
+use Illuminate\Http\JsonResponse;
 
 class DosubaReportController extends Controller
 {
     public function __construct(
-        private DosubaReportService $reportService
-    ) {}
+        private DosubaReportService $reportService,
+    ) {
+    }
 
     public function generate(string $year, string $month): JsonResponse
     {

@@ -4,20 +4,20 @@ namespace App\Exports\Sheets;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class FallecidosBloqueoSheet implements
     FromCollection,
@@ -30,6 +30,7 @@ class FallecidosBloqueoSheet implements
     WithColumnFormatting
 {
     protected $records;
+
     protected string $periodo;
 
     public function __construct($records, string $periodo)
@@ -41,7 +42,7 @@ class FallecidosBloqueoSheet implements
     public function collection()
     {
         $collection = $this->records;
-        $collection = $collection->filter(fn($row) => $row !== null);
+        $collection = $collection->filter(fn ($row) => $row !== null);
         return $collection;
     }
 
@@ -63,8 +64,8 @@ class FallecidosBloqueoSheet implements
                 'Fecha Baja',
                 'Apellido',
                 'Nombre',
-                'Observación'
-            ]
+                'Observación',
+            ],
         ];
     }
 
@@ -74,13 +75,13 @@ class FallecidosBloqueoSheet implements
 
         // Manejo seguro de la fecha
         $fechaBaja = $row->fecha_baja;
-        if (is_string($fechaBaja)) {
+        if (\is_string($fechaBaja)) {
             $fechaBaja = Carbon::parse($fechaBaja);
         }
 
         $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
 
-        if(!$row){
+        if (!$row) {
             return [
                 '',
                 '',
@@ -89,7 +90,7 @@ class FallecidosBloqueoSheet implements
                 '',
                 '',
                 '',
-                ''
+                '',
             ];
         }
         return [
@@ -100,7 +101,7 @@ class FallecidosBloqueoSheet implements
             $fechaBaja ? $fechaBaja->format('d/m/Y') : '',
             $row->dh01?->desc_appat ?? '',
             $row->dh01?->desc_nombr ?? '',
-            $row->observaciones ?? ''
+            $row->observaciones ?? '',
         ];
     }
 
@@ -110,8 +111,8 @@ class FallecidosBloqueoSheet implements
         $sheet->getStyle($sheet->calculateWorksheetDimension())->applyFromArray([
             'font' => [
                 'name' => 'Arial',
-                'size' => 10
-            ]
+                'size' => 10,
+            ],
         ]);
 
         // Combinar celdas para el título del período
@@ -128,26 +129,26 @@ class FallecidosBloqueoSheet implements
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'D9E1F2']
+                    'startColor' => ['rgb' => 'D9E1F2'],
                 ],
             ],
             3 => [  // La fila de encabezados ahora es la 3
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
-                ]
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
             ],
             // Borde para todos los datos
             "A3:H$lastRow" => [
@@ -173,7 +174,7 @@ class FallecidosBloqueoSheet implements
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet;
                 $lastRow = $sheet->getHighestRow();
 
@@ -187,8 +188,8 @@ class FallecidosBloqueoSheet implements
                         $sheet->getStyle("A$row:G$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
-                            ]
+                                'startColor' => ['rgb' => 'F2F2F2'], // Gris claro
+                            ],
                         ]);
                     }
                 }
@@ -200,7 +201,7 @@ class FallecidosBloqueoSheet implements
                 $sheet->getDelegate()->getSheetView()
                     ->setZoomScale(100)
                     ->setZoomScaleNormal(100);
-            }
+            },
         ];
     }
 }

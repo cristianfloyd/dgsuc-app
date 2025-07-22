@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dh01;
-use Illuminate\Http\Request;
 use App\Services\SicossCodigoActividadService;
+use Illuminate\Http\Request;
 
 class SicossController extends Controller
 {
@@ -38,7 +38,7 @@ class SicossController extends Controller
 
         // 5. Obtener conceptos liquidados del legajo
         $conceptosLiquidados = $this->sicossService->obtenerConceptosLiquidados($nroLegajo);
-        
+
         // 6. Calcular tipo de actividad usando esos conceptos
         $tipoActividad = $this->sicossService->calcularTipoActividad($conceptosLiquidados, $codigoActividad);
 
@@ -48,7 +48,7 @@ class SicossController extends Controller
         return response()->json([
             'nroLegajo' => $nroLegajo,
             'tipoActividad' => $tipoActividad,
-            'conceptosCount' => count($conceptosLiquidados)
+            'conceptosCount' => \count($conceptosLiquidados),
         ]);
     }
 }

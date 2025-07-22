@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 class ClearConceptoListadoCache extends Command
 {
     protected $signature = 'concepto-listado:clear-cache';
+
     protected $description = 'Limpia la caché del listado de conceptos';
 
     public function handle(): void

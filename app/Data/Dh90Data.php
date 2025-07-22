@@ -3,14 +3,11 @@
 namespace App\Data;
 
 use App\Models\Dh90;
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Attributes\Validation\Max;
-use Spatie\LaravelData\Attributes\Validation\Min;
-use Spatie\LaravelData\Attributes\Validation\Size;
-use Spatie\LaravelData\Attributes\Validation\Integer;
-use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\Min;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\Size;
+use Spatie\LaravelData\Data;
 
 /**
  * Data Object para la tabla dh90.
@@ -27,10 +24,8 @@ class Dh90Data extends Data
     public function __construct(
         #[Required, IntegerType, Min(1)]
         public int $nroCargo,
-
         #[IntegerType, Min(1)]
         public ?int $nroCargoasociado = null,
-
         #[Size(1)]
         public ?string $tipoasociacion = null,
     ) {
@@ -54,6 +49,7 @@ class Dh90Data extends Data
      * Actualiza un modelo existente con los datos del DTO.
      *
      * @param Dh90 $model
+     *
      * @return Dh90
      */
     public function updateModel(Dh90 $model): Dh90

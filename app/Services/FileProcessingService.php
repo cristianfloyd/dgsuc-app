@@ -2,36 +2,48 @@
 
 namespace App\Services;
 
-use App\Models\UploadedFile;
-use App\Livewire\CompareCuils;
-use App\Livewire\SicossImporter;
-use Illuminate\Support\Facades\Log;
-use App\Livewire\AfipRelacionesActivas;
-use App\Contracts\FileProcessorInterface;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
-use App\Contracts\WorkflowServiceInterface;
-use App\Jobs\ImportAfipRelacionesActivasJob;
-use App\Contracts\WorkflowExecutionInterface;
-use App\Contracts\TransactionServiceInterface;
+use App\Contracts\FileProcessorInterface;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\TableManagementServiceInterface;
+use App\Contracts\TransactionServiceInterface;
+use App\Contracts\WorkflowExecutionInterface;
+use App\Contracts\WorkflowServiceInterface;
+use App\Livewire\AfipRelacionesActivas;
+use App\Livewire\CompareCuils;
+use App\Livewire\SicossImporter;
+use App\Models\UploadedFile;
+use Illuminate\Support\Facades\Log;
 
 class FileProcessingService
 {
     private $afipRelacionesActivas;
+
     private $sicossImporter;
+
     private $compareCuils;
+
     private $fileUploadRepository;
+
     private $fileProcessor;
+
     private $employeeService;
+
     private $validationService;
+
     private $transactionService;
+
     private $workflowService;
+
     private $columnMetadata;
+
     private $sicossImporterService;
+
     private $workflowExecutionService;
+
     private $databaseService;
+
     private $tableManagementService;
 
     public function __construct(
@@ -78,7 +90,7 @@ class FileProcessingService
             return [
                 'success' => false,
                 'message' => 'Los archivos no están disponibles o no coinciden.',
-                'data' => []
+                'data' => [],
             ];
         }
 
@@ -89,8 +101,8 @@ class FileProcessingService
             'data' => [
                 'afip' => [],
                 'mapuche' => [],
-                'workflow' => []
-            ]
+                'workflow' => [],
+            ],
         ];
 
         // 1.- Procesar archivo AFIP
@@ -132,7 +144,6 @@ class FileProcessingService
         return $result;
     }
 
-
     /**
      * Procesa un archivo AFIP y lo importa a la base de datos.
      *
@@ -142,15 +153,16 @@ class FileProcessingService
      * 3. Inserta los datos mapeados en la base de datos
      *
      * @param UploadedFile $afipFile El archivo AFIP a procesar
+     *
      * @return array Resultado del procesamiento con la siguiente estructura:
      *               - success: bool Indica si el proceso fue exitoso
      *               - message: string Mensaje descriptivo del resultado
      *               - data: array Datos adicionales del proceso
-     *                 - file: int ID del archivo procesado
-     *                 - tableName: string Nombre de la tabla destino
-     *                 - step: string Paso actual del workflow
-     *                 - recordsProcessed: int|null Cantidad de registros procesados (solo si success=true)
-     *                 - error: string|null Mensaje de error (solo si success=false)
+     *               - file: int ID del archivo procesado
+     *               - tableName: string Nombre de la tabla destino
+     *               - step: string Paso actual del workflow
+     *               - recordsProcessed: int|null Cantidad de registros procesados (solo si success=true)
+     *               - error: string|null Mensaje de error (solo si success=false)
      */
     private function processFileAfip(UploadedFile $afipFile): array
     {
@@ -171,7 +183,7 @@ class FileProcessingService
             return [
                 'success' => false,
                 'message' => 'No se encontraron datos para procesar',
-                'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step]
+                'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step],
             ];
         }
 
@@ -184,7 +196,7 @@ class FileProcessingService
                 'success' => false,
                 'message' => 'Error al verificar y preparar la tabla: ' . $tableResult['message'],
                 'data' => array_merge(['file' => $uploadedFile->id, 'step' => $step], $tableResult['data']),
-                'error' => $tableResult['error'] ?? null
+                'error' => $tableResult['error'] ?? null,
             ];
         }
 
@@ -203,19 +215,18 @@ class FileProcessingService
                     'file' => $uploadedFile->id,
                     'tableName' => $tableName,
                     'step' => $step,
-                    'recordsProcessed' => $mappedData->count()
-                ]
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Error al insertar los datos en la base de datos',
-                'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step]
+                    'recordsProcessed' => $mappedData->count(),
+                ],
             ];
         }
+        return [
+            'success' => false,
+            'message' => 'Error al insertar los datos en la base de datos',
+            'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step],
+        ];
+
 
     }
-
 
     private function processFileMapuche($mapucheFile)
     {
@@ -234,21 +245,21 @@ class FileProcessingService
                     'data' => [
                         'tableName' => $tableName,
                         'step' => $step,
-                        'fileId' => $mapucheFile->id
-                    ]
-                ];
-            } else {
-                Log::error('Error al procesar el archivo Mapuche.');
-                return [
-                    'success' => false,
-                    'message' => 'Error al procesar el archivo Mapuche.',
-                    'data' => [
-                        'tableName' => $tableName,
-                        'step' => $step,
-                        'fileId' => $mapucheFile->id
-                    ]
+                        'fileId' => $mapucheFile->id,
+                    ],
                 ];
             }
+            Log::error('Error al procesar el archivo Mapuche.');
+            return [
+                'success' => false,
+                'message' => 'Error al procesar el archivo Mapuche.',
+                'data' => [
+                    'tableName' => $tableName,
+                    'step' => $step,
+                    'fileId' => $mapucheFile->id,
+                ],
+            ];
+
         } catch (\Exception $e) {
             Log::error('Excepción al procesar el archivo Mapuche: ' . $e->getMessage());
             return [
@@ -258,13 +269,13 @@ class FileProcessingService
                     'tableName' => $tableName,
                     'step' => $step,
                     'fileId' => $mapucheFile->id,
-                    'error' => $e->getMessage()
-                ]
+                    'error' => $e->getMessage(),
+                ],
             ];
         }
     }
 
-    private function executeCompareCuilsStep()
+    private function executeCompareCuilsStep(): void
     {
         // try {
         //     $this->compareCuils->excecuteWorkfloSteps();
@@ -274,7 +285,7 @@ class FileProcessingService
         // }
     }
 
-    private function deleteFiles($afipFile, $mapucheFile)
+    private function deleteFiles($afipFile, $mapucheFile): void
     {
         try {
             // Utilizar el repositorio para eliminar los archivos

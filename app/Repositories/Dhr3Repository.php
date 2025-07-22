@@ -2,15 +2,16 @@
 
 namespace App\Repositories;
 
-use App\Models\Mapuche\Dhr3;
 use App\Data\DataObjects\Dhr3Data;
+use App\Models\Mapuche\Dhr3;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dhr3Repository
 {
     public function __construct(
-        private readonly Dhr3 $model
-    ) {}
+        private readonly Dhr3 $model,
+    ) {
+    }
 
     public function find(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo): ?Dhr3
     {
@@ -19,7 +20,7 @@ class Dhr3Repository
             'nro_legaj' => $nro_legaj,
             'nro_cargo' => $nro_cargo,
             'codc_hhdd' => $codc_hhdd,
-            'nro_renglo' => $nro_renglo
+            'nro_renglo' => $nro_renglo,
         ])->first();
     }
 

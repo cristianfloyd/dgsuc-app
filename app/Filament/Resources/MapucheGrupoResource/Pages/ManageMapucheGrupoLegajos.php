@@ -2,31 +2,31 @@
 
 namespace App\Filament\Resources\MapucheGrupoResource\Pages;
 
-use App\Models\Dh01;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Resources\Pages\Page;
-use App\Models\Mapuche\MapucheGrupo;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Mapuche\MapucheGrupoLegajo;
-use Illuminate\Database\Eloquent\Collection;
-use Filament\Forms\Concerns\InteractsWithForms;
 use App\Filament\Resources\MapucheGrupoResource;
+use App\Models\Dh01;
+use App\Models\Mapuche\MapucheGrupo;
+use App\Models\Mapuche\MapucheGrupoLegajo;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
+use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
 {
     use InteractsWithForms;
     use InteractsWithTable;
 
+    public MapucheGrupo $record;
+
     protected static string $resource = MapucheGrupoResource::class;
 
     protected static string $view = 'filament.resources.mapuche-grupo-resource.pages.manage-mapuche-grupo-legajos';
-
-    public MapucheGrupo $record;
 
     public function table(Table $table): Table
     {
@@ -77,10 +77,10 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                         }
 
                         return match ($data['value']) {
-                            'en_grupo' => $query->whereHas('grupos', function ($q) {
+                            'en_grupo' => $query->whereHas('grupos', function ($q): void {
                                 $q->where('mapuche.grupo.id_grupo', $this->record->id_grupo);
                             }),
-                            'sin_grupo' => $query->whereDoesntHave('grupos', function ($q) {
+                            'sin_grupo' => $query->whereDoesntHave('grupos', function ($q): void {
                                 $q->where('mapuche.grupo.id_grupo', $this->record->id_grupo);
                             }),
                             default => $query
@@ -90,28 +90,28 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
             ->actions([
                 Tables\Actions\Action::make('toggle_grupo')
                     ->label(
-                        fn(Dh01 $record): string =>
+                        fn (Dh01 $record): string =>
                         $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'Quitar del Grupo'
-                            : 'Agregar al Grupo'
+                            : 'Agregar al Grupo',
                     )
                     ->icon(
-                        fn(Dh01 $record): string =>
+                        fn (Dh01 $record): string =>
                         $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'heroicon-o-x-mark'
-                            : 'heroicon-o-plus'
+                            : 'heroicon-o-plus',
                     )
                     ->color(
-                        fn(Dh01 $record): string =>
+                        fn (Dh01 $record): string =>
                         $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'danger'
-                            : 'success'
+                            : 'success',
                     )
                     ->action(function (Dh01 $record): void {
                         $exists = $record->grupos()
@@ -131,7 +131,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                         } else {
                             MapucheGrupoLegajo::create([
                                 'nro_legaj' => $record->nro_legaj,
-                                'id_grupo' => $this->record->id_grupo
+                                'id_grupo' => $this->record->id_grupo,
                             ]);
 
                             Notification::make()
@@ -140,7 +140,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                                 ->send();
                         }
                     })
-                    ->requiresConfirmation()
+                    ->requiresConfirmation(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('agregar_al_grupo')
@@ -148,11 +148,11 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->icon('heroicon-o-plus')
                     ->color('success')
                     ->action(function ($records): void {
-                        $records->each(function ($record) {
+                        $records->each(function ($record): void {
                             if (!$record->grupos()->where('mapuche.grupo.id_grupo', $this->record->id_grupo)->exists()) {
                                 MapucheGrupoLegajo::create([
                                     'nro_legaj' => $record->nro_legaj,
-                                    'id_grupo' => $this->record->id_grupo
+                                    'id_grupo' => $this->record->id_grupo,
                                 ]);
                             }
                         });
@@ -164,14 +164,14 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
-                    ->visible(fn(): bool => !request()->boolean('tableFilters.en_grupo')),
+                    ->visible(fn (): bool => !request()->boolean('tableFilters.en_grupo')),
 
                 Tables\Actions\BulkAction::make('quitar_del_grupo')
                     ->label('Quitar del Grupo')
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->action(function ($records): void {
-                        $records->each(function ($record) {
+                        $records->each(function ($record): void {
                             MapucheGrupoLegajo::query()
                                 ->where('nro_legaj', $record->nro_legaj)
                                 ->where('id_grupo', $this->record->id_grupo)
@@ -185,15 +185,15 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
-                    ->visible(fn(): bool => request()->boolean('tableFilters.en_grupo')),
+                    ->visible(fn (): bool => request()->boolean('tableFilters.en_grupo')),
             ])
             ->headerActions([
                 Tables\Actions\Action::make('asignar_todos')
                     ->label('Asignar Todos los Filtrados')
                     ->icon('heroicon-o-user-plus')
                     ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $records->each(function ($record) {
+                    ->action(function (Collection $records): void {
+                        $records->each(function ($record): void {
                             if (!$this->record->legajos()->where('nro_legaj', $record->nro_legaj)->exists()) {
                                 $this->record->legajos()->create(['nro_legaj' => $record->nro_legaj]);
                             }

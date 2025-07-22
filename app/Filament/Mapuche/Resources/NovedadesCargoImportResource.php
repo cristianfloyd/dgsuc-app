@@ -2,16 +2,13 @@
 
 namespace App\Filament\Mapuche\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use App\Models\NovedadesCargoImportModel;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Mapuche\Resources\NovedadesCargoImportResource\Pages;
-use App\Filament\Mapuche\Resources\NovedadesCargoImportResource\RelationManagers;
+use App\Models\NovedadesCargoImportModel;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class NovedadesCargoImportResource extends Resource
 {
@@ -24,6 +21,7 @@ class NovedadesCargoImportResource extends Resource
     // Configuración del icono y del label
     // -------------------------------------------------------------------------
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationLabel = 'Importar Cargos';
 
     // -------------------------------------------------------------------------
@@ -65,7 +63,7 @@ class NovedadesCargoImportResource extends Resource
                     ->label('Tipo Nov.'),
                 Tables\Columns\TextColumn::make('errors')
                     ->label('Errores de Validación')
-                    ->formatStateUsing(fn ($state) => implode(', ', (array) $state)),
+                    ->formatStateUsing(fn ($state) => implode(', ', (array)$state)),
             ])
             ->filters([])
             ->defaultSort('id', 'desc');
@@ -74,10 +72,9 @@ class NovedadesCargoImportResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
-
 
     // -------------------------------------------------------------------------
     // Páginas (acciones) que se crean para el Resource

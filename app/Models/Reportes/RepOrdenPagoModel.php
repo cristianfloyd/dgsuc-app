@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Reportes;
 
-use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Services\RepOrdenPagoService;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepOrdenPagoModel extends Model implements HasLabel
 {
@@ -22,12 +19,16 @@ class RepOrdenPagoModel extends Model implements HasLabel
     use HasFactory;
 
     public const TABLA_UNIDAD_ACADEMICA = 13;
-    protected static ?string $label = 'Orden de Pago';
-    protected $primaryKey = 'id';
-    public $timestamps = true;
-    public $incrementing = true;
-    protected $table = 'suc.rep_orden_pago';
 
+    public $timestamps = true;
+
+    public $incrementing = true;
+
+    protected static ?string $label = 'Orden de Pago';
+
+    protected $primaryKey = 'id';
+
+    protected $table = 'suc.rep_orden_pago';
 
     protected $fillable = [
         'nro_liqui',
@@ -56,6 +57,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
 
     /**
      * Indica los tipos de datos que deben ser convertidos automáticamente al acceder a los atributos del modelo.
+     *
      * @var array
      */
     protected $casts = [
@@ -78,43 +80,10 @@ class RepOrdenPagoModel extends Model implements HasLabel
         'imp_gasto' => 'decimal:2',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($model) {
-            // Validacion de campos no negativos
-            $camposMonetarios = [
-                'remunerativo',
-                'no_remunerativo',
-                'otros_no_remunerativo',
-                'bruto',
-                'descuentos',
-                'aportes',
-                'sueldo',
-                'neto',
-                'estipendio',
-                'med_resid',
-                'productividad',
-                'sal_fam',
-                'hs_extras',
-                'total',
-                'imp_gasto'
-            ];
-
-            foreach ($camposMonetarios as $campo) {
-                if ($model->$campo < 0) {
-                    throw new \InvalidArgumentException("El campo {$campo} no puede ser negativo");
-                }
-            }
-        });
-    }
-
     public static function generarReporte(array $nro_liqui): void
     {
         app(RepOrdenPagoService::class)->generateReport($nro_liqui);
     }
-
 
     /* ####################################################################### */
     /* ########################## RELACIONES ################################# */
@@ -128,10 +97,10 @@ class RepOrdenPagoModel extends Model implements HasLabel
     /* ################ SCOPES PARA BUSQUEDA Y FILTRO ######################## */
     public function scopeSearch(Builder $query, string $search): Builder
     {
-        return $query->where(function ($query) use ($search) {
+        return $query->where(function ($query) use ($search): void {
             $query->where('desc_liqui', 'like', "%{$search}%")
-                  ->orWhere('codc_uacad', 'like', "%{$search}%")
-                  ->orWhere('desc_progr', 'like', "%{$search}%");
+                ->orWhere('codc_uacad', 'like', "%{$search}%")
+                ->orWhere('desc_progr', 'like', "%{$search}%");
         });
     }
 
@@ -158,5 +127,37 @@ class RepOrdenPagoModel extends Model implements HasLabel
     public function getPluralLabel(): string
     {
         return $this->label;
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function ($model): void {
+            // Validacion de campos no negativos
+            $camposMonetarios = [
+                'remunerativo',
+                'no_remunerativo',
+                'otros_no_remunerativo',
+                'bruto',
+                'descuentos',
+                'aportes',
+                'sueldo',
+                'neto',
+                'estipendio',
+                'med_resid',
+                'productividad',
+                'sal_fam',
+                'hs_extras',
+                'total',
+                'imp_gasto',
+            ];
+
+            foreach ($camposMonetarios as $campo) {
+                if ($model->$campo < 0) {
+                    throw new \InvalidArgumentException("El campo {$campo} no puede ser negativo");
+                }
+            }
+        });
     }
 }

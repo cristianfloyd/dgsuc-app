@@ -2,27 +2,27 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Facades\DB;
 use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmbargoUacadSummary extends BaseExcelSheet implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
-
     public function __construct(protected Builder $query)
-    {}
+    {
+    }
+
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         return $this->query->getModel()
@@ -38,7 +38,7 @@ class EmbargoUacadSummary extends BaseExcelSheet implements FromCollection, With
     {
         return [
             'U. Acad.',
-            'Total'
+            'Total',
         ];
     }
 

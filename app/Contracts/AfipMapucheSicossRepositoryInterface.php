@@ -2,8 +2,8 @@
 
 namespace App\Contracts;
 
-use App\Models\AfipMapucheSicoss;
 use App\DTOs\AfipMapucheSicossDTO;
+use App\Models\AfipMapucheSicoss;
 
 interface AfipMapucheSicossRepositoryInterface
 {
@@ -12,6 +12,7 @@ interface AfipMapucheSicossRepositoryInterface
      *
      * @param string $periodoFiscal
      * @param string $cuil
+     *
      * @return AfipMapucheSicoss|null
      */
     public function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss;
@@ -20,6 +21,7 @@ interface AfipMapucheSicossRepositoryInterface
      * Crea un nuevo registro de AfipMapucheSicoss.
      *
      * @param AfipMapucheSicossDTO $dto
+     *
      * @return AfipMapucheSicoss
      */
     public function create(AfipMapucheSicossDTO $dto): AfipMapucheSicoss;
@@ -29,6 +31,7 @@ interface AfipMapucheSicossRepositoryInterface
      *
      * @param AfipMapucheSicoss $model
      * @param AfipMapucheSicossDTO $dto
+     *
      * @return AfipMapucheSicoss
      */
     public function update(AfipMapucheSicoss $model, AfipMapucheSicossDTO $dto): AfipMapucheSicoss;
@@ -37,6 +40,7 @@ interface AfipMapucheSicossRepositoryInterface
      * Elimina un registro de AfipMapucheSicoss.
      *
      * @param AfipMapucheSicoss $model
+     *
      * @return bool
      */
     public function delete(AfipMapucheSicoss $model): bool;

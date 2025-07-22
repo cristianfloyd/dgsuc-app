@@ -3,21 +3,25 @@
 namespace App\Services;
 
 use App\Models\LiquidacionControl;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 
 class LiquidacionControlService
 {
     use MapucheConnectionTrait;
 
-    protected $connection = $this->getConnectionFromTrait();
+    protected \Illuminate\Database\Connection $connection;
 
-    
+    public function __construct()
+    {
+        $this->connection = $this->getConnectionFromTrait();
+    }
+
     /**
      * Obtiene el conteo de controles por estado de manera segura
-     * 
+     *
      * @param string $estado Estado de los controles a contar
      * @return int Número de controles en el estado especificado
      */
@@ -42,7 +46,7 @@ class LiquidacionControlService
 
     /**
      * Obtiene el conteo de controles pendientes
-     * 
+     *
      * @return int Número de controles pendientes
      */
     public function getPendingControlsCount(): int
@@ -52,7 +56,7 @@ class LiquidacionControlService
 
     /**
      * Obtiene el conteo de controles con error
-     * 
+     *
      * @return int Número de controles con error
      */
     public function getErrorControlsCount(): int
@@ -62,7 +66,7 @@ class LiquidacionControlService
 
     /**
      * Obtiene el conteo de controles completados
-     * 
+     *
      * @return int Número de controles completados
      */
     public function getCompletedControlsCount(): int
@@ -72,7 +76,7 @@ class LiquidacionControlService
 
     /**
      * Controla negativos en una liquidación
-     * 
+     *
      * @param int $nroLiqui Número de liquidación
      * @return object Resultado del control
      */
@@ -113,7 +117,7 @@ class LiquidacionControlService
 
     /**
      * Controla cargos liquidados en una liquidación
-     * 
+     *
      * @param int $nroLiqui Número de liquidación
      * @return object Resultado del control
      */
@@ -153,14 +157,14 @@ class LiquidacionControlService
 
     /**
      * Crea la tabla de controles si no existe
-     * 
+     *
      * @return bool Resultado de la operación
      */
     public function createTableIfNotExists(): bool
     {
         try {
             if (!Schema::hasTable('suc.controles_liquidacion')) {
-                Schema::create('suc.controles_liquidacion', function ($table) {
+                Schema::create('suc.controles_liquidacion', function ($table): void {
                     $table->id();
                     $table->integer('nro_liqui');
                     $table->string('nombre_control');
@@ -170,15 +174,15 @@ class LiquidacionControlService
                     $table->timestamp('fecha_ejecucion')->nullable();
                     $table->string('ejecutado_por')->nullable();
                     $table->timestamps();
-                    
+
                     $table->index('nro_liqui');
                     $table->index('estado');
                 });
-                
+
                 Log::info('Tabla suc.controles_liquidacion creada exitosamente');
                 return true;
             }
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Error al crear la tabla suc.controles_liquidacion', [

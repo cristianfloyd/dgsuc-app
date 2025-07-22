@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Services\MapucheMiSimplificacionService;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
+use App\Services\MapucheMiSimplificacionService;
+use Illuminate\Support\ServiceProvider;
 
 class MapucheMiSimplificacionProvider extends ServiceProvider
 {
@@ -21,6 +21,6 @@ class MapucheMiSimplificacionProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

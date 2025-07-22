@@ -2,16 +2,16 @@
 
 namespace App\Filament\Liquidaciones\Resources\LiquidacionControlResource\Components;
 
-use Filament\Forms;
-use Filament\Tables;
 use Filament\Support\View\Components\Modal;
+use Filament\Tables;
 
 class ResultadoControlModal extends Modal
 {
     public $data;
+
     public $titulo;
 
-    public function mount($data, $titulo)
+    public function mount($data, $titulo): void
     {
         $this->data = $data;
         $this->titulo = $titulo;

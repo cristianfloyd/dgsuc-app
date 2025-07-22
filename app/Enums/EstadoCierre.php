@@ -5,6 +5,7 @@ namespace App\Enums;
 enum EstadoCierre: string
 {
     case CERRADO = 'S';
+
     case ABIERTO = 'N';
 
     public function getLabel(): string

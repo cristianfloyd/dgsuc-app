@@ -2,26 +2,26 @@
 
 namespace App\Data\Responses;
 
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
 
 class ConceptoTotalItemData extends Data
 {
     public function __construct(
         #[MapName('codn_conce')]
         public readonly string $codigoConcepto,
-
         #[MapName('desc_conce')]
         public readonly string $descripcionConcepto,
-
         #[MapName('importe')]
-        public readonly float $importe
-    ) {}
+        public readonly float $importe,
+    ) {
+    }
 
     /**
-     * Crea una instancia desde los datos de BD
+     * Crea una instancia desde los datos de BD.
      *
      * @param object $rowData
+     *
      * @return static
      */
     public static function fromRowData(object $rowData): static
@@ -29,7 +29,7 @@ class ConceptoTotalItemData extends Data
         return new static(
             codigoConcepto: $rowData->codn_conce,
             descripcionConcepto: $rowData->desc_conce,
-            importe: (float) $rowData->importe
+            importe: (float)$rowData->importe,
         );
     }
 

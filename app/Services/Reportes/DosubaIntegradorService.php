@@ -2,8 +2,8 @@
 
 namespace App\Services\Reportes;
 
-use Illuminate\Database\Eloquent\Builder;
 use App\Services\Mapuche\DosubaReportService;
+use Illuminate\Database\Eloquent\Builder;
 
 class DosubaIntegradorService
 {
@@ -13,7 +13,8 @@ class DosubaIntegradorService
     public function __construct(
         private readonly LegajosSinLiquidarService $legajosSinLiquidarService,
         private readonly DosubaReportService $dosubaReportService,
-    ){}
+    ) {
+    }
 
     public function getLegajosSinLiquidarConDosuba(): Builder
     {

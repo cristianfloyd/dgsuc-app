@@ -2,38 +2,52 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheArtResource\Pages;
 
-use Filament\Actions;
-use Filament\Actions\Action;
-use App\Models\AfipMapucheArt;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AfipMapucheArtExport;
-use Filament\Resources\Components\Tab;
-use Filament\Support\Enums\ActionSize;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
 use App\Filament\Afip\Resources\AfipMapucheArtResource;
+use App\Models\AfipMapucheArt;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\ActionSize;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ListAfipMapucheArt extends ListRecords
 {
     protected static string $resource = AfipMapucheArtResource::class;
 
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('Todos')
+                ->icon('heroicon-o-users'),
+            'sin_legajo' => Tab::make('Sin Legajo')
+                ->icon('heroicon-o-exclamation-circle')
+                ->badge(AfipMapucheArt::whereNull('nro_legaj')->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('nro_legaj')),
+            'con_legajo' => Tab::make('Con Legajo')
+                ->icon('heroicon-o-check-circle')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('nro_legaj')),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Action::make('export')
-                    ->label('Exportar a Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(function ($livewire) {
-                        return Excel::download(
-                            new AfipMapucheArtExport(
-                                session('periodo_fiscal', date('Ym')),
-                                $livewire->getFilteredTableQuery()
-                            ),
-                            'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx'
-                        );
-                    }),
+                ->label('Exportar a Excel')
+                ->icon('heroicon-o-document-arrow-down')
+                ->action(function ($livewire) {
+                    return Excel::download(
+                        new AfipMapucheArtExport(
+                            session('periodo_fiscal', date('Ym')),
+                            $livewire->getFilteredTableQuery(),
+                        ),
+                        'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx',
+                    );
+                }),
             PoblarAfipArtAction::make()
                 ->label('Poblar ART')
                 ->modalHeading('Confirmación de Poblado ART')
@@ -67,7 +81,7 @@ class ListAfipMapucheArt extends ListRecords
                 ->size(ActionSize::Large)
                 ->icon('heroicon-o-trash')
                 ->requiresConfirmation()
-                ->action(function () {
+                ->action(function (): void {
                     try {
                         AfipMapucheArt::truncate();
                         Notification::make()
@@ -81,23 +95,7 @@ class ListAfipMapucheArt extends ListRecords
                             ->danger()
                             ->send();
                     }
-                })
-                ,
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make('Todos')
-                ->icon('heroicon-o-users'),
-            'sin_legajo' => Tab::make('Sin Legajo')
-                ->icon('heroicon-o-exclamation-circle')
-                ->badge(AfipMapucheArt::whereNull('nro_legaj')->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('nro_legaj')),
-            'con_legajo' => Tab::make('Con Legajo')
-                ->icon('heroicon-o-check-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('nro_legaj')),
+                }),
         ];
     }
 }

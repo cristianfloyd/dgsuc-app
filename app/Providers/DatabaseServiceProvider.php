@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Contracts\DatabaseOperationInterface;
 use App\Repositories\DatabaseOperationRepository;
+use Illuminate\Support\ServiceProvider;
 
 class DatabaseServiceProvider extends ServiceProvider
 {
     /**
-     * Registra los servicios en el contenedor
+     * Registra los servicios en el contenedor.
      *
      * @return void
      */
@@ -27,12 +27,12 @@ class DatabaseServiceProvider extends ServiceProvider
     }
 
     /**
-     * Inicializa los servicios después del registro
+     * Inicializa los servicios después del registro.
      *
      * @return void
      */
     public function boot(): void
     {
-        //
+
     }
 }

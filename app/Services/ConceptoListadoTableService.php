@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 
 class ConceptoListadoTableService
@@ -16,7 +16,7 @@ class ConceptoListadoTableService
     public function createAndPopulate(): void
     {
         try {
-            DB::connection($this->getConnectionName())->transaction(function () {
+            DB::connection($this->getConnectionName())->transaction(function (): void {
                 $this->createTableIfNotExists();
                 $this->truncateTable();
                 $this->populateTable();
@@ -28,16 +28,48 @@ class ConceptoListadoTableService
         } catch (\Exception $e) {
             Log::error('Error en createAndPopulate', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
+        }
+    }
+
+    public function getLastSync(): ?\DateTime
+    {
+        $result = DB::connection($this->getConnectionName())
+            ->table(self::TABLE_NAME)
+            ->select('last_sync')
+            ->orderBy('last_sync', 'desc')
+            ->first();
+
+        return $result ? new \DateTime($result->last_sync) : null;
+    }
+
+    public function getCount(): int
+    {
+        return DB::connection($this->getConnectionName())
+            ->table(self::TABLE_NAME)
+            ->count();
+    }
+
+    public function exists(): bool
+    {
+        return Schema::connection($this->getConnectionName())
+            ->hasTable(self::TABLE_NAME);
+    }
+
+    public function drop(): void
+    {
+        if ($this->exists()) {
+            Schema::connection($this->getConnectionName())
+                ->drop(self::TABLE_NAME);
         }
     }
 
     private function createTableIfNotExists(): void
     {
         if (!Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME)) {
-            Schema::connection($this->getConnectionName())->create(self::TABLE_NAME, function ($table) {
+            Schema::connection($this->getConnectionName())->create(self::TABLE_NAME, function ($table): void {
                 // Campos idénticos a la vista materializada
                 $table->bigInteger('id')->primary();
                 $table->integer('nro_liqui');
@@ -72,8 +104,8 @@ class ConceptoListadoTableService
 
     private function populateTable(): void
     {
-        DB::connection($this->getConnectionName())->statement("
-            INSERT INTO " . self::TABLE_NAME . "
+        DB::connection($this->getConnectionName())->statement('
+            INSERT INTO ' . self::TABLE_NAME . "
             SELECT
                 ROW_NUMBER() OVER () AS id,
                 d.nro_liqui,
@@ -98,9 +130,9 @@ class ConceptoListadoTableService
     private function createIndexes(): void
     {
         // Índices adicionales si son necesarios
-        DB::connection($this->getConnectionName())->statement("
+        DB::connection($this->getConnectionName())->statement('
             CREATE INDEX IF NOT EXISTS idx_rep_concepto_listado_compound ON suc.rep_concepto_listado (periodo_fiscal, codn_conce)
-        ");
+        ');
     }
 
     private function updateLastSync(): void
@@ -108,37 +140,5 @@ class ConceptoListadoTableService
         DB::connection($this->getConnectionName())
             ->table(self::TABLE_NAME)
             ->update(['last_sync' => now()]);
-    }
-
-    public function getLastSync(): ?\DateTime
-    {
-        $result = DB::connection($this->getConnectionName())
-            ->table(self::TABLE_NAME)
-            ->select('last_sync')
-            ->orderBy('last_sync', 'desc')
-            ->first();
-
-        return $result ? new \DateTime($result->last_sync) : null;
-    }
-
-    public function getCount(): int
-    {
-        return DB::connection($this->getConnectionName())
-            ->table(self::TABLE_NAME)
-            ->count();
-    }
-
-    public function exists(): bool
-    {
-        return Schema::connection($this->getConnectionName())
-            ->hasTable(self::TABLE_NAME);
-    }
-
-    public function drop(): void
-    {
-        if ($this->exists()) {
-            Schema::connection($this->getConnectionName())
-                ->drop(self::TABLE_NAME);
-        }
     }
 }

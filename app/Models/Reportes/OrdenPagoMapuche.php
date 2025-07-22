@@ -2,11 +2,10 @@
 
 namespace App\Models\Reportes;
 
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\MapucheDesaConnectionTrait;
-use App\Traits\MapucheLiquiConnectionTrait;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
+use App\Traits\MapucheLiquiConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class OrdenPagoMapuche extends Model
 {

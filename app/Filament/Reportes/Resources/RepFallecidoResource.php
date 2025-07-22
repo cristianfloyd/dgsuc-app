@@ -2,22 +2,21 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Carbon\Carbon;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\RepFallecido;
-use Filament\Resources\Resource;
 use App\Exports\FallecidosExport;
-use Filament\Tables\Actions\Action;
-use Maatwebsite\Excel\Facades\Excel;
-use Filament\Forms\Components\Select;
-use App\Exports\DosubaSinLiquidarExport;
-use App\Services\FallecidosTableService;
-use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Forms\Components\DatePicker;
 use App\Filament\Reportes\Resources\RepFallecidoResource\Pages;
+use App\Models\RepFallecido;
+use App\Services\FallecidosTableService;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RepFallecidoResource extends Resource
 {
@@ -30,7 +29,7 @@ class RepFallecidoResource extends Resource
     {
         return $form
             ->schema([
-                //
+
             ]);
     }
 
@@ -101,7 +100,7 @@ class RepFallecidoResource extends Resource
                         ->form([
                             Select::make('periodo')
                                 ->label('Período')
-                                ->options(function() {
+                                ->options(function () {
                                     $options = [];
                                     $date = Carbon::now();
                                     for ($i = 0; $i < 12; $i++) {
@@ -111,21 +110,21 @@ class RepFallecidoResource extends Resource
                                     }
                                     return $options;
                                 })
-                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
-                                ->required()
+                                ->default(fn () => Carbon::now()->subMonth()->format('Ym'))
+                                ->required(),
                         ])
                         ->action(function (array $data) {
                             return Excel::download(
                                 new FallecidosExport(
                                     records: RepFallecido::all(),
-                                    periodo: $data['periodo']
+                                    periodo: $data['periodo'],
                                 ),
-                                'fallecidos-' . $data['periodo'] . '.xlsx'
+                                'fallecidos-' . $data['periodo'] . '.xlsx',
                             );
                         }),
                 ])
-                ->label('Acciones')
-                ->icon('heroicon-m-cog-6-tooth'),
+                    ->label('Acciones')
+                    ->icon('heroicon-m-cog-6-tooth'),
             ])
             ->defaultSort('nro_legaj', 'desc');
     }
@@ -133,7 +132,7 @@ class RepFallecidoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

@@ -3,32 +3,34 @@
 namespace App\Models\Mapuche;
 
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Modelo para la tabla de liquidaciones de haberes
+ * Modelo para la tabla de liquidaciones de haberes.
  *
  * @property int $nro_liqui Número de liquidación
  * @property int $nro_legaj Número de legajo
  * @property int $nro_cargo Número de cargo
  * @property string|null $desc_apyno Apellido y nombre
- * ...
+ *                                   ...
  */
 class Dhr2 extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
 
-
-    protected $table = 'mapuche.dhr2';
     public $timestamps = false;
-    protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];
+
     public $incrementing = false;
 
+    protected $table = 'mapuche.dhr2';
+
+    protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];
+
     /**
-     * Atributos asignables masivamente
+     * Atributos asignables masivamente.
      */
     protected $fillable = [
         'nro_liqui', 'nro_legaj', 'nro_cargo', 'desc_apyno',
@@ -38,11 +40,11 @@ class Dhr2 extends Model
         'dias_trab', 'hs_dedica', 'obrasocial', 'dias_retro',
         'tipocuenta', 'ctabanco', 'codbanco', 'texto1',
         'texto2', 'texto3', 'texto4', 'codc_regio',
-        'anulado', 'impreso'
+        'anulado', 'impreso',
     ];
 
     /**
-     * Casteos de atributos
+     * Casteos de atributos.
      */
     protected $casts = [
         'nro_liqui' => 'integer',
@@ -58,11 +60,11 @@ class Dhr2 extends Model
         'tot_neto' => 'float',
         'hs_dedica' => 'float',
         'anulado' => 'boolean',
-        'impreso' => 'boolean'
+        'impreso' => 'boolean',
     ];
 
     /**
-     * Relación con la liquidación principal
+     * Relación con la liquidación principal.
      */
     public function liquidacion(): BelongsTo
     {
@@ -70,7 +72,7 @@ class Dhr2 extends Model
     }
 
     /**
-     * Scope para filtrar por legajo
+     * Scope para filtrar por legajo.
      */
     public function scopePorLegajo($query, $legajo): mixed
     {
@@ -78,7 +80,7 @@ class Dhr2 extends Model
     }
 
     /**
-     * Mutados para desc_apyno en mayusculas
+     * Mutados para desc_apyno en mayusculas.
      */
     public function getDescApynoAttribute($value)
     {

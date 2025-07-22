@@ -2,20 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Dh13;
-use App\Models\Dh14;
-use App\Enums\TipoNove;
+use App\Enums\ConceptoGrupo;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
-use App\Enums\ConceptoGrupo;
+use App\Enums\TipoNove;
 use App\Services\EncodingService;
-use Illuminate\Support\Facades\DB;
 use App\Traits\CharacterEncodingTrait;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\MapucheLiquiConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dh12 extends Model
@@ -23,7 +18,12 @@ class Dh12 extends Model
     use MapucheConnectionTrait;
     use CharacterEncodingTrait;
 
-    private static $connectionInstance = null;
+    /**
+     * Indica si el modelo debe ser timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * La tabla asociada con el modelo.
@@ -38,13 +38,6 @@ class Dh12 extends Model
      * @var string
      */
     protected $primaryKey = 'codn_conce';
-
-    /**
-     * Indica si el modelo debe ser timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
 
     /**
      * Los atributos que son asignables en masa.
@@ -84,7 +77,7 @@ class Dh12 extends Model
         'chkptesubconcep',
         'chkinfcuotasnovper',
         'genconimp0',
-        'sino_visible'
+        'sino_visible',
     ];
 
     /**
@@ -105,50 +98,15 @@ class Dh12 extends Model
         'chkptesubconcep' => 'boolean',
         'chkinfcuotasnovper' => 'boolean',
         'genconimp0' => 'boolean',
-        'flag_acumu' => 'string'
+        'flag_acumu' => 'string',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        $connection = static::getMapucheConnection();
-
-        // Configuramos la sesión para manejar correctamente los caracteres
-        $connection->statement("SET client_encoding TO 'SQL_ASCII'");
-
-        static::retrieved(function ($model) {
-            // Al recuperar datos, convertimos de ISO-8859-1 a UTF-8
-            if (isset($model->attributes['desc_conce'])) {
-                $model->attributes['desc_conce'] = EncodingService::toLatin1($model->attributes['desc_conce']);
-            }
-        });
-
-        static::saving(function ($model) {
-            // Al guardar datos, convertimos de UTF-8 a ISO-8859-1
-            if (isset($model->attributes['desc_conce'])) {
-                $model->attributes['desc_conce'] = mb_convert_encoding(
-                    $model->attributes['desc_conce'],
-                    'ISO-8859-1',
-                    'UTF-8'
-                );
-            }
-        });
-    }
-
-    protected static function getMapucheConnection()
-    {
-        if (self::$connectionInstance === null) {
-            $model = new static();
-            self::$connectionInstance = $model->getConnectionFromTrait();
-        }
-        return self::$connectionInstance;
-    }
+    private static $connectionInstance;
 
     public function perteneceAGrupo(ConceptoGrupo $grupo): bool
     {
         return $grupo->containsConcepto($this->codn_conce);
     }
-
 
     // ######################## RELACIONES ########################
     /**
@@ -160,7 +118,7 @@ class Dh12 extends Model
     }
 
     /**
-     * Obtiene los números de acumuladores activos basados en el campo flag_acumu
+     * Obtiene los números de acumuladores activos basados en el campo flag_acumu.
      *
      * @return array<int> Array de números de acumuladores activos
      */
@@ -189,42 +147,26 @@ class Dh12 extends Model
         return Dh14::query()->whereIn('nro_acumu', $this->getAcumuladoresActivosAttribute());
     }
 
-
-    // ######################## ACCESORES ########################
     /**
-     * Accessor para asegurar la codificación UTF-8 del campo desc_conce
-     */
-    protected function descConce(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value)
-        );
-    }
-
-    /**
-     * Método para obtener el texto formateado para el select
+     * Método para obtener el texto formateado para el select.
      */
     public function getSelectLabelAttribute(): string
     {
         try {
-            return sprintf(
+            return \sprintf(
                 '%d - %s',
                 $this->codn_conce,
-                EncodingService::toUtf8($this->desc_conce)
+                EncodingService::toUtf8($this->desc_conce),
             );
         } catch (\Exception $e) {
-            return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
+            return \sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
         }
     }
 
-
     // ############################# DIAGNOSTICOS #############################
     /**
-     * Diagnóstico mejorado para caracteres especiales
+     * Diagnóstico mejorado para caracteres especiales.
      */
-
     public static function diagnosticarCodificacion($codn_conce)
     {
         // Usamos la conexión específica
@@ -254,7 +196,7 @@ class Dh12 extends Model
         $analisis_bytes = array_map(function ($byte) {
             return [
                 'byte' => bin2hex($byte),
-                'ascii' => ord($byte)
+                'ascii' => \ord($byte),
             ];
         }, $bytes);
 
@@ -267,10 +209,59 @@ class Dh12 extends Model
             'bytes_hex' => $registro->bytes_hex,
             'analisis_bytes' => $analisis_bytes,
             'configuracion_db' => [
-                'client_encoding' => $connection->selectOne("SHOW client_encoding")->client_encoding,
+                'client_encoding' => $connection->selectOne('SHOW client_encoding')->client_encoding,
                 'server_encoding' => $registro->server_encoding,
-                'php_encoding' => mb_internal_encoding()
-            ]
+                'php_encoding' => mb_internal_encoding(),
+            ],
         ];
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        $connection = static::getMapucheConnection();
+
+        // Configuramos la sesión para manejar correctamente los caracteres
+        $connection->statement("SET client_encoding TO 'SQL_ASCII'");
+
+        static::retrieved(function ($model): void {
+            // Al recuperar datos, convertimos de ISO-8859-1 a UTF-8
+            if (isset($model->attributes['desc_conce'])) {
+                $model->attributes['desc_conce'] = EncodingService::toLatin1($model->attributes['desc_conce']);
+            }
+        });
+
+        static::saving(function ($model): void {
+            // Al guardar datos, convertimos de UTF-8 a ISO-8859-1
+            if (isset($model->attributes['desc_conce'])) {
+                $model->attributes['desc_conce'] = mb_convert_encoding(
+                    $model->attributes['desc_conce'],
+                    'ISO-8859-1',
+                    'UTF-8',
+                );
+            }
+        });
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
+    }
+
+    // ######################## ACCESORES ########################
+    /**
+     * Accessor para asegurar la codificación UTF-8 del campo desc_conce.
+     */
+    protected function descConce(): Attribute
+    {
+
+        return Attribute::make(
+            get: fn ($value) => EncodingService::toUtf8($value),
+            set: fn ($value) => EncodingService::toLatin1($value),
+        );
     }
 }

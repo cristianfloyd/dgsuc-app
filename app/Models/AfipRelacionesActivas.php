@@ -2,29 +2,27 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AfipRelacionesActivas extends Model
 {
     use MapucheConnectionTrait;
     use SoftDeletes;
 
-
-    protected $table = 'suc.afip_relaciones_activas';
-    protected $primaryKey = 'id';
     public $incrementing = true;
+
     public $timestamps = true;
 
+    protected $table = 'suc.afip_relaciones_activas';
+
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'periodo_fiscal',
@@ -48,46 +46,17 @@ class AfipRelacionesActivas extends Model
         'tipo_servicio',
         'categoria_profesional',
         'ccct',
-        'no_hay_datos'
+        'no_hay_datos',
     ];
 
     protected $appends = ['nro_cuil'];
-
-    protected static function getConnectionSafely(): string
-    {
-        try {
-            // Crear una instancia temporal para acceder a los métodos del trait
-            $instance = new self();
-            $connection = $instance->getConnectionName();
-
-            // Verificar que la conexión existe
-            if (!Config::has("database.connections.{$connection}")) {
-                Log::warning("La conexión '{$connection}' no existe en la configuración, usando predeterminada");
-                return 'pgsql-mapuche';
-            }
-
-            return $connection;
-        } catch (\Exception $e) {
-            Log::error("Error al obtener la conexión", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Retornar una conexión predeterminada segura
-            return 'pgsql-prod';
-        }
-    }
-
-    protected static function getConexionNombre(): string
-    {
-        return self::getConnectionSafely();
-    }
 
     /**
      * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
      *
      * @param array $datosMapeados
      * @param int $chunkSize
+     *
      * @return bool
      */
     public static function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
@@ -114,7 +83,7 @@ class AfipRelacionesActivas extends Model
             // Confirmar la transaccion en la conexion especificada.
             DB::connection($conexion)->commit();
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::connection($conexion)->rollBack();
             // Manejo del error, log, etc.
             log::error('Error al insertar los datos' . $e->getMessage(), ['exception' => $e]);
@@ -124,6 +93,7 @@ class AfipRelacionesActivas extends Model
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
      * @param array $datosProcessados Los datos procesados.
+     *
      * @return array Los datos mapeados al modelo AfipRelacionesActivas.
      */
     public static function mapearDatosAlModelo(array $datosProcesados): array
@@ -151,7 +121,7 @@ class AfipRelacionesActivas extends Model
             'tipo_servicio' => $datosProcesados[18], //Tipo de Servicio,3
             'categoria_profesional' => $datosProcesados[19], //Categoría Profesional,6
             'ccct' => $datosProcesados[20], //Código de Convenio Colectivo de Trabajo,7
-            'no_hay_datos' => $datosProcesados[21] // campo vacio,5
+            'no_hay_datos' => $datosProcesados[21], // campo vacio,5
         ];
         return $datosMapeados;
     }
@@ -160,6 +130,7 @@ class AfipRelacionesActivas extends Model
      * Busca los registros que coincidan con el término de búsqueda.
      *
      * @param string $search
+     *
      * @return mixed
      */
     public function scopeSearch($query, $search)
@@ -173,12 +144,49 @@ class AfipRelacionesActivas extends Model
         return $query->where('cuil', $cuil);
     }
 
+    // #######################################################################
+    // ###########################  RELACIONES ###############################
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
+    }
+
+    protected static function getConnectionSafely(): string
+    {
+        try {
+            // Crear una instancia temporal para acceder a los métodos del trait
+            $instance = new self();
+            $connection = $instance->getConnectionName();
+
+            // Verificar que la conexión existe
+            if (!Config::has("database.connections.{$connection}")) {
+                Log::warning("La conexión '{$connection}' no existe en la configuración, usando predeterminada");
+                return 'pgsql-mapuche';
+            }
+
+            return $connection;
+        } catch (\Exception $e) {
+            Log::error('Error al obtener la conexión', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Retornar una conexión predeterminada segura
+            return 'pgsql-prod';
+        }
+    }
+
+    protected static function getConexionNombre(): string
+    {
+        return self::getConnectionSafely();
+    }
+
     // ######################### ACCESORES Y MUTADORES #########################
     protected function retribucionPactada(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => floatval(trim($value)),
-            set: fn(float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT)
+            get: fn (string $value) => (float)(trim($value)),
+            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', \STR_PAD_LEFT),
         );
     }
 
@@ -189,18 +197,10 @@ class AfipRelacionesActivas extends Model
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
-                    return intval(substr($this->cuil, 2, 8));
+                    return (int)(substr($this->cuil, 2, 8));
                 }
                 return null;
-            }
+            },
         );
-    }
-
-
-    // #######################################################################
-    // ###########################  RELACIONES ###############################
-    public function dh01(): BelongsTo
-    {
-        return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
     }
 }

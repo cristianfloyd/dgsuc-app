@@ -12,7 +12,7 @@ class DatabaseConnectionService
     public const string DEFAULT_CONNECTION = 'pgsql-prod';
 
     /**
-     * Obtener todas las conexiones disponibles para el selector
+     * Obtener todas las conexiones disponibles para el selector.
      */
     public function getAvailableConnections(): array
     {
@@ -27,7 +27,7 @@ class DatabaseConnectionService
     }
 
     /**
-     * Obtener la conexión actualmente seleccionada
+     * Obtener la conexión actualmente seleccionada.
      */
     public function getCurrentConnection(): string
     {
@@ -45,7 +45,7 @@ class DatabaseConnectionService
         }
 
         // Si no se encontró en ningún lado o no es un string válido, usar el valor predeterminado
-        if (!is_string($connection) || !array_key_exists($connection, $this->getAvailableConnections())) {
+        if (!\is_string($connection) || !\array_key_exists($connection, $this->getAvailableConnections())) {
             return self::DEFAULT_CONNECTION;
         }
 
@@ -53,11 +53,11 @@ class DatabaseConnectionService
     }
 
     /**
-     * Establecer la conexión seleccionada
+     * Establecer la conexión seleccionada.
      */
     public function setConnection(string $connection): void
     {
-        if (array_key_exists($connection, $this->getAvailableConnections())) {
+        if (\array_key_exists($connection, $this->getAvailableConnections())) {
             Session::put(self::SESSION_KEY, $connection);
 
             // La cookie se establece en el componente Livewire para asegurar
@@ -66,21 +66,21 @@ class DatabaseConnectionService
     }
 
     /**
-     * Formatear el nombre de la conexión para mostrar en la UI
-     */
-    private function formatConnectionName(string $name): string
-    {
-        $name = str_replace('pgsql-', '', $name);
-        return ucfirst($name);
-    }
-
-    /**
-     * Obtiene el nombre de la conexión actualmente en uso
+     * Obtiene el nombre de la conexión actualmente en uso.
      *
      * @return string|null
      */
     public function getCurrentConnectionName(): ?string
     {
         return Session::get(self::SESSION_KEY) ?? self::DEFAULT_CONNECTION;
+    }
+
+    /**
+     * Formatear el nombre de la conexión para mostrar en la UI.
+     */
+    private function formatConnectionName(string $name): string
+    {
+        $name = str_replace('pgsql-', '', $name);
+        return ucfirst($name);
     }
 }

@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 class ValidacionCargoAsociadoService
 {
     /**
-     * Verifica si todos los registros tienen cargo asociado en Mapuche
-     * 
+     * Verifica si todos los registros tienen cargo asociado en Mapuche.
+     *
      * @return array Estadísticas del proceso
      */
     public function validarCargosAsociados(): array
@@ -22,7 +22,7 @@ class ValidacionCargoAsociadoService
         foreach ($registros as $registro) {
             try {
                 $registro->verificarCargoAsociado();
-                
+
                 if ($registro->tiene_cargo_asociado) {
                     $conCargo++;
                 } else {
@@ -31,7 +31,7 @@ class ValidacionCargoAsociadoService
             } catch (\Exception $e) {
                 Log::error("Error al validar cargo asociado: {$e->getMessage()}", [
                     'legajo' => $registro->nro_legaj,
-                    'cargo' => $registro->nro_cargo
+                    'cargo' => $registro->nro_cargo,
                 ]);
                 $sinCargo++;
             }
@@ -43,4 +43,4 @@ class ValidacionCargoAsociadoService
             'sin_cargo' => $sinCargo,
         ];
     }
-} 
+}

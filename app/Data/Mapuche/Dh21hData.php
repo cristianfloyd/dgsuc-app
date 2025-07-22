@@ -7,18 +7,17 @@ use Spatie\LaravelData\Data;
 class Dh21hData extends Data
 {
     public function __construct(
-
-                public ?int $id_liquidacion = null,
-                public ?int $nro_liqui = null,
-                public ?int $nro_legaj = null,
-                public ?int $nro_cargo = null,
-                public ?int $codn_conce = null,
-                public ?float $impp_conce = null,
-                public ?string $tipo_conce = null,
-                public ?float $nov1_conce = null,
-                public ?float $nov2_conce = null
-
-    ) {}
+        public ?int $id_liquidacion = null,
+        public ?int $nro_liqui = null,
+        public ?int $nro_legaj = null,
+        public ?int $nro_cargo = null,
+        public ?int $codn_conce = null,
+        public ?float $impp_conce = null,
+        public ?string $tipo_conce = null,
+        public ?float $nov1_conce = null,
+        public ?float $nov2_conce = null,
+    ) {
+    }
 
     public static function rules($context): array
     {

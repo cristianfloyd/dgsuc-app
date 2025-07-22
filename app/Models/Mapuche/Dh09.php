@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Dh01;
-use App\Traits\Mapuche\Dh09Queries;
-use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\Catalogo\Dh30;
+use App\Traits\Mapuche\Dh09Queries;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Modelo para la tabla de Otros Datos del Empleado (DH09)
+ * Modelo para la tabla de Otros Datos del Empleado (DH09).
  *
  * Esta clase representa los datos adicionales de empleados en el sistema Mapuche,
  * incluyendo información sobre estado civil, jubilación, obra social, y otros
@@ -69,16 +69,20 @@ class Dh09 extends Model
     use MapucheConnectionTrait;
     use Dh09Queries;
 
+    public $timestamps = false;
+
+    public $incrementing = false;
+
     // Configuración básica del modelo
     protected $table = 'mapuche.dh09';
+
     protected $primaryKey = 'nro_legaj';
-    public $timestamps = false;
-    public $incrementing = false;
+
     protected $keyType = 'int';
 
     /**
      * Campos que pueden ser asignados masivamente
-     * Organizados por categorías para mejor legibilidad
+     * Organizados por categorías para mejor legibilidad.
      */
     protected $fillable = [
         // Datos de vigencia
@@ -143,12 +147,12 @@ class Dh09 extends Model
         'fec_norma',
 
         // Configuraciones especiales
-        'fuerza_reparto'
+        'fuerza_reparto',
     ];
 
     /**
      * Configuración de casting de tipos de datos
-     * Organizado por tipos para mejor mantenimiento
+     * Organizado por tipos para mejor mantenimiento.
      */
     protected $casts = [
         // Enteros
@@ -202,14 +206,14 @@ class Dh09 extends Model
     ];
 
     /**
-     * Atributos que deben ser ocultados en arrays/JSON
+     * Atributos que deben ser ocultados en arrays/JSON.
      */
     protected $hidden = [
         // Campos sensibles que no deben exponerse en APIs
     ];
 
     /**
-     * Atributos que deben ser visibles en arrays/JSON
+     * Atributos que deben ser visibles en arrays/JSON.
      */
     protected $visible = [
         // Se pueden especificar campos específicos si es necesario
@@ -220,7 +224,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Scope para filtrar por empleados activos (no fallecidos)
+     * Scope para filtrar por empleados activos (no fallecidos).
      */
     public function scopeActivos(Builder $query): Builder
     {
@@ -228,7 +232,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Scope para filtrar por empleados jubilados
+     * Scope para filtrar por empleados jubilados.
      */
     public function scopeJubilados(Builder $query): Builder
     {
@@ -236,7 +240,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Scope para filtrar por empleados con embargo
+     * Scope para filtrar por empleados con embargo.
      */
     public function scopeConEmbargo(Builder $query): Builder
     {
@@ -244,16 +248,16 @@ class Dh09 extends Model
     }
 
     /**
-     * Scope para filtrar por período de vigencia
+     * Scope para filtrar por período de vigencia.
      */
     public function scopePorPeriodo(Builder $query, int $ano, int $mes): Builder
     {
         return $query->where('vig_otano', $ano)
-                    ->where('vig_otmes', $mes);
+            ->where('vig_otmes', $mes);
     }
 
     /**
-     * Scope para filtrar por obra social
+     * Scope para filtrar por obra social.
      */
     public function scopePorObraSocial(Builder $query, string $codigoObraSocial): Builder
     {
@@ -261,7 +265,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Scope para filtrar por dependencia
+     * Scope para filtrar por dependencia.
      */
     public function scopePorDependencia(Builder $query, string $codigoDependencia): Builder
     {
@@ -273,7 +277,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Accessor para obtener el estado de jubilación como booleano
+     * Accessor para obtener el estado de jubilación como booleano.
      */
     public function getEsJubiladoAttribute(): bool
     {
@@ -281,7 +285,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para obtener si tiene salario familiar en otro organismo
+     * Accessor para obtener si tiene salario familiar en otro organismo.
      */
     public function getTieneSalarioFamiliarExternoAttribute(): bool
     {
@@ -289,7 +293,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para obtener la edad aproximada basada en fecha de ingreso
+     * Accessor para obtener la edad aproximada basada en fecha de ingreso.
      */
     public function getAntiguedadAttribute(): ?int
     {
@@ -301,18 +305,18 @@ class Dh09 extends Model
             return (int)$this->fec_ingreso->diffInYears(now());
         } catch (\Exception $e) {
             Log::warning('Error calculando antigüedad para legajo: ' . $this->nro_legaj, [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return null;
         }
     }
 
     /**
-     * Accessor para verificar si el empleado está fallecido
+     * Accessor para verificar si el empleado está fallecido.
      */
     public function getEstaFallecidoAttribute(): bool
     {
-        return !is_null($this->fec_defun);
+        return $this->fec_defun !== null;
     }
 
     // ========================================
@@ -320,7 +324,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Verifica si el empleado tiene datos de obra social completos
+     * Verifica si el empleado tiene datos de obra social completos.
      */
     public function tieneObraSocialCompleta(): bool
     {
@@ -329,15 +333,15 @@ class Dh09 extends Model
 
     /**
      * Verifica si el empleado está en condiciones de jubilarse
-     * (basado en fecha de jubilación o estado de jubilación)
+     * (basado en fecha de jubilación o estado de jubilación).
      */
     public function puedeJubilarse(): bool
     {
-        return $this->es_jubilado || !is_null($this->fecha_jubilacion);
+        return $this->es_jubilado || $this->fecha_jubilacion !== null;
     }
 
     /**
-     * Obtiene el período de vigencia como string formateado
+     * Obtiene el período de vigencia como string formateado.
      */
     public function getPeriodoVigenciaFormateado(): string
     {
@@ -345,11 +349,11 @@ class Dh09 extends Model
             return 'Sin período definido';
         }
 
-        return sprintf('%04d-%02d', $this->vig_otano, $this->vig_otmes);
+        return \sprintf('%04d-%02d', $this->vig_otano, $this->vig_otmes);
     }
 
     /**
-     * Verifica si los datos están vigentes para un período específico
+     * Verifica si los datos están vigentes para un período específico.
      */
     public function esVigenteEn(int $ano, int $mes): bool
     {
@@ -361,7 +365,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Busca empleados por número de legajo con manejo de errores
+     * Busca empleados por número de legajo con manejo de errores.
      */
     public static function buscarPorLegajo(int $numeroLegajo): ?self
     {
@@ -370,26 +374,26 @@ class Dh09 extends Model
         } catch (\Exception $e) {
             Log::error('Error buscando empleado por legajo', [
                 'legajo' => $numeroLegajo,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return null;
         }
     }
 
     /**
-     * Obtiene empleados por período con paginación
+     * Obtiene empleados por período con paginación.
      */
     public static function obtenerPorPeriodo(int $ano, int $mes, int $limite = 100): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         try {
             return static::porPeriodo($ano, $mes)
-                        ->orderBy('nro_legaj')
-                        ->paginate($limite);
+                ->orderBy('nro_legaj')
+                ->paginate($limite);
         } catch (\Exception $e) {
             Log::error('Error obteniendo empleados por período', [
                 'ano' => $ano,
                 'mes' => $mes,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Retornar paginador vacío en caso de error
@@ -398,7 +402,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Obtiene estadísticas básicas de empleados por período
+     * Obtiene estadísticas básicas de empleados por período.
      */
     public static function obtenerEstadisticasPorPeriodo(int $ano, int $mes): array
     {
@@ -417,7 +421,7 @@ class Dh09 extends Model
             Log::error('Error obteniendo estadísticas por período', [
                 'ano' => $ano,
                 'mes' => $mes,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return [
@@ -437,7 +441,7 @@ class Dh09 extends Model
 
     /**
      * Relación con la tabla de empleados (DH01)
-     * Un empleado tiene un registro de otros datos
+     * Un empleado tiene un registro de otros datos.
      */
     public function empleado()
     {
@@ -445,7 +449,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Relación con tabla múltiple DH30 (nro_tab02)
+     * Relación con tabla múltiple DH30 (nro_tab02).
      */
     public function tablaMultiple02()
     {
@@ -453,7 +457,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Relación con tabla múltiple DH30 (nro_tab08)
+     * Relación con tabla múltiple DH30 (nro_tab08).
      */
     public function tablaMultiple08()
     {
@@ -461,7 +465,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Relación con tabla múltiple DH30 (nro_tab09)
+     * Relación con tabla múltiple DH30 (nro_tab09).
      */
     public function tablaMultiple09()
     {
@@ -469,72 +473,11 @@ class Dh09 extends Model
     }
 
     // ========================================
-    // EVENTOS DEL MODELO
-    // ========================================
-
-    /**
-     * Configuración de eventos del modelo
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Evento antes de crear un registro
-        static::creating(function ($model) {
-            try {
-                // Validar que el legajo no esté vacío
-                if (empty($model->nro_legaj)) {
-                    throw new \InvalidArgumentException('El número de legajo es requerido');
-                }
-
-                // Establecer valores por defecto si no están definidos
-                if (is_null($model->fuerza_reparto)) {
-                    $model->fuerza_reparto = false;
-                }
-
-                Log::info('Creando registro DH09 para legajo: ' . $model->nro_legaj);
-            } catch (\Exception $e) {
-                Log::error('Error en evento creating de DH09', [
-                    'legajo' => $model->nro_legaj ?? 'null',
-                    'error' => $e->getMessage()
-                ]);
-                return false; // Cancela la creación
-            }
-        });
-
-        // Evento antes de actualizar un registro
-        static::updating(function ($model) {
-            try {
-                Log::info("Actualizando registro DH09 para legajo: {$model->nro_legaj}");
-
-                // Validaciones adicionales si es necesario
-                if ($model->isDirty('fec_defun') && !($model->fec_defun === null)) {
-                    Log::warning('Se está registrando fecha de defunción para legajo: ' . $model->nro_legaj);
-                }
-            } catch (\Exception $e) {
-                Log::error('Error en evento updating de DH09', [
-                    'legajo' => $model->nro_legaj,
-                    'error' => $e->getMessage()
-                ]);
-                return false; // Cancela la actualización
-            }
-        });
-
-        // Evento después de guardar (crear o actualizar)
-        static::saved(function ($model) {
-            Log::info('Registro DH09 guardado exitosamente', [
-                'legajo' => $model->nro_legaj,
-                'periodo' => $model->getPeriodoVigenciaFormateado()
-            ]);
-        });
-    }
-
-    // ========================================
     // MÉTODOS DE VALIDACIÓN
     // ========================================
 
     /**
-     * Valida la consistencia de los datos del modelo
+     * Valida la consistencia de los datos del modelo.
      */
     public function validarConsistencia(): array
     {
@@ -551,7 +494,7 @@ class Dh09 extends Model
             }
 
             // Validar coherencia de estado de jubilación
-            if ($this->sino_jubil === 'S' && is_null($this->fecha_jubilacion)) {
+            if ($this->sino_jubil === 'S' && $this->fecha_jubilacion === null) {
                 $errores[] = 'Si está marcado como jubilado, debe tener fecha de jubilación';
             }
 
@@ -561,17 +504,17 @@ class Dh09 extends Model
             }
 
             // Validar período de vigencia
-            if (!is_null($this->vig_otmes) && ($this->vig_otmes < 1 || $this->vig_otmes > 12)) {
+            if ($this->vig_otmes !== null && ($this->vig_otmes < 1 || $this->vig_otmes > 12)) {
                 $errores[] = 'El mes de vigencia debe estar entre 1 y 12';
             }
 
-            if (!is_null($this->vig_otano) && $this->vig_otano < 1900) {
+            if ($this->vig_otano !== null && $this->vig_otano < 1900) {
                 $errores[] = 'El año de vigencia debe ser mayor a 1900';
             }
         } catch (\Exception $e) {
             Log::error('Error validando consistencia de DH09', [
                 'legajo' => $this->nro_legaj,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             $errores[] = 'Error interno durante la validación';
         }
@@ -580,7 +523,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Verifica si el modelo tiene datos válidos para procesar
+     * Verifica si el modelo tiene datos válidos para procesar.
      */
     public function esValidoParaProcesamiento(): bool
     {
@@ -593,7 +536,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Convierte el modelo a array con formato personalizado
+     * Convierte el modelo a array con formato personalizado.
      */
     public function toArrayPersonalizado(): array
     {
@@ -632,7 +575,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Búsqueda avanzada con múltiples criterios
+     * Búsqueda avanzada con múltiples criterios.
      */
     public static function busquedaAvanzada(array $criterios): Builder
     {
@@ -693,7 +636,7 @@ class Dh09 extends Model
         } catch (\Exception $e) {
             Log::error('Error en búsqueda avanzada de DH09', [
                 'criterios' => $criterios,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
 
@@ -705,7 +648,7 @@ class Dh09 extends Model
     // ========================================
 
     /**
-     * Limpia registros huérfanos o inconsistentes
+     * Limpia registros huérfanos o inconsistentes.
      */
     public static function limpiarRegistrosInconsistentes(): int
     {
@@ -730,14 +673,14 @@ class Dh09 extends Model
             return $registrosLimpiados;
         } catch (\Exception $e) {
             Log::error('Error limpiando registros inconsistentes de DH09', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return 0;
         }
     }
 
     /**
-     * Genera reporte de salud de los datos
+     * Genera reporte de salud de los datos.
      */
     public static function generarReporteSalud(): array
     {
@@ -759,13 +702,74 @@ class Dh09 extends Model
             ];
         } catch (\Exception $e) {
             Log::error('Error generando reporte de salud de DH09', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return [
                 'error' => 'No se pudo generar el reporte de salud',
-                'mensaje' => $e->getMessage()
+                'mensaje' => $e->getMessage(),
             ];
         }
+    }
+
+    // ========================================
+    // EVENTOS DEL MODELO
+    // ========================================
+
+    /**
+     * Configuración de eventos del modelo.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Evento antes de crear un registro
+        static::creating(function ($model) {
+            try {
+                // Validar que el legajo no esté vacío
+                if (empty($model->nro_legaj)) {
+                    throw new \InvalidArgumentException('El número de legajo es requerido');
+                }
+
+                // Establecer valores por defecto si no están definidos
+                if ($model->fuerza_reparto === null) {
+                    $model->fuerza_reparto = false;
+                }
+
+                Log::info('Creando registro DH09 para legajo: ' . $model->nro_legaj);
+            } catch (\Exception $e) {
+                Log::error('Error en evento creating de DH09', [
+                    'legajo' => $model->nro_legaj ?? 'null',
+                    'error' => $e->getMessage(),
+                ]);
+                return false; // Cancela la creación
+            }
+        });
+
+        // Evento antes de actualizar un registro
+        static::updating(function ($model) {
+            try {
+                Log::info("Actualizando registro DH09 para legajo: {$model->nro_legaj}");
+
+                // Validaciones adicionales si es necesario
+                if ($model->isDirty('fec_defun') && !($model->fec_defun === null)) {
+                    Log::warning('Se está registrando fecha de defunción para legajo: ' . $model->nro_legaj);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error en evento updating de DH09', [
+                    'legajo' => $model->nro_legaj,
+                    'error' => $e->getMessage(),
+                ]);
+                return false; // Cancela la actualización
+            }
+        });
+
+        // Evento después de guardar (crear o actualizar)
+        static::saved(function ($model): void {
+            Log::info('Registro DH09 guardado exitosamente', [
+                'legajo' => $model->nro_legaj,
+                'periodo' => $model->getPeriodoVigenciaFormateado(),
+            ]);
+        });
     }
 }

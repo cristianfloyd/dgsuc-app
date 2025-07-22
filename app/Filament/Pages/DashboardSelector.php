@@ -2,15 +2,17 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
 use App\Support\PanelRegistry;
-use Filament\Support\Enums\IconPosition;
+use Filament\Pages\Page;
 
 class DashboardSelector extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+
     protected static ?string $title = 'Seleccionar Panel';
+
     protected static ?string $navigationLabel = 'Inicio';
+
     protected static ?int $navigationSort = -2; // Asegura que aparezca primero en la navegación
 
     protected static string $view = 'filament.pages.dashboard-selector';
@@ -23,13 +25,6 @@ class DashboardSelector extends Page
         }
     }
 
-    protected function getPanels(): array
-    {
-        return PanelRegistry::getAllPanels()
-            ->sortBy('sortOrder')
-            ->toArray();
-    }
-
     public function getHeading(): string
     {
         return 'Bienvenido al Sistema';
@@ -38,5 +33,12 @@ class DashboardSelector extends Page
     public function getSubheading(): string
     {
         return 'Seleccione el panel al que desea acceder';
+    }
+
+    protected function getPanels(): array
+    {
+        return PanelRegistry::getAllPanels()
+            ->sortBy('sortOrder')
+            ->toArray();
     }
 }

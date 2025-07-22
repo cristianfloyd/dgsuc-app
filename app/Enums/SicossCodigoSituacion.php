@@ -5,37 +5,69 @@ namespace App\Enums;
 enum SicossCodigoSituacion: int
 {
     case BAJA_FALLECIMIENTO = 0;
+
     case ACTIVO = 1;
+
     case BAJA_OTRAS_CAUSALES = 2;
+
     case ACTIVO_DECRETO_796 = 3;
+
     case BAJA_DECRETO_796 = 4;
+
     case MATERNIDAD = 5;
+
     case SUSPENDIDO = 6;
+
     case BAJA_DESPIDO = 7;
+
     case BAJA_DESPIDO_DECRETO_796 = 8;
+
     case SUSPENDIDO_LEY_20744 = 9;
+
     case LICENCIA_EXCEDENCIA = 10;
+
     case LICENCIA_MATERNIDAD_DOWN = 11;
+
     case LICENCIA_VACACIONES = 12;
+
     case LICENCIA_SIN_GOCE = 13;
+
     case RESERVA_PUESTO = 14;
+
     case ESE_CESE_TRANSITORIO = 15;
+
     case PERSONAL_SINIESTRADO_ART = 16;
+
     case REINGRESO_JUDICIAL = 17;
+
     case ILT_PRIMEROS_10_DIAS = 18;
+
     case ILT_DIAS_SIGUIENTES = 19;
+
     case TRABAJADOR_SINIESTRADO_ART = 20;
+
     case TRABAJADOR_TEMPORADA = 21;
+
     case ACTIVO_EXTERIOR = 31;
+
     case LICENCIA_PATERNIDAD = 32;
+
     case LICENCIA_FUERZA_MAYOR = 33;
+
     case EMPLEADO_EVENTUAL_MES_COMPLETO = 42;
+
     case EMPLEADO_EVENTUAL_MES_INCOMPLETO = 43;
+
     case CONSERVACION_EMPLEO_ART_211 = 44;
+
     case SUSPENSION_DISCIPLINARIA = 45;
+
     case SUSPENDIDO_RES_397 = 48;
+
     case SUSPENSION_PARCIAL = 49;
+
     case DECRETO_792_GRUPO_RIESGO = 50;
+
     case LICENCIA_LEY_27674 = 51;
 
     public function descripcion(): string
@@ -78,7 +110,7 @@ enum SicossCodigoSituacion: int
     }
 
     /**
-     * Obtiene el enum a partir de un código numérico
+     * Obtiene el enum a partir de un código numérico.
      */
     public static function fromCodigo(int $codigo): ?self
     {

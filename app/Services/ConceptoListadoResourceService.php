@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
-use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class ConceptoListadoResourceService
 {
@@ -25,6 +25,7 @@ class ConceptoListadoResourceService
      *                       - 'codn_conce': un valor o array de valores para filtrar por el código de concepto.
      *                       - 'periodo_fiscal': un valor para filtrar por el período fiscal.
      *                       - 'nro_liqui': un valor para filtrar por el número de liquidación.
+     *
      * @return Builder La consulta de ConceptoListado con los filtros aplicados.
      */
     public function getFilteredQuery(array $filters = []): Builder
@@ -49,48 +50,6 @@ class ConceptoListadoResourceService
         return $query;
     }
 
-
-    /**
-     * Aplica los filtros especificados a la consulta de ConceptoListado.
-     *
-     * @param Builder $query La consulta base a la que se aplicarán los filtros.
-     * @param array $filters Un array asociativo con los filtros a aplicar. Las claves válidas son:
-     *                       - 'codn_conce': un valor o array de valores para filtrar por el código de concepto.
-     *                       - 'periodo_fiscal': un valor para filtrar por el período fiscal.
-     *                       - 'nro_liqui': un valor para filtrar por el número de liquidación.
-     * @return Builder La consulta con los filtros aplicados.
-     */
-    private function applyFilters(Builder $query, array $filters): Builder
-    {
-        // Validamos que al menos exista un filtro obligatorio
-        // if (empty($filters['codn_conce'])) {
-        //     return ConceptoListado::query()->whereRaw('1 = 0');
-        // }
-
-
-        $query = ConceptoListado::query()
-        ->when(
-            $filters['codn_conce'] ?? null,
-            fn ($query, $concepto) => $query->whereIn('codn_conce', (array)$concepto)
-        )
-        ->when(
-            $filters['nro_liqui'] ?? null,
-            fn ($query, $liquidacion) => $query->where('nro_liqui', $liquidacion)
-        );
-
-        return $query;
-    }
-
-    // Método separado para obtener resultados cacheados
-    private function getCachedResults(Builder $query, string $cacheKey)
-    {
-        return Cache::store('file')->remember(
-            $cacheKey,
-            now()->addHours(2),
-            fn() => $query->get()
-        );
-    }
-
     /**
      * Actualiza la vista materializada 'concepto_listado' y limpia la caché asociada.
      * Esta función se utiliza para refrescar los datos de la vista materializada que almacena
@@ -105,5 +64,47 @@ class ConceptoListadoResourceService
     public function refreshCache(): void
     {
         Redis::connection()->flushdb();
+    }
+
+    /**
+     * Aplica los filtros especificados a la consulta de ConceptoListado.
+     *
+     * @param Builder $query La consulta base a la que se aplicarán los filtros.
+     * @param array $filters Un array asociativo con los filtros a aplicar. Las claves válidas son:
+     *                       - 'codn_conce': un valor o array de valores para filtrar por el código de concepto.
+     *                       - 'periodo_fiscal': un valor para filtrar por el período fiscal.
+     *                       - 'nro_liqui': un valor para filtrar por el número de liquidación.
+     *
+     * @return Builder La consulta con los filtros aplicados.
+     */
+    private function applyFilters(Builder $query, array $filters): Builder
+    {
+        // Validamos que al menos exista un filtro obligatorio
+        // if (empty($filters['codn_conce'])) {
+        //     return ConceptoListado::query()->whereRaw('1 = 0');
+        // }
+
+
+        $query = ConceptoListado::query()
+            ->when(
+                $filters['codn_conce'] ?? null,
+                fn ($query, $concepto) => $query->whereIn('codn_conce', (array)$concepto),
+            )
+            ->when(
+                $filters['nro_liqui'] ?? null,
+                fn ($query, $liquidacion) => $query->where('nro_liqui', $liquidacion),
+            );
+
+        return $query;
+    }
+
+    // Método separado para obtener resultados cacheados
+    private function getCachedResults(Builder $query, string $cacheKey)
+    {
+        return Cache::store('file')->remember(
+            $cacheKey,
+            now()->addHours(2),
+            fn () => $query->get(),
+        );
     }
 }

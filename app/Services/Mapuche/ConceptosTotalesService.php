@@ -2,10 +2,10 @@
 
 namespace App\Services\Mapuche;
 
-use App\NroLiqui;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
 use App\Contracts\Dh21RepositoryInterface;
+use App\NroLiqui;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class ConceptosTotalesService
 {
@@ -17,8 +17,7 @@ class ConceptosTotalesService
         $this->repository = $repository;
     }
 
-
-    public function calcular(NroLiqui $nroLiqui = null, int $codn_fuent = null): Builder
+    public function calcular(?NroLiqui $nroLiqui = null, ?int $codn_fuent = null): Builder
     {
         try {
             // Construcción de la consulta base
@@ -45,4 +44,5 @@ class ConceptosTotalesService
             Log::error('Error en conceptosTotales: ' . $e->getMessage());
             throw $e;
         }
-    }}
+    }
+}

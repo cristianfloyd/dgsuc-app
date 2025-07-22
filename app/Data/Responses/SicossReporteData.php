@@ -2,49 +2,42 @@
 
 namespace App\Data\Responses;
 
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 class SicossReporteData extends Data
 {
     public function __construct(
         #[MapName('nro_liqui')]
         public readonly int $numeroLiquidacion,
-
         #[MapName('desc_liqui')]
         public readonly string $descripcionLiquidacion,
-
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly float $remunerativo,
-
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly float $noRemunerativo,
-
         #[MapName('aportesijpdh21')]
         public readonly float $aportesSijp,
-
         #[MapName('aporteinssjpdh21')]
         public readonly float $aportesInssjp,
-
         #[MapName('contribucionsijpdh21')]
         public readonly float $contribucionesSijp,
-
         #[MapName('contribucioninssjpdh21')]
         public readonly float $contribucionesInssjp,
-
         #[MapName('c305')]
         public readonly float $c305,
-
         #[MapName('c306')]
         public readonly float $c306,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia de SicossReporteData a partir de un modelo.
-     * 
+     *
      * @param mixed $model El modelo desde el cual crear la instancia
+     *
      * @return self Nueva instancia de SicossReporteData
      */
     public static function fromModel($model): self

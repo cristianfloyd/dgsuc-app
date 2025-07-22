@@ -4,12 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Dh01;
 use App\Models\Dh03;
-use App\Models\Mapuche\Dh22;
 use App\Models\Mapuche\Dh21h;
-use Illuminate\Database\Seeder;
-use League\Csv\Serializer\CastToString;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Mapuche\Dh22;
 use App\Services\EncodingService;
+use Illuminate\Database\Seeder;
 
 class Dh21hHistoricoSeeder extends Seeder
 {
@@ -20,7 +18,7 @@ class Dh21hHistoricoSeeder extends Seeder
     {
         // Obtenemos 10 legajos aleatorios únicos de dh01
         $legajosConCargo = Dh03::select('nro_legaj', 'nro_cargo')
-            ->whereIn('nro_legaj', function($query) {
+            ->whereIn('nro_legaj', function ($query): void {
                 $query->select('nro_legaj')
                     ->from('dh01')
                     ->inRandomOrder()
@@ -65,7 +63,7 @@ class Dh21hHistoricoSeeder extends Seeder
                         'nro_legaj' => $legajo->nro_legaj,
                         'nro_cargo' => $legajo->nro_cargo,
                         'ano_retro' => $periodo['ano'],
-                        'mes_retro' => $periodo['mes']
+                        'mes_retro' => $periodo['mes'],
                     ]);
                 }
             }
@@ -78,7 +76,7 @@ class Dh21hHistoricoSeeder extends Seeder
                         'nro_legaj' => $legajo->nro_legaj,
                         'nro_cargo' => $legajo->nro_cargo,
                         'ano_retro' => $periodo['ano'],
-                        'mes_retro' => $periodo['mes']
+                        'mes_retro' => $periodo['mes'],
                     ]);
                 }
             }

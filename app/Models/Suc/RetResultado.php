@@ -2,18 +2,20 @@
 
 namespace App\Models\Suc;
 
+use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RetResultado extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
 
+    public $incrementing = false;
 
+    public $timestamps = false;
 
     /**
      * La tabla asociada con el modelo.
@@ -28,9 +30,6 @@ class RetResultado extends Model
      * @var array
      */
     protected $primaryKey = ['nro_legaj', 'nro_cargo_ant', 'fecha_ret_desde', 'periodo'];
-
-    public $incrementing = false;
-    public $timestamps = false;
 
     /**
      * Los atributos que son asignables en masa.
@@ -67,6 +66,7 @@ class RetResultado extends Model
      * Obtiene el resultado del retroactivo para un legajo específico.
      *
      * @param int $nroLegaj
+     *
      * @return RetResultado|null
      */
     public static function obtenerPorLegajo(int $nroLegaj): ?RetResultado

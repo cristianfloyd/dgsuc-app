@@ -2,19 +2,18 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Filament\Tables\Table;
-use App\Enums\PuestoDesempenado;
-use App\Services\ColumnMetadata;
-use Filament\Tables\Actions\Action;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Illuminate\Support\Facades\Storage;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Concerns\InteractsWithTable;
 use App\Models\AfipMapucheMiSimplificacion as ModelsAfipMapucheMiSimplificacion;
+use App\Services\ColumnMetadata;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
 
 class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTable
 {
@@ -100,8 +99,8 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                 Action::make('exportTxt')
                     ->label('Exportar TXT')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn() => $this->exportarTxt())
-                    ->color('success')
+                    ->action(fn () => $this->exportarTxt())
+                    ->color('success'),
             ])
             ->defaultSort('nro_legaj', 'asc')
             ->paginated([5, 10, 25, 50])
@@ -139,16 +138,16 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
             'tipo_servicio',
             'fecha_susp_serv_temp',
             'nro_form_agro',
-            'covid'
+            'covid',
         ];
 
         // Obtener los registros
         $records = ModelsAfipMapucheMiSimplificacion::all();
 
         // Construir el contenido del archivo
-        $txtContent = "";
+        $txtContent = '';
         foreach ($records as $record) {
-            $line = "";
+            $line = '';
             foreach ($fieldOrder as $index => $field) {
                 $width = $columnWidths[$index];
 
@@ -159,7 +158,7 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                     $value = $record->{$field} ?? '';
 
                     // Formatear fechas si es necesario
-                    if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab'])) {
+                    if (\in_array($field, ['inicio_rel_lab', 'fin_rel_lab'])) {
                         $value = $value ? date('Y-m-d', strtotime($value)) : str_repeat(' ', $width);
                     } elseif ($field === 'fecha_tel_renuncia') {
                         $value = '0';
@@ -189,9 +188,9 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
 
                 // Aplicar el padding según el tipo de campo
                 if ($field === 'cuil' || $field === 'retribucion_pactada') {
-                    $line .= str_pad($value, $width, '0', STR_PAD_LEFT);
+                    $line .= str_pad($value, $width, '0', \STR_PAD_LEFT);
                 } else {
-                    $line .= str_pad($value, $width, ' ', STR_PAD_RIGHT);
+                    $line .= str_pad($value, $width, ' ', \STR_PAD_RIGHT);
                 }
             }
             $txtContent .= $line . "\n";

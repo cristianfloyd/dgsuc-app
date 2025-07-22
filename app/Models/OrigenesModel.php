@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use App\Contracts\OrigenRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class OrigenesModel extends Model implements OrigenRepositoryInterface
 {
@@ -19,8 +19,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         'name',
     ];
 
-
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
         self::verificarYCrearTabla();
@@ -32,7 +31,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
     }
 
     /**
-     * Verifica si la tabla existe y la crea si no existe
+     * Verifica si la tabla existe y la crea si no existe.
      *
      * @return void
      */
@@ -41,7 +40,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         $schema = \Illuminate\Support\Facades\DB::connection(self::connectionName())->getSchemaBuilder();
 
         if (!$schema->hasTable('suc.origenes_models')) {
-            $schema->create('suc.origenes_models', function ($table) {
+            $schema->create('suc.origenes_models', function ($table): void {
                 $table->id();
                 $table->string('name');
                 $table->timestamps();
@@ -53,6 +52,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
      * Encuentra un registro de origen por su ID.
      *
      * @param int $id El ID del registro de origen a buscar.
+     *
      * @return OrigenesModel|null El registro de origen encontrado, o null si no se encuentra.
      */
     public function findById(int $id): ?OrigenesModel

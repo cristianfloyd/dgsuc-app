@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Models\Reportes\ConceptoListado;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Services\ConceptoListado\ConceptoListadoSyncService;
 use App\Services\ConceptoListado\ConceptoListadoQueryService;
 use App\Services\ConceptoListado\ConceptoListadoServiceInterface;
+use App\Services\ConceptoListado\ConceptoListadoSyncService;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Support\ServiceProvider;
 
 class ConceptoListadoServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,7 @@ class ConceptoListadoServiceProvider extends ServiceProvider
         $this->app->singleton(ConceptoListadoSyncService::class, function ($app) {
             return new ConceptoListadoSyncService(
                 $app->make(ConceptoListado::class),
-                $app->make(PeriodoFiscalService::class)
+                $app->make(PeriodoFiscalService::class),
             );
         });
 

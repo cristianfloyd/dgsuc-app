@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait HasCompositePrimaryKey
 {
-
     /**
      * Devuelve un array con los valores de los campos que componen la clave primaria del modelo.
      *
@@ -49,18 +48,20 @@ trait HasCompositePrimaryKey
      * @param array $foreignKeys Nombres de los campos que componen la clave primaria del modelo relacionado.
      * @param array $localKeys Nombres de los campos que componen la clave primaria del modelo actual.
      * @param string|null $relation Nombre de la relación (opcional).
+     *
      * @return BelongsTo Instancia de la relación BelongsTo con las restricciones necesarias.
      */
-    public function compositeBelongsTo(string $related, array $foreignKeys, array $localKeys, string $relation = null): BelongsTo
+    public function compositeBelongsTo(string $related, array $foreignKeys, array $localKeys, ?string $relation = null): BelongsTo
     {
-        if (is_null($relation)) {
+        if ($relation === null) {
             $relation = $this->guessBelongsToRelation();
         }
 
         $instance = $this->newRelatedInstance($related);
 
-        return new class($instance->newQuery(), $this, $foreignKeys, $localKeys, $relation) extends BelongsTo {
+        return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys, $relation) extends BelongsTo {
             protected array $foreignKeys;
+
             protected array $localKeys;
 
             /**
@@ -101,7 +102,7 @@ trait HasCompositePrimaryKey
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
-                        $this->wrapValuesInArray($foreignValues)
+                        $this->wrapValuesInArray($foreignValues),
                     );
                 }
             }
@@ -114,11 +115,12 @@ trait HasCompositePrimaryKey
              * of the underlying query builder.
              *
              * @param array|string $columns The column name or list of column names to qualify.
+             *
              * @return string|array The qualified column name or list of qualified column names.
              */
             public function qualifySubSelectColumn(array|string $columns): array|string
             {
-                if (is_array($columns)) {
+                if (\is_array($columns)) {
                     return array_map([$this->query, 'qualifyColumn'], $columns);
                 }
                 return $this->query->qualifyColumn($columns);
@@ -147,11 +149,12 @@ trait HasCompositePrimaryKey
              * necesario para que la consulta se ejecute correctamente.
              *
              * @param mixed $values Los valores a envolver en un array.
+             *
              * @return array Los valores envueltos en un array si es necesario.
              */
             protected function wrapValuesInArray(mixed $values): array
             {
-                return count($this->foreignKeys) > 1 ? [$values] : $values;
+                return \count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }
@@ -166,14 +169,16 @@ trait HasCompositePrimaryKey
      * @param string $related El nombre de la clase del modelo relacionado.
      * @param array $foreignKeys Los nombres de los campos que componen la clave primaria del modelo relacionado.
      * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany La relación HasMany con clave primaria compuesta.
      */
     public function compositeHasMany(string $related, array $foreignKeys, array $localKeys)
     {
         $instance = $this->newRelatedInstance($related);
 
-        return new class($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
+        return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
             protected array $foreignKeys;
+
             protected $localKeys;
 
             public function __construct(Builder $query, $parent, $foreignKeys, $localKeys)
@@ -192,7 +197,7 @@ trait HasCompositePrimaryKey
              *
              * @return void
              */
-            public function addConstraints()
+            public function addConstraints(): void
             {
                 if (static::$constraints) {
                     $parentValues = array_map(function ($key) {
@@ -201,7 +206,7 @@ trait HasCompositePrimaryKey
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
-                        $this->wrapValuesInArray($parentValues)
+                        $this->wrapValuesInArray($parentValues),
                     );
                 }
             }
@@ -212,11 +217,12 @@ trait HasCompositePrimaryKey
              * se realice correctamente, independientemente de si la clave primaria tiene una o más columnas.
              *
              * @param array $values Los valores a envolver en un array.
+             *
              * @return array Los valores envueltos en un array si es necesario.
              */
             protected function wrapValuesInArray($values)
             {
-                return count($this->foreignKeys) > 1 ? [$values] : $values;
+                return \count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }
@@ -230,6 +236,7 @@ trait HasCompositePrimaryKey
      * valores de clave primaria correspondientes.
      *
      * @param Builder $query La consulta a la que se agregarán las condiciones WHERE.
+     *
      * @return Builder La consulta con las condiciones WHERE agregadas.
      */
     protected function setKeysForSaveQuery($query): Builder

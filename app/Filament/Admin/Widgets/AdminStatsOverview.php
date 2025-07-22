@@ -5,13 +5,14 @@ namespace App\Filament\Admin\Widgets;
 use App\Models\Dh03;
 use App\Models\Dh11;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 
 class AdminStatsOverview extends BaseWidget
 {
     protected static ?int $sort = 0;
+
     protected int | string | array $columnSpan = 'full';
 
     protected function getStats(): array

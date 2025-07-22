@@ -3,18 +3,18 @@
 namespace App\Exports\Sicoss;
 
 use Illuminate\Support\Collection;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 abstract class BaseSicossExport implements
     FromCollection,
@@ -27,8 +27,11 @@ abstract class BaseSicossExport implements
     WithColumnFormatting
 {
     protected Collection $data;
+
     protected int $year;
+
     protected int $month;
+
     protected string $reportTitle;
 
     public function __construct(Collection $data, int $year, int $month, string $reportTitle)
@@ -56,14 +59,13 @@ abstract class BaseSicossExport implements
 
     /**
      * Define los formatos de columna
-     * Implementación requerida por WithColumnFormatting
+     * Implementación requerida por WithColumnFormatting.
      */
     public function columnFormats(): array
     {
         // Aquí puedes definir formatos específicos para columnas si es necesario
         return [];
     }
-
 
     public function styles(Worksheet $sheet)
     {
@@ -77,13 +79,13 @@ abstract class BaseSicossExport implements
         $sheet->mergeCells('A2:' . $this->getLastColumn() . '2');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-" . str_pad($this->month, 2, '0', STR_PAD_LEFT));
+        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-" . str_pad($this->month, 2, '0', \STR_PAD_LEFT));
 
         // Estilo para la fecha de generación
         $sheet->mergeCells('A3:' . $this->getLastColumn() . '3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('A3', "Generado el: " . now()->format('d/m/Y H:i:s'));
+        $sheet->setCellValue('A3', 'Generado el: ' . now()->format('d/m/Y H:i:s'));
 
         // Espacio en blanco
         $sheet->mergeCells('A4:' . $this->getLastColumn() . '4');
@@ -123,29 +125,30 @@ abstract class BaseSicossExport implements
         return [];
     }
 
+    abstract public function headings(): array;
+
+    abstract public function map($row): array;
+
     /**
-     * Obtiene la última columna basada en la cantidad de encabezados
+     * Obtiene la última columna basada en la cantidad de encabezados.
      */
     protected function getLastColumn(): string
     {
-        $headingsCount = count($this->headings());
+        $headingsCount = \count($this->headings());
         return $this->getColumnLetter($headingsCount);
     }
 
     /**
-     * Convierte un número de columna a letra (1 = A, 2 = B, etc.)
+     * Convierte un número de columna a letra (1 = A, 2 = B, etc.).
      */
     protected function getColumnLetter(int $columnNumber): string
     {
         $columnLetter = '';
         while ($columnNumber > 0) {
             $modulo = ($columnNumber - 1) % 26;
-            $columnLetter = chr(65 + $modulo) . $columnLetter;
+            $columnLetter = \chr(65 + $modulo) . $columnLetter;
             $columnNumber = (int)(($columnNumber - $modulo) / 26);
         }
         return $columnLetter;
     }
-
-    abstract public function headings(): array;
-    abstract public function map($row): array;
 }

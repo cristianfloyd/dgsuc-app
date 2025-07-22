@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Services\AfipMapucheSicossTableService;
 use App\Contracts\TableService\AfipMapucheSicossTableServiceInterface;
+use App\Services\AfipMapucheSicossTableService;
+use Illuminate\Support\ServiceProvider;
 
 class AfipMapucheSicossServiceProvider extends ServiceProvider
 {
@@ -21,6 +21,6 @@ class AfipMapucheSicossServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

@@ -21,6 +21,7 @@ interface Dh19RepositoryInterface
      * @param int $codnConce
      * @param string $tipoDocum
      * @param int $nroDocum
+     *
      * @return Dh19|null
      */
     public function findByPrimaryKey(int $nroLegaj, int $codnConce, string $tipoDocum, int $nroDocum): ?Dh19;
@@ -29,6 +30,7 @@ interface Dh19RepositoryInterface
      * Crea un nuevo registro de Dh19.
      *
      * @param array $data
+     *
      * @return Dh19
      */
     public function create(array $data): Dh19;
@@ -38,6 +40,7 @@ interface Dh19RepositoryInterface
      *
      * @param Dh19 $dh19
      * @param array $data
+     *
      * @return bool
      */
     public function update(Dh19 $dh19, array $data): bool;
@@ -46,6 +49,7 @@ interface Dh19RepositoryInterface
      * Elimina un registro de Dh19.
      *
      * @param Dh19 $dh19
+     *
      * @return bool
      */
     public function delete(Dh19 $dh19): bool;

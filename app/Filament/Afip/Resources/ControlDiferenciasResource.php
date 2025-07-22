@@ -2,33 +2,31 @@
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\ValueObjects\NroLiqui;
-use Filament\Resources\Resource;
-use App\Models\ControlDiferencias;
-use Illuminate\Support\HtmlString;
-use App\Services\CombinacionesService;
-use App\Models\ControlAportesDiferencia;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\ControlDiferenciasResource\Pages;
-use App\Filament\Afip\Resources\ControlDiferenciasResource\RelationManagers;
+use App\Models\ControlAportesDiferencia;
+use App\Services\CombinacionesService;
+use App\ValueObjects\NroLiqui;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ControlDiferenciasResource extends Resource
 {
     protected static ?string $model = ControlAportesDiferencia::class;
+
     protected static ?string $title = 'Control de Diferencias';
+
     protected static ?string $navigationGroup = 'SICOSS';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+
             ]);
     }
 
@@ -52,7 +50,7 @@ class ControlDiferenciasResource extends Resource
                     ->alignRight(),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -61,18 +59,18 @@ class ControlDiferenciasResource extends Resource
                     ->icon('heroicon-o-magnifying-glass')
                     ->color('primary')
                     ->modalWidth('6xl')
-                    ->modalHeading(fn($record) => "Combinaciones para Legajo {$record->dh01->nro_legaj}")
-                    ->modalDescription(fn($record) => "Buscando combinaciones que sumen aproximadamente $ " . number_format($record->diferencia, 2, ',', '.'))
+                    ->modalHeading(fn ($record) => "Combinaciones para Legajo {$record->dh01->nro_legaj}")
+                    ->modalDescription(fn ($record) => 'Buscando combinaciones que sumen aproximadamente $ ' . number_format($record->diferencia, 2, ',', '.'))
                     ->modalContent(function ($record, CombinacionesService $combinacionesService) {
                         // Obtener el número de liquidación (asumiendo que está en el modelo o en sesión)
                         $nroLiqui = new NroLiqui(session('nro_liqui', 10)); // Ajusta según tu implementación
-                        
+
                         // Buscar combinaciones
                         $resultado = $combinacionesService->buscarCombinaciones(
                             $record->dh01->nro_legaj,
                             $nroLiqui,
                             $record->diferencia,
-                            0.01 // Tolerancia
+                            0.01, // Tolerancia
                         );
 
                         // Preparar el HTML para mostrar los resultados
@@ -96,7 +94,7 @@ class ControlDiferenciasResource extends Resource
 
                         // Mostrar las combinaciones encontradas
                         $html .= '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">';
-                        $html .= "Se encontraron " . count($resultado['combinaciones']) . " posibles combinaciones.";
+                        $html .= 'Se encontraron ' . \count($resultado['combinaciones']) . ' posibles combinaciones.';
                         $html .= '</div>';
 
                         $html .= '<div class="overflow-x-auto">';
@@ -194,7 +192,7 @@ class ControlDiferenciasResource extends Resource
                         $html .= '</div>';
 
                         return new HtmlString($html);
-                    })
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -206,7 +204,7 @@ class ControlDiferenciasResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

@@ -2,17 +2,17 @@
 
 namespace App\Models\Mapuche;
 
-use Spatie\LaravelData\WithData;
-use Illuminate\Support\Facades\DB;
 use App\Traits\Mapuche\Dh21hQueries;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelData\WithData;
 
 /**
- * Modelo para la tabla de liquidaciones del sistema Mapuche
+ * Modelo para la tabla de liquidaciones del sistema Mapuche.
  *
  * @property int $id_liquidacion
  * @property int|null $nro_liqui
@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $tipo_conce
  * @property float|null $nov1_conce
  * @property float|null $nov2_conce
- *
  */
 class Dh21h extends Model
 {
@@ -32,26 +31,25 @@ class Dh21h extends Model
     use WithData;
     use HasFactory;
 
-
-
     /**
-     * Nombre de la tabla
-     */
-    protected $table = 'dh21h';
-    protected $schema = 'mapuche';
-
-    /**
-     * Llave primaria
-     */
-    protected $primaryKey = 'id_liquidacion';
-
-    /**
-     * Desactivar timestamps de Laravel
+     * Desactivar timestamps de Laravel.
      */
     public $timestamps = false;
 
     /**
-     * Atributos asignables masivamente
+     * Nombre de la tabla.
+     */
+    protected $table = 'dh21h';
+
+    protected $schema = 'mapuche';
+
+    /**
+     * Llave primaria.
+     */
+    protected $primaryKey = 'id_liquidacion';
+
+    /**
+     * Atributos asignables masivamente.
      */
     protected $fillable = [
         'nro_liqui',
@@ -83,11 +81,11 @@ class Dh21h extends Model
         'detallenovedad',
         'codn_grupo_presup',
         'tipo_ejercicio',
-        'codn_subsubar'
+        'codn_subsubar',
     ];
 
     /**
-     * Casteos de atributos
+     * Casteos de atributos.
      */
     protected $casts = [
         'impp_conce' => 'float',
@@ -96,7 +94,7 @@ class Dh21h extends Model
         'tipo_conce' => 'string',
         'tipoescalafon' => 'string',
         'codigoescalafon' => 'string',
-        'tipo_ejercicio' => 'string'
+        'tipo_ejercicio' => 'string',
     ];
 
 
@@ -111,7 +109,7 @@ class Dh21h extends Model
     public function scopeByPeriodo($query, int $año, int $mes)
     {
         return $query->where('ano_retro', $año)
-                    ->where('mes_retro', $mes);
+            ->where('mes_retro', $mes);
     }
 
     public function scopeLegajosActivos($query)
@@ -126,7 +124,7 @@ class Dh21h extends Model
                 'dh21h.*',
                 'dh01.desc_appat',
                 'dh01.desc_nombr',
-                DB::raw("CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) as cuil")
+                DB::raw('CONCAT(dh01.nro_cuil1, dh01.nro_cuil, dh01.nro_cuil2) as cuil'),
             );
     }
 
@@ -138,32 +136,31 @@ class Dh21h extends Model
     public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
-        ->where(function ($q) use ($fechaInicio, $fechaFin) {
-            $q->where(function ($inner) use ($fechaInicio, $fechaFin) {
-                $inner->where('dh22.per_liano', $fechaInicio->year)
-                    ->whereBetween('dh22.per_limes', [$fechaInicio->month, $fechaFin->month]);
-            })->orWhere(function ($inner) use ($fechaInicio, $fechaFin) {
-                $inner->whereBetween('dh22.per_liano', [$fechaInicio->year, $fechaFin->year])
-                    ->where('dh22.per_limes', '>=', $fechaInicio->month)
-                    ->where('dh22.per_limes', '<=', $fechaFin->month);
-            });
-        })
-        ->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'");
-    }
-
-    /** ############################### Accesors & Mutators ############################### */
-
-    protected function importeConcepto(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->impp_conce,
-            set: fn ($value) => round($value, 2)
-        );
+            ->where(function ($q) use ($fechaInicio, $fechaFin): void {
+                $q->where(function ($inner) use ($fechaInicio, $fechaFin): void {
+                    $inner->where('dh22.per_liano', $fechaInicio->year)
+                        ->whereBetween('dh22.per_limes', [$fechaInicio->month, $fechaFin->month]);
+                })->orWhere(function ($inner) use ($fechaInicio, $fechaFin): void {
+                    $inner->whereBetween('dh22.per_liano', [$fechaInicio->year, $fechaFin->year])
+                        ->where('dh22.per_limes', '>=', $fechaInicio->month)
+                        ->where('dh22.per_limes', '<=', $fechaFin->month);
+                });
+            })
+            ->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'");
     }
 
     // ############################### Relaciones #######################################
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
+    }
+
+    /** ############################### Accesors & Mutators ############################### */
+    protected function importeConcepto(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->impp_conce,
+            set: fn ($value) => round($value, 2),
+        );
     }
 }

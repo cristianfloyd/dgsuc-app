@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class EmbargoRequest extends FormRequest
 {
     /**
-     * Determina si el usuario está autorizado para realizar esta solicitud
+     * Determina si el usuario está autorizado para realizar esta solicitud.
      */
     public function authorize(): bool
     {
@@ -15,7 +15,7 @@ class EmbargoRequest extends FormRequest
     }
 
     /**
-     * Obtiene las reglas de validación que se aplican a la solicitud
+     * Obtiene las reglas de validación que se aplican a la solicitud.
      */
     public function rules(): array
     {
@@ -29,7 +29,7 @@ class EmbargoRequest extends FormRequest
     }
 
     /**
-     * Obtiene los mensajes de error personalizados para las reglas de validación
+     * Obtiene los mensajes de error personalizados para las reglas de validación.
      */
     public function messages(): array
     {
@@ -53,7 +53,7 @@ class EmbargoRequest extends FormRequest
     }
 
     /**
-     * Prepara los datos para la validación
+     * Prepara los datos para la validación.
      */
     protected function prepareForValidation(): void
     {

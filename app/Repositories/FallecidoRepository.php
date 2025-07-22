@@ -13,18 +13,19 @@ use Illuminate\Support\Collection;
 class FallecidoRepository implements FallecidoRepositoryInterface
 {
     public function __construct(
-        private readonly RepFallecido $model
-    ) {}
+        private readonly RepFallecido $model,
+    ) {
+    }
 
     public function all(): Collection
     {
-        return $this->model->all()->map(fn($fallecido) => $fallecido->toData());
+        return $this->model->all()->map(fn ($fallecido) => $fallecido->toData());
     }
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->model->paginate($perPage)
-            ->through(fn($fallecido) => $fallecido->toData());
+            ->through(fn ($fallecido) => $fallecido->toData());
     }
 
     public function findByLegajo(int $nroLegajo): ?FallecidoData

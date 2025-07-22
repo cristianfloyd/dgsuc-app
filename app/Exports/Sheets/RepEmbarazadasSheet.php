@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Exports\Sheets;
 
 use App\Models\RepEmbarazada;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithStyles, WithTitle, WithEvents, WithColumnFormatting
 {
@@ -56,18 +56,8 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 'Nombre',
                 'CUIL',
                 'Unidad Académica',
-            ]
+            ],
         ];
-    }
-
-    /**
-     * Formatea el período en el formato YYYY/MM
-     *
-     * @return string El período formateado (ej: "2024/03")
-     */
-    protected function formatPeriodo(): string
-    {
-        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 
     public function styles(Worksheet $sheet)
@@ -76,8 +66,8 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
         $sheet->getStyle($sheet->calculateWorksheetDimension())->applyFromArray([
             'font' => [
                 'name' => 'Arial',
-                'size' => 10
-            ]
+                'size' => 10,
+            ],
         ]);
 
         // Combinar celdas para el título del período
@@ -94,26 +84,26 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'D9E1F2']
+                    'startColor' => ['rgb' => 'D9E1F2'],
                 ],
             ],
             3 => [  // La fila de encabezados ahora es la 3
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
-                ]
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
             ],
             // Borde para todos los datos
             "A3:E$lastRow" => [
@@ -131,7 +121,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
         return [
             'A' => NumberFormat::FORMAT_NUMBER, // Legajo
             'D' => '@',                         // CUIL como texto
-            'E' => '@'                          // UACAD como texto
+            'E' => '@',                          // UACAD como texto
         ];
     }
 
@@ -143,7 +133,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet;
                 $lastRow = $sheet->getHighestRow();
                 $lastColumn = $sheet->getHighestColumn();
@@ -158,8 +148,8 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                         $sheet->getStyle("A$row:E$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
-                            ]
+                                'startColor' => ['rgb' => 'F2F2F2'], // Gris claro
+                            ],
                         ]);
                     }
                 }
@@ -171,7 +161,17 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
                 $sheet->getDelegate()->getSheetView()
                     ->setZoomScale(100)
                     ->setZoomScaleNormal(100);
-            }
+            },
         ];
+    }
+
+    /**
+     * Formatea el período en el formato YYYY/MM.
+     *
+     * @return string El período formateado (ej: "2024/03")
+     */
+    protected function formatPeriodo(): string
+    {
+        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 }

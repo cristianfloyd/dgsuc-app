@@ -2,24 +2,26 @@
 
 namespace app\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\Log;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use App\Services\ComprobanteNominaService;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use App\Services\ComprobanteNominaService;
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
 
 class ImportComprobanteNomina extends Page
 {
-    protected static string $resource = ComprobanteNominaModelResource::class;
-    protected static string $view = 'filament.resources.comprobante-nomina.pages.import';
-    protected static ?string $title = 'Importación Avanzada';
-
     public ?array $data = [];
+
+    protected static string $resource = ComprobanteNominaModelResource::class;
+
+    protected static string $view = 'filament.resources.comprobante-nomina.pages.import';
+
+    protected static ?string $title = 'Importación Avanzada';
 
     public function mount(): void
     {
@@ -38,8 +40,7 @@ class ImportComprobanteNomina extends Page
                             ->helperText('Formato esperado: cheAAMM.NNNN')
                             ->required()
                             ->maxSize(5120)
-                            ->directory('comprobantes-temp')
-                            ,
+                            ->directory('comprobantes-temp'),
 
                         Toggle::make('validar_estructura')
                             ->label('Validar estructura del archivo')
@@ -55,11 +56,11 @@ class ImportComprobanteNomina extends Page
                             ->label('Modo de importación')
                             ->options([
                                 'append' => 'Agregar al existente',
-                                'replace' => 'Reemplazar todo'
+                                'replace' => 'Reemplazar todo',
                             ])
                             ->default('append')
-                            ->required()
-                    ])
+                            ->required(),
+                    ]),
             ]);
     }
 
@@ -79,7 +80,7 @@ class ImportComprobanteNomina extends Page
             }
 
             $stats = $service->processFile(
-                storage_path('app/public/' . $data['archivo'])
+                storage_path('app/public/' . $data['archivo']),
             );
 
             Notification::make()

@@ -2,30 +2,29 @@
 
 namespace App\Enums;
 
-
 enum TipoAcumulador: string
 {
     /**
      * Acumuladores de cargos
-     * Solo pueden utilizarse en conceptos de cargo
+     * Solo pueden utilizarse en conceptos de cargo.
      */
     case CARGO = 'C';
 
     /**
      * Acumuladores de mes
-     * Suman valores de todas las liquidaciones del mes (menos la corriente)
+     * Suman valores de todas las liquidaciones del mes (menos la corriente).
      */
     case MES = 'M';
 
     /**
      * Acumuladores de legajo
-     * Pueden usarse tanto en conceptos de Legajo como de Cargo
+     * Pueden usarse tanto en conceptos de Legajo como de Cargo.
      */
     case LEGAJO = 'L';
 
     /**
      * Acumuladores retroactivos
-     * Solo acumulan resultados de conceptos con fechas de reajuste
+     * Solo acumulan resultados de conceptos con fechas de reajuste.
      */
     case RETROACTIVO = 'R';
 

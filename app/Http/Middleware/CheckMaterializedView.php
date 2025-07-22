@@ -2,20 +2,20 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
 use App\Jobs\RefreshMaterializedViewJob;
-use Filament\Notifications\Notification;
-use Symfony\Component\HttpFoundation\Response;
 use App\Services\MaterializedView\ConceptoListadoViewService;
+use Filament\Notifications\Notification;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckMaterializedView
 {
     public function __construct(
-        private readonly ConceptoListadoViewService $viewService
-    ) {}
+        private readonly ConceptoListadoViewService $viewService,
+    ) {
+    }
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, \Closure $next): Response
     {
         try {
             if (!$this->viewService->exists()) {
@@ -70,4 +70,3 @@ class CheckMaterializedView
         return response()->json(['error' => 'Error interno'], 500);
     }
 }
-

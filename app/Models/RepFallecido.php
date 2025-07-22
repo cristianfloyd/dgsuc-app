@@ -8,8 +8,8 @@ use App\Data\Reportes\FallecidoData;
 use App\Services\FallecidosTableService;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $nro_legaj Número de legajo
@@ -26,18 +26,18 @@ class RepFallecido extends Model
     use MapucheConnectionTrait;
 
     /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'suc.rep_fallecidos';
-
-    /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'suc.rep_fallecidos';
 
     /**
      * The attributes that are mass assignable.

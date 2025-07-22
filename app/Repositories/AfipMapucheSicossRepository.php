@@ -2,11 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Models\AfipMapucheSicoss;
-use App\DTOs\AfipMapucheSicossDTO;
 use App\Contracts\AfipMapucheSicossRepositoryInterface;
-
-
+use App\DTOs\AfipMapucheSicossDTO;
+use App\Models\AfipMapucheSicoss;
 
 class AfipMapucheSicossRepository implements AfipMapucheSicossRepositoryInterface
 {

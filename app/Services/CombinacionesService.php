@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-
 use App\Models\Dh21;
 use App\ValueObjects\NroLiqui;
 use Illuminate\Support\Collection;
@@ -11,13 +10,14 @@ use Illuminate\Support\Facades\Log;
 class CombinacionesService
 {
     /**
-     * Encuentra combinaciones de conceptos que sumen aproximadamente un valor objetivo
+     * Encuentra combinaciones de conceptos que sumen aproximadamente un valor objetivo.
      *
      * @param int $nroLegaj Número de legajo
      * @param NroLiqui $nroLiqui Número de liquidación
      * @param float $valorObjetivo Valor a alcanzar (diff_B)
      * @param float $tolerancia Tolerancia permitida
      * @param int $maxCombinaciones Número máximo de combinaciones a devolver
+     *
      * @return array Combinaciones encontradas
      */
     public function buscarCombinaciones(
@@ -25,7 +25,7 @@ class CombinacionesService
         NroLiqui $nroLiqui,
         float $valorObjetivo,
         float $tolerancia = 0.01,
-        int $maxCombinaciones = 5
+        int $maxCombinaciones = 5,
     ): array {
         try {
             // Obtener conceptos del legajo en la liquidación específica
@@ -35,7 +35,7 @@ class CombinacionesService
                 return [
                     'success' => false,
                     'message' => "No se encontraron conceptos para el legajo {$nroLegaj} en la liquidación {$nroLiqui->value()}",
-                    'combinaciones' => []
+                    'combinaciones' => [],
                 ];
             }
 
@@ -44,7 +44,7 @@ class CombinacionesService
                 return [
                     'codn_conce' => $item->codn_conce,
                     'impp_conce' => (float)$item->impp_conce,
-                    'tipo_conce' => $item->tipo_conce
+                    'tipo_conce' => $item->tipo_conce,
                 ];
             })->toArray();
 
@@ -52,36 +52,37 @@ class CombinacionesService
             $combinaciones = $this->encontrarCombinaciones($items, $valorObjetivo, $tolerancia);
 
             // Limitar el número de combinaciones devueltas
-            $combinacionesLimitadas = array_slice($combinaciones, 0, $maxCombinaciones);
+            $combinacionesLimitadas = \array_slice($combinaciones, 0, $maxCombinaciones);
 
             return [
                 'success' => true,
-                'message' => count($combinacionesLimitadas) > 0
-                    ? "Se encontraron " . count($combinacionesLimitadas) . " combinaciones posibles"
-                    : "No se encontraron combinaciones que se aproximen al valor objetivo",
-                'combinaciones' => $combinacionesLimitadas
+                'message' => \count($combinacionesLimitadas) > 0
+                    ? 'Se encontraron ' . \count($combinacionesLimitadas) . ' combinaciones posibles'
+                    : 'No se encontraron combinaciones que se aproximen al valor objetivo',
+                'combinaciones' => $combinacionesLimitadas,
             ];
 
         } catch (\Exception $e) {
-            Log::error("Error al buscar combinaciones: " . $e->getMessage(), [
+            Log::error('Error al buscar combinaciones: ' . $e->getMessage(), [
                 'legajo' => $nroLegaj,
                 'nro_liqui' => $nroLiqui->value(),
-                'valor_objetivo' => $valorObjetivo
+                'valor_objetivo' => $valorObjetivo,
             ]);
 
             return [
                 'success' => false,
-                'message' => "Error al procesar la búsqueda: " . $e->getMessage(),
-                'combinaciones' => []
+                'message' => 'Error al procesar la búsqueda: ' . $e->getMessage(),
+                'combinaciones' => [],
             ];
         }
     }
 
     /**
-     * Obtiene los conceptos de un legajo en una liquidación específica
+     * Obtiene los conceptos de un legajo en una liquidación específica.
      *
      * @param int $nroLegaj Número de legajo
      * @param NroLiqui $nroLiqui Número de liquidación
+     *
      * @return Collection Colección de conceptos
      */
     private function obtenerConceptos(int $nroLegaj, NroLiqui $nroLiqui): Collection
@@ -93,23 +94,24 @@ class CombinacionesService
     }
 
     /**
-     * Algoritmo para encontrar combinaciones que sumen aproximadamente un valor objetivo
+     * Algoritmo para encontrar combinaciones que sumen aproximadamente un valor objetivo.
      *
      * @param array $items Elementos disponibles
      * @param float $valorObjetivo Valor a alcanzar
      * @param float $tolerancia Tolerancia permitida
+     *
      * @return array Combinaciones encontradas
      */
     private function encontrarCombinaciones(array $items, float $valorObjetivo, float $tolerancia): array
     {
         // Optimización: para 50 registros, podemos usar un enfoque más eficiente
         // Separamos los conceptos positivos y negativos para optimizar la búsqueda
-        $positivos = array_filter($items, fn($item) => $item['impp_conce'] > 0);
-        $negativos = array_filter($items, fn($item) => $item['impp_conce'] < 0);
+        $positivos = array_filter($items, fn ($item) => $item['impp_conce'] > 0);
+        $negativos = array_filter($items, fn ($item) => $item['impp_conce'] < 0);
 
         // Ordenamos de mayor a menor valor absoluto para mejorar la eficiencia
-        usort($positivos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
-        usort($negativos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($positivos, fn ($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($negativos, fn ($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
 
         $resultados = [];
 
@@ -123,7 +125,7 @@ class CombinacionesService
             $resultados,
             $tolerancia,
             0,
-            5000 // Límite de iteraciones para evitar procesamiento excesivo
+            5000, // Límite de iteraciones para evitar procesamiento excesivo
         );
 
         // Ordenamos por cercanía al valor objetivo
@@ -137,7 +139,7 @@ class CombinacionesService
     }
 
     /**
-     * Método recursivo optimizado para encontrar subconjuntos
+     * Método recursivo optimizado para encontrar subconjuntos.
      *
      * @param array $items Elementos disponibles
      * @param float $valorObjetivo Valor objetivo
@@ -148,6 +150,7 @@ class CombinacionesService
      * @param float $tolerancia Tolerancia permitida
      * @param int $profundidad Profundidad de la recursión
      * @param int $maxIteraciones Máximo de iteraciones permitidas
+     *
      * @return bool True si debe continuar, false si debe detenerse
      */
     private function buscarSubconjuntos(
@@ -159,7 +162,7 @@ class CombinacionesService
         array &$resultados,
         float $tolerancia,
         int $profundidad = 0,
-        int $maxIteraciones = 5000
+        int $maxIteraciones = 5000,
     ): bool {
         // Control de profundidad para evitar stack overflow
         static $iteraciones = 0;
@@ -175,17 +178,17 @@ class CombinacionesService
             $resultados[] = [
                 'items' => $subconjuntoActual,
                 'total' => $sumaActual,
-                'diferencia' => abs($sumaActual - $valorObjetivo)
+                'diferencia' => abs($sumaActual - $valorObjetivo),
             ];
 
             // Si ya tenemos suficientes resultados exactos, podemos terminar
-            if (count($resultados) >= 10 && abs($sumaActual - $valorObjetivo) < 0.001) {
+            if (\count($resultados) >= 10 && abs($sumaActual - $valorObjetivo) < 0.001) {
                 return false;
             }
         }
 
         // Si ya procesamos todos los elementos o la profundidad es excesiva
-        if ($indice >= count($items) || $profundidad > 10) {
+        if ($indice >= \count($items) || $profundidad > 10) {
             return true;
         }
 
@@ -204,10 +207,12 @@ class CombinacionesService
             $resultados,
             $tolerancia,
             $profundidad + 1,
-            $maxIteraciones
+            $maxIteraciones,
         );
 
-        if (!$continuar) return false;
+        if (!$continuar) {
+            return false;
+        }
 
         // Probamos sin incluir el elemento actual
         return $this->buscarSubconjuntos(
@@ -219,7 +224,7 @@ class CombinacionesService
             $resultados,
             $tolerancia,
             $profundidad + 1,
-            $maxIteraciones
+            $maxIteraciones,
         );
     }
 }

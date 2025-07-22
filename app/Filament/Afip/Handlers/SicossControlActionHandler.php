@@ -11,17 +11,17 @@ class SicossControlActionHandler
 {
     public function __construct(
         protected SicossControlService $controlService,
-        protected PeriodoFiscalService $periodoFiscalService
+        protected PeriodoFiscalService $periodoFiscalService,
     ) {
     }
 
     /**
-     * Ejecuta un control específico siguiendo el patrón común
+     * Ejecuta un control específico siguiendo el patrón común.
      */
     public function ejecutarControl(
         string $tipoControl,
         object $livewire,
-        ?callable $customLogic = null
+        ?callable $customLogic = null,
     ): array {
         try {
             // Estado de loading
@@ -35,7 +35,7 @@ class SicossControlActionHandler
             Log::info("Iniciando control de {$tipoControl}", [
                 'year' => $year,
                 'month' => $month,
-                'connection' => $livewire->getConnectionName()
+                'connection' => $livewire->getConnectionName(),
             ]);
 
             // Configurar servicio
@@ -59,7 +59,7 @@ class SicossControlActionHandler
     }
 
     /**
-     * Ejecuta el control específico según el tipo
+     * Ejecuta el control específico según el tipo.
      */
     protected function ejecutarControlEspecifico(string $tipo, int $year, int $month): array
     {
@@ -73,9 +73,8 @@ class SicossControlActionHandler
         };
     }
 
-
     /**
-     * Realiza el post-procesamiento después de ejecutar un control SICOSS
+     * Realiza el post-procesamiento después de ejecutar un control SICOSS.
      *
      * Este método se encarga de las tareas de limpieza y notificación que deben
      * realizarse después de completar cualquier control de SICOSS, incluyendo:
@@ -88,6 +87,7 @@ class SicossControlActionHandler
      * @param int $year Año del período fiscal procesado
      * @param int $month Mes del período fiscal procesado
      * @param array $resultados Resultados obtenidos del control ejecutado
+     *
      * @return void
      */
     protected function postProcesamiento(
@@ -95,7 +95,7 @@ class SicossControlActionHandler
         string $tipoControl,
         int $year,
         int $month,
-        array $resultados
+        array $resultados,
     ): void {
         // Invalidar caché para forzar actualización de estadísticas
         cache()->forget('sicoss_resumen_stats');
@@ -107,13 +107,12 @@ class SicossControlActionHandler
         Notification::make()
             ->success()
             ->title(ucfirst($tipoControl) . ' Control Ejecutado')
-            ->body("Se completó el control de {$tipoControl} para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
+            ->body("Se completó el control de {$tipoControl} para el período {$year}-" . str_pad($month, 2, '0', \STR_PAD_LEFT))
             ->send();
     }
 
-
     /**
-     * Maneja y registra errores que ocurren durante la ejecución de controles SICOSS
+     * Maneja y registra errores que ocurren durante la ejecución de controles SICOSS.
      *
      * Este método centraliza el manejo de errores para todos los tipos de controles
      * de SICOSS, proporcionando:
@@ -123,13 +122,14 @@ class SicossControlActionHandler
      *
      * @param \Exception $e Excepción capturada durante la ejecución del control
      * @param string $tipoControl Tipo de control que falló (aportes, contribuciones, cuils, etc.)
+     *
      * @return void
      */
     protected function manejarError(\Exception $e, string $tipoControl): void
     {
         Log::error("Error en control de {$tipoControl}", [
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
 
         Notification::make()

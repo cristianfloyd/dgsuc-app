@@ -13,6 +13,7 @@ trait ReportCacheTrait
      * @param string $report Nombre del reporte
      * @param string $type Tipo de datos (data|totals)
      * @param array $params Parámetros adicionales
+     *
      * @return string
      */
     protected function getCacheKey(string $report, string $type, array $params = []): string
@@ -27,13 +28,14 @@ trait ReportCacheTrait
      *
      * @param string $report Nombre del reporte
      * @param string $type Tipo de datos (data|totals)
+     *
      * @return int
      */
     protected function getCacheTTL(string $report, string $type): int
     {
         return Config::get(
             "cache.reports.{$report}.{$type}_ttl",
-            Config::get('cache.ttl', 3600)
+            Config::get('cache.ttl', 3600),
         );
     }
 
@@ -45,6 +47,7 @@ trait ReportCacheTrait
      * @param array $params Parámetros adicionales
      * @param \Closure $callback Función que genera los datos
      * @param int|null $customTtl TTL personalizado en segundos (opcional)
+     *
      * @return mixed
      */
     protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback, ?int $customTtl = null)
@@ -61,6 +64,7 @@ trait ReportCacheTrait
      * @param string $report Nombre del reporte
      * @param string $type Tipo de datos (data|totals)
      * @param array $params Parámetros adicionales
+     *
      * @return bool
      */
     protected function forgetReportCache(string $report, string $type, array $params = []): bool
@@ -72,6 +76,7 @@ trait ReportCacheTrait
      * Invalida todo el caché relacionado con un reporte.
      *
      * @param string $report Nombre del reporte
+     *
      * @return bool
      */
     protected function forgetAllReportCache(string $report): bool

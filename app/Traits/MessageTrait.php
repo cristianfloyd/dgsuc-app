@@ -4,11 +4,12 @@ namespace App\Traits;
 
 trait MessageTrait
 {
-    public $message = null;
+    public $message;
 
     /** Set the message to be displayed.
      *
      * @param string $message The message to be displayed.
+     *
      * @return void
      */
     public function showMessage($message): void

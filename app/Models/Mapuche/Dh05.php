@@ -30,7 +30,7 @@ class Dh05 extends Model
         'nrovarlicencia', 'observacion', 'tipo_norma_alta', 'emite_norma_alta', 'fecha_norma_alta',
         'nro_norma_alta', 'tipo_norma_baja', 'emite_norma_baja', 'fecha_norma_baja', 'nro_norma_baja',
         'mes_actualizacion', 'anio_actualizacion', 'trab_sab', 'trab_dom', 'presentismo',
-        'codmotivolic', 'trab_fer'
+        'codmotivolic', 'trab_fer',
     ];
 
     // Especificar los tipos de datos para los campos
@@ -56,7 +56,7 @@ class Dh05 extends Model
     ];
 
     /**
-     * Relación con el modelo Dh01
+     * Relación con el modelo Dh01.
      */
     public function dh01(): BelongsTo
     {
@@ -64,7 +64,7 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dh03
+     * Relación con el modelo Dh03.
      */
     public function dh03(): BelongsTo
     {
@@ -72,7 +72,7 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dl09 (tipo_norma_alta)
+     * Relación con el modelo Dl09 (tipo_norma_alta).
      */
     public function dl09(): BelongsTo
     {
@@ -80,7 +80,7 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dl10 (emite_norma_alta)
+     * Relación con el modelo Dl10 (emite_norma_alta).
      */
     public function dl10(): BelongsTo
     {

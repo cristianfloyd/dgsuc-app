@@ -2,22 +2,22 @@
 
 namespace App\Models\Mapuche;
 
-use App\Models\Dh01;
+use App\Services\Mapuche\PeriodoFiscalService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use App\Services\Mapuche\PeriodoFiscalService;
 
 class MapucheSicossReporte extends Model
 {
     use MapucheConnectionTrait;
 
+    public $timestamps = false;
 
     protected $table = 'mapuche.dh21h';
+
     protected $primaryKey = 'nro_liqui';
-    public $timestamps = false;
 
     /**
      * Obtiene el registro de liquidación asociado con el reporte.
@@ -27,14 +27,13 @@ class MapucheSicossReporte extends Model
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
-
-
     /**
      * Scope para obtener el reporte SICOSS.
      *
      * @param Builder $query
      * @param string $anio
      * @param string $mes
+     *
      * @return Builder
      */
     public function scopeGetReporte($query, string $anio, string $mes): Builder
@@ -54,7 +53,7 @@ class MapucheSicossReporte extends Model
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucionsijpdh21'),
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucioninssjpdh21'),
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'C\' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS remunerativo'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS no_remunerativo')
+                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS no_remunerativo'),
                 ])
                 ->join('mapuche.dh01', "$tablaPeriodo.nro_legaj", '=', 'dh01.nro_legaj')
                 ->join('mapuche.dh22', "$tablaPeriodo.nro_liqui", '=', 'dh22.nro_liqui')
@@ -64,7 +63,7 @@ class MapucheSicossReporte extends Model
             Log::error('Error en scopeGetReporte', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
-                'mes' => $mes
+                'mes' => $mes,
             ]);
             return $query->whereRaw('1 = 0');
         }
@@ -76,6 +75,7 @@ class MapucheSicossReporte extends Model
      * @param Builder $query
      * @param string $anio
      * @param string $mes
+     *
      * @return array
      */
     public function scopeGetTotales($query, string $anio, string $mes): array
@@ -93,7 +93,7 @@ class MapucheSicossReporte extends Model
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_contribuciones_sijp'),
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_contribuciones_inssjp'),
                     DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'C\' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_remunerativo'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_no_remunerativo')
+                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_no_remunerativo'),
                 ])
                 ->join('mapuche.dh01', $tablaPeriodo . '.nro_legaj', '=', 'dh01.nro_legaj')
                 ->join('mapuche.dh22', $tablaPeriodo . '.nro_liqui', '=', 'dh22.nro_liqui')
@@ -124,7 +124,7 @@ class MapucheSicossReporte extends Model
             Log::error('Error en scopeGetTotales', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
-                'mes' => $mes
+                'mes' => $mes,
             ]);
 
             return [
@@ -139,10 +139,11 @@ class MapucheSicossReporte extends Model
     }
 
     /**
-     * Determina la tabla de período a utilizar basada en el año y mes proporcionados
+     * Determina la tabla de período a utilizar basada en el año y mes proporcionados.
      *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
+     *
      * @return string Nombre de la tabla a utilizar
      */
     private function determinarTablaPeriodo(string $anio, string $mes): string
@@ -158,7 +159,7 @@ class MapucheSicossReporte extends Model
             Log::error('Error al determinar tabla de período', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
-                'mes' => $mes
+                'mes' => $mes,
             ]);
             // En caso de error, usar la tabla histórica por defecto
             return 'mapuche.dh21h';
@@ -166,15 +167,16 @@ class MapucheSicossReporte extends Model
     }
 
     /**
-     * Genera la subconsulta para filtrar por liquidaciones del período especificado
+     * Genera la subconsulta para filtrar por liquidaciones del período especificado.
      *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
+     *
      * @return \Closure Función que genera la subconsulta
      */
     private function generarSubconsultaLiquidaciones(string $anio, string $mes): \Closure
     {
-        return function ($query) use ($anio, $mes) {
+        return function ($query) use ($anio, $mes): void {
             $query->select('nro_liqui')
                 ->from('mapuche.dh22')
                 ->where('sino_genimp', true)

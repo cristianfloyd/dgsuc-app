@@ -8,7 +8,6 @@ use App\Contracts\OrigenRepositoryInterface;
 use App\Livewire\Uploadtxt;
 use App\Models\UploadedFile;
 use App\Services\FileUploadService;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -18,9 +17,17 @@ class UploadtxtTest extends TestCase
     // use RefreshDatabase;
 
     private $fileUploadRepository;
+
     private $uploadtxt;
 
-    public function testDeleteFileSuccess()
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
+        $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
+    }
+
+    public function testDeleteFileSuccess(): void
     {
         $fileId = 1;
         $file = (object)['id' => $fileId];
@@ -32,7 +39,7 @@ class UploadtxtTest extends TestCase
 
         DB::shouldReceive('transaction')
             ->once()
-            ->andReturnUsing(function ($callback) {
+            ->andReturnUsing(function ($callback): void {
                 $callback();
             });
 
@@ -47,7 +54,7 @@ class UploadtxtTest extends TestCase
             ->call('deleteFile', $fileId);
     }
 
-    public function testDeleteFileFailure()
+    public function testDeleteFileFailure(): void
     {
         $fileId = 1;
         $errorMessage = 'File not found';
@@ -55,11 +62,11 @@ class UploadtxtTest extends TestCase
         $this->fileUploadRepository->expects($this->once())
             ->method('findOrFail')
             ->with($fileId)
-            ->willThrowException(new Exception($errorMessage));
+            ->willThrowException(new \Exception($errorMessage));
 
         DB::shouldReceive('transaction')
             ->once()
-            ->andReturnUsing(function ($callback) {
+            ->andReturnUsing(function ($callback): void {
                 $callback();
             });
 
@@ -68,13 +75,13 @@ class UploadtxtTest extends TestCase
             ->assertDispatched('error', 'Error: ' . $errorMessage);
     }
 
-    public function testSaveSuccess()
+    public function testSaveSuccess(): void
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
         $mockFileUploadRepository = $this->createMock(FileUploadRepositoryInterface::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
-        $component = Livewire:: Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
+        $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
 
         $mockFile = $this->createMock(UploadedFile::class);
         $mockFile->method('getClientOriginalName')->willReturn('test.txt');
@@ -104,7 +111,7 @@ class UploadtxtTest extends TestCase
         $component->save();
     }
 
-    public function testSaveFailureFileUpload()
+    public function testSaveFailureFileUpload(): void
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
         $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
@@ -124,18 +131,18 @@ class UploadtxtTest extends TestCase
 
         $component->expects($this->once())
             ->method('handleException')
-            ->with($this->isInstanceOf(Exception::class));
+            ->with($this->isInstanceOf(\Exception::class));
 
         $component->save();
     }
 
-    public function testSaveFailureDatabaseInsert()
+    public function testSaveFailureDatabaseInsert(): void
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
         $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
-        $component = Livewire:: Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
+        $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
 
         $mockFile = $this->createMock(UploadedFile::class);
         $mockFile->method('getClientOriginalName')->willReturn('test.txt');
@@ -161,15 +168,8 @@ class UploadtxtTest extends TestCase
 
         $component->expects($this->once())
             ->method('handleException')
-            ->with($this->isInstanceOf(Exception::class));
+            ->with($this->isInstanceOf(\Exception::class));
 
         $component->save();
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
-        $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
     }
 }

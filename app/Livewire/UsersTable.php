@@ -14,16 +14,20 @@ class UsersTable extends Component
 
     #[Url(history: true)]
     public $search = '';
+
     #[Url(history: true)]
     public $perPage = 5;
+
     #[Url(history: true)]
     public $sortField = 'nro_legaj';
+
     #[Url(history: true)]
     public $sortDir = 'DESC';
+
     #[Url(history: true)]
     public $admin = '';
 
-    public function setSortBy($field)
+    public function setSortBy($field): void
     {
         if ($this->sortField === $field) {
             $this->sortDir = $this->sortDir === 'ASC' ? 'DESC' : 'ASC';
@@ -33,19 +37,19 @@ class UsersTable extends Component
         }
     }
 
-    public function updatedSearch()
+    public function updatedSearch(): void
     {
         $this->resetPage();
     }
 
-    public function deleteUser(User $user)
+    public function deleteUser(User $user): void
     {
         $user->delete();
     }
 
     public function render()
     {
-        return view('livewire.users-table',[
+        return view('livewire.users-table', [
             'users' => dh01::search($this->search)
                 // ->when($this->admin !== '', function ($query) {
                 //     return $query->where('is_admin', $this->admin);

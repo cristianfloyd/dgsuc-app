@@ -2,33 +2,32 @@
 
 namespace App\Repositories\Sicoss;
 
-use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
-use App\Services\Mapuche\LicenciaService;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
+use App\Services\Mapuche\LicenciaService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterface
 {
     use MapucheConnectionTrait;
 
-
     public function __construct(
-        protected Dh01RepositoryInterface $dh01Repository
-    ) {}
+        protected Dh01RepositoryInterface $dh01Repository,
+    ) {
+    }
 
     /**
      * Obtiene los legajos filtrados para el proceso SICOSS
-     * Código extraído tal como está del método obtener_legajos() de SicossLegacy
+     * Código extraído tal como está del método obtener_legajos() de SicossLegacy.
      */
     public function obtenerLegajos(
         string $codc_reparto,
         string $where_periodo_retro,
         string $where_legajo = ' true ',
         bool $check_lic = false,
-        bool $check_sin_activo = false
-    ): array
-    {
+        bool $check_sin_activo = false,
+    ): array {
         // Si la opcion no tiene en cuenta los retroactivos el proceso es como se venia haciendo, se toma de la tabla anterior y se vuelca sobre un unico archivo
         // Si hay que tener en cuenta los retros se toma la tabla anterior y se segmenta por periodo retro, se genera un archivo por cada segmento
 
@@ -46,9 +45,9 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_conceptos_liq_filtrados);
 
 
-        $sql_ix = "CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);";
+        $sql_ix = 'CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);';
         $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
-        $sql_ix = "CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);";
+        $sql_ix = 'CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);';
         $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
 
         // Se obtienen datos por legajo, de los numeros de legajos liquidados en la tabla anterior conceptos_liquidados
@@ -68,13 +67,14 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
             $tabla = 'dh01';
             $where = ' true ';
             if (isset($legajos_lic) && !empty($legajos_lic)) {
-                $where  = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
-                if (!$check_lic)
-                    $where .=  ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
-                else
+                $where = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
+                if (!$check_lic) {
+                    $where .= ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
+                } else {
                     $where .= ' )';
+                }
                 // si tengo licencias consulto la union de legajos. Ordeno por agente, luego de obtener todos los legajos
-                $sql_datos_lic = ' UNION (' . $this->dh01Repository->getSqlLegajos("mapuche.dh01", 1, $where, $codc_reparto) . ' ORDER BY apyno';
+                $sql_datos_lic = ' UNION (' . $this->dh01Repository->getSqlLegajos('mapuche.dh01', 1, $where, $codc_reparto) . ' ORDER BY apyno';
 
                 $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo . $sql_datos_lic);
             } else {
@@ -106,28 +106,31 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
                                                                             car.nro_legaj = dh01.nro_legaj AND  mapuche.map_es_cargo_activo(car.nro_cargo) )
                 ";
 
-            $sql_legajos_no_liquidados = $this->dh01Repository->getSqlLegajos("mapuche.dh01", 0, $where_no_liquidado, $codc_reparto);
+            $sql_legajos_no_liquidados = $this->dh01Repository->getSqlLegajos('mapuche.dh01', 0, $where_no_liquidado, $codc_reparto);
             $legajos_t = DB::connection($this->getConnectionName())->select($sql_legajos_no_liquidados);
             $legajos = array_merge($legajos, $legajos_t);
         }
 
         // Convertir objetos stdClass a arrays
-        $legajos = array_map(function($legajo) {
-            return (array) $legajo;
+        $legajos = array_map(function ($legajo) {
+            return (array)$legajo;
         }, $legajos);
 
         // Elimino legajos repetidos
         $legajos_sin_repetidos = [];
         foreach ($legajos as $legajo) {
             if (isset($legajos_sin_repetidos[$legajo['nro_legaj']])) {
-                if ($legajos_sin_repetidos[$legajo['nro_legaj']]['licencia'] == 1)
+                if ($legajos_sin_repetidos[$legajo['nro_legaj']]['licencia'] == 1) {
                     $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
-            } else
+                }
+            } else {
                 $legajos_sin_repetidos[$legajo['nro_legaj']] = $legajo;
+            }
         }
         $legajos = [];
-        foreach ($legajos_sin_repetidos as $legajo)
+        foreach ($legajos_sin_repetidos as $legajo) {
             $legajos[] = $legajo;
+        }
 
         return $legajos;
     }

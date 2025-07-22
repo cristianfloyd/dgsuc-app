@@ -2,12 +2,10 @@
 
 namespace App\Data\Sicoss;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Attributes\MapName;
-use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Required;
-use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Data;
 
 class SicossProcessData extends Data
 {
@@ -16,36 +14,28 @@ class SicossProcessData extends Data
         #[IntegerType]
         #[Min(1)]
         public readonly int $nro_legaj,
-
         #[IntegerType]
         #[Min(0)]
         public readonly int $check_retro = 0,
-
         #[IntegerType]
         #[Min(0)]
         public readonly int $check_lic = 0,
-
         #[IntegerType]
         #[Min(0)]
         public readonly int $check_sin_activo = 0,
-
         #[IntegerType]
         #[Min(0)]
         public readonly int $seguro_vida_patronal = 0,
-
         public readonly ?float $TopeJubilatorioPatronal = null,
-
         public readonly ?float $TopeJubilatorioPersonal = null,
-
         public readonly ?float $TopeOtrosAportesPersonal = null,
-
         public readonly bool $truncaTope = false,
-
-        public readonly ?int $nro_liqui = null
-    ) {}
+        public readonly ?int $nro_liqui = null,
+    ) {
+    }
 
     /**
-     * Crea una instancia desde un array de datos
+     * Crea una instancia desde un array de datos.
      */
     public static function fromArray(array $data): self
     {
@@ -59,12 +49,12 @@ class SicossProcessData extends Data
             TopeJubilatorioPersonal: $data['TopeJubilatorioPersonal'] ?? null,
             TopeOtrosAportesPersonal: $data['TopeOtrosAportesPersonal'] ?? null,
             truncaTope: $data['truncaTope'] ?? false,
-            nro_liqui: $data['nro_liqui'] ?? null
+            nro_liqui: $data['nro_liqui'] ?? null,
         );
     }
 
     /**
-     * Crea una nueva instancia con los topes por defecto aplicados
+     * Crea una nueva instancia con los topes por defecto aplicados.
      */
     public function withDefaultTopes(array $topes): self
     {
@@ -78,22 +68,22 @@ class SicossProcessData extends Data
             TopeJubilatorioPersonal: $this->TopeJubilatorioPersonal ?? $topes['TopeJubilatorioPersonal'],
             TopeOtrosAportesPersonal: $this->TopeOtrosAportesPersonal ?? $topes['TopeOtrosAportesPersonal'],
             truncaTope: $this->truncaTope,
-            nro_liqui: $this->nro_liqui
+            nro_liqui: $this->nro_liqui,
         );
     }
 
     /**
-     * Verifica si todos los topes están configurados
+     * Verifica si todos los topes están configurados.
      */
     public function hasAllTopes(): bool
     {
-        return !is_null($this->TopeJubilatorioPatronal)
-            && !is_null($this->TopeJubilatorioPersonal)
-            && !is_null($this->TopeOtrosAportesPersonal);
+        return $this->TopeJubilatorioPatronal !== null
+            && $this->TopeJubilatorioPersonal !== null
+            && $this->TopeOtrosAportesPersonal !== null;
     }
 
     /**
-     * Convierte a array para compatibilidad con código legacy
+     * Convierte a array para compatibilidad con código legacy.
      */
     public function toArray(): array
     {
@@ -107,7 +97,7 @@ class SicossProcessData extends Data
             'TopeJubilatorioPersonal' => $this->TopeJubilatorioPersonal,
             'TopeOtrosAportesPersonal' => $this->TopeOtrosAportesPersonal,
             'truncaTope' => $this->truncaTope,
-            'nro_liqui' => $this->nro_liqui
+            'nro_liqui' => $this->nro_liqui,
         ];
     }
 }

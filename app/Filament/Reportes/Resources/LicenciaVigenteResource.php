@@ -2,37 +2,35 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Get;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use App\Filament\Reportes\Resources\LicenciaVigenteResource\Pages;
 use App\Models\LicenciaVigente;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\DB;
-use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\DateFormatterService;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
+use App\Services\Excel\Exports\LicenciasVigentesExport;
+use App\Services\Mapuche\LicenciaService;
+use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use App\Services\Mapuche\LicenciaService;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Data\Responses\LicenciaVigenteData;
-use Illuminate\Database\Eloquent\Collection;
-use App\Services\Excel\Exports\LicenciasVigentesExport;
-use App\Filament\Reportes\Resources\LicenciaVigenteResource\Pages;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LicenciaVigenteResource extends Resource
 {
     protected static ?string $model = LicenciaVigente::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationGroup = 'Licencias';
+
     protected static ?int $navigationSort = 100;
+
     protected static ?string $slug = 'licencias-vigentes';
 
     /**
@@ -50,7 +48,7 @@ class LicenciaVigenteResource extends Resource
         } else {
             Log::info('Consultando licencias para legajos', [
                 'legajos' => $legajos,
-                'session_id' => $sessionId
+                'session_id' => $sessionId,
             ]);
         }
 
@@ -96,7 +94,7 @@ class LicenciaVigenteResource extends Resource
                 TextColumn::make('descripcion_licencia')
                     ->label('Descripción')
                     ->limit(50)
-                    ->tooltip(fn(?LicenciaVigente $record) => $record?->descripcion_licencia ?? '')
+                    ->tooltip(fn (?LicenciaVigente $record) => $record?->descripcion_licencia ?? '')
                     ->sortable(),
 
                 TextColumn::make('condicion')
@@ -206,16 +204,16 @@ class LicenciaVigenteResource extends Resource
 
                             // Registrar para depuración
                             \Illuminate\Support\Facades\Log::info('Legajos con licencias cargados en sesión', [
-                                'count' => count($legajos)
+                                'count' => \count($legajos),
                             ]);
 
-                            $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
+                            $action->success('Se han cargado ' . \count($legajos) . ' legajos con licencias vigentes');
 
                             // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
                             // No es necesario llamar a refreshTable manualmente
                         } catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::error('Error al consultar todas las licencias', [
-                                'error' => $e->getMessage()
+                                'error' => $e->getMessage(),
                             ]);
                             $action->failure('Error al consultar licencias: ' . $e->getMessage());
                         }
@@ -252,7 +250,7 @@ class LicenciaVigenteResource extends Resource
 
                             // Registrar para depuración
                             \Illuminate\Support\Facades\Log::info('Legajos específicos cargados en sesión', [
-                                'legajos' => $legajos
+                                'legajos' => $legajos,
                             ]);
 
                             // Verificar si hay licencias para estos legajos
@@ -262,7 +260,7 @@ class LicenciaVigenteResource extends Resource
                             if ($forzarRecarga) {
                                 $licenciaService->invalidateCache($legajos);
                                 Log::info('Forzando recarga desde base de datos para legajos', [
-                                    'legajos' => $legajos
+                                    'legajos' => $legajos,
                                 ]);
                             }
 
@@ -284,7 +282,7 @@ class LicenciaVigenteResource extends Resource
                         } catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::error('Error al consultar legajos específicos', [
                                 'error' => $e->getMessage(),
-                                'legajos' => $data['legajos'] ?? 'no proporcionados'
+                                'legajos' => $data['legajos'] ?? 'no proporcionados',
                             ]);
                             $action->failure('Error al consultar licencias: ' . $e->getMessage());
                         }
@@ -309,7 +307,7 @@ class LicenciaVigenteResource extends Resource
 
                         return Excel::download(
                             new LicenciasVigentesExport($licencias, $periodo),
-                            $nombreArchivo
+                            $nombreArchivo,
                         );
                     }),
             ])
@@ -319,26 +317,17 @@ class LicenciaVigenteResource extends Resource
             ->bulkActions([
                 // No necesitamos acciones masivas
             ])
-            ->paginated([5,10, 25, 50, 100])
+            ->paginated([5, 10, 25, 50, 100])
             ->defaultPaginationPageOption(10)
             ->persistFiltersInSession()
             ->persistSortInSession()
             ->deferLoading();
     }
 
-    /**
-     * Método para forzar la recarga de la tabla
-     */
-    protected function refreshTable()
-    {
-        // Este método ya no es necesario en Filament 3 con Livewire 3
-        // Las tablas se actualizan automáticamente cuando cambian los datos
-    }
-
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -348,5 +337,14 @@ class LicenciaVigenteResource extends Resource
         return [
             'index' => Pages\ListLicenciaVigentes::route('/'),
         ];
+    }
+
+    /**
+     * Método para forzar la recarga de la tabla.
+     */
+    protected function refreshTable(): void
+    {
+        // Este método ya no es necesario en Filament 3 con Livewire 3
+        // Las tablas se actualizan automáticamente cuando cambian los datos
     }
 }

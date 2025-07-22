@@ -4,31 +4,30 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class PermissionManagementService
 {
     /**
-     * Asigna roles y permisos iniciales a un usuario
+     * Asigna roles y permisos iniciales a un usuario.
      */
     public function assignInitialPermissions(User $user, string $userType): void
     {
-        DB::transaction(function () use ($user, $userType) {
+        DB::transaction(function () use ($user, $userType): void {
             switch ($userType) {
                 case 'admin':
                     $user->assignRole('admin');
                     $user->givePermissionTo([
                         'access_admin_panel',
                         'view_reports',
-                        'manage_users'
+                        'manage_users',
                     ]);
                     break;
 
                 case 'report_viewer':
                     $user->assignRole('report_viewer');
                     $user->givePermissionTo([
-                        'view_reports'
+                        'view_reports',
                     ]);
                     break;
 
@@ -36,7 +35,7 @@ class PermissionManagementService
                     $user->assignRole('workflow_manager');
                     $user->givePermissionTo([
                         'manage_workflow',
-                        'view_reports'
+                        'view_reports',
                     ]);
                     break;
             }
@@ -44,17 +43,17 @@ class PermissionManagementService
     }
 
     /**
-     * Sincroniza los permisos de un usuario
+     * Sincroniza los permisos de un usuario.
      */
     public function syncUserPermissions(User $user, array $permissions): void
     {
-        DB::transaction(function () use ($user, $permissions) {
+        DB::transaction(function () use ($user, $permissions): void {
             $user->syncPermissions($permissions);
         });
     }
 
     /**
-     * Obtiene todos los permisos disponibles agrupados por panel
+     * Obtiene todos los permisos disponibles agrupados por panel.
      */
     public function getAvailablePermissions(): array
     {

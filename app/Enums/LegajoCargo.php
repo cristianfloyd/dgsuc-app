@@ -7,9 +7,13 @@ readonly class LegajoCargo
     public function __construct(
         public ?int $legajo = null,
         public ?int $cargo = null,
-    ) {}
+    ) {
+    }
 
-
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
 
     public function getLegajo(): int
     {
@@ -26,11 +30,6 @@ readonly class LegajoCargo
         return "{$this->legajo}-{$this->cargo}";
     }
 
-    public function __toString(): string
-    {
-        return $this->toString();
-    }
-    
     public static function from(?int $legajo = null, ?int $cargo = null): self
     {
         return new self($legajo, $cargo);
@@ -48,6 +47,6 @@ readonly class LegajoCargo
 
     public function isValid(): bool
     {
-        return !is_null($this->legajo) && !is_null($this->cargo);
+        return $this->legajo !== null && $this->cargo !== null;
     }
 }

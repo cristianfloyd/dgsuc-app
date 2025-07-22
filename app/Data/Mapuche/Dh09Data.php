@@ -5,141 +5,100 @@ declare(strict_types=1);
 namespace App\Data\Mapuche;
 
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
-use Ramsey\Uuid\Type\Integer;
-use phpDocumentor\Reflection\Types\Boolean;
+use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\Date;
+use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\StringType;
-use Spatie\LaravelData\Attributes\Validation\BooleanType;
-use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Data;
 
 class Dh09Data extends Data
 {
     public function __construct(
         #[IntegerType]
         public readonly int $nro_legaj,
-
         #[IntegerType, Nullable]
         public readonly ?int $vig_otano,
-
         #[IntegerType, Nullable]
         public readonly ?int $vig_otmes,
-
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab02,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_estcv,
-
         #[BooleanType]
         public readonly bool $sino_embargo,
-
         #[StringType(max: 1), Nullable]
         public readonly ?string $sino_otsal,
-
         #[StringType(max: 1), Nullable]
         public readonly ?string $sino_jubil,
-
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab08,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_bprev,
-
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab09,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_obsoc,
-
         #[StringType(max: 15), Nullable]
         public readonly ?string $nro_afili,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_altos,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_endjp,
-
         #[StringType(max: 20), Nullable]
         public readonly ?string $desc_envio,
-
         #[IntegerType, Nullable]
         public readonly ?int $cant_cargo,
-
         #[StringType(max: 40), Nullable]
         public readonly ?string $desc_tarea,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_regio,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_uacad,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_vtosf,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_reasf,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_defun,
-
         #[Date, Nullable]
         public readonly ?Carbon $fecha_jubilacion,
-
         #[Date, Nullable]
         public readonly ?Carbon $fecha_grado,
-
         #[IntegerType, Nullable]
         public readonly ?int $nro_agremiacion,
-
         #[Date, Nullable]
         public readonly ?Carbon $fecha_permanencia,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $ua_asigfamiliar,
-
         #[Date, Nullable]
         public readonly ?Carbon $fechadjur894,
-
         #[StringType(max: 1), Nullable]
         public readonly ?string $renunciadj894,
-
         #[Date, Nullable]
         public readonly ?Carbon $fechadechere,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $coddependesemp,
-
         #[IntegerType, Nullable]
         public readonly ?int $conyugedependiente,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_ingreso,
-
         #[StringType(max: 4), Nullable]
         public readonly ?string $codc_uacad_seguro,
-
         #[Date, Nullable]
         public readonly ?Carbon $fecha_recibo,
-
         #[StringType(max: 20), Nullable]
         public readonly ?string $tipo_norma,
-
         #[IntegerType, Nullable]
         public readonly ?int $nro_norma,
-
         #[StringType(max: 20), Nullable]
         public readonly ?string $tipo_emite,
-
         #[Date, Nullable]
         public readonly ?Carbon $fec_norma,
-
         #[BooleanType]
         public readonly bool $fuerza_reparto = false,
-    ) {}
+    ) {
+    }
 
     public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context): array
     {
@@ -184,7 +143,7 @@ class Dh09Data extends Data
             'nro_norma' => ['nullable', 'integer'],
             'tipo_emite' => ['nullable', 'string', 'max:20'],
             'fec_norma' => ['nullable', 'date'],
-            'fuerza_reparto' => ['required', 'boolean']
+            'fuerza_reparto' => ['required', 'boolean'],
         ];
     }
 

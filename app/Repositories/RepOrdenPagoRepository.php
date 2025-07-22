@@ -2,22 +2,23 @@
 
 namespace App\Repositories;
 
+use App\Contracts\RepOrdenPagoRepositoryInterface;
+use App\Models\Reportes\RepOrdenPagoModel;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use App\Models\Reportes\RepOrdenPagoModel;
-use Illuminate\Database\Eloquent\Collection;
-use App\Contracts\RepOrdenPagoRepositoryInterface;
 
 class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
     use MapucheConnectionTrait;
 
-
     public function __construct(protected RepOrdenPagoModel $model)
-    {}
+    {
+    }
+
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.
      *
@@ -31,9 +32,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             ->orderBy('codn_fuent', 'asc')
             ->orderBy('codc_uacad', 'asc');
 
-        if (is_array($nroLiquis)) {
+        if (\is_array($nroLiquis)) {
             $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (is_int(value: $nroLiquis)) {
+        } elseif (\is_int(value: $nroLiquis)) {
             $query->where(column: 'nro_liqui', operator: $nroLiquis);
         }
 
@@ -44,6 +45,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Obtiene todas las instancias de RepOrdenPagoModel junto con su unidad académica.
      *
      * @param array|int|null $nroLiquis Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
+     *
      * @return Collection La colección de instancias de RepOrdenPagoModel con su unidad académica.
      */
     public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
@@ -51,14 +53,14 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         $query = RepOrdenPagoModel::with(relations: ['unidadAcademica' => function ($query): void {
             $query->select('nro_tabla', 'desc_abrev', 'desc_item');
         }])
-        ->orderBy('banco', 'desc')
-        ->orderBy('codn_funci', 'asc')
-        ->orderBy('codn_fuent', 'asc')
-        ->orderBy('codc_uacad', 'asc');
+            ->orderBy('banco', 'desc')
+            ->orderBy('codn_funci', 'asc')
+            ->orderBy('codn_fuent', 'asc')
+            ->orderBy('codc_uacad', 'asc');
 
-        if (is_array($nroLiquis)) {
+        if (\is_array($nroLiquis)) {
             $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (is_int(value: $nroLiquis)) {
+        } elseif (\is_int(value: $nroLiquis)) {
             $query->where(column: 'nro_liqui', operator: $nroLiquis);
         }
 
@@ -69,6 +71,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Obtiene la primera instancia de RepOrdenPagoModel que coincida con el número de liquidación proporcionado.
      *
      * @param int $nroLiqui El número de liquidación a buscar.
+     *
      * @return RepOrdenPagoModel|null La primera instancia de RepOrdenPagoModel que coincida con el número de liquidación, o null si no se encuentra ninguna.
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
@@ -76,11 +79,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         return RepOrdenPagoModel::where('nro_liqui', $nroLiqui)->first();
     }
 
-
     /**
      * Crea una nueva instancia de RepOrdenPagoModel con los datos proporcionados.
      *
      * @param array $data Los datos para crear la nueva instancia.
+     *
      * @return RepOrdenPagoModel La nueva instancia creada.
      */
     public function create(array $data): RepOrdenPagoModel
@@ -88,12 +91,12 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         return RepOrdenPagoModel::create($data);
     }
 
-
     /**
      * Actualiza los datos de una instancia de RepOrdenPagoModel.
      *
      * @param RepOrdenPagoModel $repOrdenPago La instancia de RepOrdenPagoModel a actualizar.
      * @param array $data Los nuevos datos para actualizar la instancia.
+     *
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */
     public function update(RepOrdenPagoModel $repOrdenPago, array $data): bool
@@ -110,10 +113,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     }
 
     /**
-     * Trunca la tabla rep_orden_pago
+     * Trunca la tabla rep_orden_pago.
+     *
+     * @throws \Exception
      *
      * @return bool
-     * @throws \Exception
      */
     public function truncate(): bool
     {
@@ -139,35 +143,35 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     {
         try {
             if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_orden_pago')) {
-                Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table) {
-                        $table->id();
-                        $table->integer('nro_liqui');
-                        $table->integer('banco')->nullable();
-                        $table->integer('codn_funci')->nullable();
-                        $table->integer('codn_fuent')->nullable();
-                        $table->char('codc_uacad', 4)->nullable();
-                        $table->char('caracter', 4)->nullable();
-                        $table->integer('codn_progr')->nullable();
-                        $table->decimal('remunerativo',  15,  2)->default(0.00);
-                        $table->decimal('no_remunerativo', 15, 2)->default(0.00);
-                        $table->decimal('otros_no_remunerativo', 15, 2)->default(0.00);
-                        $table->decimal('bruto', 15, 2)->default(0.00);
-                        $table->decimal('descuentos', 15, 2)->default(0.00);
-                        $table->decimal('aportes', 15, 2)->default(0.00);
-                        $table->decimal('sueldo', 15, 2)->default(0.00);
-                        $table->decimal('neto', 15, 2)->default(0.00);
-                        $table->decimal('estipendio', 15, 2)->default(0.00);
-                        $table->decimal('med_resid', 15, 2)->default(0.00);
-                        $table->decimal('productividad', 15, 2)->default(0.00);
-                        $table->decimal('sal_fam', 15, 2)->default(0.00);
-                        $table->decimal('hs_extras', 15, 2)->default(0.00);
-                        $table->decimal('total', 15, 2)->default(0.00);
-                        $table->decimal('imp_gasto', 15, 2)->default(0.00);
-                        $table->timestamps();
-    
-                        // Índices
-                        $table->index('nro_liqui');
-                        $table->index('codc_uacad');
+                Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table): void {
+                    $table->id();
+                    $table->integer('nro_liqui');
+                    $table->integer('banco')->nullable();
+                    $table->integer('codn_funci')->nullable();
+                    $table->integer('codn_fuent')->nullable();
+                    $table->char('codc_uacad', 4)->nullable();
+                    $table->char('caracter', 4)->nullable();
+                    $table->integer('codn_progr')->nullable();
+                    $table->decimal('remunerativo', 15, 2)->default(0.00);
+                    $table->decimal('no_remunerativo', 15, 2)->default(0.00);
+                    $table->decimal('otros_no_remunerativo', 15, 2)->default(0.00);
+                    $table->decimal('bruto', 15, 2)->default(0.00);
+                    $table->decimal('descuentos', 15, 2)->default(0.00);
+                    $table->decimal('aportes', 15, 2)->default(0.00);
+                    $table->decimal('sueldo', 15, 2)->default(0.00);
+                    $table->decimal('neto', 15, 2)->default(0.00);
+                    $table->decimal('estipendio', 15, 2)->default(0.00);
+                    $table->decimal('med_resid', 15, 2)->default(0.00);
+                    $table->decimal('productividad', 15, 2)->default(0.00);
+                    $table->decimal('sal_fam', 15, 2)->default(0.00);
+                    $table->decimal('hs_extras', 15, 2)->default(0.00);
+                    $table->decimal('total', 15, 2)->default(0.00);
+                    $table->decimal('imp_gasto', 15, 2)->default(0.00);
+                    $table->timestamps();
+
+                    // Índices
+                    $table->index('nro_liqui');
+                    $table->index('codc_uacad');
                 });
                 Log::info('Tabla suc.rep_orden_pago creada exitosamente');
             }
@@ -180,8 +184,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
      *
-     * @return void
      * @throws \Exception
+     *
+     * @return void
      */
     public function ensureStoredProcedure(): void
     {
@@ -207,11 +212,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         try {
             // Asegurarse de que el procedimiento almacenado existe
             $this->ensureStoredProcedure();
-            
+
             // Ejecutar el procedimiento almacenado
             DB::connection($this->model->getConnectionName())
                 ->statement('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $liquidaciones) . '}']);
-                
+
             Log::info('Reporte generado exitosamente para liquidaciones: ' . implode(',', $liquidaciones));
         } catch (\Exception $e) {
             Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: ' . $e->getMessage());

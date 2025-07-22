@@ -5,16 +5,27 @@ namespace App\Enums;
 enum BloqueosEstadoEnum: string
 {
     case PENDIENTE = 'pendiente';
+
     case IMPORTADO = 'importado';
+
     case DUPLICADO = 'duplicado';
+
     case VALIDADO = 'validado';
+
     case FECHAS_COINCIDENTES = 'fechas_coincidentes';
+
     case FECHA_SUPERIOR = 'fecha_superior';
+
     case ERROR_VALIDACION = 'error_validacion';
+
     case PROCESADO = 'procesado';
+
     case ERROR_PROCESO = 'error_proceso';
+
     case LICENCIA_YA_BLOQUEADA = 'licencia_ya_bloqueada';
+
     case FALTA_CARGO_ASOCIADO = 'falta_cargo_asociado';
+
     case FECHA_CARGO_NO_COINCIDE = 'fecha_cargo_no_coincide';
 
     public function getLabel(): string

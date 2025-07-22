@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class RepEmbarazadaService
 {
     use MapucheConnectionTrait;
-
 
     /**
      * Servicio para gestionar la tabla de embarazadas.
@@ -49,7 +48,7 @@ class RepEmbarazadaService
         DB::connection($this->getConnectionName())->table('suc.rep_embarazadas')->truncate();
 
         // Ejecutamos la consulta de inserción
-        return DB::connection($this->getConnectionName())->statement("
+        return DB::connection($this->getConnectionName())->statement('
             INSERT INTO suc.rep_embarazadas (nro_legaj, apellido, nombre, cuil, codc_uacad)
             WITH embarazadas AS (
                 SELECT DISTINCT nro_legaj
@@ -71,7 +70,7 @@ class RepEmbarazadaService
             JOIN mapuche.dh01 d1 ON e.nro_legaj = d1.nro_legaj
             LEFT JOIN latest_dh03 d3 ON d3.nro_legaj = d1.nro_legaj AND d3.rn = 1
             ORDER BY 1
-        ");
+        ');
     }
 
     /**

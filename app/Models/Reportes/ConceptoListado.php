@@ -3,26 +3,26 @@
 namespace App\Models\Reportes;
 
 use App\Services\EncodingService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class ConceptoListado extends Model
 {
     use MapucheConnectionTrait;
 
-    private static $connectionInstance = null;
+    public $incrementing = false;
+
+    public $timestamps = false;
 
     protected $table = 'suc.rep_concepto_listado';
+
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    public $timestamps = false;
 
     protected $fillable = [
         'nro_liqui',
@@ -35,35 +35,27 @@ class ConceptoListado extends Model
         'cuil',
         'codc_uacad',
         'codn_conce',
-        'impp_conce'
+        'impp_conce',
     ];
-
 
     protected $appends = [
         'nombre_completo',
-        'importe_formateado'
+        'importe_formateado',
     ];
 
-    public static function boot()
+    private static $connectionInstance;
+
+    public static function boot(): void
     {
         parent::boot();
         if (static::createTableIfNotExists()) {
-            Log::info("Tabla suc.rep_concepto_listado creada exitosamente");
-        };
-    }
-
-    protected static function getMapucheConnection()
-    {
-        if (self::$connectionInstance === null) {
-            $model = new static();
-            self::$connectionInstance = $model->getConnectionFromTrait();
+            Log::info('Tabla suc.rep_concepto_listado creada exitosamente');
         }
-        return self::$connectionInstance;
     }
-
 
     /**
-     * Crea la tabla si no existe
+     * Crea la tabla si no existe.
+     *
      * @return bool
      */
     public static function createTableIfNotExists(): bool
@@ -71,7 +63,7 @@ class ConceptoListado extends Model
         $connection = static::getMapucheConnection();
         try {
             if (!Schema::connection($connection->getName())->hasTable('suc.rep_concepto_listado')) {
-                Schema::connection($connection->getName())->create('suc.rep_concepto_listado', function (Blueprint $table) {
+                Schema::connection($connection->getName())->create('suc.rep_concepto_listado', function (Blueprint $table): void {
                     $table->id();
                     $table->string('nro_liqui')->nullable();
                     $table->string('desc_liqui')->nullable();
@@ -91,17 +83,15 @@ class ConceptoListado extends Model
                     $table->index('codn_conce');
                 });
 
-                Log::info("Tabla suc.rep_concepto_listado creada exitosamente");
+                Log::info('Tabla suc.rep_concepto_listado creada exitosamente');
                 return true;
             }
         } catch (\Exception $e) {
-            Log::error("Error al crear tabla suc.rep_concepto_listado: " . $e->getMessage());
+            Log::error('Error al crear tabla suc.rep_concepto_listado: ' . $e->getMessage());
             throw $e;
         }
         return false;
     }
-
-
 
     public function getNombreCompletoAttribute()
     {
@@ -113,17 +103,15 @@ class ConceptoListado extends Model
         return number_format($this->impp_conce, 2, ',', '.');
     }
 
-
-
     // Scope para cachear resultados
     public function scopeCached($query)
     {
-        $cacheKey = "rep_concepto_listado." . md5(request()->getQueryString());
+        $cacheKey = 'rep_concepto_listado.' . md5(request()->getQueryString());
 
         return Cache::tags(['rep_concepto_listado'])->remember(
             $cacheKey,
             now()->addHours(24),
-            fn() => $query->get()
+            fn () => $query->get(),
         );
     }
 
@@ -137,7 +125,6 @@ class ConceptoListado extends Model
         return $query->where('cuil', $cuil);
     }
 
-
     public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
@@ -147,16 +134,25 @@ class ConceptoListado extends Model
     public function apellido(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn($value) => strtoupper($value),
+            get: fn ($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn ($value) => strtoupper($value),
         );
     }
 
     public function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn($value) => strtoupper($value),
+            get: fn ($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn ($value) => strtoupper($value),
         );
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 }

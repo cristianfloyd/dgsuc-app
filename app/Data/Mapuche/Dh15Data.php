@@ -10,7 +10,8 @@ class Dh15Data extends Data
         public readonly int $codn_grupo,
         public readonly string $desc_grupo,
         public readonly int $codn_tipogrupo,
-    ) {}
+    ) {
+    }
 
     public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context): array
     {

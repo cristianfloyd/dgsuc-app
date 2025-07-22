@@ -2,24 +2,23 @@
 
 namespace App\Exports\Sheets;
 
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithProperties;
-use PhpOffice\PhpSpreadsheet\Style\Protection;
 use App\Models\Reportes\DosubaSinLiquidarModel;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithProperties;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class DosubaSinLiquidarDataSheet implements
     FromQuery,
@@ -43,10 +42,10 @@ class DosubaSinLiquidarDataSheet implements
     public function properties(): array
     {
         return [
-            'creator'        => 'S.U.C. - Reportes',
-            'title'         => 'Reporte Dosuba Sin Liquidar',
-            'description'   => 'Listado de personal sin liquidar',
-            'company'       => 'UBA',
+            'creator' => 'S.U.C. - Reportes',
+            'title' => 'Reporte Dosuba Sin Liquidar',
+            'description' => 'Listado de personal sin liquidar',
+            'company' => 'UBA',
         ];
     }
 
@@ -62,15 +61,15 @@ class DosubaSinLiquidarDataSheet implements
             1 => [
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
@@ -97,8 +96,8 @@ class DosubaSinLiquidarDataSheet implements
                 $styles["A$row:$lastColumn$row"] = [
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
-                    ]
+                        'startColor' => ['rgb' => 'F2F2F2'], // Gris claro
+                    ],
                 ];
             }
         }
@@ -121,11 +120,6 @@ class DosubaSinLiquidarDataSheet implements
         ];
     }
 
-    private function formatCuil($cuil)
-    {
-        return preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $cuil);
-    }
-
     public function query()
     {
         // Convertir la colección a query
@@ -141,7 +135,7 @@ class DosubaSinLiquidarDataSheet implements
             'CUIL',
             'Unidad Académica',
             'Última Liquidación',
-            'Período'
+            'Período',
         ];
     }
 
@@ -149,19 +143,19 @@ class DosubaSinLiquidarDataSheet implements
     {
         return [
             $row->nro_legaj,
-            mb_convert_case($row->apellido, MB_CASE_TITLE, 'UTF-8'),
-            mb_convert_case($row->nombre, MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case($row->apellido, \MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case($row->nombre, \MB_CASE_TITLE, 'UTF-8'),
             $this->formatCuil($row->cuil),
             $row->codc_uacad,
             $row->ultima_liquidacion,
-            $row->periodo_fiscal
+            $row->periodo_fiscal,
         ];
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event): void {
                 try {
                     $lastRow = $event->sheet->getHighestRow();
                     $lastColumn = $event->sheet->getHighestColumn();
@@ -193,5 +187,10 @@ class DosubaSinLiquidarDataSheet implements
                 }
             },
         ];
+    }
+
+    private function formatCuil($cuil)
+    {
+        return preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $cuil);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\View\Components\Filament;
 
-use Illuminate\Contracts\View\View;
 use Filament\Support\Components\ViewComponent;
 use Filament\Support\Concerns\HasExtraAttributes;
+use Illuminate\Contracts\View\View;
 
 class PanelSwitcherModal extends ViewComponent
 {
@@ -41,6 +41,6 @@ class PanelSwitcherModal extends ViewComponent
                 'color' => 'success',
             ],
         ])//->filter(fn ($panel) => Auth::user()->hasPermissionToAccessPanel($panel['id']))
-        ->toArray();
+            ->toArray();
     }
 }

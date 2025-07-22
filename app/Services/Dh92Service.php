@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Contracts\Dh92Repository;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 class Dh92Service
@@ -27,8 +26,10 @@ class Dh92Service
      * Crea un nuevo registro con transacción.
      *
      * @param array $data
+     *
+     * @throws \Exception
+     *
      * @return mixed
-     * @throws Exception
      */
     public function createWithTransaction(array $data)
     {
@@ -37,7 +38,7 @@ class Dh92Service
             $result = $this->repository->create($data);
             DB::commit();
             return $result;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -48,8 +49,10 @@ class Dh92Service
      *
      * @param int $id
      * @param array $data
+     *
+     * @throws \Exception
+     *
      * @return bool
-     * @throws Exception
      */
     public function updateWithTransaction($id, array $data)
     {
@@ -58,7 +61,7 @@ class Dh92Service
             $result = $this->repository->update($id, $data);
             DB::commit();
             return $result;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }

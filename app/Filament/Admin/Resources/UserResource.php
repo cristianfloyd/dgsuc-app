@@ -2,20 +2,22 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Models\User;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Admin\Resources\UserResource\Pages;
+use App\Models\User;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
     protected static ?string $label = 'Usuarios';
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
@@ -45,7 +47,7 @@ class UserResource extends Resource
                     ->maxLength(255),
                 DateTimePicker::make('email_verified_at')->label('Verificado en'),
                 FileUpload::make('profile_photo_path')
-                    ->label('Foto de perfil')
+                    ->label('Foto de perfil'),
             ]);
     }
 
@@ -79,7 +81,7 @@ class UserResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -90,7 +92,6 @@ class UserResource extends Resource
                 ]),
             ]);
     }
-
 
     public static function getPages(): array
     {

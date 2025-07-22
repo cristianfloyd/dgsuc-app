@@ -2,15 +2,14 @@
 
 namespace App\Traits;
 
+use App\Services\DatabaseConnectionService;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
-use App\Services\DatabaseConnectionService;
 
 /**
- * Trait DynamicConnectionTrait
+ * Trait DynamicConnectionTrait.
  *
  * Este trait proporciona una configuración dinámica de conexión para los modelos
  * que necesitan usar la conexión seleccionada por el usuario.
@@ -30,16 +29,16 @@ trait DynamicConnectionTrait
 
         // Verificar si la conexión seleccionada existe y es válida
         if ($selectedConnection && Config::has("database.connections.{$selectedConnection}")) {
-            Log::debug("conexion seleccionada:",[""=> $selectedConnection]);
+            Log::debug('conexion seleccionada:', ['' => $selectedConnection]);
             return $selectedConnection;
         }
-        Log::debug("conexion fallback predeterminada:",[""=> DatabaseConnectionService::DEFAULT_CONNECTION]);
+        Log::debug('conexion fallback predeterminada:', ['' => DatabaseConnectionService::DEFAULT_CONNECTION]);
         // Si no hay conexión seleccionada o no es válida, usar la conexión predeterminada
         return DatabaseConnectionService::DEFAULT_CONNECTION;
     }
 
     /**
-     * Obtiene la conexión desde el trait
+     * Obtiene la conexión desde el trait.
      *
      * @return \Illuminate\Database\Connection
      */
@@ -68,7 +67,7 @@ trait DynamicConnectionTrait
     }
 
     /**
-     * Obtiene el nombre de la tabla incluyendo el esquema
+     * Obtiene el nombre de la tabla incluyendo el esquema.
      *
      * @return string
      */

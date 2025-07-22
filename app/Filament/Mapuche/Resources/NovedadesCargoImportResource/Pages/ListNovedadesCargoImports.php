@@ -2,23 +2,21 @@
 
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImportResource\Pages;
 
+use App\Filament\Mapuche\Resources\NovedadesCargoImportResource;
+use App\Services\NovedadesCargoImportTableService;
 use Filament\Actions;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use App\Services\NovedadesCargoImportTableService;
-use App\Filament\Mapuche\Resources\NovedadesCargoImportResource;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 
 class ListNovedadesCargoImports extends ListRecords
 {
-    protected static string $resource = NovedadesCargoImportResource::class;
-
     public NovedadesCargoImportTableService $service;
+
     public Collection $importData;
 
-
+    protected static string $resource = NovedadesCargoImportResource::class;
 
     public function mount(): void
     {
@@ -39,15 +37,15 @@ class ListNovedadesCargoImports extends ListRecords
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
-        };
+        }
     }
 
-    
     #[Computed]
-    public function getService():  NovedadesCargoImportTableService
+    public function getService(): NovedadesCargoImportTableService
     {
         return app(NovedadesCargoImportTableService::class);
     }
+
     protected function getHeaderActions(): array
     {
         return [

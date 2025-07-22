@@ -7,22 +7,22 @@ namespace App\Traits;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Trait para consultas complejas del modelo Embargo
+ * Trait para consultas complejas del modelo Embargo.
  */
 trait EmbargoQueries
 {
     /**
-     * Scope para embargos activos
+     * Scope para embargos activos.
      */
     public function scopeActivos(Builder $query): Builder
     {
-        return $query->whereHas('estado', function($q) {
+        return $query->whereHas('estado', function ($q): void {
             $q->where('es_activo', true);
         });
     }
 
     /**
-     * Scope para embargos por vencer
+     * Scope para embargos por vencer.
      */
     public function scopePorVencer(Builder $query, int $dias = 30): Builder
     {

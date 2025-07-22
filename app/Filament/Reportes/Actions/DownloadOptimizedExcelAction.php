@@ -4,7 +4,6 @@ namespace App\Filament\Reportes\Actions;
 
 use App\Exports\LazyReportExport;
 use Filament\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
 
 class DownloadOptimizedExcelAction extends Action
 {
@@ -36,7 +35,7 @@ class DownloadOptimizedExcelAction extends Action
                     'nro_cargo',
                     'codc_uacad',
                     'codn_conce',
-                    'impp_conce'
+                    'impp_conce',
                 ]);
 
                 return (new LazyReportExport($query))

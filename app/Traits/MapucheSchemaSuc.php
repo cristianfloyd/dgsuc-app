@@ -6,6 +6,7 @@ trait MapucheSchemaSuc
 {
     /**
      * Obtiene el nombre de la conexión de base de datos.
+     *
      * @return string
      */
     public function getConnectionName(): string
@@ -21,6 +22,6 @@ trait MapucheSchemaSuc
     public function getTable()
     {
         $table = parent::getTable();
-        return strpos($table, 'suc.') === 0 ? $table : "suc.$table";
+        return str_starts_with($table, 'suc.') ? $table : "suc.$table";
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\TableVerificationService;
+use Illuminate\Support\ServiceProvider;
 
 class TableVerificationServiceProvider extends ServiceProvider
 {
@@ -22,6 +22,6 @@ class TableVerificationServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

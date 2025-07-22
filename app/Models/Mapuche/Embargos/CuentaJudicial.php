@@ -6,12 +6,12 @@ namespace App\Models\Mapuche\Embargos;
 
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Modelo Eloquent para la tabla mapuche.emb_cuenta_judicial
+ * Modelo Eloquent para la tabla mapuche.emb_cuenta_judicial.
  *
  * @property string $nro_cuenta_judicial Número de cuenta judicial (PK)
  * @property int $codigo_sucursal Código de sucursal (PK)
@@ -30,27 +30,27 @@ class CuentaJudicial extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'mapuche.emb_cuenta_judicial';
-
-    /**
-     * Indicar que no hay una única clave primaria autoincremental
+     * Indicar que no hay una única clave primaria autoincremental.
      */
     public $incrementing = false;
 
     /**
-     * Desactivar timestamps de Laravel
+     * Desactivar timestamps de Laravel.
      */
     public $timestamps = false;
 
     /**
-     * Definir clave primaria compuesta
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'mapuche.emb_cuenta_judicial';
+
+    /**
+     * Definir clave primaria compuesta.
      */
     protected $primaryKey = ['nro_cuenta_judicial', 'codigo_sucursal', 'nroentidadbancaria'];
 
     /**
-     * Atributos que se pueden asignar masivamente
+     * Atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
         'nro_cuenta_judicial',
@@ -60,11 +60,11 @@ class CuentaJudicial extends Model
         'titular',
         'codigo_sucursal',
         'nrovalorpago',
-        'nroentidadbancaria'
+        'nroentidadbancaria',
     ];
 
     /**
-     * Casting de atributos
+     * Casting de atributos.
      */
     protected $casts = [
         'nro_cuenta_judicial' => 'string',
@@ -74,11 +74,11 @@ class CuentaJudicial extends Model
         'titular' => 'string',
         'codigo_sucursal' => 'integer',
         'nrovalorpago' => 'integer',
-        'nroentidadbancaria' => 'integer'
+        'nroentidadbancaria' => 'integer',
     ];
 
     /**
-     * Obtener la clave primaria compuesta
+     * Obtener la clave primaria compuesta.
      */
     public function getKey()
     {
@@ -90,17 +90,17 @@ class CuentaJudicial extends Model
     }
 
     /**
-     * Relación con embargos
+     * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(
             Embargo::class,
             'nro_cuenta_judicial',
-            'nro_cuenta_judicial'
+            'nro_cuenta_judicial',
         )->where([
             'codigo_sucursal' => $this->codigo_sucursal,
-            'nroentidadbancaria' => $this->nroentidadbancaria
+            'nroentidadbancaria' => $this->nroentidadbancaria,
         ]);
     }
 }

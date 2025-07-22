@@ -5,7 +5,7 @@ namespace App\Traits\Mapuche;
 trait Dh35Queries
 {
     /**
-     * Obtiene caracteres con control de planta activo
+     * Obtiene caracteres con control de planta activo.
      */
     public function scopeConControlPlanta($query)
     {
@@ -13,11 +13,11 @@ trait Dh35Queries
     }
 
     /**
-     * Obtiene caracteres ordenados por número de orden
+     * Obtiene caracteres ordenados por número de orden.
      */
     public function scopeOrdenadoPorOrden($query)
     {
         return $query->orderBy('tipo_escal')
-                    ->orderBy('nro_orden');
+            ->orderBy('nro_orden');
     }
 }

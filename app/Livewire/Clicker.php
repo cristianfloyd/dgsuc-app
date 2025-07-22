@@ -11,14 +11,16 @@ class Clicker extends Component
 {
     use WithPagination;
 
-    #[Rule(['required', 'min:5','max:100'])]
+    #[Rule(['required', 'min:5', 'max:100'])]
     public $name;
+
     #[Rule(['required', 'email', 'unique:users', 'max:255'])]
     public $email;
+
     #[Rule(['required', 'min:6'])]
     public $password;
 
-    public function createNewUser()
+    public function createNewUser(): void
     {
         $validated = $this->validate();
         User::create([
@@ -34,8 +36,8 @@ class Clicker extends Component
     {
         $users = User::orderByDesc('created_at')->paginate(5);
         // dd($users);
-        return view('livewire.clicker',[
-            'users' => $users
+        return view('livewire.clicker', [
+            'users' => $users,
         ]);
     }
 }

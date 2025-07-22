@@ -5,19 +5,33 @@ namespace App\Enums;
 enum SicossCodigoCondicion: int
 {
     case JUBILADO_DECRETO_894 = 0;
+
     case SERVICIOS_COMUNES_MAYOR_18 = 1;
+
     case JUBILADO = 2;
+
     case MENOR = 3;
+
     case MENOR_ANTERIOR = 4;
+
     case SERVICIOS_DIFERENCIADOS_MAYOR_18 = 5;
+
     case PRE_JUBILABLES = 6;
+
     case MEDIDA_NO_INNOVAR_SERV_COMUNES = 7;
+
     case MEDIDA_NO_INNOVAR_SERV_DIFERENCIADOS = 8;
+
     case JUBILADO_DECRETO_206 = 9;
+
     case PENSION_NO_SIPA = 10;
+
     case PENSION_NO_CONTRIBUTIVA = 11;
+
     case ART_8_LEY_27426 = 12;
+
     case SERVICIOS_DIFERENCIADOS_NO_ALCANZADOS = 13;
+
     case JUBILADO_DOCENTES_UNIVERSITARIOS = 14;
 
     public function descripcion(): string
@@ -42,7 +56,7 @@ enum SicossCodigoCondicion: int
     }
 
     /**
-     * Obtiene el enum a partir de un código numérico
+     * Obtiene el enum a partir de un código numérico.
      */
     public static function fromCodigo(int $codigo): ?self
     {

@@ -11,6 +11,7 @@ interface SicossReporteRepositoryInterface
      *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
+     *
      * @return Collection Colección de registros del reporte
      */
     public function getReporte(string $anio, string $mes): Collection;
@@ -20,6 +21,7 @@ interface SicossReporteRepositoryInterface
      *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
+     *
      * @return array Totales del reporte
      */
     public function getTotales(string $anio, string $mes): array;
@@ -29,6 +31,7 @@ interface SicossReporteRepositoryInterface
      *
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
+     *
      * @return bool True si existen datos para el período, false en caso contrario
      */
     public function existenDatosParaPeriodo(string $anio, string $mes): bool;

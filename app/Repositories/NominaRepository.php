@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class NominaRepository
@@ -13,6 +13,7 @@ class NominaRepository
     use MapucheConnectionTrait;
 
     protected $connection;
+
     protected $schema;
 
     public function __construct()
@@ -22,6 +23,15 @@ class NominaRepository
             $this->schema = Schema::connection($this->connection->getName());
         } catch (\Exception $e) {
             throw new \RuntimeException('No se pudo establecer la conexión a la base de datos: ' . $e->getMessage());
+        }
+    }
+
+    public function __destruct()
+    {
+        try {
+            $this->dropTemporaryTables();
+        } catch (\Exception $e) {
+            Log::error('Error al limpiar tablas temporales: ' . $e->getMessage());
         }
     }
 
@@ -43,10 +53,10 @@ class NominaRepository
                         ->orderBy('dh21.codc_uacad');
 
                     DB::connection($this->connection->getName())->statement(
-                        "CREATE TEMPORARY TABLE l AS " . $query->toSql(),
-                        $query->getBindings()
+                        'CREATE TEMPORARY TABLE l AS ' . $query->toSql(),
+                        $query->getBindings(),
                     );
-                    Log::info("Tabla l creada exitosamente", [$query->toSql(), $query->getBindings()]);
+                    Log::info('Tabla l creada exitosamente', [$query->toSql(), $query->getBindings()]);
                     DB::connection($this->connection->getName())->commit();
                 } catch (\Exception $e) {
                     DB::connection($this->connection->getName())->rollBack();
@@ -62,7 +72,7 @@ class NominaRepository
     {
         $this->dropTable('che');
 
-        $this->schema->create('che', function ($table) {
+        $this->schema->create('che', function ($table): void {
             $table->temporary();
             $table->string('codn_area')->nullable();
             $table->string('codn_subar')->nullable();
@@ -86,9 +96,9 @@ class NominaRepository
                 ->insertUsing(
                     [
                         'codn_area', 'codn_subar', 'tipo_conce', 'codn_grupo',
-                        'desc_grupo', 'sino_cheque', 'importe'
+                        'desc_grupo', 'sino_cheque', 'importe',
                     ],
-                    function ($query) use ($defaultDescription) {
+                    function ($query) use ($defaultDescription): void {
                         $query->from('l')
                             ->leftJoin('dh46', 'l.codn_conce', '=', 'dh46.cod_conce')
                             ->select([
@@ -98,11 +108,11 @@ class NominaRepository
                                 'dh46.codn_grupo',
                                 DB::raw('?::varchar as desc_grupo'),
                                 DB::raw("'S'::char(1) AS sino_cheque"),
-                                DB::raw('sum(l.impp_conce::NUMERIC) as importe')
+                                DB::raw('sum(l.impp_conce::NUMERIC) as importe'),
                             ])
                             ->groupBy('l.codn_area', 'l.codn_subar', 'l.tipo_conce', 'dh46.codn_grupo')
                             ->setBindings([$defaultDescription]);
-                    }
+                    },
                 );
 
             DB::connection($this->connection->getName())->commit();
@@ -161,6 +171,12 @@ class NominaRepository
             ->toArray();
     }
 
+    public function dropTemporaryTables(): void
+    {
+        $this->dropTable('l');
+        $this->dropTable('che');
+    }
+
     protected function updateImportesNegativos(): void
     {
         DB::connection($this->connection->getName())
@@ -173,21 +189,6 @@ class NominaRepository
     {
         if ($this->schema->hasTable($table)) {
             $this->schema->drop($table);
-        }
-    }
-
-    public function dropTemporaryTables(): void
-    {
-        $this->dropTable('l');
-        $this->dropTable('che');
-    }
-
-    public function __destruct()
-    {
-        try {
-            $this->dropTemporaryTables();
-        } catch (\Exception $e) {
-            Log::error('Error al limpiar tablas temporales: ' . $e->getMessage());
         }
     }
 }

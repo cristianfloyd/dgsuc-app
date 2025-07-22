@@ -26,7 +26,6 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action as TableAction;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -43,31 +42,46 @@ class SicossControles extends Page implements HasTable
     use InteractsWithTable {
         InteractsWithTable::getTable insteadof MapucheConnectionTrait;
     }
+
     // use SicossConnectionTrait;
     use HasSicossControlTables;
     use MapucheConnectionTrait {
         MapucheConnectionTrait::getTable as getMapucheTable;
     }
 
+    public $selectedConnection;
+
+    public $availableConnections = [];
+
+    public $activeTab = 'resumen';
+
+    public $resultadosControles;
+
+    public $cachedStats;
+
+    public $loading = false;
+
+    public $record;
+
+    public $search = '';
+
+    public $year;
+
+    public $month;
+
+    public $conceptosSeleccionados = [];
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
-    protected static ?string $navigationGroup = 'SICOSS';
-    protected static string $view = 'filament.afip.pages.sicoss-controles';
-    protected static ?string $title = 'Controles SICOSS';
-    protected static ?string $slug = 'afip/sicoss-controles';
-    protected static ?string $panel = 'afip';
 
-    public $selectedConnection = null;
-    public $availableConnections = [];
-    public $activeTab = 'resumen';
-    public $resultadosControles = null;
-    public $cachedStats = null;
-    public $loading = false;
-    public $record = null;
-    public $search = '';
-    public $year;
-    public $month;
-    public $conceptosSeleccionados = [];
+    protected static ?string $navigationGroup = 'SICOSS';
+
+    protected static string $view = 'filament.afip.pages.sicoss-controles';
+
+    protected static ?string $title = 'Controles SICOSS';
+
+    protected static ?string $slug = 'afip/sicoss-controles';
+
+    protected static ?string $panel = 'afip';
 
     protected PeriodoFiscalService $periodoFiscalService;
 
@@ -76,15 +90,7 @@ class SicossControles extends Page implements HasTable
         $this->periodoFiscalService = $periodoFiscalService;
     }
 
-    private function conexionesDisponibles(): array
-    {
-        return collect(config('database.connections'))
-            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
-            ->mapWithKeys(fn($config, $name) => [$name => $name])
-            ->all();
-    }
-
-    public function mount()
+    public function mount(): void
     {
         $this->availableConnections = $this->conexionesDisponibles();
 
@@ -98,7 +104,7 @@ class SicossControles extends Page implements HasTable
         $this->conceptosSeleccionados = array_merge(
             ConceptosSicossEnum::getAllAportesCodes(),
             ConceptosSicossEnum::getAllContribucionesCodes(),
-            ConceptosSicossEnum::getContribucionesArtCodes()
+            ConceptosSicossEnum::getContribucionesArtCodes(),
         );
     }
 
@@ -150,7 +156,7 @@ class SicossControles extends Page implements HasTable
                 'diferenciasAportes' => number_format($diferenciasAportes, 2, ',', '.'),
                 'diferenciasContribuciones' => number_format($diferenciasContribuciones, 2, ',', '.'),
                 'totalCuils' => $this->getDiferenciasCount(),
-                'totalDependencias' => $this->getDependenciasCount()
+                'totalDependencias' => $this->getDependenciasCount(),
             ])->render();
 
             // Invalidamos el caché después de ejecutar los controles
@@ -168,14 +174,14 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Resumen')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $this->activeTab = 'resumen'),
+                        ->action(fn () => $this->activeTab = 'resumen'),
                 ])
                 ->persistent()
                 ->send();
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de controles SICOSS', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -190,7 +196,7 @@ class SicossControles extends Page implements HasTable
     }
 
     /**
-     * Obtiene los datos de conteos almacenados en la sesión
+     * Obtiene los datos de conteos almacenados en la sesión.
      */
     public function getConteosData(): ?array
     {
@@ -198,7 +204,7 @@ class SicossControles extends Page implements HasTable
     }
 
     /**
-     * Verifica si hay datos de conteos disponibles
+     * Verifica si hay datos de conteos disponibles.
      */
     public function hasConteosData(): bool
     {
@@ -206,7 +212,7 @@ class SicossControles extends Page implements HasTable
     }
 
     /**
-     * Calcula la diferencia entre DH21 y SICOSS Cálculos
+     * Calcula la diferencia entre DH21 y SICOSS Cálculos.
      */
     public function getDiferenciaConteos(): int
     {
@@ -218,39 +224,9 @@ class SicossControles extends Page implements HasTable
         return abs($conteos['dh21aporte'] - $conteos['sicoss_calculos']);
     }
 
-    /**
-     * Obtiene los datos para la vista de resumen
-     */
-    protected function getViewData(): array
-    {
-        $data = [
-            'tabs' => [
-                'resumen' => 'Resumen',
-                'diferencias_aportes' => 'Diferencias por Aportes',
-                'diferencias_contribuciones' => 'Diferencias por Contribuciones',
-                'diferencias_cuils' => 'CUILs no encontrados',
-                'conceptos' => 'Conceptos por Período',
-            ],
-        ];
-
-        // Agregar datos de conteos si están disponibles
-        if ($this->hasConteosData()) {
-            $data['conteos'] = $this->getConteosData();
-            $data['diferencia_conteos'] = $this->getDiferenciaConteos();
-        }
-
-        return $data;
-    }
-
     public function formatMoney($value): string
     {
         return '$ ' . number_format($value, 2, ',', '.');
-    }
-
-    protected function hasResults(): bool
-    {
-        return $this->resultadosControles !== null &&
-            isset($this->resultadosControles['aportes_contribuciones']);
     }
 
     public function getDiferenciasCount(): int
@@ -263,77 +239,7 @@ class SicossControles extends Page implements HasTable
         if (!$this->hasResults()) {
             return 0;
         }
-        return count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
-    }
-
-    protected function getResumenStats(): array
-    {
-        try {
-            return cache()->remember('sicoss_resumen_stats', now()->addMinutes(5), function () {
-                // Creamos la tabla temporal primero
-                $service = app(SicossControlService::class);
-                $service->setConnection($this->getConnectionName());
-                $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
-                $this->year = $periodoFiscal['year'];
-                $this->month = $periodoFiscal['month'];
-                $service->crearTablaDH21Aportes($this->year, $this->month);
-
-                $data = [
-                    'totales' => [
-                        'cuils_procesados' => ControlAportesDiferencia::count(),
-                        'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-                        'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
-                    ],
-                    'diferencias_por_dependencia' => app(SicossControlService::class)
-                        ->setConnection($this->getConnectionName())
-                        ->getDiferenciasPorDependencia(),
-                    'totales_monetarios' => [
-                        'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
-                        'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
-                    ],
-                    'comparacion_931' => [
-                        'aportes' => [
-                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
-                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
-                                ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
-                        ],
-                        'contribuciones' => [
-                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
-                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
-                        ],
-                    ],
-                    'cuils_no_encontrados' => [
-                        'en_dh21' => DB::connection($this->getConnectionName())
-                            ->table('dh21aporte')
-                            ->whereNotIn('cuil', function ($query) {
-                                $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
-                            })
-                            ->count(),
-                        'en_sicoss' => DB::connection($this->getConnectionName())
-                            ->table('suc.afip_mapuche_sicoss_calculos')
-                            ->whereNotIn('cuil', function ($query) {
-                                $query->select('cuil')->from('dh21aporte');
-                            })
-                            ->count(),
-                    ],
-                ];
-
-                return $data;
-            });
-        } catch (\Exception $e) {
-            logger()->error('Error obteniendo resumen stats:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            Notification::make()
-                ->danger()
-                ->title('Error cargando resumen')
-                ->body('No se pudieron cargar los datos del resumen.')
-                ->send();
-
-            return [];
-        }
+        return \count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
     }
 
     public function table(Table $table): Table
@@ -365,164 +271,18 @@ class SicossControles extends Page implements HasTable
             ->columns($this->getColumnsForActiveTab())
             ->when(
                 $this->activeTab !== 'diferencias_cuils' && $this->activeTab !== 'conceptos',
-                fn(Table $table) =>
-                $table->defaultSort('diferencia', 'desc')
+                fn (Table $table) =>
+                $table->defaultSort('diferencia', 'desc'),
             )
             ->when(
                 $this->activeTab === 'conceptos',
-                fn(Table $table) => $table->defaultSort('codn_conce', 'asc')
+                fn (Table $table) => $table->defaultSort('codn_conce', 'asc'),
             )
             ->striped()
             ->defaultPaginationPageOption(5)
             ->paginated([5, 10, 25, 50, 100])
             ->searchable()
             ->actions($this->getTableActions());
-    }
-
-    protected function getTableActions(): array
-    {
-        return match ($this->activeTab) {
-            'diferencias_aportes' => [
-                TableAction::make('view_aportes')
-                    ->label('Ver detalles')
-                    ->icon('heroicon-m-eye')
-                    ->modalContent(function ($record): View {
-                            return view('filament.afip.pages.partials.sicoss-detalle-aportes-modal', [
-                            'record' => $record,
-                            'sicossCalculo' => $record->sicossCalculo,
-                            'relacionActiva' => $record->relacionActiva,
-                            'dh01' => $record->dh01,
-                            ]);
-                    })
-                    ->modalHeading(fn($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
-            ],
-            'diferencias_contribuciones' => [
-                TableAction::make('view_contribuciones')
-                    ->label('Ver detalles')
-                    ->icon('heroicon-m-eye')
-                    ->modalContent(function ($record): View {
-                            return view('filament.afip.pages.partials.sicoss-detalle-contribuciones-modal', [
-                            'record' => $record,
-                            'sicossCalculo' => $record->sicossCalculo,
-                            'relacionActiva' => $record->relacionActiva,
-                            'dh01' => $record->dh01,
-                            ]);
-                    })
-                    ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
-            ],
-            'diferencias_cuils' => [
-                TableAction::make('view_cuils')
-                    ->label('Ver detalles')
-                    ->icon('heroicon-m-eye')
-                    ->modalContent(function ($record): View {
-                            return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
-                            'record' => $record,
-                            ]);
-                    })
-                    ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
-            ],
-            'conceptos' => [
-                TableAction::make('view_conceptos')
-                    ->label('Ver detalles')
-                    ->icon('heroicon-m-eye')
-                    ->modalContent(function ($record): View {
-                            return view('filament.afip.pages.partials.sicoss-detalle-conceptos-modal', [
-                            'record' => $record,
-                            ]);
-                    })
-                    ->modalHeading(fn($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
-            ],
-            default => [],
-        };
-    }
-
-    protected function getColumnsForActiveTab(): array
-    {
-        if ($this->activeTab === 'diferencias_cuils') {
-            return $this->getDiferenciasCuilsColumns();
-        }
-
-        if ($this->activeTab === 'diferencias_aportes') {
-            return $this->getAportesColumns();
-        }
-
-        if ($this->activeTab === 'diferencias_contribuciones') {
-            return $this->getContribucionesColumns();
-        }
-
-        if ($this->activeTab === 'diferencias_art') {
-            return $this->getArtColumns();
-        }
-
-        if ($this->activeTab === 'conceptos') {
-            return $this->getConceptosColumns();
-        }
-
-        return [];
-    }
-
-    protected function getHeaderActions(): array
-    {
-        // Acciones base según la pestaña activa
-        $actions = match ($this->activeTab) {
-            'diferencias_aportes' => [
-                EjecutarControlAportesAction::make()
-                    ->withPeriodBadge(),
-            ],
-            'diferencias_contribuciones' => [
-                EjecutarControlContribucionesAction::make()->withPeriodBadge(),
-            ],
-            'diferencias_cuils' => [
-                EjecutarControlCuilsAction::make()->withPeriodBadge(),
-            ],
-            'conceptos' => [
-                EjecutarControlConceptosAction::make()->withPeriodBadge(),
-            ],
-            default => [
-                Action::make('ejecutarControles')
-                    ->label('Ejecutar los Controles')
-                    ->icon('heroicon-o-play')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
-                    ->action(function () {
-                            $this->ejecutarControles();
-                    })
-            ],
-        };
-
-        // Agregar acciones comunes
-        // if ($this->activeTab !== 'conceptos') {
-        //     $actions[] = Action::make('ejecutarControlConceptos')
-        //         ->label('Control de Conceptos')
-        //         ->icon('heroicon-o-document-text')
-        //         ->color('gray')
-        //         ->action(function () {
-        //             $this->ejecutarControlConceptos();
-        //         });
-        // }
-
-        // Agregar acción de conteo a todas las pestañas
-        $actions[] = Action::make('ejecutarControlConteos')
-            ->label('Control de Conteos')
-            ->icon('heroicon-o-list-bullet')
-            ->color('gray')
-            ->action(function () {
-                $this->ejecutarControlConteos();
-            });
-
-        // Agregar acción de exportar a todas las pestañas
-        $actions[] = Action::make('export')
-            ->label('Exportar')
-            ->icon('heroicon-o-arrow-down-tray')
-            ->action(function () {
-                return $this->exportActiveTable();
-            })
-            ->disabled(fn() => false);
-
-        return $actions;
     }
 
     public function ejecutarControlAportes(): void
@@ -675,7 +435,7 @@ class SicossControles extends Page implements HasTable
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de control de conteos', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -718,11 +478,11 @@ class SicossControles extends Page implements HasTable
             // Ejecutar la consulta
             $resultados = DB::connection($connection)
                 ->table(DB::raw('(SELECT * FROM mapuche.dh21 UNION ALL SELECT * FROM mapuche.dh21h) as h21'))
-                ->join('mapuche.dh12 as h12', function ($join) {
+                ->join('mapuche.dh12 as h12', function ($join): void {
                     $join->on('h21.codn_conce', '=', 'h12.codn_conce');
                 })
                 ->whereIn('h21.codn_conce', $conceptos)
-                ->whereIn('h21.nro_liqui', function ($query) {
+                ->whereIn('h21.nro_liqui', function ($query): void {
                     $query->select('d22.nro_liqui')
                         ->from('mapuche.dh22 as d22')
                         ->where('d22.sino_genimp', true)
@@ -778,14 +538,14 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $this->activeTab = 'conceptos'),
+                        ->action(fn () => $this->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();
         } catch (\Exception $e) {
             logger()->error('Error en ejecución de control de conceptos', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -815,10 +575,261 @@ class SicossControles extends Page implements HasTable
         $this->record = null;
     }
 
-    public function cargarResumen()
+    public function cargarResumen(): void
     {
         $this->cachedStats = $this->getResumenStats();
         $this->dispatch('resumen-loaded');
+    }
+
+    public function buscar(): void
+    {
+        $this->dispatch('buscar', search: $this->search);
+    }
+
+    /**
+     * Obtiene los datos para la vista de resumen.
+     */
+    protected function getViewData(): array
+    {
+        $data = [
+            'tabs' => [
+                'resumen' => 'Resumen',
+                'diferencias_aportes' => 'Diferencias por Aportes',
+                'diferencias_contribuciones' => 'Diferencias por Contribuciones',
+                'diferencias_cuils' => 'CUILs no encontrados',
+                'conceptos' => 'Conceptos por Período',
+            ],
+        ];
+
+        // Agregar datos de conteos si están disponibles
+        if ($this->hasConteosData()) {
+            $data['conteos'] = $this->getConteosData();
+            $data['diferencia_conteos'] = $this->getDiferenciaConteos();
+        }
+
+        return $data;
+    }
+
+    protected function hasResults(): bool
+    {
+        return $this->resultadosControles !== null &&
+            isset($this->resultadosControles['aportes_contribuciones']);
+    }
+
+    protected function getResumenStats(): array
+    {
+        try {
+            return cache()->remember('sicoss_resumen_stats', now()->addMinutes(5), function () {
+                // Creamos la tabla temporal primero
+                $service = app(SicossControlService::class);
+                $service->setConnection($this->getConnectionName());
+                $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
+                $this->year = $periodoFiscal['year'];
+                $this->month = $periodoFiscal['month'];
+                $service->crearTablaDH21Aportes($this->year, $this->month);
+
+                $data = [
+                    'totales' => [
+                        'cuils_procesados' => ControlAportesDiferencia::count(),
+                        'cuils_con_diferencias_aportes' => ControlAportesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
+                        'cuils_con_diferencias_contribuciones' => ControlContribucionesDiferencia::where(DB::raw('ABS(diferencia)'), '>', 1)->count(),
+                    ],
+                    'diferencias_por_dependencia' => app(SicossControlService::class)
+                        ->setConnection($this->getConnectionName())
+                        ->getDiferenciasPorDependencia(),
+                    'totales_monetarios' => [
+                        'diferencia_aportes' => ControlAportesDiferencia::sum('diferencia'),
+                        'diferencia_contribuciones' => ControlContribucionesDiferencia::sum('diferencia'),
+                    ],
+                    'comparacion_931' => [
+                        'aportes' => [
+                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('aportesijpdh21 + aporteinssjpdh21')),
+                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')
+                                ->sum(DB::raw('aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re')),
+                        ],
+                        'contribuciones' => [
+                            'dh21' => DB::connection($this->getConnectionName())->table('dh21aporte')->sum(DB::raw('contribucionsijpdh21 + contribucioninssjpdh21')),
+                            'sicoss' => DB::connection($this->getConnectionName())->table('suc.afip_mapuche_sicoss_calculos')->sum(DB::raw('contribucionsijp + contribucioninssjp')),
+                        ],
+                    ],
+                    'cuils_no_encontrados' => [
+                        'en_dh21' => DB::connection($this->getConnectionName())
+                            ->table('dh21aporte')
+                            ->whereNotIn('cuil', function ($query): void {
+                                $query->select('cuil')->from('suc.afip_mapuche_sicoss_calculos');
+                            })
+                            ->count(),
+                        'en_sicoss' => DB::connection($this->getConnectionName())
+                            ->table('suc.afip_mapuche_sicoss_calculos')
+                            ->whereNotIn('cuil', function ($query): void {
+                                $query->select('cuil')->from('dh21aporte');
+                            })
+                            ->count(),
+                    ],
+                ];
+
+                return $data;
+            });
+        } catch (\Exception $e) {
+            logger()->error('Error obteniendo resumen stats:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Error cargando resumen')
+                ->body('No se pudieron cargar los datos del resumen.')
+                ->send();
+
+            return [];
+        }
+    }
+
+    protected function getTableActions(): array
+    {
+        return match ($this->activeTab) {
+            'diferencias_aportes' => [
+                TableAction::make('view_aportes')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-m-eye')
+                    ->modalContent(function ($record): View {
+                        return view('filament.afip.pages.partials.sicoss-detalle-aportes-modal', [
+                            'record' => $record,
+                            'sicossCalculo' => $record->sicossCalculo,
+                            'relacionActiva' => $record->relacionActiva,
+                            'dh01' => $record->dh01,
+                        ]);
+                    })
+                    ->modalHeading(fn ($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
+                    ->modalWidth(MaxWidth::SevenExtraLarge),
+            ],
+            'diferencias_contribuciones' => [
+                TableAction::make('view_contribuciones')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-m-eye')
+                    ->modalContent(function ($record): View {
+                        return view('filament.afip.pages.partials.sicoss-detalle-contribuciones-modal', [
+                            'record' => $record,
+                            'sicossCalculo' => $record->sicossCalculo,
+                            'relacionActiva' => $record->relacionActiva,
+                            'dh01' => $record->dh01,
+                        ]);
+                    })
+                    ->modalHeading(fn ($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
+                    ->modalWidth(MaxWidth::SevenExtraLarge),
+            ],
+            'diferencias_cuils' => [
+                TableAction::make('view_cuils')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-m-eye')
+                    ->modalContent(function ($record): View {
+                        return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
+                            'record' => $record,
+                        ]);
+                    })
+                    ->modalHeading(fn ($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
+                    ->modalWidth(MaxWidth::SevenExtraLarge),
+            ],
+            'conceptos' => [
+                TableAction::make('view_conceptos')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-m-eye')
+                    ->modalContent(function ($record): View {
+                        return view('filament.afip.pages.partials.sicoss-detalle-conceptos-modal', [
+                            'record' => $record,
+                        ]);
+                    })
+                    ->modalHeading(fn ($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
+                    ->modalWidth(MaxWidth::SevenExtraLarge),
+            ],
+            default => [],
+        };
+    }
+
+    protected function getColumnsForActiveTab(): array
+    {
+        if ($this->activeTab === 'diferencias_cuils') {
+            return $this->getDiferenciasCuilsColumns();
+        }
+
+        if ($this->activeTab === 'diferencias_aportes') {
+            return $this->getAportesColumns();
+        }
+
+        if ($this->activeTab === 'diferencias_contribuciones') {
+            return $this->getContribucionesColumns();
+        }
+
+        if ($this->activeTab === 'diferencias_art') {
+            return $this->getArtColumns();
+        }
+
+        if ($this->activeTab === 'conceptos') {
+            return $this->getConceptosColumns();
+        }
+
+        return [];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        // Acciones base según la pestaña activa
+        $actions = match ($this->activeTab) {
+            'diferencias_aportes' => [
+                EjecutarControlAportesAction::make()
+                    ->withPeriodBadge(),
+            ],
+            'diferencias_contribuciones' => [
+                EjecutarControlContribucionesAction::make()->withPeriodBadge(),
+            ],
+            'diferencias_cuils' => [
+                EjecutarControlCuilsAction::make()->withPeriodBadge(),
+            ],
+            'conceptos' => [
+                EjecutarControlConceptosAction::make()->withPeriodBadge(),
+            ],
+            default => [
+                Action::make('ejecutarControles')
+                    ->label('Ejecutar los Controles')
+                    ->icon('heroicon-o-play')
+                    ->badge(fn () => \sprintf('%d-%02d', $this->year, $this->month))
+                    ->action(function (): void {
+                        $this->ejecutarControles();
+                    }),
+            ],
+        };
+
+        // Agregar acciones comunes
+        // if ($this->activeTab !== 'conceptos') {
+        //     $actions[] = Action::make('ejecutarControlConceptos')
+        //         ->label('Control de Conceptos')
+        //         ->icon('heroicon-o-document-text')
+        //         ->color('gray')
+        //         ->action(function () {
+        //             $this->ejecutarControlConceptos();
+        //         });
+        // }
+
+        // Agregar acción de conteo a todas las pestañas
+        $actions[] = Action::make('ejecutarControlConteos')
+            ->label('Control de Conteos')
+            ->icon('heroicon-o-list-bullet')
+            ->color('gray')
+            ->action(function (): void {
+                $this->ejecutarControlConteos();
+            });
+
+        // Agregar acción de exportar a todas las pestañas
+        $actions[] = Action::make('export')
+            ->label('Exportar')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->action(function () {
+                return $this->exportActiveTable();
+            })
+            ->disabled(fn () => false);
+
+        return $actions;
     }
 
     protected function getHeaderWidgets(): array
@@ -828,7 +839,7 @@ class SicossControles extends Page implements HasTable
         ];
         if ($this->activeTab === 'conceptos') {
             $widgets[] = \App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget::make([
-                'conceptosSeleccionados' => $this->conceptosSeleccionados ?? []
+                'conceptosSeleccionados' => $this->conceptosSeleccionados ?? [],
             ]);
         }
         return $widgets;
@@ -867,7 +878,7 @@ class SicossControles extends Page implements HasTable
                 'class' => ResumenDependenciasExport::class,
                 'filename' => 'resumen-diferencias-dependencias',
                 'title' => 'Diferencias por Dependencia',
-                'data' => collect($this->getResumenStats()['diferencias_por_dependencia'])
+                'data' => collect($this->getResumenStats()['diferencias_por_dependencia']),
             ],
             'diferencias_aportes' => [
                 'class' => AportesDiferenciasExport::class,
@@ -875,7 +886,7 @@ class SicossControles extends Page implements HasTable
                 'title' => 'Diferencias por Aportes',
                 'data' => ControlAportesDiferencia::query()
                     ->with(['sicossCalculo', 'relacionActiva', 'dh01'])
-                    ->get()
+                    ->get(),
             ],
             'diferencias_contribuciones' => [
                 'class' => ContribucionesDiferenciasExport::class,
@@ -883,13 +894,13 @@ class SicossControles extends Page implements HasTable
                 'title' => 'Diferencias por Contribuciones',
                 'data' => ControlContribucionesDiferencia::query()
                     ->with(['sicossCalculo', 'relacionActiva', 'dh01'])
-                    ->get()
+                    ->get(),
             ],
             'diferencias_cuils' => [
                 'class' => CuilsDiferenciasExport::class,
                 'filename' => 'diferencias-cuils',
                 'title' => 'CUILs no encontrados',
-                'data' => ControlCuilsDiferencia::query()->get()
+                'data' => ControlCuilsDiferencia::query()->get(),
             ],
             'conceptos' => [
                 'class' => ConceptosExport::class,
@@ -898,7 +909,7 @@ class SicossControles extends Page implements HasTable
                 'data' => ControlConceptosPeriodo::query()
                     ->where('year', $this->year)
                     ->where('month', $this->month)
-                    ->get()
+                    ->get(),
             ],
             default => null
         };
@@ -913,12 +924,12 @@ class SicossControles extends Page implements HasTable
         }
 
         // Construir el nombre del archivo con la extensión explícita
-        $filename = sprintf(
+        $filename = \sprintf(
             '%s-%d-%02d-%s.xlsx',
             $data['filename'],
             $this->year,
             $this->month,
-            now()->format('Ymd-His')
+            now()->format('Ymd-His'),
         );
 
         // Crear la instancia del exportador con los parámetros adicionales
@@ -932,12 +943,15 @@ class SicossControles extends Page implements HasTable
         return Excel::download(
             $exporter,
             $filename,
-            \Maatwebsite\Excel\Excel::XLSX
+            \Maatwebsite\Excel\Excel::XLSX,
         );
     }
 
-    public function buscar()
+    private function conexionesDisponibles(): array
     {
-        $this->dispatch('buscar', search: $this->search);
+        return collect(config('database.connections'))
+            ->filter(fn ($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->mapWithKeys(fn ($config, $name) => [$name => $name])
+            ->all();
     }
 }

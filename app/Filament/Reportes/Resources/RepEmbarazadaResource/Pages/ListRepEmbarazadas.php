@@ -2,10 +2,10 @@
 
 namespace App\Filament\Reportes\Resources\RepEmbarazadaResource\Pages;
 
-use Filament\Actions;
-use App\Services\RepEmbarazadaService;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Reportes\Resources\RepEmbarazadaResource;
+use App\Services\RepEmbarazadaService;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
 
 class ListRepEmbarazadas extends ListRecords
 {

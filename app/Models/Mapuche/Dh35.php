@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Mapuche\Dh35Queries;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo para la tabla de Caracteres y Escalafones
+ * Modelo para la tabla de Caracteres y Escalafones.
  *
  * @property string $tipo_escal Tipo de Escalafón
  * @property string $codc_carac Código de Carácter
@@ -27,13 +27,13 @@ class Dh35 extends Model
     use HasFactory;
     use Dh35Queries;
 
-    protected $table = 'mapuche.dh35';
-
     public $timestamps = false;
 
-    protected $primaryKey = ['tipo_escal', 'codc_carac'];
-
     public $incrementing = false;
+
+    protected $table = 'mapuche.dh35';
+
+    protected $primaryKey = ['tipo_escal', 'codc_carac'];
 
     protected $fillable = [
         'tipo_escal',
@@ -45,7 +45,7 @@ class Dh35 extends Model
         'controlcargos',
         'controlhoras',
         'controlpuntos',
-        'caracter_concursado'
+        'caracter_concursado',
     ];
 
     protected $casts = [
@@ -58,11 +58,11 @@ class Dh35 extends Model
         'controlcargos' => 'integer',
         'controlhoras' => 'integer',
         'controlpuntos' => 'integer',
-        'caracter_concursado' => 'boolean'
+        'caracter_concursado' => 'boolean',
     ];
 
     /**
-     * Scope para filtrar por tipo de escalafón
+     * Scope para filtrar por tipo de escalafón.
      */
     public function scopeTipoEscalafon($query, string $tipoEscal)
     {
@@ -70,7 +70,7 @@ class Dh35 extends Model
     }
 
     /**
-     * Scope para caracteres concursados
+     * Scope para caracteres concursados.
      */
     public function scopeConcursados($query)
     {

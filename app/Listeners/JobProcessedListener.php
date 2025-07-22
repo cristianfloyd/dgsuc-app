@@ -3,10 +3,8 @@
 namespace App\Listeners;
 
 use App\Jobs\ImportAfipRelacionesActivasJob;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Events\JobProcessed;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class JobProcessedListener
 {
@@ -15,7 +13,7 @@ class JobProcessedListener
      */
     public function __construct()
     {
-        //
+
     }
 
     /**

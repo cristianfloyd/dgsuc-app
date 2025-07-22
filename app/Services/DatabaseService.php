@@ -2,38 +2,25 @@
 
 namespace app\Services;
 
-use PDO;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Contracts\DatabaseServiceInterface;
 use App\Models\AfipRelacionesActivas;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\LazyCollection;
-use App\Contracts\DatabaseServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\LazyCollection;
 
 class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
-
-    private static $connectionInstance = null;
     private const DEFAULT_CHUNK_SIZE = 1000;
 
-
-
-
-    protected static function getMapucheConnection(): PDO
-    {
-        if (self::$connectionInstance === null) {
-            $model = new static;
-            self::$connectionInstance = $model->getConnectionFromTrait();
-        }
-        return self::$connectionInstance;
-    }
+    private static $connectionInstance;
 
     /** Inserta datos de manera masiva en la base de datos.
      *
      * @param array $datosMapeados Un arreglo de datos que se insertarán en la base de datos.
+     *
      * @return bool Retorna true si la inserción fue exitosa, de lo contrario, false.
      */
     public function insertarDatosMasivos(array $datosMapeados): bool
@@ -49,7 +36,7 @@ class DatabaseService implements DatabaseServiceInterface
                 // Divide la colección en lotes del tamaño especificado
                 ->chunk($tamanoLote)
                 // Inserta cada lote en la base de datos
-                ->each(function ($lote) {
+                ->each(function ($lote): void {
                     AfipRelacionesActivas::insert($lote->toArray());
                 });
 
@@ -59,7 +46,7 @@ class DatabaseService implements DatabaseServiceInterface
             // Registra un mensaje de éxito en el log
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Revierte la transacción en caso de error
             DB::rollBack();
             // Registra un mensaje de error en el log
@@ -71,6 +58,7 @@ class DatabaseService implements DatabaseServiceInterface
     /** Inserta datos de manera masiva en la base de datos utilizando una conexión específica.
      *
      * @param array $datosMapeados Los datos que se desean insertar.
+     *
      * @return bool Retorna true si la inserción fue exitosa, false en caso contrario.
      */
     public function insertarDatosMasivos2(array $datosMapeados): bool
@@ -84,10 +72,10 @@ class DatabaseService implements DatabaseServiceInterface
             // Divide los datos en lotes y los inserta
             foreach (array_chunk($datosMapeados, $tamanoLote) as $lote) {
                 // Crea los placeholders para la consulta
-                $placeholders = implode(',', array_fill(0, count($lote[0]), '?'));
+                $placeholders = implode(',', array_fill(0, \count($lote[0]), '?'));
 
                 // Construye la consulta de inserción
-                $query = "INSERT INTO afip_relaciones_activas (" . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";
+                $query = 'INSERT INTO afip_relaciones_activas (' . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";
 
                 // Prepara la consulta
                 $statement = $connection->prepare($query);
@@ -102,7 +90,7 @@ class DatabaseService implements DatabaseServiceInterface
 
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $connection->rollBack(); // Revierte la transacción en caso de error
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
             return false;
@@ -121,6 +109,7 @@ class DatabaseService implements DatabaseServiceInterface
      * @param Collection $mappedData La colección de datos mapeados que se desean insertar.
      * @param string $tableName El nombre de la tabla donde se insertarán los datos.
      * @param int $chunkSize El tamaño de los lotes en los que se dividirán los datos. Por defecto es 1000.
+     *
      * @return array Un array con información sobre el resultado de la inserción.
      */
     public function insertBulkData(Collection $mappedData, string $tableName, int $chunkSize = self::DEFAULT_CHUNK_SIZE): array
@@ -132,7 +121,7 @@ class DatabaseService implements DatabaseServiceInterface
             return [
                 'success' => false,
                 'message' => "No se encontraron datos para insertar en la tabla: $tableName",
-                'data' => ['tableName' => $tableName, 'connection' => $conexion]
+                'data' => ['tableName' => $tableName, 'connection' => $conexion],
             ];
         }
 
@@ -141,7 +130,7 @@ class DatabaseService implements DatabaseServiceInterface
         try {
             DB::connection($conexion)->beginTransaction();
 
-            $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted) {
+            $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted): void {
                 $processedChunk = $chunk->map(function ($data) {
                     return collect($data)->except('id')->toArray();
                 });
@@ -155,14 +144,14 @@ class DatabaseService implements DatabaseServiceInterface
             Log::info("Se insertaron $rowInserted filas en la tabla: $tableName");
             return [
                 'success' => true,
-                'message' => "Inserción completada con éxito",
+                'message' => 'Inserción completada con éxito',
                 'data' => [
                     'tableName' => $tableName,
                     'connection' => $conexion,
-                    'rowsInserted' => $rowInserted
-                ]
+                    'rowsInserted' => $rowInserted,
+                ],
             ];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos en ' . $tableName . ': ' . $e->getMessage());
             return [
@@ -171,12 +160,11 @@ class DatabaseService implements DatabaseServiceInterface
                 'data' => [
                     'tableName' => $tableName,
                     'connection' => $conexion,
-                    'error' => $e->getMessage()
-                ]
+                    'error' => $e->getMessage(),
+                ],
             ];
         }
     }
-
 
     /** Mapea los datos de una línea al modelo AfipRelacionesActivas.
      *
@@ -184,11 +172,21 @@ class DatabaseService implements DatabaseServiceInterface
      * que sigue la estructura del modelo AfipRelacionesActivas.
      *
      * @param array $linea Los datos que se desean mapear.
+     *
      * @return array Los datos mapeados al modelo.
      */
     public function mapearDatosAlModelo(array $linea): array
     {
         return AfipRelacionesActivas::mapearDatosAlModelo($linea);
+    }
+
+    protected static function getMapucheConnection(): \PDO
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 
     private function sanitizeData($data)

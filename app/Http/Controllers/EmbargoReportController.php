@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\Reportes\EmbargoReportService;
+use Illuminate\Http\Request;
 
 class EmbargoReportController extends Controller
 {

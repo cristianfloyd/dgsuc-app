@@ -5,10 +5,15 @@ namespace App\Enums;
 enum PuestoDesempenado: string
 {
     case DIRECTIVO = '1120';
+
     case PROFESOR_UNIVERSITARIO = '2310';
+
     case PROFESOR_SECUNDARIO = '2320';
+
     case NODOCENTE = '4190';
+
     case MEDICO = '2221';
+
     case ENFERMERO = '2230';
 
     public function descripcion(): string
@@ -27,10 +32,10 @@ enum PuestoDesempenado: string
     {
         return match($this) {
             self::DIRECTIVO => 'Autoridades Superiores',
-            self::PROFESOR_UNIVERSITARIO, 
+            self::PROFESOR_UNIVERSITARIO,
             self::PROFESOR_SECUNDARIO => 'Docentes',
             self::NODOCENTE => 'NoDocentes',
-            self::MEDICO, 
+            self::MEDICO,
             self::ENFERMERO => 'Asistenciales',
         };
     }

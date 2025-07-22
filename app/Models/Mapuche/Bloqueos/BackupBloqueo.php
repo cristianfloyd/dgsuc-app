@@ -7,18 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class BackupBloqueo extends Model
 {
     /**
-     * La tabla asociada con el modelo.
-     *
-     * @var string
-     */
-    protected $table = 'dh03_backup_bloqueos';
-
-    /**
      * Indica si el modelo debe ser timestamped.
      *
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * La tabla asociada con el modelo.
+     *
+     * @var string
+     */
+    protected $table = 'dh03_backup_bloqueos';
 
     /**
      * Los atributos que son asignables en masa.

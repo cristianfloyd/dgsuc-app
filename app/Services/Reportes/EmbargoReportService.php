@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services\Reportes;
@@ -28,7 +29,7 @@ class EmbargoReportService
             EmbargoReportModel::cleanOldRecords();
 
             $results = $connection->query()
-                ->fromSub(function ($query) {
+                ->fromSub(function ($query): void {
                     $query->from('mapuche.emb_embargo as e')
                         ->select([
                             'e.nro_legaj',
@@ -36,15 +37,15 @@ class EmbargoReportService
                             'e.codn_conce',
                             'e.nro_embargo',
                             DB::connection($this->getConnectionName())->raw("CONCAT(e.nro_embargo, '-', e.nro_oficio) as detallenovedad"),
-                            'e.caratula'
+                            'e.caratula',
                         ]);
                 }, 'embargos')
-                ->join('mapuche.dh03 as d', function ($join) {
+                ->join('mapuche.dh03 as d', function ($join): void {
                     $join->on('d.nro_legaj', '=', 'embargos.nro_legaj')
                         ->where('d.chkstopliq', '=', 0)
                         ->whereNotNull('d.nro_legaj');
                 })
-                ->Join('mapuche.dh21 as d2', function ($join) use ($nro_liqui) {
+                ->Join('mapuche.dh21 as d2', function ($join) use ($nro_liqui): void {
                     $join->on('d2.nro_legaj', '=', 'embargos.nro_legaj')
                         ->on('d2.nro_cargo', '=', 'd.nro_cargo')
                         ->on('d2.codn_conce', '=', 'embargos.codn_conce')
@@ -64,7 +65,7 @@ class EmbargoReportService
                     'd2.nov2_conce',
                     'embargos.nro_embargo',
                     'embargos.detallenovedad',
-                    'd2.nro_liqui'
+                    'd2.nro_liqui',
                 ])
                 ->where('d2.nro_liqui', '=', $nro_liqui)
                 ->distinct()
@@ -95,14 +96,14 @@ class EmbargoReportService
                     'nro_cargo',
                     DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::REMUNERATIVO->value . ' THEN impp_conce ELSE 0 END) as remunerativo'),
                     DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::CONCEPTO_860->value . ' THEN impp_conce ELSE 0 END) as concepto_860'),
-                    DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::CONCEPTO_861->value . ' THEN impp_conce ELSE 0 END) as concepto_861')
+                    DB::raw('SUM(CASE WHEN codn_conce = ' . ConceptosEmbargoEnum::CONCEPTO_861->value . ' THEN impp_conce ELSE 0 END) as concepto_861'),
                 )
                 ->whereIn('nro_legaj', $embargos->pluck('nro_legaj')->unique())
                 ->whereIn('nro_cargo', $embargos->pluck('nro_cargo')->unique())
                 ->where('nro_liqui', $nro_liqui)
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->get()
-                ->keyBy(fn($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
+                ->keyBy(fn ($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
 
             // Agregar los conceptos adicionales al resultado
             $embargos = $embargos->map(function ($item) use ($conceptosAdicionales) {
@@ -122,14 +123,14 @@ class EmbargoReportService
         } catch (\Exception $e) {
             Log::error('Error generando reporte de embargos', [
                 'error' => $e->getMessage(),
-                'nro_liqui' => $nro_liqui
+                'nro_liqui' => $nro_liqui,
             ]);
             throw $e;
         }
     }
 
     /**
-     * Obtiene los embargos activos con sus relaciones
+     * Obtiene los embargos activos con sus relaciones.
      */
     public function getActiveEmbargos(): Collection
     {
@@ -137,29 +138,24 @@ class EmbargoReportService
             ->with([
                 'datosPersonales',
                 'tipoEmbargo',
-                'datosPersonales.dh03'
+                'datosPersonales.dh03',
             ])
             // ->whereIn('nro_legaj', [149639,159300,164859])
             ->get();
     }
 
-
-
-
-
-
     /**
      * Obtiene los datos de los embargos agrupados por legajo.
      *
-     * @param Collection $embargos  Colección de embargos.
-     * @param int        $nro_liqui Número de liquidación.
+     * @param Collection $embargos Colección de embargos.
+     * @param int $nro_liqui Número de liquidación.
      *
-     * @return Collection   Colección de datos de embargos, donde cada elemento
-     *                      representa un embargo con su información asociada,
-     *                      incluyendo el número de legajo, nombre completo,
-     *                      código de concepto, importe descontado, 
-     *                      número de embargo, número de cargo, 
-     *                      carátula y código de unidad académica.
+     * @return Collection Colección de datos de embargos, donde cada elemento
+     *                    representa un embargo con su información asociada,
+     *                    incluyendo el número de legajo, nombre completo,
+     *                    código de concepto, importe descontado,
+     *                    número de embargo, número de cargo,
+     *                    carátula y código de unidad académica.
      */
     public function getEmbargos(Collection $embargos, int $nro_liqui)
     {
@@ -180,7 +176,7 @@ class EmbargoReportService
                             'caratula' => $embargo->caratula,
                             'codc_uacad' => $embargo->datosPersonales->dh03()
                                 ->where('nro_cargo', $importe->nro_cargo)
-                                ->value('codc_uacad')
+                                ->value('codc_uacad'),
                         ];
                     });
                 })->flatten(1);

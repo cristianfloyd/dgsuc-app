@@ -10,15 +10,19 @@ class EstadoLiquidacion extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'estado_liquidacion';
-    protected $primaryKey = 'cod_estado_liquidacion';
     public $incrementing = false;
+
     public $timestamps = false;
+
+    protected $table = 'estado_liquidacion';
+
+    protected $primaryKey = 'cod_estado_liquidacion';
+
     protected $keyType = 'string';
 
     protected $fillable = [
         'cod_estado_liquidacion',
-        'desc_estado_liquidacion'
+        'desc_estado_liquidacion',
     ];
 
     public function liquidaciones()

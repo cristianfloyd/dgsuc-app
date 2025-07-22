@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\EmployeeServiceInterface;
+use App\Contracts\FileProcessorInterface;
+use App\Contracts\TransactionServiceInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\UploadedFile;
-use Illuminate\Console\Command;
 use App\Services\ColumnMetadata;
 use App\Services\ValidationService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use App\Contracts\FileProcessorInterface;
-use App\Contracts\EmployeeServiceInterface;
-use App\Contracts\WorkflowServiceInterface;
-use App\Contracts\TransactionServiceInterface;
 
 class ImportAfipRelacionesActivas extends Command
 {
@@ -19,7 +19,7 @@ class ImportAfipRelacionesActivas extends Command
      *
      * @var string
      */
-    protected $signature =  'afip:import {uploadedFileId}';
+    protected $signature = 'afip:import {uploadedFileId}';
 
     /**
      * The console command description.
@@ -28,12 +28,16 @@ class ImportAfipRelacionesActivas extends Command
      */
     protected $description = 'Importa las relaciones activas desde un archivo AFIP.';
 
-
     protected $fileProcessor;
+
     protected $employeeService;
+
     protected $validationService;
+
     protected $transactionService;
+
     protected $workflowService;
+
     protected $columnMetadata;
 
     public function __construct(
@@ -42,7 +46,7 @@ class ImportAfipRelacionesActivas extends Command
         ValidationService $validationService,
         TransactionServiceInterface $transactionService,
         WorkflowServiceInterface $workflowService,
-        ColumnMetadata $columnMetadata
+        ColumnMetadata $columnMetadata,
     ) {
         parent::__construct();
         // ... (Asignar las dependencias a las propiedades)
@@ -53,10 +57,11 @@ class ImportAfipRelacionesActivas extends Command
         $this->workflowService = $workflowService;
         $this->columnMetadata = $columnMetadata;
     }
+
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $uploadedFileId = $this->argument('uploadedFileId'); // Obtener el ID del archivo
         Log::info('Importando archivo con ID: ' . $uploadedFileId);
@@ -69,14 +74,14 @@ class ImportAfipRelacionesActivas extends Command
             $currentStep = $this->workflowService->getCurrentStep($processLog);
             $this->workflowService->updateStep($processLog, $currentStep, 'in_progress');
 
-            $this->transactionService->executeInTransaction(function () use ($uploadedFile) {
+            $this->transactionService->executeInTransaction(function () use ($uploadedFile): void {
                 // 3. Validar el archivo
                 $this->validationService->validateSelectedFile($uploadedFile);
 
                 // 4. Procesar el archivo
                 $processedLines = $this->fileProcessor->processFile(
                     $uploadedFile,
-                    $this->columnMetadata->getWidths()
+                    $this->columnMetadata->getWidths(),
                 );
 
                 // 5. Guardar las líneas procesadas

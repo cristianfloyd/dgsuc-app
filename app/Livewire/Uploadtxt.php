@@ -2,57 +2,72 @@
 
 namespace App\Livewire;
 
-use Exception;
-use Livewire\Component;
-use Illuminate\Support\Str;
-use App\Models\Mapuche\Dh22;
-use App\Models\UploadedFile;
-use App\Models\OrigenesModel;
-use Livewire\WithFileUploads;
-use App\Services\UploadService;
-use Illuminate\Support\Facades\DB;
-use App\Services\FileUploadService;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use App\Services\FileProcessingService;
-use App\Contracts\WorkflowServiceInterface;
-use App\Contracts\OrigenRepositoryInterface;
-use Illuminate\Validation\ValidationException;
-use Filament\Forms\Concerns\InteractsWithForms;
 use App\Contracts\FileUploadRepositoryInterface;
-
+use App\Contracts\OrigenRepositoryInterface;
+use App\Contracts\WorkflowServiceInterface;
+use App\Models\Mapuche\Dh22;
+use App\Models\OrigenesModel;
+use App\Models\UploadedFile;
+use App\Services\FileProcessingService;
+use App\Services\FileUploadService;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Uploadtxt extends Component implements HasForms
 {
     use WithFileUploads;
     use InteractsWithForms;
 
-
     public $archivotxt;
+
     public $archivotxtAfip;
+
     public $archivotxtMapuche;
+
     public $headers = [];
+
     public $importaciones;
+
     public $archivoModel = [];
+
     public $file_path;
+
     public $periodo_fiscal;
+
     public $origenes = ['afip', 'mapuche'];
+
     public $selectedOrigen;
+
     public $showUploadForm = false;
-    public $nextStepUrl = null;
+
+    public $nextStepUrl;
+
     public $processId;
+
     public $showButtonProcessFiles = false;
+
     public int $selectedLiquidacion;
 
     protected $workflowService;
-    protected $processLog;
-    protected $currentStep;
-    private $fileUploadRepository;
-    private $origenRepository;
-    private $fileUploadService;
-    private $fileProcessingService;
 
+    protected $processLog;
+
+    protected $currentStep;
+
+    private $fileUploadRepository;
+
+    private $origenRepository;
+
+    private $fileUploadService;
+
+    private $fileProcessingService;
 
     /**
      * Constructor del componente.
@@ -62,7 +77,6 @@ class Uploadtxt extends Component implements HasForms
      * @param OrigenRepositoryInterface $origenRepository
      * @param FileUploadService $fileUploadService
      * @param FileProcessingService $file
-     *
      */
     public function boot(
         WorkflowServiceInterface $workflowService,
@@ -70,7 +84,7 @@ class Uploadtxt extends Component implements HasForms
         OrigenRepositoryInterface $origenRepository,
         FileUploadService $fileUploadService,
         FileProcessingService $file,
-    ) {
+    ): void {
         $this->workflowService = $workflowService;
         $this->fileUploadRepository = $fileUploadRepository;
         $this->origenRepository = $origenRepository;
@@ -80,7 +94,7 @@ class Uploadtxt extends Component implements HasForms
         $this->checkCurrentStep();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->importaciones = $this->fileUploadRepository->all();
         $this->origenes = OrigenesModel::all();
@@ -97,29 +111,27 @@ class Uploadtxt extends Component implements HasForms
      * 2. Obtiene el paso actual en el flujo de trabajo utilizando el WorkflowService.
      * 3. Establece la propiedad 'showUploadForm' en función de si el paso actual es 'subir_archivo_afip' o 'subir_archivo_mapuche'.
      * 4. Establece la propiedad 'nextStepUrl' con la URL del siguiente paso en el flujo de trabajo.
+     *
      * @return void
      */
     public function checkCurrentStep(): void
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->showUploadForm = in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
+        $this->showUploadForm = \in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
         $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
         $this->checkShowButtonProcessFiles();
     }
 
-    public function saveAfip()
+    public function saveAfip(): void
     {
         $this->save('afip');
     }
 
-    public function saveMapuche()
+    public function saveMapuche(): void
     {
         $this->save('mapuche');
     }
-
-
-
 
     /**
      * Guarda un archivo cargado en la base de datos y actualiza el flujo de trabajo.
@@ -138,16 +150,17 @@ class Uploadtxt extends Component implements HasForms
 
             // Verifica el orden de subidaa de archivos
             if ($origen == 'mapuche' && !$this->fileUploadRepository->existsByOrigen('afip')) {
-                throw new Exception('Primero debe cargar el archivo de AFIP');
+                throw new \Exception('Primero debe cargar el archivo de AFIP');
             }
 
             // 1. Cargar el archivo en el servidor
             $filePath = $this->fileUploadService->uploadFile(
-                $origen === 'afip' ? $this->archivotxtAfip : $this->archivotxtMapuche, 'afiptxt'
+                $origen === 'afip' ? $this->archivotxtAfip : $this->archivotxtMapuche,
+                'afiptxt',
             );
 
             if (!$filePath) {
-                throw new Exception('Error al cargar el archivo en el servidor.');
+                throw new \Exception('Error al cargar el archivo en el servidor.');
             }
 
 
@@ -155,7 +168,7 @@ class Uploadtxt extends Component implements HasForms
 
             $origenModel = $this->origenRepository->findByName($origen);
             if (!$origenModel) {
-                throw new Exception("No se encontró el origen '{$origen}'.");
+                throw new \Exception("No se encontró el origen '{$origen}'.");
             }
 
             $uploadedFile = $this->fileUploadRepository->create([
@@ -171,37 +184,129 @@ class Uploadtxt extends Component implements HasForms
             ]);
 
             if (!$uploadedFile) {
-                throw new Exception('Error al guardar la información del archivo en la base de datos.');
+                throw new \Exception('Error al guardar la información del archivo en la base de datos.');
             }
 
             // 3. Actualizar el flujo de trabajo y redirigir
             $this->updateWorkflowAndRedirect($origen);
 
-            if($this->fileUploadRepository->existsByOrigen('afip'))
-            {
-                log::info("Archivo AFIP cargado correctamente");
-            }
-            elseif ($this->fileUploadRepository->existsByOrigen('mapuche'))
-            {
-                log::info("Archivo MAPACHE cargado correctamente");
+            if ($this->fileUploadRepository->existsByOrigen('afip')) {
+                log::info('Archivo AFIP cargado correctamente');
+            } elseif ($this->fileUploadRepository->existsByOrigen('mapuche')) {
+                log::info('Archivo MAPACHE cargado correctamente');
             }
 
             // 4. Procesar los archivos si ambos han sido cargados
             if ($this->fileUploadRepository->existsByOrigen('afip') && $this->fileUploadRepository->existsByOrigen('mapuche')) {
                 $fileAfip = UploadedFile::where('origen', 'afip')->latest()->first();
                 $fileMapuche = UploadedFile::where('origen', 'mapuche')->latest()->first();
-                Log::info("Ambos archivos han sido cargados. Iniciando procesamiento...");
+                Log::info('Ambos archivos han sido cargados. Iniciando procesamiento...');
 
                 $this->showButtonProcessFiles = true;
 
-                if ($fileAfip->process_id == $fileMapuche->process_id){
+                if ($fileAfip->process_id == $fileMapuche->process_id) {
                     Log::info('UUID iguales, redirigiendo');
                     $this->handleNextStep(); // Redirige solo si ambos archivos han sido cargados
                 }
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->handleException($e);
         }
+    }
+
+    public function processFiles(): void
+    {
+        Log::info('uploadtxt->processFiles');
+        $this->fileProcessingService->processFiles();
+    }
+
+    public function checkShowButtonProcessFiles(): void
+    {
+        // Verificar si ambos archivos han sido subidos
+        $afipFile = UploadedFile::where('origen', 'afip')->latest()->first();
+        $mapucheFile = UploadedFile::where('origen', 'mapuche')->latest()->first();
+
+        if ($afipFile && $mapucheFile && $afipFile->process_id == $mapucheFile->process_id) {
+            $this->showButtonProcessFiles = true;
+        } else {
+            $this->showButtonProcessFiles = false;
+        }
+    }
+
+    public function deleteFile($fileId): void
+    {
+        try {
+            DB::transaction(function () use ($fileId): void {
+                $file = $this->fileUploadRepository->findOrFail($fileId);
+                $this->deleteFileAndRecord($file);
+            });
+            $this->handleSuccessfulDeletion();
+        } catch (\Exception $e) {
+            $this->dispatch('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function updatedImportaciones(): void
+    {
+
+    }
+
+    public function render()
+    {
+        Log::debug('Renderizando componente Uploadtxt', [
+            'selectedLiquidacion' => $this->selectedLiquidacion ?? 'no seleccionada',
+        ]);
+        if ($this->showUploadForm) {
+            return view('livewire.uploadtxt');
+        }
+        return view('livewire.uploadtxtcompleted', [
+            'redirectUrl' => $this->nextStepUrl,
+        ]);
+
+    }
+
+    protected function getFormSchema(): array
+    {
+        $options = Dh22::query()
+            ->definitiva()
+            ->orderBy('nro_liqui', 'desc')
+            ->limit(12)
+            ->get();
+
+        Log::debug('Liquidaciones encontradas:', [
+            'count' => $options->count(),
+            'liquidaciones' => $options->map(fn ($liq) => [
+                'nro_liqui' => $liq->nro_liqui,
+                'desc_liqui' => $liq->desc_liqui,
+            ])->toArray(),
+        ]);
+
+        return [
+            Select::make('selectedLiquidacion')
+                ->label('Liquidación')
+                ->options(function () use ($options) {
+                    $mappedOptions = $options->mapWithKeys(function ($liquidacion) {
+                        $option = "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}";
+                        Log::debug('Opción generada:', [
+                            'nro_liqui' => $liquidacion->nro_liqui,
+                            'option' => $option,
+                        ]);
+                        return [$liquidacion->nro_liqui => $option];
+                    })->toArray();
+
+                    Log::debug('Opciones finales del selector:', $mappedOptions);
+                    return $mappedOptions;
+                })
+                ->searchable()
+                ->preload()
+                ->required()
+                ->placeholder('Seleccione una liquidación')
+                ->helperText('Seleccione la liquidación definitiva correspondiente')
+                ->columnSpanFull()
+                ->afterStateUpdated(function ($state): void {
+                    Log::debug('Liquidación seleccionada:', ['selectedLiquidacion' => $state]);
+                }),
+        ];
     }
 
     /**
@@ -214,7 +319,7 @@ class Uploadtxt extends Component implements HasForms
      *
      * @return void
      */
-    private function validateAndPrepare($origen)
+    private function validateAndPrepare($origen): void
     {
         Log::debug("uploadtxt->validateAndPrepare, Paso actual: {$origen}");
 
@@ -233,26 +338,6 @@ class Uploadtxt extends Component implements HasForms
         Log::info("uploadtxt->validateAndPrepare, Paso actual: {$this->currentStep}");
     }
 
-    public function processFiles(): void
-    {
-        Log::info("uploadtxt->processFiles");
-        $this->fileProcessingService->processFiles();
-    }
-
-    public function checkShowButtonProcessFiles(): void
-    {
-        // Verificar si ambos archivos han sido subidos
-        $afipFile = UploadedFile::where('origen', 'afip')->latest()->first();
-        $mapucheFile = UploadedFile::where('origen', 'mapuche')->latest()->first();
-
-        if ($afipFile && $mapucheFile && $afipFile->process_id == $mapucheFile->process_id) {
-            $this->showButtonProcessFiles = true;
-        } else {
-            $this->showButtonProcessFiles = false;
-        }
-    }
-
-
     /**
      * Valida los datos de entrada antes de procesar el archivo.
      *
@@ -262,6 +347,7 @@ class Uploadtxt extends Component implements HasForms
      * - Verifica que el archivo no supere los 20MB de tamaño.
      *
      * @param string $origen El origen del archivo a validar ('afip' o 'mapuche').
+     *
      * @return void
      */
     private function validateInput($origen): void
@@ -284,10 +370,12 @@ class Uploadtxt extends Component implements HasForms
      * Actualiza el paso actual del flujo de trabajo, restablece el formulario y maneja el siguiente paso.
      *
      * Esta función se encarga de completar el paso actual del flujo de trabajo, restablecer los campos del formulario a sus valores predeterminados y redirigir al usuario al siguiente paso del flujo de trabajo, si lo hay.
+     *
      * @param string $name
+     *
      * @return void
      */
-    private function updateWorkflowAndRedirect($origen)
+    private function updateWorkflowAndRedirect($origen): void
     {
         $this->updateWorkflowStep($origen);
         // $this->resetForm($origen);
@@ -298,10 +386,12 @@ class Uploadtxt extends Component implements HasForms
      * Restablece los campos del formulario a sus valores predeterminados.
      *
      * Esta función se encarga de restablecer los campos del formulario, como el archivo cargado, el período fiscal y la ruta del archivo, y también restablece la validación del formulario.
+     *
      * @param string $name
+     *
      * @return void
      */
-    private function resetForm($origen)
+    private function resetForm($origen): void
     {
         switch ($origen) {
             case 'afip':
@@ -326,15 +416,14 @@ class Uploadtxt extends Component implements HasForms
      *
      * @return void
      */
-    private function updateWorkflowStep($origen)
+    private function updateWorkflowStep($origen): void
     {
         $stepToComplete = $origen == 'afip' ? 'subir_archivo_afip' : 'subir_archivo_mapuche';
         $this->workflowService->completeStep($this->processLog, $stepToComplete);
         Log::info("Paso completado updateWorkflowStep(): {$stepToComplete}");
     }
 
-
-    private function handleNextStep()
+    private function handleNextStep(): void
     {
         $nextStep = $this->workflowService->getNextStep($this->currentStep);
         if ($nextStep) {
@@ -351,10 +440,11 @@ class Uploadtxt extends Component implements HasForms
      * Dependiendo del tipo de excepción, se envía un evento al frontend con el tipo de error y el mensaje de error correspondiente.
      * También se registra el error en el log de la aplicación.
      *
-     * @param Exception $e La excepción que se produjo.
+     * @param \Exception $e La excepción que se produjo.
+     *
      * @return void
      */
-    private function handleException(Exception $e)
+    private function handleException(\Exception $e): void
     {
         $errorType = $e instanceof ValidationException ? 'validationError' : 'fileUploadError';
         $errorMessage = $e instanceof ValidationException ? $e->errors() : $e->getMessage();
@@ -362,96 +452,18 @@ class Uploadtxt extends Component implements HasForms
         Log::error("Error en save(): {$e->getMessage()}");
     }
 
-
-
-
-    public function deleteFile($fileId)
-    {
-        try {
-            DB::transaction(function () use ($fileId) {
-                $file = $this->fileUploadRepository->findOrFail($fileId);
-                $this->deleteFileAndRecord($file);
-            });
-            $this->handleSuccessfulDeletion();
-        } catch (Exception $e) {
-            $this->dispatch('error', 'Error: ' . $e->getMessage());
-        }
-    }
-
-    private function deleteFileAndRecord($file)
+    private function deleteFileAndRecord($file): void
     {
         if (!$this->fileUploadService->deleteFile($file->file_path)) {
-            throw new Exception('Error al eliminar el archivo del servidor.');
+            throw new \Exception('Error al eliminar el archivo del servidor.');
         }
         $this->fileUploadRepository->delete($file);
     }
 
-    private function handleSuccessfulDeletion()
+    private function handleSuccessfulDeletion(): void
     {
         $this->dispatch('success', 'Archivo eliminado correctamente.');
         $this->dispatch('fileDeleted');
         $this->importaciones = $this->fileUploadRepository->all();
-    }
-    public function updatedImportaciones()
-    {
-        //
-    }
-
-    protected function getFormSchema(): array
-    {
-        $options = Dh22::query()
-            ->definitiva()
-            ->orderBy('nro_liqui', 'desc')
-            ->limit(12)
-            ->get();
-
-        Log::debug('Liquidaciones encontradas:', [
-            'count' => $options->count(),
-            'liquidaciones' => $options->map(fn($liq) => [
-                'nro_liqui' => $liq->nro_liqui,
-                'desc_liqui' => $liq->desc_liqui
-            ])->toArray()
-        ]);
-
-        return [
-            Select::make('selectedLiquidacion')
-                ->label('Liquidación')
-                ->options(function () use ($options) {
-                    $mappedOptions = $options->mapWithKeys(function ($liquidacion) {
-                        $option = "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}";
-                        Log::debug("Opción generada:", [
-                            'nro_liqui' => $liquidacion->nro_liqui,
-                            'option' => $option
-                        ]);
-                        return [$liquidacion->nro_liqui => $option];
-                    })->toArray();
-
-                    Log::debug('Opciones finales del selector:', $mappedOptions);
-                    return $mappedOptions;
-                })
-                ->searchable()
-                ->preload()
-                ->required()
-                ->placeholder('Seleccione una liquidación')
-                ->helperText('Seleccione la liquidación definitiva correspondiente')
-                ->columnSpanFull()
-                ->afterStateUpdated(function ($state) {
-                    Log::debug('Liquidación seleccionada:', ['selectedLiquidacion' => $state]);
-                })
-        ];
-    }
-
-    public function render()
-    {
-        Log::debug('Renderizando componente Uploadtxt', [
-            'selectedLiquidacion' => $this->selectedLiquidacion ?? 'no seleccionada'
-        ]);
-        if ( $this->showUploadForm) {
-            return view('livewire.uploadtxt');
-        } else {
-            return view('livewire.uploadtxtcompleted', [
-                'redirectUrl' => $this->nextStepUrl,
-            ]);
-        }
     }
 }

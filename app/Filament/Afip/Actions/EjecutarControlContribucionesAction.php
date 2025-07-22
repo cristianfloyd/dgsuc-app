@@ -7,11 +7,6 @@ use Filament\Actions\Action;
 
 class EjecutarControlContribucionesAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'ejecutar_control_contribuciones';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -27,16 +22,21 @@ class EjecutarControlContribucionesAction extends Action
             ->action(function (): void {
                 app(SicossControlActionHandler::class)->ejecutarControl(
                     'contribuciones',
-                    $this->getLivewire()
+                    $this->getLivewire(),
                 );
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'ejecutar_control_contribuciones';
     }
 
     public function withPeriodBadge(): static
     {
         return $this->badge(function () {
             $livewire = $this->getLivewire();
-            return sprintf('%d-%02d', $livewire->year, $livewire->month);
+            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
 }

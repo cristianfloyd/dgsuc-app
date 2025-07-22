@@ -2,29 +2,29 @@
 
 namespace App\Services\Afip;
 
-use Illuminate\Support\Facades\Log;
-use App\Data\Sicoss\SicossProcessData;
-use App\Traits\MapucheConnectionTrait;
+use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
-use App\Contracts\DatabaseOperationInterface;
+use App\Data\Sicoss\SicossProcessData;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Log;
 
 class SicossLegacy
 {
     use MapucheConnectionTrait;
 
     protected string $codc_reparto;
-    protected array $archivos = [];
 
+    protected array $archivos = [];
 
     /**
      * Create a new class instance.
@@ -41,18 +41,17 @@ class SicossLegacy
         protected SicossLegajoFilterRepositoryInterface $sicossLegajoFilterRepository,
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected SicossOrchestatorRepositoryInterface $sicossOrchestatorRepository,
-        protected DatabaseOperationInterface $databaseOperation
-    ) {}
+        protected DatabaseOperationInterface $databaseOperation,
+    ) {
+    }
 
-
-
-    public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = FALSE)
+    public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = false)
     {
         try {
 
             Log::info('Iniciando generación de SICOSS', [
                 'datos' => $datos,
-                'retornar_datos' => $retornar_datos
+                'retornar_datos' => $retornar_datos,
             ]);
 
             // 1. Crear el DTO con los datos recibidos
@@ -77,10 +76,10 @@ class SicossLegacy
 
             // 6. Generar filtros básicos usando el nuevo repositorio
             $filtros = $this->sicossConfigurationRepository->generarFiltrosBasicos($datos);
-            $opcion_retro   = $filtros['opcion_retro'];
-            $filtro_legajo  = $filtros['filtro_legajo'];
-            $where          = $filtros['where'];
-            $where_periodo  = $filtros['where_periodo'];
+            $opcion_retro = $filtros['opcion_retro'];
+            $filtro_legajo = $filtros['filtro_legajo'];
+            $where = $filtros['where'];
+            $where_periodo = $filtros['where_periodo'];
 
             // 7. Limpiar tablas temporales previas antes de iniciar el proceso
             $this->limpiarTablasTemporales();
@@ -107,7 +106,7 @@ class SicossLegacy
                 $filtros,
                 $path,
                 $licencias_agentes,
-                $retornar_datos
+                $retornar_datos,
             );
 
             // dd($totales); // Hasta aca se comprobaron los totales y salen correctos
@@ -118,7 +117,7 @@ class SicossLegacy
             $resultado = $this->sicossOrchestatorRepository->procesarResultadoFinal(
                 $totales,
                 $testeo_directorio_salida,
-                $testeo_prefijo_archivos
+                $testeo_prefijo_archivos,
             );
 
             return $resultado;
@@ -126,7 +125,7 @@ class SicossLegacy
             Log::error('Error en generación de SICOSS', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'datos' => $datos
+                'datos' => $datos,
             ]);
 
             // Limpiar tablas temporales en caso de error
@@ -137,12 +136,13 @@ class SicossLegacy
     }
 
     /**
-     * Procesa los conceptos liquidados según los parámetros
+     * Procesa los conceptos liquidados según los parámetros.
      *
      * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
      * @param int $per_mesct Mes del período
      * @param string $where Condición WHERE base
+     *
      * @return void
      */
     protected function procesarConceptosLiquidados(SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where): void
@@ -162,16 +162,17 @@ class SicossLegacy
         } catch (\Exception $e) {
             Log::error('Error al procesar conceptos liquidados', [
                 'error' => $e->getMessage(),
-                'periodo' => "{$per_mesct}/{$per_anoct}"
+                'periodo' => "{$per_mesct}/{$per_anoct}",
             ]);
             throw $e;
         }
     }
 
     /**
-     * Obtiene las licencias de agentes remuneradas y no remuneradas
+     * Obtiene las licencias de agentes remuneradas y no remuneradas.
      *
      * @param string $where Condición WHERE
+     *
      * @return array Array combinado de licencias
      */
     protected function obtenerLicenciasAgentes(string $where): array
@@ -183,26 +184,23 @@ class SicossLegacy
             $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
 
             Log::info('Licencias de agentes obtenidas', [
-                'no_remuneradas' => count($licencias_agentes_no_remunem),
-                'remuneradas' => count($licencias_agentes_remunem),
-                'total' => count($licencias_agentes)
+                'no_remuneradas' => \count($licencias_agentes_no_remunem),
+                'remuneradas' => \count($licencias_agentes_remunem),
+                'total' => \count($licencias_agentes),
             ]);
 
             return $licencias_agentes;
 
         } catch (\Exception $e) {
             Log::error('Error al obtener licencias de agentes', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
     }
 
-
-
-
     /**
-     * Limpia todas las tablas temporales utilizadas en el proceso
+     * Limpia todas las tablas temporales utilizadas en el proceso.
      *
      * @return void
      */
@@ -212,7 +210,7 @@ class SicossLegacy
             // Lista de tablas temporales a limpiar
             $tablas_temporales = [
                 'pre_conceptos_liquidados',
-                'conceptos_liquidados'
+                'conceptos_liquidados',
             ];
 
             foreach ($tablas_temporales as $tabla) {
@@ -222,7 +220,7 @@ class SicossLegacy
                 } catch (\Exception $e) {
                     // Ignorar errores si la tabla no existe
                     Log::debug("Tabla temporal no existía o no se pudo eliminar: {$tabla}", [
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
                 }
             }
@@ -231,24 +229,25 @@ class SicossLegacy
 
         } catch (\Exception $e) {
             Log::error('Error general al limpiar tablas temporales', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             // No relanzamos la excepción para no interrumpir el flujo principal
         }
     }
 
     /**
-     * Procesa el resultado final según los parámetros de testing
+     * Procesa el resultado final según los parámetros de testing.
      *
      * @param array $totales Totales calculados
      * @param string $testeo_directorio_salida Directorio de salida para testing
      * @param string $testeo_prefijo_archivos Prefijo de archivos para testing
+     *
      * @return mixed
      */
     protected function procesarResultadoFinal(
         array $totales,
         string $testeo_directorio_salida = '',
-        string $testeo_prefijo_archivos = ''
+        string $testeo_prefijo_archivos = '',
     ) {
         try {
             // Si estamos en modo de testeo, copiar el archivo al directorio especificado
@@ -259,14 +258,14 @@ class SicossLegacy
 
                 if (!file_exists($origen)) {
                     Log::error('Archivo de origen no encontrado', [
-                        'origen' => $origen
+                        'origen' => $origen,
                     ]);
                     throw new \Exception("Archivo de origen no encontrado: {$origen}");
                 }
 
                 if (!is_dir($testeo_directorio_salida)) {
                     Log::error('Directorio de destino no encontrado', [
-                        'destino' => $testeo_directorio_salida
+                        'destino' => $testeo_directorio_salida,
                     ]);
                     throw new \Exception("Directorio de destino no encontrado: {$testeo_directorio_salida}");
                 }
@@ -274,28 +273,28 @@ class SicossLegacy
                 if (!copy($origen, $destino)) {
                     Log::error('Error al copiar archivo', [
                         'origen' => $origen,
-                        'destino' => $destino
+                        'destino' => $destino,
                     ]);
                     throw new \Exception("Error al copiar archivo de {$origen} a {$destino}");
                 }
 
                 Log::info('Archivo copiado exitosamente para testing', [
                     'origen' => $origen,
-                    'destino' => $destino
+                    'destino' => $destino,
                 ]);
 
                 return true;
-            } else {
-                // Transformar los totales a formato recordset
-                Log::info('Transformando totales a recordset', [
-                    'cantidad_totales' => count($totales)
-                ]);
-
-                return $this->sicossFormateadorRepository->transformarARecordset($totales);
             }
+            // Transformar los totales a formato recordset
+            Log::info('Transformando totales a recordset', [
+                'cantidad_totales' => \count($totales),
+            ]);
+
+            return $this->sicossFormateadorRepository->transformarARecordset($totales);
+
         } catch (\Exception $e) {
             Log::error('Error al procesar resultado final', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }

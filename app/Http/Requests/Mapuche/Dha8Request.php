@@ -28,7 +28,7 @@ class Dha8Request extends FormRequest
             'codigozona' => 'nullable|integer',
             'porcaporteadicss' => 'nullable|numeric|between:0,100',
             'codigomodalcontrat' => 'nullable|integer',
-            'provincialocalidad' => 'nullable|string|max:50'
+            'provincialocalidad' => 'nullable|string|max:50',
         ];
     }
 }

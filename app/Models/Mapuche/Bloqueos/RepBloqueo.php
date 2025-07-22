@@ -2,7 +2,6 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
-use App\Traits\MapucheSchemaSuc;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

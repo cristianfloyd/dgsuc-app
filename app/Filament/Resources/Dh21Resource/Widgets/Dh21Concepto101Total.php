@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Dh21Resource\Widgets;
 
-use App\Models\Dh21;
 use App\Services\Dh21Service;
 use Filament\Widgets\Widget;
 use Illuminate\Contracts\View\View;
@@ -10,10 +9,12 @@ use Livewire\Attributes\On;
 
 class Dh21Concepto101Total extends Widget
 {
+    public $nroLiqui = 1;
+
+    public $totalConcepto101 = 0;
+
     protected static string $vista = 'filament.widgets.dh21-concepto101-total';
 
-    public $nroLiqui = 1;
-    public $totalConcepto101 = 0;
     protected $dh21;
 
     public function boot(Dh21Service $dh21): void
@@ -21,14 +22,13 @@ class Dh21Concepto101Total extends Widget
         $this->dh21 = $dh21;
     }
 
-
-    public function mount()
+    public function mount(): void
     {
         $this->updateTotal();
     }
 
     #[On('idLiquiSelected')]
-    public function updateTotal($nroLiqui = null)
+    public function updateTotal($nroLiqui = null): void
     {
         $this->nroLiqui = $nroLiqui;
         $this->totalConcepto101 = $this->dh21->totalConcepto101($nroLiqui);

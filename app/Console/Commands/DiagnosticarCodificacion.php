@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Reportes\OrdenesDescuento;
+use Illuminate\Console\Command;
 
 class DiagnosticarCodificacion extends Command
 {
     protected $signature = 'diagnostico:codificacion {id}';
+
     protected $description = 'Diagnostica problemas de codificación para un registro específico';
 
     public function handle()
@@ -30,7 +31,7 @@ class DiagnosticarCodificacion extends Command
                     $info['longitud'] ?? 'N/A',
                     $info['valor_utf8'] ?? 'N/A',
                 ];
-            })
+            }),
         );
 
         $this->info('Configuración de base de datos:');
@@ -38,7 +39,7 @@ class DiagnosticarCodificacion extends Command
             ['Configuración', 'Valor'],
             collect($diagnostico['configuracion_db'])->map(function ($valor, $clave) {
                 return [$clave, $valor];
-            })
+            }),
         );
 
         return 0;

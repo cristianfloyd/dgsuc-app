@@ -2,25 +2,23 @@
 
 namespace App\Services;
 
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Models\ComprobanteNominaModel;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class ComprobanteNominaService
 {
     use MapucheConnectionTrait;
-    protected $table = 'suc.comprobantes_nomina';
-    protected $currentHeader = [];
     private const  LINE_FORMAT = [
         'CODIGO' => ['start' => 0, 'length' => 2],
         'DESCRIPCION' => ['start' => 3, 'length' => 50],
         'IMPORTE' => ['start' => 55, 'length' => 16],
         'TIPO' => ['start' => 71, 'length' => 1],
-        'CODIGO_GRUPO' => ['start' => 72, 'length' => 7]
+        'CODIGO_GRUPO' => ['start' => 72, 'length' => 7],
     ];
 
     // Constantes para las posiciones en el header
@@ -30,8 +28,12 @@ class ComprobanteNominaService
         'MONTH_START' => 2,
         'MONTH_LENGTH' => 2,
         'SEPARATOR' => '.',
-        'LIQUI_LENGTH' => 4
+        'LIQUI_LENGTH' => 4,
     ];
+
+    protected $table = 'suc.comprobantes_nomina';
+
+    protected $currentHeader = [];
 
     public function checkTableExists(): bool
     {
@@ -42,7 +44,7 @@ class ComprobanteNominaService
     public function createTable(): void
     {
         Schema::connection($this->getConnectionName())
-            ->create("{$this->table}", function (Blueprint $table) {
+            ->create("{$this->table}", function (Blueprint $table): void {
                 $table->id();
                 $table->integer('anio_periodo');
                 $table->integer('mes_periodo');
@@ -80,7 +82,7 @@ class ComprobanteNominaService
         try {
             DB::connection($this->getConnectionName())->beginTransaction();
 
-            Log::info("Iniciando procesamiento del archivo: " . basename($filePath));
+            Log::info('Iniciando procesamiento del archivo: ' . basename($filePath));
 
             $fileHandle = fopen($filePath, 'r');
             $lineNumber = 0;
@@ -103,9 +105,9 @@ class ComprobanteNominaService
                         $stats['header'] = true;
                         $stats['procesados']++;
                         continue;
-                    } else {
-                        throw new \Exception("El archivo no comienza con un encabezado válido");
                     }
+                    throw new \Exception('El archivo no comienza con un encabezado válido');
+
                 }
 
                 // Procesar el resto de las líneas como datos
@@ -122,28 +124,12 @@ class ComprobanteNominaService
             DB::connection($this->getConnectionName())->commit();
         } catch (\Throwable $e) {
             DB::connection($this->getConnectionName())->rollBack();
-            Log::error("Error de procesamiento: " . $e->getMessage());
+            Log::error('Error de procesamiento: ' . $e->getMessage());
             throw $e;
         }
 
         return $stats;
     }
-
-    private function sanitizeText(string $text): string
-    {
-        // Detectamos la codificación original
-        $encoding = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1'], true);
-
-        // Convertimos a UTF-8 si es necesario
-        if ($encoding !== 'UTF-8') {
-            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
-        }
-
-        // Limpiamos caracteres especiales y espacios
-        return trim(preg_replace('/[^\p{L}\p{N}\s\-\.]/u', '', $text));
-    }
-
-
 
     // Modificamos el processLine para que no procese encabezados después de la primera línea
     public function processLine(string $line): bool|ComprobanteNominaModel
@@ -159,7 +145,7 @@ class ComprobanteNominaService
         $fields = $this->extractFields($line);
 
         // Procesamos el importe eliminando caracteres no numéricos
-        $importe = (float) preg_replace('/[^0-9.-]/', '', $fields['importe']);
+        $importe = (float)preg_replace('/[^0-9.-]/', '', $fields['importe']);
         $esRetencion = preg_match('/^\d{2}\./', $line);
 
 
@@ -173,9 +159,9 @@ class ComprobanteNominaService
             'area_administrativa' => $esRetencion ? '000' : '010',
             'subarea_administrativa' => '000',
             'numero_retencion' => $esRetencion ? (int)str_replace('.', '', $fields['codigo']) : null,
-            'descripcion_retencion' =>  trim($fields['descripcion']),
+            'descripcion_retencion' => trim($fields['descripcion']),
             'requiere_cheque' => $esRetencion && $fields['tipo'] === 'S',
-            'codigo_grupo' => $esRetencion ? trim($fields['codigo_grupo']) : null
+            'codigo_grupo' => $esRetencion ? trim($fields['codigo_grupo']) : null,
         ]);
     }
 
@@ -202,15 +188,11 @@ class ComprobanteNominaService
             'mes_periodo' => (int)$month,
             'nro_liqui' => $nroLiqui,
             'desc_liqui' => $descripcion,
-            'tipo_pago' => $tipoPago
+            'tipo_pago' => $tipoPago,
         ];
 
         return true;
     }
-
-
-
-
 
     public function verifyImport(int $year, int $month, int $settlementNumber): array
     {
@@ -218,18 +200,18 @@ class ComprobanteNominaService
             'total_records' => ComprobanteNominaModel::where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
-                'nro_liqui' => $settlementNumber
+                'nro_liqui' => $settlementNumber,
             ])->count(),
             'total_net' => ComprobanteNominaModel::where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
-                'nro_liqui' => $settlementNumber
+                'nro_liqui' => $settlementNumber,
             ])->sum('importe'),
             'total_retentions' => ComprobanteNominaModel::where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
-                'nro_liqui' => $settlementNumber
-            ])->sum('retention_amount')
+                'nro_liqui' => $settlementNumber,
+            ])->sum('retention_amount'),
         ];
     }
 
@@ -237,18 +219,6 @@ class ComprobanteNominaService
     {
         return $this->currentHeader;
     }
-
-    private function extractFields(string $line): array
-    {
-        return [
-            'codigo' => substr($line, self::LINE_FORMAT['CODIGO']['start'], self::LINE_FORMAT['CODIGO']['length']),
-            'descripcion' => substr($line, self::LINE_FORMAT['DESCRIPCION']['start'], self::LINE_FORMAT['DESCRIPCION']['length']),
-            'importe' => substr($line, self::LINE_FORMAT['IMPORTE']['start'], self::LINE_FORMAT['IMPORTE']['length']),
-            'tipo' => substr($line, self::LINE_FORMAT['TIPO']['start'], self::LINE_FORMAT['TIPO']['length']),
-            'codigo_grupo' => substr($line, self::LINE_FORMAT['CODIGO_GRUPO']['start'], self::LINE_FORMAT['CODIGO_GRUPO']['length'])
-        ];
-    }
-
 
     public static function exportarPdf($liquidacion)
     {
@@ -269,5 +239,30 @@ class ComprobanteNominaService
         return Pdf::loadView('exports.comprobantes-nomina', $data)
             ->setPaper('a4')
             ->output();
+    }
+
+    private function sanitizeText(string $text): string
+    {
+        // Detectamos la codificación original
+        $encoding = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1'], true);
+
+        // Convertimos a UTF-8 si es necesario
+        if ($encoding !== 'UTF-8') {
+            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
+        }
+
+        // Limpiamos caracteres especiales y espacios
+        return trim(preg_replace('/[^\p{L}\p{N}\s\-\.]/u', '', $text));
+    }
+
+    private function extractFields(string $line): array
+    {
+        return [
+            'codigo' => substr($line, self::LINE_FORMAT['CODIGO']['start'], self::LINE_FORMAT['CODIGO']['length']),
+            'descripcion' => substr($line, self::LINE_FORMAT['DESCRIPCION']['start'], self::LINE_FORMAT['DESCRIPCION']['length']),
+            'importe' => substr($line, self::LINE_FORMAT['IMPORTE']['start'], self::LINE_FORMAT['IMPORTE']['length']),
+            'tipo' => substr($line, self::LINE_FORMAT['TIPO']['start'], self::LINE_FORMAT['TIPO']['length']),
+            'codigo_grupo' => substr($line, self::LINE_FORMAT['CODIGO_GRUPO']['start'], self::LINE_FORMAT['CODIGO_GRUPO']['length']),
+        ];
     }
 }

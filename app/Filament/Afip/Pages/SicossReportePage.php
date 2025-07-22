@@ -18,10 +18,8 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
@@ -32,24 +30,31 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
     use InteractsWithTable;
     use InteractsWithForms;
 
+    public $periodoFiscal;
+
+    public $anio;
+
+    public $mes;
+
+    public bool $isLoading = false;
+
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationLabel = 'Reporte SICOSS';
+
     protected static ?string $title = 'Reporte SICOSS';
+
     protected static ?string $navigationGroup = 'SICOSS';
+
     protected static ?int $navigationSort = 2;
 
-    public $periodoFiscal;
-    public $anio;
-    public $mes;
     protected $queryString = ['periodoFiscal'];
 
     protected static string $view = 'filament.pages.sicoss-reporte';
 
     protected SicossReporteService $sicossReporteService;
 
-    public bool $isLoading = false;
-
-    public function boot()
+    public function boot(): void
     {
         $this->sicossReporteService = app(SicossReporteService::class);
     }
@@ -112,11 +117,11 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
                                 Blade::render(
                                     '<div wire:loading wire:target="periodoFiscal">
                                             <x-filament::loading-indicator class="h-5 w-5" />
-                                            </div>'
+                                            </div>',
                                 ),
                             ),
                         )
-                        ->afterStateUpdated(function ($state) {
+                        ->afterStateUpdated(function ($state): void {
                             if (!$state) {
                                 return;
                             }
@@ -142,7 +147,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
     {
         try {
             // Actualizar la tabla
-            $this->table->query(fn() => MapucheSicossReporte::query()->getReporte($this->anio, $this->mes));
+            $this->table->query(fn () => MapucheSicossReporte::query()->getReporte($this->anio, $this->mes));
 
             // Actualizar los totales
             $this->updateWidgetData();
@@ -180,11 +185,6 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         return $this->sicossReporteService->getTotales($this->anio, $this->mes)->toArray();
     }
 
-    protected function getHeaderWidgets(): array
-    {
-        return [SicossTotalesWidget::class];
-    }
-
     public function getWidgetData(): array
     {
         return [
@@ -214,7 +214,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             ->defaultSort('nro_liqui')
             ->filters(
                 [
-                    //
+
                 ],
                 layout: FiltersLayout::AboveContent,
             )
@@ -246,13 +246,8 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             ->persistSortInSession();
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [];
-    }
-
     /**
-     * Método para refrescar los datos cuando sea necesario
+     * Método para refrescar los datos cuando sea necesario.
      */
     public function refreshData(): void
     {
@@ -260,5 +255,15 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         $this->updateWidgetData();
 
         Notification::make()->title('Datos actualizados')->success()->send();
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [SicossTotalesWidget::class];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [];
     }
 }

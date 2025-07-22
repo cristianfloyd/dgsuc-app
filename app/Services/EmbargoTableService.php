@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class EmbargoTableService
 {
     use MapucheConnectionTrait;
 
     /**
-     * Verifica y crea la tabla si no existe
+     * Verifica y crea la tabla si no existe.
      *
      * @return bool
      */
@@ -31,7 +31,7 @@ class EmbargoTableService
     }
 
     /**
-     * Verifica si la tabla existe
+     * Verifica si la tabla existe.
      *
      * @return bool
      */
@@ -42,14 +42,14 @@ class EmbargoTableService
     }
 
     /**
-     * Crea la tabla con su estructura
+     * Crea la tabla con su estructura.
      *
      * @return void
      */
     private function createTable(): void
     {
         Schema::connection($this->getConnectionName())
-            ->create('suc.embargo_proceso_results', function (Blueprint $table) {
+            ->create('suc.embargo_proceso_results', function (Blueprint $table): void {
                 $table->id();
                 $table->integer('nro_liqui');
                 $table->string('tipo_noved', 1)->nullable();

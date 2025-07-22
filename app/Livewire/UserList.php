@@ -15,34 +15,39 @@ class UserList extends Component
 
     #[Url(as : 's', history: true)]
     public $search;
+
     public $selectedUser;
 
     #[On('user-created')]
-    public function updateList(){
+    public function updateList(): void
+    {
 
     }
 
-    public function viewUser(User $user){
+    public function viewUser(User $user): void
+    {
         $this->selectedUser = $user;
         // dd($this->selectedUser);
         $this->dispatch('open-modal', name: 'user-details');
     }
+
     public function render()
     {
         $users = User::latest()
-            ->where('name', 'like', '%'.$this->search.'%')
-            ->orWhere('email', 'like', '%'.$this->search.'%')
+            ->where('name', 'like', '%' . $this->search . '%')
+            ->orWhere('email', 'like', '%' . $this->search . '%')
             ->paginate(5);
-        return view('livewire.user-list',[
-            'users' => $users
+        return view('livewire.user-list', [
+            'users' => $users,
         ]);
     }
 
     #[Computed()]
-    public function users(){
+    public function users()
+    {
         return User::latest()
-            ->where('name', 'like', '%'.$this->search.'%')
-            ->orWhere('email', 'like', '%'.$this->search.'%')
+            ->where('name', 'like', '%' . $this->search . '%')
+            ->orWhere('email', 'like', '%' . $this->search . '%')
             ->paginate(5);
     }
 }

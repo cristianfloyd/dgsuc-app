@@ -10,6 +10,7 @@ class Dh21hService
      * Create a new class instance.
      */
     public function __construct(
-        private readonly Dh21hRepository $repository
-    ){}
+        private readonly Dh21hRepository $repository,
+    ) {
+    }
 }

@@ -2,19 +2,17 @@
 
 namespace App\Exceptions;
 
-use Exception;
-use Illuminate\Support\Collection;
-
-class ValidationException extends Exception
+class ValidationException extends \Exception
 {
     private array $errors = [];
+
     private ?string $field = null;
 
     public function __construct(
         string $message,
         private readonly array $context = [],
         int $code = 0,
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }
@@ -64,7 +62,7 @@ class ValidationException extends Exception
             'message' => $this->getMessage(),
             'field' => $this->field,
             'errors' => $this->errors,
-            'context' => $this->context
+            'context' => $this->context,
         ];
     }
 }

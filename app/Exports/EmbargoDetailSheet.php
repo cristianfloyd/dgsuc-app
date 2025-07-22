@@ -2,23 +2,20 @@
 
 namespace App\Exports;
 
-use App\Exports\EmbargoSummarySheet;
 use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithBackgroundColor;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\WithBackgroundColor;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class EmbargoDetailSheet extends BaseExcelSheet implements
     FromCollection,
@@ -32,17 +29,17 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     WithCustomStartCell
 {
     /**
-     * @var Builder $query Consulta para obtener los datos
+     * @var Builder Consulta para obtener los datos
      */
     protected Builder $query;
 
     /**
-     * @var string $periodoLiquidacion Período de liquidación del reporte
+     * @var string Período de liquidación del reporte
      */
     protected string $periodoLiquidacion;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param Builder $query Consulta para obtener los datos
      * @param string $periodoLiquidacion Período de liquidación (opcional)
@@ -54,7 +51,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     }
 
     /**
-     * Define la celda de inicio para los datos
+     * Define la celda de inicio para los datos.
      *
      * @return string
      */
@@ -64,7 +61,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     }
 
     /**
-     * Obtiene la colección de datos para la hoja de Excel
+     * Obtiene la colección de datos para la hoja de Excel.
      *
      * @return \Illuminate\Support\Collection
      */
@@ -76,7 +73,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     }
 
     /**
-     * Define los encabezados de las columnas
+     * Define los encabezados de las columnas.
      *
      * @return array
      */
@@ -95,12 +92,12 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
             'Nov. 2',
             'Remunerativo',
             '860',
-            '861'
+            '861',
         ];
     }
 
     /**
-     * Define el ancho de las columnas específicas
+     * Define el ancho de las columnas específicas.
      *
      * @return array
      */
@@ -124,7 +121,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     }
 
     /**
-     * Define el formato de las columnas
+     * Define el formato de las columnas.
      *
      * @return array
      */
@@ -150,16 +147,17 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
 
     /**
      * Mapea cada fila de datos a las columnas de Excel
-     * Limita el texto de la caratula a 30 caracteres
+     * Limita el texto de la caratula a 30 caracteres.
      *
      * @param mixed $row
+     *
      * @return array
      */
     public function map($row): array
     {
         // Limitar el texto de la caratula a 30 caracteres
         $caratula = $row->caratula;
-        if (strlen($caratula) > 30) {
+        if (\strlen($caratula) > 30) {
             $caratula = substr($caratula, 0, 27) . '...';
         }
 
@@ -176,12 +174,12 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
             $row->nov2_conce ?? 0,
             $row->remunerativo ?? 0,
             $row->{'860'} ?? 0,
-            $row->{'861'} ?? 0
+            $row->{'861'} ?? 0,
         ];
     }
 
     /**
-     * Define el título de la hoja
+     * Define el título de la hoja.
      *
      * @return string
      */
@@ -191,9 +189,10 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     }
 
     /**
-     * Aplica estilos a la hoja de Excel
+     * Aplica estilos a la hoja de Excel.
      *
      * @param Worksheet $sheet
+     *
      * @return $this
      */
     public function styles(Worksheet $sheet)
@@ -366,7 +365,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
 
     /**
      * Define el color de fondo para los encabezados
-     * Ya no se utiliza este método porque estamos aplicando el estilo directamente
+     * Ya no se utiliza este método porque estamos aplicando el estilo directamente.
      *
      * @return string
      */

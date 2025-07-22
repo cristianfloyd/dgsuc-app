@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use App\Data\Dh90Data;
+use App\Traits\CargoQueries;
+use App\Traits\DatabaseSchema;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\DatabaseSchema;
-use App\Traits\CargoQueries;
-use App\Traits\MapucheConnectionTrait;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh90 que almacena información de cargos asociados.
@@ -28,6 +28,13 @@ class Dh90 extends Model
     use CargoQueries, MapucheConnectionTrait {
         MapucheConnectionTrait::getConnectionName insteadof DatabaseSchema;
     }
+
+    /**
+     * Indica si el modelo debe utilizar timestamps.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Nombre de la tabla en la base de datos.
@@ -51,13 +58,6 @@ class Dh90 extends Model
     protected $primaryKey = 'nro_cargo';
 
     /**
-     * Indica si el modelo debe utilizar timestamps.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
      * Los atributos que son asignables masivamente.
      *
      * @var array<int, string>
@@ -67,20 +67,6 @@ class Dh90 extends Model
         'nro_cargoasociado',
         'tipoasociacion',
     ];
-
-    /**
-     * Los atributos que deben convertirse a tipos nativos.
-     *
-     * @var array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'nro_cargo' => 'integer',
-            'nro_cargoasociado' => 'integer',
-            'tipoasociacion' => 'string',
-        ];
-    }
 
     /**
      * Obtiene el Data Object a partir del modelo.
@@ -97,6 +83,7 @@ class Dh90 extends Model
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $tipo
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePorTipoAsociacion($query, string $tipo)
@@ -108,6 +95,7 @@ class Dh90 extends Model
      * Scope para obtener registros que tienen cargos asociados.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeConCargosAsociados($query)
@@ -126,11 +114,25 @@ class Dh90 extends Model
     }
 
     /**
+     * Los atributos que deben convertirse a tipos nativos.
+     *
+     * @var array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_cargo' => 'integer',
+            'nro_cargoasociado' => 'integer',
+            'tipoasociacion' => 'string',
+        ];
+    }
+
+    /**
      * Boot del modelo para configurar opciones específicas de PostgreSQL.
      *
      * @return void
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

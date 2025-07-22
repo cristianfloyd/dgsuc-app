@@ -15,28 +15,30 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Widget que permite seleccionar el período fiscal actual.
+ *
  * @property mixed $form
  */
 class PeriodoFiscalSelectorWidget extends Widget implements HasForms
 {
     use InteractsWithForms;
 
+    public int $year;
+
+    public int $month;
+
     protected static string $view = 'filament.widgets.fiscal-period-selector';
 
     protected PeriodoFiscalService $periodoFiscalService;
+
     protected array $periodoFiscal;
-
-    public int $year;
-    public int $month;
-
-
 
     public function boot(PeriodoFiscalService $periodoFiscalService): void
     {
         $this->periodoFiscalService = $periodoFiscalService;
     }
+
     /**
-     * Inicializa el widget cargando el período fiscal actual
+     * Inicializa el widget cargando el período fiscal actual.
      */
     public function mount(): void
     {
@@ -45,14 +47,14 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
 
             // Convertimos a enteros para los selectores
-            $this->year = (int) $periodoFiscal['year'];
-            $this->month = (int) $periodoFiscal['month'];
+            $this->year = (int)$periodoFiscal['year'];
+            $this->month = (int)$periodoFiscal['month'];
 
             $this->form->fill();
 
             Log::debug("Widget PeriodoFiscal montado con año: {$this->year}, mes: {$this->month}");
         } catch (\Exception $e) {
-            Log::error("Error al montar el widget PeriodoFiscal: " . $e->getMessage());
+            Log::error('Error al montar el widget PeriodoFiscal: ' . $e->getMessage());
 
             // Valores predeterminados en caso de error
             $this->year = Carbon::now()->year;
@@ -65,6 +67,11 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
         $this->periodoFiscalService->setPeriodoFiscal($this->year, $this->month);
         $this->periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
         $this->dispatch('fiscalPeriodUpdated');
+    }
+
+    public static function canView(): bool
+    {
+        return true;
     }
 
     protected function form(Form $form): Form
@@ -87,7 +94,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
                         ->button()
                         ->badge("$this->year - $this->month")
                         ->icon('heroicon-o-cog-6-tooth')
-                        ->action(function ($livewire) {
+                        ->action(function ($livewire): void {
                             $this->submit();
                             $livewire->dispatch('updated-periodo-fiscal', $this->periodoFiscal);
                         }),
@@ -118,14 +125,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             9 => 'Septiembre',
             10 => 'Octubre',
             11 => 'Noviembre',
-            12 => 'Diciembre'
+            12 => 'Diciembre',
         ];
-    }
-
-
-
-    public static function canView(): bool
-    {
-        return true;
     }
 }

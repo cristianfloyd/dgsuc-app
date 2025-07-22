@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\PeriodoFiscalActualizado;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class PeriodoFiscalSelected
 {
@@ -13,7 +11,7 @@ class PeriodoFiscalSelected
      */
     public function __construct()
     {
-        //
+
     }
 
     /**
@@ -21,6 +19,6 @@ class PeriodoFiscalSelected
      */
     public function handle(PeriodoFiscalActualizado $event): void
     {
-        //
+
     }
 }

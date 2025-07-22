@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Mapuche\Repositories\RepGerencialFinalRepositoryInterface;
+use App\Models\Reportes\RepGerencialFinal;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Models\Reportes\RepGerencialFinal;
-use App\Contracts\Mapuche\Repositories\RepGerencialFinalRepositoryInterface;
 
 class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterface
 {
@@ -19,7 +19,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
                 'imp_bruto',
                 'imp_neto',
                 'imp_dctos',
-                'nro_liqui'
+                'nro_liqui',
             ])
             ->orderBy('desc_apyno')
             ->get();
@@ -33,7 +33,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
                 DB::raw('SUM(imp_bruto) as total_bruto'),
                 DB::raw('SUM(imp_neto) as total_neto'),
                 DB::raw('SUM(imp_dctos) as total_descuentos'),
-                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes')
+                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes'),
             ])
             ->groupBy('nro_inciso')
             ->orderBy('nro_inciso')
@@ -47,7 +47,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
                 'coddependesemp',
                 DB::raw('SUM(imp_bruto) as total_bruto'),
                 DB::raw('SUM(imp_neto) as total_neto'),
-                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes')
+                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes'),
             ])
             ->groupBy('coddependesemp')
             ->orderBy('coddependesemp')
@@ -61,7 +61,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
                 'tipo_escal',
                 DB::raw('SUM(imp_bruto) as total_bruto'),
                 DB::raw('SUM(imp_neto) as total_neto'),
-                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes')
+                DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes'),
             ])
             ->groupBy('tipo_escal')
             ->orderBy('tipo_escal')
@@ -76,7 +76,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
                 DB::raw('SUM(imp_bruto) as total_bruto'),
                 DB::raw('SUM(imp_neto) as total_neto'),
                 DB::raw('COUNT(DISTINCT nro_legaj) as cantidad_agentes'),
-                DB::raw('AVG(imp_bruto) as promedio_bruto')
+                DB::raw('AVG(imp_bruto) as promedio_bruto'),
             ])
             ->groupBy('codc_agrup')
             ->orderBy('codc_agrup')

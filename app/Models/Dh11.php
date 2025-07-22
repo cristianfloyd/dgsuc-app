@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use App\Traits\PostgresqlTrait;
-use App\Traits\HasLaboralStatus;
-use Illuminate\Support\Facades\Cache;
-use App\Traits\MapucheConnectionTrait;
-use App\Traits\CategoriasConstantTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use App\Contracts\CategoryUpdateServiceInterface;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\CategoriasConstantTrait;
+use App\Traits\HasLaboralStatus;
+use App\Traits\MapucheConnectionTrait;
+use App\Traits\PostgresqlTrait;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 /**
- * Modelo para la tabla de Categorías del sistema Mapuche
+ * Modelo para la tabla de Categorías del sistema Mapuche.
  *
  * @property string $codc_categ Código de categoría (PK)
  * @property string|null $equivalencia Equivalencia Sipuver
@@ -22,7 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $nro_escal Número de escalafón
  * @property float|null $impp_basic Importe básico
  * @property string|null $codc_dedic Código de dedicación (FK)
- * ...
+ *                                   ...
+ *
  * @method static whereIn(string $string, string[] $DOCS)
  * @method static updateOrCreate(array $attributes, array $values)
  */
@@ -34,7 +35,9 @@ class Dh11 extends Model
     use HasLaboralStatus;
 
     public $timestamps = false;
+
     public $incrementing = false;
+
     /**
      * Nombre de la tabla de base de datos utilizada por este modelo.
      */
@@ -44,50 +47,27 @@ class Dh11 extends Model
      * Clave primaria.
      */
     protected $primaryKey = 'codc_categ';
+
     /**
      * Clave primaria de este modelo es de tipo cadena de caracteres.
      */
     protected $keyType = 'string';
-
 
     protected $fillable = [
         'codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano',
         'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos',
         'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif',
         'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon',
-        'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao', 'factor_hs_catedra'
+        'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao', 'factor_hs_catedra',
     ];
-    protected function casts(): array
-    {
-        return [
-            'controlcargos' => 'boolean',
-            'controlhoras' => 'boolean',
-            'controlpuntos' => 'boolean',
-            'controlpresup' => 'boolean',
-            'aportalao' => 'boolean',
-            'remunbonif' => 'double',
-            'noremunbonif' => 'double',
-            'remunnobonif' => 'double',
-            'noremunnobonif' => 'double',
-            'otrasrem' => 'double',
-            'dto1610' => 'double',
-            'reflaboral' => 'double',
-            'refadm95' => 'double',
-            'critico' => 'double',
-            'jefatura' => 'double',
-            'gastosrepre' => 'double',
-            'factor_hs_catedra' => 'double',
-        ];
-    }
 
     /**
-     * Atributos que deben ser convertidos a tipos nativos
+     * Atributos que deben ser convertidos a tipos nativos.
      */
     protected $dates = [
         'vig_caano',
-        'vig_cames'
+        'vig_cames',
     ];
-
 
     /**
      * Obtiene el recuento de cargos docentes de educación secundaria.
@@ -184,6 +164,7 @@ class Dh11 extends Model
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $type
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function scopeOfTipo(Builder $query, string $tipo): Builder
@@ -192,7 +173,6 @@ class Dh11 extends Model
         return $query->whereIn('codc_categ', $categorias);
     }
 
-
     /**
      * Scope para filtrar categorías activas.
      *
@@ -200,14 +180,14 @@ class Dh11 extends Model
      * los registros donde las categorías están activas (es decir, no son nulas).
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereNotNull('vig_caano')
-                    ->whereNotNull('vig_cames');
+            ->whereNotNull('vig_cames');
     }
-
 
     /**
      * Scope para filtrar por tipo de escalafón.
@@ -217,6 +197,7 @@ class Dh11 extends Model
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $type El tipo de escalafón por el que se desea filtrar.
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByScalafon(Builder $query, string $type): Builder
@@ -228,6 +209,7 @@ class Dh11 extends Model
      * Obtiene los códigos de categoría para un tipo específico.
      *
      * @param string $tipo
+     *
      * @return array
      */
     public static function getCategoriasPorTipo(string $tipo): array
@@ -240,7 +222,7 @@ class Dh11 extends Model
     }
 
     /**
-     * Accessor para obtener el estado de mensualización
+     * Accessor para obtener el estado de mensualización.
      */
     public function getIsMensualizedAttribute(): bool
     {
@@ -248,7 +230,7 @@ class Dh11 extends Model
     }
 
     /**
-     * Accessor para obtener el estado de jefatura
+     * Accessor para obtener el estado de jefatura.
      */
     public function getHasLeadershipAttribute(): bool
     {
@@ -268,7 +250,7 @@ class Dh11 extends Model
     }
 
     /**
-     * Relación con la tabla de escalafón
+     * Relación con la tabla de escalafón.
      */
     public function dh89(): BelongsTo
     {
@@ -284,6 +266,7 @@ class Dh11 extends Model
      * Actualiza el campo impp_basic del modelo actual aplicando un porcentaje de incremento.
      *
      * @param float $porcentaje El porcentaje de incremento a aplicar.
+     *
      * @return bool Verdadero si la actualización se realizó correctamente, falso en caso contrario.
      */
     public function actualizarImppBasicPorPorcentaje(float $porcentaje): bool
@@ -292,12 +275,35 @@ class Dh11 extends Model
         return $service->updateCategoryWithHistory($this, $porcentaje);
     }
 
+    protected function casts(): array
+    {
+        return [
+            'controlcargos' => 'boolean',
+            'controlhoras' => 'boolean',
+            'controlpuntos' => 'boolean',
+            'controlpresup' => 'boolean',
+            'aportalao' => 'boolean',
+            'remunbonif' => 'double',
+            'noremunbonif' => 'double',
+            'remunnobonif' => 'double',
+            'noremunnobonif' => 'double',
+            'otrasrem' => 'double',
+            'dto1610' => 'double',
+            'reflaboral' => 'double',
+            'refadm95' => 'double',
+            'critico' => 'double',
+            'jefatura' => 'double',
+            'gastosrepre' => 'double',
+            'factor_hs_catedra' => 'double',
+        ];
+    }
+
     /**
      * Establece los valores de los atributos 'impp_basic' e 'impp_asign' con el valor proporcionado.
      *
      * @param float $value El valor a establecer en los atributos 'impp_basic' e 'impp_asign'.
      */
-    protected function setImppBasicAttribute($value)
+    protected function setImppBasicAttribute($value): void
     {
         $this->attributes['impp_basic'] = $value;
         $this->attributes['impp_asign'] = $value;

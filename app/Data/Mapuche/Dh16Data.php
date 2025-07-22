@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Mapuche;
 
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Data;
 
 class Dh16Data extends Data
 {
@@ -14,11 +14,11 @@ class Dh16Data extends Data
         #[Required]
         #[IntegerType]
         public readonly int $codn_grupo,
-
         #[Required]
         #[IntegerType]
         public readonly int $codn_conce,
-    ) {}
+    ) {
+    }
 
     public static function rules(): array
     {

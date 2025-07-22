@@ -2,18 +2,20 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class TestCuils extends Component
 {
     use MapucheConnectionTrait;
 
-
     public $periodoFiscal = 202312;
+
     public $nroLiqui = 1;
+
     public $cuil = 20190814670;
+
     public function render()
     {
         $data = DB::connection($this->getConnectionName())

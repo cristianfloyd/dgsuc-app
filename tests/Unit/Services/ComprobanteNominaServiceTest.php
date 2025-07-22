@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Models\ComprobanteNominaModel;
 use App\Services\ComprobanteNominaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ComprobanteNominaServiceTest extends TestCase
 {
     // use RefreshDatabase;
 
     private ComprobanteNominaService $service;
+
     private string $testFilePath;
 
     protected function setUp(): void
@@ -24,10 +24,18 @@ class ComprobanteNominaServiceTest extends TestCase
         $this->createTestFile();
     }
 
-    /** @test */
-    public function it_processes_header_line_correctly()
+    protected function tearDown(): void
     {
-        $line = "2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]";
+        if (file_exists($this->testFilePath)) {
+            unlink($this->testFilePath);
+        }
+        parent::tearDown();
+    }
+
+    /** @test */
+    public function it_processes_header_line_correctly(): void
+    {
+        $line = '2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]';
         $result = $this->service->processLine($line);
 
         $this->assertTrue($result);
@@ -36,10 +44,10 @@ class ComprobanteNominaServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_net_amount_line_correctly()
+    public function it_processes_net_amount_line_correctly(): void
     {
-        $line = "00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000";
-        $this->service->processHeaderLine("2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]");
+        $line = '00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000';
+        $this->service->processHeaderLine('2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]');
 
         $result = $this->service->processLine($line);
 
@@ -47,15 +55,15 @@ class ComprobanteNominaServiceTest extends TestCase
         $this->assertDatabaseHas('comprobantes_nomina', [
             'net_amount' => 30238029491.72,
             'administrative_area' => '010',
-            'administrative_subarea' => '000'
+            'administrative_subarea' => '000',
         ]);
     }
 
     /** @test */
-    public function it_processes_retention_line_correctly()
+    public function it_processes_retention_line_correctly(): void
     {
-        $line = "01.DOSUBA - Obra Social                              =   3944521528.39S0000001";
-        $this->service->processHeaderLine("2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]");
+        $line = '01.DOSUBA - Obra Social                              =   3944521528.39S0000001';
+        $this->service->processHeaderLine('2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]');
 
         $result = $this->service->processLine($line);
 
@@ -65,12 +73,12 @@ class ComprobanteNominaServiceTest extends TestCase
             'retention_description' => 'DOSUBA - Obra Social',
             'retention_amount' => 3944521528.39,
             'requires_check' => true,
-            'group_code' => '0000001'
+            'group_code' => '0000001',
         ]);
     }
 
     /** @test */
-    public function it_processes_complete_file_successfully()
+    public function it_processes_complete_file_successfully(): void
     {
         $stats = $this->service->processFile($this->testFilePath);
 
@@ -82,25 +90,17 @@ class ComprobanteNominaServiceTest extends TestCase
 
     private function createTestFile(): void
     {
-        if (!file_exists(dirname($this->testFilePath))) {
-            mkdir(dirname($this->testFilePath), 0777, true);
+        if (!file_exists(\dirname($this->testFilePath))) {
+            mkdir(\dirname($this->testFilePath), 0o777, true);
         }
 
         $content = <<<EOT
-2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]
-00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000
-01.DOSUBA - Obra Social                              =   3944521528.39S0000001
-FIN
-EOT;
+            2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]
+            00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000
+            01.DOSUBA - Obra Social                              =   3944521528.39S0000001
+            FIN
+            EOT;
 
         file_put_contents($this->testFilePath, $content);
-    }
-
-    protected function tearDown(): void
-    {
-        if (file_exists($this->testFilePath)) {
-            unlink($this->testFilePath);
-        }
-        parent::tearDown();
     }
 }

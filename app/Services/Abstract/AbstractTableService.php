@@ -2,15 +2,14 @@
 
 namespace App\Services\Abstract;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use App\Exceptions\TableStructureException;
 use App\Contracts\TableService\TableServiceInterface;
+use App\Exceptions\TableStructureException;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
- * Clase base abstracta para servicios de gestión de tablas
+ * Clase base abstracta para servicios de gestión de tablas.
  *
  * Esta clase implementa el patrón Template Method para manejar:
  * - Creación de estructura de tabla
@@ -22,9 +21,8 @@ abstract class AbstractTableService implements TableServiceInterface
 {
     use MapucheConnectionTrait;
 
-
     /**
-     * Valida la estructura actual de la tabla contra la definición esperada
+     * Valida la estructura actual de la tabla contra la definición esperada.
      *
      * @throws TableStructureException
      */
@@ -42,7 +40,7 @@ abstract class AbstractTableService implements TableServiceInterface
             throw new TableStructureException(
                 $this->getTableName(),
                 $missingColumns,
-                $extraColumns
+                $extraColumns,
             );
         }
 
@@ -53,7 +51,71 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Valida la definición de una columna específica
+     * Verifica la existencia de la tabla.
+     */
+    public function exists(): bool
+    {
+        return Schema::connection($this->getConnectionName())
+            ->hasTable($this->getTableName());
+    }
+
+    /**
+     * Crea y puebla la tabla dentro de una transacción.
+     *
+     * @throws \Exception
+     */
+    public function createAndPopulate(): void
+    {
+        try {
+            $this->getConnectionFromTrait()->transaction(function (): void {
+                $this->createTable();
+                $this->createIndexes();
+                $this->populateTable();
+                $this->afterPopulate();
+            });
+
+            Log::info("Tabla {$this->getTableName()} creada y poblada exitosamente");
+        } catch (\Exception $e) {
+            Log::error("Error en createAndPopulate para {$this->getTableName()}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Crea la estructura de la tabla.
+     */
+    public function createTable(): void
+    {
+        if (!$this->exists()) {
+            Schema::connection($this->getConnectionName())
+                ->create($this->getTableName(), function ($table): void {
+                    $this->addColumns($table);
+                });
+        }
+    }
+
+    /**
+     * Puebla la tabla con datos iniciales.
+     */
+    public function populateTable(): void
+    {
+        $query = $this->getTablePopulationQuery();
+
+        if (!empty($query)) {
+            $this->getConnectionFromTrait()->statement($query);
+        }
+    }
+
+    /**
+     * Obtiene el nombre de la tabla.
+     */
+    abstract public function getTableName(): string;
+
+    /**
+     * Valida la definición de una columna específica.
      *
      * @throws TableStructureException
      */
@@ -70,13 +132,13 @@ abstract class AbstractTableService implements TableServiceInterface
                 $this->getTableName(),
                 [],
                 [],
-                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}"
+                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}",
             );
         }
     }
 
     /**
-     * Mapea tipos de columna de Laravel a tipos de base de datos
+     * Mapea tipos de columna de Laravel a tipos de base de datos.
      */
     protected function mapColumnType(string $laravelType): string
     {
@@ -89,62 +151,14 @@ abstract class AbstractTableService implements TableServiceInterface
             'datetime' => 'timestamp',
             'timestamp' => 'timestamp',
             'json' => 'json',
-            'jsonb' => 'jsonb'
+            'jsonb' => 'jsonb',
         ];
 
         return $typeMap[$laravelType] ?? $laravelType;
     }
 
-
     /**
-     * Verifica la existencia de la tabla
-     */
-    public function exists(): bool
-    {
-        return Schema::connection($this->getConnectionName())
-            ->hasTable($this->getTableName());
-    }
-
-    /**
-     * Crea y puebla la tabla dentro de una transacción
-     *
-     * @throws \Exception
-     */
-    public function createAndPopulate(): void
-    {
-        try {
-            $this->getConnectionFromTrait()->transaction(function () {
-                $this->createTable();
-                $this->createIndexes();
-                $this->populateTable();
-                $this->afterPopulate();
-            });
-
-            Log::info("Tabla {$this->getTableName()} creada y poblada exitosamente");
-        } catch (\Exception $e) {
-            Log::error("Error en createAndPopulate para {$this->getTableName()}", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Crea la estructura de la tabla
-     */
-    public function createTable(): void
-    {
-        if (!$this->exists()) {
-            Schema::connection($this->getConnectionName())
-                ->create($this->getTableName(), function ($table) {
-                    $this->addColumns($table);
-                });
-        }
-    }
-
-    /**
-     * Agrega las columnas a la tabla
+     * Agrega las columnas a la tabla.
      */
     protected function addColumns($table): void
     {
@@ -154,7 +168,7 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Agrega una columna específica a la tabla
+     * Agrega una columna específica a la tabla.
      */
     protected function addColumn($table, string $column, array $definition): void
     {
@@ -207,12 +221,12 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Crea los índices de la tabla
+     * Crea los índices de la tabla.
      */
     protected function createIndexes(): void
     {
         Schema::connection($this->getConnectionName())
-            ->table($this->getTableName(), function ($table) {
+            ->table($this->getTableName(), function ($table): void {
                 foreach ($this->getIndexes() as $name => $columns) {
                     $table->index($columns, $name);
                 }
@@ -220,19 +234,7 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Puebla la tabla con datos iniciales
-     */
-    public function populateTable(): void
-    {
-        $query = $this->getTablePopulationQuery();
-
-        if (!empty($query)) {
-            $this->getConnectionFromTrait()->statement($query);
-        }
-    }
-
-    /**
-     * Hook para ejecutar acciones después de poblar la tabla
+     * Hook para ejecutar acciones después de poblar la tabla.
      */
     protected function afterPopulate(): void
     {
@@ -240,24 +242,21 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Obtiene la definición de la tabla
+     * Obtiene la definición de la tabla.
+     *
      * @return array<string, array>
      */
     abstract protected function getTableDefinition(): array;
 
     /**
-     * Obtiene los índices de la tabla
+     * Obtiene los índices de la tabla.
+     *
      * @return array<string, array>
      */
     abstract protected function getIndexes(): array;
 
     /**
-     * Obtiene la consulta SQL para poblar la tabla
+     * Obtiene la consulta SQL para poblar la tabla.
      */
     abstract protected function getTablePopulationQuery(): string;
-
-    /**
-     * Obtiene el nombre de la tabla
-     */
-    abstract public function getTableName(): string;
 }

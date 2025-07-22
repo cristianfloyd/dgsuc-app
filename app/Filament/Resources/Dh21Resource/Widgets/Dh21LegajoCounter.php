@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Dh21Resource\Widgets;
 
 use App\Models\Dh21;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class Dh21LegajoCounter extends BaseWidget
 {

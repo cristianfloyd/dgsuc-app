@@ -36,18 +36,6 @@ class Dhe7Service
         return $this->dhe7Repository->create($data);
     }
 
-    // Actualiza un registro existente
-
-    protected function validate(array $data)
-    {
-        $rules = [
-            'codigoaccesoescalafon' => 'required|string|size:4',
-            'descaccesoescalafon' => 'nullable|string|max:255',
-        ];
-
-        Validator::make($data, $rules)->validate();
-    }
-
     // Elimina un registro
 
     public function update(string $codigo, array $data)
@@ -63,5 +51,17 @@ class Dhe7Service
     public function delete(string $codigo)
     {
         return $this->dhe7Repository->delete($codigo);
+    }
+
+    // Actualiza un registro existente
+
+    protected function validate(array $data): void
+    {
+        $rules = [
+            'codigoaccesoescalafon' => 'required|string|size:4',
+            'descaccesoescalafon' => 'nullable|string|max:255',
+        ];
+
+        Validator::make($data, $rules)->validate();
     }
 }

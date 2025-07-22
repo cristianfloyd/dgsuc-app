@@ -13,7 +13,9 @@ use Filament\Tables\Table;
 class UploadedFileResource extends Resource
 {
     protected static ?string $model = UploadedFile::class;
+
     protected static ?string $label = 'Archivos';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
@@ -56,7 +58,7 @@ class UploadedFileResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -71,7 +73,7 @@ class UploadedFileResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

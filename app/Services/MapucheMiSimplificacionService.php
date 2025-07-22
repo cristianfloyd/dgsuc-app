@@ -2,18 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Dh21;
+use App\Contracts\CuilRepositoryInterface;
+use App\Contracts\MapucheMiSimplificacionServiceInterface;
+use App\Models\AfipMapucheMiSimplificacion;
+use App\Models\AfipMapucheSicoss;
 use App\Models\Mapuche\Dh22;
 use App\Models\TablaTempCuils;
+use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\NroLiqui;
-use App\Models\AfipMapucheSicoss;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use App\Contracts\CuilRepositoryInterface;
-use App\Models\AfipMapucheMiSimplificacion;
-use App\Contracts\MapucheMiSimplificacionServiceInterface;
 
 class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceInterface
 {
@@ -29,10 +28,9 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     public function __construct(
         private AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion,
         private TablaTempCuils $tablaTempCuils,
-        private CuilRepositoryInterface $cuilRepository
-        )
-    {}
-
+        private CuilRepositoryInterface $cuilRepository,
+    ) {
+    }
 
     /**
      * Ejecuta el proceso principal de MapucheMiSimplificacion.
@@ -45,6 +43,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @param NroLiqui $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
+     *
      * @return bool Verdadero si el proceso se ejecutó correctamente, falso en caso contrario
      */
     public function execute(NroLiqui $nroLiqui, int $periodoFiscal): bool
@@ -63,7 +62,6 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         return $this->ejecutarFuncionAlmacenada($nroLiqui->value(), $periodoFiscal);
     }
 
-
     /**
      * Orquesta el proceso de poblar "Mi Simplificación" desde una acción de la interfaz.
      *
@@ -75,8 +73,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @param int $periodoFiscal El período fiscal en formato YYYYMM.
      * @param int $nroLiqui El número de liquidación.
-     * @return int La cantidad de registros procesados.
+     *
      * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada.
+     *
+     * @return int La cantidad de registros procesados.
      */
     public function poblarMiSimplificacion(string $periodoFiscal, int $nroLiqui): int
     {
@@ -98,7 +98,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             // para mantener consistencia.
             $resultado = AfipMapucheMiSimplificacion::mapucheMiSimplificacion(
                 $nroLiqui,
-                $periodoFiscal
+                $periodoFiscal,
             );
 
             if (!$resultado) {
@@ -118,6 +118,55 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     }
 
     /**
+     * Verifica si la tabla contiene registros.
+     *
+     * @return bool Verdadero si la tabla existe y contiene registros, falso en caso contrario.
+     */
+    public function isNotEmpty(): bool
+    {
+        try {
+            $model = $this->afipMapucheMiSimplificacion;
+            $fullTableName = $model->getFullTableName();
+            $connection = $this->getConnectionName();
+
+            // Primero verificamos si el schema existe
+            $schemaExists = DB::connection($connection)
+                ->select('SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?', [$model->getSchemaName()]);
+
+            if (empty($schemaExists)) {
+                Log::info("El schema {$model->getSchemaName()} no existe en la base de datos {$connection}.");
+                return false;
+            }
+
+            // Luego verificamos si la tabla existe
+            if (!Schema::connection($connection)->hasTable($fullTableName)) {
+                Log::info("La tabla {$fullTableName} no existe en la base de datos {$connection}.");
+                return false;
+            }
+
+            // Verificamos si hay registros de manera eficiente
+            $exists = DB::connection($connection)
+                ->table($fullTableName)
+                ->exists();
+
+            if ($exists) {
+                $count = DB::connection($connection)
+                    ->table($fullTableName)
+                    ->count();
+                Log::info("La tabla {$fullTableName} contiene {$count} registros.");
+                return true;
+            }
+
+            Log::info("La tabla {$fullTableName} está vacía.");
+            return false;
+
+        } catch (\Exception $e) {
+            Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Valida que los parámetros $nroLiqui y $periodoFiscal existan en la base de datos.
      *
      * Esta función verifica si el número de liquidación y el período fiscal
@@ -126,6 +175,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @param int $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
+     *
      * @return bool Verdadero si los parámetros existen en la base de datos, falso en caso contrario
      */
     private function validarExistenciaEnBaseDeDatos(int $nroLiqui, int $periodoFiscal): bool
@@ -152,9 +202,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @param NroLiqui $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
+     *
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario
      */
-    private function validarParametros(NroLiqui $nroLiqui,  $periodoFiscal): bool
+    private function validarParametros(NroLiqui $nroLiqui, $periodoFiscal): bool
     {
         if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui->value(), $periodoFiscal)) {
             return false;
@@ -207,8 +258,10 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @param int $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
-     * @return bool Verdadero si la ejecución de la función almacenada fue exitosa, falso en caso contrario
+     *
      * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada
+     *
+     * @return bool Verdadero si la ejecución de la función almacenada fue exitosa, falso en caso contrario
      */
     private function ejecutarFuncionAlmacenada(int $nroLiqui, int $periodoFiscal): bool
     {
@@ -217,62 +270,12 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             if ($result) {
                 Log::info('Función almacenada ejecutada exitosamente');
                 return true;
-            } else {
-                Log::error('Error al ejecutar la función almacenada');
-                return false;
             }
+            Log::error('Error al ejecutar la función almacenada');
+            return false;
+
         } catch (\Exception $e) {
             Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-
-    /**
-     * Verifica si la tabla contiene registros.
-     *
-     * @return bool Verdadero si la tabla existe y contiene registros, falso en caso contrario.
-     */
-    public function isNotEmpty(): bool
-    {
-        try {
-            $model = $this->afipMapucheMiSimplificacion;
-            $fullTableName = $model->getFullTableName();
-            $connection = $this->getConnectionName();
-
-            // Primero verificamos si el schema existe
-            $schemaExists = DB::connection($connection)
-                ->select("SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?", [$model->getSchemaName()]);
-
-            if (empty($schemaExists)) {
-                Log::info("El schema {$model->getSchemaName()} no existe en la base de datos {$connection}.");
-                return false;
-            }
-
-            // Luego verificamos si la tabla existe
-            if (!Schema::connection($connection)->hasTable($fullTableName)) {
-                Log::info("La tabla {$fullTableName} no existe en la base de datos {$connection}.");
-                return false;
-            }
-
-            // Verificamos si hay registros de manera eficiente
-            $exists = DB::connection($connection)
-                ->table($fullTableName)
-                ->exists();
-
-            if ($exists) {
-                $count = DB::connection($connection)
-                    ->table($fullTableName)
-                    ->count();
-                Log::info("La tabla {$fullTableName} contiene {$count} registros.");
-                return true;
-            }
-
-            Log::info("La tabla {$fullTableName} está vacía.");
-            return false;
-
-        } catch (\Exception $e) {
-            Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
             return false;
         }
     }

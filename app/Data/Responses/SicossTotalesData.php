@@ -2,30 +2,26 @@
 
 namespace App\Data\Responses;
 
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
 
 class SicossTotalesData extends Data
 {
     public function __construct(
         #[MapName('total_aportes')]
         public readonly float $totalAportes,
-
         #[MapName('total_contribuciones')]
         public readonly float $totalContribuciones,
-
         #[MapName('total_remunerativo')]
         public readonly float $totalRemunerativo,
-
         #[MapName('total_no_remunerativo')]
         public readonly float $totalNoRemunerativo,
-
         #[MapName('total_c305')]
         public readonly float $totalC305,
-
         #[MapName('total_c306')]
         public readonly float $totalC306,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {

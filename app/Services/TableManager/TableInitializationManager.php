@@ -2,11 +2,11 @@
 
 namespace App\Services\TableManager;
 
-use Illuminate\Support\Facades\Log;
 use App\Contracts\TableService\TableServiceInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Administrador central para la inicialización de tablas
+ * Administrador central para la inicialización de tablas.
  *
  * @package App\Services\TableManager
  */
@@ -16,10 +16,12 @@ class TableInitializationManager
     {
         return $service->exists();
     }
+
     /**
-     * Inicializa una tabla si no existe
+     * Inicializa una tabla si no existe.
      *
      * @param TableServiceInterface $tableService
+     *
      * @return bool
      */
     public function initializeTable(TableServiceInterface $tableService): bool
@@ -32,7 +34,7 @@ class TableInitializationManager
             }
             return true;
         } catch (\Exception $e) {
-            Log::error("Error al inicializar tabla: " . $e->getMessage());
+            Log::error('Error al inicializar tabla: ' . $e->getMessage());
             return false;
         }
     }

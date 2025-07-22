@@ -9,17 +9,18 @@ class ControlCuilsDiferencia extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.control_cuils_diferencias';
     public $timestamps = false;
+
+    protected $table = 'suc.control_cuils_diferencias';
 
     protected $fillable = [
         'cuil',
         'origen',
         'fecha_control',
-        'connection'
+        'connection',
     ];
 
     protected $casts = [
-        'fecha_control' => 'datetime'
+        'fecha_control' => 'datetime',
     ];
 }

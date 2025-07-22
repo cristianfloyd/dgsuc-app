@@ -2,17 +2,16 @@
 
 namespace App\Models\Reportes;
 
-use Spatie\LaravelData\Data;
 use App\Models\Mapuche\Catalogo\Dh36;
 use App\Models\Mapuche\Catalogo\Dhe4;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Modelo Eloquent para la tabla rep_ger_final
+ * Modelo Eloquent para la tabla rep_ger_final.
  *
  * @property int $codn_fuent Código de fuente
  * @property int $codn_depen Código de dependencia
@@ -33,20 +32,22 @@ class RepGerencialFinal extends Model
     use HasFactory;
     use MapucheConnectionTrait;
 
-    /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'suc.rep_ger_final';
-    protected $primaryKey = 'id';
     public $incrementing = true;
 
     /**
-     * Indica si el modelo debe tener timestamps
+     * Indica si el modelo debe tener timestamps.
      */
     public $timestamps = false;
 
     /**
-     * Los atributos que son asignables masivamente
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'suc.rep_ger_final';
+
+    protected $primaryKey = 'id';
+
+    /**
+     * Los atributos que son asignables masivamente.
      */
     protected $fillable = [
         'codn_fuent', 'codn_depen', 'tipo_ejercicio', 'codn_grupo_presup',
@@ -60,11 +61,11 @@ class RepGerencialFinal extends Model
         'imp_aport', 'imp_familiar', 'ano_liqui', 'mes_liqui', 'nro_liqui',
         'tipo_estad', 'cuil', 'hs_catedra', 'dias_trab', 'rem_c_apor',
         'otr_no_rem', 'en_banco', 'coddependesemp', 'porc_aplic',
-        'cod_clasif_cargo', 'tipo_carac', 'rem_s_apor'
+        'cod_clasif_cargo', 'tipo_carac', 'rem_s_apor',
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos
+     * Los atributos que deben ser convertidos a tipos nativos.
      */
     protected $casts = [
         'codn_fuent' => 'integer',
@@ -93,14 +94,14 @@ class RepGerencialFinal extends Model
         'otr_no_rem' => 'decimal:2',
         'porc_aplic' => 'float',
         'cod_clasif_cargo' => 'integer',
-        'rem_s_apor' => 'decimal:2'
+        'rem_s_apor' => 'decimal:2',
     ];
 
 
     /* #################### SCOPES #################### */
 
     /**
-     * Scope para filtrar por liquidación
+     * Scope para filtrar por liquidación.
      */
     public function scopeLiquidacion(Builder $query, int $nroLiqui): Builder
     {
@@ -108,7 +109,7 @@ class RepGerencialFinal extends Model
     }
 
     /**
-     * Scope para filtrar por dependencia
+     * Scope para filtrar por dependencia.
      */
     public function scopeDependencia(Builder $query, string $codDependencia): Builder
     {
@@ -117,7 +118,7 @@ class RepGerencialFinal extends Model
 
     /* #################### ACCESSORS #################### */
     /**
-     * Accessor para obtener nombre completo
+     * Accessor para obtener nombre completo.
      */
     public function getNombreCompletoAttribute(): string
     {

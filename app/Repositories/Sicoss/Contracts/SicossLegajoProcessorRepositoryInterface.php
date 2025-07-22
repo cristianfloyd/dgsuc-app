@@ -8,7 +8,7 @@ interface SicossLegajoProcessorRepositoryInterface
 {
     /**
      * Procesa los legajos filtrados para generar datos SICOSS
-     * Maneja cálculos complejos, topes jubilatorios, situaciones de revista y estados
+     * Maneja cálculos complejos, topes jubilatorios, situaciones de revista y estados.
      *
      * Extraído del método procesa_sicoss() de SicossLegacy tal como está
      */
@@ -21,6 +21,6 @@ interface SicossLegajoProcessorRepositoryInterface
         ?array $licencias = null,
         bool $retro = false,
         bool $check_sin_activo = false,
-        bool $retornar_datos = false
+        bool $retornar_datos = false,
     ): array;
 }

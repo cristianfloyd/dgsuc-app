@@ -10,7 +10,6 @@ use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use app\Services\DatabaseService;
 use App\Services\SicossImportService;
-use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -25,27 +24,37 @@ class SicossImporter extends Component
     private const  STEP_IMPORT_ARCHIVO = 'import_archivo_mapuche';
     private const  TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
-
-
     // Propiedades públicas
     public ?UploadedFile $selectedArchivo;
+
     public ?Collection $listadoArchivos;
+
     public ?int $selectedArchivoID = null;
+
     public ?string $filename = null;
+
     public ?string $nextstepUrl = null;
+
     public bool $showUploadForm = false;
 
     // Propiedades protegidas
     protected ?string $filepath = null;
+
     protected ?string $absolutePath = null;
+
     protected ?int $periodoFiscal = null;
 
     // Servicios inyectados
     protected readonly ImportService $importService;
+
     protected SicossImportService $sicossImporterService;
+
     private readonly WorkflowServiceInterface $workflowService;
+
     private readonly FileProcessorInterface $fileProcessor;
+
     private readonly TableManagementServiceInterface $tableManagementService;
+
     private readonly DatabaseService $databaseService;
 
     public function boot(
@@ -55,8 +64,7 @@ class SicossImporter extends Component
         TableManagementServiceInterface $tableManagementService,
         DatabaseService $databaseService,
         SicossImportService $sicossImporterService,
-    ): void
-    {
+    ): void {
         $this->importService = $importService;
         $this->workflowService = $workflowService;
         $this->fileProcessor = $fileProcessor;
@@ -82,7 +90,7 @@ class SicossImporter extends Component
         $this->listadoArchivos = UploadedFile::all();
     }
 
-    public function importar(int $archivoId = null): void
+    public function importar(?int $archivoId = null): void
     {
         $file = UploadedFile::findOrFail($archivoId ?? $this->selectedArchivoID);
         if ($this->sicossImportService->importarArchivo($file)) {
@@ -92,11 +100,11 @@ class SicossImporter extends Component
         }
     }
 
-
     /**
      * Importa un archivo y maneja el proceso después de una importación exitosa.
      *
      * @param int|null $archivoId
+     *
      * @return void
      */
     public function importarArchivo(?int $archivoId = null): void
@@ -118,7 +126,7 @@ class SicossImporter extends Component
                 $this->verifyAndPrepareTable($tableName);
                 Log::info('Tabla verificada y preparada:', [$tableName]);
 
-                 // Paso 3: Insertar los datos mapeados en la base de datos
+                // Paso 3: Insertar los datos mapeados en la base de datos
                 $inserted = $this->databaseService->insertBulkData($mappedData, $tableName);
 
                 if ($inserted) {
@@ -133,20 +141,9 @@ class SicossImporter extends Component
             } else {
                 $this->dispatch('error', 'Hubo un problema durante la importación.');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->dispatch('error', 'Error al procesar el archivo: ' . $e->getMessage());
         }
-    }
-
-    private function verifyAndPrepareTable($tableName): void
-    {
-        if($this->tableManagementService::verifyAndPrepareTable($tableName))
-        {
-            Log::info('Tabla verificada y preparada:', [$tableName]);
-        } else {
-            Log::info('Error al verificar y preparar la tabla:', [$tableName]);
-        }
-
     }
 
     public function seleccionarArchivo(): void
@@ -158,27 +155,23 @@ class SicossImporter extends Component
         $this->absolutePath = $this->selectedArchivo->absolute_path;
     }
 
-    private function getArchivoById(int $archivoId): UploadedFile
-    {
-        return UploadedFile::find($archivoId);
-    }
-
     public function render(): View
     {
         if ($this->showUploadForm) {
             return view('livewire.mapuche-sicoss');
-        } else {
-            return view('livewire.uploadtxtcompleted',[
-                'redirectUrl' => $this->nextstepUrl,
-            ]);
         }
+        return view('livewire.uploadtxtcompleted', [
+            'redirectUrl' => $this->nextstepUrl,
+        ]);
+
     }
 
     /**
-     * Set the value of selectedArchivo
+     * Set the value of selectedArchivo.
      *
      * @param $selectedArchivo
-     * @return  self
+     *
+     * @return self
      */
     public function setSelectedArchivo($selectedArchivo): static
     {
@@ -186,9 +179,24 @@ class SicossImporter extends Component
         return $this;
     }
 
+    private function verifyAndPrepareTable($tableName): void
+    {
+        if ($this->tableManagementService::verifyAndPrepareTable($tableName)) {
+            Log::info('Tabla verificada y preparada:', [$tableName]);
+        } else {
+            Log::info('Error al verificar y preparar la tabla:', [$tableName]);
+        }
+
+    }
+
+    private function getArchivoById(int $archivoId): UploadedFile
+    {
+        return UploadedFile::find($archivoId);
+    }
+
     private function getColumnWidths(): array
     {
-        $data = new ColumnMetadata;
+        $data = new ColumnMetadata();
         return $data->getWidths();
     }
 }

@@ -6,7 +6,7 @@ interface SicossLegajoFilterRepositoryInterface
 {
     /**
      * Obtiene los legajos filtrados para el proceso SICOSS
-     * Maneja filtrado por período retroactivo, licencias y agentes sin liquidación
+     * Maneja filtrado por período retroactivo, licencias y agentes sin liquidación.
      *
      * Extraído del método obtener_legajos() de SicossLegacy tal como está
      */
@@ -15,6 +15,6 @@ interface SicossLegajoFilterRepositoryInterface
         string $where_periodo_retro,
         string $where_legajo = ' true ',
         bool $check_lic = false,
-        bool $check_sin_activo = false
+        bool $check_sin_activo = false,
     ): array;
 }

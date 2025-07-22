@@ -4,21 +4,21 @@ namespace App\Services;
 
 use App\Enums\BloqueosEstadoEnum;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class ImportDataTableService
 {
     use MapucheConnectionTrait;
 
     /**
-     * Verifica y crea la tabla si no existe
+     * Verifica y crea la tabla si no existe.
      */
     public function ensureTableExists(): void
     {
 
         if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_bloqueos_import')) {
-            Schema::connection($this->getConnectionName())->create('suc.rep_bloqueos_import', function (Blueprint $table) {
+            Schema::connection($this->getConnectionName())->create('suc.rep_bloqueos_import', function (Blueprint $table): void {
                 // Campos de identificación
                 $table->id();
                 $table->integer('nro_liqui');

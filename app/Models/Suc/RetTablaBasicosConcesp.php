@@ -3,21 +3,13 @@
 namespace App\Models\Suc;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RetTablaBasicosConcesp extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
-
-
-    /**
-     * El nombre de la tabla asociada con el modelo.
-     *
-     * @var string
-     */
-    protected $table = 'suc.ret_tabla_basicos_conc_esp';
 
     /**
      * Indica si el modelo debe ser timestamped.
@@ -25,6 +17,13 @@ class RetTablaBasicosConcesp extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * El nombre de la tabla asociada con el modelo.
+     *
+     * @var string
+     */
+    protected $table = 'suc.ret_tabla_basicos_conc_esp';
 
     /**
      * Los atributos que son asignables en masa.
@@ -60,6 +59,7 @@ class RetTablaBasicosConcesp extends Model
      * @param string $catId
      * @param string $concLiqId
      * @param int $anios
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeBuscarRegistros($query, \DateTime $fecha, string $catId, string $concLiqId, int $anios)

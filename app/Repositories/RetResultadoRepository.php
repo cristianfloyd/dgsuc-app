@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\Suc\RetResultado;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
-use App\Models\Suc\RetResultado;
 
 class RetResultadoRepository
 {
@@ -15,6 +15,7 @@ class RetResultadoRepository
      * @param int $nroCargoAnt
      * @param \DateTime $fechaRetDesde
      * @param Periodo $periodo
+     *
      * @return RetResultado|null
      */
     public function obtenerPorLlavePrimaria(int $nroLegaj, int $nroCargoAnt, \DateTime $fechaRetDesde, Periodo $periodo): ?RetResultado
@@ -30,6 +31,7 @@ class RetResultadoRepository
      * Crea un nuevo resultado de retroactivo.
      *
      * @param array $datos
+     *
      * @return RetResultado
      */
     public function crear(array $datos): RetResultado
@@ -42,6 +44,7 @@ class RetResultadoRepository
      *
      * @param RetResultado $retResultado
      * @param array $datos
+     *
      * @return bool
      */
     public function actualizar(RetResultado $retResultado, array $datos): bool
@@ -53,6 +56,7 @@ class RetResultadoRepository
      * Elimina un resultado de retroactivo.
      *
      * @param RetResultado $retResultado
+     *
      * @return bool|null
      */
     public function eliminar(RetResultado $retResultado): ?bool
@@ -64,6 +68,7 @@ class RetResultadoRepository
      * Obtiene todos los resultados de retroactivo para un tipo específico.
      *
      * @param TipoRetro $tipoRetro
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function obtenerPorTipoRetro(TipoRetro $tipoRetro): \Illuminate\Database\Eloquent\Collection

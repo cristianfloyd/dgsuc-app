@@ -7,6 +7,7 @@ use Illuminate\View\Component;
 class ExpandableSection extends Component
 {
     public $title;
+
     public $expanded;
 
     public function __construct($title, $expanded = false)

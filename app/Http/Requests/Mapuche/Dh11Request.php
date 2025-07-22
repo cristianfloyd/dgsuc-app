@@ -58,12 +58,12 @@ class Dh11Request extends FormRequest
             'noinformasirhu' => 'nullable|integer',
             'imppnooblig' => 'nullable|integer',
             'aportalao' => 'nullable|boolean',
-            'factor_hs_catedra' => 'nullable|numeric'
+            'factor_hs_catedra' => 'nullable|numeric',
         ];
     }
 
     /**
-     * Mensajes personalizados para las reglas de validación
+     * Mensajes personalizados para las reglas de validación.
      */
     public function messages(): array
     {
@@ -87,7 +87,7 @@ class Dh11Request extends FormRequest
     }
 
     /**
-     * Prepara los datos para la validación
+     * Prepara los datos para la validación.
      */
     protected function prepareForValidation(): void
     {

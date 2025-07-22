@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\AfipMapucheSicoss;
+use App\Contracts\AfipMapucheSicossRepositoryInterface;
 use App\DTOs\AfipMapucheSicossDTO;
 use App\Exceptions\AfipMapucheSicossNotFoundException;
-use App\Contracts\AfipMapucheSicossRepositoryInterface;
+use App\Models\AfipMapucheSicoss;
 
 class AfipMapucheSicossService
 {
@@ -20,6 +20,7 @@ class AfipMapucheSicossService
      * Crea o actualiza un registro de AfipMapucheSicoss.
      *
      * @param AfipMapucheSicossDTO $dto
+     *
      * @return AfipMapucheSicoss
      */
     public function createOrUpdate(AfipMapucheSicossDTO $dto)
@@ -38,8 +39,10 @@ class AfipMapucheSicossService
      *
      * @param string $periodoFiscal
      * @param string $cuil
-     * @return AfipMapucheSicoss
+     *
      * @throws AfipMapucheSicossNotFoundException
+     *
+     * @return AfipMapucheSicoss
      */
     public function getByPeriodoAndCuil(string $periodoFiscal, string $cuil)
     {

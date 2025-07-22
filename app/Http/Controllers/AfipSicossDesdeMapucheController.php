@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\AfipSicossDesdeMapuche;
 use App\Traits\MapucheConnectionTrait;
-use App\Models\afipImportacionCrudaModel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AfipSicossDesdeMapucheController extends Controller
 {
@@ -22,19 +21,21 @@ class AfipSicossDesdeMapucheController extends Controller
     //     return view('afip-sicoss-desde-mapuche.show', compact('afip_sicoss_desde_mapuche'));
     // }
 
-    public function create(){
+    public function create()
+    {
         return view('afip-sicoss-desde-mapuche.create');
     }
 
-    public function transformar (){
-        //
+    public function transformar(): void
+    {
+
     }
 
-    public function store(Request $request){
+    public function store(Request $request): void
+    {
         $data = $request->validate([
-        // Validar los datos
+            // Validar los datos
         ]);
-        //
-    }
 
+    }
 }

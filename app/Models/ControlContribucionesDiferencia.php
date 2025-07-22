@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ControlContribucionesDiferencia extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.control_contribuciones_diferencias';
     public $timestamps = true;
+
+    protected $table = 'suc.control_contribuciones_diferencias';
 
     protected $fillable = [
         'cuil',
@@ -25,7 +26,7 @@ class ControlContribucionesDiferencia extends Model
         'contribucioninssjp',
         'diferencia',
         'fecha_control',
-        'connection'
+        'connection',
     ];
 
     protected $casts = [
@@ -34,11 +35,11 @@ class ControlContribucionesDiferencia extends Model
         'contribucionsijp' => 'decimal:2',
         'contribucioninssjp' => 'decimal:2',
         'diferencia' => 'decimal:2',
-        'fecha_control' => 'datetime'
+        'fecha_control' => 'datetime',
     ];
 
     protected $appends = [
-        'nro_cuil'
+        'nro_cuil',
     ];
 
     public function nroCuil(): Attribute
@@ -48,10 +49,10 @@ class ControlContribucionesDiferencia extends Model
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
-                    return intval(substr($this->cuil, 2, 8));
+                    return (int)(substr($this->cuil, 2, 8));
                 }
                 return null;
-            }
+            },
         );
     }
 
@@ -87,7 +88,7 @@ class ControlContribucionesDiferencia extends Model
         return Attribute::make(
             get: function () {
                 return $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp;
-            }
+            },
         );
     }
 }

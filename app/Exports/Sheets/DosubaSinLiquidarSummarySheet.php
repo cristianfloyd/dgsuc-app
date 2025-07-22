@@ -3,34 +3,29 @@
 namespace App\Exports\Sheets;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting, WithEvents
 {
     protected $records;
+
     protected string $periodo;
 
     public function __construct(Collection $records, string $periodo)
     {
         $this->records = $records;
         $this->periodo = $periodo;
-    }
-
-    protected function formatPeriodo(): string
-    {
-        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 
     public function collection()
@@ -53,15 +48,15 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             // Agrupación por Unidad Académica
             ['Distribución por Unidad Académica'],
             ...$this->records->groupBy('codc_uacad')
-                ->map(fn($group, $uacad) => [$uacad, $group->count()])
+                ->map(fn ($group, $uacad) => [$uacad, $group->count()])
                 ->values(),
             [''],
 
             // Última liquidación
             ['Distribución por Última Liquidación'],
             ...$this->records->groupBy('ultima_liquidacion')
-                ->map(fn($group, $liq) => [$liq, $group->count()])
-                ->sortByDesc(fn($item) => $item[0])
+                ->map(fn ($group, $liq) => [$liq, $group->count()])
+                ->sortByDesc(fn ($item) => $item[0])
                 ->take(5)
                 ->values(),
             [''],
@@ -69,8 +64,8 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             // Período Fiscal
             ['Distribución por Período'],
             ...$this->records->groupBy('periodo_fiscal')
-                ->map(fn($group, $periodo) => [$periodo, $group->count()])
-                ->sortByDesc(fn($item) => $item[0])
+                ->map(fn ($group, $periodo) => [$periodo, $group->count()])
+                ->sortByDesc(fn ($item) => $item[0])
                 ->values(),
 
             // Pie de página
@@ -97,18 +92,18 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             'A1:B2' => [
                 'font' => [
                     'bold' => true, 'size' => 14,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
                 ],
                 'borders' => [
                     'bottom' => ['borderStyle' => Border::BORDER_THIN],
-                ]
+                ],
             ],
 
             // Estilo para información de encabezado
@@ -117,11 +112,11 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             ],
 
             // Estilo para pie de página
-            'A'.($lastRow-2).':A'.$lastRow => [
+            'A' . ($lastRow - 2) . ':A' . $lastRow => [
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'F0F0F0'] // Gris claro
+                    'startColor' => ['rgb' => 'F0F0F0'], // Gris claro
                 ],
             ],
 
@@ -130,10 +125,10 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
                 ],
             ],
         ];
@@ -145,7 +140,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 'font' => ['bold' => true, 'size' => 12],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'D9E1F2']
+                    'startColor' => ['rgb' => 'D9E1F2'],
                 ],
             ];
         }
@@ -162,7 +157,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
         // Alineación para columna de cantidades
         $styles["B2:B$lastRow"] = [
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_RIGHT
+                'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],
         ];
 
@@ -179,7 +174,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event): void {
                 // Combinar celdas para el título y período
                 $event->sheet->mergeCells('A1:B1');
                 $event->sheet->mergeCells('A2:B2');
@@ -190,7 +185,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
                 // Agregar bordes al pie de página
                 $lastRow = $event->sheet->getHighestRow();
-                $event->sheet->getStyle('A'.($lastRow-2).':B'.$lastRow)->getBorders()
+                $event->sheet->getStyle('A' . ($lastRow - 2) . ':B' . $lastRow)->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
 
@@ -198,7 +193,12 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
                 $event->sheet->getDelegate()->getSheetView()
                     ->setZoomScale(100)
                     ->setZoomScaleNormal(100);
-            }
+            },
         ];
+    }
+
+    protected function formatPeriodo(): string
+    {
+        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\ImportService;
-use Illuminate\Support\ServiceProvider;
 use App\Services\TableManagementService;
+use Illuminate\Support\ServiceProvider;
 
 class ImportServiceProvider extends ServiceProvider
 {
@@ -15,7 +15,7 @@ class ImportServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ImportService::class, function ($app) {
             return new ImportService($app->make(TableManagementService::class));
-            ;
+
         });
     }
 
@@ -24,6 +24,6 @@ class ImportServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

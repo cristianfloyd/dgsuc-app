@@ -2,28 +2,28 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\File;
-use Filament\Notifications\Notification;
 use League\CommonMark\CommonMarkConverter;
 
 class DocumentationPage extends Page
 {
+    public string $activeSection = 'index';
+
     // protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationLabel = 'Documentación';
+
     protected static ?string $title = 'Documentación del Sistema';
+
     protected static string $view = 'filament.pages.documentation';
 
     protected static ?string $navigationGroup = 'Ayuda';
+
     protected static ?int $navigationSort = 100;
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return true;
-    }
-
-    public string $activeSection = 'index';
     protected array $documentationData = [];
+
     protected array $markdownFiles = [
         'index' => 'Resumen General',
         'panel-liquidaciones' => 'Panel de Liquidaciones',
@@ -31,19 +31,43 @@ class DocumentationPage extends Page
         'panel-admin' => 'Panel Administrativo',
         'recursos' => 'Recursos del Sistema',
         'controles-sicoss' => 'Controles SICOSS',
-        'bloqueos' => 'Sistema de Bloqueos'
+        'bloqueos' => 'Sistema de Bloqueos',
     ];
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
 
-
-    public function mount()
+    public function mount(): void
     {
         $this->loadDocumentation();
     }
 
+    public function setActiveSection(string $section): void
+    {
+        $this->activeSection = $section;
+    }
 
+    public function print(): void
+    {
+        $this->dispatch('print-documentation');
+    }
 
-    protected function loadDocumentation()
+    public function getHeadings(): array
+    {
+        $currentDoc = collect($this->documentationData)
+            ->firstWhere('section', $this->activeSection);
+
+        if (!$currentDoc) {
+            return [];
+        }
+
+        preg_match_all('/#+ (.*)/', $currentDoc['content'], $matches);
+        return $matches[1] ?? [];
+    }
+
+    protected function loadDocumentation(): void
     {
         $converter = new CommonMarkConverter([
             'html_input' => 'strip',
@@ -64,7 +88,7 @@ class DocumentationPage extends Page
                     'title' => $title,
                     'section' => $file,
                     'content' => $content,
-                    'rendered_content' => (string) $converter->convert($content)
+                    'rendered_content' => (string)$converter->convert($content),
                 ];
             }
         }
@@ -76,16 +100,6 @@ class DocumentationPage extends Page
                 ->body('No se encontraron archivos de documentación en el directorio especificado.')
                 ->send();
         }
-    }
-
-    public function setActiveSection(string $section): void
-    {
-        $this->activeSection = $section;
-    }
-
-    public function print(): void
-    {
-        $this->dispatch('print-documentation');
     }
 
     protected function getViewData(): array
@@ -106,18 +120,5 @@ class DocumentationPage extends Page
                 ];
             })
             ->toArray();
-    }
-
-    public function getHeadings(): array
-    {
-        $currentDoc = collect($this->documentationData)
-            ->firstWhere('section', $this->activeSection);
-
-        if (!$currentDoc) {
-            return [];
-        }
-
-        preg_match_all('/#+ (.*)/', $currentDoc['content'], $matches);
-        return $matches[1] ?? [];
     }
 }

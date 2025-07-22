@@ -4,7 +4,6 @@ namespace App\ValueObjects;
 
 use Carbon\Carbon;
 use JsonSerializable;
-use InvalidArgumentException;
 
 /**
  * Value Object que representa un período fiscal en el sistema.
@@ -13,7 +12,7 @@ use InvalidArgumentException;
  * permitiendo su representación tanto en formato combinado (YYYYMM) como
  * en componentes separados (año y mes).
  */
-class PeriodoFiscal implements JsonSerializable
+class PeriodoFiscal implements \JsonSerializable
 {
     /**
      * @var int El año del período fiscal
@@ -30,7 +29,8 @@ class PeriodoFiscal implements JsonSerializable
      *
      * @param int $year El año del período fiscal
      * @param int $month El mes del período fiscal (1-12)
-     * @throws InvalidArgumentException Si los valores no cumplen con las reglas de validación
+     *
+     * @throws \InvalidArgumentException Si los valores no cumplen con las reglas de validación
      */
     public function __construct(int $year, int $month)
     {
@@ -40,38 +40,32 @@ class PeriodoFiscal implements JsonSerializable
     }
 
     /**
-     * Valida que el año y mes cumplan con las reglas de negocio.
+     * Representación en string del período fiscal.
      *
-     * @param int $year El año a validar
-     * @param int $month El mes a validar
-     * @throws InvalidArgumentException Si los valores no son válidos
+     * @return string
      */
-    private function validate(int $year, int $month): void
+    public function __toString(): string
     {
-        if ($year < 1900 || $year > 2100) {
-            throw new InvalidArgumentException('El año debe estar entre 1900 y 2100');
-        }
-
-        if ($month < 1 || $month > 12) {
-            throw new InvalidArgumentException('El mes debe estar entre 1 y 12');
-        }
+        return $this->toString();
     }
 
     /**
      * Crea una instancia a partir de un string en formato YYYYMM.
      *
      * @param string $periodoFiscal El período fiscal en formato YYYYMM
+     *
+     * @throws \InvalidArgumentException Si el formato no es válido
+     *
      * @return self
-     * @throws InvalidArgumentException Si el formato no es válido
      */
     public static function fromString(string $periodoFiscal): self
     {
         if (!preg_match('/^(\d{4})(\d{2})$/', $periodoFiscal, $matches)) {
-            throw new InvalidArgumentException('El período fiscal debe tener el formato YYYYMM');
+            throw new \InvalidArgumentException('El período fiscal debe tener el formato YYYYMM');
         }
 
-        $year = (int) $matches[1];
-        $month = (int) $matches[2];
+        $year = (int)$matches[1];
+        $month = (int)$matches[2];
 
         return new self($year, $month);
     }
@@ -80,6 +74,7 @@ class PeriodoFiscal implements JsonSerializable
      * Crea una instancia a partir de un objeto Carbon.
      *
      * @param Carbon $date La fecha de la que se extraerá el período fiscal
+     *
      * @return self
      */
     public static function fromCarbon(Carbon $date): self
@@ -125,7 +120,7 @@ class PeriodoFiscal implements JsonSerializable
      */
     public function formattedMonth(): string
     {
-        return str_pad($this->month, 2, '0', STR_PAD_LEFT);
+        return str_pad($this->month, 2, '0', \STR_PAD_LEFT);
     }
 
     /**
@@ -184,6 +179,7 @@ class PeriodoFiscal implements JsonSerializable
      * Compara si este período fiscal es igual a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
+     *
      * @return bool
      */
     public function equals(PeriodoFiscal $other): bool
@@ -195,6 +191,7 @@ class PeriodoFiscal implements JsonSerializable
      * Compara si este período fiscal es anterior a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
+     *
      * @return bool
      */
     public function isBefore(PeriodoFiscal $other): bool
@@ -210,6 +207,7 @@ class PeriodoFiscal implements JsonSerializable
      * Compara si este período fiscal es posterior a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
+     *
      * @return bool
      */
     public function isAfter(PeriodoFiscal $other): bool
@@ -231,18 +229,8 @@ class PeriodoFiscal implements JsonSerializable
         return [
             'year' => $this->year,
             'month' => $this->month,
-            'formatted' => $this->toString()
+            'formatted' => $this->toString(),
         ];
-    }
-
-    /**
-     * Representación en string del período fiscal.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->toString();
     }
 
     /**
@@ -254,7 +242,26 @@ class PeriodoFiscal implements JsonSerializable
     {
         return [
             'year' => $this->year,
-            'month' => $this->month
+            'month' => $this->month,
         ];
+    }
+
+    /**
+     * Valida que el año y mes cumplan con las reglas de negocio.
+     *
+     * @param int $year El año a validar
+     * @param int $month El mes a validar
+     *
+     * @throws \InvalidArgumentException Si los valores no son válidos
+     */
+    private function validate(int $year, int $month): void
+    {
+        if ($year < 1900 || $year > 2100) {
+            throw new \InvalidArgumentException('El año debe estar entre 1900 y 2100');
+        }
+
+        if ($month < 1 || $month > 12) {
+            throw new \InvalidArgumentException('El mes debe estar entre 1 y 12');
+        }
     }
 }

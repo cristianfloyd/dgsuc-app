@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->booted(function (){
+        $this->app->booted(function (): void {
             $schedule = $this->app->make(Schedule::class);
             $schedule->command('concepto-listado:refresh')
                 ->monthlyOn(1, '00:01')
@@ -22,6 +22,6 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

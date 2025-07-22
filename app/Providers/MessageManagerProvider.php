@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\MessageManagerInterface;
 use App\Services\MessageManager;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\MessageManagerInterface;
 
 class MessageManagerProvider extends ServiceProvider
 {
@@ -21,6 +21,6 @@ class MessageManagerProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

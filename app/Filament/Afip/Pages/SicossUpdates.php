@@ -14,13 +14,11 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Widgets\MultipleIdLiquiSelector;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 
 /**
- * Class SicossUpdates
+ * Class SicossUpdates.
  *
  * Página de Filament para gestionar y mostrar actualizaciones relacionadas con SICOSS de AFIP.
  *
@@ -28,25 +26,38 @@ use Livewire\Attributes\On;
  */
 class SicossUpdates extends Page
 {
+    public array $updateResults = [];
+
+    public bool $isProcessing = false;
+
+    public ?array $selectedIdLiqui = null;
+
+    public $year;
+
+    public $month;
+
+    public bool $isHelpVisible = false;
+
+    public ?array $selectedliquiDefinitiva = null;
+
+    public PeriodoFiscalData $periodoFiscal;
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+
     protected static ?string $navigationGroup = 'AFIP';
+
     protected static ?string $navigationLabel = 'Actualización SICOSS';
+
     protected static ?string $title = 'Actualización de Datos SICOSS';
 
     protected static string $view = 'filament.afip.pages.sicoss-updates';
 
-    public array $updateResults = [];
-    public bool $isProcessing = false;
-    public ?array $selectedIdLiqui = null;
-    public $year;
-    public $month;
-    public bool $isHelpVisible = false;
-    public ?array $selectedliquiDefinitiva = null;
-    public PeriodoFiscalData $periodoFiscal;
-
     protected PeriodoFiscalService $periodoFiscalService;
+
     protected SicossEmbarazadasService $sicossEmbarazadasService;
+
     protected SicossActividadUpdateService $sicossActividadUpdateService;
+
     protected SicossCpto205Service $sicossCpto205Service;
 
     /**
@@ -61,7 +72,7 @@ class SicossUpdates extends Page
         PeriodoFiscalService $periodoFiscalService,
         SicossEmbarazadasService $sicossEmbarazadasService,
         SicossActividadUpdateService $sicossActividadUpdateService,
-        SicossCpto205Service $sicossCpto205Service
+        SicossCpto205Service $sicossCpto205Service,
     ): void {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->sicossEmbarazadasService = $sicossEmbarazadasService;
@@ -69,7 +80,7 @@ class SicossUpdates extends Page
         $this->sicossCpto205Service = $sicossCpto205Service;
     }
 
-    public function mount()
+    public function mount(): void
     {
         // Obtener el período fiscal actual
         $periodoFiscalData = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
@@ -88,52 +99,6 @@ class SicossUpdates extends Page
         // ];
     }
 
-    protected function getHeaderWidgets(): array
-    {
-        return [
-        \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
-        ];
-    }
-
-    protected function executeServiceMethod(callable $serviceMethod, string $successTitle): void
-    {
-        $this->isProcessing = true;
-        try {
-            $this->updateResults = $serviceMethod();
-
-            if ($this->updateResults['status'] === 'success') {
-                Notification::make()
-                ->title($successTitle)
-                ->success()
-                ->body($this->updateResults['message'])
-                ->send();
-            } else {
-                Notification::make()
-                ->title('Error en la actualización')
-                ->danger()
-                ->body($this->updateResults['message'])
-                ->send();
-            }
-        } catch (\Throwable $th) {
-            Log::error(
-                'Error en actualización SICOSS',
-                [
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
-                ]
-            );
-
-            Notification::make()
-            ->title('Error')
-            ->danger()
-            ->body($th->getMessage())
-            ->send();
-        } finally {
-            $this->isProcessing = false;
-        }
-    }
-
-
     #[On('fiscalPeriodUpdated')]
     public function handlePeriodoFiscalUpdated(): void
     {
@@ -148,30 +113,29 @@ class SicossUpdates extends Page
 
         // Obtener las liquidaciones para el nuevo período fiscal
         $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
-        ->generaImpositivo()
-        ->pluck('nro_liqui', 'desc_liqui')
-        ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
-        ->toArray();
+            ->generaImpositivo()
+            ->pluck('nro_liqui', 'desc_liqui')
+            ->map(fn ($nro, $desc) => "#{$nro} - {$desc}")
+            ->toArray();
 
         // Actualizar la propiedad selectedIdLiqui
         $this->selectedIdLiqui = $liquidaciones;
 
         // Determinar la liquidación definitiva (ejemplo: la última liquidación)
         $this->selectedliquiDefinitiva = Dh22::FilterByYearMonth($this->year, $this->month)
-        ->generaImpositivo()
-        ->definitiva()
-        ->pluck('nro_liqui', 'desc_liqui')
-        ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
-        ->toArray();
+            ->generaImpositivo()
+            ->definitiva()
+            ->pluck('nro_liqui', 'desc_liqui')
+            ->map(fn ($nro, $desc) => "#{$nro} - {$desc}")
+            ->toArray();
 
         // Notificar al usuario
         Notification::make()
-        ->title('Período fiscal actualizado')
-        ->body("Período actual: {$this->year}-{$this->month}")
-        ->success()
-        ->send();
+            ->title('Período fiscal actualizado')
+            ->body("Período actual: {$this->year}-{$this->month}")
+            ->success()
+            ->send();
     }
-
 
     public function runUpdates(): void
     {
@@ -181,16 +145,16 @@ class SicossUpdates extends Page
             // Obtener las liquidaciones con sino_genimp = true para el período fiscal seleccionado
             // usando los scopes definidos en el modelo Dh22
             $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
-            ->generaImpositivo()
-            ->pluck('nro_liqui')
-            ->toArray();
+                ->generaImpositivo()
+                ->pluck('nro_liqui')
+                ->toArray();
 
             if (empty($liquidaciones)) {
                 Notification::make()
-                ->title('Sin liquidaciones')
-                ->warning()
-                ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
-                ->send();
+                    ->title('Sin liquidaciones')
+                    ->warning()
+                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                    ->send();
                 $this->isProcessing = false;
                 return;
             }
@@ -201,38 +165,38 @@ class SicossUpdates extends Page
 
             if ($this->updateResults['status'] === 'success') {
                 Notification::make()
-                ->title('Actualización completada')
-                ->success()
-                ->body("Se procesaron " . count($liquidaciones) . " liquidaciones para el período {$this->year}-{$this->month}")
-                ->send();
+                    ->title('Actualización completada')
+                    ->success()
+                    ->body('Se procesaron ' . \count($liquidaciones) . " liquidaciones para el período {$this->year}-{$this->month}")
+                    ->send();
             } else {
                 Notification::make()
-                ->title('Error en la actualización')
-                ->danger()
-                ->body($this->updateResults['message'])
-                ->send();
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($this->updateResults['message'])
+                    ->send();
             }
         } catch (\Exception $e) {
             Log::error(
                 'Error en actualización SICOSS',
                 [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-                ]
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ],
             );
 
             Notification::make()
-            ->title('Error')
-            ->danger()
-            ->body($e->getMessage())
-            ->send();
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
         } finally {
             $this->isProcessing = false;
         }
     }
 
     /**
-     * Ejecuta la actualización de datos de embarazadas en SICOSS
+     * Ejecuta la actualización de datos de embarazadas en SICOSS.
      */
     public function runEmbarazadasUpdate(): void
     {
@@ -241,17 +205,17 @@ class SicossUpdates extends Page
         try {
             // Obtener las liquidaciones para el período fiscal seleccionado
             $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
-            ->generaImpositivo()
-            ->definitiva()
-            ->pluck('nro_liqui')
-            ->toArray();
+                ->generaImpositivo()
+                ->definitiva()
+                ->pluck('nro_liqui')
+                ->toArray();
 
             if (empty($liquidaciones)) {
                 Notification::make()
-                ->title('Sin liquidaciones')
-                ->warning()
-                ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
-                ->send();
+                    ->title('Sin liquidaciones')
+                    ->warning()
+                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                    ->send();
                 $this->isProcessing = false;
                 return;
             }
@@ -260,11 +224,11 @@ class SicossUpdates extends Page
             // Ejecutar la actualización de embarazadas
             $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas(
                 [
-                'year' => $this->year,
-                'month' => $this->month,
-                'liquidaciones' => $liquidaciones,
-                'nro_liqui' => $liquidaciones[0] // Usar la primera liquidación
-                ]
+                    'year' => $this->year,
+                    'month' => $this->month,
+                    'liquidaciones' => $liquidaciones,
+                    'nro_liqui' => $liquidaciones[0], // Usar la primera liquidación
+                ],
             );
 
             // Guardar resultados para mostrar en la vista
@@ -279,31 +243,31 @@ class SicossUpdates extends Page
                     ->send();
             } elseif ($resultado['status'] === 'warning') {
                 Notification::make()
-                ->title('Advertencia')
-                ->warning()
-                ->body($resultado['message'])
-                ->send();
+                    ->title('Advertencia')
+                    ->warning()
+                    ->body($resultado['message'])
+                    ->send();
             } else {
                 Notification::make()
-                ->title('Error en la actualización')
-                ->danger()
-                ->body($resultado['message'])
-                ->send();
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
             }
         } catch (\Exception $e) {
             Log::error(
                 'Error en actualización de embarazadas',
                 [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-                ]
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ],
             );
 
             Notification::make()
-            ->title('Error')
-            ->danger()
-            ->body($e->getMessage())
-            ->send();
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
         } finally {
             $this->isProcessing = false;
         }
@@ -319,30 +283,30 @@ class SicossUpdates extends Page
 
             if ($resultado['status'] === 'success') {
                 Notification::make()
-                ->title('Actualización de Actividad completada')
-                ->success()
-                ->body($resultado['message'])
-                ->send();
+                    ->title('Actualización de Actividad completada')
+                    ->success()
+                    ->body($resultado['message'])
+                    ->send();
             } else {
                 Notification::make()
-                ->title('Error en la actualización')
-                ->danger()
-                ->body($resultado['message'])
-                ->send();
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
             }
         } catch (\Exception $e) {
             Notification::make()
-            ->title('Error')
-            ->danger()
-            ->body($e->getMessage())
-            ->send();
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
         } finally {
             $this->isProcessing = false;
         }
     }
 
     /**
-     * Ejecuta la actualización de datos del concepto 205 en SICOSS
+     * Ejecuta la actualización de datos del concepto 205 en SICOSS.
      */
     public function runConcepto205Update(): void
     {
@@ -351,17 +315,17 @@ class SicossUpdates extends Page
         try {
             // Obtener las liquidaciones para el período fiscal seleccionado
             $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
-            ->generaImpositivo()
-            ->definitiva()
-            ->pluck('nro_liqui')
-            ->toArray();
+                ->generaImpositivo()
+                ->definitiva()
+                ->pluck('nro_liqui')
+                ->toArray();
 
             if (empty($liquidaciones)) {
                 Notification::make()
-                ->title('Sin liquidaciones')
-                ->warning()
-                ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
-                ->send();
+                    ->title('Sin liquidaciones')
+                    ->warning()
+                    ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
+                    ->send();
                 $this->isProcessing = false;
                 return;
             }
@@ -370,8 +334,8 @@ class SicossUpdates extends Page
             // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
             $resultado = $this->sicossCpto205Service->actualizarCpto205(
                 [
-                'liquidaciones' => $liquidaciones
-                ]
+                    'liquidaciones' => $liquidaciones,
+                ],
             );
             $this->updateResults = $resultado;
 
@@ -384,25 +348,70 @@ class SicossUpdates extends Page
                     ->send();
             } else {
                 Notification::make()
-                ->title('Error en la actualización')
-                ->danger()
-                ->body($resultado['message'])
-                ->send();
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($resultado['message'])
+                    ->send();
             }
         } catch (\Exception $e) {
             Log::error(
                 'Error en actualización de concepto 205',
                 [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-                ]
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ],
             );
 
             Notification::make()
-            ->title('Error')
-            ->danger()
-            ->body($e->getMessage())
-            ->send();
+                ->title('Error')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+        } finally {
+            $this->isProcessing = false;
+        }
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
+        ];
+    }
+
+    protected function executeServiceMethod(callable $serviceMethod, string $successTitle): void
+    {
+        $this->isProcessing = true;
+        try {
+            $this->updateResults = $serviceMethod();
+
+            if ($this->updateResults['status'] === 'success') {
+                Notification::make()
+                    ->title($successTitle)
+                    ->success()
+                    ->body($this->updateResults['message'])
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('Error en la actualización')
+                    ->danger()
+                    ->body($this->updateResults['message'])
+                    ->send();
+            }
+        } catch (\Throwable $th) {
+            Log::error(
+                'Error en actualización SICOSS',
+                [
+                    'error' => $th->getMessage(),
+                    'trace' => $th->getTraceAsString(),
+                ],
+            );
+
+            Notification::make()
+                ->title('Error')
+                ->danger()
+                ->body($th->getMessage())
+                ->send();
         } finally {
             $this->isProcessing = false;
         }
@@ -412,12 +421,12 @@ class SicossUpdates extends Page
     {
         return [
             Action::make('show_help')
-                ->label(fn() => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
-                ->icon(fn() => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                ->label(fn () => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
+                ->icon(fn () => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                 ->action(
-                    function () {
+                    function (): void {
                         $this->isHelpVisible = !$this->isHelpVisible;
-                    }
+                    },
                 ),
 
             Action::make('run_updates')
@@ -427,8 +436,8 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalDescription(
                     '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso puede tomar varios minutos.'
+                    $this->year . '-' . str_pad((string)$this->month, 2, '0', \STR_PAD_LEFT) .
+                    '? Este proceso puede tomar varios minutos.',
                 ),
 
             Action::make('run_embarazadas_update')
@@ -441,8 +450,8 @@ class SicossUpdates extends Page
                 ->modalHeading('Actualizar Situación de Embarazadas')
                 ->modalDescription(
                     '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.'
+                    $this->year . '-' . str_pad((string)$this->month, 2, '0', \STR_PAD_LEFT) .
+                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.',
                 ),
 
             Action::make('run_actividad_update')
@@ -463,9 +472,9 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Concepto 205')
-                ->modalDescription('Accion en modo de prueba. No se realizará la actualización.')
+                ->modalDescription('Accion en modo de prueba. No se realizará la actualización.'),
             // ->modalDescription('¿Está seguro que desea actualizar los datos
             // del concepto 205 ? Este proceso creará una tabla temporal con los montos calculados para los agentes que tienen el concepto 789 y 205.')
-            ];
+        ];
     }
 }

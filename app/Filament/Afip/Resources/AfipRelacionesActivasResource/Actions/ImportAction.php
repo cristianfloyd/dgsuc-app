@@ -4,25 +4,19 @@ namespace App\Filament\Afip\Resources\AfipRelacionesActivasResource\Actions;
 
 use App\Models\Mapuche\Dh22;
 use App\Models\UploadedFile;
-use Filament\Actions\Action;
 use App\Services\ColumnMetadata;
 use App\Services\DatabaseService;
-use App\Services\ValidationService;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\Select;
 use App\Services\FileProcessorService;
-use Illuminate\Support\Facades\Storage;
+use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ImportAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'import';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -48,7 +42,7 @@ class ImportAction extends Action
                             ->get()
                             ->mapWithKeys(function ($liquidacion) {
                                 return [
-                                    $liquidacion->nro_liqui => "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}"
+                                    $liquidacion->nro_liqui => "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}",
                                 ];
                             });
                     })
@@ -66,7 +60,7 @@ class ImportAction extends Action
                     ->directory('afiptxt')
                     ->visibility('public')
                     ->storeFileNamesIn('original_filename')
-                    ->required()
+                    ->required(),
             ])
             ->action(function (array $data): void {
                 try {
@@ -74,9 +68,9 @@ class ImportAction extends Action
                     $file = $data['file'];
                     $filePath = $file;
                     $filename = basename($filePath);
-                    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+                    $extension = pathinfo($filename, \PATHINFO_EXTENSION);
                     $timenow = time();
-                    $newFilename = pathinfo($filename, PATHINFO_FILENAME) . "-{$timenow}.{$extension}";
+                    $newFilename = pathinfo($filename, \PATHINFO_FILENAME) . "-{$timenow}.{$extension}";
 
                     // Filament ya movió el archivo a almacenamiento, solo necesitamos la ruta
                     $filePath = Storage::disk('public')->path($file);
@@ -104,7 +98,7 @@ class ImportAction extends Action
                         new DatabaseService(),
                         new ColumnMetadata(),
                         app()->make('App\Contracts\DataMapperInterface'),
-                        $periodoFiscal
+                        $periodoFiscal,
                     );
 
 
@@ -136,5 +130,10 @@ class ImportAction extends Action
                         ->send();
                 }
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'import';
     }
 }

@@ -2,29 +2,30 @@
 
 namespace App\Filament\Resources\Dh03Resource\Widgets;
 
-use Carbon\Carbon;
+use App\Contracts\CargoFilterServiceInterface;
 use App\Models\Dh03;
 use App\Models\Dh11;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\DatePicker;
-use App\Contracts\CargoFilterServiceInterface;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Support\Facades\DB;
 
 class CargosOverTime extends ChartWidget
 {
     use InteractsWithPageFilters;
 
     public ?string $startDate = null;
+
     public ?string $endDate = null;
+
     protected static ?int  $sort = 1;
+
     protected static ?string $heading = 'Cargos';
+
     private CargoFilterServiceInterface $filterService;
-
-
 
     public function boot(CargoFilterServiceInterface $filterService): void
     {
@@ -49,7 +50,6 @@ class CargosOverTime extends ChartWidget
                 ->minDate(fn (Get $get) => $get('startDate')),
         ];
     }
-
 
     // Configuración del tipo de gráfico
     protected function getType(): string
@@ -96,7 +96,7 @@ class CargosOverTime extends ChartWidget
                 throw new \Exception('Datos de altas, bajas o permanentes no disponibles');
             }
 
-             // Formatear los datos para el gráfico
+            // Formatear los datos para el gráfico
             $labels = $this->getLabels($data);
             $altasData = $this->formatData($labels, $data['altas']);
             $bajasData = $this->formatData($labels, $data['bajas']);
@@ -106,13 +106,13 @@ class CargosOverTime extends ChartWidget
                 'labels' => $labels,
                 'datasets' => [
 
-                        $this->createDataset('Altas', $altasData, '#4AE24A'),
+                    $this->createDataset('Altas', $altasData, '#4AE24A'),
 
 
-                        $this->createDataset('Bajas', $bajasData, '#E24A4A'),
+                    $this->createDataset('Bajas', $bajasData, '#E24A4A'),
 
 
-                        $this->createDataset('Permanentes', $permanentesData, '#E2E24A'),
+                    $this->createDataset('Permanentes', $permanentesData, '#E2E24A'),
 
                 ],
             ];
@@ -130,40 +130,40 @@ class CargosOverTime extends ChartWidget
     {
         return $query->select(
             DB::raw('TO_CHAR(fec_alta, \'YYYY-MM\') as month'),
-            DB::raw('count(*) as count')
+            DB::raw('count(*) as count'),
         )
-        ->whereBetween('fec_alta', [$start, $end])
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+            ->whereBetween('fec_alta', [$start, $end])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
     }
 
     private function getBajasData($query, $start, $end)
     {
         return $query->select(
             DB::raw('TO_CHAR(fec_baja, \'YYYY-MM\') as month'),
-            DB::raw('count(*) as count')
+            DB::raw('count(*) as count'),
         )
-        ->where('fec_baja', '<=', $end)
-        ->whereNotNull('fec_baja')
-        ->whereBetween('fec_alta', [$start, $end])
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+            ->where('fec_baja', '<=', $end)
+            ->whereNotNull('fec_baja')
+            ->whereBetween('fec_alta', [$start, $end])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
     }
 
     private function getPermanentesData($query, $start, $end)
     {
         return $query->select(
             DB::raw('TO_CHAR(fec_alta, \'YYYY-MM\') as month'),
-            DB::raw('count(*) as count')
+            DB::raw('count(*) as count'),
         )
-        ->whereNull('fec_baja')
-        ->whereBetween('fec_alta', [$start, $end])
-        ->where('codc_carac', '=', 'PERM')
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+            ->whereNull('fec_baja')
+            ->whereBetween('fec_alta', [$start, $end])
+            ->where('codc_carac', '=', 'PERM')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
     }
 
     private function getLabels($data)
@@ -180,7 +180,7 @@ class CargosOverTime extends ChartWidget
     // Formatear los datos para el gráfico
     private function formatData(array $labels, $data)
     {
-        $formattedData = array_fill(0, count($labels), 0);
+        $formattedData = array_fill(0, \count($labels), 0);
         foreach ($data as $item) {
             $index = array_search($item->month, $labels);
             if ($index !== false) {
@@ -196,6 +196,7 @@ class CargosOverTime extends ChartWidget
      * @param string $label Etiqueta del conjunto de datos.
      * @param array $data Datos numéricos del conjunto de datos.
      * @param string $color Color del conjunto de datos.
+     *
      * @return array Arreglo con la información del conjunto de datos.
      */
     private function createDataset($label, $data, $color)
@@ -213,11 +214,12 @@ class CargosOverTime extends ChartWidget
      *
      * @param string $color El color hexadecimal a ajustar.
      * @param float $opacity La opacidad deseada, entre 0 y 1.
+     *
      * @return string El color con la opacidad ajustada en formato RGBA.
      */
     private function adjustColorOpacity($color, $opacity)
     {
-        [$r, $g, $b] = sscanf($color, "#%02x%02x%02x");
+        [$r, $g, $b] = sscanf($color, '#%02x%02x%02x');
         return "rgba($r, $g, $b, $opacity)";
     }
 }

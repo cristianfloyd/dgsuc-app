@@ -5,7 +5,9 @@ namespace App\Enums;
 enum BloqueosTipoEnum: string
 {
     case LICENCIA = 'licencia';
+
     case FALLECIDO = 'fallecido';
+
     case RENUNCIA = 'renuncia';
     // Agrega aquí otros tipos si existen
 

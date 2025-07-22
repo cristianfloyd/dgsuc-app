@@ -2,9 +2,8 @@
 
 namespace App\Traits;
 
-
 /**
- * Trait MapucheLiquiConnectionTrait
+ * Trait MapucheLiquiConnectionTrait.
  *
  * Este trait proporciona la configuración de conexión para la base de datos Mapuchito.
  * Se puede utilizar en cualquier modelo que requiera esta conexión específica.
@@ -13,6 +12,7 @@ trait MapucheLiquiConnectionTrait
 {
     /**
      * Obtiene el nombre de la conexión de base de datos.
+     *
      * @return string
      */
     public function getConnectionName(): string
@@ -28,6 +28,6 @@ trait MapucheLiquiConnectionTrait
     public function getTable()
     {
         $table = parent::getTable();
-        return strpos($table, 'mapuche.') === 0 ? $table : "mapuche.$table";
+        return str_starts_with($table, 'mapuche.') ? $table : "mapuche.$table";
     }
 }

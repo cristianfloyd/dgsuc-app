@@ -3,20 +3,20 @@
 namespace App\Exports;
 
 use Illuminate\Support\LazyCollection;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LazyReportExport implements
     FromCollection,
@@ -32,8 +32,11 @@ class LazyReportExport implements
     use Exportable;
 
     protected $query;
+
     protected $lazyCollection;
+
     protected $columns;
+
     protected $summaryData;
 
     public function __construct($query)
@@ -49,7 +52,7 @@ class LazyReportExport implements
             'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe'
+            'impp_conce' => 'Importe',
         ];
 
         // Convertimos el query a una LazyCollection usando cursor
@@ -86,7 +89,7 @@ class LazyReportExport implements
 
             switch ($column) {
                 case 'cuil':
-                    if (strlen($value) >= 3) {
+                    if (\strlen($value) >= 3) {
                         $value = substr($value, 2, -1);
                     }
                     break;
@@ -184,7 +187,7 @@ class LazyReportExport implements
     {
         return [
             'Reporte de Conceptos' => new LazyReportDetailSheet($this->query),
-            'Resumen' => new LazyReportSummarySheet($this->summaryData)
+            'Resumen' => new LazyReportSummarySheet($this->summaryData),
         ];
     }
 
@@ -203,7 +206,7 @@ class LazyReportExport implements
                 $dependencyTotals[$record->codc_uacad] = [
                     'dependencia' => $record->codc_uacad,
                     'total' => 0,
-                    'registros' => 0
+                    'registros' => 0,
                 ];
             }
 
@@ -219,7 +222,7 @@ class LazyReportExport implements
         $this->summaryData = [
             'totalGeneral' => $totalGeneral,
             'totalsByDependency' => array_values($dependencyTotals),
-            'totalRegistros' => $totalRegistros
+            'totalRegistros' => $totalRegistros,
         ];
     }
 }

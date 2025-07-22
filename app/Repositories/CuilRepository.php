@@ -2,12 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\AfipMapucheSicoss;
+use App\Contracts\CuilRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
-use App\Contracts\CuilRepositoryInterface;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class CuilRepository implements CuilRepositoryInterface
 {
@@ -18,6 +17,7 @@ class CuilRepository implements CuilRepositoryInterface
      * para un período fiscal específico.
      *
      * @param string $periodoFiscal Período fiscal en formato YYYYMM
+     *
      * @return Collection Colección de CUILs
      */
     public function getCuilsNotInAfip(string $periodoFiscal): Collection
@@ -25,9 +25,9 @@ class CuilRepository implements CuilRepositoryInterface
         return DB::connection($this->getConnectionName())
             ->table('suc.afip_mapuche_sicoss as ams')
             ->select('ams.cuil')
-            ->leftJoin('suc.afip_relaciones_activas as ara', function ($join) use ($periodoFiscal) {
+            ->leftJoin('suc.afip_relaciones_activas as ara', function ($join) use ($periodoFiscal): void {
                 $join->on('ams.cuil', '=', 'ara.cuil')
-                     ->where('ara.periodo_fiscal', '=', $periodoFiscal);
+                    ->where('ara.periodo_fiscal', '=', $periodoFiscal);
             })
             ->whereNull('ara.cuil')
             ->where('ams.periodo_fiscal', '=', $periodoFiscal)
@@ -55,6 +55,7 @@ class CuilRepository implements CuilRepositoryInterface
      *
      * @param \Illuminate\Support\Collection $collection La colección a paginar.
      * @param int $perPage El número de resultados por página.
+     *
      * @return \Illuminate\Pagination\LengthAwarePaginator El paginador de los resultados.
      */
     private function paginateResults($collection, $perPage): LengthAwarePaginator
@@ -64,7 +65,7 @@ class CuilRepository implements CuilRepositoryInterface
         return new LengthAwarePaginator(
             $currentPageItems,
             $collection->count(),
-            $perPage
+            $perPage,
         );
     }
 }

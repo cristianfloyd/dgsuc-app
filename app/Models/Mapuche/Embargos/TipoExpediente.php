@@ -6,12 +6,12 @@ namespace App\Models\Mapuche\Embargos;
 
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Modelo Eloquent para la tabla mapuche.emb_tipo_expediente
+ * Modelo Eloquent para la tabla mapuche.emb_tipo_expediente.
  *
  * @property int $id_tipo_expediente ID del tipo de expediente (PK)
  * @property string $desc_tipo_expediente Descripción del tipo de expediente
@@ -24,37 +24,37 @@ class TipoExpediente extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'mapuche.emb_tipo_expediente';
-
-    /**
-     * Clave primaria
-     */
-    protected $primaryKey = 'id_tipo_expediente';
-
-    /**
-     * Desactivar timestamps de Laravel
+     * Desactivar timestamps de Laravel.
      */
     public $timestamps = false;
 
     /**
-     * Atributos que se pueden asignar masivamente
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'mapuche.emb_tipo_expediente';
+
+    /**
+     * Clave primaria.
+     */
+    protected $primaryKey = 'id_tipo_expediente';
+
+    /**
+     * Atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
-        'desc_tipo_expediente'
+        'desc_tipo_expediente',
     ];
 
     /**
-     * Casting de atributos
+     * Casting de atributos.
      */
     protected $casts = [
         'id_tipo_expediente' => 'integer',
-        'desc_tipo_expediente' => 'string'
+        'desc_tipo_expediente' => 'string',
     ];
 
     /**
-     * Relación con embargos
+     * Relación con embargos.
      */
     public function embargos(): HasMany
     {

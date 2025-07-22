@@ -2,30 +2,30 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Symfony\Component\HttpFoundation\Response;
 use App\Services\EnhancedDatabaseConnectionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class SetDatabaseConnection
 {
     public function __construct(
-        protected EnhancedDatabaseConnectionService $connectionService
-    ) {}
+        protected EnhancedDatabaseConnectionService $connectionService,
+    ) {
+    }
 
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, \Closure $next): Response
     {
         try {
             $connection = $this->connectionService->getCurrentConnection();
 
-            Log::debug("Middleware SetDatabaseConnection", [
+            Log::debug('Middleware SetDatabaseConnection', [
                 'connection' => $connection,
-                'request_path' => $request->path()
+                'request_path' => $request->path(),
             ]);
 
             // Verificar que la conexión existe en la configuración
@@ -47,9 +47,9 @@ class SetDatabaseConnection
 
             return $next($request);
         } catch (\Exception $e) {
-            Log::error("Error en middleware de conexión", [
+            Log::error('Error en middleware de conexión', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Usar conexión predeterminada en caso de error

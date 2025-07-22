@@ -2,30 +2,34 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Dh11;
-use Filament\Forms\Set;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Tables\Grouping\Group;
-use App\Traits\CategoriasConstantTrait;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Columns\TextInputColumn;
 use App\Filament\Resources\Dh11Resource\Pages;
+use App\Models\Dh11;
+use App\Traits\CategoriasConstantTrait;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Set;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class Dh11Resource extends Resource
 {
     use CategoriasConstantTrait;
+
     protected static ?string $model = Dh11::class;
+
     protected static ?string $modelLabel = 'Básicos (dh11)';
+
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form
@@ -35,7 +39,7 @@ class Dh11Resource extends Resource
                 TextInput::make('impp_basic')
                     ->numeric()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, ?float $state) {
+                    ->afterStateUpdated(function (Set $set, ?float $state): void {
                         $set('impp_asign', $state);
                         //fn (Set $set, ?int $state) => $set('impp_asign', $state)
                     }),
@@ -58,7 +62,7 @@ class Dh11Resource extends Resource
             ->groups([
                 Group::make('codigoescalafon')
                     ->label('Escalafón')
-                    ->collapsible()
+                    ->collapsible(),
             ])
             ->filtersLayout(FiltersLayout::Modal)
             ->columns([
@@ -95,10 +99,10 @@ class Dh11Resource extends Resource
                         'DOC2' => 'Preuniversitario',
                         'DOCU' => 'Docente Universitario',
                         'AUTU' => 'Autoridad Universitaria',
-                        'NODO' => 'Nodocente'
+                        'NODO' => 'Nodocente',
                     ])
-                    ->query(function (Builder $query, array $data){
-                        if (!$data['value']){
+                    ->query(function (Builder $query, array $data) {
+                        if (!$data['value']) {
                             return $query;
                         }
 
@@ -120,7 +124,7 @@ class Dh11Resource extends Resource
                         'B' => 'Baja',
                         'P' => 'P',
                     ])
-                    ->default('P')
+                    ->default('P'),
             ])
             ->actions([
                 //Tables\Actions\EditAction::make()->modal(),
@@ -136,7 +140,7 @@ class Dh11Resource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -148,6 +152,7 @@ class Dh11Resource extends Resource
             'edit' => Pages\EditDh11::route('/{record}/edit'),
         ];
     }
+
     public static function getWidgets(): array
     {
         return [

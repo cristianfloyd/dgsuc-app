@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Clase PeriodoFiscalService
+ * Clase PeriodoFiscalService.
  *
  * Esta clase proporciona servicios relacionados con los períodos fiscales.
  *
@@ -18,18 +18,15 @@ use Illuminate\Support\Facades\Log;
  * @method void setPeriodoFiscal(int $year, int $month) Establece el período fiscal actual en la sesión.
  * @method array getPeriodoFiscal Obtiene el período fiscal actual almacenado en la sesión.
  * @method array getPeriodoFiscalFromDatabase Obtiene el período fiscal actual almacenado en la base de datos.
- *
  */
 class PeriodoFiscalService
 {
-
     public function getFechaInicioPeriodoCorriente(): string
     {
-        $sql = "SELECT map_get_fecha_inicio_periodo();";
+        $sql = 'SELECT map_get_fecha_inicio_periodo();';
         $rs = DB::select($sql);
         return $rs[0]->map_get_fecha_inicio_periodo;
     }
-
 
     /**
      * Obtiene la fecha de fin del período fiscal actual.
@@ -41,16 +38,13 @@ class PeriodoFiscalService
      */
     public function getFechaFinPeriodoCorriente(): string
     {
-        $sql = "SELECT map_get_fecha_fin_periodo();";
+        $sql = 'SELECT map_get_fecha_fin_periodo();';
         $rs = DB::select($sql);
         return $rs['map_get_fecha_fin_periodo'];
     }
 
-
-
-
     /**
-    * Determina si una liquidación corresponde al período actual
+     * Determina si una liquidación corresponde al período actual.
      */
     public function isPeriodoActual(int $nroLiqui): bool
     {
@@ -73,12 +67,11 @@ class PeriodoFiscalService
      */
     public function setPeriodoFiscal(int $year, int $month): void
     {
-        $formattedYear = strval($year);
-        $formattedMonth = sprintf('%02d', $month);
+        $formattedYear = (string)$year;
+        $formattedMonth = \sprintf('%02d', $month);
         session(['year' => $formattedYear, 'month' => $formattedMonth]);
         Log::debug("Período fiscal establecido en la sesión: $formattedYear-$formattedMonth");
     }
-
 
     /**
      * Obtiene el período fiscal actual.
@@ -93,7 +86,7 @@ class PeriodoFiscalService
         $periodoFiscal = [];
 
         if (session()->has(['year', 'month'])) {
-            log::debug("Período fiscal obtenido de la sesión: " . session('year') . "-" . session('month'));
+            log::debug('Período fiscal obtenido de la sesión: ' . session('year') . '-' . session('month'));
             $periodoFiscal = [
                 'year' => session('year'),
                 'month' => session('month'),
@@ -110,6 +103,7 @@ class PeriodoFiscalService
      * Obtiene el periodo fiscal de una liquidación específica.
      *
      * @param int $nroLiqui Número de liquidación para obtener su periodo fiscal.
+     *
      * @return array Un array con el año y el mes del periodo fiscal en el formato ['year' => 'YYYY', 'month' => 'MM'].
      */
     public function getPeriodoFiscalFromLiqui(int $nroLiqui): array
@@ -132,8 +126,8 @@ class PeriodoFiscalService
         $periodoFiscal = Dh99::first();
 
         // Formatea el año y el mes al formato deseado.
-        $formattedYear = strval($periodoFiscal->per_anoct);
-        $formattedMonth = sprintf('%02d', $periodoFiscal->per_mesct);
+        $formattedYear = (string)($periodoFiscal->per_anoct);
+        $formattedMonth = \sprintf('%02d', $periodoFiscal->per_mesct);
 
         return [
             'year' => $formattedYear,
@@ -177,12 +171,12 @@ class PeriodoFiscalService
         $periodoFiscal = Dh22::find($id);
         return [
             'year' => $periodoFiscal->per_liano,
-            'month' => $periodoFiscal->per_limes
-            ];
+            'month' => $periodoFiscal->per_limes,
+        ];
     }
 
     /**
-     * Obtiene los períodos fiscales formateados para usar en selects de Filament
+     * Obtiene los períodos fiscales formateados para usar en selects de Filament.
      *
      * @return array Array asociativo con formato 'YYYY-MM' => 'YYYY-MM'
      */
@@ -191,7 +185,7 @@ class PeriodoFiscalService
         return $this->getPeriodosFiscales()['periodosFiscales']
             ->mapWithKeys(function ($periodo) {
                 $year = $periodo->per_liano;
-                $month = sprintf('%02d', $periodo->per_limes);
+                $month = \sprintf('%02d', $periodo->per_limes);
                 $label = "$year-$month";
                 $value = "$year-$month";
                 return [$value => $label];
@@ -200,10 +194,11 @@ class PeriodoFiscalService
     }
 
     /**
-     * Obtiene las liquidaciones disponibles para un período fiscal específico
+     * Obtiene las liquidaciones disponibles para un período fiscal específico.
      *
      * @param string $year Año del período fiscal
      * @param string $month Mes del período fiscal
+     *
      * @return array Array asociativo con nro_liqui => desc_liqui
      */
     public function getLiquidacionesByPeriodo(string $year, string $month): array

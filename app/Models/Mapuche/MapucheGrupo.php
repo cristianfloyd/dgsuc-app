@@ -2,35 +2,37 @@
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Builder;
 use App\Data\Mapuche\GrupoData;
-use App\Traits\MapucheConnectionTrait;
 use App\Models\Dh01;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MapucheGrupo extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'grupo';
-    protected $primaryKey = 'id_grupo';
     public $timestamps = false;
+
+    protected $table = 'grupo';
+
+    protected $primaryKey = 'id_grupo';
 
     protected $fillable = [
         'nombre',
         'descripcion',
-        'tipo'
+        'tipo',
     ];
 
     protected $casts = [
         'fec_modificacion' => 'datetime',
-        'id_grupo' => 'integer'
+        'id_grupo' => 'integer',
     ];
 
     /**
-     * Los permisos asociados al grupo
+     * Los permisos asociados al grupo.
      */
     public function permisos(): HasMany
     {
@@ -38,7 +40,7 @@ class MapucheGrupo extends Model
     }
 
     /**
-     * Los legajos asociados al grupo a través de la tabla pivote
+     * Los legajos asociados al grupo a través de la tabla pivote.
      */
     public function legajos(): BelongsToMany
     {
@@ -46,12 +48,12 @@ class MapucheGrupo extends Model
             Dh01::class,
             'mapuche.grupo_x_legajo',
             'id_grupo',
-            'nro_legaj'
+            'nro_legaj',
         );
     }
 
     /**
-     * Relación directa con la tabla pivote
+     * Relación directa con la tabla pivote.
      */
     public function grupoLegajos(): HasMany
     {
@@ -59,18 +61,7 @@ class MapucheGrupo extends Model
     }
 
     /**
-     * Boot the model.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        static::saving(function ($model) {
-            $model->fec_modificacion = now();
-        });
-    }
-
-    /**
-     * Scope para filtrar por tipo
+     * Scope para filtrar por tipo.
      */
     public function scopeOfTipo(Builder $query, string $tipo): Builder
     {
@@ -78,7 +69,7 @@ class MapucheGrupo extends Model
     }
 
     /**
-     * Scope para buscar por nombre
+     * Scope para buscar por nombre.
      */
     public function scopeBuscarPorNombre(Builder $query, string $nombre): Builder
     {
@@ -86,10 +77,21 @@ class MapucheGrupo extends Model
     }
 
     /**
-     * Convertir el modelo a DTO
+     * Convertir el modelo a DTO.
      */
     public function toDto(): GrupoData
     {
         return GrupoData::from($this);
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::saving(function ($model): void {
+            $model->fec_modificacion = now();
+        });
     }
 }

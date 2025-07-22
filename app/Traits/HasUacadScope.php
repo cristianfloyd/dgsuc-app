@@ -16,14 +16,15 @@ trait HasUacadScope
      */
     public function __construct()
     {
-        //
+
     }
 
     /**
      * Scope para filtrar por unidad académica.
      *
      * @param Builder $query
-     * @param string  $codcUacad
+     * @param string $codcUacad
+     *
      * @return Builder
      */
     public function scopeByUacad(Builder $query, string $codcUacad): Builder

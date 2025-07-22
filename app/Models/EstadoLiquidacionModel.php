@@ -9,11 +9,12 @@ class EstadoLiquidacionModel extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'estado_liquidacion';
     public $timestamps = false;
+
+    protected $table = 'estado_liquidacion';
 
     protected $fillable = [
         'cod_estado_liquidacion',
-        'desc_estado_liquidacion'
+        'desc_estado_liquidacion',
     ];
 }

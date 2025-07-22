@@ -2,19 +2,19 @@
 
 namespace App\Scripts;
 
-use App\Services\Afip\Sicoss;
-use Illuminate\Support\Facades\Log;
 use App\Contracts\SicossGeneratorInterface;
 use App\Exceptions\SicossGenerationException;
+use App\Services\Afip\Sicoss;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Clase responsable de generar archivos SICOSS para AFIP
- * Permite generar reportes con o sin restricción de legajo específico
+ * Permite generar reportes con o sin restricción de legajo específico.
  */
 class GenerarSicossLegajo implements SicossGeneratorInterface
 {
     /**
-     * Configuración por defecto para la generación de SICOSS
+     * Configuración por defecto para la generación de SICOSS.
      */
     private const array DEFAULT_CONFIG = [
         'check_retro' => 0,
@@ -28,7 +28,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     ];
 
     /**
-     * Rutas de archivos de salida
+     * Rutas de archivos de salida.
      */
     private const array OUTPUT_PATHS = [
         'directory' => 'comunicacion/sicoss',
@@ -36,13 +36,12 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
         'zip' => 'sicoss.zip',
     ];
 
-
-
     /**
-     * Genera archivo SICOSS con parámetros opcionales
-     * 
+     * Genera archivo SICOSS con parámetros opcionales.
+     *
      * @param int|null $numeroLegajo Número de legajo específico (opcional)
      * @param array $configuracionPersonalizada Configuración adicional (opcional)
+     *
      * @return array Resultado de la operación
      */
     public function generar(?int $numeroLegajo = null, array $configuracionPersonalizada = []): array
@@ -50,82 +49,84 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
         try {
             // Preparar configuración de datos para SICOSS
             $datosConfiguracion = $this->prepararConfiguracion($numeroLegajo, $configuracionPersonalizada);
-            
+
             // Validar configuración antes de procesar
             $this->validarConfiguracion($datosConfiguracion);
-            
+
             // Ejecutar generación del archivo SICOSS
             $resultadoGeneracion = $this->ejecutarGeneracionSicoss($datosConfiguracion);
-            
+
             // Procesar y formatear resultado para mejor legibilidad
             $datosFormateados = $this->formatearResultado($resultadoGeneracion, $numeroLegajo);
-            
+
             // Verificar que los archivos se generaron correctamente
             //$this->verificarArchivosGenerados();
-            
+
             // Registrar operación exitosa
             $this->registrarOperacionExitosa($numeroLegajo);
-            
+
             return $this->construirRespuestaExitosa($datosFormateados);
-            
+
         } catch (SicossGenerationException $e) {
             // Manejo específico de errores de generación SICOSS
             Log::error('Error específico en generación SICOSS', [
                 'legajo' => $numeroLegajo,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->construirRespuestaError($e->getMessage());
-            
+
         } catch (\Exception $e) {
             // Manejo general de errores inesperados
             Log::error('Error inesperado en generación SICOSS', [
                 'legajo' => $numeroLegajo,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return $this->construirRespuestaError('Error interno del sistema: ' . $e->getMessage());
         }
     }
 
     /**
-     * Prepara la configuración combinando valores por defecto con parámetros específicos
-     * 
+     * Prepara la configuración combinando valores por defecto con parámetros específicos.
+     *
      * @param int|null $numeroLegajo
      * @param array $configuracionPersonalizada
+     *
      * @return array
      */
     private function prepararConfiguracion(?int $numeroLegajo, array $configuracionPersonalizada): array
     {
         // Iniciar con configuración base
         $configuracion = self::DEFAULT_CONFIG;
-        
+
         // Agregar número de legajo solo si se proporciona
         if ($numeroLegajo !== null) {
             $configuracion['nro_legaj'] = $numeroLegajo;
         }
-        
+
         // Fusionar con configuración personalizada (sobrescribe valores por defecto)
         return array_merge($configuracion, $configuracionPersonalizada);
     }
 
     /**
-     * Formatea el resultado para mejor legibilidad
-     * 
+     * Formatea el resultado para mejor legibilidad.
+     *
      * @param mixed $resultado
      * @param int|null $numeroLegajo
+     *
      * @return array
      */
     private function formatearResultado($resultado, ?int $numeroLegajo): array
     {
         // Si no hay resultado o está vacío
-        if (empty($resultado) || !is_array($resultado)) {
+        if (empty($resultado) || !\is_array($resultado)) {
             return [
                 'tipo' => 'sin_datos',
                 'mensaje' => 'No se encontraron datos para procesar',
-                'datos_raw' => $resultado
+                'datos_raw' => $resultado,
             ];
         }
 
@@ -133,15 +134,16 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
         if ($numeroLegajo !== null && isset($resultado[0])) {
             return $this->formatearDatosLegajo($resultado[0]);
         }
-        
+
         // Si son múltiples legajos, formatear resumen
         return $this->formatearResumenMultiple($resultado);
     }
 
     /**
-     * Formatea los datos de un legajo específico
-     * 
+     * Formatea los datos de un legajo específico.
+     *
      * @param array $datosLegajo
+     *
      * @return array
      */
     private function formatearDatosLegajo(array $datosLegajo): array
@@ -182,28 +184,29 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
             'informacion_basica' => $informacionBasica,
             'importes' => $importes,
             'informacion_adicional' => $informacionAdicional,
-            'datos_completos' => $datosLegajo // Para debugging si es necesario
+            'datos_completos' => $datosLegajo, // Para debugging si es necesario
         ];
     }
 
     /**
-     * Formatea resumen para múltiples legajos
-     * 
+     * Formatea resumen para múltiples legajos.
+     *
      * @param array $resultados
+     *
      * @return array
      */
     private function formatearResumenMultiple(array $resultados): array
     {
-        
-        $totalLegajos = count($resultados);
+
+        $totalLegajos = \count($resultados);
         $totalBruto = 0;
         $totalImponible = 0;
         $legajosProcesados = [];
 
         foreach ($resultados as $legajo) {
-            $totalBruto += floatval($legajo['IMPORTE_BRUTO'] ?? 0);
-            $totalImponible += floatval($legajo['importeimponible_9'] ?? 0);
-            
+            $totalBruto += (float)($legajo['IMPORTE_BRUTO'] ?? 0);
+            $totalImponible += (float)($legajo['importeimponible_9'] ?? 0);
+
             $legajosProcesados[] = [
                 'legajo' => $legajo['nro_legaj'] ?? 'N/A',
                 'apellido_nombres' => trim($legajo['apyno'] ?? 'N/A'),
@@ -220,31 +223,33 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 'total_imponible' => $this->formatearImporte($totalImponible),
             ],
             'legajos' => $legajosProcesados,
-            'datos_completos' => $resultados // Para debugging si es necesario
+            'datos_completos' => $resultados, // Para debugging si es necesario
         ];
     }
 
     /**
-     * Formatea un importe para mostrar con separadores de miles
-     * 
+     * Formatea un importe para mostrar con separadores de miles.
+     *
      * @param float|int|string $importe
+     *
      * @return string
      */
     private function formatearImporte($importe): string
     {
-        $valor = floatval($importe);
-        
+        $valor = (float)$importe;
+
         if ($valor == 0) {
             return '0,00';
         }
-        
+
         return number_format($valor, 2, ',', '.');
     }
 
     /**
-     * Valida que la configuración tenga los parámetros mínimos requeridos
-     * 
+     * Valida que la configuración tenga los parámetros mínimos requeridos.
+     *
      * @param array $configuracion
+     *
      * @throws SicossGenerationException
      */
     private function validarConfiguracion(array $configuracion): void
@@ -253,7 +258,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
         // if (!isset($configuracion['nro_liqui']) || !is_numeric($configuracion['nro_liqui'])) {
         //     throw new SicossGenerationException('Número de liquidación inválido o faltante');
         // }
-        
+
         // Validar legajo si está presente
         if (isset($configuracion['nro_legaj']) && !is_numeric($configuracion['nro_legaj'])) {
             throw new SicossGenerationException('Número de legajo debe ser numérico');
@@ -261,11 +266,13 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     }
 
     /**
-     * Ejecuta la generación del archivo SICOSS utilizando el servicio AFIP
-     * 
+     * Ejecuta la generación del archivo SICOSS utilizando el servicio AFIP.
+     *
      * @param array $configuracion
-     * @return mixed
+     *
      * @throws SicossGenerationException
+     *
+     * @return mixed
      */
     private function ejecutarGeneracionSicoss(array $configuracion)
     {
@@ -275,32 +282,32 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 $configuracion,
                 '', // directorio de salida para testing
                 '', // prefijo de archivos para testing
-                false // retornar datos para verificación
+                false, // retornar datos para verificación
             );
-            
+
         } catch (\Exception $e) {
             throw new SicossGenerationException(
                 'Fallo en la generación del archivo SICOSS: ' . $e->getMessage(),
                 0,
-                $e
+                $e,
             );
         }
     }
 
     /**
-     * Verifica que los archivos esperados se hayan generado correctamente
-     * 
+     * Verifica que los archivos esperados se hayan generado correctamente.
+     *
      * @throws SicossGenerationException
      */
     private function verificarArchivosGenerados(): void
     {
         $rutaArchivo = $this->obtenerRutaCompleta(self::OUTPUT_PATHS['file']);
-        
+
         // Verificar existencia del archivo principal
         if (!file_exists($rutaArchivo)) {
             throw new SicossGenerationException('El archivo SICOSS no se generó correctamente');
         }
-        
+
         // Verificar que el archivo no esté vacío
         if (filesize($rutaArchivo) === 0) {
             throw new SicossGenerationException('El archivo SICOSS generado está vacío');
@@ -308,27 +315,28 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     }
 
     /**
-     * Registra la operación exitosa en los logs del sistema
-     * 
+     * Registra la operación exitosa en los logs del sistema.
+     *
      * @param int|null $numeroLegajo
      */
     private function registrarOperacionExitosa(?int $numeroLegajo): void
     {
-        $mensaje = $numeroLegajo 
+        $mensaje = $numeroLegajo
             ? "SICOSS generado exitosamente para legajo: {$numeroLegajo}"
-            : "SICOSS generado exitosamente para todos los legajos";
-            
+            : 'SICOSS generado exitosamente para todos los legajos';
+
         Log::info($mensaje, [
             'legajo' => $numeroLegajo,
             'timestamp' => now(),
-            'usuario' => auth()->guard('web')->id() ?? 'sistema'
+            'usuario' => auth()->guard('web')->id() ?? 'sistema',
         ]);
     }
 
     /**
-     * Construye respuesta exitosa estandarizada
-     * 
+     * Construye respuesta exitosa estandarizada.
+     *
      * @param array $datosFormateados
+     *
      * @return array
      */
     private function construirRespuestaExitosa(array $datosFormateados): array
@@ -340,15 +348,16 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 'archivo' => $this->obtenerRutaCompleta(self::OUTPUT_PATHS['file']),
                 'zip' => $this->obtenerRutaCompleta(self::OUTPUT_PATHS['zip']),
                 'datos_procesados' => $datosFormateados,
-                'timestamp' => now()->toISOString()
-            ]
+                'timestamp' => now()->toISOString(),
+            ],
         ];
     }
 
     /**
-     * Construye respuesta de error estandarizada
-     * 
+     * Construye respuesta de error estandarizada.
+     *
      * @param string $mensaje
+     *
      * @return array
      */
     private function construirRespuestaError(string $mensaje): array
@@ -357,14 +366,15 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
             'success' => false,
             'message' => $mensaje,
             'data' => null,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ];
     }
 
     /**
-     * Obtiene la ruta completa del archivo en el directorio de storage
-     * 
+     * Obtiene la ruta completa del archivo en el directorio de storage.
+     *
      * @param string $archivo
+     *
      * @return string
      */
     private function obtenerRutaCompleta(string $archivo): string

@@ -5,7 +5,7 @@ return [
      * Default is empty.
      *    prefix => ''
      *              <x-button />
-     *              <x-card />
+     *              <x-card />.
      *
      * Renaming all components:
      *    prefix => 'mary-'
@@ -14,17 +14,15 @@ return [
      *
      * Make sure to clear view cache after renaming
      *    php artisan view:clear
-     *
      */
     'prefix' => 'mary-',
 
     /**
-     * Components settings
+     * Components settings.
      */
     'components' => [
         'spotlight' => [
             'class' => 'App\Support\Spotlight',
-        ]
-    ]
+        ],
+    ],
 ];
-

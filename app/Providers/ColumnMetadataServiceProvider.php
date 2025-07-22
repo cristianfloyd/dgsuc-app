@@ -20,6 +20,6 @@ class ColumnMetadataServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

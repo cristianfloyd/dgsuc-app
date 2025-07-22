@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Concerns\BelongsToMapucheSchema;
 use App\Traits\MapucheConnectionTrait;
 use Database\Factories\Dh16Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Conceptos por Grupo en sistema Mapuche
+ * Conceptos por Grupo en sistema Mapuche.
  *
  * @property int $codn_grupo Código de grupo
  * @property int $codn_conce Código de concepto

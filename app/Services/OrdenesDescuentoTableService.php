@@ -2,19 +2,21 @@
 
 namespace App\Services;
 
+use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
+use App\Services\Abstract\AbstractTableService;
+use App\Traits\Mapuche\TableServiceTrait;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use App\Traits\Mapuche\TableServiceTrait;
-use App\Services\Abstract\AbstractTableService;
-use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 
 class OrdenesDescuentoTableService extends AbstractTableService
 {
-    use MapucheConnectionTrait, TableServiceTrait;
+    use MapucheConnectionTrait;
+    use TableServiceTrait;
 
     private const TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
+
     private OrdenesDescuentoTableDefinition $definition;
 
     public function __construct(OrdenesDescuentoTableDefinition $definition)
@@ -25,6 +27,36 @@ class OrdenesDescuentoTableService extends AbstractTableService
     public function getTableName(): string
     {
         return $this->definition->getTableName();
+    }
+
+    public function createAndPopulate(): void
+    {
+        try {
+            DB::connection($this->getConnectionName())->transaction(function (): void {
+                $this->createTableIfNotExists();
+                $this->truncateTable();
+                $this->populateTable();
+                $this->updateLastSync();
+            });
+
+            Log::info('Tabla rep_ordenes_descuento creada y poblada exitosamente');
+        } catch (\Exception $e) {
+            Log::error('Error en createAndPopulate', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function populateTable(): void
+    {
+        DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
+    }
+
+    public function exists(): bool
+    {
+        return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
     }
 
     /**
@@ -48,8 +80,8 @@ class OrdenesDescuentoTableService extends AbstractTableService
      */
     protected function getTablePopulationQuery(): string
     {
-        return "
-            INSERT INTO " . self::TABLE_NAME . " (
+        return '
+            INSERT INTO ' . self::TABLE_NAME . " (
                 id,
                 nro_liqui,
                 desc_liqui,
@@ -124,31 +156,6 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         ";
     }
 
-    public function createAndPopulate(): void
-    {
-        try {
-            DB::connection($this->getConnectionName())->transaction(function () {
-                $this->createTableIfNotExists();
-                $this->truncateTable();
-                $this->populateTable();
-                $this->updateLastSync();
-            });
-
-            Log::info('Tabla rep_ordenes_descuento creada y poblada exitosamente');
-        } catch (\Exception $e) {
-            Log::error('Error en createAndPopulate', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
-        }
-    }
-
-    private function updateLastSync(): void
-    {
-        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->update(['last_sync' => now()]);
-    }
-
     protected function createIndexes(): void
     {
         $connection = $this->getConnectionName();
@@ -161,32 +168,10 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
                 ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
 
             if (!$indexExists) {
-                Schema::connection($connection)->table(self::TABLE_NAME, function ($table) use ($columns, $name) {
+                Schema::connection($connection)->table(self::TABLE_NAME, function ($table) use ($columns, $name): void {
                     $table->index($columns, $name);
                 });
             }
-        }
-    }
-
-    private function truncateTable(): void
-    {
-        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
-    }
-
-    private function createTableIfNotExists(): void
-    {
-        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_ordenes_descuento')) {
-            Schema::connection($this->getConnectionName())->create('suc.rep_ordenes_descuento', function ($table) {
-                $this->addLaravelPrimaryKey($table);
-                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
-                    if ($column !== 'id') {
-                        $this->addColumn($table, $column, $definition);
-                    }
-                }
-            });
-
-            // Mover la creación de índices fuera del callback de create
-            $this->createIndexes();
         }
     }
 
@@ -214,14 +199,30 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         }
     }
 
-
-    public function populateTable(): void
+    private function updateLastSync(): void
     {
-        DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
+        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->update(['last_sync' => now()]);
     }
 
-    public function exists(): bool
+    private function truncateTable(): void
     {
-        return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
+        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
+    }
+
+    private function createTableIfNotExists(): void
+    {
+        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_ordenes_descuento')) {
+            Schema::connection($this->getConnectionName())->create('suc.rep_ordenes_descuento', function ($table): void {
+                $this->addLaravelPrimaryKey($table);
+                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
+                    if ($column !== 'id') {
+                        $this->addColumn($table, $column, $definition);
+                    }
+                }
+            });
+
+            // Mover la creación de índices fuera del callback de create
+            $this->createIndexes();
+        }
     }
 }

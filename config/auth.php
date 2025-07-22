@@ -40,9 +40,9 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-    'toba' => [
-        'driver' => 'session',
-        'provider' => 'toba',
+        'toba' => [
+            'driver' => 'session',
+            'provider' => 'toba',
         ],
     ],
 

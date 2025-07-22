@@ -7,9 +7,13 @@ use App\Models\Suc\RetResultado;
 class RetResultadoDTO
 {
     public int $nroLegaj;
+
     public int $nroCargoAnt;
+
     public string $fechaRetDesde;
+
     public string $periodo;
+
     public float $montoTotal;
 
     public function __construct(RetResultado $retResultado, float $montoTotal)

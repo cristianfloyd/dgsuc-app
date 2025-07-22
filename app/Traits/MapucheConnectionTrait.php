@@ -2,15 +2,15 @@
 
 namespace App\Traits;
 
+use App\Services\DatabaseConnectionService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
-use App\Services\DatabaseConnectionService;
 
 /**
- * Trait MapucheConnectionTrait
+ * Trait MapucheConnectionTrait.
  *
  * Este trait proporciona la configuración de conexión dinámica para la base de datos.
  * Utiliza la conexión seleccionada por el usuario o la conexión predeterminada.
@@ -31,7 +31,7 @@ trait MapucheConnectionTrait
         $hasSecondaryConnection = Config::has('database.connections.secondary');
 
         // Determinamos la conexión predeterminada
-        $defaultConnection = defined('DatabaseConnectionService::DEFAULT_CONNECTION')
+        $defaultConnection = \defined('DatabaseConnectionService::DEFAULT_CONNECTION')
             ? DatabaseConnectionService::DEFAULT_CONNECTION
             : 'pgsql-prod';
 
@@ -62,7 +62,7 @@ trait MapucheConnectionTrait
         // 2. Si existe la conexión "secondary", usamos esa (configurada por el middleware)
         if ($hasSecondaryConnection) {
             // Verificar que la base de datos configurada existe
-            $dbConfig = Config::get("database.connections.secondary");
+            $dbConfig = Config::get('database.connections.secondary');
             $dbName = $dbConfig['database'] ?? null;
 
             if (empty($dbName)) {
@@ -71,7 +71,7 @@ trait MapucheConnectionTrait
                 return $defaultConnection;
             }
 
-            Log::debug("Usando conexión secondary configurada por middleware");
+            Log::debug('Usando conexión secondary configurada por middleware');
             return 'secondary';
         }
 
@@ -81,14 +81,14 @@ trait MapucheConnectionTrait
     }
 
     /**
-     * Obtiene la conexión desde el trait
+     * Obtiene la conexión desde el trait.
      *
      * @return \Illuminate\Database\Connection
      */
     public function getConnectionFromTrait()
     {
         $connectionName = $this->getConnectionName();
-        Log::debug("Obteniendo conexión:", ["nombre" => $connectionName]);
+        Log::debug('Obteniendo conexión:', ['nombre' => $connectionName]);
         return DB::connection($connectionName);
     }
 
@@ -96,6 +96,7 @@ trait MapucheConnectionTrait
      * Obtiene el nombre de la tabla calificado con el esquema correspondiente.
      *
      * @param Model|string|null $table Tabla opcional
+     *
      * @return string
      */
     public function getTable(?Model $table = null): string
@@ -113,7 +114,7 @@ trait MapucheConnectionTrait
     }
 
     /**
-     * Obtiene el nombre de la tabla incluyendo el esquema
+     * Obtiene el nombre de la tabla incluyendo el esquema.
      *
      * @return string
      */

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Casts\AsStringable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Modelo Dhr1 para gestión de liquidaciones Mapuche
+ * Modelo Dhr1 para gestión de liquidaciones Mapuche.
  *
  * @property int $nro_liqui Número de liquidación (Primary Key)
  * @property int|null $per_liano Año del período
@@ -33,24 +32,23 @@ class Dhr1 extends Model
     use HasUuids;
     use MapucheConnectionTrait;
 
-
     /**
-     * Esquema y tabla específicos
-     */
-    protected $table = 'dhr1';
-
-    /**
-     * Clave primaria
-     */
-    protected $primaryKey = 'nro_liqui';
-
-    /**
-     * Deshabilitar timestamps de Laravel
+     * Deshabilitar timestamps de Laravel.
      */
     public $timestamps = false;
 
     /**
-     * Atributos asignables masivamente
+     * Esquema y tabla específicos.
+     */
+    protected $table = 'dhr1';
+
+    /**
+     * Clave primaria.
+     */
+    protected $primaryKey = 'nro_liqui';
+
+    /**
+     * Atributos asignables masivamente.
      */
     protected $fillable = [
         'per_liano',
@@ -61,11 +59,11 @@ class Dhr1 extends Model
         'per_anoap',
         'per_mesap',
         'desc_lugap',
-        'plantilla'
+        'plantilla',
     ];
 
     /**
-     * Casting de atributos
+     * Casting de atributos.
      */
     protected $casts = [
         'nro_liqui' => 'integer',
@@ -81,23 +79,23 @@ class Dhr1 extends Model
     ];
 
     /**
-     * Relación con la tabla dh22
+     * Relación con la tabla dh22.
      */
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
+    public function uniqueIds(): array
+    {
+        return ['plantilla'];
+    }
+
     protected function plantilla(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value ? (string)$value : null,
-            set: fn ($value) => $value ? (string)$value : null
+            set: fn ($value) => $value ? (string)$value : null,
         );
-    }
-
-    public function uniqueIds(): array
-    {
-        return ['plantilla'];
     }
 }

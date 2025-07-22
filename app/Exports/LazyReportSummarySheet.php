@@ -3,13 +3,13 @@
 namespace App\Exports;
 
 use Illuminate\Support\Collection;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LazyReportSummarySheet implements
@@ -46,7 +46,7 @@ class LazyReportSummarySheet implements
             $collection->push([
                 $dependency['dependencia'],
                 number_format($dependency['total'], 2, ',', '.'),
-                number_format($dependency['registros'], 0, ',', '.')
+                number_format($dependency['registros'], 0, ',', '.'),
             ]);
         }
 
@@ -106,7 +106,7 @@ class LazyReportSummarySheet implements
             ]);
 
             // Alineación para columnas numéricas
-            $sheet->getStyle("B" . ($tableStart + 1) . ":C{$lastRow}")->applyFromArray([
+            $sheet->getStyle('B' . ($tableStart + 1) . ":C{$lastRow}")->applyFromArray([
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_RIGHT,
                 ],

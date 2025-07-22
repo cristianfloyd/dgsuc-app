@@ -2,24 +2,25 @@
 
 namespace App\Filament\Liquidaciones\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use App\Models\LiquidacionControl;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Liquidaciones\Resources\LiquidacionControlResource\Pages;
-use App\Filament\Liquidaciones\Resources\LiquidacionControlResource\RelationManagers;
+use App\Models\LiquidacionControl;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LiquidacionControlResource extends Resource
 {
     protected static ?string $model = LiquidacionControl::class;
 
     protected static ?string $navigationGroup = 'Liquidaciones';
+
     protected static ?string $navigationIcon = 'heroicon-o-check-badge';
+
     protected static ?string $modelLabel = 'Control Post-Liquidación';
+
     protected static ?string $pluralModelLabel = 'Controles Post-Liquidación';
 
     public static function form(Form $form): Form
@@ -100,14 +101,14 @@ class LiquidacionControlResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['nro_liqui'],
-                            fn (Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui)
+                            fn (Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui),
                         );
                     }),
             ]);
     }
 
     // Implementa el método para ejecutar controles
-    public static function ejecutarControl($record)
+    public static function ejecutarControl($record): void
     {
         // Aquí iría la lógica para ejecutar el control específico basado en $record->nombre_control
         // usando LiquidacionControlService
@@ -135,7 +136,7 @@ class LiquidacionControlResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

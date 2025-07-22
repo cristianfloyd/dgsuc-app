@@ -5,16 +5,20 @@ namespace App\DTOs;
 class ImportResultDTO
 {
     private int $processedCount = 0;
+
     private int $duplicateCount = 0;
+
     private int $errorCount = 0;
+
     private array $errors = [];
 
     public function __construct(
         public bool $success = false,
         public string $message = '',
         public array $processedData = [],
-        public ?\Throwable $error = null
-    ) {}
+        public ?\Throwable $error = null,
+    ) {
+    }
 
     public function incrementProcessedCount(): void
     {
@@ -36,7 +40,7 @@ class ImportResultDTO
         $this->errors[] = [
             'message' => $message,
             'context' => $context,
-            'timestamp' => now()
+            'timestamp' => now(),
         ];
         $this->incrementErrorCount();
     }
@@ -70,8 +74,7 @@ class ImportResultDTO
             'duplicateCount' => $this->duplicateCount,
             'errorCount' => $this->errorCount,
             'errors' => $this->errors,
-            'processedData' => $this->processedData
+            'processedData' => $this->processedData,
         ];
     }
 }
-

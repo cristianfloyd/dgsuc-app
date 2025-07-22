@@ -2,17 +2,18 @@
 
 namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Widgets;
 
+use App\Traits\MapucheConnectionTrait;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use Filament\Widgets\StatsOverviewWidget\Stat;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 
-    // protected static string $view = 'filament.reportes.resources.orden-de-pago-resource.widgets.orden-pago-stats-widget';
+// protected static string $view = 'filament.reportes.resources.orden-de-pago-resource.widgets.orden-pago-stats-widget';
 class OrdenPagoStatsWidget extends BaseWidget
 {
     use MapucheConnectionTrait;
+
     protected static ?string $pollingInterval = null;
 
     protected function getStats(): array

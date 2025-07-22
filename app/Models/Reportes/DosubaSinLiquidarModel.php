@@ -2,22 +2,26 @@
 
 namespace App\Models\Reportes;
 
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DosubaSinLiquidarModel extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.rep_dosuba_sin_liquidar';
-    protected $primaryKey = 'id';
     public $incrementing = true;
-    protected $keyType = 'integer';
+
     public $timestamps = true;
+
+    protected $table = 'suc.rep_dosuba_sin_liquidar';
+
+    protected $primaryKey = 'id';
+
+    protected $keyType = 'integer';
 
     protected $fillable = [
         'nro_legaj',
@@ -30,7 +34,7 @@ class DosubaSinLiquidarModel extends Model
         'periodo_fiscal',
         'fecha_generacion',
         'embarazada',
-        'fallecido'
+        'fallecido',
     ];
 
     protected $casts = [
@@ -39,7 +43,7 @@ class DosubaSinLiquidarModel extends Model
     ];
 
     /**
-     * Crea la tabla temporal si no existe
+     * Crea la tabla temporal si no existe.
      */
     public static function createTableIfNotExists(): void
     {
@@ -79,7 +83,7 @@ class DosubaSinLiquidarModel extends Model
     }
 
     /**
-     * Limpia los datos de la sesión actual
+     * Limpia los datos de la sesión actual.
      */
     public static function clearSessionData(): void
     {
@@ -92,7 +96,7 @@ class DosubaSinLiquidarModel extends Model
     }
 
     /**
-     * Elimina registros antiguos basados en el tiempo de vida de la sesión
+     * Elimina registros antiguos basados en el tiempo de vida de la sesión.
      */
     public static function cleanOldRecords(): void
     {
@@ -106,7 +110,7 @@ class DosubaSinLiquidarModel extends Model
     }
 
     /**
-     * Guarda los datos del reporte para la sesión actual
+     * Guarda los datos del reporte para la sesión actual.
      */
     public static function setReportData($data): void
     {
@@ -144,7 +148,7 @@ class DosubaSinLiquidarModel extends Model
     }
 
     /**
-     * Obtiene los datos del reporte para la sesión actual
+     * Obtiene los datos del reporte para la sesión actual.
      */
     public static function getReportData()
     {

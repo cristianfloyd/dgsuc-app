@@ -2,18 +2,12 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivasResource\Actions;
 
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\DB;
 use App\Models\AfipRelacionesActivas;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
 class TruncateAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'truncate';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,5 +29,10 @@ class TruncateAction extends Action
                     ->success()
                     ->send();
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'truncate';
     }
 }

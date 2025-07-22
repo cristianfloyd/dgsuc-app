@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
+use Illuminate\Console\Command;
 
 class GenerarSicossBD extends Command
 {
@@ -43,7 +43,7 @@ class GenerarSicossBD extends Command
 
         $this->info("🚀 Iniciando generación SICOSS para período {$periodo}");
         if ($incluirInactivos) {
-            $this->info("📝 Incluyendo empleados inactivos");
+            $this->info('📝 Incluyendo empleados inactivos');
         }
 
         try {
@@ -54,7 +54,7 @@ class GenerarSicossBD extends Command
 
             $resultado = SicossOptimizado::generar_sicoss_bd($datos, $periodoFiscal, $incluirInactivos);
 
-            $this->info("✅ SICOSS generado exitosamente:");
+            $this->info('✅ SICOSS generado exitosamente:');
             $this->table(
                 ['Métrica', 'Valor'],
                 [
@@ -63,13 +63,13 @@ class GenerarSicossBD extends Command
                     ['Chunks procesados', $resultado['chunks_procesados']],
                     ['Errores', $resultado['errores']],
                     ['Tiempo total', $resultado['tiempo_total'] . 's'],
-                ]
+                ],
             );
 
             return 0;
 
         } catch (\Exception $e) {
-            $this->error("❌ Error: " . $e->getMessage());
+            $this->error('❌ Error: ' . $e->getMessage());
             return 1;
         }
     }

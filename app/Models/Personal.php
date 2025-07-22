@@ -9,11 +9,16 @@ class Personal extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh01';
-    protected $primaryKey = 'nro_legaj';
     public $incrementing = false;
-    protected $keyType = 'integer';
+
     public $timestamps = false;
+
+    protected $table = 'mapuche.dh01';
+
+    protected $primaryKey = 'nro_legaj';
+
+    protected $keyType = 'integer';
+
     protected $fillable = [
         'nro_legaj',
         'desc_appat',
@@ -38,6 +43,6 @@ class Personal extends Model
         'periodoactualizacion',
         'anioactualizacion',
         'pcia_nacim',
-        'pais_nacim'
+        'pais_nacim',
     ];
 }

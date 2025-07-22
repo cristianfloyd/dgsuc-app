@@ -3,12 +3,12 @@
 namespace App\Data\Reportes;
 
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 /**
- * Data Transfer Object para el resultado de transferencia al historial
+ * Data Transfer Object para el resultado de transferencia al historial.
  */
 class TransferResultData extends Data
 {
@@ -39,17 +39,18 @@ class TransferResultData extends Data
         public readonly array $idsTransferidos = [],
 
         /** @var array IDs de registros que fallaron con sus errores */
-        public readonly array $idsFallidos = []
-    ) {}
+        public readonly array $idsFallidos = [],
+    ) {
+    }
 
     /**
-     * Crea una instancia exitosa
+     * Crea una instancia exitosa.
      */
     public static function success(
         int $transferidos,
         array $periodoFiscal,
         array $idsTransferidos = [],
-        array $detalles = []
+        array $detalles = [],
     ): self {
         return new self(
             success: true,
@@ -59,19 +60,19 @@ class TransferResultData extends Data
             timestamp: now(),
             mensaje: "Se transfirieron {$transferidos} registros al historial exitosamente",
             detalles: $detalles,
-            idsTransferidos: $idsTransferidos
+            idsTransferidos: $idsTransferidos,
         );
     }
 
     /**
-     * Crea una instancia con errores parciales
+     * Crea una instancia con errores parciales.
      */
     public static function partial(
         int $transferidos,
         int $fallidos,
         array $periodoFiscal,
         array $idsTransferidos = [],
-        array $idsFallidos = []
+        array $idsFallidos = [],
     ): self {
         return new self(
             success: $fallidos === 0,
@@ -81,12 +82,12 @@ class TransferResultData extends Data
             timestamp: now(),
             mensaje: "Transferidos: {$transferidos}, Fallidos: {$fallidos}",
             idsTransferidos: $idsTransferidos,
-            idsFallidos: $idsFallidos
+            idsFallidos: $idsFallidos,
         );
     }
 
     /**
-     * Crea una instancia de error completo
+     * Crea una instancia de error completo.
      */
     public static function error(string $mensaje, array $periodoFiscal): self
     {
@@ -96,12 +97,12 @@ class TransferResultData extends Data
             fallidos: 0,
             periodoFiscal: $periodoFiscal,
             timestamp: now(),
-            mensaje: $mensaje
+            mensaje: $mensaje,
         );
     }
 
     /**
-     * Obtiene el total de registros procesados
+     * Obtiene el total de registros procesados.
      */
     public function getTotalProcesados(): int
     {
@@ -109,7 +110,7 @@ class TransferResultData extends Data
     }
 
     /**
-     * Obtiene el porcentaje de éxito
+     * Obtiene el porcentaje de éxito.
      */
     public function getPorcentajeExito(): float
     {
@@ -118,10 +119,10 @@ class TransferResultData extends Data
     }
 
     /**
-     * Devuelve el período fiscal como string (YYYY-MM)
+     * Devuelve el período fiscal como string (YYYY-MM).
      */
     public function getPeriodoFiscalString(): string
     {
-        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
+        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
     }
 }

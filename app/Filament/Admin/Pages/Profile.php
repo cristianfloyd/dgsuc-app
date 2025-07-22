@@ -2,21 +2,22 @@
 
 namespace App\Filament\Admin\Pages;
 
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Hash;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use App\Filament\Admin\Resources\UserResource;
 
 class Profile extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-user';
-    protected static string $view = 'filament.pages.profile';
-    protected static ?string $title = 'Mi Perfil';
-
     public ?array $data = [];
+
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+
+    protected static string $view = 'filament.pages.profile';
+
+    protected static ?string $title = 'Mi Perfil';
 
     public function mount(): void
     {
@@ -58,7 +59,7 @@ class Profile extends Page
                 FileUpload::make('profile_photo_path')
                     ->label('Foto de perfil')
                     ->image()
-                    ->directory('profile-photos')
+                    ->directory('profile-photos'),
             ])
             ->statePath('data');
     }
@@ -71,7 +72,7 @@ class Profile extends Page
 
         // Validar contraseña actual si se intenta cambiar
         if ($validated['new_password']) {
-            if (! Hash::check($validated['current_password'], $user->password)) {
+            if (!Hash::check($validated['current_password'], $user->password)) {
                 Notification::make()
                     ->title('La contraseña actual es incorrecta')
                     ->danger()
@@ -85,7 +86,7 @@ class Profile extends Page
         $user->fill([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'profile_photo_path' => $validated['profile_photo_path']
+            'profile_photo_path' => $validated['profile_photo_path'],
         ])->save();
 
         Notification::make()

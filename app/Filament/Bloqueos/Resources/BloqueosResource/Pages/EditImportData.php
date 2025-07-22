@@ -2,31 +2,29 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
+use App\Filament\Bloqueos\Resources\BloqueosHistorialResource;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Models\Dh01;
-use Filament\Actions;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Forms\Form;
+use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Mapuche\VerificacionMapucheService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Select;
-use Filament\Support\Exceptions\Halt;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Forms\Components\DatePicker;
-use App\Models\Reportes\BloqueosDataModel;
-use Filament\Forms\Components\Placeholder;
-use App\Services\Mapuche\VerificacionMapucheService;
-use App\Filament\Bloqueos\Resources\BloqueosResource;
-use App\Filament\Bloqueos\Resources\BloqueosHistorialResource;
+use Filament\Support\Exceptions\Halt;
 
 class EditImportData extends EditRecord
 {
     protected static string $resource = BloqueosResource::class;
-
 
     public function form(Form $form): Form
     {
@@ -35,11 +33,11 @@ class EditImportData extends EditRecord
                 Section::make('Estado del Registro')
                     ->schema([
                         Placeholder::make('estado')
-                            ->content(fn($record) => $record->estado->getLabel()),
+                            ->content(fn ($record) => $record->estado->getLabel()),
 
                         Placeholder::make('fecha_registro')
                             ->label('Registrado el')
-                            ->content(fn($record) => $record->created_at->format('d/m/Y H:i')),
+                            ->content(fn ($record) => $record->created_at->format('d/m/Y H:i')),
                     ])
                     ->columnSpan(1),
                 Section::make('Datos principales del bloqueo')
@@ -52,7 +50,7 @@ class EditImportData extends EditRecord
                                 ->numeric()
                                 ->minValue(1)
                                 ->live()
-                                ->afterStateUpdated(function ($state, Set $set) {
+                                ->afterStateUpdated(function ($state, Set $set): void {
                                     if ($state) {
                                         $legajo = Dh01::find($state);
                                         if ($legajo) {
@@ -75,11 +73,11 @@ class EditImportData extends EditRecord
                 Section::make('')
                     ->schema([
                         Placeholder::make('')
-                            ->content(fn($record) => view('filament.components.cargo-info', [
-                                'cargo' => $record->cargo
+                            ->content(fn ($record) => view('filament.components.cargo-info', [
+                                'cargo' => $record->cargo,
                             ])),
                     ])
-                    ->visible(fn($record) => $record->cargo()->exists())
+                    ->visible(fn ($record) => $record->cargo()->exists())
                     ->columnSpan(1),
                 Grid::make(3)
                     ->schema([
@@ -87,7 +85,7 @@ class EditImportData extends EditRecord
                             ->schema([
                                 DatePicker::make('fecha_baja')
                                     ->label('Fecha de Baja')
-                                    ->required(fn(Get $get): bool => $get('tipo') !== 'Licencia')
+                                    ->required(fn (Get $get): bool => $get('tipo') !== 'Licencia')
                                     ->beforeOrEqual('today'),
 
                                 Select::make('tipo')
@@ -99,7 +97,7 @@ class EditImportData extends EditRecord
                                     ])
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function (Get $get, Set $set) {
+                                    ->afterStateUpdated(function (Get $get, Set $set): void {
                                         if ($get('tipo') === 'fallecido') {
                                             $set('chkstopliq', true);
                                         }
@@ -108,7 +106,7 @@ class EditImportData extends EditRecord
                                 Textarea::make('observaciones')
                                     ->label('Observaciones')
                                     ->rows(3)
-                                    ->maxLength(255)
+                                    ->maxLength(255),
                                 // ->columnSpanFull(),
                             ])->columns(2)
                             ->columnSpan(2),
@@ -125,26 +123,26 @@ class EditImportData extends EditRecord
             Action::make('revalidar')
                 ->label('Revalidar Registro')
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn() => $this->record->validarEstado())
-                ->visible(fn() => $this->record->estado === 'error_validacion'),
+                ->action(fn () => $this->record->validarEstado())
+                ->visible(fn () => $this->record->estado === 'error_validacion'),
             Action::make('marcar_procesado')
                 ->label('Marcar como Procesado')
                 ->icon('heroicon-o-check')
                 ->requiresConfirmation()
-                ->action(fn() => $this->record->marcarProcesado())
-                ->visible(fn() => !$this->record->chkstopliq),
+                ->action(fn () => $this->record->marcarProcesado())
+                ->visible(fn () => !$this->record->chkstopliq),
             Action::make('verificar_mapuche')
                 ->label('Verificar en Mapuche')
                 ->icon('heroicon-o-check-circle')
                 ->requiresConfirmation()
                 ->modalHeading('Verificar datos en Mapuche')
                 ->modalDescription('¿Desea verificar el legajo y cargo en el sistema Mapuche?')
-                ->action(function () {
+                ->action(function (): void {
                     $service = app(VerificacionMapucheService::class);
 
                     $resultado = $service->verificarLegajoCargo(
                         $this->record->nro_legaj,
-                        $this->record->nro_cargo
+                        $this->record->nro_cargo,
                     );
 
                     if (!$resultado['existe']) {
@@ -170,10 +168,11 @@ class EditImportData extends EditRecord
             Action::make('historial')
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
-                ->url(fn($record) =>
+                ->url(
+                    fn ($record) =>
                     BloqueosHistorialResource::getUrl('index') .
-                    '?tableFilters[nro_legaj][value]=' . $record->nro_legaj
-            ),
+                    '?tableFilters[nro_legaj][value]=' . $record->nro_legaj,
+                ),
         ];
     }
 
@@ -199,7 +198,7 @@ class EditImportData extends EditRecord
             Action::make('ver_siguiente')
                 ->label('Siguiente Registro con Error')
                 ->icon('heroicon-o-arrow-right')
-                ->action(function () {
+                ->action(function (): void {
                     $siguiente = BloqueosDataModel::where('id', '>', $this->record->id)
                         ->where('estado', 'error')
                         ->first();

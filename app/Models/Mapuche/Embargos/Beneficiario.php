@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Mapuche\Embargos;
 
 use App\Models\Mapuche\Embargo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Modelo Eloquent para la tabla mapuche.emb_beneficiario
+ * Modelo Eloquent para la tabla mapuche.emb_beneficiario.
  *
  * @property string $cuit CUIT del beneficiario (PK)
  * @property string $nom_beneficiario Nombre del beneficiario
@@ -22,48 +22,48 @@ class Beneficiario extends Model
     use HasFactory;
 
     /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'mapuche.emb_beneficiario';
-
-    /**
-     * Clave primaria
-     */
-    protected $primaryKey = 'cuit';
-
-    /**
-     * Tipo de clave primaria
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Desactivar incremento automático
+     * Desactivar incremento automático.
      */
     public $incrementing = false;
 
     /**
-     * Desactivar timestamps de Laravel
+     * Desactivar timestamps de Laravel.
      */
     public $timestamps = false;
 
     /**
-     * Atributos que se pueden asignar masivamente
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'mapuche.emb_beneficiario';
+
+    /**
+     * Clave primaria.
+     */
+    protected $primaryKey = 'cuit';
+
+    /**
+     * Tipo de clave primaria.
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
         'cuit',
-        'nom_beneficiario'
+        'nom_beneficiario',
     ];
 
     /**
-     * Casting de atributos
+     * Casting de atributos.
      */
     protected $casts = [
         'cuit' => 'string',
-        'nom_beneficiario' => 'string'
+        'nom_beneficiario' => 'string',
     ];
 
     /**
-     * Relación con embargos
+     * Relación con embargos.
      */
     public function embargos(): HasMany
     {

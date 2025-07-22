@@ -19,7 +19,7 @@ class ContribucionesDiferenciasExport extends BaseSicossExport
             'Contribución INSSJP DH21',
             'Contribución SIJP',
             'Contribución INSSJP',
-            'Diferencia'
+            'Diferencia',
         ];
     }
 
@@ -31,7 +31,7 @@ class ContribucionesDiferenciasExport extends BaseSicossExport
             $row->contribucioninssjpdh21,
             $row->contribucionsijp,
             $row->contribucioninssjp,
-            $row->diferencia
+            $row->diferencia,
         ];
     }
 }

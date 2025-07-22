@@ -2,38 +2,20 @@
 
 namespace App\Services;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Connection;
-use Illuminate\Support\Facades\Log;
+use App\Contracts\TableManagementServiceInterface;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use App\Contracts\TableManagementServiceInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class TableManagementService implements TableManagementServiceInterface
 {
     use MapucheConnectionTrait;
-    private static $connectionInstance = null;
 
-
-    protected static function getMapucheConnection(): Connection
-    {
-        if (self::$connectionInstance === null) {
-            $model = new static;
-            self::$connectionInstance = $model->getConnectionFromTrait();
-        }
-        return self::$connectionInstance;
-    }
-
-    protected static function getMapucheConnectionName(): string
-    {
-        return (new static)->getConnectionFromTrait()->getName();
-    }
-
-
-
+    private static $connectionInstance;
 
     /**
      * Verifica y prepara una tabla de base de datos.
@@ -42,15 +24,16 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string $tableName El nombre de la tabla a verificar y preparar.
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar. Si se omite, se utilizará la conexión predeterminada.
+     *
      * @return array Un arreglo que contiene información sobre el estado de la tabla, incluyendo si se creó, truncó o simplemente se verificó.
      */
-    public static function verifyAndPrepareTable(string $tableName, string $connection = null): array
+    public static function verifyAndPrepareTable(string $tableName, ?string $connection = null): array
     {
         try {
             // Separar schema y nombre de tabla si se proporciona con formato schema.tabla
             $parts = explode('.', $tableName);
-            $schema = count($parts) > 1 ? $parts[0] : 'suc';  // Default schema 'suc'
-            $tableNameWithoutSchema = count($parts) > 1 ? $parts[1] : $parts[0];
+            $schema = \count($parts) > 1 ? $parts[0] : 'suc';  // Default schema 'suc'
+            $tableNameWithoutSchema = \count($parts) > 1 ? $parts[1] : $parts[0];
 
             // Obtenemos el nombre de la conexión como string
             $connectionName = $connection ?: self::getMapucheConnectionName();
@@ -66,8 +49,8 @@ class TableManagementService implements TableManagementServiceInterface
                     'schema' => $schema,
                     'tableName' => $tableNameWithoutSchema,
                     'fullTableName' => "{$schema}.{$tableNameWithoutSchema}",
-                    'connection' => $connectionName
-                ]
+                    'connection' => $connectionName,
+                ],
             ];
 
             // Verificar existencia de la tabla en el schema correcto
@@ -83,7 +66,7 @@ class TableManagementService implements TableManagementServiceInterface
 
             Log::info($result['message'], $result['actions']);
             return $result;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
             return [
                 'success' => false,
@@ -92,13 +75,41 @@ class TableManagementService implements TableManagementServiceInterface
                 'data' => [
                     'schema' => $schema ?? null,
                     'tableName' => $tableNameWithoutSchema ?? null,
-                    'connection' => $connectionName ?? null
-                ]
+                    'connection' => $connectionName ?? null,
+                ],
             ];
         }
     }
 
+    /**
+     * Verifica si una tabla está vacía.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model Modelo Eloquent de la tabla a verificar.
+     * @param string $tableName Nombre de la tabla a verificar.
+     *
+     * @return bool Verdadero si la tabla está vacía, falso de lo contrario.
+     */
+    public static function verifyTableIsEmpty(Model $model, string $tableName): bool
+    {
+        $tableIsEmpty = $model->all()->isEmpty();
 
+        return !($tableIsEmpty);
+
+    }
+
+    protected static function getMapucheConnection(): Connection
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
+    }
+
+    protected static function getMapucheConnectionName(): string
+    {
+        return (new static())->getConnectionFromTrait()->getName();
+    }
 
     /**
      * Obtiene una instancia de la conexión de base de datos especificada.
@@ -106,6 +117,7 @@ class TableManagementService implements TableManagementServiceInterface
      * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
      *
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     *
      * @return \Illuminate\Database\Schema\Builder La instancia de la conexión de base de datos.
      */
     private static function getSchemaConnection(?string $connectionName = null)
@@ -119,6 +131,7 @@ class TableManagementService implements TableManagementServiceInterface
      * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
      *
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     *
      * @return \Illuminate\Database\Connection La instancia de la conexión de base de datos.
      */
     private static function getDbConnection(?string $connectionName = null)
@@ -135,7 +148,6 @@ class TableManagementService implements TableManagementServiceInterface
         }
     }
 
-
     /**
      * Crea la tabla 'afip_mapuche_sicoss' con un esquema de base de datos específico.
      *
@@ -146,7 +158,7 @@ class TableManagementService implements TableManagementServiceInterface
      */
     private static function createTableMapucheSicoss(string $tableName, $schema): void
     {
-        $schema->create($tableName, function (Blueprint $table) {
+        $schema->create($tableName, function (Blueprint $table): void {
             $table->char('periodo_fiscal', 6);
             $table->char('cuil', 11)->nullable()->unique();
             $table->char('apnom', 30)->nullable();
@@ -160,17 +172,17 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('cod_mod_cont', 3)->nullable();
             $table->char('cod_os', 6)->nullable();
             $table->char('cant_adh', 2)->nullable();
-            $table->decimal('rem_total', 15,2)->nullable();
-            $table->decimal('rem_impo1', 15,2)->nullable();
+            $table->decimal('rem_total', 15, 2)->nullable();
+            $table->decimal('rem_impo1', 15, 2)->nullable();
             $table->char('asig_fam_pag', 9)->nullable();
             $table->char('aporte_vol', 9)->nullable();
             $table->char('imp_adic_os', 9)->nullable();
             $table->char('exc_aport_ss', 9)->nullable();
             $table->char('exc_aport_os', 9)->nullable();
             $table->char('prov', 50)->nullable();
-            $table->decimal('rem_impo2', 15,2)->nullable();
-            $table->decimal('rem_impo3', 15,2)->nullable();
-            $table->decimal('rem_impo4', 15,2)->nullable();
+            $table->decimal('rem_impo2', 15, 2)->nullable();
+            $table->decimal('rem_impo3', 15, 2)->nullable();
+            $table->decimal('rem_impo4', 15, 2)->nullable();
             $table->char('cod_siniestrado', 2)->nullable();
             $table->char('marca_reduccion', 1)->nullable();
             $table->char('recomp_lrt', 9)->nullable();
@@ -191,7 +203,7 @@ class TableManagementService implements TableManagementServiceInterface
             $table->char('cant_dias_trab', 9)->nullable();
             $table->char('rem_impo5', 12)->nullable();
             $table->char('convencionado', 1)->nullable();
-            $table->decimal('rem_impo6', 15,2)->nullable();
+            $table->decimal('rem_impo6', 15, 2)->nullable();
             $table->char('tipo_oper', 1)->nullable();
             $table->char('adicionales', 12)->nullable();
             $table->char('premios', 12)->nullable();
@@ -218,10 +230,9 @@ class TableManagementService implements TableManagementServiceInterface
         Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
     }
 
-
     private static function createTableRelacionesActivas(string $tableName, $schema): void
     {
-        $schema->create($tableName, function (Blueprint $table) {
+        $schema->create($tableName, function (Blueprint $table): void {
             // $table->id();
             $table->char('periodo_fiscal', 6);
             $table->char('codigo_movimiento', 2)->nullable();
@@ -254,6 +265,7 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string $tableName Nombre de la tabla a verificar.
      * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     *
      * @return bool Verdadero si la tabla tiene datos, falso de lo contrario.
      */
     private static function tableHasData(string $tableName, $db): bool
@@ -267,29 +279,12 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string $tableName Nombre de la tabla a truncar.
      * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     *
      * @return void
      */
     private static function truncateTable(string $tableName, $db): void
     {
         $db->statement("TRUNCATE TABLE {$tableName} RESTART IDENTITY CASCADE");
         Log::info("Tabla $tableName truncada y secuencias reiniciadas.");
-    }
-
-    /**
-     * Verifica si una tabla está vacía.
-     *
-     * @param \Illuminate\Database\Eloquent\Model $model Modelo Eloquent de la tabla a verificar.
-     * @param string $tableName Nombre de la tabla a verificar.
-     * @return bool Verdadero si la tabla está vacía, falso de lo contrario.
-     */
-    public static function verifyTableIsEmpty(Model $model, string $tableName): bool
-    {
-        $tableIsEmpty = $model->all()->isEmpty();
-
-        if ($tableIsEmpty) {
-            return false;
-        } else {
-            return true;
-        }
     }
 }

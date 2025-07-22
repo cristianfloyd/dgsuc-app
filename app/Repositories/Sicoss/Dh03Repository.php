@@ -2,21 +2,21 @@
 
 namespace App\Repositories\Sicoss;
 
-use Exception;
+use App\Models\Mapuche\MapucheConfig;
+use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Mapuche\MapucheConfig;
-use App\Traits\MapucheConnectionTrait;
-use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 
 class Dh03Repository implements Dh03RepositoryInterface
 {
     use MapucheConnectionTrait;
 
     /**
-     * Obtiene cargos activos sin licencia para un legajo
+     * Obtiene cargos activos sin licencia para un legajo.
      *
      * @param int $legajo
+     *
      * @return array
      */
     public function getCargosActivosSinLicencia(int $legajo): array
@@ -55,9 +55,10 @@ class Dh03Repository implements Dh03RepositoryInterface
     }
 
     /**
-     * Obtiene cargos activos con licencia vigente para un legajo
+     * Obtiene cargos activos con licencia vigente para un legajo.
      *
      * @param int $legajo
+     *
      * @return array
      */
     public function getCargosActivosConLicenciaVigente(int $legajo): array
@@ -118,9 +119,10 @@ class Dh03Repository implements Dh03RepositoryInterface
     }
 
     /**
-     * Obtiene los límites de cargos para un legajo
+     * Obtiene los límites de cargos para un legajo.
      *
      * @param int $legajo
+     *
      * @return array
      */
     public function getLimitesCargos(int $legajo): array
@@ -158,12 +160,13 @@ class Dh03Repository implements Dh03RepositoryInterface
      *
      * @param string $fecha Fecha a verificar en formato compatible con PostgreSQL
      * @param int $vinculo Número de vínculo a validar
+     *
      * @return bool True si el vínculo es válido, False en caso contrario
      */
     public static function esVinculoValido(string $fecha, int $vinculo): bool
     {
         try {
-            $sql = "
+            $sql = '
                 SELECT
                     COUNT(*) as cantidad
                 FROM
@@ -183,16 +186,16 @@ class Dh03Repository implements Dh03RepositoryInterface
                             vinculo.vcl_cargo
                         HAVING count(*) > 1
                     )
-            ";
-            
+            ';
+
             $result = DB::connection(MapucheConfig::getStaticConnectionName())
-                       ->selectOne($sql, [$vinculo, $fecha, $vinculo]);
-                       
+                ->selectOne($sql, [$vinculo, $fecha, $vinculo]);
+
             return $result->cantidad > 0;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al verificar vínculo válido: ' . $e->getMessage(), [
                 'fecha' => $fecha,
-                'vinculo' => $vinculo
+                'vinculo' => $vinculo,
             ]);
             return false;
         }
@@ -200,28 +203,29 @@ class Dh03Repository implements Dh03RepositoryInterface
 
     /**
      * Verifica si existe una categoría diferencial activa para un legajo específico.
-     * 
-     * Consulta la tabla dh03 para determinar si un legajo tiene asignada alguna de las 
+     *
+     * Consulta la tabla dh03 para determinar si un legajo tiene asignada alguna de las
      * categorías diferenciales especificadas y si el cargo está activo según la función
      * map_es_cargo_activo de PostgreSQL.
      *
      * @param int $nroLegajo Número de legajo a consultar
      * @param string|array $catDiferencial Categorías diferenciales (string separado por comas o array)
+     *
      * @return bool True si existe al menos una categoría diferencial activa, false en caso contrario
      */
     public function existeCategoriaDiferencial(int $nroLegajo, string|array $catDiferencial): bool
     {
         try {
             // Procesamiento de categorías: convertir string a array si es necesario
-            if (is_string($catDiferencial)) {
+            if (\is_string($catDiferencial)) {
                 $categorias = array_map('trim', explode("','", trim($catDiferencial, "'")));
             } else {
                 $categorias = $catDiferencial;
             }
 
             // Construcción de la consulta SQL con parámetros seguros
-            $placeholders = str_repeat('?,', count($categorias) - 1) . '?';
-            
+            $placeholders = str_repeat('?,', \count($categorias) - 1) . '?';
+
             $sql = "SELECT COUNT(*) as total 
                     FROM mapuche.dh03 
                     WHERE codc_categ IN ($placeholders) 
@@ -233,14 +237,14 @@ class Dh03Repository implements Dh03RepositoryInterface
 
             // Ejecución de la consulta
             $result = DB::connection(MapucheConfig::getStaticConnectionName())
-                       ->selectOne($sql, $params);
+                ->selectOne($sql, $params);
 
             return $result->total > 0;
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al verificar categoría diferencial: ' . $e->getMessage(), [
                 'legajo' => $nroLegajo,
-                'categorias' => $catDiferencial
+                'categorias' => $catDiferencial,
             ]);
             return false;
         }

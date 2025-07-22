@@ -2,9 +2,9 @@
 
 namespace App\Services\MaterializedView;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 
 class ConceptoListadoViewService
 {
@@ -13,7 +13,7 @@ class ConceptoListadoViewService
     public function exists(): bool
     {
         try {
-            return (bool) DB::connection($this->getConnectionName())
+            return (bool)DB::connection($this->getConnectionName())
                 ->selectOne("
                     SELECT EXISTS (
                         SELECT 1
@@ -24,7 +24,7 @@ class ConceptoListadoViewService
                 ")->exists;
         } catch (\Exception $e) {
             Log::error('Error verificando existencia de vista', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return false;
         }
@@ -33,8 +33,8 @@ class ConceptoListadoViewService
     public function create(): void
     {
         try {
-                // sql de la migracion original
-                DB::connection($this->getConnectionName())->statement("
+            // sql de la migracion original
+            DB::connection($this->getConnectionName())->statement("
                 CREATE MATERIALIZED VIEW IF NOT EXISTS suc.concepto_listado AS
                 SELECT DISTINCT
                     ROW_NUMBER() OVER () AS id,
@@ -55,19 +55,19 @@ class ConceptoListadoViewService
                 WHERE d.codn_conce/100 IN (1,2,3);
             ");
 
-                // Indices para optimizar las búsquedas
-                DB::connection($this->getConnectionName())->statement(
-                    'CREATE INDEX IF NOT EXISTS idx_concepto_listado_codn_conce ON suc.concepto_listado(codn_conce)'
-                );
-                DB::connection($this->getConnectionName())->statement(
-                    'CREATE INDEX IF NOT EXISTS idx_concepto_listado_periodo_fiscal ON suc.concepto_listado(periodo_fiscal)'
-                );
-            ;
+            // Indices para optimizar las búsquedas
+            DB::connection($this->getConnectionName())->statement(
+                'CREATE INDEX IF NOT EXISTS idx_concepto_listado_codn_conce ON suc.concepto_listado(codn_conce)',
+            );
+            DB::connection($this->getConnectionName())->statement(
+                'CREATE INDEX IF NOT EXISTS idx_concepto_listado_periodo_fiscal ON suc.concepto_listado(periodo_fiscal)',
+            );
+
 
             Log::info('Vista materializada concepto_listado creada exitosamente');
         } catch (\Throwable $e) {
             Log::error('Error creando vista materializada', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -84,13 +84,13 @@ class ConceptoListadoViewService
             }
 
             DB::connection($this->getConnectionName())->statement(
-                'REFRESH MATERIALIZED VIEW suc.concepto_listado'
+                'REFRESH MATERIALIZED VIEW suc.concepto_listado',
             );
             Log::info('Vista materializada actualizada exitosamente');
         } catch (\Throwable $th) {
             Log::error('Error actualizando vista materializada', [
                 'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
+                'trace' => $th->getTraceAsString(),
             ]);
             throw $th;
         }
@@ -100,12 +100,12 @@ class ConceptoListadoViewService
     {
         try {
             DB::connection($this->getConnectionName())->statement(
-                'DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado CASCADE'
+                'DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado CASCADE',
             );
             Log::info('Vista materializada concepto_listado eliminada exitosamente');
         } catch (\Exception $e) {
             Log::error('Error eliminando vista materializada', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }

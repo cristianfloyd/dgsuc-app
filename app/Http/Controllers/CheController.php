@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\CheFileGenerator;
+use Illuminate\Http\Request;
 
 class CheController extends Controller
 {
@@ -20,7 +20,7 @@ class CheController extends Controller
             $request->liquidaciones,
             $request->anio,
             $request->mes,
-            $request->indice
+            $request->indice,
         );
 
         // Aquí manejas la respuesta según necesites
@@ -33,7 +33,7 @@ class CheController extends Controller
             $request->liquidaciones,
             $request->anio,
             $request->mes,
-            $request->indice
+            $request->indice,
         );
 
         return response()->json($result);
@@ -44,12 +44,12 @@ class CheController extends Controller
         $comprobantes = $this->cheGenerator->processAndStore(
             $request->liquidaciones,
             $request->anio,
-            $request->mes
+            $request->mes,
         );
 
         return response()->json([
             'message' => 'Comprobantes generados exitosamente',
-            'data' => $comprobantes
+            'data' => $comprobantes,
         ]);
     }
 }

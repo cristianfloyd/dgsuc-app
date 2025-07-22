@@ -1,41 +1,39 @@
 <?php
 
-use App\Livewire\Dh21;
-use App\Livewire\Modal;
-use App\Livewire\Clicker;
-use App\Livewire\TodoList;
-use App\Livewire\UserList;
-use App\Livewire\ContactUs;
-use App\Livewire\TestCuils;
-use App\Livewire\Uploadtxt;
-use App\Livewire\UsersTable;
-use Illuminate\Http\Request;
-use App\Livewire\CompareCuils;
-use App\Livewire\FileEncoding;
-use App\Livewire\RegisterForm;
-use App\Livewire\BuscarColumna;
-use App\Livewire\PanelSelector;
-use App\Livewire\ConvertirTabla;
-use App\Livewire\SicossImporter;
-use App\services\ColumnMetadata;
-use App\Livewire\AfipImportCrudo;
-use App\Livewire\ShowCuilDetails;
-use App\Livewire\BuscarComentario;
-use App\Livewire\MapucheSicossTable;
-use App\Livewire\ReporteLiquidacion;
-use Illuminate\Support\Facades\Route;
-use App\Livewire\AfipMiSimplificacion;
-use App\Livewire\ParaMiSimplificacion;
-use App\Livewire\AfipRelacionesActivas;
-use App\Http\Controllers\UsersController;
-use App\Livewire\Reportes\OrdenPagoReporte;
-use App\Livewire\AfipMapucheMiSimplificacion;
-use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\Auth\Office365Controller;
+use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\UsersController;
+use App\Livewire\AfipImportCrudo;
+use App\Livewire\AfipMapucheMiSimplificacion;
 use App\Livewire\AfipMapucheMiSimplificacionTable;
+use App\Livewire\AfipMiSimplificacion;
+use App\Livewire\AfipRelacionesActivas;
 use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use App\Livewire\BuscarColumna;
+use App\Livewire\BuscarComentario;
+use App\Livewire\Clicker;
+use App\Livewire\CompareCuils;
+use App\Livewire\ContactUs;
+use App\Livewire\ConvertirTabla;
+use App\Livewire\Dh21;
+use App\Livewire\FileEncoding;
+use App\Livewire\MapucheSicossTable;
+use App\Livewire\Modal;
+use App\Livewire\PanelSelector;
+use App\Livewire\ParaMiSimplificacion;
+use App\Livewire\RegisterForm;
+use App\Livewire\ReporteLiquidacion;
+use App\Livewire\Reportes\OrdenPagoReporte;
+use App\Livewire\ShowCuilDetails;
+use App\Livewire\SicossImporter;
+use App\Livewire\TestCuils;
+use App\Livewire\TodoList;
+use App\Livewire\Uploadtxt;
+use App\Livewire\UserList;
+use App\Livewire\UsersTable;
+use App\services\ColumnMetadata;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
@@ -46,12 +44,12 @@ Route::get('/user/register', RegisterForm::class)->name('registerform');
 
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])
-    ->group(function () {
+    ->group(function (): void {
         // Rutas protegidas que requieren autenticación y gestión de conexión BD
     });
 
 
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', ])->group(function (): void {
     Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
     Route::get('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () {
@@ -79,7 +77,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
     })->name('reporte-orden-pago-pdf');
-    Route::get('/test-column-metadata', function () {
+    Route::get('/test-column-metadata', function (): void {
         $columnMetadata = app(ColumnMetadata::class);
     });
 
@@ -120,7 +118,7 @@ Route::get('/afip/sicoss/download', function (Request $request) {
         abort(404, 'Archivo no encontrado');
     }
 
-    $extension = pathinfo($path, PATHINFO_EXTENSION);
+    $extension = pathinfo($path, \PATHINFO_EXTENSION);
     $contentType = $extension === 'txt' ? 'text/plain' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     $fileName = basename($path);
 

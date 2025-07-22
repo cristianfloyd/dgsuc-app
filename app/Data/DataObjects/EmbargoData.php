@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Data\DataObjects;
@@ -37,5 +38,6 @@ class EmbargoData extends Data
         public readonly ?string $nom_demandado = null,
         public readonly ?Carbon $fec_oficio = null,
         public readonly ?int $id_tipo_expediente = null,
-    ) {}
+    ) {
+    }
 }

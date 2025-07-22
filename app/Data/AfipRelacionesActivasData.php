@@ -2,9 +2,9 @@
 
 namespace App\Data;
 
+use App\Models\AfipRelacionesActivas;
 use Carbon\Carbon;
 use Spatie\LaravelData\Data;
-use App\Models\AfipRelacionesActivas;
 
 class AfipRelacionesActivasData extends Data
 {
@@ -30,8 +30,9 @@ class AfipRelacionesActivasData extends Data
         public readonly string $tipoServicio,
         public readonly string $categoriaProfesional,
         public readonly string $ccct,
-        public readonly string $noHayDatos
-    ) {}
+        public readonly string $noHayDatos,
+    ) {
+    }
 
     public static function fromModel(AfipRelacionesActivas $model): self
     {
@@ -57,7 +58,7 @@ class AfipRelacionesActivasData extends Data
             $model->tipo_servicio,
             $model->categoria_profesional,
             $model->ccct,
-            $model->no_hay_datos
+            $model->no_hay_datos,
         );
     }
 }

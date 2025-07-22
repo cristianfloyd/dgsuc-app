@@ -29,52 +29,52 @@ interface SicossConfigurationRepositoryInterface
     public function inicializarConfiguracionArchivos(): array;
 
     /**
-     * Obtiene el porcentaje de aporte adicional de jubilación
+     * Obtiene el porcentaje de aporte adicional de jubilación.
      */
     public function getPorcentajeAporteAdicionalJubilacion(): float;
 
     /**
-     * Obtiene si el trabajador es convencionado
+     * Obtiene si el trabajador es convencionado.
      */
     public function getTrabajadorConvencionado(): int;
 
     /**
-     * Obtiene si se deben considerar asignaciones familiares
+     * Obtiene si se deben considerar asignaciones familiares.
      */
     public function getAsignacionFamiliar(): bool;
 
     /**
-     * Obtiene la cantidad de adherentes SICOSS
+     * Obtiene la cantidad de adherentes SICOSS.
      */
     public function getCantidadAdherentesSicoss(): int;
 
     /**
-     * Obtiene si las horas extras son por novedad
+     * Obtiene si las horas extras son por novedad.
      */
     public function getHorasExtrasPorNovedad(): int;
 
     /**
-     * Obtiene el código de obra social aporte adicional
+     * Obtiene el código de obra social aporte adicional.
      */
     public function getCodigoObraSocialAporteAdicional(): int;
 
     /**
-     * Obtiene el código de aportes voluntarios
+     * Obtiene el código de aportes voluntarios.
      */
     public function getAportesVoluntarios(): int;
 
     /**
-     * Obtiene el código de obra social familiar a cargo
+     * Obtiene el código de obra social familiar a cargo.
      */
     public function getCodigoObraSocialFamiliarCargo(): int;
 
     /**
-     * Obtiene el código de reparto
+     * Obtiene el código de reparto.
      */
     public function getCodigoReparto(): string;
 
     /**
-     * Obtiene los topes jubilatorios configurados
+     * Obtiene los topes jubilatorios configurados.
      *
      * @return array Array con los topes jubilatorios y otros aportes
      */

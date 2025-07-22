@@ -11,23 +11,26 @@ class MapucheGrupoLegajo extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'grupo_x_legajo';
     public $timestamps = false;
-    protected $primaryKey = null;
+
     public $incrementing = false;
+
+    protected $table = 'grupo_x_legajo';
+
+    protected $primaryKey;
 
     protected $fillable = [
         'id_grupo',
-        'nro_legaj'
+        'nro_legaj',
     ];
 
     protected $casts = [
         'id_grupo' => 'integer',
-        'nro_legaj' => 'integer'
+        'nro_legaj' => 'integer',
     ];
 
     /**
-     * El grupo al que pertenece este legajo
+     * El grupo al que pertenece este legajo.
      */
     public function grupo(): BelongsTo
     {
@@ -35,7 +38,7 @@ class MapucheGrupoLegajo extends Model
     }
 
     /**
-     * El legajo asociado
+     * El legajo asociado.
      */
     public function legajo(): BelongsTo
     {

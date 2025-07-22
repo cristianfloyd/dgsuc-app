@@ -3,9 +3,9 @@
 namespace App\Repositories\Sicoss;
 
 use App\Models\Dh01;
-use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 class SicossCalculoRepository implements SicossCalculoRepositoryInterface
 {
@@ -13,11 +13,12 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
 
     /**
      * Sumariza importes de conceptos que pertenecen a un determinado tipo de concepto
-     * Se podía hacer en la función sumarizar_conceptos_por_tipos_grupos pero queda más claro separado
+     * Se podía hacer en la función sumarizar_conceptos_por_tipos_grupos pero queda más claro separado.
      *
      * @param int $nro_legajo
      * @param string $tipo
      * @param string $where
+     *
      * @return float
      */
     public function calcularRemunerGrupo(int $nro_legajo, string $tipo, string $where): float
@@ -38,10 +39,11 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     }
 
     /**
-     * Calcula horas extras por concepto y cargo
+     * Calcula horas extras por concepto y cargo.
      *
      * @param int $concepto
      * @param int $cargo
+     *
      * @return array
      */
     public function calculoHorasExtras(int $concepto, int $cargo): array
@@ -79,9 +81,10 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     }
 
     /**
-     * Se obtienen los importes de otra actividad, cuando tiene varias tomo la del último periodo
+     * Se obtienen los importes de otra actividad, cuando tiene varias tomo la del último periodo.
      *
      * @param int $nro_legajo
+     *
      * @return array
      */
     public function otraActividad(int $nro_legajo): array
@@ -104,7 +107,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         if (empty($resp)) {
             return [
                 'importesacotraactividad' => 0,
-                'importebrutootraactividad' => 0
+                'importebrutootraactividad' => 0,
             ];
         }
 
@@ -112,9 +115,10 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     }
 
     /**
-     * Devuelve el código DGI de obra social correspondiente dado un legajo
+     * Devuelve el código DGI de obra social correspondiente dado un legajo.
      *
      * @param int $nro_legajo
+     *
      * @return string
      */
     public function codigoOs(int $nro_legajo): string

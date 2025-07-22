@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories\Mapuche;
 
-use App\Models\Mapuche\Dh09;
 use App\Data\Mapuche\Dh09Data;
+use App\Models\Mapuche\Dh09;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh09Repository
 {
-    public function __construct(private Dh09 $model) {}
+    public function __construct(private Dh09 $model)
+    {
+    }
 
     public function findByLegajo(int $nroLegajo): ?Dh09Data
     {

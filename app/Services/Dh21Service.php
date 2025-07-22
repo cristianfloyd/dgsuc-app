@@ -2,36 +2,36 @@
 
 namespace App\Services;
 
-use App\Models\Dh21;
-use InvalidArgumentException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Repositories\Dh21Repository;
 use App\Data\Responses\ConceptoTotalData;
+use App\Models\Dh21;
+use App\Repositories\Dh21Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\LaravelData\DataCollection;
 
 class Dh21Service
 {
-
     /**
      * Crea una nueva instancia de la clase Dh21Service.
      */
-    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository){}
+    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository)
+    {
+    }
 
     /**
      * Obtiene la suma total del concepto 101 en la tabla.
      *
      * @return float
      */
-    public function totalConcepto101(int $nro_liqui = null)
+    public function totalConcepto101(?int $nro_liqui = null)
     {
         $query = $this->dh21->where('codn_conce', '101');
 
         if ($nro_liqui !== null) {
             if ($nro_liqui <= 0) {
-                throw new InvalidArgumentException('El número de liquidación debe ser positivo');
+                throw new \InvalidArgumentException('El número de liquidación debe ser positivo');
             }
             $query->where('nro_liqui', $nro_liqui);
         }
@@ -39,16 +39,17 @@ class Dh21Service
         return $query->sum('impp_conce');
     }
 
-
     /**
      * Obtiene los conceptos totales aplicando filtros opcionales.
      *
      * @param int|null $nro_liqui Número de liquidación (opcional)
      * @param int|null $codn_fuent Código de fuente (opcional)
-     * @return Builder Query builder con los conceptos totales
+     *
      * @throws \Exception Si ocurre un error durante la consulta
+     *
+     * @return Builder Query builder con los conceptos totales
      */
-    public function conceptosTotales(int $nro_liqui = null, int $codn_fuent = null): Builder
+    public function conceptosTotales(?int $nro_liqui = null, ?int $codn_fuent = null): Builder
     {
         try {
             // Construcción de la consulta base
@@ -56,7 +57,7 @@ class Dh21Service
                 ->select(
                     DB::raw('ROW_NUMBER() OVER (ORDER BY codn_conce) as id_liquidacion'),
                     'codn_conce',
-                    DB::raw('SUM(impp_conce) as total_impp')
+                    DB::raw('SUM(impp_conce) as total_impp'),
                 )
                 // Filtro opcional por nro_liqui
                 ->when($nro_liqui !== null, function ($query) use ($nro_liqui) {
@@ -88,15 +89,16 @@ class Dh21Service
      *
      * @param int|null $nro_liqui Número de liquidación (opcional)
      * @param int|null $codn_fuent Código de fuente (opcional)
+     *
      * @return DataCollection<ConceptoTotalData>
      */
-    public function getConceptosTotalesCollection(int $nro_liqui = null, int $codn_fuent = null): DataCollection
+    public function getConceptosTotalesCollection(?int $nro_liqui = null, ?int $codn_fuent = null): DataCollection
     {
         return new DataCollection(
             ConceptoTotalData::class,
             $this->conceptosTotales($nro_liqui, $codn_fuent)
                 ->get()
-                ->map(fn ($item) => ConceptoTotalData::fromArray($item->toArray()))
+                ->map(fn ($item) => ConceptoTotalData::fromArray($item->toArray())),
         );
     }
 
@@ -105,6 +107,7 @@ class Dh21Service
      *
      * @param int $legajo Número de legajo del empleado
      * @param int $cargo Código del cargo
+     *
      * @return array Arreglo con las horas y días laborados
      */
     public function obtenerHorasYDias(int $legajo, int $cargo): array
@@ -113,9 +116,10 @@ class Dh21Service
     }
 
     /**
-     * Obtiene las liquidaciones aplicando filtros opcionales
+     * Obtiene las liquidaciones aplicando filtros opcionales.
      *
      * @param array $conditions
+     *
      * @return Collection
      */
     public function obtenerLiquidaciones(array $conditions = []): Collection

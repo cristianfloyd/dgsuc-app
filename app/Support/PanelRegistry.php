@@ -116,7 +116,7 @@ class PanelRegistry
                 'badge' => 'SUC',
                 'bgColor' => 'bg-slate-700',
                 'sortOrder' => 80,
-            ]
+            ],
         ]);
     }
 
@@ -127,7 +127,7 @@ class PanelRegistry
             'admin' => 'Administración',
             'rrhh' => 'Recursos Humanos',
             'finance' => 'Finanzas',
-            'reports' => 'Reportes'
+            'reports' => 'Reportes',
         ]);
     }
 }

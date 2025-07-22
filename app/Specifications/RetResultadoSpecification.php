@@ -2,9 +2,9 @@
 
 namespace App\Specifications;
 
-use Illuminate\Database\Eloquent\Builder;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use Illuminate\Database\Eloquent\Builder;
 
 class RetResultadoSpecification
 {
@@ -13,6 +13,7 @@ class RetResultadoSpecification
      *
      * @param Builder $query
      * @param Periodo $periodo
+     *
      * @return Builder
      */
     public function porPeriodo(Builder $query, Periodo $periodo): Builder
@@ -25,6 +26,7 @@ class RetResultadoSpecification
      *
      * @param Builder $query
      * @param TipoRetro $tipoRetro
+     *
      * @return Builder
      */
     public function porTipoRetro(Builder $query, TipoRetro $tipoRetro): Builder
@@ -38,6 +40,7 @@ class RetResultadoSpecification
      * @param Builder $query
      * @param \DateTime $desde
      * @param \DateTime $hasta
+     *
      * @return Builder
      */
     public function porRangoFechas(Builder $query, \DateTime $desde, \DateTime $hasta): Builder

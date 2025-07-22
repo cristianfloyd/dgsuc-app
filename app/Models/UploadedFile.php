@@ -28,7 +28,6 @@ class UploadedFile extends Model
         'process_id', // Nuevo campo para el ID del proceso
     ];
 
-
     /**
      * Crea un nuevo registro de archivo cargado en la base de datos.
      *
@@ -36,6 +35,7 @@ class UploadedFile extends Model
      * y la guarda en la base de datos.
      *
      * @param array $data Un array asociativo que contiene los atributos para el nuevo UploadedFile
+     *
      * @return UploadedFile La instancia recién creada de UploadedFile
      */
     public static function create(array $data): UploadedFile
@@ -46,7 +46,6 @@ class UploadedFile extends Model
 
         return $uploadedFile;
     }
-
 
     /**
      * Obtiene el nombre de la tabla asociada al modelo.
@@ -62,6 +61,7 @@ class UploadedFile extends Model
      * Obtiene un registro por su ID.
      *
      * @param int $id El ID del registro a buscar.
+     *
      * @return UploadedFile|null El registro encontrado o null si no existe.
      */
     public function getById($id)
@@ -74,6 +74,7 @@ class UploadedFile extends Model
      *
      * @param \Illuminate\Database\Eloquent\Builder $query El objeto de consulta.
      * @param string $search El término de búsqueda.
+     *
      * @return \Illuminate\Database\Eloquent\Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
      */
     public function scopeSearch($query, $search)

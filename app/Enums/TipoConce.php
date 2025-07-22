@@ -4,44 +4,44 @@ namespace App\Enums;
 
 enum TipoConce: string
 {
-/**
+    /**
      * Remuneración con aporte
-     * Ejemplo: Sueldo Básico
+     * Ejemplo: Sueldo Básico.
      */
     case REMUNERACION_CON_APORTE = 'C';
 
-/**
+    /**
      * Remuneración sin Aporte
-     * Ejemplo: Ajuste de Haberes
+     * Ejemplo: Ajuste de Haberes.
      */
     case REMUNERACION_SIN_APORTE = 'S';
 
-/**
+    /**
      * Salario Familiar
-     * Ejemplo: Asignación por Hijo
+     * Ejemplo: Asignación por Hijo.
      */
     case SALARIO_FAMILIAR = 'F';
 
-/**
+    /**
      * Descuento
-     * Ejemplo: Obra Social
+     * Ejemplo: Obra Social.
      */
     case DESCUENTO = 'D';
 
-/**
+    /**
      * Aporte Patronal
-     * Ejemplo: Obra Social Patronal
+     * Ejemplo: Obra Social Patronal.
      */
     case APORTE_PATRONAL = 'A';
 
-/**
+    /**
      * Otro No remunerativo
-     * Ejemplo: Becas
+     * Ejemplo: Becas.
      */
     case OTRO_NO_REMUNERATIVO = 'O';
 
     /**
-     * Obtiene la descripción del tipo de concepto
+     * Obtiene la descripción del tipo de concepto.
      */
     public function getDescription(): string
     {
@@ -56,7 +56,7 @@ enum TipoConce: string
     }
 
     /**
-     * Obtiene el color de badge para el tipo de concepto
+     * Obtiene el color de badge para el tipo de concepto.
      */
     public function getBadgeColor(): string
     {
@@ -71,18 +71,18 @@ enum TipoConce: string
     }
 
     /**
-     * Determina si el concepto es remunerativo
+     * Determina si el concepto es remunerativo.
      */
     public function isRemunerativo(): bool
     {
-        return in_array($this, [
+        return \in_array($this, [
             self::REMUNERACION_CON_APORTE,
-            self::REMUNERACION_SIN_APORTE
+            self::REMUNERACION_SIN_APORTE,
         ]);
     }
 
     /**
-     * Determina si el concepto lleva aportes
+     * Determina si el concepto lleva aportes.
      */
     public function tieneAportes(): bool
     {
@@ -90,18 +90,18 @@ enum TipoConce: string
     }
 
     /**
-     * Determina si el concepto es un descuento o aporte patronal
+     * Determina si el concepto es un descuento o aporte patronal.
      */
     public function esDescuentoOAporte(): bool
     {
-        return in_array($this, [
+        return \in_array($this, [
             self::DESCUENTO,
-            self::APORTE_PATRONAL
+            self::APORTE_PATRONAL,
         ]);
     }
 
     /**
-     * Obtiene un ejemplo del tipo de concepto
+     * Obtiene un ejemplo del tipo de concepto.
      */
     public function getExample(): string
     {

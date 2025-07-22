@@ -2,17 +2,16 @@
 
 namespace App\Models\Mapuche;
 
-use App\Traits\DynamicConnectionTrait;
+use App\Services\EnhancedDatabaseConnectionService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\EnhancedDatabaseConnectionService;
 
 abstract class MapucheBase extends Model
 {
     use MapucheConnectionTrait;
 
     /**
-     * Override del getConnectionName para permitir fallback a conexión dinámica
+     * Override del getConnectionName para permitir fallback a conexión dinámica.
      */
     public function getConnectionName(): string
     {
@@ -27,7 +26,7 @@ abstract class MapucheBase extends Model
     }
 
     /**
-     * Determina si debe usar conexión dinámica basado en el contexto
+     * Determina si debe usar conexión dinámica basado en el contexto.
      */
     protected function shouldUseDynamicConnection(): bool
     {

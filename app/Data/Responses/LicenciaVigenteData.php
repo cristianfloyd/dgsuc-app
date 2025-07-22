@@ -3,11 +3,11 @@
 namespace App\Data\Responses;
 
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 
 class LicenciaVigenteData extends Data
 {
@@ -44,7 +44,7 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Obtiene la descripción legible del tipo de condición/licencia
+     * Obtiene la descripción legible del tipo de condición/licencia.
      *
      * @return string
      */
@@ -64,47 +64,49 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Determina si la licencia es de maternidad
+     * Determina si la licencia es de maternidad.
      *
      * @return bool
      */
     public function esLicenciaMaternidad(): bool
     {
-        return in_array($this->condicion, [5, 11]);
+        return \in_array($this->condicion, [5, 11]);
     }
 
     /**
-     * Determina si la licencia es por enfermedad
+     * Determina si la licencia es por enfermedad.
      *
      * @return bool
      */
     public function esLicenciaEnfermedad(): bool
     {
-        return in_array($this->condicion, [18, 19]);
+        return \in_array($this->condicion, [18, 19]);
     }
 
     /**
-     * Crear una colección tipada desde un conjunto de resultados
+     * Crear una colección tipada desde un conjunto de resultados.
      *
      * @param Collection|array $resultados
+     *
      * @return DataCollection
      */
     public static function fromResultados($resultados): DataCollection
     {
-        if (is_array($resultados)) {
+        if (\is_array($resultados)) {
             $resultados = collect($resultados);
         }
 
         return new DataCollection(
             LicenciaVigenteData::class,
-            $resultados->map(fn($row) => self::fromRow($row))
+            $resultados->map(fn ($row) => self::fromRow($row)),
         );
     }
 
     /**
-     * Crear una instancia desde una fila de resultados
+     * Crear una instancia desde una fila de resultados.
      *
      * @param object|array $row
+     *
      * @return self
      */
     public static function fromRow($row): self
@@ -125,7 +127,7 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Convierte el DTO a un array para exportación Excel
+     * Convierte el DTO a un array para exportación Excel.
      *
      * @return array
      */

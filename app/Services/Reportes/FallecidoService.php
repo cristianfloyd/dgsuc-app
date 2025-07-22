@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Services\Reportes;
 
+use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 
 class FallecidoService
 {
     public function __construct(
-        private readonly FallecidoRepositoryInterface $repository
-    ) {}
+        private readonly FallecidoRepositoryInterface $repository,
+    ) {
+    }
 
     /**
-     * Crea la tabla rep_fallecidos si no existe
+     * Crea la tabla rep_fallecidos si no existe.
      */
     public function createTableIfNotExists(): void
     {
         if (!Schema::hasTable('rep_fallecidos')) {
-            Schema::create('rep_fallecidos', function ($table) {
+            Schema::create('rep_fallecidos', function ($table): void {
                 $table->integer('nro_legaj');
                 $table->char('apellido', 20);
                 $table->char('nombre', 20);
@@ -32,7 +33,7 @@ class FallecidoService
     }
 
     /**
-     * Trunca la tabla rep_fallecidos
+     * Trunca la tabla rep_fallecidos.
      */
     public function truncateTable(): void
     {
@@ -40,7 +41,7 @@ class FallecidoService
     }
 
     /**
-     * Pobla la tabla con datos desde Mapuche
+     * Pobla la tabla con datos desde Mapuche.
      */
     public function populateFromMapuche(): void
     {
@@ -71,11 +72,11 @@ class FallecidoService
     }
 
     /**
-     * Ejecuta el proceso completo de actualización
+     * Ejecuta el proceso completo de actualización.
      */
     public function refreshData(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             $this->createTableIfNotExists();
             $this->truncateTable();
             $this->populateFromMapuche();

@@ -2,42 +2,51 @@
 
 namespace App\Filament\Resources\Dh11Resource\Widgets;
 
+use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh11;
-use Filament\Forms\Form;
-use Livewire\Attributes\On;
-use Filament\Widgets\Widget;
+use App\Services\Dh11RestoreService;
 use App\Services\Dh11Service;
+use App\Services\Mapuche\EscalafonService;
+use App\Services\Mapuche\PeriodoFiscalService;
+use App\Traits\CategoriasConstantTrait;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\Services\Dh11RestoreService;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Contracts\HasForms;
-use App\Traits\CategoriasConstantTrait;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use App\Services\Mapuche\EscalafonService;
-use Filament\Forms\Components\Actions\Action;
-use App\Services\Mapuche\PeriodoFiscalService;
-use Filament\Forms\Concerns\InteractsWithForms;
-use App\Contracts\CategoryUpdateServiceInterface;
+use Livewire\Attributes\On;
 
 class ActualizarImppBasicWidget extends Widget implements HasForms
 {
-    use InteractsWithForms, CategoriasConstantTrait;
-    protected static string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
-
+    use InteractsWithForms;
+    use CategoriasConstantTrait;
 
     public ?float $porcentaje = null;
+
     public Collection $previewData;
+
     public bool $showConfirmButton = false;
+
     public ?string $codigoescalafon = null;
 
+    protected static string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
+
     private $categoryUpdateService;
+
     private $periodoFiscalService;
+
     private $periodoFiscal;
+
     private $dh11RestoreService;
+
     private $dh11Service;
+
     private $escalafonService;
 
     public function boot(
@@ -45,14 +54,15 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
         CategoryUpdateServiceInterface $categoryUpdateService,
         Dh11RestoreService $dh11RestoreService,
         Dh11Service $dh11Service,
-        EscalafonService $escalafonService): void
-    {
+        EscalafonService $escalafonService,
+    ): void {
         $this->periodoFiscalService = $periodoFiscalService;
         $this->categoryUpdateService = $categoryUpdateService;
         $this->dh11RestoreService = $dh11RestoreService;
         $this->dh11Service = $dh11Service;
         $this->escalafonService = $escalafonService;
     }
+
     public function mount(): void
     {
         $this->form->fill();
@@ -71,22 +81,22 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                                 'DOC2' => 'Preuniversitario',
                                 'DOCU' => 'Docente Universitario',
                                 'AUTU' => 'Autoridad Universitaria',
-                                'NODO' => 'Nodocente'
+                                'NODO' => 'Nodocente',
                             ]);
                         return $codc_categs;
-                })
-                ->reactive()
-                ->afterStateUpdated(function ($state, callable $set) {
-                    $codc_categs = match ($state) {
-                        'DOC2' => self::CATEGORIAS['DOC2'],
-                        'DOCU' => self::CATEGORIAS['DOCU'],
-                        'AUTU' => self::CATEGORIAS['AUTU'],
-                        'NODO' => self::CATEGORIAS['NODO'],
-                        'TODO' => $this->dh11Service->getAllCodcCateg(),
-                        default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
-                    };
-                    session(['selected_codc_categs' => $codc_categs]);
-                }),
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        $codc_categs = match ($state) {
+                            'DOC2' => self::CATEGORIAS['DOC2'],
+                            'DOCU' => self::CATEGORIAS['DOCU'],
+                            'AUTU' => self::CATEGORIAS['AUTU'],
+                            'NODO' => self::CATEGORIAS['NODO'],
+                            'TODO' => $this->dh11Service->getAllCodcCateg(),
+                            default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
+                        };
+                        session(['selected_codc_categs' => $codc_categs]);
+                    }),
                 TextInput::make('porcentaje')
                     ->label('Porcentaje')
                     ->numeric()
@@ -105,9 +115,9 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                 Actions::make([
                     Action::make('restore')->label('Restaurar')->icon('heroicon-m-arrow-path')
                         ->color('info')
-                        ->badge(function(){
-                             // Verificar si $this->periodoFiscal es válido antes de acceder a sus índices
-                            if (isset($this->periodoFiscal['year']) && isset($this->periodoFiscal['month'])) {
+                        ->badge(function () {
+                            // Verificar si $this->periodoFiscal es válido antes de acceder a sus índices
+                            if (isset($this->periodoFiscal['year'], $this->periodoFiscal['month'])) {
                                 $year = $this->periodoFiscal['year'];
                                 $month = $this->periodoFiscal['month'];
                                 return "{$year}-{$month}";
@@ -119,11 +129,10 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                         ->requiresConfirmation()
                         ->action('restoreData'),
                 ])
-                ->alignCenter()
-                ->verticallyAlignEnd()
+                    ->alignCenter()
+                    ->verticallyAlignEnd(),
             ])
-            ->columns(3)
-            ;
+            ->columns(3);
     }
 
     public function previsualizar(): void
@@ -148,13 +157,13 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                     'impp_basic_nuevo' => $newImppBasic,
                 ];
             });
-            $this->showConfirmButton = true;
+        $this->showConfirmButton = true;
     }
 
     public function confirmarCambios(): void
     {
         // Verificar si $this->periodoFiscal es válido
-        $periodoFiscal =  $this->periodoFiscalService->getPeriodoFiscal();
+        $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
         Log::debug("Periodo fiscal en confirmarCambios: {$periodoFiscal['year']} - {$periodoFiscal['month']}");
 
 
@@ -172,7 +181,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
                     $this->categoryUpdateService->updateCategoryWithHistory(
                         $categoria,
                         $this->porcentaje,
-                        $periodoFiscal
+                        $periodoFiscal,
                     );
                 } else {
                     Log::warning("No se encontró la categoría con código: {$codc_categ}");
@@ -208,7 +217,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
             $this->dh11RestoreService->restoreFiscalPeriod(
                 $periodoFiscal['year'],
-                $periodoFiscal['month']
+                $periodoFiscal['month'],
             );
 
             $this->addNotification('Categorías restauradas correctamente.');
@@ -231,12 +240,18 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
     /**
      * Restablece el formulario a su estado inicial.
      */
-    public function cancelarCambios()
+    public function cancelarCambios(): void
     {
         $this->resetForm();
     }
 
-    private function addNotification($message)
+    public static function canView(): bool
+    {
+        // return auth()->user()->can('manage_dh11');
+        return true;
+    }
+
+    private function addNotification($message): void
     {
         Notification::make()
             ->title($message)
@@ -253,23 +268,17 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
         $this->codigoescalafon = null;
     }
 
-
     /**
      * Redondea un número hacia arriba con un número específico de decimales.
      *
      * @param float $number El número a redondear.
      * @param int $precision El número de decimales a mantener.
+     *
      * @return float El número redondeado hacia arriba.
      */
     private function round_up($number, $precision = 2)
     {
-        $fig = (int) str_pad('1', $precision, '0');
+        $fig = (int)str_pad('1', $precision, '0');
         return ceil($number * $fig) / $fig;
-    }
-
-    public static function canView():bool
-    {
-        // return auth()->user()->can('manage_dh11');
-        return true;
     }
 }

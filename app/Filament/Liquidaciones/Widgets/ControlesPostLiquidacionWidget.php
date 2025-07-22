@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class ControlesPostLiquidacionWidget extends BaseWidget
 {
     /**
-     * Define las estadísticas que se mostrarán en el widget
+     * Define las estadísticas que se mostrarán en el widget.
      *
      * @return array Array de objetos Stat para mostrar en el widget
      */
@@ -36,7 +36,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
         } catch (\Exception $e) {
             Log::error('Error al generar estadísticas de controles post-liquidación', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Devolver estadísticas vacías en caso de error
@@ -49,7 +49,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     }
 
     /**
-     * Obtiene la cantidad de controles pendientes
+     * Obtiene la cantidad de controles pendientes.
      *
      * @return int Número de controles pendientes
      */
@@ -59,14 +59,14 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             return LiquidacionControl::where('estado', 'pendiente')->count();
         } catch (\Exception $e) {
             Log::error('Error al obtener controles pendientes', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return 0;
         }
     }
 
     /**
-     * Obtiene la cantidad de controles con error
+     * Obtiene la cantidad de controles con error.
      *
      * @return int Número de controles con error
      */
@@ -76,14 +76,14 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             return LiquidacionControl::where('estado', 'error')->count();
         } catch (\Exception $e) {
             Log::error('Error al obtener controles con error', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return 0;
         }
     }
 
     /**
-     * Obtiene la cantidad de controles completados
+     * Obtiene la cantidad de controles completados.
      *
      * @return int Número de controles completados
      */
@@ -93,7 +93,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             return LiquidacionControl::where('estado', 'completado')->count();
         } catch (\Exception $e) {
             Log::error('Error al obtener controles completados', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return 0;
         }

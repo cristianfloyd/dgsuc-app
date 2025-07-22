@@ -2,34 +2,39 @@
 
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
-use App\Models\Dh21;
-use Filament\Forms\Get;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use App\Models\Mapuche\Dh22;
-use App\Services\Dh21Service;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\Log;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
 use App\Filament\Resources\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Dh21;
+use App\Models\Mapuche\Dh22;
+use App\Services\Dh21Service;
+use Filament\Forms\Get;
+use Filament\Resources\Pages\Page;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class ConceptosTotales extends Page implements HasTable
 {
     use InteractsWithTable;
+
     protected static string $resource = Dh21Resource::class;
 
     protected static string $view = 'filament.resources.dh21-resource.pages.conceptos-totales';
-    protected ?int $nro_liqui = null;
-    protected ?int $codn_fuent = null;
-    protected string $total = 'Total';
-    protected ?int $lastNroLiqui = null;
-    protected ?string $codigoEscalafon = null;
 
+    protected ?int $nro_liqui = null;
+
+    protected ?int $codn_fuent = null;
+
+    protected string $total = 'Total';
+
+    protected ?int $lastNroLiqui = null;
+
+    protected ?string $codigoEscalafon = null;
 
     public function table(Table $table): Table
     {
@@ -43,30 +48,23 @@ class ConceptosTotales extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('total_impp')
                     ->label(
-                        function (Get $get){
+                        function (Get $get) {
                             return $this->total;
-                        }
+                        },
                     )
                     ->money('ARS')
                     ->sortable(),
             ]);
     }
 
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            IdLiquiSelector::class,
-        ];
-    }
-
-
     /**
      * Obtiene una consulta de Dh21 que filtra los conceptos totales por el número de liquidación proporcionado.
      *
      * @param int|null $nro_liqui El número de liquidación a filtrar, o null para obtener todos los conceptos.
+     *
      * @return \Illuminate\Database\Eloquent\Builder La consulta de Dh21 filtrada por el número de liquidación.
      */
-    public function updateQuery($nro_liqui = null):Builder
+    public function updateQuery($nro_liqui = null): Builder
     {
         try {
             if ($this->lastNroLiqui == null) {
@@ -80,7 +78,6 @@ class ConceptosTotales extends Page implements HasTable
             return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
         }
     }
-
 
     #[On('idLiquiSelected')]
     public function updateTable($nro_liqui = null, $desc_liqui = null): void
@@ -96,14 +93,15 @@ class ConceptosTotales extends Page implements HasTable
      * Método para actualizar el query con el filtro de codigoEscalafon.
      *
      * @param int $codigoEscalafon El código de escalafón para filtrar.
+     *
      * @return void
      */
-    public function filterByCodigoEscalafon(string $codigoEscalafon = null): void
+    public function filterByCodigoEscalafon(?string $codigoEscalafon = null): void
     {
         $this->codigoEscalafon = $codigoEscalafon;
         $this->table->query(
             $this->updateQuery($this->nro_liqui)
-                ->where('codigoescalafon', '=', $codigoEscalafon)
+                ->where('codigoescalafon', '=', $codigoEscalafon),
         );
     }
 
@@ -115,5 +113,12 @@ class ConceptosTotales extends Page implements HasTable
     public function getHeaderWidgetsColumns(): int | array
     {
         return 3;
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            IdLiquiSelector::class,
+        ];
     }
 }

@@ -2,24 +2,26 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Facades\DB;
 use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmbargoSummarySheet extends BaseExcelSheet implements FromCollection, WithHeadings, WithTitle, WithStyles, ShouldAutoSize
 {
-    public function __construct(protected Builder $query) {}
+    public function __construct(protected Builder $query)
+    {
+    }
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         return $this->query
@@ -33,7 +35,7 @@ class EmbargoSummarySheet extends BaseExcelSheet implements FromCollection, With
     {
         return [
             'Concepto',
-            'Importe'
+            'Importe',
         ];
     }
 

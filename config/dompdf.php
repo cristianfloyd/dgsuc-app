@@ -22,7 +22,7 @@ return [
 
     'options' => [
         /**
-         * The location of the DOMPDF font directory
+         * The location of the DOMPDF font directory.
          *
          * The location of the directory where DOMPDF will store fonts and font metrics
          * Note: This directory must exist and be writable by the webserver process.
@@ -48,7 +48,7 @@ return [
         'font_dir' => storage_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
 
         /**
-         * The location of the DOMPDF font cache directory
+         * The location of the DOMPDF font cache directory.
          *
          * This directory contains the cached font metrics for the fonts used by DOMPDF.
          * This directory can be the same as DOMPDF_FONT_DIR
@@ -67,7 +67,7 @@ return [
         'temp_dir' => sys_get_temp_dir(),
 
         /**
-         * ==== IMPORTANT ====
+         * ==== IMPORTANT ====.
          *
          * dompdf's "chroot": Prevents dompdf from accessing system files or other
          * files on the webserver.  All local files opened by dompdf must be in a
@@ -81,7 +81,7 @@ return [
         'chroot' => realpath(base_path()),
 
         /**
-         * Protocol whitelist
+         * Protocol whitelist.
          *
          * Protocols and PHP wrappers allowed in URIs, and the validation rules
          * that determine if a resouce may be loaded. Full support is not guaranteed
@@ -97,7 +97,7 @@ return [
         ],
 
         /**
-         * Operational artifact (log files, temporary files) path validation
+         * Operational artifact (log files, temporary files) path validation.
          */
         'artifactPathValidation' => null,
 
@@ -112,7 +112,7 @@ return [
         'enable_font_subsetting' => false,
 
         /**
-         * The PDF rendering backend to use
+         * The PDF rendering backend to use.
          *
          * Valid settings are 'PDFLib', 'CPDF' (the bundled R&OS PDF class), 'GD' and
          * 'auto'. 'auto' will look for PDFLib and use it if found, or if not it will
@@ -172,7 +172,7 @@ return [
         'default_paper_orientation' => 'portrait',
 
         /**
-         * The default font family
+         * The default font family.
          *
          * Used if no suitable fonts can be found. This must exist in the font folder.
          *
@@ -181,7 +181,7 @@ return [
         'default_font' => 'serif',
 
         /**
-         * Image DPI setting
+         * Image DPI setting.
          *
          * This setting determines the default DPI setting for images and fonts.  The
          * DPI may be overridden for inline images by explictly setting the
@@ -216,7 +216,7 @@ return [
         'dpi' => 96,
 
         /**
-         * Enable embedded PHP
+         * Enable embedded PHP.
          *
          * If this setting is set to true then DOMPDF will automatically evaluate embedded PHP contained
          * within <script type="text/php"> ... </script> tags.
@@ -235,7 +235,7 @@ return [
         'enable_php' => false,
 
         /**
-         * Rnable inline JavaScript
+         * Rnable inline JavaScript.
          *
          * If this setting is set to true then DOMPDF will automatically insert JavaScript code contained
          * within <script type="text/javascript"> ... </script> tags as written into the PDF.
@@ -247,7 +247,7 @@ return [
         'enable_javascript' => true,
 
         /**
-         * Enable remote file access
+         * Enable remote file access.
          *
          *  If this setting is set to true, DOMPDF will access remote sites for
          *  images and CSS files as required.
@@ -269,7 +269,7 @@ return [
         'enable_remote' => true,
 
         /**
-         * List of allowed remote hosts
+         * List of allowed remote hosts.
          *
          * Each value of the array must be a valid hostname.
          *
@@ -283,12 +283,12 @@ return [
         'allowed_remote_hosts' => null,
 
         /**
-         * A ratio applied to the fonts height to be more like browsers' line height
+         * A ratio applied to the fonts height to be more like browsers' line height.
          */
         'font_height_ratio' => 1.1,
 
         /**
-         * Use the HTML5 Lib parser
+         * Use the HTML5 Lib parser.
          *
          * @deprecated This feature is now always on in dompdf 2.x
          *

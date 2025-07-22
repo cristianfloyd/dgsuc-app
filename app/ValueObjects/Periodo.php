@@ -2,9 +2,6 @@
 
 namespace App\ValueObjects;
 
-use InvalidArgumentException;
-
-
 /**
  * Representa un periodo de tiempo en formato YYYYMM.
  *
@@ -17,19 +14,19 @@ class Periodo
     public function __construct(string $periodo)
     {
         if (!preg_match('/^\d{6}$/', $periodo)) {
-            throw new InvalidArgumentException('El periodo debe ser una cadena de 6 dígitos.');
+            throw new \InvalidArgumentException('El periodo debe ser una cadena de 6 dígitos.');
         }
         $this->value = $periodo;
     }
 
-    /// Obtiene el valor del periodo como una cadena de texto.
-    public function getValue(): string
+    /// Devuelve el valor del periodo como una cadena de texto.
+    public function __toString(): string
     {
         return $this->value;
     }
 
-    /// Devuelve el valor del periodo como una cadena de texto.
-    public function __toString(): string
+    /// Obtiene el valor del periodo como una cadena de texto.
+    public function getValue(): string
     {
         return $this->value;
     }

@@ -5,7 +5,7 @@ namespace App\DTOs\Mapuche\Dh13;
 use Spatie\LaravelData\Data;
 
 /**
- * DTO base para la entidad Dh13
+ * DTO base para la entidad Dh13.
  *
  * @property int $codn_conce Código de concepto
  * @property string|null $desc_calcu Descripción del cálculo
@@ -15,17 +15,18 @@ use Spatie\LaravelData\Data;
 class Dh13DTO extends Data
 {
     /**
-     * Constructor del DTO
+     * Constructor del DTO.
      */
     public function __construct(
         public readonly int $codn_conce,
         public readonly ?string $desc_calcu,
         public readonly int $nro_orden_formula,
-        public readonly ?string $desc_condi
-    ) {}
+        public readonly ?string $desc_condi,
+    ) {
+    }
 
     /**
-     * Convierte el DTO a un array para persistencia
+     * Convierte el DTO a un array para persistencia.
      */
     public function toArray(): array
     {

@@ -2,14 +2,15 @@
 
 namespace App\Strategies;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Contracts\CuilOperationStrategy;
 use App\Contracts\CuilRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CompareCuilsStrategy implements CuilOperationStrategy
 {
     private $repository;
+
     private $perPage;
 
     public function __construct(CuilRepositoryInterface $repository, int $perPage = 10)
@@ -29,7 +30,7 @@ class CompareCuilsStrategy implements CuilOperationStrategy
                 return [
                     'cuils' => $cuils,
                     'success' => true,
-                    'message' => 'Comparación de CUILs completada'
+                    'message' => 'Comparación de CUILs completada',
                 ];
             });
         } catch (\Exception $e) {
@@ -37,7 +38,7 @@ class CompareCuilsStrategy implements CuilOperationStrategy
             return [
                 'cuils' => [],
                 'success' => false,
-                'message' => 'Error al comparar CUILs'
+                'message' => 'Error al comparar CUILs',
             ];
         }
     }

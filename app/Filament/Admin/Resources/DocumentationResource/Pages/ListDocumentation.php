@@ -4,8 +4,8 @@ namespace App\Filament\Admin\Resources\DocumentationResource\Pages;
 
 use App\Filament\Admin\Resources\DocumentationResource;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
 
 class ListDocumentation extends ListRecords
 {
@@ -17,7 +17,7 @@ class ListDocumentation extends ListRecords
             Action::make('sync_docs')
                 ->label('Sincronizar Documentación')
                 ->icon('heroicon-o-arrow-path')
-                ->action(function () {
+                ->action(function (): void {
                     try {
                         DocumentationResource::syncMarkdownFiles();
 

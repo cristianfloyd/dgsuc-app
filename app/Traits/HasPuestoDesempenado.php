@@ -9,11 +9,13 @@ trait HasPuestoDesempenado
     use CategoriasConstantTrait;
 
     /**
-     * Determina el puesto desempeñado basado en la categoría
+     * Determina el puesto desempeñado basado en la categoría.
      */
     public function determinarPuestoDesempenado(?string $categoria): ?PuestoDesempenado
     {
-        if (!$categoria) return null;
+        if (!$categoria) {
+            return null;
+        }
 
         $categoria = trim($categoria);
 
@@ -30,7 +32,7 @@ trait HasPuestoDesempenado
     }
 
     /**
-     * Obtiene la descripción del puesto basada en la categoría
+     * Obtiene la descripción del puesto basada en la categoría.
      */
     public function getPuestoDescripcionFromCategoria(?string $categoria): ?string
     {
@@ -38,7 +40,7 @@ trait HasPuestoDesempenado
     }
 
     /**
-     * Obtiene el escalafón basado en la categoría
+     * Obtiene el escalafón basado en la categoría.
      */
     public function getPuestoEscalafonFromCategoria(?string $categoria): ?string
     {

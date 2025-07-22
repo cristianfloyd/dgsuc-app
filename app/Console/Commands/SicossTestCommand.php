@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Exception;
+use App\Models\Mapuche\MapucheConfig;
+use App\Services\Afip\SicossLegacy;
+use App\Services\EnhancedDatabaseConnectionService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Services\Afip\SicossLegacy;
-use App\Models\Mapuche\MapucheConfig;
-use App\Services\EnhancedDatabaseConnectionService;
 
 class SicossTestCommand extends Command
 {
@@ -16,7 +15,7 @@ class SicossTestCommand extends Command
      *
      * @var string
      */
-        protected $signature = 'sicoss:test
+    protected $signature = 'sicoss:test
                             {legajo : Número de legajo a procesar}
                             {--periodo= : Período fiscal (formato: YYYY-MM, ej: 2024-10)}
                             {--retro : Incluir períodos retroactivos}
@@ -37,7 +36,7 @@ class SicossTestCommand extends Command
      */
     protected $description = 'Comando de testing para generar SICOSS de un legajo específico sin crear archivos TXT';
 
-        /**
+    /**
      * Execute the console command.
      */
     public function handle(): int
@@ -53,7 +52,7 @@ class SicossTestCommand extends Command
                 return $this->limpiarTablasTemporales();
             }
 
-            $legajo = (int) $this->argument('legajo');
+            $legajo = (int)$this->argument('legajo');
 
             if ($legajo <= 0) {
                 $this->error('❌ El número de legajo debe ser un entero positivo');
@@ -93,7 +92,7 @@ class SicossTestCommand extends Command
 
             return 0;
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->newLine();
             $this->error('❌ Error durante el proceso:');
             $this->error("Mensaje: {$e->getMessage()}");
@@ -110,14 +109,14 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Configura la conexión de base de datos
+     * Configura la conexión de base de datos.
      */
     protected function configurarConexion(string $connection): void
     {
         $service = app(EnhancedDatabaseConnectionService::class);
         $conexionesDisponibles = $service->getAvailableConnections();
 
-        if (!array_key_exists($connection, $conexionesDisponibles)) {
+        if (!\array_key_exists($connection, $conexionesDisponibles)) {
             $this->error("❌ Conexión '{$connection}' no válida");
             $this->line('Conexiones disponibles:');
             foreach ($conexionesDisponibles as $key => $name) {
@@ -134,7 +133,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Configura el período fiscal
+     * Configura el período fiscal.
      */
     protected function configurarPeriodo(string $periodo): void
     {
@@ -143,8 +142,8 @@ class SicossTestCommand extends Command
             exit(1);
         }
 
-        $año = (int) $matches[1];
-        $mes = (int) $matches[2];
+        $año = (int)$matches[1];
+        $mes = (int)$matches[2];
 
         if ($mes < 1 || $mes > 12) {
             $this->error('❌ El mes debe estar entre 1 y 12');
@@ -153,14 +152,14 @@ class SicossTestCommand extends Command
 
         // Temporalmente podemos usar variables de entorno o advertir al usuario
         // que debe configurar el período desde la interfaz de Mapuche
-        $this->warn("⚠️  NOTA: Para cambiar el período fiscal, debe configurarlo desde la interfaz de Mapuche");
+        $this->warn('⚠️  NOTA: Para cambiar el período fiscal, debe configurarlo desde la interfaz de Mapuche');
         $this->warn("   Período solicitado: {$mes}/{$año}");
-        $this->warn("   Período actual del sistema: " . MapucheConfig::getMesFiscal() . "/" . MapucheConfig::getAnioFiscal());
+        $this->warn('   Período actual del sistema: ' . MapucheConfig::getMesFiscal() . '/' . MapucheConfig::getAnioFiscal());
         $this->newLine();
     }
 
     /**
-     * Muestra la configuración actual
+     * Muestra la configuración actual.
      */
     protected function mostrarConfiguracion(int $legajo): void
     {
@@ -182,13 +181,13 @@ class SicossTestCommand extends Command
                 ['Seguro Vida', $this->option('seguro-vida') ? 'SÍ' : 'NO'],
                 ['Truncar Topes', !$this->option('no-topes') ? 'SÍ' : 'NO'],
                 ['Núm. Liquidación', $this->option('liqui') ? $this->option('liqui') : 'TODAS'],
-            ]
+            ],
         );
         $this->newLine();
     }
 
-        /**
-     * Limpia las tablas temporales
+    /**
+     * Limpia las tablas temporales.
      */
     protected function limpiarTablasTemporales(): int
     {
@@ -206,12 +205,12 @@ class SicossTestCommand extends Command
                 DB::connection($currentConnection)->statement("DROP TABLE IF EXISTS {$tabla} CASCADE");
                 $this->line("   ✅ {$tabla} eliminada de {$currentConnection}");
                 $limpiezas_exitosas++;
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->line("   ⚠️  {$tabla}: {$e->getMessage()}");
             }
         }
 
-        $this->info("✅ Limpieza completada ({$limpiezas_exitosas}/" . count($tablas) . " tablas)");
+        $this->info("✅ Limpieza completada ({$limpiezas_exitosas}/" . \count($tablas) . ' tablas)');
 
         if ($this->option('clean-only')) {
             return 0;
@@ -222,11 +221,11 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Prepara los datos de configuración para SICOSS
+     * Prepara los datos de configuración para SICOSS.
      */
     protected function prepararDatos(int $legajo): array
     {
-                return [
+        return [
             'nro_legaj' => $legajo,
             'check_retro' => $this->option('retro') ? 1 : 0,
             'check_lic' => $this->option('licencias') ? 1 : 0,
@@ -243,7 +242,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Ejecuta el proceso SICOSS
+     * Ejecuta el proceso SICOSS.
      */
     protected function ejecutarSicoss(array $datos): array
     {
@@ -252,7 +251,7 @@ class SicossTestCommand extends Command
         if ($this->option('detailed')) {
             $this->info('📋 Datos enviados al procesador:');
             foreach ($datos as $key => $value) {
-                $valorMostrar = is_bool($value) ? ($value ? 'true' : 'false') : ($value ?? 'null');
+                $valorMostrar = \is_bool($value) ? ($value ? 'true' : 'false') : ($value ?? 'null');
                 $this->line("   {$key}: {$valorMostrar}");
             }
             $this->newLine();
@@ -264,7 +263,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Muestra los resultados del proceso
+     * Muestra los resultados del proceso.
      */
     protected function mostrarResultados(array $resultado, int $legajo): void
     {
@@ -274,13 +273,13 @@ class SicossTestCommand extends Command
         // Debug: mostrar estructura del resultado si está en modo detallado
         if ($this->option('detailed')) {
             $this->info('🔍 Estructura del resultado:');
-            $this->line('   Tipo: ' . gettype($resultado));
-            $this->line('   Es array: ' . (is_array($resultado) ? 'SÍ' : 'NO'));
-            $this->line('   Elementos: ' . (is_countable($resultado) ? count($resultado) : 'N/A'));
-            if (is_array($resultado) && !empty($resultado)) {
+            $this->line('   Tipo: ' . \gettype($resultado));
+            $this->line('   Es array: ' . (\is_array($resultado) ? 'SÍ' : 'NO'));
+            $this->line('   Elementos: ' . (is_countable($resultado) ? \count($resultado) : 'N/A'));
+            if (\is_array($resultado) && !empty($resultado)) {
                 $this->line('   Claves: ' . implode(', ', array_keys($resultado)));
                 if (isset($resultado[0])) {
-                    $this->line('   Primer elemento es array: ' . (is_array($resultado[0]) ? 'SÍ' : 'NO'));
+                    $this->line('   Primer elemento es array: ' . (\is_array($resultado[0]) ? 'SÍ' : 'NO'));
                 }
             }
             $this->newLine();
@@ -296,9 +295,9 @@ class SicossTestCommand extends Command
         }
 
         // Verificar la estructura del resultado
-        if (isset($resultado['totales']) && isset($resultado['status'])) {
+        if (isset($resultado['totales'], $resultado['status'])) {
             // Es la estructura del procesarResultadoFinal
-            $this->info("✅ Resultado: Estructura completa del procesamiento");
+            $this->info('✅ Resultado: Estructura completa del procesamiento');
             $this->mostrarResultadoCompleto($resultado, $legajo);
             return;
         }
@@ -306,13 +305,13 @@ class SicossTestCommand extends Command
         // Verificar si el resultado es un array de totales o un array de legajos
         if (isset($resultado['bruto']) || isset($resultado['imponible_1'])) {
             // Es un array de totales, no de legajos individuales
-            $this->info("✅ Resultado: Totales de procesamiento");
+            $this->info('✅ Resultado: Totales de procesamiento');
             $this->mostrarTotales($resultado);
             return;
         }
 
         // Es un array de legajos
-        $this->info("✅ Legajos procesados: " . count($resultado));
+        $this->info('✅ Legajos procesados: ' . \count($resultado));
         $this->newLine();
 
         // Buscar el legajo específico solicitado
@@ -346,7 +345,7 @@ class SicossTestCommand extends Command
                 ['Obra Social', $legajo_data['codigo_os'] ?? 'N/A'],
                 ['Hijos', $legajo_data['hijos'] ?? 0],
                 ['Cónyuge', ($legajo_data['conyugue'] ?? false) ? 'SÍ' : 'NO'],
-            ]
+            ],
         );
 
         // Importes principales
@@ -359,7 +358,7 @@ class SicossTestCommand extends Command
                 ['Imponible Principal', '$' . number_format($legajo_data['IMPORTE_IMPON'] ?? 0, 2)],
                 ['Imponible Patronal', '$' . number_format($legajo_data['ImporteImponiblePatronal'] ?? 0, 2)],
                 ['SAC', '$' . number_format($legajo_data['ImporteSAC'] ?? 0, 2)],
-            ]
+            ],
         );
 
         // Detalles adicionales si se solicita
@@ -369,7 +368,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Muestra el resultado completo del procesamiento
+     * Muestra el resultado completo del procesamiento.
      */
     protected function mostrarResultadoCompleto(array $resultado, int $legajo): void
     {
@@ -396,7 +395,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Intenta mostrar datos específicos del legajo desde los archivos generados
+     * Intenta mostrar datos específicos del legajo desde los archivos generados.
      */
     protected function intentarMostrarDatosLegajo(int $legajo, array $archivos): void
     {
@@ -416,17 +415,17 @@ class SicossTestCommand extends Command
                 $lineas = explode("\n", $contenido);
 
                 foreach ($lineas as $numero_linea => $linea) {
-                    if (strlen($linea) >= 11) {
+                    if (\strlen($linea) >= 11) {
                         // Extraer CUIL de los primeros 11 caracteres
                         $cuil_archivo = substr($linea, 0, 11);
 
                         // Buscar por patrón de legajo en la línea (aproximado)
-                        if (strpos($linea, (string)$legajo) !== false) {
-                            $this->info("✅ Legajo encontrado en {$periodo} (línea " . ($numero_linea + 1) . ")");
+                        if (str_contains($linea, (string)$legajo)) {
+                            $this->info("✅ Legajo encontrado en {$periodo} (línea " . ($numero_linea + 1) . ')');
 
                             if ($this->option('detailed')) {
                                 $this->line("   CUIL: {$cuil_archivo}");
-                                $this->line("   Línea SICOSS (primeros 100 chars): " . substr($linea, 0, 100) . "...");
+                                $this->line('   Línea SICOSS (primeros 100 chars): ' . substr($linea, 0, 100) . '...');
                             }
 
                             $encontrado = true;
@@ -443,7 +442,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Muestra los totales de procesamiento
+     * Muestra los totales de procesamiento.
      */
     protected function mostrarTotales(array $totales): void
     {
@@ -458,12 +457,12 @@ class SicossTestCommand extends Command
                 ['Imponible 6', '$' . number_format($totales['ImporteImponible_6'] ?? 0, 2)],
                 ['Imponible 8', '$' . number_format($totales['imponible_8'] ?? 0, 2)],
                 ['Imponible 9', '$' . number_format($totales['importeimponible_9'] ?? 0, 2)],
-            ]
+            ],
         );
     }
 
     /**
-     * Muestra detalles adicionales del legajo
+     * Muestra detalles adicionales del legajo.
      */
     protected function mostrarDetallesAdicionales(array $legajo_data): void
     {
@@ -479,14 +478,14 @@ class SicossTestCommand extends Command
                 ['Imponible 5', '$' . number_format($legajo_data['ImporteImponible_5'] ?? 0, 2)],
                 ['Imponible 6', '$' . number_format($legajo_data['ImporteImponible_6'] ?? 0, 2)],
                 ['Imponible 9', '$' . number_format($legajo_data['importeimponible_9'] ?? 0, 2)],
-            ]
+            ],
         );
 
         // Mostrar datos completos si hay claves adicionales
         $campos_mostrados = ['cuil', 'apyno', 'codigosituacion', 'dias_trabajados', 'codigo_os', 'hijos', 'conyugue',
-                            'IMPORTE_BRUTO', 'IMPORTE_IMPON', 'ImporteImponiblePatronal', 'ImporteSAC',
-                            'ImporteHorasExtras', 'ImporteZonaDesfavorable', 'ImporteAdicionales',
-                            'ImporteImponible_4', 'ImporteImponible_5', 'ImporteImponible_6', 'importeimponible_9'];
+            'IMPORTE_BRUTO', 'IMPORTE_IMPON', 'ImporteImponiblePatronal', 'ImporteSAC',
+            'ImporteHorasExtras', 'ImporteZonaDesfavorable', 'ImporteAdicionales',
+            'ImporteImponible_4', 'ImporteImponible_5', 'ImporteImponible_6', 'importeimponible_9'];
 
         $campos_adicionales = array_diff(array_keys($legajo_data), $campos_mostrados);
 
@@ -503,7 +502,7 @@ class SicossTestCommand extends Command
     }
 
     /**
-     * Exporta los resultados a un archivo JSON
+     * Exporta los resultados a un archivo JSON.
      */
     protected function exportarResultados(array $resultado, string $archivo): void
     {
@@ -523,17 +522,17 @@ class SicossTestCommand extends Command
                     'seguro_vida' => $this->option('seguro-vida'),
                     'connection' => $this->option('connection'),
                 ],
-                'resultado' => $resultado
+                'resultado' => $resultado,
             ];
 
-            $json = json_encode($datos_export, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $json = json_encode($datos_export, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE);
             file_put_contents($archivo, $json);
 
             $this->newLine();
             $this->info("📁 Resultados exportados a: {$archivo}");
-            $this->line("   Tamaño: " . number_format(strlen($json)) . " bytes");
+            $this->line('   Tamaño: ' . number_format(\strlen($json)) . ' bytes');
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->error("❌ Error al exportar: {$e->getMessage()}");
         }
     }

@@ -7,7 +7,7 @@ namespace App\Traits\Mapuche;
 trait Dha8Queries
 {
     /**
-     * Scope para filtrar por código de situación
+     * Scope para filtrar por código de situación.
      */
     public function scopeBySituacion($query, int $codigosituacion)
     {
@@ -15,7 +15,7 @@ trait Dha8Queries
     }
 
     /**
-     * Scope para filtrar por zona
+     * Scope para filtrar por zona.
      */
     public function scopeByZona($query, int $codigozona)
     {

@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AfipMapucheParaSicoss extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.afip_mapuche_para_sicoss';
-    protected $primaryKey = 'nro_legaj';
     public $timestamps = false;
+
+    protected $table = 'suc.afip_mapuche_para_sicoss';
+
+    protected $primaryKey = 'nro_legaj';
+
     protected $collection;
 
     protected $fillable = [
@@ -43,12 +43,12 @@ class AfipMapucheParaSicoss extends Model
         'categoria',
         'fecha_suspencion_servicios',
         'no_form_agro',
-        'covid'
+        'covid',
     ];
 
     public function getNroLegajAttribute($value)
     {
-        return str_pad($value, 8, '0', STR_PAD_LEFT);
+        return str_pad($value, 8, '0', \STR_PAD_LEFT);
     }
 
     /**

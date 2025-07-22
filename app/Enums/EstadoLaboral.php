@@ -5,10 +5,15 @@ namespace App\Enums;
 enum EstadoLaboral: string
 {
     case PLANTA = 'P';
+
     case CONTRATO = 'C';
+
     case AD_HONOREM = 'A';
+
     case BECARIO = 'B';
+
     case SERVICIOS = 'S';
+
     case OBRA = 'O';
 
     public function descripcion(): string
@@ -26,7 +31,7 @@ enum EstadoLaboral: string
     public static function toArray(): array
     {
         return collect(self::cases())->mapWithKeys(fn ($estado) => [
-            $estado->value => $estado->descripcion()
+            $estado->value => $estado->descripcion(),
         ])->toArray();
     }
 }

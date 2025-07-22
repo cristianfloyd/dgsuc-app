@@ -9,24 +9,24 @@ use Illuminate\Support\Facades\Log;
 
 class Dh11RestoreService
 {
-
     /**
      * Constructor del servicio.
      *
      * @param Dh61Repository $dh61Repository
      * @param Dh11RepositoryInterface $dh11Repository
      */
-    public function __construct(protected Dh61Repository          $dh61Repository,
-                                protected Dh11RepositoryInterface $dh11Repository)
-    {
+    public function __construct(
+        protected Dh61Repository          $dh61Repository,
+        protected Dh11RepositoryInterface $dh11Repository,
+    ) {
     }
-
 
     /**
      * Restaura las categorías para un período fiscal específico.
      *
      * @param int $year
      * @param int $month
+     *
      * @throws \Exception
      */
     public function restoreFiscalPeriod(int $year, int $month): void
@@ -55,14 +55,14 @@ class Dh11RestoreService
             }
 
             $updatedRecords = $this->restoreHistoricalRecords($historicalRecords);
-            Log::debug("Registros actualizados: " . array_count_values($updatedRecords));
+            Log::debug('Registros actualizados: ' . array_count_values($updatedRecords));
 
 
             DB::commit();
             Log::info("Restauración completada con éxito para el período {$year}-{$month}");
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error durante la restauración: " . $e->getMessage());
+            Log::error('Error durante la restauración: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -71,8 +71,10 @@ class Dh11RestoreService
      * Restaura los registros históricos de categorías en la tabla dh11.
      *
      * @param \Illuminate\Support\Collection $historicalRecords Colección de registros históricos a restaurar.
-     * @return array Arreglo de registros actualizados.
+     *
      * @throws \Exception Si ocurre un error durante la actualización de los registros.
+     *
+     * @return array Arreglo de registros actualizados.
      */
     private function restoreHistoricalRecords($historicalRecords): array
     {
@@ -86,9 +88,9 @@ class Dh11RestoreService
                     [
                         'codc_categ' => $record->codc_categ,
                         'vig_caano' => $record->vig_caano,
-                        'vig_cames' => $record->vig_cames
+                        'vig_cames' => $record->vig_cames,
                     ],
-                    $record
+                    $record,
                 );
 
                 $updatedRecords[] = $record;

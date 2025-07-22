@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Models\RepEmbarazada;
 use App\Data\RepEmbarazadaData;
+use App\Models\RepEmbarazada;
 use Illuminate\Database\Eloquent\Collection;
 
 class RepEmbarazadaRepository
@@ -14,8 +14,9 @@ class RepEmbarazadaRepository
      * Create a new class instance.
      */
     public function __construct(
-        private readonly RepEmbarazada $model
-    ) {}
+        private readonly RepEmbarazada $model,
+    ) {
+    }
 
     /**
      * Obtener todos los registros.

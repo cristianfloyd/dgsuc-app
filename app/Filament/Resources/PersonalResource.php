@@ -2,30 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Dh01;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\PersonalResource\Pages;
+use App\Models\Dh01;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PersonalResource extends Resource
 {
     protected static ?string $model = Dh01::class;
+
     protected static ?string $label = 'Personal';
+
     protected static ?string $plurallabel = 'Personal';
 
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+
             ]);
     }
 
@@ -59,7 +61,7 @@ class PersonalResource extends Resource
                 TextColumn::make('pais_nacim')->searchable()->toggleable(true),
             ])
             ->filters([
-                //
+
 
             ])
             ->actions([
@@ -72,24 +74,14 @@ class PersonalResource extends Resource
             ])
             ->defaultSort('nro_legaj', 'desc')
             ->paginated(5) //configurar la paginacion
-            ->paginationPageOptions([5,10,25,50,100, 250])
+            ->paginationPageOptions([5, 10, 25, 50, 100, 250])
             ->searchable();
-    }
-
-    protected function getTableQuery(): Builder
-    {
-        return parent::getTableQuery()->where(function (Builder $query, $searchTerm) {
-            $query->orWhereRaw(
-                "CONCAT(tipo_docum, '-', nro_docum) ILIKE ?",
-                ["%$searchTerm%"]
-            );
-        });
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -100,5 +92,15 @@ class PersonalResource extends Resource
             'create' => Pages\CreatePersonal::route('/create'),
             'edit' => Pages\EditPersonal::route('/{record}/edit'),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()->where(function (Builder $query, $searchTerm): void {
+            $query->orWhereRaw(
+                "CONCAT(tipo_docum, '-', nro_docum) ILIKE ?",
+                ["%$searchTerm%"],
+            );
+        });
     }
 }

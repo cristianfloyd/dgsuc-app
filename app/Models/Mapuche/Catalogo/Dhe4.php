@@ -19,9 +19,13 @@ class Dhe4 extends Model
     use MapucheConnectionTrait;
 
     public $incrementing = false;
+
     public $timestamps = false;
+
     protected $table = 'dhe4';
+
     protected $primaryKey = 'cod_organismo';
+
     protected $fillable = [
         'cod_organismo',
         'descripcion',

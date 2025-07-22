@@ -2,35 +2,33 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Enums\ConceptoGrupo;
-use App\Models\Mapuche\Dh22;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Select;
-use App\Exports\OrdenesDescuentoExport;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use App\Exports\OrdenesDescuentoSheet200;
-use App\Models\Reportes\OrdenesDescuento;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use App\Exports\OrdenAportesyContribuciones;
-use App\Services\OrdenesDescuentoTableService;
-use App\Exports\OrdenesDescuentoMultipleExport;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
+use App\Enums\ConceptoGrupo;
+use App\Exports\OrdenAportesyContribuciones;
+use App\Exports\OrdenesDescuentoMultipleExport;
+use App\Exports\OrdenesDescuentoSheet200;
 use App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
+use App\Models\Mapuche\Dh22;
+use App\Models\Reportes\OrdenesDescuento;
+use App\Services\OrdenesDescuentoTableService;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrdenesDescuentoResource extends Resource
 {
     protected static ?string $model = OrdenesDescuento::class;
+
     protected static ?string $navigationGroup = 'Informes';
+
     protected static ?int $navigationSort = 2;
-
-
 
     public static function table(Table $table): Table
     {
@@ -63,64 +61,66 @@ class OrdenesDescuentoResource extends Resource
             ])
             ->filters([
                 Filter::make('periodo_liquidacion')
-                        ->form([
-                            Select::make('periodo_fiscal')
-                                ->label('Periodo')
-                                ->options( Dh22::getPeriodosFiscales())
-                                ->searchable()
-                                ->live()
-                                ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+                    ->form([
+                        Select::make('periodo_fiscal')
+                            ->label('Periodo')
+                            ->options(Dh22::getPeriodosFiscales())
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
 
-                            Select::make('nro_liqui')
-                                ->label('Liquidación')
-                                ->options(function (callable $get): array {
-                                    $periodo = $get('periodo_fiscal');
-                                    if (!$periodo) return [];
+                        Select::make('nro_liqui')
+                            ->label('Liquidación')
+                            ->options(function (callable $get): array {
+                                $periodo = $get('periodo_fiscal');
+                                if (!$periodo) {
+                                    return [];
+                                }
 
-                                    return Dh22::query()
-                                        ->WithPeriodoFiscal($periodo)
-                                        ->definitiva()
-                                        ->pluck('desc_liqui', 'nro_liqui')
-                                        ->toArray();
-                                })
-                                ->searchable()
-                                ->live()
-                                ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
-                        ])
-                        ->query(function (Builder $query, array $data): Builder {
-                            return $query
+                                return Dh22::query()
+                                    ->WithPeriodoFiscal($periodo)
+                                    ->definitiva()
+                                    ->pluck('desc_liqui', 'nro_liqui')
+                                    ->toArray();
+                            })
+                            ->searchable()
+                            ->live()
+                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
                             ->when(
                                 $data['nro_liqui'],
-                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                                fn (Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             );
-                        }),
-                    SelectFilter::make('codc_uacad')
-                        ->label('Unidad Académica')
-                        ->options(function () {
-                            $data = OrdenesDescuento::distinct()
-                                ->orderBy('codc_uacad')
-                                ->pluck('desc_item', 'codc_uacad')
-                                ->toArray();
+                    }),
+                SelectFilter::make('codc_uacad')
+                    ->label('Unidad Académica')
+                    ->options(function () {
+                        $data = OrdenesDescuento::distinct()
+                            ->orderBy('codc_uacad')
+                            ->pluck('desc_item', 'codc_uacad')
+                            ->toArray();
 
-                            // Sanitizar los datos para asegurar que estén en UTF-8 válido
-                            return array_map(function ($item) {
-                                return mb_convert_encoding($item, 'UTF-8', 'auto');
-                            }, $data);
-                        })
-                        ->searchable()
-                        ->preload(),
-                    SelectFilter::make('codn_conce')
-                        ->label('Concepto')
-                        ->options(fn () => OrdenesDescuento::distinct()
-                            ->orderBy('codn_conce')
-                            ->pluck('desc_conce', 'codn_conce')
-                            ->toArray())
-                        ->searchable()
-                        ->multiple()
-                        ->preload(),
+                        // Sanitizar los datos para asegurar que estén en UTF-8 válido
+                        return array_map(function ($item) {
+                            return mb_convert_encoding($item, 'UTF-8', 'auto');
+                        }, $data);
+                    })
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('codn_conce')
+                    ->label('Concepto')
+                    ->options(fn () => OrdenesDescuento::distinct()
+                        ->orderBy('codn_conce')
+                        ->pluck('desc_conce', 'codn_conce')
+                        ->toArray())
+                    ->searchable()
+                    ->multiple()
+                    ->preload(),
             ])
             ->actions([
-                //
+
             ])
             ->headerActions([
                 Action::make('populate')
@@ -132,7 +132,7 @@ class OrdenesDescuentoResource extends Resource
                     ->modalHeading('¿Desea sincronizar los datos?')
                     ->modalDescription('Esta acción actualizará los datos desde la base de datos Mapuche. Puede tomar varios minutos.')
                     ->modalSubmitActionLabel('Sí, sincronizar')
-                    ->action(function () {
+                    ->action(function (): void {
                         $tableService = new OrdenesDescuentoTableService(new OrdenesDescuentoTableDefinition());
                         $tableService->populateTable();
 
@@ -164,7 +164,8 @@ class OrdenesDescuentoResource extends Resource
                     ->action(function ($livewire) {
                         return (new OrdenAportesyContribuciones(
                             $livewire->getFilteredTableQuery()
-                            ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos())))
+                                ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos()),
+                        ))
                             ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx');
                     }),
                 Action::make('truncate')
@@ -176,7 +177,7 @@ class OrdenesDescuentoResource extends Resource
                     ->modalHeading('¿Está seguro que desea eliminar todos los registros?')
                     ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
                     ->modalSubmitActionLabel('Sí, eliminar todo')
-                    ->action(function () {
+                    ->action(function (): void {
                         OrdenesDescuento::truncate();
                         Notification::make()
                             ->success()
@@ -186,7 +187,7 @@ class OrdenesDescuentoResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    //
+
                 ]),
             ])
             ->deferLoading()
@@ -204,7 +205,7 @@ class OrdenesDescuentoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

@@ -3,13 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Models\Dh11;
-use App\Models\Dh89;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
+use App\Services\Mapuche\EscalafonService;
 use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\DatePicker;
-use App\Services\Mapuche\EscalafonService;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class Dashboard extends \Filament\Pages\Dashboard
@@ -18,9 +17,10 @@ class Dashboard extends \Filament\Pages\Dashboard
     use CategoriasConstantTrait;
 
     protected ?string $heading = '';
+
     protected EscalafonService $escalafonService;
 
-    public function boot(EscalafonService $escalafonService)
+    public function boot(EscalafonService $escalafonService): void
     {
         $this->escalafonService = $escalafonService;
     }
@@ -35,16 +35,16 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->label('Escalafon')
                     ->options(function () {
                         return collect(['TODO' => 'Todos'])
-                        ->merge($this->escalafonService->getEscalafones())
-                        ->merge([
-                            'DOCU' => 'Docente Universitario',
-                            'AUTU' => 'Autoridad Universitario',
-                            'AUTS' => 'Autoridad Secundario',
-                            'DOC2' => 'Preuniversitario',
-                        ]);
+                            ->merge($this->escalafonService->getEscalafones())
+                            ->merge([
+                                'DOCU' => 'Docente Universitario',
+                                'AUTU' => 'Autoridad Universitario',
+                                'AUTS' => 'Autoridad Secundario',
+                                'DOC2' => 'Preuniversitario',
+                            ]);
                     })
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         /**
                          * Almacena los códigos de categoría seleccionados en la sesión basados en el código de escalafón seleccionado.
                          *

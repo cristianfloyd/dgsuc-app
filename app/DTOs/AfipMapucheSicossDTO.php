@@ -65,8 +65,9 @@ class AfipMapucheSicossDTO
         public ?string $seguro = null,
         public ?string $ley27430 = null,
         public ?string $incsalarial = null,
-        public ?string $remimp11 = null
-    ) {}
+        public ?string $remimp11 = null,
+    ) {
+    }
 
     public function toArray(): array
     {

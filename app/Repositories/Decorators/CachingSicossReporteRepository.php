@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Decorators;
 
-use Illuminate\Support\Collection;
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
-use Illuminate\Support\Facades\Log; // Para logging si es necesario
-use App\Traits\ReportCacheTrait; // Reutilizamos el trait para la lógica de caché
+use App\Traits\ReportCacheTrait;
+use Illuminate\Support\Collection; // Para logging si es necesario
+use Illuminate\Support\Facades\Log; // Reutilizamos el trait para la lógica de caché
 
 class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
 {
@@ -39,8 +39,8 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn() => $this->decoratedRepository->getReporte($anio, $mes),
-            self::CACHE_TTL
+            fn () => $this->decoratedRepository->getReporte($anio, $mes),
+            self::CACHE_TTL,
         );
     }
 
@@ -57,8 +57,8 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn() => $this->decoratedRepository->getTotales($anio, $mes),
-            self::CACHE_TTL
+            fn () => $this->decoratedRepository->getTotales($anio, $mes),
+            self::CACHE_TTL,
         );
     }
 
@@ -75,8 +75,8 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn() => $this->decoratedRepository->existenDatosParaPeriodo($anio, $mes),
-            self::CACHE_TTL
+            fn () => $this->decoratedRepository->existenDatosParaPeriodo($anio, $mes),
+            self::CACHE_TTL,
         );
     }
 
@@ -90,14 +90,14 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
         $cacheType = 'available_periods';
 
         // Un TTL más largo para datos que cambian con menos frecuencia
-        $longTtl = self::CACHE_TTL * 24; 
+        $longTtl = self::CACHE_TTL * 24;
 
         return $this->rememberReportCache(
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn() => $this->decoratedRepository->getPeriodosFiscalesDisponibles(),
-            $longTtl
+            fn () => $this->decoratedRepository->getPeriodosFiscalesDisponibles(),
+            $longTtl,
         );
     }
 
@@ -120,7 +120,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
         $this->forgetReportCache(self::REPORT_NAME, 'report_totals', [$anio, $mes]);
         Log::info("Caché invalidado para reporte SICOSS (totales): {$anio}-{$mes}");
     }
-    
+
     /**
      * Invalida el caché para la existencia de un período.
      */
@@ -136,7 +136,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
     public function invalidatePeriodosFiscalesDisponiblesCache(): void
     {
         $this->forgetReportCache(self::REPORT_NAME, 'available_periods', []);
-        Log::info("Caché invalidado para períodos fiscales disponibles SICOSS.");
+        Log::info('Caché invalidado para períodos fiscales disponibles SICOSS.');
     }
 
     /**
@@ -150,6 +150,6 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
         // Esto es una simplificación; una estrategia de invalidación más robusta
         // podría usar tags de caché.
         $this->forgetAllReportCache(self::REPORT_NAME); // Asume que el trait maneja esto bien
-        Log::info("Todo el caché del repositorio SICOSS ha sido invalidado.");
+        Log::info('Todo el caché del repositorio SICOSS ha sido invalidado.');
     }
 }

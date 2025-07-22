@@ -2,14 +2,13 @@
 
 namespace App\Data\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Dh01;
-use App\Models\Dh03;
-use Spatie\LaravelData\Data;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Attributes\Validation\Size;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 class AgenteData extends Data
 {
@@ -21,7 +20,8 @@ class AgenteData extends Data
         public string $dni,
         #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public ?Carbon $fechaInicio,
-    ) {}
+    ) {
+    }
 
     // Validación integrada
     public static function rules(): array
@@ -50,7 +50,7 @@ class AgenteData extends Data
     // Método helper para crear una colección de agentes
     public static function collection(Collection $employees): Collection
     {
-        return $employees->map(fn(Dh01 $employee) => self::fromModel($employee));
+        return $employees->map(fn (Dh01 $employee) => self::fromModel($employee));
     }
 
     // Método para obtener el nombre completo

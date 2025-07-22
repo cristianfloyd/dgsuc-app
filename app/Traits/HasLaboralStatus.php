@@ -5,7 +5,7 @@ namespace App\Traits;
 trait HasLaboralStatus
 {
     /**
-     * Estados laborales disponibles
+     * Estados laborales disponibles.
      */
     public const STATUS_PERMANENT = 'P';    // Permanente
     public const STATUS_CONTRACT = 'C';      // Contratado
@@ -15,7 +15,7 @@ trait HasLaboralStatus
     public const STATUS_OTHER = 'O';         // Otro
 
     /**
-     * Obtiene el estado laboral en formato legible
+     * Obtiene el estado laboral en formato legible.
      */
     public function getLaboralStatusAttribute(): string
     {
@@ -31,7 +31,7 @@ trait HasLaboralStatus
     }
 
     /**
-     * Scope para filtrar por estado laboral
+     * Scope para filtrar por estado laboral.
      */
     public function scopeWithLaboralStatus($query, string $status)
     {

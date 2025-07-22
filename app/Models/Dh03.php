@@ -2,25 +2,25 @@
 
 namespace App\Models;
 
-use App\Models\SpuDisc;
 use App\Enums\LegajoCargo;
-use App\Models\Mapuche\Dh05;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
+use App\Models\Mapuche\Dh05;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Dh03 extends Model
 {
     use MapucheConnectionTrait;
 
+    public $timestamps = false;
 
     protected $table = 'dh03';
-    public $timestamps = false;
+
     protected $primaryKey = 'nro_cargo';
 
     protected $fillable = [
@@ -97,7 +97,7 @@ class Dh03 extends Model
         'transito',
         'cod_clasif_cargo',
         'cod_licencia',
-        'cargo_concursado'
+        'cargo_concursado',
     ];
 
     protected $casts = [
@@ -124,7 +124,7 @@ class Dh03 extends Model
         'porcdedicdocente' => 'double',
         'porcdedicinvestig' => 'double',
         'porcdedicagestion' => 'double',
-        'porcdedicaextens' => 'double'
+        'porcdedicaextens' => 'double',
     ];
 
     protected $attributes = [
@@ -137,15 +137,14 @@ class Dh03 extends Model
         'chktrayectoria' => true,
         'chkfuncionejec' => false,
         'chkretroactivo' => false,
-        'cargo_concursado' => false
+        'cargo_concursado' => false,
     ];
 
-
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
-        static::saving(function ($model) {
+        static::saving(function ($model): void {
             // Validar porcentajes
             if (
                 $model->porcdedicdocente + $model->porcdedicinvestig +
@@ -164,16 +163,6 @@ class Dh03 extends Model
         });
     }
 
-    protected function setCodigocontratoAttribute($value)
-    {
-        $this->attributes['codigocontrato'] = (int)$value;
-    }
-
-    protected function setChkstopliqAttribute($value)
-    {
-        $this->attributes['chkstopliq'] = (int)$value;
-    }
-
     /* ############################### GETTERS ############################## */
     public static function getCargoCount(): int
     {
@@ -181,10 +170,11 @@ class Dh03 extends Model
     }
 
     /**
-     * Obtiene los detalles completos de la validación
+     * Obtiene los detalles completos de la validación.
      *
      * @param int $nroLegaj
      * @param int $nroCargo
+     *
      * @return array
      */
     public static function getDetallesValidacion(int $nroLegaj, int $nroCargo): array
@@ -198,15 +188,15 @@ class Dh03 extends Model
                 'cargo' => $cargo->nro_cargo,
                 'estado' => $cargo->chkstopliq ? 'Bloqueado' : 'Activo',
                 'fecha_baja' => $cargo->fec_baja,
-            ] : null
+            ] : null,
         ];
     }
 
-
     /**
-     * Obtiene los cargos activos de un legajo
+     * Obtiene los cargos activos de un legajo.
      *
      * @param int $nroLegajo
+     *
      * @return array
      */
     public static function getCargosActivos(int $nroLegajo): array
@@ -214,10 +204,7 @@ class Dh03 extends Model
         return static::cargosActivos($nroLegajo)->get()->toArray();
     }
 
-
-
     /** ############################## SCOPES ############################## */
-
     public function scopeEmpleadosActivos($query)
     {
         return $query->where('chkstopliq', '=', 0)
@@ -226,11 +213,12 @@ class Dh03 extends Model
     }
 
     /**
-     * Scope para validar la combinación legajo-cargo
+     * Scope para validar la combinación legajo-cargo.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param int $nroLegaj
      * @param int $nroCargo
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeValidarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
@@ -240,10 +228,11 @@ class Dh03 extends Model
     }
 
     /**
-     * Scope para obtener cargos activos de un legajo
+     * Scope para obtener cargos activos de un legajo.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param int $nroLegajo
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeCargosActivos($query, int $nroLegajo)
@@ -256,9 +245,9 @@ class Dh03 extends Model
                 WHEN (codc_categ = '' OR codc_categ IS NULL)
                 THEN nro_cargo::TEXT
                 ELSE codc_categ
-            END AS codc_categ")
+            END AS codc_categ"),
         ])
-            ->where(function ($query) use ($fecha) {
+            ->where(function ($query) use ($fecha): void {
                 $query->whereNull('fec_baja')
                     ->orWhere('fec_baja', '>=', $fecha);
             })
@@ -273,6 +262,7 @@ class Dh03 extends Model
     {
         return $this->hasMany(Dh21::class, 'nro_cargo', 'nro_cargo');
     }
+
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
@@ -288,12 +278,10 @@ class Dh03 extends Model
         return $this->belongsTo(Dhc9::class, 'codc_agrup', 'codagrup');
     }
 
-
     public function dhd7(): BelongsTo
     {
         return $this->belongsTo(Dhd7::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
     }
-
 
     public function spuDisc(): BelongsTo
     {
@@ -334,14 +322,6 @@ class Dh03 extends Model
         return trim($value);
     }
 
-    /* ##################### ATRIBUTOS ##################### */
-    protected function legajoCargo(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
-        );
-    }
-
     /*  ##################### HELPER ##################### */
     public static function validarParLegajoCargo(int $nroLegaj, int $nroCargo): bool
     {
@@ -349,15 +329,34 @@ class Dh03 extends Model
     }
 
     /**
-     * Método estático para buscar un cargo por legajo y número de cargo
+     * Método estático para buscar un cargo por legajo y número de cargo.
      *
      * @param int $nroLegaj
      * @param int $nroCargo
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function buscarPorLegajoCargo(int $nroLegaj, int $nroCargo)
     {
         return static::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_cargo', $nroCargo);
+    }
+
+    protected function setCodigocontratoAttribute($value): void
+    {
+        $this->attributes['codigocontrato'] = (int)$value;
+    }
+
+    protected function setChkstopliqAttribute($value): void
+    {
+        $this->attributes['chkstopliq'] = (int)$value;
+    }
+
+    /* ##################### ATRIBUTOS ##################### */
+    protected function legajoCargo(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+        );
     }
 }

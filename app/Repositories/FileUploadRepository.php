@@ -2,19 +2,20 @@
 
 namespace App\Repositories;
 
+use App\Contracts\FileUploadRepositoryInterface;
 use App\Models\UploadedFile;
 use Illuminate\Database\Eloquent\Collection;
-use App\Contracts\FileUploadRepositoryInterface;
 
 class FileUploadRepository implements FileUploadRepositoryInterface
 {
-
     /**
      * Obtiene un archivo cargado por su ID o lanza una excepción si no se encuentra.
      *
      * @param int $id El ID del archivo cargado a buscar.
-     * @return UploadedFile El modelo del archivo cargado.
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Si no se encuentra el archivo cargado.
+     *
+     * @return UploadedFile El modelo del archivo cargado.
      */
     public function findOrFail($id): UploadedFile
     {
@@ -26,6 +27,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Crea un nuevo registro de archivo cargado.
      *
      * @param array $data
+     *
      * @return UploadedFile
      */
     public function create(array $data): UploadedFile
@@ -37,6 +39,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Elimina un archivo cargado.
      *
      * @param UploadedFile $model El modelo de archivo cargado a eliminar.
+     *
      * @return bool Verdadero si el archivo se eliminó correctamente, falso en caso contrario.
      */
     public function delete($model): bool
@@ -58,6 +61,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Verifica si existe un archivo cargado con el origen especificado.
      *
      * @param string $origen El origen del archivo cargado a buscar.
+     *
      * @return bool Verdadero si existe un archivo cargado con el origen especificado, falso en caso contrario.
      */
     public function existsByOrigen(string $origen): bool
@@ -69,6 +73,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      * Get the latest uploaded file by origen.
      *
      * @param string $origen
+     *
      * @return UploadedFile|null
      */
     public function getLatestByOrigen(string $origen): ?UploadedFile

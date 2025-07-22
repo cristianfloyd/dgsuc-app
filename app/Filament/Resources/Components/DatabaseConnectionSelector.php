@@ -37,15 +37,15 @@ class DatabaseConnectionSelector extends Component implements HasForms
                     ->label('Base de Datos')
                     ->options($service->getAvailableConnections())
                     ->live()
-                    ->afterStateUpdated(function ($state) use ($service) {
+                    ->afterStateUpdated(function ($state) use ($service): void {
                         $service->setConnection($state);
-                        
+
                         Notification::make()
                             ->title('Conexión cambiada')
                             ->body('La conexión a la base de datos ha sido cambiada')
                             ->success()
                             ->send();
-                            
+
                         $this->redirect(request()->header('Referer'));
                     }),
             ]);
@@ -55,4 +55,4 @@ class DatabaseConnectionSelector extends Component implements HasForms
     {
         return view('filament.components.database-connection-selector');
     }
-} 
+}

@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\TransactionServiceInterface;
 use App\Services\TransactionService;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\TransactionServiceInterface;
 
 class TransactionServiceProvider extends ServiceProvider
 {
@@ -21,6 +21,6 @@ class TransactionServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+
     }
 }

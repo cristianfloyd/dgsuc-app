@@ -11,23 +11,24 @@ class DatabaseHealthWidget extends Widget
 {
     use MapucheConnectionTrait;
 
-    protected static string $view = 'filament.widgets.database-health-widget';
-    protected static ?int $sort = 2;
-    protected static bool $isLazy = true;
-
-
     // Actualizamos cada 5 minutos
     public $poolingInterval = 300;
+
+    protected static string $view = 'filament.widgets.database-health-widget';
+
+    protected static ?int $sort = 2;
+
+    protected static bool $isLazy = true;
 
     public function getMetrics()
     {
         // return Cache::remember('database_metrics', 300, function () {
-            return [
-                'size_db' => $this->getDatabaseSize(),
-                'tablas_info' => $this->getMainTablesInfo(),
-                'conexion_status' => $this->checkDatabaseConnection(),
-                'queries_lentos' => $this->getSlowQueries(),
-            ];
+        return [
+            'size_db' => $this->getDatabaseSize(),
+            'tablas_info' => $this->getMainTablesInfo(),
+            'conexion_status' => $this->checkDatabaseConnection(),
+            'queries_lentos' => $this->getSlowQueries(),
+        ];
         // });
     }
 
@@ -51,7 +52,7 @@ class DatabaseHealthWidget extends Widget
         return [
             'value' => $size[0]->size_in_mb ?? 0,
             'unit' => 'MB',
-            'status' => $this->getSizeStatus($size[0]->size ?? 0)
+            'status' => $this->getSizeStatus($size[0]->size ?? 0),
         ];
     }
 
@@ -70,7 +71,6 @@ class DatabaseHealthWidget extends Widget
             LIMIT 5");
     }
 
-
     private function checkDatabaseConnection(): array
     {
         try {
@@ -81,13 +81,13 @@ class DatabaseHealthWidget extends Widget
             return [
                 'status' => 'success',
                 'latencia' => $time,
-                'mensaje' => 'Conexión establecida'
+                'mensaje' => 'Conexión establecida',
             ];
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
                 'latencia' => 0,
-                'mensaje' => 'Error de conexión: ' . $e->getMessage()
+                'mensaje' => 'Error de conexión: ' . $e->getMessage(),
             ];
         }
     }

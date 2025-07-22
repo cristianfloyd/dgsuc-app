@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ControlAportesDiferencia;
 use Illuminate\Http\Request;
-use App\Models\ControlDiferencias;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\ControlAportesDiferencia;
 
 class AplicarCombinacionController extends Controller
 {
     /**
-     * Aplica una combinación seleccionada para resolver una diferencia
+     * Aplica una combinación seleccionada para resolver una diferencia.
      *
      * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function aplicar(Request $request)
@@ -24,7 +24,7 @@ class AplicarCombinacionController extends Controller
                 'combinacion' => 'required|array',
                 'combinacion.items' => 'required|array',
                 'combinacion.total' => 'required|numeric',
-                'recordId' => 'required|integer|exists:control_diferencias,id'
+                'recordId' => 'required|integer|exists:control_diferencias,id',
             ]);
 
             // Obtener el registro de control
@@ -42,7 +42,7 @@ class AplicarCombinacionController extends Controller
                 'total_aplicado' => $request->combinacion['total'],
                 'diferencia_resultante' => abs($controlDiferencia->diff_B - $request->combinacion['total']),
                 'aplicado_por' => auth()->guard('web')->user()->id,
-                'aplicado_en' => now()
+                'aplicado_en' => now(),
             ];
 
             // Aquí puedes guardar en tu tabla de registro de combinaciones aplicadas
@@ -68,7 +68,7 @@ class AplicarCombinacionController extends Controller
                 'usuario' => auth()->guard('web')->user()->name,
                 'control_id' => $controlDiferencia->id,
                 'nro_legaj' => $controlDiferencia->nro_legaj,
-                'combinacion' => $request->combinacion
+                'combinacion' => $request->combinacion,
             ]);
 
             return response()->json([
@@ -76,8 +76,8 @@ class AplicarCombinacionController extends Controller
                 'message' => 'Combinación aplicada correctamente',
                 'data' => [
                     'control' => $controlDiferencia,
-                    'combinacion_aplicada' => $combinacionAplicada
-                ]
+                    'combinacion_aplicada' => $combinacionAplicada,
+                ],
             ]);
 
         } catch (\Exception $e) {
@@ -86,12 +86,12 @@ class AplicarCombinacionController extends Controller
 
             Log::error('Error al aplicar combinación: ' . $e->getMessage(), [
                 'exception' => $e,
-                'request' => $request->all()
+                'request' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error al aplicar la combinación: ' . $e->getMessage()
+                'message' => 'Error al aplicar la combinación: ' . $e->getMessage(),
             ], 500);
         }
     }

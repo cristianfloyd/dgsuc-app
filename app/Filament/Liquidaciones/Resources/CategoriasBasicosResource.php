@@ -2,34 +2,34 @@
 
 namespace App\Filament\Liquidaciones\Resources;
 
-use Filament\Forms;
-use App\Models\Dh11;
-use Filament\Tables;
-use Filament\Forms\Set;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Tables\Grouping\Group;
-use App\Traits\CategoriasConstantTrait;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Columns\TextInputColumn;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Liquidaciones\Resources\CategoriasBasicosResource\Pages;
-use App\Filament\Liquidaciones\Resources\CategoriasBasicosResource\RelationManagers;
+use App\Models\Dh11;
+use App\Traits\CategoriasConstantTrait;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Set;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CategoriasBasicosResource extends Resource
 {
     use CategoriasConstantTrait;
+
     protected static ?string $model = Dh11::class;
+
     protected static ?string $modelLabel = 'Básicos (dh11)';
+
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationGroup = 'Personal';
 
     public static function form(Form $form): Form
@@ -39,7 +39,7 @@ class CategoriasBasicosResource extends Resource
                 TextInput::make('impp_basic')
                     ->numeric()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, ?float $state) {
+                    ->afterStateUpdated(function (Set $set, ?float $state): void {
                         $set('impp_asign', $state);
                         //fn (Set $set, ?int $state) => $set('impp_asign', $state)
                     }),
@@ -84,7 +84,7 @@ class CategoriasBasicosResource extends Resource
                     ->numeric(
                         decimalPlaces:2,
                         decimalSeparator: ',',
-                        thousandsSeparator: '.'
+                        thousandsSeparator: '.',
                     )->disabled(),
                 TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault:true),
                 ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault:true),
@@ -102,10 +102,10 @@ class CategoriasBasicosResource extends Resource
                         'DOC2' => 'Preuniversitario',
                         'DOCU' => 'Docente Universitario',
                         'AUTU' => 'Autoridad Universitaria',
-                        'NODO' => 'Nodocente'
+                        'NODO' => 'Nodocente',
                     ])
-                    ->query(function (Builder $query, array $data){
-                        if (!$data['value']){
+                    ->query(function (Builder $query, array $data) {
+                        if (!$data['value']) {
                             return $query;
                         }
 
@@ -125,18 +125,17 @@ class CategoriasBasicosResource extends Resource
                         'B' => 'Baja',
                         'P' => 'P',
                     ])
-                    ->default('P')
+                    ->default('P'),
             ])
             ->actions([
-                //
+
             ])
             ->bulkActions([
-                //
+
             ])
             ->defaultSort('codc_categ', 'asc')
             ->defaultPaginationPageOption(5);
     }
-
 
     public static function getPages(): array
     {

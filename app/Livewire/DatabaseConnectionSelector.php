@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use App\Services\EnhancedDatabaseConnectionService;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use App\Services\EnhancedDatabaseConnectionService;
+use Livewire\Component;
 
 class DatabaseConnectionSelector extends Component implements HasForms
 {
@@ -21,7 +21,7 @@ class DatabaseConnectionSelector extends Component implements HasForms
         $service = app(EnhancedDatabaseConnectionService::class);
 
         $currentConnection = $service->getCurrentConnection();
-        $this->connection = is_string($currentConnection) ? $currentConnection : null;
+        $this->connection = \is_string($currentConnection) ? $currentConnection : null;
 
         // Log::debug("DatabaseConnectionSelector montado", [
         //     'connection' => $this->connection
@@ -52,14 +52,14 @@ class DatabaseConnectionSelector extends Component implements HasForms
                             'class' => 'fi-compact ' . ($colorClasses[$state] ?? ''),
                         ];
                     })
-                    ->afterStateUpdated(function ($state) use ($service) {
-                        if (is_string($state)) {
-                            Log::debug("Cambiando conexión", ['nueva_conexion' => $state]);
+                    ->afterStateUpdated(function ($state) use ($service): void {
+                        if (\is_string($state)) {
+                            Log::debug('Cambiando conexión', ['nueva_conexion' => $state]);
 
                             $service->setConnection($state);
 
                             $this->dispatch('connection-changed', [
-                                'message' => 'Conexión cambiada a ' . ($service->getAvailableConnections()[$state] ?? $state)
+                                'message' => 'Conexión cambiada a ' . ($service->getAvailableConnections()[$state] ?? $state),
                             ]);
 
                             // Recargar la página para aplicar la nueva conexión

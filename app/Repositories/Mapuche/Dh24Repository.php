@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Mapuche;
 
-use App\Models\Mapuche\Dh24;
-use App\Data\Mapuche\Dh24Data;
-use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\Mapuche\Repositories\Dh24RepositoryInterface;
+use App\Data\Mapuche\Dh24Data;
+use App\Models\Mapuche\Dh24;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dh24Repository implements Dh24RepositoryInterface
 {

@@ -11,7 +11,9 @@ class ActivityLogWidget extends Widget
     use MapucheConnectionTrait;
 
     protected static string $view = 'filament.widgets.activity-log-widget';
+
     protected static bool $isLazy = true;
+
     protected static ?int $sort = 4;
 
     public function getActivityData(): array
@@ -26,7 +28,7 @@ class ActivityLogWidget extends Widget
     private function getActiveUsers(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     usename as usuario,
                     application_name,
@@ -36,13 +38,13 @@ class ActivityLogWidget extends Widget
                 WHERE usename IS NOT NULL
                 ORDER BY backend_start DESC
                 LIMIT 5
-            ");
+            ');
     }
 
     private function getLastActions(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     schemaname,
                     relname as tabla,
@@ -53,13 +55,13 @@ class ActivityLogWidget extends Widget
                 FROM pg_stat_user_tables
                 ORDER BY last_vacuum DESC NULLS LAST
                 LIMIT 5
-            ");
+            ');
     }
 
     private function getStatistics(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     relname as tabla,
                     seq_scan as escaneos_secuenciales,
@@ -70,6 +72,6 @@ class ActivityLogWidget extends Widget
                 FROM pg_stat_user_tables
                 ORDER BY (n_tup_ins + n_tup_upd + n_tup_del) DESC
                 LIMIT 5
-            ");
+            ');
     }
 }

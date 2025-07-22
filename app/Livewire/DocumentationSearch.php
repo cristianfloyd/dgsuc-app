@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Documentation;
+use Livewire\Component;
 
 class DocumentationSearch extends Component
 {
@@ -13,9 +13,9 @@ class DocumentationSearch extends Component
     {
         $results = [];
 
-        if (strlen($this->search) >= 2) {
+        if (\strlen($this->search) >= 2) {
             $results = Documentation::where('is_published', true)
-                ->where(function ($query) {
+                ->where(function ($query): void {
                     $query->where('title', 'like', '%' . $this->search . '%')
                         ->orWhere('content', 'like', '%' . $this->search . '%');
                 })
@@ -24,7 +24,7 @@ class DocumentationSearch extends Component
         }
 
         return view('livewire.documentation-search', [
-            'results' => $results
+            'results' => $results,
         ]);
     }
 }

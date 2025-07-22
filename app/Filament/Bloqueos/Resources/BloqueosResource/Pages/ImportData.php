@@ -2,29 +2,29 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
-use Filament\Forms\Form;
-use Livewire\WithFileUploads;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Imports\BloqueosImport;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ImportDataTableService;
+use App\Services\Imports\BloqueosImportService;
+use App\Services\Imports\DuplicateValidationService;
+use App\Services\Imports\ImportNotificationService;
 use App\Services\Mapuche\Dh22Service;
+use App\Services\Reportes\BloqueosImportOrchestratorService;
+use App\Services\Reportes\BloqueosProcessService;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use App\Services\Validation\ExcelRowValidationService;
+use App\Traits\MapucheConnectionTrait;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use App\Traits\MapucheConnectionTrait;
-use Filament\Forms\Components\Section;
-use App\Services\ImportDataTableService;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use App\Services\Imports\BloqueosImportService;
 use Filament\Forms\Concerns\InteractsWithForms;
-use App\Services\Reportes\BloqueosProcessService;
-use App\Services\Imports\ImportNotificationService;
-use App\Services\Imports\DuplicateValidationService;
-use App\Filament\Bloqueos\Resources\BloqueosResource;
-use App\Services\Validation\ExcelRowValidationService;
-use App\Services\Reportes\BloqueosImportOrchestratorService;
-use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
+use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportData extends Page
 {
@@ -32,11 +32,13 @@ class ImportData extends Page
     use InteractsWithForms;
     use WithFileUploads;
 
-    protected static string $resource = BloqueosResource::class;
-    protected static string $view = 'filament.reportes.resources.import-data-resource.pages.import-data';
-    protected static ?string $title = 'Importar Datos';
-
     public array $data = [];
+
+    protected static string $resource = BloqueosResource::class;
+
+    protected static string $view = 'filament.reportes.resources.import-data-resource.pages.import-data';
+
+    protected static ?string $title = 'Importar Datos';
 
     public function mount(): void
     {
@@ -69,11 +71,11 @@ class ImportData extends Page
                     ->visibility('private')
                     ->acceptedFileTypes([
                         'application/vnd.ms-excel',
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     ])
                     ->maxSize(10240)
                     ->required(),
-                    Section::make('Opciones avanzadas')
+                Section::make('Opciones avanzadas')
                     ->description('Puedes personalizar el flujo de validación y procesamiento.')
                     ->collapsible()
                     ->schema([
@@ -117,7 +119,7 @@ class ImportData extends Page
 
             Log::debug('Iniciando importación', [
                 'liquidacion' => $nroLiqui,
-                'archivo' => $filePath
+                'archivo' => $filePath,
             ]);
 
             // Creamos una instancia del importador con sus dependencias
@@ -127,7 +129,7 @@ class ImportData extends Page
                 app(BloqueosServiceInterface::class, [
                     'importService' => app(BloqueosImportService::class),
                     'processService' => app(BloqueosProcessService::class),
-                    'nroLiqui' => $nroLiqui
+                    'nroLiqui' => $nroLiqui,
                 ]),
                 app(ImportNotificationService::class),
                 app(ExcelRowValidationService::class),
@@ -144,7 +146,7 @@ class ImportData extends Page
             if ($importResult->success) {
                 app(ImportNotificationService::class)->notifyImportResults(
                     $importResult->getProcessedCount(),
-                    $importResult->getDuplicateCount()
+                    $importResult->getDuplicateCount(),
                 );
                 Log::info('Importación completada exitosamente', $importResult->toArray());
 
@@ -189,20 +191,17 @@ class ImportData extends Page
                 'file' => $filePath,
                 'liquidacion' => $nroLiqui,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             app(ImportNotificationService::class)->sendErrorNotification($e->getMessage());
         }
     }
 
-
-
-
     protected function getHeaderActions(): array
     {
         return [
-            //
+
         ];
     }
 }

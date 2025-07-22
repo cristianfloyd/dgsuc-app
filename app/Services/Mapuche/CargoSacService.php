@@ -2,22 +2,21 @@
 
 namespace App\Services\Mapuche;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Dh03Repository;
+use Illuminate\Support\Facades\DB;
 
 class CargoSacService
 {
-    public $vcl_cargos = array();
+    public $vcl_cargos = [];
+
     /**
      * Create a new class instance.
      */
     public function __construct()
     {
-        //
+
     }
-
-
 
     public static function getBrutosSacCargo(int $legajo, int $nro_cargo)
     {
@@ -59,63 +58,73 @@ class CargoSacService
 
         $rs = DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
 
-        foreach ($rs as $registro)
+        foreach ($rs as $registro) {
             $rs1[$registro['clave']] = $registro;
+        }
 
         $rs2 = [];
         $rs2 = $rs1[$nro_cargo];
         $rs2['primer_semestre'] = $primer_semestre;
         $rs2['segundo_semestre'] = $segundo_semestre;
-        if (!isset($rs1[$nro_cargo]))
-            for ($i = 1; $i <= 12; $i++)
+        if (!isset($rs1[$nro_cargo])) {
+            for ($i = 1; $i <= 12; $i++) {
                 $rs2['imp_bruto_' . $i] = 0;
-        for ($i = 1; $i <= 12; $i++)
+            }
+        }
+        for ($i = 1; $i <= 12; $i++) {
             $rs2['imp_acumu_' . $i] = 0;
-        for ($i = 1; $i <= 12; $i++)
+        }
+        for ($i = 1; $i <= 12; $i++) {
             $rs2['vinculo_' . $i] = '';
+        }
         $vinculo = $rs1[$nro_cargo]['vcl_cargo'];
         $nro_cargo = $rs1[$nro_cargo]['vcl_cargo'];
         while (isset($rs1[$nro_cargo]) && ($rs1[$nro_cargo]['nro_cargo'] != $rs1[$nro_cargo]['vcl_cargo'])) {
             for ($i = 1; $i <= 12; $i++) {
                 $rs2['imp_acumu_' . $i] = $rs2['imp_acumu_' . $i] + $rs1[$nro_cargo]['imp_bruto_' . $i];
-                if ($rs1[$nro_cargo]['imp_bruto_' . $i] != 0)
-                    if ($rs2['vinculo_' . $i] == '')
+                if ($rs1[$nro_cargo]['imp_bruto_' . $i] != 0) {
+                    if ($rs2['vinculo_' . $i] == '') {
                         $rs2['vinculo_' . $i] = $vinculo;
-                    else
+                    } else {
                         $rs2['vinculo_' . $i] = $rs2['vinculo_' . $i] . ' -> ' . $vinculo;
+                    }
+                }
             }
             $vinculo = $rs1[$nro_cargo]['vcl_cargo'];
             $nro_cargo = $rs1[$nro_cargo]['vcl_cargo'];
         }
-        if ($rs2['nro_cargo'] != $rs1[$nro_cargo]['nro_cargo'])
+        if ($rs2['nro_cargo'] != $rs1[$nro_cargo]['nro_cargo']) {
             //Se suman los acumulados del ultimo cargo en los vinculos
             for ($i = 1; $i <= 12; $i++) {
                 $rs2['imp_acumu_' . $i] = $rs2['imp_acumu_' . $i] + $rs1[$nro_cargo]['imp_bruto_' . $i];
-                if ($rs1[$nro_cargo]['imp_bruto_' . $i] != 0)
-                    if ($rs2['vinculo_' . $i] == '')
+                if ($rs1[$nro_cargo]['imp_bruto_' . $i] != 0) {
+                    if ($rs2['vinculo_' . $i] == '') {
                         $rs2['vinculo_' . $i] = $vinculo;
-                    else
+                    } else {
                         $rs2['vinculo_' . $i] = $rs2['vinculo_' . $i] . ' -> ' . $vinculo;
+                    }
+                }
             }
+        }
         return $rs2;
     }
 
     public static function modificacion($clave, $datos)
     {
         $clave_sac['nro_cargo'] = $clave;
-        for ($i = 1; $i <= 12; $i++)
+        for ($i = 1; $i <= 12; $i++) {
             $datos_sac['imp_bruto_' . $i] = $datos['imp_bruto_' . $i];
+        }
         DB::connection(MapucheConfig::getStaticConnectionName())->beginTransaction();
         $ok = DB::connection(MapucheConfig::getStaticConnectionName())->table('dh10')->where('nro_cargo', $clave)->update($datos);
         if ($ok) {
             DB::connection(MapucheConfig::getStaticConnectionName())->commit();
             return true;
-        } else {
-            DB::connection(MapucheConfig::getStaticConnectionName())->rollBack();
-            return false;
         }
-    }
+        DB::connection(MapucheConfig::getStaticConnectionName())->rollBack();
+        return false;
 
+    }
 
     public static function get_brutos_para_sac($filtro, $orderby = '')
     {
@@ -123,14 +132,15 @@ class CargoSacService
         $mes_periodo = (int)MapucheConfig::getMesFiscal();
         $anio_periodo = (int)MapucheConfig::getAnioFiscal();
 
-        if ($orderby != '')
+        if ($orderby != '') {
             $order = ' ORDER BY nyapel ' . $orderby;
-        else
-            $order  = 'ORDER BY	dh03.codc_uacad, nyapel, nro_legaj,	fec_baja DESC';
+        } else {
+            $order = 'ORDER BY	dh03.codc_uacad, nyapel, nro_legaj,	fec_baja DESC';
+        }
 
-        $where = "TRUE ";
+        $where = 'TRUE ';
         if (isset($filtro['cod_regional'])) {
-            if ($filtro['cod_regional']['condicion'] == "es_igual_a") {
+            if ($filtro['cod_regional']['condicion'] == 'es_igual_a') {
                 $where .= " AND dh03.codc_regio = '" . $filtro['cod_regional']['valor'] . "'";
             } else {
                 $where .= " AND dh03.codc_regio <> '" . $filtro['cod_regional']['valor'] . "'";
@@ -138,7 +148,7 @@ class CargoSacService
         }
 
         if (isset($filtro['cod_depcia'])) {
-            if ($filtro['cod_depcia']['condicion'] == "es_igual_a") {
+            if ($filtro['cod_depcia']['condicion'] == 'es_igual_a') {
                 $where .= " AND dh03.codc_uacad = '" . $filtro['cod_depcia']['valor'] . "'";
             } else {
                 $where .= " AND dh03.codc_uacad <> '" . $filtro['cod_depcia']['valor'] . "'";
@@ -148,8 +158,8 @@ class CargoSacService
         //Saco el periodo
         if (isset($filtro['periodo'])) {
             //periodo Actual
-            if (($filtro['periodo']['condicion'] == "es_igual_a" && $filtro['periodo']['valor'] == 0) ||
-                ($filtro['periodo']['condicion'] == "es_distinto_de" && $filtro['periodo']['valor'] == 1)
+            if (($filtro['periodo']['condicion'] == 'es_igual_a' && $filtro['periodo']['valor'] == 0) ||
+                ($filtro['periodo']['condicion'] == 'es_distinto_de' && $filtro['periodo']['valor'] == 1)
             ) {
 
                 if ($mes_periodo > 6) {
@@ -185,7 +195,7 @@ class CargoSacService
                            (dh03.fec_alta <= '" . $f_alta . "' AND ((dh03.fec_baja <= '" . $fec_baja . "' AND dh03.fec_baja >= '" . $f_alta . "') OR dh03.fec_baja is null)) OR
                            (dh03.fec_alta >= '" . $f_alta . "' AND dh03.fec_alta <  '" . $fec_baja . "' AND (dh03.fec_baja >= '" . $fec_baja . "' OR dh03.fec_baja is null)) OR
                            (dh03.fec_alta >= '" . $f_alta . "' AND (dh03.fec_baja <= '" . $fec_baja . "' OR dh03.fec_baja is null))
-                       ) AND " . $where . " ";
+                       ) AND " . $where . ' ';
 
         $sql = "SELECT
                        dh03.nro_legaj,
@@ -216,7 +226,7 @@ class CargoSacService
                        mapuche.dh03,
                        mapuche.dh01
                    WHERE
-                       " . $filtrowhere . " " . $order;
+                       " . $filtrowhere . ' ' . $order;
 
         $rs = DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
 
@@ -232,19 +242,20 @@ class CargoSacService
 
         foreach ($rs as $row) {
 
-            if (in_array($row['nro_cargo'], $vinculos))
+            if (\in_array($row['nro_cargo'], $vinculos)) {
                 continue;
+            }
 
             if ($idAgente != $row['nro_legaj'] && $idAgente != -1) {
 
-                if (count($cargosVigentes) == 0) {
-                    $cv = array();
-                    $cv['nro_cargo']  = '-';
+                if (\count($cargosVigentes) == 0) {
+                    $cv = [];
+                    $cv['nro_cargo'] = '-';
                     $cv['fecha_alta'] = '--/--/----';
                     $cv['fecha_baja'] = '--/--/----';
-                    $cv['categoria']  = '';
+                    $cv['categoria'] = '';
                     $cv['uacademica'] = '';
-                    $cv['vinculado']  = '';
+                    $cv['vinculado'] = '';
                     $cargosVigentes[] = $cv;
                 }
 
@@ -254,42 +265,44 @@ class CargoSacService
                 $legajo['dependencia'] = $row['codc_uacad'];
 
                 $legajos[] = $legajo;
-                $cargo = array();
-                $cargos = array();
-                $legajo = array();
+                $cargo = [];
+                $cargos = [];
+                $legajo = [];
                 $idAgente = -1;
-                $cargosVigentes = array();
+                $cargosVigentes = [];
 
-                $meses = array();
-            };
+                $meses = [];
+            }
             if ($idAgente == $row['nro_legaj'] || $idAgente == -1) { // ==-1 la primera vez q itera
 
                 $idAgente = $row['nro_legaj'];
-                if ($row['nro_cargo'] != $row['vcl_cargo']) //tiene un vinculo, verifico q sea valido
+                if ($row['nro_cargo'] != $row['vcl_cargo']) { //tiene un vinculo, verifico q sea valido
                     $esVinculado = Dh03Repository::esVinculoValido($row['fec_alta'], $row['vcl_cargo']);
-                else
+                } else {
                     $esVinculado = false;
+                }
 
                 if ($esVinculado) {
-                    $detalleCargo = array();
+                    $detalleCargo = [];
                     $continuarVinculos = true;
                     $cargovinculado = $row;
                     while ($continuarVinculos) {
 
-                        if (count($meses) == 0)
-                            $meses = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                        if (\count($meses) == 0) {
+                            $meses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        }
                         for ($j = 1; $j <= 12; $j++) {
                             $meses[$j] = $meses[$j] + $cargovinculado['imp_bruto_' . $j];
                         }
 
 
-                        $dc = array();
+                        $dc = [];
 
                         //detalle del cargo
-                        $dc['nro_cargo']  = $cargovinculado['nro_cargo'];
+                        $dc['nro_cargo'] = $cargovinculado['nro_cargo'];
                         $dc['fecha_alta'] = $cargovinculado['fec_alta'];
                         $dc['fecha_baja'] = $cargovinculado['fec_baja'];
-                        $dc['categoria']  = $cargovinculado['codc_categ'];
+                        $dc['categoria'] = $cargovinculado['codc_categ'];
 
                         $detalleCargo[] = $dc;
 
@@ -299,29 +312,32 @@ class CargoSacService
                             $esVinculo = Dh03Repository::esVinculoValido($cargovinculado['fec_alta'], $cargovinculado['vcl_cargo']);
                             if (!$esVinculo) {
                                 $continuarVinculos = false;
-                            } else
+                            } else {
                                 $cargovinculado = self::traerCargo($cargovinculado['vcl_cargo'], $filtrowhere);
-                            if ($cargovinculado == false)
+                            }
+                            if ($cargovinculado == false) {
                                 $continuarVinculos = false;
-                            else
+                            } else {
                                 $vinculos[] = $cargovinculado['nro_cargo'];
+                            }
                         }
                     } //fin del while
 
-                    if ($row['fec_baja'] == "" || (strtotime($row['fec_baja']) >= strtotime($anio_periodo . '-' . $mes_periodo . '-' . self::get_dias_mes($mes_periodo, $anio_periodo)))) {
-                        $cv = array();
-                        $cv['nro_cargo']  = $row['nro_cargo'];
+                    if ($row['fec_baja'] == '' || (strtotime($row['fec_baja']) >= strtotime($anio_periodo . '-' . $mes_periodo . '-' . self::get_dias_mes($mes_periodo, $anio_periodo)))) {
+                        $cv = [];
+                        $cv['nro_cargo'] = $row['nro_cargo'];
                         $cv['fecha_alta'] = $row['fec_alta'];
-                        if ($row['fec_baja'] != "")
+                        if ($row['fec_baja'] != '') {
                             $cv['fecha_baja'] = $row['fec_baja'];
-                        else
+                        } else {
                             $cv['fecha_baja'] = '--/--/----';
-                        $cv['categoria']  = $row['codc_categ'];
+                        }
+                        $cv['categoria'] = $row['codc_categ'];
                         $cv['uacademica'] = $row['codc_uacad'];
-                        $cv['vinculado']  = "VINC";
+                        $cv['vinculado'] = 'VINC';
                         $cargosVigentes[] = $cv;
                     }
-                    if (count($legajo) == 0) {
+                    if (\count($legajo) == 0) {
                         $legajo['nro_legaj'] = $row['nro_legaj'];
                         $legajo['nyapel'] = $row['nyapel'];
                         $legajo['documento'] = $row['documento'];
@@ -331,7 +347,7 @@ class CargoSacService
 
 
                     //Arreglo de meses con los importes
-                    $mayor = array('pos' => 0, 'imp' => 0);
+                    $mayor = ['pos' => 0, 'imp' => 0];
                     for ($j = $p_inicio; $j <= $p_fin; $j++) {
                         if ($meses[$j] > $mayor['imp']) {
                             $mayor['pos'] = $j;
@@ -341,20 +357,20 @@ class CargoSacService
                     $meses['mayor'] = $mayor;
 
 
-                    $c = array();
+                    $c = [];
                     $c['meses'] = $meses;
                     $c['detalle_cargo'] = $detalleCargo;
                     $cargos[] = $c;
-                    $meses = array();
+                    $meses = [];
                 }
 
 
                 //Esta condicion es para ver si el cargo no tiene ningun vinculo
                 if ($row['nro_cargo'] == $row['vcl_cargo'] || !$esVinculado) {
-                    $detalleCargo = array();
-                    $meses = array();
+                    $detalleCargo = [];
+                    $meses = [];
 
-                    if (count($legajo) == 0) {
+                    if (\count($legajo) == 0) {
                         $legajo['nro_legaj'] = $row['nro_legaj'];
                         $legajo['nyapel'] = $row['nyapel'];
                         $legajo['documento'] = $row['documento'];
@@ -363,7 +379,7 @@ class CargoSacService
                     }
 
                     //Arreglo de meses con los importes
-                    $mayor = array('pos' => 0, 'imp' => 0);
+                    $mayor = ['pos' => 0, 'imp' => 0];
                     for ($j = $p_inicio; $j <= $p_fin; $j++) {
                         if ($row['imp_bruto_' . $j] > $mayor['imp']) {
                             $mayor['pos'] = $j;
@@ -374,46 +390,47 @@ class CargoSacService
                     $meses['mayor'] = $mayor;
 
                     //detalle del cargo
-                    $dc = array();
-                    $dc['nro_cargo']  = $row['nro_cargo'];
+                    $dc = [];
+                    $dc['nro_cargo'] = $row['nro_cargo'];
                     $dc['fecha_alta'] = $row['fec_alta'];
                     $dc['fecha_baja'] = $row['fec_baja'];
-                    $dc['categoria']  = $row['codc_categ'];
+                    $dc['categoria'] = $row['codc_categ'];
 
                     $detalleCargo[] = $dc;
 
-                    if ($row['fec_baja'] == "" || (strtotime($row['fec_baja']) >= strtotime($anio_periodo . '-' . $mes_periodo . '-' . self::get_dias_mes($mes_periodo, $anio_periodo)))) {
-                        $cv = array();
-                        $cv['nro_cargo']  = $row['nro_cargo'];
+                    if ($row['fec_baja'] == '' || (strtotime($row['fec_baja']) >= strtotime($anio_periodo . '-' . $mes_periodo . '-' . self::get_dias_mes($mes_periodo, $anio_periodo)))) {
+                        $cv = [];
+                        $cv['nro_cargo'] = $row['nro_cargo'];
                         $cv['fecha_alta'] = $row['fec_alta'];
-                        if ($row['fec_baja'] != "")
+                        if ($row['fec_baja'] != '') {
                             $cv['fecha_baja'] = $row['fec_baja'];
-                        else
+                        } else {
                             $cv['fecha_baja'] = '--/--/----';
-                        $cv['categoria'] =  $row['codc_categ'];
+                        }
+                        $cv['categoria'] = $row['codc_categ'];
                         $cv['uacademica'] = $row['codc_uacad'];
                         $cv['vinculado'] = '';
                         $cargosVigentes[] = $cv;
                     }
 
-                    $c = array();
+                    $c = [];
                     $c['meses'] = $meses;
                     $c['detalle_cargo'] = $detalleCargo;
                     $cargos[] = $c;
-                    $meses = array();
+                    $meses = [];
                 }
             }
         }
-        if (count($rs) > 0) {
+        if (\count($rs) > 0) {
             //Es para el ultimo caso
-            if (count($cargosVigentes) == 0) {
+            if (\count($cargosVigentes) == 0) {
                 $cv = [];
-                $cv['nro_cargo']  = '-';
+                $cv['nro_cargo'] = '-';
                 $cv['fecha_alta'] = '--/--/----';
                 $cv['fecha_baja'] = '--/--/----';
-                $cv['categoria']  = '';
+                $cv['categoria'] = '';
                 $cv['uacademica'] = '';
-                $cv['vinculado']  = '';
+                $cv['vinculado'] = '';
                 $cargosVigentes[] = $cv;
             }
             $cargo['cargos'] = $cargos;
@@ -460,8 +477,7 @@ class CargoSacService
             * */
     }
 
-
-    static function traerCargo($nroCargo, $filtro = ' true ')
+    public static function traerCargo($nroCargo, $filtro = ' true ')
     {
 
         $sql = "SELECT
@@ -490,24 +506,25 @@ class CargoSacService
                        mapuche.dh03,
                        mapuche.dh01
                    WHERE
-                       " . $filtro . " AND
-                       dh03.nro_cargo =" . $nroCargo . "
+                       " . $filtro . ' AND
+                       dh03.nro_cargo =' . $nroCargo . '
 
                    ORDER BY
                        nro_legaj DESC,
                        fec_baja DESC
-                   ";
+                   ';
 
         $result = DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
-        if (count($result) > 0)
+        if (\count($result) > 0) {
             return $result[0];
-        else
-            return false;
+        }
+
+        return false;
     }
 
     public static function getCargoBasicos(int $nro_cargo, bool $alta = false)
     {
-        $datos_cargo_sac = array();
+        $datos_cargo_sac = [];
         if (isset($nro_cargo)) {
             $sql = "SELECT
                                 dh10.nro_cargo,
@@ -530,7 +547,9 @@ class CargoSacService
                                dh10.nro_cargo = $nro_cargo
                            ";
             $datos_cargo_sac = DB::connection(MapucheConfig::getStaticConnectionName())->selectOne($sql);
-            if (!is_array($datos_cargo_sac)) $datos_cargo_sac = []; // retorna false si no obtiene datos y despues se lo trata como array
+            if (!\is_array($datos_cargo_sac)) {
+                $datos_cargo_sac = [];
+            } // retorna false si no obtiene datos y despues se lo trata como array
             // Si no existe o es alta preparo la nueva entrada para dh10, necesito igualar todos los valores en cero sino se guarda como nulls
             if (empty($datos_cargo_sac) || $alta) {
                 for ($i = 1; $i <= 12; $i++) {
@@ -562,12 +581,14 @@ class CargoSacService
     }
 
     /**
-     * Obtiene el número de días de un mes específico
+     * Obtiene el número de días de un mes específico.
      *
      * @param int $mes Mes (1-12)
      * @param int $anio Año (formato YYYY)
-     * @return int Número de días del mes
+     *
      * @throws \InvalidArgumentException Si el mes o año son inválidos
+     *
+     * @return int Número de días del mes
      */
     public static function get_dias_mes(int $mes, int $anio): int
     {
@@ -590,10 +611,11 @@ class CargoSacService
 
     /**
      * Obtiene el número de días de un mes específico con cache
-     * Versión optimizada para consultas frecuentes
+     * Versión optimizada para consultas frecuentes.
      *
      * @param int $mes Mes (1-12)
      * @param int $anio Año (formato YYYY)
+     *
      * @return int Número de días del mes
      */
     public static function get_dias_mes_cached(int $mes, int $anio): int
@@ -606,10 +628,11 @@ class CargoSacService
     }
 
     /**
-     * Obtiene información completa del mes
+     * Obtiene información completa del mes.
      *
      * @param int $mes Mes (1-12)
      * @param int $anio Año (formato YYYY)
+     *
      * @return array Información del mes
      */
     public static function get_info_mes(int $mes, int $anio): array

@@ -2,18 +2,18 @@
 
 namespace App\Services\Reportes;
 
-use Carbon\Carbon;
-use App\Models\Dh03;
+use App\Data\Reportes\BloqueoProcesadoData;
+use App\Data\Reportes\BloqueosData;
 use App\Enums\BloqueosEstadoEnum;
+use App\Models\Dh03;
+use App\Models\Reportes\BloqueosDataModel;
+use App\Traits\MapucheConnectionTrait;
+use Carbon\Carbon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Data\Reportes\BloqueosData;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use App\Models\Reportes\BloqueosDataModel;
-use App\Data\Reportes\BloqueoProcesadoData;
 
 class BloqueosProcessService
 {
@@ -32,7 +32,7 @@ class BloqueosProcessService
     public function crearTablaBackupSiNoExiste(): void
     {
         if (!Schema::connection($this->getConnectionName())->hasTable('suc.dh03_backup_bloqueos')) {
-            Schema::connection($this->getConnectionName())->create('suc.dh03_backup_bloqueos', function (Blueprint $table) {
+            Schema::connection($this->getConnectionName())->create('suc.dh03_backup_bloqueos', function (Blueprint $table): void {
                 $table->id();
                 $table->integer('nro_liqui');
                 $table->integer('nro_cargo')->unique();
@@ -58,8 +58,10 @@ class BloqueosProcessService
      * registro de backup para posible restauración.
      *
      * @param BloqueosData|null $bloqueosData Datos específicos a procesar. Si es null, procesa todos los registros pendientes.
-     * @return Collection<BloqueoProcesadoData> Colección con los resultados del procesamiento
+     *
      * @throws \Exception Si ocurre un error durante el procesamiento
+     *
+     * @return Collection<BloqueoProcesadoData> Colección con los resultados del procesamiento
      */
     public function procesarBloqueos(?BloqueosData $bloqueosData = null): Collection
     {
@@ -88,7 +90,7 @@ class BloqueosProcessService
                 if ($registrosInvalidos->isNotEmpty()) {
                     throw new \Exception(
                         'Existen registros no validados, con errores o ya procesados. ' .
-                            'Por favor, valide todos los registros antes de procesar.'
+                            'Por favor, valide todos los registros antes de procesar.',
                     );
                 }
 
@@ -101,7 +103,7 @@ class BloqueosProcessService
             }
 
             // Procesar en lotes
-            $query->chunk(100, function ($lote) use (&$resultados) {
+            $query->chunk(100, function ($lote) use (&$resultados): void {
                 // Procesamos cada registro individualmente
                 foreach ($lote as $bloqueo) {
                     try {
@@ -129,7 +131,7 @@ class BloqueosProcessService
                                 $bloqueo->update([
                                     'estado' => BloqueosEstadoEnum::PROCESADO,
                                     'mensaje_error' => null,
-                                    'esta_procesado' => true
+                                    'esta_procesado' => true,
                                 ]);
 
                                 Log::info('Registro procesado y marcado como procesado', [
@@ -137,27 +139,27 @@ class BloqueosProcessService
                                     'tipo' => $bloqueo->tipo,
                                     'legajo' => $bloqueo->nro_legaj,
                                     'cargo' => $bloqueo->nro_cargo,
-                                    'cambios_realizados' => $resultado->cambiosRealizados
+                                    'cambios_realizados' => $resultado->cambiosRealizados,
                                 ]);
                             } else {
                                 // Actualizar estado en caso de error
                                 $bloqueo->update([
                                     'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
-                                    'mensaje_error' => $resultado->message
+                                    'mensaje_error' => $resultado->message,
                                 ]);
                             }
-                        } else {
-                            // ... existing code ...
                         }
+                        // ... existing code ...
+
                     } catch (\Exception $e) {
                         Log::error('Error procesando registro individual', [
                             'id' => $bloqueo->id,
-                            'error' => $e->getMessage()
+                            'error' => $e->getMessage(),
                         ]);
 
                         $bloqueo->update([
                             'estado' => BloqueosEstadoEnum::ERROR_PROCESO,
-                            'mensaje_error' => $e->getMessage()
+                            'mensaje_error' => $e->getMessage(),
                         ]);
                     }
                 }
@@ -168,7 +170,7 @@ class BloqueosProcessService
             Log::info('Procesamiento completado', [
                 'total_procesados' => $resultados->count(),
                 'exitosos' => $resultados->where('success', true)->count(),
-                'fallidos' => $resultados->where('success', false)->count()
+                'fallidos' => $resultados->where('success', false)->count(),
             ]);
 
             return $resultados;
@@ -176,7 +178,7 @@ class BloqueosProcessService
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en procesamiento de bloqueos', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw $e;
@@ -192,7 +194,7 @@ class BloqueosProcessService
                 return BloqueoProcesadoData::fromError(
                     'Combinacion de legajo y cargo no encontrada',
                     $bloqueo,
-                    ['error_tipo0' => 'validacion']
+                    ['error_tipo0' => 'validacion'],
                 );
             }
 
@@ -203,7 +205,7 @@ class BloqueosProcessService
             // Guardar datos originales antes de cualquier modificación
             $datosOriginales = [
                 'fec_baja' => $cargo->fec_baja,
-                'chkstopliq' => $cargo->chkstopliq
+                'chkstopliq' => $cargo->chkstopliq,
             ];
 
             // Procesar según tipo
@@ -228,34 +230,10 @@ class BloqueosProcessService
                 $bloqueo,
                 [
                     'error_tipo' => 'procesamiento',
-                    'error_trace' => $e->getTraceAsString()
-                ]
+                    'error_trace' => $e->getTraceAsString(),
+                ],
             );
         }
-    }
-
-    private function procesarLicencia(Dh03 $cargo): bool
-    {
-        // Si ya está bloqueado, no hacemos cambios
-        if ($cargo->chkstopliq) {
-            return false;
-        }
-
-        $cargo->update(['chkstopliq' => true]);
-        return true;
-    }
-
-    private function procesarBaja(Dh03 $cargo, string $fechaBaja): bool
-    {
-        $fechaBajaImportada = Carbon::parse($fechaBaja);
-        $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;
-
-        if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
-            $cargo->update(['fec_baja' => $fechaBajaImportada]);
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -264,6 +242,7 @@ class BloqueosProcessService
      * @param BloqueosDataModel $bloqueo El bloqueo que se está procesando
      * @param Dh03 $cargo El cargo asociado al bloqueo
      * @param array $datosOriginales Los datos originales antes de la modificación
+     *
      * @return array Datos preparados para el backup
      */
     public function prepararBackupRegistro(BloqueosDataModel $bloqueo, Dh03 $cargo, array $datosOriginales): array
@@ -271,7 +250,7 @@ class BloqueosProcessService
         Log::info('Preparando backup para registro individual', [
             'cargo' => $cargo->nro_cargo,
             'legajo' => $cargo->nro_legaj,
-            'datos_originales' => $datosOriginales
+            'datos_originales' => $datosOriginales,
         ]);
 
         return [
@@ -283,7 +262,7 @@ class BloqueosProcessService
             'chkstopliq' => $datosOriginales['chkstopliq'],
             'tipo_bloqueo' => $bloqueo->tipo,
             'fecha_backup' => now(),
-            'session_id' => session()->getId()
+            'session_id' => session()->getId(),
         ];
     }
 
@@ -304,7 +283,7 @@ class BloqueosProcessService
                 Dh03::where('nro_cargo', $registro->nro_cargo)
                     ->update([
                         'fec_baja' => $registro->fec_baja,
-                        'chkstopliq' => $registro->chkstopliq
+                        'chkstopliq' => $registro->chkstopliq,
                     ]);
 
                 $idsRestaurados[] = $registro->id;
@@ -359,7 +338,7 @@ class BloqueosProcessService
                     // Guardar datos originales antes de cualquier modificación
                     $datosOriginales = [
                         'fec_baja' => $cargo->fec_baja,
-                        'chkstopliq' => $cargo->chkstopliq
+                        'chkstopliq' => $cargo->chkstopliq,
                     ];
 
                     // Procesar solo el primer registro (el más antiguo)
@@ -376,7 +355,7 @@ class BloqueosProcessService
 
                         Log::info('Backup creado para registro duplicado', [
                             'cargo' => $cargo->nro_cargo,
-                            'legajo' => $cargo->nro_legaj
+                            'legajo' => $cargo->nro_legaj,
                         ]);
                     }
 
@@ -390,7 +369,7 @@ class BloqueosProcessService
                         $duplicado->update([
                             'estado' => BloqueosEstadoEnum::DUPLICADO,
                             'mensaje_error' => 'Registro duplicado. Se procesó el registro más antiguo.',
-                            'esta_procesado' => true
+                            'esta_procesado' => true,
                         ]);
 
                         $procesados++;
@@ -400,8 +379,8 @@ class BloqueosProcessService
 
             DB::connection($this->getConnectionName())->commit();
 
-            Log::info("Procesamiento de duplicados completado", [
-                'total_procesados' => $procesados
+            Log::info('Procesamiento de duplicados completado', [
+                'total_procesados' => $procesados,
             ]);
 
             return true;
@@ -409,17 +388,42 @@ class BloqueosProcessService
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error procesando duplicados', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw $e;
         }
     }
 
+    private function procesarLicencia(Dh03 $cargo): bool
+    {
+        // Si ya está bloqueado, no hacemos cambios
+        if ($cargo->chkstopliq) {
+            return false;
+        }
+
+        $cargo->update(['chkstopliq' => true]);
+        return true;
+    }
+
+    private function procesarBaja(Dh03 $cargo, string $fechaBaja): bool
+    {
+        $fechaBajaImportada = Carbon::parse($fechaBaja);
+        $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;
+
+        if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
+            $cargo->update(['fec_baja' => $fechaBajaImportada]);
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Marca un registro como procesado.
      *
      * @param BloqueosDataModel $registro El registro a marcar como procesado
+     *
      * @return void
      */
     private function marcarComoProcesado(BloqueosDataModel $registro): void
@@ -427,22 +431,22 @@ class BloqueosProcessService
         $registro->update([
             'estado' => BloqueosEstadoEnum::PROCESADO,
             'mensaje_error' => null,
-            'esta_procesado' => true
+            'esta_procesado' => true,
         ]);
 
         Log::info('Registro marcado como procesado', [
             'id' => $registro->id,
             'tipo' => $registro->tipo,
             'legajo' => $registro->nro_legaj,
-            'cargo' => $registro->nro_cargo
+            'cargo' => $registro->nro_cargo,
         ]);
     }
 
-    private function procesarLicencias()
+    private function procesarLicencias(): void
     {
         BloqueosDataModel::where('tipo', 'Licencia')
             ->whereHas('cargo')
-            ->chunk(100, function ($licencias) {
+            ->chunk(100, function ($licencias): void {
                 foreach ($licencias as $licencia) {
                     $cargo = $licencia->cargo;
                     if ($cargo) {
@@ -452,14 +456,16 @@ class BloqueosProcessService
             });
     }
 
-    private function procesarBajas()
+    private function procesarBajas(): void
     {
         BloqueosDataModel::whereIn('tipo', ['Fallecido', 'Renuncia'])
             ->whereHas('cargo')
-            ->chunk(100, function ($bajas) {
+            ->chunk(100, function ($bajas): void {
                 foreach ($bajas as $baja) {
                     $cargo = $baja->cargo;
-                    if (!$cargo) continue;
+                    if (!$cargo) {
+                        continue;
+                    }
 
                     $fechaBajaImportada = Carbon::parse($baja->fecha_baja);
                     $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;

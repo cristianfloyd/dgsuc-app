@@ -4,21 +4,21 @@ namespace App\Enums;
 
 enum TipoNove: string
 {
-/**
+    /**
      * General: El concepto no necesita una novedad para liquidarse,
      * sólo puede forzarse o anularse.
      */
     case GENERAL = 'G';
 
-/**
+    /**
      * Permanente: El concepto necesita una novedad para ser liquidado.
-     * Puede incluir valores que afectan la fórmula (Importe, Porcentaje, Cantidad)
+     * Puede incluir valores que afectan la fórmula (Importe, Porcentaje, Cantidad).
      */
     case PERMANENTE = 'P';
 
-/**
+    /**
      * Transitorio: Necesita novedad para ser liquidado.
-     * Puede ser forzado o anulado por un período de tiempo (ej: Horas Extras)
+     * Puede ser forzado o anulado por un período de tiempo (ej: Horas Extras).
      */
     case TRANSITORIO = 'T';
 

@@ -12,16 +12,13 @@ class Dh19 extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'mapuche.dh19';
-
-
-    protected $primaryKey = ['nro_legaj', 'codn_conce', 'tipo_docum', 'nro_docum'];
-
-
     public $incrementing = false;
 
-
     public $timestamps = false;
+
+    protected $table = 'mapuche.dh19';
+
+    protected $primaryKey = ['nro_legaj', 'codn_conce', 'tipo_docum', 'nro_docum'];
 
     /**
      * The attributes that are mass assignable.
@@ -39,7 +36,6 @@ class Dh19 extends Model
         'porc_benef',
     ];
 
-
     /**
      * Especifica el tipo de datos que se utilizarán para los campos de la tabla 'mapuche.dh19'.
      * Esto permite que Laravel realice la conversión automática de los datos al guardarlos o recuperarlos de la base de datos.
@@ -51,7 +47,6 @@ class Dh19 extends Model
         'nro_docum' => 'integer',
         'porc_benef' => 'decimal:2',
     ];
-
 
     /**
      * Obtiene la relación Dh12 que pertenece a la instancia actual de Dh19.
