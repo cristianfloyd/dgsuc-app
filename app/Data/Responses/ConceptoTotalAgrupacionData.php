@@ -25,11 +25,12 @@ class ConceptoTotalAgrupacionData extends Data
     /**
      * Crea una instancia desde el resultado del repositorio.
      *
-     *
+     * @param array $data
+     * @return self
      */
-    public static function fromRepositoryResult(array $data): static
+    public static function fromRepositoryResult(array $data): self
     {
-        return new static(
+        return new self(
             haberes: $data['haberes'],
             descuentos: $data['descuentos'],
             totalHaberes: (float) $data['total_haberes'],

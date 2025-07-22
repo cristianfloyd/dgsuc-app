@@ -23,6 +23,11 @@ class SicossTotalesData extends Data
     ) {
     }
 
+    /**
+     * Summary of fromArray
+     * @param array $data
+     * @return SicossTotalesData
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -35,6 +40,11 @@ class SicossTotalesData extends Data
         );
     }
 
+    /**
+     * Convertir el objeto de datos a un array.
+     *
+     * @return array<string, float> La representacion del objeto de datos en forma de array.
+     */
     public function toArray(): array
     {
         return [
