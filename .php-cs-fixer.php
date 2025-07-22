@@ -136,6 +136,8 @@ return (new PhpCsFixer\Config())
         'logical_operators' => true, // and/or -> &&/||
         
     ])
+    ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig(12, 20))
+    ->setRiskyAllowed(true)
     ->setFinder($finder)
     ->setRiskyAllowed(true) // ¡IMPORTANTE! Permitir reglas riesgosas
     ->setUsingCache(true)

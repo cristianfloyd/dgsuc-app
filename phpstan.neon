@@ -29,7 +29,7 @@ parameters:
     # === REGLAS ESPECÍFICAS DE LARASTAN 3.x ===
     
     # Verificar vistas no utilizadas
-    checkUnusedViews: true  # Cambiar a true si quieres activarlo
+    checkUnusedViews: false  # Cambiar a true si quieres activarlo
     
     # Directorios de vistas personalizados (si los tienes)
     # viewDirectories:

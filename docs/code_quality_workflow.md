@@ -14,7 +14,11 @@ Este proyecto utiliza un stack completo de herramientas para mantener alta calid
 - **Archivo config:** `phpcs.xml`
 - **Estándares:** PSR-12 customizado para Laravel
 
-### 3. **PHPStan** - Análisis Estático
+### 4. **Rector** - Refactoring y Modernización
+- **Función:** Corrige automáticamente problemas de tipos, refactoriza código y moderniza
+- **Archivo config:** `rector.php`
+- **Capacidades:** Typed constants, type hints, modernización PHP 8.3, refactoring Laravel
+### 5. **PHPStan** - Análisis Estático
 - **Función:** Detecta errores de tipos, lógica y bugs potenciales
 - **Archivo config:** `phpstan.neon`
 - **Extensión:** Larastan para soporte específico de Laravel
@@ -22,14 +26,16 @@ Este proyecto utiliza un stack completo de herramientas para mantener alta calid
 ## 🔄 Workflow Recomendado
 
 ### Orden de ejecución:
-1. **PHP CS Fixer** → Arregla formato y moderniza
-2. **PHP_CodeSniffer** → Verifica cumplimiento de estándares  
-3. **PHPStan** → Analiza tipos y lógica
+1. **PHP CS Fixer** → Arregla formato y moderniza básicamente
+2. **PHP_CodeSniffer** → Verifica cumplimiento de estándares PSR-12
+3. **Rector** → Refactoriza, moderniza avanzado y corrige tipos
+4. **PHPStan** → Verificación final de tipos y lógica
 
 ### ¿Por qué este orden?
-- PHPStan analiza código ya formateado → reportes más claros
-- PHP CS Fixer corrige problemas que phpcs también detectaría
-- Cada herramienta se enfoca en su especialidad
+- **PHP CS Fixer** → Limpia formato básico primero
+- **phpcs/phpcbf** → Asegura cumplimiento PSR-12
+- **Rector** → Moderniza y refactoriza sobre código ya limpio
+- **PHPStan** → Verificación final sobre código ya optimizado → reportes más precisos
 
 ## 📋 Comandos Disponibles
 
@@ -44,7 +50,10 @@ composer cs-fix:dry
 # Aplicar correcciones básicas de phpcs
 composer lint:fix
 
-# Aplicar ambos: cs-fix + lint:fix
+# Aplicar refactoring con Rector  
+composer rector
+
+# Aplicar todo: cs-fix + lint:fix + rector
 composer fix
 ```
 
@@ -55,6 +64,9 @@ composer lint
 
 # Resumen de errores de phpcs
 composer lint:summary
+
+# Verificar refactoring con Rector
+composer rector:dry
 
 # Análisis estático con PHPStan
 composer analyse
@@ -69,29 +81,29 @@ composer check
 ```bash
 composer quality
 ```
-**Ejecuta:** cs-fix → lint → analyse  
-**Propósito:** Mantener código limpio durante desarrollo
+**Ejecuta:** cs-fix → lint → rector → analyse  
+**Propósito:** Mantener código limpio y moderno durante desarrollo
 
 #### Antes de Commit
 ```bash
 composer quality:check
 ```
-**Ejecuta:** cs-fix:dry → lint → analyse  
+**Ejecuta:** cs-fix:dry → lint → rector:dry → analyse  
 **Propósito:** Verificar estado sin modificar archivos
 
 #### Para CI/CD
 ```bash
 composer quality:ci
 ```
-**Ejecuta:** cs-fix:dry → lint:summary → analyse  
+**Ejecuta:** cs-fix:dry → lint:summary → rector:dry → analyse  
 **Propósito:** Pipeline optimizado, falla si hay errores
 
 #### Limpieza Completa
 ```bash
 composer quality:full
 ```
-**Ejecuta:** cs-fix → lint:fix → lint → analyse  
-**Propósito:** Arreglar todo lo posible automáticamente
+**Ejecuta:** cs-fix → lint:fix → rector → lint → analyse  
+**Propósito:** Arreglar y modernizar todo lo posible automáticamente
 
 ### 🔍 **PHPStan Específico**
 ```bash
@@ -107,16 +119,18 @@ composer analyse:level
 
 ## 📊 Comparación de Herramientas
 
-| Problema | PHP CS Fixer | PHP_CodeSniffer | PHPStan |
-|----------|--------------|-----------------|---------|
-| `'Hello'.'World'` | ✅ Corrige | ✅ Detecta | ❌ |
-| `const PER_PAGE = 20` (sin tipo) | ❌ | ❌ | ✅ Detecta |
-| `$user->badProperty` | ❌ | ❌ | ✅ Detecta |
-| `function($undefined)` | ❌ | Parcial | ✅ Detecta |
-| `return 'string'` en función tipada `int` | ❌ | ❌ | ✅ Detecta |
-| `is_null($var)` | ✅ → `$var === null` | ❌ | ❌ |
-| `pow(2, 3)` | ✅ → `2 ** 3` | ❌ | ❌ |
-| Espacios después de cast | ✅ Corrige | ✅ Detecta | ❌ |
+| Problema | PHP CS Fixer | PHP_CodeSniffer | Rector | PHPStan |
+|----------|--------------|-----------------|--------|---------|
+| `'Hello'.'World'` | ✅ Corrige | ✅ Detecta | ❌ | ❌ |
+| `const PER_PAGE = 20` (sin tipo) | ❌ | ❌ | ✅ Corrige | ✅ Detecta |
+| `$user->badProperty` | ❌ | ❌ | ❌ | ✅ Detecta |
+| `function($undefined)` | ❌ | Parcial | ✅ Corrige | ✅ Detecta |
+| `return 'string'` en función tipada `int` | ❌ | ❌ | ✅ Corrige | ✅ Detecta |
+| `is_null($var)` | ✅ → `$var === null` | ❌ | ✅ → `$var === null` | ❌ |
+| `pow(2, 3)` | ✅ → `2 ** 3` | ❌ | ✅ → `2 ** 3` | ❌ |
+| Espacios después de cast | ✅ Corrige | ✅ Detecta | ❌ | ❌ |
+| Type hints faltantes | ❌ | ❌ | ✅ Corrige | ✅ Detecta |
+| Property types | ❌ | ❌ | ✅ Corrige | ✅ Detecta |
 
 ## 🚀 Integración en Desarrollo
 

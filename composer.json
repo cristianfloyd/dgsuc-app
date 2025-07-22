@@ -32,6 +32,7 @@
         "spatie/laravel-data": "^4.11"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "^3.84",
         "larastan/larastan": "^3.6",
@@ -42,6 +43,7 @@
         "nunomaduro/collision": "^8.0",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.0.1",
+        "rector/rector": "^2.1",
         "slevomat/coding-standard": "^8.19",
         "spatie/laravel-ignition": "^2.4"
     },
@@ -84,6 +86,10 @@
         "lint:fix": "./vendor/bin/phpcbf",
         "lint:summary": "./vendor/bin/phpcs --report=summary",
         "lint:source": "./vendor/bin/phpcs --report=source",
+        "rector": "./vendor/bin/rector process",
+        "rector:dry": "./vendor/bin/rector process --dry-run",
+        "rector:diff": "./vendor/bin/rector process --dry-run --diff",
+        "rector:debug": "./vendor/bin/rector process --dry-run --debug",
         "analyse": "./vendor/bin/phpstan analyse",
         "analyse:baseline": "./vendor/bin/phpstan analyse --generate-baseline",
         "analyse:clear": "./vendor/bin/phpstan clear-result-cache",
@@ -91,32 +97,56 @@
         "quality": [
             "@cs-fix",
             "@lint",
+            "@rector",
             "@analyse"
         ],
         "quality:check": [
             "@cs-fix:dry",
             "@lint",
+            "@rector:dry",
             "@analyse"
         ],
         "quality:ci": [
             "@cs-fix:dry",
             "@lint:summary",
+            "@rector:dry",
             "@analyse"
         ],
         "quality:full": [
             "@cs-fix",
             "@lint:fix",
+            "@rector",
             "@lint",
             "@analyse"
         ],
         "fix": [
             "@cs-fix",
-            "@lint:fix"
+            "@lint:fix",
+            "@rector"
         ],
         "check": [
             "@cs-fix:dry",
             "@lint:summary",
+            "@rector:dry",
             "@analyse"
+        ],
+        "quality:models": [
+            "./vendor/bin/php-cs-fixer fix app/Models/ --dry-run --diff",
+            "./vendor/bin/phpcs app/Models/",
+            "./vendor/bin/rector process app/Models/ --dry-run",
+            "./vendor/bin/phpstan analyse app/Models/"
+        ],
+        "quality:controllers": [
+            "./vendor/bin/php-cs-fixer fix app/Http/Controllers/ --dry-run --diff",
+            "./vendor/bin/phpcs app/Http/Controllers/",
+            "./vendor/bin/rector process app/Http/Controllers/ --dry-run",
+            "./vendor/bin/phpstan analyse app/Http/Controllers/"
+        ],
+        "quality:tests": [
+            "./vendor/bin/php-cs-fixer fix tests/ --dry-run --diff",
+            "./vendor/bin/phpcs tests/",
+            "./vendor/bin/rector process tests/ --dry-run",
+            "./vendor/bin/phpstan analyse tests/"
         ]
     },
     "extra": {

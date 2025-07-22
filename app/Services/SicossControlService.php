@@ -3,19 +3,18 @@
 namespace App\Services;
 
 use App\Enums\ConceptosSicossEnum;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Models\ControlArtDiferencia;
+use App\Models\ControlAportesDiferencia;
+use App\Models\ControlConceptosPeriodo;
+use App\Models\ControlContribucionesDiferencia;
 use App\Models\ControlCuilsDiferencia;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Query\Builder;
-use App\Models\ControlConceptosPeriodo;
-use App\Models\ControlAportesDiferencia;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Models\ControlContribucionesDiferencia;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Servicio para ejecutar controles de SICOSS
+ * Servicio para ejecutar controles de SICOSS.
  */
 class SicossControlService
 {
@@ -23,14 +22,18 @@ class SicossControlService
 
     /** @var string Conexión de base de datos actual */
     protected string $connection;
+
     protected array $conceptosAportesSijp;
+
     protected array $conceptosAportesInssjp;
+
     protected array $conceptosAportes;
+
     protected array $conceptosContribuciones;
+
     protected array $conceptosContribucionesSijp;
+
     protected array $conceptosContribucionesInssjp;
-
-
 
     public function __construct()
     {
@@ -43,10 +46,9 @@ class SicossControlService
     }
 
     /**
-     * Establece la conexión de base de datos a utilizar
+     * Establece la conexión de base de datos a utilizar.
      *
      * @param string $connection Nombre de la conexión
-     * @return self
      */
     public function setConnection(string $connection): self
     {
@@ -55,28 +57,21 @@ class SicossControlService
         return $this;
     }
 
-    protected function getConnection(): string
-    {
-        if (!$this->connection) {
-            throw new \RuntimeException('Debe establecer una conexión antes de ejecutar los controles');
-        }
-        return $this->connection;
-    }
-
     /**
-     * Ejecuta todos los controles post importación de SICOSS
+     * Ejecuta todos los controles post importación de SICOSS.
      *
      * @param int|null $year Año fiscal
      * @param int|null $month Mes fiscal
+     *
      * @return array Resultados de los controles con la siguiente estructura:
-     * [
-     *     'success' => bool,
-     *     'resultados' => [
-     *         'cuils_faltantes' => array,
-     *         'registros_actualizados' => int,
-     *         'diferencias_encontradas' => array
-     *     ]
-     * ]
+     *               [
+     *               'success' => bool,
+     *               'resultados' => [
+     *               'cuils_faltantes' => array,
+     *               'registros_actualizados' => int,
+     *               'diferencias_encontradas' => array
+     *               ]
+     *               ]
      */
     public function ejecutarControlesPostImportacion(?int $year = null, ?int $month = null): array
     {
@@ -88,9 +83,6 @@ class SicossControlService
             $month = $periodoFiscal['month'];
         }
 
-        // Formatear el período fiscal como YYYYMM
-        $periodoFiscal = $year * 100 + $month;
-
         // Crear tabla temporal con el período fiscal específico
         $this->crearTablaDH21Aportes($year, $month);
 
@@ -98,7 +90,7 @@ class SicossControlService
     }
 
     /**
-     * Ejecuta específicamente el control de aportes
+     * Ejecuta específicamente el control de aportes.
      */
     public function ejecutarControlAportes(?int $year = null, ?int $month = null): array
     {
@@ -114,7 +106,7 @@ class SicossControlService
     }
 
     /**
-     * Ejecuta específicamente el control de contribuciones
+     * Ejecuta específicamente el control de contribuciones.
      */
     public function ejecutarControlContribuciones(?int $anio = null, ?int $mes = null): array
     {
@@ -129,12 +121,12 @@ class SicossControlService
         ];
     }
 
-
     /**
-     * Ejecuta el control por dependencia
+     * Ejecuta el control por dependencia.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
+     *
      * @return array Resultados del control por dependencia
      */
     public function ejecutarControlPorDependencia(?int $anio = null, ?int $mes = null): array
@@ -147,37 +139,11 @@ class SicossControlService
         ];
     }
 
-
     /**
-     * Control de Aportes y Contribuciones
-     * Compara los aportes y contribuciones calculados en DH21 vs los registrados en SICOSS
-     *
-     * @return array{
-     *  diferencias_por_cuil: array,
-     *  diferencias_por_dependencia: array,
-     *  totales: array
-     * }
-     */
-    protected function controlAportesYContribuciones(int $year, int $month): array
-    {
-        // Crear tabla temporal con totales de DH21
-        $this->crearTablaDH21Aportes($year, $month);
-
-        return [
-            'diferencias_de_aportes' => $this->getDiferenciasDeAportes($year, $month),
-            'diferencias_por_dependencia' => $this->getDiferenciasPorDependencia(),
-            'diferencias_de_contribuciones' => $this->obtenerDiferenciasDeContribuciones($year, $month),
-            'totales' => $this->getTotalesAportesContribuciones()
-        ];
-    }
-
-
-    /**
-     * Crea la tabla temporal dh21aporte con los totales de aportes y contribuciones
+     * Crea la tabla temporal dh21aporte con los totales de aportes y contribuciones.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
-     * @return void
      */
     public function crearTablaDH21Aportes(?int $anio = null, ?int $mes = null): void
     {
@@ -209,19 +175,19 @@ class SicossControlService
                 {$tablaNovedad}.nro_legaj,
                 (nro_cuil1::CHAR(2) || LPAD(nro_cuil::CHAR(8), 8, '0') || nro_cuil2::CHAR(1)) AS cuil,
                 SUM(CASE
-                    WHEN " . ConceptosSicossEnum::getSqlConditionAportesSijp() . " THEN impp_conce * 1
+                    WHEN " . ConceptosSicossEnum::getSqlConditionAportesSijp() . ' THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS aportesijpdh21,
                 SUM(CASE
-                    WHEN " . ConceptosSicossEnum::getSqlConditionAportesInssjp() . " THEN impp_conce * 1
+                    WHEN ' . ConceptosSicossEnum::getSqlConditionAportesInssjp() . ' THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS aporteinssjpdh21,
                 SUM(CASE
-                    WHEN " . ConceptosSicossEnum::getSqlConditionContribucionesSijp() . " THEN impp_conce * 1
+                    WHEN ' . ConceptosSicossEnum::getSqlConditionContribucionesSijp() . ' THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS contribucionsijpdh21,
                 SUM(CASE
-                    WHEN " . ConceptosSicossEnum::getSqlConditionContribucionesInssjp() . " THEN impp_conce * 1
+                    WHEN ' . ConceptosSicossEnum::getSqlConditionContribucionesInssjp() . " THEN impp_conce * 1
                     ELSE impp_conce * 0
                 END)::numeric(15,2) AS contribucioninssjpdh21
             INTO TEMP dh21aporte
@@ -237,11 +203,13 @@ class SicossControlService
             GROUP BY {$tablaNovedad}.nro_legaj, nro_cuil1, nro_cuil, nro_cuil2;
         ");
     }
+
     /**
-     * Obtiene las diferencias de aportes por CUIL
+     * Obtiene las diferencias de aportes por CUIL.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
+     *
      * @return array{
      *   registros_procesados: int,
      *   diferencias_encontradas: int,
@@ -264,29 +232,29 @@ class SicossControlService
         $diferencias = DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
-                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
+            ->whereRaw('abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1')
             ->select([
                 'a.cuil',
-                DB::raw("aportesijpdh21::numeric(15,2) as aportesijpdh21"),
-                DB::raw("aporteinssjpdh21::numeric(15,2) as aporteinssjpdh21"),
-                DB::raw("contribucionsijpdh21::numeric(15,2) as contribucionsijpdh21"),
-                DB::raw("contribucioninssjpdh21::numeric(15,2) as contribucioninssjpdh21"),
-                DB::raw("aportesijp::numeric(15,2) as aportesijp"),
-                DB::raw("aporteinssjp::numeric(15,2) as aporteinssjp"),
-                DB::raw("contribucionsijp::numeric(15,2) as contribucionsijp"),
-                DB::raw("contribucioninssjp::numeric(15,2) as contribucioninssjp"),
-                DB::raw("(
+                DB::raw('aportesijpdh21::numeric(15,2) as aportesijpdh21'),
+                DB::raw('aporteinssjpdh21::numeric(15,2) as aporteinssjpdh21'),
+                DB::raw('contribucionsijpdh21::numeric(15,2) as contribucionsijpdh21'),
+                DB::raw('contribucioninssjpdh21::numeric(15,2) as contribucioninssjpdh21'),
+                DB::raw('aportesijp::numeric(15,2) as aportesijp'),
+                DB::raw('aporteinssjp::numeric(15,2) as aporteinssjp'),
+                DB::raw('contribucionsijp::numeric(15,2) as contribucionsijp'),
+                DB::raw('contribucioninssjp::numeric(15,2) as contribucioninssjp'),
+                DB::raw('(
                     (aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                     (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re)
-                    )::numeric(15,2) as diferencia"),
+                    )::numeric(15,2) as diferencia'),
                 'b.codc_uacad',
-                'b.caracter'
+                'b.caracter',
             ])
             ->get();
 
         // Inserción masiva en la tabla de control
-        $diferencias->map(fn($diferencia) => [
+        $diferencias->map(fn ($diferencia): array => [
             'cuil' => $diferencia->cuil,
             'codc_uacad' => $diferencia->codc_uacad,
             'caracter' => $diferencia->caracter,
@@ -300,9 +268,9 @@ class SicossControlService
             'contribucioninssjp' => $diferencia->contribucioninssjp,
             'diferencia' => $diferencia->diferencia,
             'fecha_control' => now(),
-            'connection' => $this->connection
+            'connection' => $this->connection,
         ])
-            ->chunk(1000)->each(function ($chunk) {
+            ->chunk(1000)->each(function ($chunk): void {
                 ControlAportesDiferencia::insert($chunk->toArray());
             });
 
@@ -310,15 +278,16 @@ class SicossControlService
         return [
             'registros_procesados' => $diferencias->count(),
             'diferencias_encontradas' => $diferencias->count(),
-            'fecha_proceso' => now()->toDateTimeString()
+            'fecha_proceso' => now()->toDateTimeString(),
         ];
     }
 
     /**
-     * Obtiene las diferencias de contribuciones por CUIL
+     * Obtiene las diferencias de contribuciones por CUIL.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
+     *
      * @return array Resultados del control
      */
     public function obtenerDiferenciasDeContribuciones(?int $anio = null, ?int $mes = null): array
@@ -338,10 +307,10 @@ class SicossControlService
             $diferencias = DB::connection($this->connection)
                 ->table('dh21aporte as a')
                 ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-                ->whereRaw("abs(
+                ->whereRaw('abs(
                 ((contribucionsijpdh21 + contribucioninssjpdh21) -
                 (contribucionsijp + contribucioninssjp))::numeric
-            ) > 1")
+            ) > 1')
                 ->select([
                     'a.cuil',
                     'b.codc_uacad',
@@ -351,55 +320,51 @@ class SicossControlService
                     'a.contribucioninssjpdh21',
                     'b.contribucionsijp',
                     'b.contribucioninssjp',
-                    DB::raw("((contribucionsijpdh21 + contribucioninssjpdh21) -
-                    (contribucionsijp + contribucioninssjp))::numeric(15,2) as diferencia")
+                    DB::raw('((contribucionsijpdh21 + contribucioninssjpdh21) -
+                    (contribucionsijp + contribucioninssjp))::numeric(15,2) as diferencia'),
                 ])
                 ->orderBy('diferencia', 'desc')
                 ->get();
 
 
             // Inserción masiva en la tabla de control
-            $diferencias->map(function ($diferencia) {
-                return [
-                    'cuil' => $diferencia->cuil,
-                    'codc_uacad' => $diferencia->codc_uacad,
-                    'caracter' => $diferencia->caracter,
-                    'nro_legaj' => $diferencia->nro_legaj,
-                    'contribucionsijpdh21' => $diferencia->contribucionsijpdh21,
-                    'contribucioninssjpdh21' => $diferencia->contribucioninssjpdh21,
-                    'contribucionsijp' => $diferencia->contribucionsijp,
-                    'contribucioninssjp' => $diferencia->contribucioninssjp,
-                    'diferencia' => $diferencia->diferencia,
-                    'fecha_control' => now(),
-                    'connection' => $this->connection
-                ];
-            })->chunk(1000)->each(function ($chunk) {
+            $diferencias->map(fn($diferencia): array => [
+                'cuil' => $diferencia->cuil,
+                'codc_uacad' => $diferencia->codc_uacad,
+                'caracter' => $diferencia->caracter,
+                'nro_legaj' => $diferencia->nro_legaj,
+                'contribucionsijpdh21' => $diferencia->contribucionsijpdh21,
+                'contribucioninssjpdh21' => $diferencia->contribucioninssjpdh21,
+                'contribucionsijp' => $diferencia->contribucionsijp,
+                'contribucioninssjp' => $diferencia->contribucioninssjp,
+                'diferencia' => $diferencia->diferencia,
+                'fecha_control' => now(),
+                'connection' => $this->connection,
+            ])->chunk(1000)->each(function ($chunk): void {
                 ControlContribucionesDiferencia::insert($chunk->toArray());
             });
 
             return [
                 'registros_procesados' => $diferencias->count(),
                 'diferencias_encontradas' => $diferencias->count(),
-                'fecha_proceso' => now()->toDateTimeString()
+                'fecha_proceso' => now()->toDateTimeString(),
             ];
         } catch (\Exception $e) {
             Log::error('Error al obtener diferencias de contribuciones', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'error' => true,
                 'mensaje' => 'Error al procesar diferencias: ' . $e->getMessage(),
-                'fecha_proceso' => now()->toDateTimeString()
+                'fecha_proceso' => now()->toDateTimeString(),
             ];
         }
     }
 
-
-
     /**
-     * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter
+     * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter.
      *
      * @return array<int, array{
      *   codc_uacad: string,
@@ -412,14 +377,14 @@ class SicossControlService
         return DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                (contribucionsijp + contribucioninssjp))::numeric) > 1")
+            ->whereRaw('abs(((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                (contribucionsijp + contribucioninssjp))::numeric) > 1')
             ->groupBy('b.codc_uacad', 'b.caracter')
             ->select([
                 'b.codc_uacad',
                 'b.caracter',
-                DB::raw("SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_total")
+                DB::raw('SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_total'),
             ])
             ->orderBy('b.codc_uacad')
             ->orderBy('b.caracter')
@@ -428,7 +393,7 @@ class SicossControlService
     }
 
     /**
-     * Obtiene los totales de aportes y contribuciones
+     * Obtiene los totales de aportes y contribuciones.
      *
      * @return array{
      *   dh21: array{aportes: float, contribuciones: float},
@@ -441,7 +406,7 @@ class SicossControlService
             ->table('dh21aporte')
             ->select([
                 DB::raw('SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric)) as aportes'),
-                DB::raw('SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric)) as contribuciones')
+                DB::raw('SUM((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric)) as contribuciones'),
             ])
             ->first();
 
@@ -449,33 +414,33 @@ class SicossControlService
             ->table('suc.afip_mapuche_sicoss_calculos')
             ->select([
                 DB::raw('SUM((aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re)::numeric) as aportes'),
-                DB::raw('SUM((contribucionsijp + contribucioninssjp)::numeric) as contribuciones')
+                DB::raw('SUM((contribucionsijp + contribucioninssjp)::numeric) as contribuciones'),
             ])
             ->first();
 
         return [
             'dh21' => [
                 'aportes' => (float) $totalesDH21->aportes,
-                'contribuciones' => (float) $totalesDH21->contribuciones
+                'contribuciones' => (float) $totalesDH21->contribuciones,
             ],
             'sicoss' => [
                 'aportes' => (float) $totalesSicoss->aportes,
-                'contribuciones' => (float) $totalesSicoss->contribuciones
-            ]
+                'contribuciones' => (float) $totalesSicoss->contribuciones,
+            ],
         ];
     }
 
     /**
-     * Obtiene el query builder para las diferencias por CUIL
+     * Obtiene el query builder para las diferencias por CUIL.
      */
     public function getQueryDiferenciasPorCuil(): Builder
     {
         return DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
-                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1")
-            ->whereNotIn('a.nro_legaj', function (Builder $query) {
+            ->whereRaw('abs(((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > 1')
+            ->whereNotIn('a.nro_legaj', function (Builder $query): void {
                 $query->select('nro_legaj')
                     ->from('mapuche.dh21')
                     ->whereIn('codn_conce', ConceptosSicossEnum::getExclusionCodes());
@@ -483,24 +448,23 @@ class SicossControlService
             ->select([
                 'a.nro_legaj',
                 'a.cuil',
-                DB::raw("((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                DB::raw('((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
                     (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric
-                    as diferencia_aportes"),
-                DB::raw("((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
-                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_contribuciones")
+                    as diferencia_aportes'),
+                DB::raw('((contribucionsijpdh21::numeric + contribucioninssjpdh21::numeric) -
+                    (contribucionsijp + contribucioninssjp))::numeric as diferencia_contribuciones'),
             ]);
     }
 
-
     /**
-     * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter
+     * Obtiene las diferencias de aportes y contribuciones agrupadas por dependencia y carácter.
      *
      * @return array Arreglo de resultados con diferencias de aportes y contribuciones por dependencia
      */
     public function getDiferenciasPorDependencia(): array
     {
         return DB::connection($this->connection)
-            ->select("
+            ->select('
                 SELECT
                     CASE
                         WHEN d.codc_uacad IS NOT NULL THEN d.codc_uacad
@@ -522,13 +486,14 @@ class SicossControlService
                 FULL JOIN suc.control_contribuciones_diferencias c ON d.cuil = c.cuil
                 GROUP BY d.caracter, c.caracter, d.codc_uacad, c.codc_uacad
                 ORDER BY 1
-            ");
+            ');
     }
 
     /**
-     * Obtiene las diferencias de aportes agrupadas por dependencia y carácter
+     * Obtiene las diferencias de aportes agrupadas por dependencia y carácter.
      *
      * @param float $minDiferencia Diferencia mínima a considerar
+     *
      * @return array<int, array{
      *   codc_uacad: string,
      *   caracter: string,
@@ -540,14 +505,14 @@ class SicossControlService
         return DB::connection($this->connection)
             ->table('dh21aporte as a')
             ->join('suc.afip_mapuche_sicoss_calculos as b', 'a.cuil', '=', 'b.cuil')
-            ->whereRaw("abs(((aportesijpdh21 + aporteinssjpdh21) -
-                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > ?", [$minDiferencia])
+            ->whereRaw('abs(((aportesijpdh21 + aporteinssjpdh21) -
+                (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric) > ?', [$minDiferencia])
             ->groupBy('b.codc_uacad', 'b.caracter')
             ->select([
                 'b.codc_uacad',
                 'b.caracter',
-                DB::raw("SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
-                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric as diferencia_total")
+                DB::raw('SUM((aportesijpdh21::numeric + aporteinssjpdh21::numeric) -
+                    (aportesijp + aporteinssjp + aportediferencialsijp + aportesres33_41re))::numeric as diferencia_total'),
             ])
             ->orderBy('b.codc_uacad')
             ->orderBy('b.caracter')
@@ -556,10 +521,11 @@ class SicossControlService
     }
 
     /**
-     * Ejecuta el control de CUILs para identificar aquellos que existen en un sistema pero no en el otro
+     * Ejecuta el control de CUILs para identificar aquellos que existen en un sistema pero no en el otro.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
+     *
      * @return array{
      *   registros_procesados: int,
      *   cuils_solo_dh21: int,
@@ -589,10 +555,10 @@ class SicossControlService
                 ->select([
                     'a.cuil',
                     DB::raw("'DH21' as origen"),
-                    DB::raw("now() as fecha_control"),
-                    DB::raw("'{$this->connection}' as connection")
+                    DB::raw('now() as fecha_control'),
+                    DB::raw("'{$this->connection}' as connection"),
                 ])
-                ->whereNotExists(function ($query) {
+                ->whereNotExists(function ($query): void {
                     $query->select(DB::raw(1))
                         ->from('suc.afip_mapuche_sicoss_calculos as b')
                         ->whereColumn('a.cuil', 'b.cuil');
@@ -604,10 +570,10 @@ class SicossControlService
                 ->select([
                     'b.cuil',
                     DB::raw("'SICOSS' as origen"),
-                    DB::raw("now() as fecha_control"),
-                    DB::raw("'{$this->connection}' as connection")
+                    DB::raw('now() as fecha_control'),
+                    DB::raw("'{$this->connection}' as connection"),
                 ])
-                ->whereNotExists(function ($query) {
+                ->whereNotExists(function ($query): void {
                     $query->select(DB::raw(1))
                         ->from('dh21aporte as a')
                         ->whereColumn('b.cuil', 'a.cuil');
@@ -635,25 +601,26 @@ class SicossControlService
                 'fecha_proceso' => now()->toDateTimeString(),
                 'periodo' => [
                     'anio' => $anio,
-                    'mes' => $mes
-                ]
+                    'mes' => $mes,
+                ],
             ];
         } catch (\Exception $e) {
             Log::error('Error en ejecutarControlCuils:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'anio' => $anio,
-                'mes' => $mes
+                'mes' => $mes,
             ]);
             throw $e;
         }
     }
 
     /**
-     * Ejecuta el control de conceptos por período fiscal
+     * Ejecuta el control de conceptos por período fiscal.
      *
      * @param int|null $anio Año de la liquidación
      * @param int|null $mes Mes de la liquidación
+     *
      * @return array{
      *   registros_procesados: int,
      *   conceptos_aportes: int,
@@ -683,17 +650,17 @@ class SicossControlService
                 'connection' => $this->connection,
                 'year' => $anio,
                 'month' => $mes,
-                'conceptos_count' => count($conceptos)
+                'conceptos_count' => \count($conceptos),
             ]);
 
             // Ejecutar la consulta
             $resultados = DB::connection($this->connection)
                 ->table(DB::raw('(SELECT * FROM mapuche.dh21 UNION ALL SELECT * FROM mapuche.dh21h) as h21'))
-                ->join('mapuche.dh12 as h12', function ($join) {
+                ->join('mapuche.dh12 as h12', function ($join): void {
                     $join->on('h21.codn_conce', '=', 'h12.codn_conce');
                 })
                 ->whereIn('h21.codn_conce', $conceptos)
-                ->whereIn('h21.nro_liqui', function ($query) use ($anio, $mes) {
+                ->whereIn('h21.nro_liqui', function ($query) use ($anio, $mes): void {
                     $query->select('d22.nro_liqui')
                         ->from('mapuche.dh22 as d22')
                         ->where('d22.sino_genimp', true)
@@ -738,19 +705,49 @@ class SicossControlService
                 'fecha_proceso' => now()->toDateTimeString(),
                 'periodo' => [
                     'anio' => $anio,
-                    'mes' => $mes
+                    'mes' => $mes,
                 ],
-                'resultados' => $resultados // Para notificaciones detalladas
+                'resultados' => $resultados, // Para notificaciones detalladas
             ];
-
         } catch (\Exception $e) {
             Log::error('Error en ejecutarControlConceptos:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'anio' => $anio,
-                'mes' => $mes
+                'mes' => $mes,
             ]);
             throw $e;
         }
+    }
+
+    protected function getConnection(): string
+    {
+        if ($this->connection === '' || $this->connection === '0') {
+            throw new \RuntimeException('Debe establecer una conexión antes de ejecutar los controles');
+        }
+        return $this->connection;
+    }
+
+    /**
+     * Control de Aportes y Contribuciones
+     * Compara los aportes y contribuciones calculados en DH21 vs los registrados en SICOSS.
+     *
+     * @return array{
+     *  diferencias_por_cuil: array,
+     *  diferencias_por_dependencia: array,
+     *  totales: array
+     * }
+     */
+    protected function controlAportesYContribuciones(int $year, int $month): array
+    {
+        // Crear tabla temporal con totales de DH21
+        $this->crearTablaDH21Aportes($year, $month);
+
+        return [
+            'diferencias_de_aportes' => $this->getDiferenciasDeAportes($year, $month),
+            'diferencias_por_dependencia' => $this->getDiferenciasPorDependencia(),
+            'diferencias_de_contribuciones' => $this->obtenerDiferenciasDeContribuciones($year, $month),
+            'totales' => $this->getTotalesAportesContribuciones(),
+        ];
     }
 }
