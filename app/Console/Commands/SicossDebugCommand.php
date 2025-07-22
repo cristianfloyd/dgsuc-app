@@ -90,7 +90,6 @@ class SicossDebugCommand extends Command
             $this->mostrarResultados($resultado);
 
             return 0;
-
         } catch (\Exception $e) {
             $this->error("\n❌ Error al ejecutar genera_sicoss:");
             $this->error('Mensaje: ' . $e->getMessage());

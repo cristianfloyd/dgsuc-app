@@ -37,7 +37,6 @@ trait DisplayResourceProperties
                 'error' => $e->getMessage(),
             ]);
         }
-
     }
 
     /**

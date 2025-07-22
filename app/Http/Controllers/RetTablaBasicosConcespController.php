@@ -13,7 +13,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function index(): void
     {
-
     }
 
     /**
@@ -21,7 +20,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function create(): void
     {
-
     }
 
     /**
@@ -29,7 +27,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function store(StoreRetTablaBasicosConcespRequest $request): void
     {
-
     }
 
     /**
@@ -37,7 +34,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function show(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
     {
-
     }
 
     /**
@@ -45,7 +41,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function edit(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
     {
-
     }
 
     /**
@@ -53,7 +48,6 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function update(UpdateRetTablaBasicosConcespRequest $request, RetTablaBasicosConcesp $retTablaBasicosConcesp): void
     {
-
     }
 
     /**
@@ -61,6 +55,5 @@ class RetTablaBasicosConcespController extends Controller
      */
     public function destroy(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
     {
-
     }
 }

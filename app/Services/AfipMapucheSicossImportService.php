@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 class AfipMapucheSicossImportService
 {
     use MapucheConnectionTrait;
+
     private const BATCH_SIZE = 1000;
     private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 

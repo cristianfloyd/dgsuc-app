@@ -15,35 +15,25 @@ class CleanupResultData extends Data
     public function __construct(
         /** @var bool Indica si la limpieza fue exitosa */
         public readonly bool $success,
-
         /** @var int Número de registros eliminados */
         public readonly int $eliminados,
-
         /** @var int Número de registros que no pudieron ser eliminados */
         public readonly int $noEliminados,
-
         /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
         public readonly array $periodoFiscal,
-
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly Carbon $timestamp,
-
         /** @var string|null Mensaje descriptivo */
         public readonly ?string $mensaje = null,
-
         /** @var array Detalles adicionales del proceso */
         public readonly array $detalles = [],
-
         /** @var array IDs de registros eliminados exitosamente */
         public readonly array $idsEliminados = [],
-
         /** @var array IDs de registros que no pudieron ser eliminados con razones */
         public readonly array $idsNoEliminados = [],
-
         /** @var array Estadísticas antes de la limpieza */
         public readonly array $estadisticasAntes = [],
-
         /** @var array Estadísticas después de la limpieza */
         public readonly array $estadisticasDespues = [],
     ) {

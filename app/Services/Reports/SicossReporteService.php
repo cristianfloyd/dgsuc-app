@@ -73,7 +73,6 @@ class SicossReporteService
         try {
             $totales = $this->sicossReporteRepository->getTotales($anio, $mes);
             return SicossTotalesData::fromArray($totales);
-
         } catch (\Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS', [
                 'error' => $e->getMessage(),

@@ -51,7 +51,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
 
             Log::info('Consulta SQL ejecutada exitosamente');
             return $result;
-
         } catch (\Exception $e) {
             // Registrar el error para debugging
             Log::error('Error al ejecutar consulta SQL', [
@@ -98,7 +97,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             ]);
 
             return $result;
-
         } catch (\Exception $e) {
             Log::error('Error al eliminar tabla temporal', [
                 'table_name' => $tableName,
@@ -134,7 +132,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             ]);
 
             return $result;
-
         } catch (\Exception $e) {
             Log::error('Error al verificar existencia de tabla', [
                 'table_name' => $tableName,
@@ -176,7 +173,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
 
             Log::info('Transacción completada exitosamente');
             return $result;
-
         } catch (\Exception $e) {
             Log::error('Error en transacción de base de datos', [
                 'error' => $e->getMessage(),
@@ -217,7 +213,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             }
 
             return $connection;
-
         } catch (\Exception $e) {
             Log::error('DatabaseOperationRepository: Error al obtener conexión', [
                 'error' => $e->getMessage(),
@@ -271,7 +266,6 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             }
 
             return $grammar->wrapTable($tableName);
-
         } catch (\Exception $e) {
             Log::error('DatabaseOperationRepository: Error en escapeTableName', [
                 'table_name' => $tableName,

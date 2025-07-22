@@ -370,8 +370,10 @@ class LicenciaService
                 }
 
                 // Verificar si el día actual está dentro del período de licencia
-                if ((isset($cargo['inicio_lic'], $cargo['final_lic'])) &&
-                    $ini_mes >= $cargo['inicio_lic'] && $ini_mes <= $cargo['final_lic']) {
+                if (
+                    (isset($cargo['inicio_lic'], $cargo['final_lic'])) &&
+                    $ini_mes >= $cargo['inicio_lic'] && $ini_mes <= $cargo['final_lic']
+                ) {
                     // Si está en licencia, usar el código de condición de la licencia
                     $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = $cargo['condicion'];
                 } else {

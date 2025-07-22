@@ -240,7 +240,6 @@ class Dh03Repository implements Dh03RepositoryInterface
                 ->selectOne($sql, $params);
 
             return $result->total > 0;
-
         } catch (\Exception $e) {
             Log::error('Error al verificar categoría diferencial: ' . $e->getMessage(), [
                 'legajo' => $nroLegajo,

@@ -58,7 +58,7 @@ enum SicossCodigoModalContrat: int
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::CONTRATO_MODALIDAD_PROMOVIDA => 'Contrato Modalidad Promovida. Reducción 0%',
             self::TIEMPO_PARCIAL_INDETERMINADO => 'A tiempo parcial: Indeterminado /permanente',
             self::BECARIOS_RESIDENCIAS => 'Becarios- Residencias médicas Ley 22127',
@@ -93,7 +93,7 @@ enum SicossCodigoModalContrat: int
      */
     public static function fromCodigo(int $codigo): ?self
     {
-        return match($codigo) {
+        return match ($codigo) {
             0 => self::CONTRATO_MODALIDAD_PROMOVIDA,
             1 => self::TIEMPO_PARCIAL_INDETERMINADO,
             2 => self::BECARIOS_RESIDENCIAS,

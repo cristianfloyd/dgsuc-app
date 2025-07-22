@@ -106,7 +106,6 @@ class NovedadesCargoImportTableService
             // pero en caso de querer forzar su eliminación antes, se usa DROP TABLE:
             $sql = "DROP TABLE IF EXISTS {$this->TableName};";
             DB::connection($this->getConnectionName())->statement($sql);
-
         } catch (\Throwable $th) {
             // Registramos excepciones y volvemos a lanzar
             Log::error('Error al eliminar la tabla temporal: ' . $th->getMessage());

@@ -82,6 +82,5 @@ class MapuchePanelProvider extends PanelProvider
         //     'panels::body.end',
         //     fn () => view('livewire.panel-switcher-modal')
         // )
-
     }
 }

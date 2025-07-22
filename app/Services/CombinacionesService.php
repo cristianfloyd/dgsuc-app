@@ -61,7 +61,6 @@ class CombinacionesService
                     : 'No se encontraron combinaciones que se aproximen al valor objetivo',
                 'combinaciones' => $combinacionesLimitadas,
             ];
-
         } catch (\Exception $e) {
             Log::error('Error al buscar combinaciones: ' . $e->getMessage(), [
                 'legajo' => $nroLegaj,

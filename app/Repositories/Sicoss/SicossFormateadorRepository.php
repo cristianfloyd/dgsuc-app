@@ -24,7 +24,6 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             return substr($valor, -($longitud));
         }
         return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
-
     }
 
     /**
@@ -41,7 +40,6 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
-
     }
 
     /**
@@ -59,7 +57,6 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             return substr($texto, 0, $longitud);
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     /**
@@ -76,7 +73,6 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     /**

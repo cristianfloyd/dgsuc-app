@@ -42,6 +42,5 @@ class CuilOperationStrategyProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

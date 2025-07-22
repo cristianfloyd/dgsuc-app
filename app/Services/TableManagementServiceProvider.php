@@ -26,6 +26,5 @@ class TableManagementServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

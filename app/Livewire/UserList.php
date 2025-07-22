@@ -21,7 +21,6 @@ class UserList extends Component
     #[On('user-created')]
     public function updateList(): void
     {
-
     }
 
     public function viewUser(User $user): void

@@ -21,6 +21,5 @@ class MapucheMiSimplificacionProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

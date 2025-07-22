@@ -18,6 +18,5 @@ class AfipMapucheSicossProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

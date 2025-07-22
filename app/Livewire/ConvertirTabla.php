@@ -67,7 +67,6 @@ class ConvertirTabla extends Component
         $archivoRuta = Storage::path("/public/{$this->filepath}");
         $AfipimportacionCruda = new AfipSicossDesdeMapuche();
         $resultado = $AfipimportacionCruda->contarCaracteresPorLinea($archivoRuta);
-
     }
 
     public function processLine($linea): void
@@ -80,7 +79,6 @@ class ConvertirTabla extends Component
     {
         // calcular la cantidad de registros en el array $this->columnWidths
         $this->cantRegistros = \count($this->columnWidths);
-
     }
 
     public function extraerFilas(): array
@@ -113,7 +111,6 @@ class ConvertirTabla extends Component
             return true;
         }
         return false; // O puedes lanzar una excepción o manejar el error de otra forma
-
     }
 
     // Si $selectedArchivo se actualiza, se ejecuta este método seleccioarArchivo()

@@ -13,6 +13,7 @@ class ShowCuilDetails extends Component
 {
     use WithPagination;
     use MapucheConnectionTrait;
+
     private const RESULTS_PER_PAGE = 10;
 
     public $cuilsNotInAfip;

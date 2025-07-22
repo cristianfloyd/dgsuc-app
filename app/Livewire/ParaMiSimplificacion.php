@@ -52,7 +52,6 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
 
     public function mount(): void
     {
-
     }
 
     #[Computed()]
@@ -178,7 +177,6 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
 
     public function toggleFinished(): void
     {
-
     }
 
     public function render()

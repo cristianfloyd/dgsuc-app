@@ -72,7 +72,7 @@ enum SicossCodigoSituacion: int
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::BAJA_FALLECIMIENTO => 'Baja por Fallecimiento',
             self::ACTIVO => 'Activo',
             self::BAJA_OTRAS_CAUSALES => 'Bajas otras causales',
@@ -114,7 +114,7 @@ enum SicossCodigoSituacion: int
      */
     public static function fromCodigo(int $codigo): ?self
     {
-        return match($codigo) {
+        return match ($codigo) {
             0 => self::BAJA_FALLECIMIENTO,
             1 => self::ACTIVO,
             2 => self::BAJA_OTRAS_CAUSALES,

@@ -19,7 +19,7 @@ trait HasLaboralStatus
      */
     public function getLaboralStatusAttribute(): string
     {
-        return match($this->estadolaboral) {
+        return match ($this->estadolaboral) {
             self::STATUS_PERMANENT => 'Permanente',
             self::STATUS_CONTRACT => 'Contratado',
             self::STATUS_AD_HONOREM => 'Ad Honorem',

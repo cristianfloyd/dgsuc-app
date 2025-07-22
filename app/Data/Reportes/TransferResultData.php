@@ -15,29 +15,21 @@ class TransferResultData extends Data
     public function __construct(
         /** @var bool Indica si la transferencia fue exitosa */
         public readonly bool $success,
-
         /** @var int Número de registros transferidos */
         public readonly int $transferidos,
-
         /** @var int Número de registros que fallaron */
         public readonly int $fallidos,
-
         /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
         public readonly array $periodoFiscal,
-
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly Carbon $timestamp,
-
         /** @var string|null Mensaje descriptivo */
         public readonly ?string $mensaje = null,
-
         /** @var array Detalles adicionales del proceso */
         public readonly array $detalles = [],
-
         /** @var array IDs de registros transferidos exitosamente */
         public readonly array $idsTransferidos = [],
-
         /** @var array IDs de registros que fallaron con sus errores */
         public readonly array $idsFallidos = [],
     ) {

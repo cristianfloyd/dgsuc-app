@@ -150,7 +150,6 @@ class BloqueosProcessService
                             }
                         }
                         // ... existing code ...
-
                     } catch (\Exception $e) {
                         Log::error('Error procesando registro individual', [
                             'id' => $bloqueo->id,

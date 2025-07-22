@@ -46,7 +46,6 @@ class AfipImportCrudo extends Component
 
         $this->showButton = 1;
         session()->flash('status', 'Archivo subido exitosamente!.');
-
     }
 
     public function mostrartabla(): void

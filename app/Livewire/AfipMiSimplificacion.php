@@ -100,7 +100,6 @@ class AfipMiSimplificacion extends Component
             $this->ButtonMiSimplificacion = false;
             $this->showMessage('No se encontraron datos en Mi Simplificación', 'info');
         }
-
     }
 
     #[On('proceso-iniciado')]

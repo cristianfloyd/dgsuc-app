@@ -9,7 +9,6 @@ class SicossOptimizadoLegajosBeta
      */
     public function __construct()
     {
-
     }
 
     /**

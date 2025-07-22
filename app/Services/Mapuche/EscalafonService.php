@@ -16,7 +16,6 @@ class EscalafonService
      */
     public function __construct()
     {
-
     }
 
     public function getEscalafones()

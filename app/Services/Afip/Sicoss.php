@@ -980,7 +980,6 @@ class Sicoss
 
                 // Se evaluan las licencias
                 if ($licencias != null) {
-
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
@@ -1143,7 +1142,8 @@ class Sicoss
                         $legajoActual['IMPORTE_IMPON'] = $legajoActual['IMPORTE_IMPON'] - $legajoActual['ImporteImponible_6'];
                         $legajoActual['ImporteSACNoDocente'] = $legajoActual['ImporteSAC'] - $legajoActual['SACInvestigador'];
                     } else {
-                        if ((($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
+                        if (
+                            (($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
                             && (($Imponible6_aux - 5) < $legajoActual['IMPORTE_IMPON'])
                         ) {
                             $legajoActual['ImporteImponible_6'] = $legajoActual['IMPORTE_IMPON'];
@@ -1177,9 +1177,7 @@ class Sicoss
                         $legajoActual['ImporteSACNoDocente'] = $TopeSACJubilatorioPers;
                     }
                 } else {
-
                     if ($trunca_tope == 1) {
-
                         $bruto_nodo_sin_sac = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'] - $legajoActual['ImporteSACNoDocente'];
 
                         $sac = $legajoActual['ImporteSACNoDocente'];
@@ -1655,7 +1653,7 @@ class Sicoss
 
             /*if(preg_match('/[^\d]+85[^\d]+/', $grupos_concepto))
             {
-            	$leg['ContribTareaDif'] += $importe;
+                $leg['ContribTareaDif'] += $importe;
 
             }*/
 
@@ -1677,7 +1675,8 @@ class Sicoss
         // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
-        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
+        } elseif (
+            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
             $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
         ) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
@@ -1869,7 +1868,6 @@ class Sicoss
             return substr($valor, -($longitud));
         }
         return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
-
     }
 
     public static function llena_blancos_izq($texto, $longitud)
@@ -1878,7 +1876,6 @@ class Sicoss
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
-
     }
 
     // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
@@ -1888,7 +1885,6 @@ class Sicoss
             return substr($texto, 0, ($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     public static function llena_blancos($texto, $longitud)
@@ -1897,7 +1893,6 @@ class Sicoss
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     public static function transformar_a_recordset($totales_periodo)

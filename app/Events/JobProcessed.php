@@ -19,7 +19,6 @@ class JobProcessed
      */
     public function __construct(UploadedFile $uploadedFile)
     {
-
     }
 
     /**

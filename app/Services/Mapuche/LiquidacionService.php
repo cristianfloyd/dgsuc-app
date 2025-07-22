@@ -11,7 +11,6 @@ class LiquidacionService
      */
     public function __construct()
     {
-
     }
 
     /**

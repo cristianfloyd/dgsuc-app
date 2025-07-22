@@ -30,7 +30,7 @@ enum BloqueosEstadoEnum: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDIENTE => 'Pendiente',
             self::IMPORTADO => 'Recién Importado',
             self::DUPLICADO => 'Duplicado',
@@ -48,7 +48,7 @@ enum BloqueosEstadoEnum: string
 
     public function getColor(): string
     {
-        return match($this) {
+        return match ($this) {
             self::IMPORTADO => 'gray',
             self::DUPLICADO => 'warning',
             self::VALIDADO => 'success',

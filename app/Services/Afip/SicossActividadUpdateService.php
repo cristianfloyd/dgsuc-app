@@ -15,7 +15,6 @@ class SicossActividadUpdateService
      */
     public function __construct()
     {
-
     }
 
     /**

@@ -15,7 +15,6 @@ class InspectJobDependencies
             $property->setAccessible(true);
             $value = $property->getValue($job);
             Log::info("Job dependency: {$property->getName()} - " . (\is_object($value) ? $value::class : \gettype($value)));
-
         }
 
         return $next($job);

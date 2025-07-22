@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\LiquidacionControl;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
@@ -20,9 +19,10 @@ class LiquidacionControlService
     }
 
     /**
-     * Obtiene el conteo de controles por estado de manera segura
+     * Obtiene el conteo de controles por estado de manera segura.
      *
      * @param string $estado Estado de los controles a contar
+     *
      * @return int Número de controles en el estado especificado
      */
     public function getControlCountByState(string $estado): int
@@ -30,7 +30,7 @@ class LiquidacionControlService
         try {
             // Verificar si la tabla existe antes de realizar la consulta
             if (!LiquidacionControl::tableExists()) {
-                Log::warning("La tabla suc.controles_lquidacion no existe en la base de datos");
+                Log::warning('La tabla suc.controles_lquidacion no existe en la base de datos');
                 return 0;
             }
 
@@ -38,14 +38,14 @@ class LiquidacionControlService
         } catch (\Exception $e) {
             Log::error("Error al obtener controles {$estado}", [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return 0;
         }
     }
 
     /**
-     * Obtiene el conteo de controles pendientes
+     * Obtiene el conteo de controles pendientes.
      *
      * @return int Número de controles pendientes
      */
@@ -55,7 +55,7 @@ class LiquidacionControlService
     }
 
     /**
-     * Obtiene el conteo de controles con error
+     * Obtiene el conteo de controles con error.
      *
      * @return int Número de controles con error
      */
@@ -65,7 +65,7 @@ class LiquidacionControlService
     }
 
     /**
-     * Obtiene el conteo de controles completados
+     * Obtiene el conteo de controles completados.
      *
      * @return int Número de controles completados
      */
@@ -75,15 +75,16 @@ class LiquidacionControlService
     }
 
     /**
-     * Controla negativos en una liquidación
+     * Controla negativos en una liquidación.
      *
      * @param int $nroLiqui Número de liquidación
+     *
      * @return object Resultado del control
      */
     public function controlarNegativos(int $nroLiqui): object
     {
         try {
-            $result = $this->connection->select("
+            $result = $this->connection->select('
                 select nro_legaj, nro_cargo,
                 sum(case when codn_conce >= 100 and codn_conce < 200 then impp_conce
                          when codn_conce >= 200 and codn_conce < 300 then impp_conce * -1
@@ -94,37 +95,38 @@ class LiquidacionControlService
                 having sum(case when codn_conce >= 100 and codn_conce < 200 then impp_conce
                                when codn_conce >= 200 and codn_conce < 300 then impp_conce * -1
                           end)::numeric::money < 0::money
-            ", [$nroLiqui]);
+            ', [$nroLiqui]);
 
-            return (object) [
-                'success' => count($result) === 0,
-                'message' => count($result) > 0 ? 'Se encontraron ' . count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
-                'data' => $result
+            return (object)[
+                'success' => \count($result) === 0,
+                'message' => \count($result) > 0 ? 'Se encontraron ' . \count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
+                'data' => $result,
             ];
         } catch (\Exception $e) {
             Log::error("Error al controlar negativos para liquidación #{$nroLiqui}", [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return (object) [
+            return (object)[
                 'success' => false,
                 'message' => 'Error al controlar negativos: ' . $e->getMessage(),
-                'data' => []
+                'data' => [],
             ];
         }
     }
 
     /**
-     * Controla cargos liquidados en una liquidación
+     * Controla cargos liquidados en una liquidación.
      *
      * @param int $nroLiqui Número de liquidación
+     *
      * @return object Resultado del control
      */
     public function controlarCargosLiquidados(int $nroLiqui): object
     {
         try {
-            $result = $this->connection->select("
+            $result = $this->connection->select('
                 select a.nro_legaj, a.nro_cargo, c.codigoescalafon, a.codc_agrup,
                        a.codc_categ, a.codc_carac, c.desc_categ
                 from mapuche.dh03 a, mapuche.dh21 b, mapuche.dh11 c
@@ -134,29 +136,29 @@ class LiquidacionControlService
                 and nro_liqui = ?
                 group by a.nro_legaj, a.nro_cargo, c.codigoescalafon,
                          a.codc_agrup, a.codc_categ, a.codc_carac, c.desc_categ
-            ", [$nroLiqui]);
+            ', [$nroLiqui]);
 
-            return (object) [
-                'success' => count($result) > 0,
-                'message' => 'Se encontraron ' . count($result) . ' cargos liquidados',
-                'data' => $result
+            return (object)[
+                'success' => \count($result) > 0,
+                'message' => 'Se encontraron ' . \count($result) . ' cargos liquidados',
+                'data' => $result,
             ];
         } catch (\Exception $e) {
             Log::error("Error al controlar cargos liquidados para liquidación #{$nroLiqui}", [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return (object) [
+            return (object)[
                 'success' => false,
                 'message' => 'Error al controlar cargos liquidados: ' . $e->getMessage(),
-                'data' => []
+                'data' => [],
             ];
         }
     }
 
     /**
-     * Crea la tabla de controles si no existe
+     * Crea la tabla de controles si no existe.
      *
      * @return bool Resultado de la operación
      */
@@ -187,7 +189,7 @@ class LiquidacionControlService
         } catch (\Exception $e) {
             Log::error('Error al crear la tabla suc.controles_liquidacion', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return false;
         }

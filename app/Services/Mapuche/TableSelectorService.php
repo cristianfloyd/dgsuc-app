@@ -48,15 +48,16 @@ class TableSelectorService
             $mesActual = (int)$periodoActual['month'];
 
             // Comparar períodos fiscales
-            if ($yearLiquidacion < $yearActual ||
-                ($yearLiquidacion == $yearActual && $mesLiquidacion < $mesActual)) {
+            if (
+                $yearLiquidacion < $yearActual ||
+                ($yearLiquidacion == $yearActual && $mesLiquidacion < $mesActual)
+            ) {
                 Log::info("Usando tabla histórica dh21h para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
                 return 'dh21h';
             }
 
             Log::info("Usando tabla actual dh21 para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
             return 'dh21';
-
         } catch (\Exception $e) {
             Log::error("Error al determinar la tabla para la liquidación {$nroLiqui}: " . $e->getMessage());
             return 'dh21'; // Por defecto, usamos la tabla actual

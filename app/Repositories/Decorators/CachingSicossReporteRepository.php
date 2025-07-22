@@ -5,7 +5,9 @@ namespace App\Repositories\Decorators;
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Traits\ReportCacheTrait;
 use Illuminate\Support\Collection; // Para logging si es necesario
-use Illuminate\Support\Facades\Log; // Reutilizamos el trait para la lógica de caché
+use Illuminate\Support\Facades\Log;
+
+// Reutilizamos el trait para la lógica de caché
 
 class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
 {

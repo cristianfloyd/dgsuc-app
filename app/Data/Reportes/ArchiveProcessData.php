@@ -15,29 +15,21 @@ class ArchiveProcessData extends Data
     public function __construct(
         /** @var bool Indica si el proceso completo fue exitoso */
         public readonly bool $success,
-
         /** @var array Período fiscal procesado ['year' => ..., 'month' => ...] */
         public readonly array $periodoFiscal,
-
         /** @var Carbon Timestamp del proceso */
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly Carbon $timestamp,
-
         /** @var TransferResultData Resultado de la transferencia al historial */
         public readonly TransferResultData $transferResult,
-
         /** @var CleanupResultData Resultado de la limpieza */
         public readonly CleanupResultData $cleanupResult,
-
         /** @var string|null Mensaje general del proceso */
         public readonly ?string $mensaje = null,
-
         /** @var array Resumen estadístico del proceso */
         public readonly array $resumen = [],
-
         /** @var array Detalles adicionales del proceso completo */
         public readonly array $detalles = [],
-
         /** @var float Duración del proceso en segundos */
         public readonly float $duracionSegundos = 0.0,
     ) {

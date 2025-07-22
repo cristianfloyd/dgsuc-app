@@ -13,7 +13,6 @@ class JobProcessedListener
      */
     public function __construct()
     {
-
     }
 
     /**
@@ -25,6 +24,5 @@ class JobProcessedListener
         if ($event->job instanceof ImportAfipRelacionesActivasJob) {
             Log::info('Job ImportAfipRelacionesActivasJob completado exitosamente');
         }
-
     }
 }

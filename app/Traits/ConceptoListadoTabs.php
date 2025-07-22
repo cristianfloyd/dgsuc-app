@@ -39,7 +39,7 @@ trait ConceptoListadoTabs
                 ->badge(fn () => $this->getTabBadge(ConceptosSindicatosService::getAdubaCodigos()))
                 ->modifyQueryUsing(
                     fn (Builder $query) =>
-                $this->getTabQuery($query, ConceptosSindicatosService::getAdubaCodigos()),
+                    $this->getTabQuery($query, ConceptosSindicatosService::getAdubaCodigos()),
                 ),
         ];
     }

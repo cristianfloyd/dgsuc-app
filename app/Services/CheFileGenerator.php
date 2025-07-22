@@ -148,7 +148,6 @@ class CheFileGenerator
             return substr($valor, -$longitud);
         }
         return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
-
     }
 
     public function fillWithSpaces($texto, $longitud): string
@@ -157,7 +156,6 @@ class CheFileGenerator
             return substr($texto, -$longitud);
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     public function fillWithLeftSpaces($texto, $longitud): string
@@ -166,12 +164,10 @@ class CheFileGenerator
             return substr($texto, -$longitud);
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
-
     }
 
     public function set_progreso($porcentaje): void
     {
-
     }
 
     public function setNroLiqui(int $nroLiqui): self

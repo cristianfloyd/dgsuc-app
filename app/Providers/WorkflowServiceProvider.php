@@ -39,7 +39,6 @@ class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvi
      */
     public function boot(): void
     {
-
     }
 
     /**

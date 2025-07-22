@@ -85,7 +85,6 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
                             'legajo' => $bloqueo->nro_legaj,
                             'cargo' => $bloqueo->nro_cargo,
                         ]);
-
                     } catch (\Exception $e) {
                         Log::error('Error al transferir bloqueo individual', [
                             'id' => $bloqueo->id,
@@ -128,8 +127,6 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
                 $idsTransferidos,
                 $idsFallidos,
             );
-
-
         } catch (\Exception $e) {
             Log::error('Error general en transferencia al historial', [
                 'error' => $e->getMessage(),

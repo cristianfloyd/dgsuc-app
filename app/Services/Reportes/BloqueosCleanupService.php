@@ -93,7 +93,6 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                             'legajo' => $registro->nro_legaj,
                             'cargo' => $registro->nro_cargo,
                         ]);
-
                     } catch (\Exception $e) {
                         Log::error('Error al eliminar registro individual', [
                             'id' => $registro->id,
@@ -140,8 +139,6 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 $idsEliminados,
                 $idsNoEliminados,
             );
-
-
         } catch (\Exception $e) {
             Log::error('Error general en limpieza de tabla de trabajo', [
                 'error' => $e->getMessage(),
@@ -204,7 +201,6 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             }
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Error al validar limpieza', [
                 'periodo_fiscal' => $periodoString,
@@ -304,7 +300,6 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 'periodo_fiscal' => $periodoString,
                 'timestamp' => now()->toISOString(),
             ];
-
         } catch (\Exception $e) {
             Log::error('Error al contar registros por estado', [
                 'periodo_fiscal' => $periodoString,

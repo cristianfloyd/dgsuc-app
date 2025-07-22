@@ -32,7 +32,6 @@ class BuscarComentario extends Component
         $columnComments = [];
         $tableComments = [];
         if (!empty($this->description)) {
-
             $columnComments = DB::connection($this->getConnectionName())
                 ->table('information_schema.columns as cols')
                 ->join('pg_catalog.pg_class as c', 'c.relname', '=', 'cols.table_name')
@@ -83,7 +82,6 @@ class BuscarComentario extends Component
                     ->orderBy('column_name');
                 $query = $query->paginate($this->perPage);
             }
-
         }
 
         return view('livewire.buscar-comentario', [

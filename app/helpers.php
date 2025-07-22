@@ -12,7 +12,7 @@ if (!\function_exists('money')) {
 if (!\function_exists('nombreMes')) {
     function nombreMes(int $mes): string
     {
-        return match($mes) {
+        return match ($mes) {
             1 => 'Enero',
             2 => 'Febrero',
             3 => 'Marzo',
@@ -83,7 +83,7 @@ if (!\function_exists('esRetencion')) {
 if (!\function_exists('tipoComprobanteTexto')) {
     function tipoComprobanteTexto(string $tipo): string
     {
-        return match($tipo) {
+        return match ($tipo) {
             'A' => 'Aporte',
             'D' => 'Descuento',
             'N' => 'Neto',

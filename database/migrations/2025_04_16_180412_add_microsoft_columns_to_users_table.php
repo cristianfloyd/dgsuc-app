@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('microsoft_id')->nullable()->after('id');
             $table->string('avatar')->nullable()->after('email');
             $table->json('office_groups')->nullable()->after('avatar');
-            });
+        });
     }
 
     public function down(): void

@@ -13,7 +13,6 @@ class JobFailedListener
      */
     public function __construct()
     {
-
     }
 
     public function handle(JobFailed $event): void

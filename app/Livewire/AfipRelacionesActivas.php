@@ -134,7 +134,6 @@ class AfipRelacionesActivas extends Component
             // Manejar cualquier excepción que ocurra durante la ejecución del comando
             Log::error('Hubo un error durante la importación: ' . $e->getMessage());
         }
-
     }
 
     public function render()
@@ -145,7 +144,6 @@ class AfipRelacionesActivas extends Component
         return view('livewire.uploadtxtcompleted', [
             'redirectUrl' => $this->nextStepUrl,
         ]);
-
     }
 
     /**

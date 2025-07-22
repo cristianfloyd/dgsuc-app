@@ -45,7 +45,6 @@ class TablaTempCuils extends Component
             log::info('iniciarPobladoTablaTemp: cuils es null');
             $this->cuils = TableModel::all();
             dd($nroLiqui, $periodoFiscal, $cuils);
-
         } else {
             $this->cuils = TableModel::whereIn('cuil', $cuils)->get();
         }
@@ -270,7 +269,6 @@ class TablaTempCuils extends Component
             $this->dispatch('error-tabla-temp-cuils', 'Fallo en la inserción en suc.afip_tabla_temp_cuils');
             Log::error('Fallo en la inserción en suc.afip_tabla_temp_cuils');
             return false;
-
         } catch (\Exception $e) {
             Log::error('Error al insertar datos en afip_tabla_temp_cuils: ' . $e->getMessage());
             $this->dispatch('error-tabla-temp-cuils', 'Error al insertar datos en afip_tabla_temp_cuils');

@@ -18,7 +18,7 @@ enum PuestoDesempenado: string
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DIRECTIVO => 'Personal Directivo de la Adm. Pública',
             self::PROFESOR_UNIVERSITARIO => 'Profesores de Universidades',
             self::PROFESOR_SECUNDARIO => 'Profesores de Enseñanza Secundaria',
@@ -30,7 +30,7 @@ enum PuestoDesempenado: string
 
     public function escalafon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DIRECTIVO => 'Autoridades Superiores',
             self::PROFESOR_UNIVERSITARIO,
             self::PROFESOR_SECUNDARIO => 'Docentes',
@@ -42,7 +42,7 @@ enum PuestoDesempenado: string
 
     public static function fromCodigo(string $codigo): ?self
     {
-        return match($codigo) {
+        return match ($codigo) {
             '1120' => self::DIRECTIVO,
             '2310' => self::PROFESOR_UNIVERSITARIO,
             '2320' => self::PROFESOR_SECUNDARIO,

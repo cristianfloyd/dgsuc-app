@@ -142,7 +142,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Se evaluan las licencias
                 if ($licencias != null) {
-
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
@@ -306,7 +305,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                         $legajos[$i]['IMPORTE_IMPON'] = $legajos[$i]['IMPORTE_IMPON'] - $legajos[$i]['ImporteImponible_6'];
                         $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'] - $legajos[$i]['SACInvestigador'];
                     } else {
-                        if ((($Imponible6_aux + 5) > $legajos[$i]['IMPORTE_IMPON'])
+                        if (
+                            (($Imponible6_aux + 5) > $legajos[$i]['IMPORTE_IMPON'])
                             && (($Imponible6_aux - 5) < $legajos[$i]['IMPORTE_IMPON'])
                         ) {
                             $legajos[$i]['ImporteImponible_6'] = $legajos[$i]['IMPORTE_IMPON'];
@@ -340,9 +340,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                         $legajos[$i]['ImporteSACNoDocente'] = $TopeSACJubilatorioPers;
                     }
                 } else {
-
                     if ($trunca_tope == 1) {
-
                         $bruto_nodo_sin_sac = $legajos[$i]['IMPORTE_BRUTO'] - $legajos[$i]['ImporteImponible_6'] - $legajos[$i]['ImporteSACNoDocente'];
 
                         $sac = $legajos[$i]['ImporteSACNoDocente'];
@@ -557,7 +555,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 'legajos_procesados' => $procesados,
                 'tamaño_archivo' => filesize($rutaCompleta) . ' bytes',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al grabar archivo SICOSS TXT', [
                 'archivo' => $nombre_arch,
@@ -812,7 +809,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
-        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
+        } elseif (
+            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
             $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
         ) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];

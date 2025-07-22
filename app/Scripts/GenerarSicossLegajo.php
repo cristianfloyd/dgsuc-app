@@ -66,7 +66,6 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
             $this->registrarOperacionExitosa($numeroLegajo);
 
             return $this->construirRespuestaExitosa($datosFormateados);
-
         } catch (SicossGenerationException $e) {
             // Manejo específico de errores de generación SICOSS
             Log::error('Error específico en generación SICOSS', [
@@ -76,7 +75,6 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
             ]);
 
             return $this->construirRespuestaError($e->getMessage());
-
         } catch (\Exception $e) {
             // Manejo general de errores inesperados
             Log::error('Error inesperado en generación SICOSS', [
@@ -284,7 +282,6 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 '', // prefijo de archivos para testing
                 false, // retornar datos para verificación
             );
-
         } catch (\Exception $e) {
             throw new SicossGenerationException(
                 'Fallo en la generación del archivo SICOSS: ' . $e->getMessage(),

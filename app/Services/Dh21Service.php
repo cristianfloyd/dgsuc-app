@@ -75,7 +75,6 @@ class Dh21Service
                 ->groupBy('codn_conce')
                 // Ordenación por codn_conce
                 ->orderBy('codn_conce');
-
         } catch (\Exception $e) {
             // Manejo de excepciones
             Log::error('Error en conceptosTotales: ' . $e->getMessage());

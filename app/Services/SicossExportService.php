@@ -86,7 +86,7 @@ class SicossExportService
      */
     public function generarArchivo(Collection $registros, string $formato = 'txt', ?string $periodoFiscal = null): string
     {
-        return match(strtolower($formato)) {
+        return match (strtolower($formato)) {
             'excel', 'xlsx' => $this->generarArchivoExcel($registros, $periodoFiscal),
             'txt', 'text' => $this->generarArchivoTxt($registros, $periodoFiscal),
             default => $this->generarArchivoTxt($registros, $periodoFiscal),

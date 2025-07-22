@@ -18,7 +18,7 @@ enum EmbEstadoEmbargoEnum: int
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVO => 'Activo',
             self::FINALIZADO => 'Finalizado',
             self::SUSPENDIDO => 'Suspendido',

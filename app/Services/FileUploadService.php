@@ -71,7 +71,6 @@ class FileUploadService
             }
             Log::error('Failed to upload file');
             return false;
-
         } catch (\Exception $e) {
             Log::error('Error uploading file: ' . $e->getMessage());
             return false;

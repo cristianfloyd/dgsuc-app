@@ -79,7 +79,6 @@ class GenerarSicossBDPrueba extends Command
             $this->mostrarResultados($resultado, $periodoFiscal, $tiempo);
 
             return 0;
-
         } catch (\Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());
             $this->error('📍 En: ' . $e->getFile() . ':' . $e->getLine());

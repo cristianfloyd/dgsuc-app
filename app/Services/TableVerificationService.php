@@ -11,6 +11,5 @@ class TableVerificationService
         $tableIsEmpty = $model->all()->isEmpty();
 
         return !($tableIsEmpty);
-
     }
 }

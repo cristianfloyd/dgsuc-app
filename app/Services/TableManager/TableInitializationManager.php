@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
  */
 class TableInitializationManager
 {
-    public function isTableInitialized(TableServiceInterface  $service): bool
+    public function isTableInitialized(TableServiceInterface $service): bool
     {
         return $service->exists();
     }

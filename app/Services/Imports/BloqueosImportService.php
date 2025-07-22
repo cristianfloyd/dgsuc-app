@@ -45,8 +45,6 @@ class BloqueosImportService
             ]);
 
             return $processedRow;
-
-
         } catch (\Exception $e) {
             Log::error('Error procesando fila', [
                 'row' => $row,
@@ -117,7 +115,6 @@ class BloqueosImportService
             }
 
             throw new \Exception('Formato de fecha no válido');
-
         } catch (\Exception $e) {
             throw new ImportValidationException("Error al procesar fecha: {$date}");
         }

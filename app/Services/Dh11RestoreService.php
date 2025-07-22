@@ -16,7 +16,7 @@ class Dh11RestoreService
      * @param Dh11RepositoryInterface $dh11Repository
      */
     public function __construct(
-        protected Dh61Repository          $dh61Repository,
+        protected Dh61Repository $dh61Repository,
         protected Dh11RepositoryInterface $dh11Repository,
     ) {
     }
@@ -99,7 +99,6 @@ class Dh11RestoreService
             DB::commit();
 
             return $updatedRecords;
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error actualizando los registros: ' . $e->getMessage());

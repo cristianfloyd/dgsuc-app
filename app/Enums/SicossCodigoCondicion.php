@@ -36,7 +36,7 @@ enum SicossCodigoCondicion: int
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::JUBILADO_DECRETO_894 => 'Jubilado Decreto N° 894/01 y/o Dec 2288/02',
             self::SERVICIOS_COMUNES_MAYOR_18 => 'SERVICIOS COMUNES Mayor de 18 años',
             self::JUBILADO => 'Jubilado',
@@ -60,7 +60,7 @@ enum SicossCodigoCondicion: int
      */
     public static function fromCodigo(int $codigo): ?self
     {
-        return match($codigo) {
+        return match ($codigo) {
             0 => self::JUBILADO_DECRETO_894,
             1 => self::SERVICIOS_COMUNES_MAYOR_18,
             2 => self::JUBILADO,

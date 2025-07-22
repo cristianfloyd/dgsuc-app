@@ -24,6 +24,5 @@ class EmployeeRepositoryProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

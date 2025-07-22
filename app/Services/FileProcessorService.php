@@ -34,7 +34,6 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         int $periodoFiscal = 0,
     ) {
         $this->periodoFiscal = $periodoFiscal;
-
     }
 
     public function setPeriodoFiscal(int $periodoFiscal): void
@@ -228,7 +227,6 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             return $this->mapearDatosRelacionesActivas($processedLines);
         }
         throw new \RuntimeException('Sistema no válido: ' . $system);
-
     }
 
     private function mapearDatosRelacionesActivas(Collection $processedLines): Collection

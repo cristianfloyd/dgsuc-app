@@ -23,6 +23,5 @@ class FileProcessorServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-
     }
 }

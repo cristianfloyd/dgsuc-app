@@ -22,6 +22,5 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

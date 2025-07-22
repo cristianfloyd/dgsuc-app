@@ -8,6 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration
 {
     use MapucheConnectionTrait;
+
     /**
      * Run the migrations.
      */

@@ -89,6 +89,5 @@ class ImportJobServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

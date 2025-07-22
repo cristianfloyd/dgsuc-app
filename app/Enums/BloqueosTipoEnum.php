@@ -13,7 +13,7 @@ enum BloqueosTipoEnum: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::LICENCIA => 'Licencia',
             self::FALLECIDO => 'Fallecido',
             self::RENUNCIA => 'Renuncia',
@@ -22,7 +22,7 @@ enum BloqueosTipoEnum: string
 
     public function getColor(): string
     {
-        return match($this) {
+        return match ($this) {
             self::LICENCIA => 'info',
             self::FALLECIDO => 'danger',
             self::RENUNCIA => 'warning',

@@ -132,8 +132,6 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                         'message' => 'Error al almacenar las líneas procesadas',
                         'data' => [],
                     ];
-
-
                 } catch (\Exception $e) {
                     Log::error('Error durante la importación: ' . $e->getMessage());
                     return [

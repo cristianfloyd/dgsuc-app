@@ -91,7 +91,6 @@ class SicossTestCommand extends Command
             $this->info('✅ Proceso completado exitosamente');
 
             return 0;
-
         } catch (\Exception $e) {
             $this->newLine();
             $this->error('❌ Error durante el proceso:');
@@ -531,7 +530,6 @@ class SicossTestCommand extends Command
             $this->newLine();
             $this->info("📁 Resultados exportados a: {$archivo}");
             $this->line('   Tamaño: ' . number_format(\strlen($json)) . ' bytes');
-
         } catch (\Exception $e) {
             $this->error("❌ Error al exportar: {$e->getMessage()}");
         }

@@ -55,7 +55,6 @@ class EmbargoRepository implements EmbargoRepositoryInterface
             return $this->model->newQuery()->setModel(
                 $this->model->newInstance()->hydrate($results),
             );
-
         } catch (\Exception $e) {
             Log::error('Error en proceso de embargo: ' . $e->getMessage());
             return $this->model->getEmptyQuery();

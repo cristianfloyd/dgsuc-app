@@ -15,7 +15,6 @@ class CargoSacService
      */
     public function __construct()
     {
-
     }
 
     public static function getBrutosSacCargo(int $legajo, int $nro_cargo)
@@ -123,7 +122,6 @@ class CargoSacService
         }
         DB::connection(MapucheConfig::getStaticConnectionName())->rollBack();
         return false;
-
     }
 
     public static function get_brutos_para_sac($filtro, $orderby = '')
@@ -158,10 +156,10 @@ class CargoSacService
         //Saco el periodo
         if (isset($filtro['periodo'])) {
             //periodo Actual
-            if (($filtro['periodo']['condicion'] == 'es_igual_a' && $filtro['periodo']['valor'] == 0) ||
+            if (
+                ($filtro['periodo']['condicion'] == 'es_igual_a' && $filtro['periodo']['valor'] == 0) ||
                 ($filtro['periodo']['condicion'] == 'es_distinto_de' && $filtro['periodo']['valor'] == 1)
             ) {
-
                 if ($mes_periodo > 6) {
                     $f_alta = $anio_periodo . '-7-1';
                     $fec_baja = $anio_periodo . '-12-31';
@@ -241,13 +239,11 @@ class CargoSacService
         $vinculos = []; //arreglo para ir sumando los imp. para el caso de cargos vinculados
 
         foreach ($rs as $row) {
-
             if (\in_array($row['nro_cargo'], $vinculos)) {
                 continue;
             }
 
             if ($idAgente != $row['nro_legaj'] && $idAgente != -1) {
-
                 if (\count($cargosVigentes) == 0) {
                     $cv = [];
                     $cv['nro_cargo'] = '-';
@@ -274,7 +270,6 @@ class CargoSacService
                 $meses = [];
             }
             if ($idAgente == $row['nro_legaj'] || $idAgente == -1) { // ==-1 la primera vez q itera
-
                 $idAgente = $row['nro_legaj'];
                 if ($row['nro_cargo'] != $row['vcl_cargo']) { //tiene un vinculo, verifico q sea valido
                     $esVinculado = Dh03Repository::esVinculoValido($row['fec_alta'], $row['vcl_cargo']);
@@ -287,7 +282,6 @@ class CargoSacService
                     $continuarVinculos = true;
                     $cargovinculado = $row;
                     while ($continuarVinculos) {
-
                         if (\count($meses) == 0) {
                             $meses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                         }
@@ -444,35 +438,35 @@ class CargoSacService
 
         /* Estructura de retorno
             *  Legajos Array(
-            *  				[nro_legaj] => INT
-            *  				[nyapel]    => VARCHAR
-            *  				[cargo]		=> Array(
-            *  										[cargos]=> Array (
-            *  															Array (
-            *  																	[meses] => Array(Arreglo de meses)
-            *  																	[detalle_cargo] => Array(
-            *  																							Array
-            *													                                                (
-            *													                                                    [nro_cargo] => INT
-            *													                                                    [fecha_alta] => DATE
-            *													                                                    [fecha_baja] => DATE
-            *													                                                    [categoria] => VARCHAR
-            *													                                                )
-            *  																							)
-            *  														 		   )
-            *  														  )
-            *  										[cargos_vigentes] => Array(
-            *  																	Array
-            *											                                (
-            *											                                    [nro_cargo] => INT
-            *											                                    [fecha_alta] => DATE
-            *											                                    [fecha_baja] => DATE
-            *																				[categoria] => VARCHAR
-            *																				[vinculado] => VARCHAR
-            *																				[uacademica] => VARCHAR
-            *											                                )
-            *  																  )
-            *  									)
+            *               [nro_legaj] => INT
+            *               [nyapel]    => VARCHAR
+            *               [cargo]     => Array(
+            *                                       [cargos]=> Array (
+            *                                                           Array (
+            *                                                                   [meses] => Array(Arreglo de meses)
+            *                                                                   [detalle_cargo] => Array(
+            *                                                                                           Array
+            *                                                                                                   (
+            *                                                                                                       [nro_cargo] => INT
+            *                                                                                                       [fecha_alta] => DATE
+            *                                                                                                       [fecha_baja] => DATE
+            *                                                                                                       [categoria] => VARCHAR
+            *                                                                                                   )
+            *                                                                                           )
+            *                                                                  )
+            *                                                         )
+            *                                       [cargos_vigentes] => Array(
+            *                                                                   Array
+            *                                                                           (
+            *                                                                               [nro_cargo] => INT
+            *                                                                               [fecha_alta] => DATE
+            *                                                                               [fecha_baja] => DATE
+            *                                                                               [categoria] => VARCHAR
+            *                                                                               [vinculado] => VARCHAR
+            *                                                                               [uacademica] => VARCHAR
+            *                                                                           )
+            *                                                                 )
+            *                                   )
             *
             * */
     }

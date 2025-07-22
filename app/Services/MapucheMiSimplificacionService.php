@@ -159,7 +159,6 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
             Log::info("La tabla {$fullTableName} está vacía.");
             return false;
-
         } catch (\Exception $e) {
             Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
             return false;
@@ -273,7 +272,6 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             }
             Log::error('Error al ejecutar la función almacenada');
             return false;
-
         } catch (\Exception $e) {
             Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
             return false;

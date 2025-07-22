@@ -248,7 +248,6 @@ class Uploadtxt extends Component implements HasForms
 
     public function updatedImportaciones(): void
     {
-
     }
 
     public function render()
@@ -262,7 +261,6 @@ class Uploadtxt extends Component implements HasForms
         return view('livewire.uploadtxtcompleted', [
             'redirectUrl' => $this->nextStepUrl,
         ]);
-
     }
 
     protected function getFormSchema(): array

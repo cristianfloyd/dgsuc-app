@@ -76,7 +76,6 @@ class TodoList extends Component
     public function delete($id): void
     {
         try {
-
             //find the todo
             $todo = Todo::findOrFail($id);
             //delete the todo

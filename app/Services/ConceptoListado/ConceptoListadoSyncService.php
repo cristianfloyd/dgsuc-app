@@ -114,7 +114,6 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
             return 'mapuche.dh21'; // Tabla actual
         }
         return 'mapuche.dh21h'; // Tabla histórica
-
     }
 
     /**

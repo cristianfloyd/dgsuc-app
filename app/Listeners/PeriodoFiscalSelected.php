@@ -11,7 +11,6 @@ class PeriodoFiscalSelected
      */
     public function __construct()
     {
-
     }
 
     /**
@@ -19,6 +18,5 @@ class PeriodoFiscalSelected
      */
     public function handle(PeriodoFiscalActualizado $event): void
     {
-
     }
 }

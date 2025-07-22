@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 class ComprobanteNominaService
 {
     use MapucheConnectionTrait;
+
     private const  LINE_FORMAT = [
         'CODIGO' => ['start' => 0, 'length' => 2],
         'DESCRIPCION' => ['start' => 3, 'length' => 50],
@@ -107,7 +108,6 @@ class ComprobanteNominaService
                         continue;
                     }
                     throw new \Exception('El archivo no comienza con un encabezado válido');
-
                 }
 
                 // Procesar el resto de las líneas como datos

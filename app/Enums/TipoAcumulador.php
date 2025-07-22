@@ -30,7 +30,7 @@ enum TipoAcumulador: string
 
     public function getDescription(): string
     {
-        return match($this) {
+        return match ($this) {
             self::CARGO => 'Solo pueden utilizarse en conceptos de cargo',
             self::MES => 'Suman valores de todas las liquidaciones del mes (menos la corriente)',
             self::LEGAJO => 'Pueden usarse tanto en conceptos de Legajo como de Cargo',
@@ -40,7 +40,7 @@ enum TipoAcumulador: string
 
     public function getPrefix(): string
     {
-        return match($this) {
+        return match ($this) {
             self::CARGO => 'Acum',
             self::MES => '+Acum',
             self::LEGAJO => 'L:Acum',

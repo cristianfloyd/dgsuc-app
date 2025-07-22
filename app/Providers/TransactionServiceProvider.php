@@ -21,6 +21,5 @@ class TransactionServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

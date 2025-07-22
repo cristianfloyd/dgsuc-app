@@ -46,7 +46,6 @@ class SicossCpto205Service
         }
 
         try {
-
             // Crear tabla temporal y obtener número de registros
             $totalRegistros = $this->repository->procesarConceptos($liquidaciones);
 
@@ -58,7 +57,6 @@ class SicossCpto205Service
                     'liquidaciones' => $liquidaciones,
                 ],
             ];
-
         } catch (\Exception $e) {
             Log::error('Error en actualización de concepto 205', [
                 'error' => $e->getMessage(),

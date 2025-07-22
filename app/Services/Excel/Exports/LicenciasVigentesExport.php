@@ -137,7 +137,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
      */
     protected function getDescripcionCondicion(int $condicion): string
     {
-        return match($condicion) {
+        return match ($condicion) {
             5 => 'Maternidad',
             10 => 'Excedencia',
             11 => 'Maternidad Down',

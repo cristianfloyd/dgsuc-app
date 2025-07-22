@@ -60,7 +60,6 @@ class FortifyServiceProvider extends ServiceProvider
             ) {
                 return $user;
             }
-
         });
 
         Fortify::loginView(function () {

@@ -49,7 +49,6 @@ class Dhe2 extends Model
     {
         return $this->belongsTo(Dh30::class, 'nro_tabla', 'nro_tabla')
             ->where('nro_tabla', 'desc__abrev');
-
     }
 
     /**

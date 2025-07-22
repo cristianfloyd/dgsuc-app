@@ -224,8 +224,6 @@ class FileProcessingService
             'message' => 'Error al insertar los datos en la base de datos',
             'data' => ['file' => $uploadedFile->id, 'tableName' => $tableName, 'step' => $step],
         ];
-
-
     }
 
     private function processFileMapuche($mapucheFile)
@@ -259,7 +257,6 @@ class FileProcessingService
                     'fileId' => $mapucheFile->id,
                 ],
             ];
-
         } catch (\Exception $e) {
             Log::error('Excepción al procesar el archivo Mapuche: ' . $e->getMessage());
             return [

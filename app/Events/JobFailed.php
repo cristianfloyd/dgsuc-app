@@ -18,7 +18,6 @@ class JobFailed
      */
     public function __construct(string $exception)
     {
-
     }
 
     /**

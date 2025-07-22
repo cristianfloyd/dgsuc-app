@@ -79,7 +79,6 @@ class AplicarCombinacionController extends Controller
                     'combinacion_aplicada' => $combinacionAplicada,
                 ],
             ]);
-
         } catch (\Exception $e) {
             // Revertir la transacción en caso de error
             DB::rollBack();

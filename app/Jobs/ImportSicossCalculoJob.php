@@ -24,6 +24,5 @@ class ImportSicossCalculoJob implements ShouldQueue
 
     public function handle(AfipMapucheSicossCalculoImportService $service): void
     {
-
     }
 }

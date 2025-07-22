@@ -390,7 +390,6 @@ class CompareCuils extends Component
             }
 
             // Resto de la lógica...
-
         } catch (\Exception $e) {
             Log::error('Error en loadCuilsNotInAfip: ' . $e->getMessage());
             $this->dispatch('notify', [

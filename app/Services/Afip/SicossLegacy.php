@@ -48,7 +48,6 @@ class SicossLegacy
     public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = false)
     {
         try {
-
             Log::info('Iniciando generación de SICOSS', [
                 'datos' => $datos,
                 'retornar_datos' => $retornar_datos,
@@ -158,7 +157,6 @@ class SicossLegacy
             }
 
             Log::info('Conceptos liquidados procesados exitosamente');
-
         } catch (\Exception $e) {
             Log::error('Error al procesar conceptos liquidados', [
                 'error' => $e->getMessage(),
@@ -190,7 +188,6 @@ class SicossLegacy
             ]);
 
             return $licencias_agentes;
-
         } catch (\Exception $e) {
             Log::error('Error al obtener licencias de agentes', [
                 'error' => $e->getMessage(),
@@ -226,7 +223,6 @@ class SicossLegacy
             }
 
             Log::info('Limpieza de tablas temporales completada');
-
         } catch (\Exception $e) {
             Log::error('Error general al limpiar tablas temporales', [
                 'error' => $e->getMessage(),
@@ -291,7 +287,6 @@ class SicossLegacy
             ]);
 
             return $this->sicossFormateadorRepository->transformarARecordset($totales);
-
         } catch (\Exception $e) {
             Log::error('Error al procesar resultado final', [
                 'error' => $e->getMessage(),

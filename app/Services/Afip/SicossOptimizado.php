@@ -688,7 +688,6 @@ class SicossOptimizado
         // Si tengo el check de licencias y ademas tengo el check de retros, debo tener en cuenta las licencias solo en el archivo generado con mes y a�o 0 (son del periodo vigente)
         // tendre en cuenta licencias en el caso general (true) y cuando tenga retros y el where tenga 0-0 (vigente)
         if ($check_lic && ($where_periodo_retro == ' true ' || $where_periodo_retro == 't.ano_retro=0 AND t.mes_retro=00')) {
-
             // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
             $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
 
@@ -1131,7 +1130,6 @@ class SicossOptimizado
 
                 // Se evaluan las licencias
                 if ($licencias != null) {
-
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
@@ -1349,7 +1347,8 @@ class SicossOptimizado
                             'SACInvestigador' => $legajoActual['SACInvestigador'],
                         ]);
                     } else {
-                        if ((($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
+                        if (
+                            (($Imponible6_aux + 5) > $legajoActual['IMPORTE_IMPON'])
                             && (($Imponible6_aux - 5) < $legajoActual['IMPORTE_IMPON'])
                         ) {
                             $legajoActual['ImporteImponible_6'] = $legajoActual['IMPORTE_IMPON'];
@@ -1399,9 +1398,7 @@ class SicossOptimizado
                         ]);
                     }
                 } else {
-
                     if ($trunca_tope == 1) {
-
                         $bruto_nodo_sin_sac = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'] - $legajoActual['ImporteSACNoDocente'];
                         Log::debug('✅ Calculo bruto nodo sin sac', [
                             'IMPORTE_BRUTO' => $legajoActual['IMPORTE_BRUTO'],
@@ -2016,7 +2013,7 @@ class SicossOptimizado
 
             /*if(preg_match('/[^\d]+85[^\d]+/', $grupos_concepto))
             {
-            	$leg['ContribTareaDif'] += $importe;
+                $leg['ContribTareaDif'] += $importe;
 
             }*/
 
@@ -2038,7 +2035,8 @@ class SicossOptimizado
         // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
-        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
+        } elseif (
+            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
             $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
         ) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
@@ -2311,7 +2309,6 @@ class SicossOptimizado
             return substr($valor, -($longitud));
         }
         return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
-
     }
 
     public static function llena_blancos_izq($texto, $longitud)
@@ -2320,7 +2317,6 @@ class SicossOptimizado
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
-
     }
 
     // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
@@ -2330,7 +2326,6 @@ class SicossOptimizado
             return substr($texto, 0, ($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     public static function llena_blancos($texto, $longitud)
@@ -2339,7 +2334,6 @@ class SicossOptimizado
             return substr($texto, -($longitud));
         }
         return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
-
     }
 
     public static function transformar_a_recordset($totales_periodo)
@@ -2846,7 +2840,8 @@ class SicossOptimizado
         // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
-        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
+        } elseif (
+            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
             $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
         ) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
@@ -3575,7 +3570,6 @@ class SicossOptimizado
             'importesacotraactividad' => 0,
             'importebrutootraactividad' => 0,
         ];
-
     }
 
     /**
@@ -3791,7 +3785,6 @@ class SicossOptimizado
 
                     // Insertar cuando llegamos al chunk_size o al final
                     if (\count($datos_para_insertar) === $chunk_size || $index === \count($legajos) - 1) {
-
                         // Inserción masiva
                         $connection->table('suc.afip_mapuche_sicoss')->insert($datos_para_insertar);
                         $stats['insertados'] += \count($datos_para_insertar);
@@ -4293,7 +4286,6 @@ class SicossOptimizado
                 return 'chunks_grandes'; // Chunks de 2000-5000
             }
             return 'chunks_medianos'; // Chunks de 1000
-
         }
 
         // Es factible la pre-carga masiva
@@ -4301,7 +4293,6 @@ class SicossOptimizado
             return 'masivo_seguro'; // Usar pre-carga masiva
         }
         return 'masivo_monitoreado'; // Pre-carga con monitoreo intensivo
-
     }
 
     /**

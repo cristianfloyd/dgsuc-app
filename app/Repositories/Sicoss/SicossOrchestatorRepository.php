@@ -79,8 +79,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $licencias_agentes,
                 $retornar_datos,
             );
-
-
         } catch (\Exception $e) {
             Log::error('Error en orquestación de proceso SICOSS', [
                 'error' => $e->getMessage(),
@@ -167,7 +165,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             ]);
 
             return $totales;
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento sin retro', [
                 'error' => $e->getMessage(),
@@ -261,7 +258,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             ]);
 
             return $totales;
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento con retro', [
                 'error' => $e->getMessage(),
@@ -289,7 +285,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 'archivos' => $this->archivos,
                 'status' => 'completed',
             ];
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento de resultado final', [
                 'error' => $e->getMessage(),
@@ -356,7 +351,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             );
 
             return [$item => $subtotal];
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento de período retro', [
                 'error' => $e->getMessage(),
@@ -394,7 +388,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             );
 
             return [$periodo_display => $subtotal];
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento de período vigente', [
                 'error' => $e->getMessage(),
@@ -428,7 +421,6 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     ]);
                 }
             }
-
         } catch (\Exception $e) {
             Log::warning('Error al mover archivos de testeo', [
                 'error' => $e->getMessage(),

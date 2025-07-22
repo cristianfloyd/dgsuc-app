@@ -94,7 +94,6 @@ class TableManagementService implements TableManagementServiceInterface
         $tableIsEmpty = $model->all()->isEmpty();
 
         return !($tableIsEmpty);
-
     }
 
     protected static function getMapucheConnection(): Connection

@@ -28,7 +28,6 @@ class AfipSicossDesdeMapucheController extends Controller
 
     public function transformar(): void
     {
-
     }
 
     public function store(Request $request): void
@@ -36,6 +35,5 @@ class AfipSicossDesdeMapucheController extends Controller
         $data = $request->validate([
             // Validar los datos
         ]);
-
     }
 }

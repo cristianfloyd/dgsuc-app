@@ -25,7 +25,7 @@ enum ConceptoGrupo: string
      */
     public function getConceptos(): array
     {
-        return match($this) {
+        return match ($this) {
             self::DOSUBA => [
                 // Rango de conceptos DOSUBA
                 207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287, 310,
@@ -72,7 +72,7 @@ enum ConceptoGrupo: string
      */
     public function getDescripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DOSUBA => 'Conceptos DOSUBA',
             self::AFIP => 'Conceptos AFIP',
             self::APORTES_Y_CONTRIBUCIONES => 'Aportes y Contribuciones'

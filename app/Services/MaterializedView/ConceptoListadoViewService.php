@@ -71,7 +71,6 @@ class ConceptoListadoViewService
             ]);
             throw $e;
         }
-
     }
 
     public function refresh(): void

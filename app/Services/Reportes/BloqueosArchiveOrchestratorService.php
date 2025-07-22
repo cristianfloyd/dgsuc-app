@@ -131,7 +131,6 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                     $duration,
                 );
             });
-
         } catch (\Exception $e) {
             Log::error('Error general en proceso de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
@@ -209,7 +208,6 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             Log::error('Error en validación de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
@@ -250,7 +248,6 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 'estadisticas_trabajo' => $estadisticasLimpieza,
                 'timestamp' => now()->toISOString(),
             ];
-
         } catch (\Exception $e) {
             Log::error('Error al obtener resumen de estado', [
                 'periodo_fiscal' => $periodoFiscal,
@@ -281,7 +278,6 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 ->count();
 
             return $registrosEnHistorial > 0 && $registrosProcesadosEnTrabajo === 0;
-
         } catch (\Exception $e) {
             Log::error('Error al verificar si período ya fue archivado', [
                 'periodo_fiscal' => $periodoFiscal,

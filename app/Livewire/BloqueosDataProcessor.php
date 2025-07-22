@@ -81,7 +81,6 @@ class BloqueosDataProcessor extends Component
             $this->guardarResultadosEnCache();
             Log::info('Procesamiento de bloqueos finalizado en BloqueosDataProcessor');
             $this->notificarResultados();
-
         } catch (\Exception $e) {
             DB::connection($this->service->getConnectionName())->rollBack();
             $this->manejarError($e);

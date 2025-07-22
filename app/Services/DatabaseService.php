@@ -13,6 +13,7 @@ use Illuminate\Support\LazyCollection;
 class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
+
     private const DEFAULT_CHUNK_SIZE = 1000;
 
     private static $connectionInstance;

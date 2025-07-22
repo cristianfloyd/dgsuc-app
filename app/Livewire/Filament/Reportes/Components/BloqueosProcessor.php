@@ -68,7 +68,6 @@ class BloqueosProcessor extends Component
 
             $this->guardarResultadosEnCache();
             $this->notificarResultados();
-
         } catch (\Exception $e) {
             $this->manejarError($e);
         } finally {

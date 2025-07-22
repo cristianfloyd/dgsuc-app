@@ -14,6 +14,7 @@ class ShowCuilDetailsBatch extends Component
 {
     use WithPagination;
     use MapucheConnectionTrait;
+
     private const RESULTS_PER_PAGE = 10;
     private const BATCH_SIZE = 20;
 

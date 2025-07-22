@@ -18,7 +18,7 @@ enum CategoriaGrupo: string
 
     public function description(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DOCS => 'Categorías docentes secundarios',
             self::DOC2 => 'Categorías preuniversitarios',
             self::DOCU => 'Categorías docentes universitarias',

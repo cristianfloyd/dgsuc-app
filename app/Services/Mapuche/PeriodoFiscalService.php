@@ -94,7 +94,6 @@ class PeriodoFiscalService
         } else {
             // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
             $periodoFiscal = $this->getPeriodoFiscalFromDatabase();
-
         }
         return $periodoFiscal;
     }

@@ -95,7 +95,6 @@ class SicossImportService
                 'message' => 'Error al insertar los datos en la base de datos',
                 'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step],
             ];
-
         } catch (\Exception $e) {
             Log::error('Error durante la importación: ' . $e->getMessage());
             return [

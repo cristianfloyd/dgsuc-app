@@ -50,7 +50,7 @@ class LicenciaVigenteData extends Data
      */
     public function getDescripcionCondicion(): string
     {
-        return match($this->condicion) {
+        return match ($this->condicion) {
             5 => 'Maternidad',
             10 => 'Excedencia',
             11 => 'Maternidad Down',

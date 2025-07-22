@@ -33,6 +33,5 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

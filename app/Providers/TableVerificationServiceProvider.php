@@ -22,6 +22,5 @@ class TableVerificationServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
     }
 }

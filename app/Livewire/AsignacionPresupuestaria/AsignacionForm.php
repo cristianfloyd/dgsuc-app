@@ -86,7 +86,6 @@ class AsignacionForm extends Component
         $this->codn_subar = $allocation->codn_subar;
         $this->codn_final = $allocation->codn_final;
         $this->codn_funci = $allocation->codn_funci;
-
     }
 
     /**
@@ -123,7 +122,6 @@ class AsignacionForm extends Component
 
             $this->reset();
             $this->dispatch('allocation-saved');
-
         } catch (\Exception $e) {
             $this->notification('Error al procesar la imputación' . $e, 'error');
         }

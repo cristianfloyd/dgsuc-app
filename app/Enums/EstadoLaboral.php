@@ -18,7 +18,7 @@ enum EstadoLaboral: string
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PLANTA => 'Planta',
             self::CONTRATO => 'Contrato',
             self::AD_HONOREM => 'Ad Honorem',

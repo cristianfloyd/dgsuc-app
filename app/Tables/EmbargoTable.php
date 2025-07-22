@@ -20,9 +20,9 @@ class EmbargoTable
 
     public function __construct(
         ?array $nroComplementarias = null,
-        ?int   $nroLiquiDefinitiva = null,
-        ?int   $nroLiquiProxima = null,
-        ?bool  $insertIntoDh25 = null,
+        ?int $nroLiquiDefinitiva = null,
+        ?int $nroLiquiProxima = null,
+        ?bool $insertIntoDh25 = null,
     ) {
         $this->nroComplementarias = $nroComplementarias;
         $this->nroLiquiDefinitiva = $nroLiquiDefinitiva;

@@ -163,7 +163,6 @@ class SicossImporter extends Component
         return view('livewire.uploadtxtcompleted', [
             'redirectUrl' => $this->nextstepUrl,
         ]);
-
     }
 
     /**
@@ -186,7 +185,6 @@ class SicossImporter extends Component
         } else {
             Log::info('Error al verificar y preparar la tabla:', [$tableName]);
         }
-
     }
 
     private function getArchivoById(int $archivoId): UploadedFile

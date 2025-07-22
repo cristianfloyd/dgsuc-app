@@ -21,3 +21,5 @@ app/Traits/SicossConnectionTrait.php
 app/Traits/MapucheConnectionTrait.php
 phpcs-report.txt
 .phpcs-cache
+.php-cs-fixer.cache
+.phpcs-cache
