@@ -1,0 +1,100 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 3
+    paths:
+        - app/
+        - routes/
+        - tests/
+        - config/
+        - database/migrations/
+        - database/seeders/
+        - database/factories/
+    
+    # Excluir archivos/directorios
+    excludePaths:
+        - vendor/
+        - storage/
+        - bootstrap/cache/
+        - node_modules/
+        - public/
+        - resources/
+        - '*/migrations/*_create_*_table.php'
+    
+    # Bootstrap files para Laravel
+    bootstrapFiles:
+        - vendor/autoload.php
+    
+    # === REGLAS ESPECÍFICAS DE LARASTAN 3.x ===
+    
+    # Verificar vistas no utilizadas
+    checkUnusedViews: true  # Cambiar a true si quieres activarlo
+    
+    # Directorios de vistas personalizados (si los tienes)
+    # viewDirectories:
+    #     - resources/views
+    #     - app/Views
+    
+    # Verificar propiedades de modelos
+    checkModelProperties: true
+    
+    # Verificar compatibilidad con Laravel Octane
+    checkOctaneCompatibility: false  # Cambiar a true si usas Octane
+    
+    # No permitir llamadas innecesarias en colecciones
+    noUnnecessaryCollectionCall: true
+    noUnnecessaryCollectionCallOnly: []
+    noUnnecessaryCollectionCallExcept: []
+    
+    # Rutas de migraciones personalizadas (si las tienes)
+    # databaseMigrationsPath:
+    #     - database/migrations
+    #     - app/Domain/*/migrations
+    
+    # Rutas de schema dumps (si usas squashed migrations)
+    # squashedMigrationsPath:
+    #     - database/schema
+    
+    # Directorios de configuración personalizados
+    # configDirectories:
+    #     - config
+    #     - app/Config
+    
+    # Ignorar errores comunes en Laravel
+    ignoreErrors:
+        # Eloquent magic methods y propiedades
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::factory\(\)#'
+        - '#Access to an undefined property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9_]+#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::[a-zA-Z]+\(\)#'
+        
+        # Livewire properties y métodos
+        - '#Property .* does not accept default value of type null#'
+        - '#Call to an undefined method Livewire\\#'
+        
+        # Filament components
+        - '#Call to an undefined method Filament\\#'
+        - '#Access to an undefined property Filament\\#'
+        
+        # Laravel facades y helpers
+        - '#Function config not found#'
+        - '#Function route not found#'
+        - '#Function auth not found#'
+        - '#Function app not found#'
+        - '#Function view not found#'
+        - '#Function request not found#'
+        - '#Function session not found#'
+        - '#Function cache not found#'
+        
+        # Blade templates y vistas
+        - '#Cannot call method .* on .* template#'
+        - '#Variable .* might not be defined#'
+        
+        # Carbon/DateTime
+        - '#Call to an undefined method Carbon\\#'
+        
+        # Macros
+        - '#Call to an undefined method .*::[a-zA-Z]+\(\)#'
+    
+    # Configuración de reporte
+    reportUnmatchedIgnoredErrors: false

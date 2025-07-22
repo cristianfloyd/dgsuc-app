@@ -2,7 +2,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -31,11 +34,13 @@
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "^3.84",
+        "larastan/larastan": "^3.6",
         "laravel-lang/common": "^6.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.0.1",
         "slevomat/coding-standard": "^8.19",
         "spatie/laravel-ignition": "^2.4"
@@ -47,7 +52,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-        "app/helpers.php"
+            "app/helpers.php"
         ]
     },
     "autoload-dev": {
@@ -71,6 +76,47 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "cs-fix": "./vendor/bin/php-cs-fixer fix",
+        "cs-fix:dry": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "cs-fix:verbose": "./vendor/bin/php-cs-fixer fix --dry-run --diff --verbose",
+        "lint": "./vendor/bin/phpcs",
+        "lint:fix": "./vendor/bin/phpcbf",
+        "lint:summary": "./vendor/bin/phpcs --report=summary",
+        "lint:source": "./vendor/bin/phpcs --report=source",
+        "analyse": "./vendor/bin/phpstan analyse",
+        "analyse:baseline": "./vendor/bin/phpstan analyse --generate-baseline",
+        "analyse:clear": "./vendor/bin/phpstan clear-result-cache",
+        "analyse:level": "./vendor/bin/phpstan analyse --level=5",
+        "quality": [
+            "@cs-fix",
+            "@lint",
+            "@analyse"
+        ],
+        "quality:check": [
+            "@cs-fix:dry",
+            "@lint",
+            "@analyse"
+        ],
+        "quality:ci": [
+            "@cs-fix:dry",
+            "@lint:summary",
+            "@analyse"
+        ],
+        "quality:full": [
+            "@cs-fix",
+            "@lint:fix",
+            "@lint",
+            "@analyse"
+        ],
+        "fix": [
+            "@cs-fix",
+            "@lint:fix"
+        ],
+        "check": [
+            "@cs-fix:dry",
+            "@lint:summary",
+            "@analyse"
         ]
     },
     "extra": {
