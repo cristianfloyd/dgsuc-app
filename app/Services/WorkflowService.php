@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\ProcessLog;
 use App\Services\ProcessLogService;
 use Illuminate\Support\Facades\Log;
-use App\Contracts\WorkflowServiceInterface;
-
 
 /** Proporciona un servicio para gestionar el flujo de trabajo de un proceso.
  *
- * La clase WorkflowService es responsable de administrar los pasos de un proceso de flujo de trabajo, incluido iniciar el proceso, obtener el paso actual, completar los pasos y determinar el siguiente paso. También proporciona métodos para obtener los pasos del flujo de trabajo y generar URL para cada paso.
+ * La clase WorkflowService es responsable de administrar los pasos de un proceso
+ * de flujo de trabajo, incluido iniciar el proceso, obtener el paso actual,
+ * completar los pasos y determinar el siguiente paso. También proporciona métodos para obtener
+ * los pasos del flujo de trabajo y generar URL para cada paso.
  *
  * @property ProcessLogService $processLogService El servicio para gestionar registros de procesos.
  */
@@ -27,7 +29,8 @@ class WorkflowService implements WorkflowServiceInterface
 
     /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
      *
-     * Este método inicializa un nuevo proceso de flujo de trabajo creando un nuevo registro ProcessLog con el tipo de proceso 'afip_mi_simplificacion_workflow'. Se devuelve la instancia de ProcessLog creada.
+     * Este método inicializa un nuevo proceso de flujo de trabajo creando un nuevo registro
+     * ProcessLog con el tipo de proceso 'afip_mi_simplificacion_workflow'. Se devuelve la instancia de ProcessLog creada.
      *
      * @return ProcessLog La instancia de ProcessLog creada para el nuevo proceso de flujo de trabajo.
      */
@@ -62,7 +65,8 @@ class WorkflowService implements WorkflowServiceInterface
 
     /**  Recupera el último registro del proceso de flujo de trabajo, si no se completó o falló.
      *
-     * Este método recupera el registro de proceso más reciente de ProcessLogService. Si el último proceso no está en un estado completo o fallido, devuelve el proceso log instance. Otherwise, it returns null.
+     * Este método recupera el registro de proceso más reciente de ProcessLogService.
+     * Si el último proceso no está en un estado completo o fallido, devuelve el proceso log instance. Otherwise, it returns null.
      *
      * @return ProcessLog|null El último registro del proceso de flujo de trabajo, o nulo si el último proceso se completó o falló.
      */

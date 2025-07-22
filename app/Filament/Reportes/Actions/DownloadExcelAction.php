@@ -2,10 +2,10 @@
 
 namespace App\Filament\Reportes\Actions;
 
-use Filament\Actions\Action;
 use App\Exports\ReportExport;
-use Maatwebsite\Excel\Facades\Excel;
+use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DownloadExcelAction extends Action
 {

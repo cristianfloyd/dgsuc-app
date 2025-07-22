@@ -2,11 +2,11 @@
 
 namespace App\Filament\Afip\Actions;
 
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Log;
-use App\Services\SicossControlService;
-use Filament\Notifications\Notification;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Services\SicossControlService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class EjecutarControlAportesAction extends Action
 {
@@ -38,7 +38,7 @@ class EjecutarControlAportesAction extends Action
     protected function ejecutarControl(): void
     {
         $livewire = $this->getLivewire();
-        
+
         try {
             // Establecer estado de loading
             $livewire->loading = true;
@@ -70,7 +70,6 @@ class EjecutarControlAportesAction extends Action
                 ->title('Control de Aportes Ejecutado')
                 ->body("Se completó el control de aportes para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
                 ->send();
-
         } catch (\Exception $e) {
             Log::error('Error en control de aportes', [
                 'error' => $e->getMessage(),

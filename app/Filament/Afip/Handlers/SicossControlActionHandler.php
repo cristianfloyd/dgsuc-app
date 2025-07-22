@@ -2,17 +2,18 @@
 
 namespace App\Filament\Afip\Handlers;
 
-use Illuminate\Support\Facades\Log;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use Filament\Notifications\Notification;
-use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Support\Facades\Log;
 
 class SicossControlActionHandler
 {
     public function __construct(
         protected SicossControlService $controlService,
         protected PeriodoFiscalService $periodoFiscalService
-    ) {}
+    ) {
+    }
 
     /**
      * Ejecuta un control específico siguiendo el patrón común
@@ -49,7 +50,6 @@ class SicossControlActionHandler
             $this->postProcesamiento($livewire, $tipoControl, $year, $month, $resultados);
 
             return $resultados;
-
         } catch (\Exception $e) {
             $this->manejarError($e, $tipoControl);
             throw $e;

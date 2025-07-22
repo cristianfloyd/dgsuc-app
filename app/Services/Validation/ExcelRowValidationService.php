@@ -3,10 +3,10 @@
 namespace App\Services\Validation;
 
 use App\Enums\BloqueosEstadoEnum;
-use App\Services\DateParserService;
-use Illuminate\Support\Facades\Log;
 use App\Exceptions\ValidationException;
+use App\Services\DateParserService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ExcelRowValidationService
@@ -16,7 +16,8 @@ class ExcelRowValidationService
 
     public function __construct(
         private readonly DateParserService $dateParserService
-    ) {}
+    ) {
+    }
 
     /**
      * Valida y normaliza una fila completa del Excel
@@ -202,7 +203,7 @@ class ExcelRowValidationService
             ];
         }
 
-        $legajo = (int)$legajo;
+        $legajo = (int) $legajo;
 
         if ($legajo < 1) {
             return [
@@ -231,7 +232,7 @@ class ExcelRowValidationService
             ];
         }
 
-        $cargo = (int)$cargo;
+        $cargo = (int) $cargo;
 
         if ($cargo < 1) {
             return [

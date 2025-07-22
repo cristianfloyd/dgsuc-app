@@ -2,14 +2,15 @@
 
 namespace App\Filament\Admin\Widgets;
 
-use Filament\Widgets\Widget;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use App\Traits\MapucheConnectionTrait;
+use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseHealthWidget extends Widget
 {
     use MapucheConnectionTrait;
+
     protected static string $view = 'filament.widgets.database-health-widget';
     protected static ?int $sort = 2;
     protected static bool $isLazy = true;
@@ -116,8 +117,12 @@ class DatabaseHealthWidget extends Widget
 
     private function getSizeStatus($size): string
     {
-        if ($size < 1000) return 'success';
-        if ($size < 5000) return 'warning';
+        if ($size < 1000) {
+            return 'success';
+        }
+        if ($size < 5000) {
+            return 'warning';
+        }
         return 'danger';
     }
 }

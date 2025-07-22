@@ -36,7 +36,7 @@ class DatabaseConnectionWidget extends Widget
             'schema' => config("database.connections.$connection.search_path", 'public'),
             'driver' => config("database.connections$connection.driver"),
             'status' => $this->getConnectionStatus($connection)
-        ], fn($value) => !is_null($value));
+        ], fn($value) => $value !== null);
     }
 
     private function getConnectionStatus(string $connection): string

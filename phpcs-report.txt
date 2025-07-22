@@ -1,2 +1,0 @@
-{"totals":{"errors":0,"warnings":0,"fixable":0},"files":{"C:\\laragon\\www\\informes-app\\app\\Models\\User.php":{"errors":0,"warnings":0,"messages":[]}}}
-

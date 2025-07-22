@@ -2,21 +2,18 @@
 
 namespace App\Filament\Afip\Actions;
 
-use Filament\Actions\Action;
 use App\Enums\ConceptosSicossEnum;
-use Illuminate\Support\Facades\Log;
-use App\Services\SicossControlService;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\CheckboxList;
 use App\Services\Mapuche\PeriodoFiscalService;
-use Illuminate\Support\Facades\View as ViewFacade;
+use App\Services\SicossControlService;
+use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View as ViewFacade;
 
 class EjecutarControlConceptosAction extends Action
 {
-
-
-
     /**
      * Obtiene el nombre por defecto de la acción
      *
@@ -126,7 +123,7 @@ class EjecutarControlConceptosAction extends Action
             // Ejecutar control
             $service = app(SicossControlService::class);
             $service->setConnection($livewire->getConnectionName());
-            $resultados = $service->ejecutarControlConceptos($year, $month, $conceptos);
+            $resultados = $service->ejecutarControlConceptos($year, $month);
 
             // Invalidar caché y actualizar stats
             cache()->forget('sicoss_resumen_stats');
@@ -155,7 +152,6 @@ class EjecutarControlConceptosAction extends Action
                 ])
                 ->persistent()
                 ->send();
-
         } catch (\Exception $e) {
             Log::error('Error en control de conceptos', [
                 'error' => $e->getMessage(),
