@@ -19,8 +19,6 @@ trait MapucheConnectionTrait
 {
     /**
      * Obtiene el nombre de la conexión de base de datos basado en la selección del usuario.
-     *
-     * @return string
      */
     public function getConnectionName(): string
     {
@@ -96,8 +94,6 @@ trait MapucheConnectionTrait
      * Obtiene el nombre de la tabla calificado con el esquema correspondiente.
      *
      * @param Model|string|null $table Tabla opcional
-     *
-     * @return string
      */
     public function getTable(?Model $table = null): string
     {
@@ -115,8 +111,6 @@ trait MapucheConnectionTrait
 
     /**
      * Obtiene el nombre de la tabla incluyendo el esquema.
-     *
-     * @return string
      */
     public function getTableName(): string
     {

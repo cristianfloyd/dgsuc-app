@@ -28,7 +28,6 @@ trait CargoQueries
     /**
      * Encuentra relaciones entre cargos basadas en criterios específicos.
      *
-     * @param int $nroCargo
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */

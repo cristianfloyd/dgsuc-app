@@ -13,14 +13,10 @@ trait DisplayResourceProperties
     /**
      * Obtiene las propiedades a mostrar.
      * Este método utiliza el caché para obtener las propiedades.
-     *
-     * @return array
      */
     public function getPropertiesToDisplay(): array
     {
-        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), function () {
-            return $this->getDefaultProperties();
-        });
+        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn () => $this->getDefaultProperties());
     }
 
     public function resetPropertiesToDefault(): void
@@ -41,10 +37,6 @@ trait DisplayResourceProperties
 
     /**
      * Establece los valores de las propiedades y actualiza el caché.
-     *
-     * @param array $properties
-     *
-     * @return void
      */
     public function setPropertyValues(array $properties): void
     {
@@ -63,10 +55,6 @@ trait DisplayResourceProperties
 
     /**
      * Actualiza los datos de las propiedades.
-     *
-     * @param array $data
-     *
-     * @return void
      */
     public function actualizarDatos(array $data = []): void
     {
@@ -80,10 +68,6 @@ trait DisplayResourceProperties
 
     /**
      * Agrega la tarjeta de propiedades al esquema del formulario del recurso.
-     *
-     * @param array $schema
-     *
-     * @return array
      */
     public function addPropertiesToFormSchema(array $schema): array
     {
@@ -95,8 +79,6 @@ trait DisplayResourceProperties
      *
      * @param string $key La clave de la nueva propiedad
      * @param mixed $value El valor de la nueva propiedad
-     *
-     * @return void
      */
     public function addProperty(string $key, mixed $value): void
     {
@@ -107,8 +89,6 @@ trait DisplayResourceProperties
 
     /**
      * Crea un componente de tarjeta para mostrar las propiedades.
-     *
-     * @return Section
      */
     public function getPropertiesCard(): Section
     {
@@ -121,15 +101,11 @@ trait DisplayResourceProperties
 
     /**
      * Obtener las propiedades que se mostrarán.
-     *
-     * @return array
      */
     abstract protected function getDefaultProperties(): array;
 
     /**
      * Obtiene la clave de caché para las propiedades del recurso.
-     *
-     * @return string
      */
     protected function getCacheKey(): string
     {
@@ -138,13 +114,9 @@ trait DisplayResourceProperties
 
     /**
      * Obtiene las propiedades almacenadas en caché o las propiedades por defecto si no existen en caché.
-     *
-     * @return array
      */
     protected function getCachedProperties(): array
     {
-        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), function () {
-            return $this->getDefaultProperties();
-        });
+        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn () => $this->getDefaultProperties());
     }
 }

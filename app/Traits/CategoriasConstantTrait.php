@@ -4,10 +4,6 @@ namespace App\Traits;
 
 /**
  * Trait para manejar categorías de cargos.
- *
- * @method bool hasCategory(string $category)
- * @method array getCategoriesByGroup(string $group)
- * @method string|null getGroupByCategory(string $category)
  */
 trait CategoriasConstantTrait
 {
@@ -20,7 +16,7 @@ trait CategoriasConstantTrait
      * AUTU: Categorías autoridades universitarias
      * NODO: Categorías no docentes.
      */
-    public const CATEGORIAS = [
+    public const array CATEGORIAS = [
         'DOCS' => [
             'HOME', 'PEO6', 'ACPN', 'AYCP', 'AYEO', 'ATTP', 'JTPM', 'PR15', 'JTEP', 'JGEP',
             'MEPS', 'MEPR', 'MC20', 'MENI', 'MEPI', 'MJMA', 'PREO', 'ASPE', 'BIPH', 'BIBL',
@@ -55,7 +51,11 @@ trait CategoriasConstantTrait
     ];
 
     /**
-     * Verifica si existe una categoría.
+     * Verifica si una categoría existe en alguno de los grupos definidos.
+     *
+     * @param string $category La categoría a buscar
+     *
+     * @return bool True si la categoría existe en algún grupo, false en caso contrario
      */
     public function hasCategory(string $category): bool
     {
@@ -68,9 +68,13 @@ trait CategoriasConstantTrait
     }
 
     /**
-     * Obtiene todas las categorías de un grupo.
+     * Obtiene las categorías pertenecientes a un grupo específico.
      *
-     * @throws \InvalidArgumentException si el grupo no existe
+     * @param string $group El grupo de categorías a obtener
+     *
+     * @throws \InvalidArgumentException Si el grupo especificado no existe
+     *
+     * @return array<string> Lista de categorías pertenecientes al grupo
      */
     public function getCategoriesByGroup(string $group): array
     {
@@ -81,7 +85,11 @@ trait CategoriasConstantTrait
     }
 
     /**
-     * Obtiene el grupo al que pertenece una categoría.
+     * Obtiene el grupo al que pertenece una categoría específica.
+     *
+     * @param string $category La categoría a buscar
+     *
+     * @return string|null El nombre del grupo si la categoría existe, null en caso contrario
      */
     public function getGroupByCategory(string $category): ?string
     {

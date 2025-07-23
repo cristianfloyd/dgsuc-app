@@ -17,7 +17,7 @@ trait HasCompositePrimaryKey
      *
      * @return array Valores de los campos que componen la clave primaria.
      */
-    public function getKey()
+    public function getKey(): array
     {
         $attributes = [];
         foreach ($this->getKeyName() as $key) {
@@ -60,10 +60,6 @@ trait HasCompositePrimaryKey
         $instance = $this->newRelatedInstance($related);
 
         return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys, $relation) extends BelongsTo {
-            protected array $foreignKeys;
-
-            protected array $localKeys;
-
             /**
              * Construye una nueva instancia de la relación BelongsTo con claves primarias compuestas.
              *
@@ -78,10 +74,8 @@ trait HasCompositePrimaryKey
              * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
              * @param string|null $relation El nombre de la relación (opcional).
              */
-            public function __construct(Builder $query, $child, $foreignKeys, $localKeys, $relation)
+            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $child, protected array $foreignKeys, protected array $localKeys, $relation)
             {
-                $this->foreignKeys = $foreignKeys;
-                $this->localKeys = $localKeys;
                 parent::__construct($query, $child, null, null, $relation);
             }
 
@@ -96,9 +90,7 @@ trait HasCompositePrimaryKey
             public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $foreignValues = array_map(function ($key) {
-                        return $this->child->{$key};
-                    }, $this->localKeys);
+                    $foreignValues = array_map(fn ($key) => $this->child->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
@@ -121,7 +113,7 @@ trait HasCompositePrimaryKey
             public function qualifySubSelectColumn(array|string $columns): array|string
             {
                 if (\is_array($columns)) {
-                    return array_map([$this->query, 'qualifyColumn'], $columns);
+                    return array_map($this->query->qualifyColumn(...), $columns);
                 }
                 return $this->query->qualifyColumn($columns);
             }
@@ -172,19 +164,13 @@ trait HasCompositePrimaryKey
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany La relación HasMany con clave primaria compuesta.
      */
-    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys)
+    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         $instance = $this->newRelatedInstance($related);
 
         return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
-            protected array $foreignKeys;
-
-            protected $localKeys;
-
-            public function __construct(Builder $query, $parent, $foreignKeys, $localKeys)
+            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $parent, protected array $foreignKeys, protected $localKeys)
             {
-                $this->foreignKeys = $foreignKeys;
-                $this->localKeys = $localKeys;
                 parent::__construct($query, $parent, null, null);
             }
 
@@ -194,15 +180,11 @@ trait HasCompositePrimaryKey
              * Este método se encarga de agregar las restricciones necesarias a la consulta de la relación
              * HasMany, utilizando los valores de los campos locales (`$this->localKeys`) del modelo padre
              * para filtrar los registros del modelo relacionado que cumplan con esas condiciones.
-             *
-             * @return void
              */
             public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $parentValues = array_map(function ($key) {
-                        return $this->parent->{$key};
-                    }, $this->localKeys);
+                    $parentValues = array_map(fn ($key) => $this->parent->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),

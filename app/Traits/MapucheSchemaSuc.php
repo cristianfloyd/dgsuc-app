@@ -6,8 +6,6 @@ trait MapucheSchemaSuc
 {
     /**
      * Obtiene el nombre de la conexión de base de datos.
-     *
-     * @return string
      */
     public function getConnectionName(): string
     {

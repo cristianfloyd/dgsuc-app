@@ -9,8 +9,6 @@ trait CharacterEncodingTrait
         if ($value === null) {
             return null;
         }
-
-        $utf8Value = mb_convert_encoding($value, 'ISO-8859-1', 'auto');
-        return $utf8Value;
+        return mb_convert_encoding($value, 'ISO-8859-1', 'auto');
     }
 }

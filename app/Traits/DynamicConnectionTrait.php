@@ -19,8 +19,6 @@ trait DynamicConnectionTrait
 {
     /**
      * Obtiene el nombre de la conexión de base de datos basado en la selección del usuario.
-     *
-     * @return string
      */
     public function getConnectionName(): string
     {
@@ -49,8 +47,6 @@ trait DynamicConnectionTrait
 
     /**
      * Obtiene el nombre de la tabla calificado con el esquema correspondiente.
-     *
-     * @return string
      */
     public function getTable(?string $table = null): string
     {
@@ -68,8 +64,6 @@ trait DynamicConnectionTrait
 
     /**
      * Obtiene el nombre de la tabla incluyendo el esquema.
-     *
-     * @return string
      */
     public function getTableName(): string
     {

@@ -95,6 +95,11 @@ parameters:
         
         # Macros
         - '#Call to an undefined method .*::[a-zA-Z]+\(\)#'
+        
+        # Traits no utilizados (falsos positivos conocidos)
+        - message: '#Trait .* is used zero times and is not analysed#'
+          identifier: trait.unused
+          path: 'app/Traits/*'
     
     # Configuración de reporte
     reportUnmatchedIgnoredErrors: false
