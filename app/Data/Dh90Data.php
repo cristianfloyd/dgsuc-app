@@ -16,10 +16,6 @@ class Dh90Data extends Data
 {
     /**
      * Crea una nueva instancia del DTO.
-     *
-     * @param int $nroCargo
-     * @param int|null $nroCargoasociado
-     * @param string|null $tipoasociacion
      */
     public function __construct(
         #[Required, IntegerType, Min(1)]
@@ -33,8 +29,6 @@ class Dh90Data extends Data
 
     /**
      * Convierte el DTO a un modelo Eloquent.
-     *
-     * @return \App\Models\Dh90
      */
     public function toModel(): Dh90
     {
@@ -48,9 +42,7 @@ class Dh90Data extends Data
     /**
      * Actualiza un modelo existente con los datos del DTO.
      *
-     * @param Dh90 $model
      *
-     * @return Dh90
      */
     public function updateModel(Dh90 $model): Dh90
     {

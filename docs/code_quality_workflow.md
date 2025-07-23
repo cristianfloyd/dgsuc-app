@@ -39,7 +39,106 @@ Este proyecto utiliza un stack completo de herramientas para mantener alta calid
 
 ## 📋 Comandos Disponibles
 
-### 🔧 **Corrección Automática**
+### 🎮 **Script PowerShell - quality_check.ps1**
+
+El script `quality_check.ps1` proporciona una interfaz unificada para ejecutar todas las herramientas de calidad de código con opciones avanzadas.
+
+#### **Sintaxis Básica**
+```powershell
+.\quality_check.ps1 [Path] [Mode] [Options]
+```
+
+#### **Parámetros**
+- **`-Path`** (Posicional 0): Directorio a analizar
+  - **Default:** `app/`
+  - **Ejemplos:** `app/Models/`, `tests/`, `app/Http/Controllers/`
+
+- **`-Mode`** (Posicional 1): Modo de ejecución
+  - **`Check`** (default): Solo verificar, no modificar archivos
+  - **`Fix`**: Aplicar correcciones automáticas
+
+- **`-Tools`**: Herramientas específicas a ejecutar
+  - **`All`** (default): Ejecutar todas las herramientas
+  - **`Fixer`**: Solo PHP CS Fixer
+  - **`Sniffer`**: Solo PHP_CodeSniffer/PHPCBF
+  - **`Rector`**: Solo Rector
+  - **`Stan`**: Solo PHPStan
+
+- **`-Level`**: Nivel de PHPStan (1-9)
+  - Solo aplicable cuando se usa `-Tools Stan`
+
+- **`-ShowVerbose`**: Mostrar output detallado de todas las herramientas
+
+#### **Ejemplos de Uso**
+
+##### Análisis Básico
+```powershell
+# Analizar app/ en modo verificación
+.\quality_check.ps1
+
+# Analizar y corregir automáticamente
+.\quality_check.ps1 -Mode Fix
+
+# Analizar directorio específico
+.\quality_check.ps1 -Path "app/Models/"
+```
+
+##### Herramientas Específicas
+```powershell
+# Solo ejecutar PHPStan con nivel 5
+.\quality_check.ps1 -Tools Stan -Level 5
+
+# Solo formato y corrección con PHP CS Fixer
+.\quality_check.ps1 -Tools Fixer -Mode Fix
+
+# Solo verificar estándares PSR-12
+.\quality_check.ps1 -Tools Sniffer
+
+# Solo refactoring con Rector
+.\quality_check.ps1 -Tools Rector -Mode Fix
+```
+
+##### Casos de Uso Avanzados
+```powershell
+# Análisis completo de tests con output detallado
+.\quality_check.ps1 -Path "tests/" -ShowVerbose
+
+# Corrección automática solo en Controllers
+.\quality_check.ps1 -Path "app/Http/Controllers/" -Mode Fix
+
+# Verificar calidad antes de commit
+.\quality_check.ps1 -Path "app/" -Tools All
+
+# Análisis estático estricto
+.\quality_check.ps1 -Tools Stan -Level 8 -ShowVerbose
+```
+
+#### **Workflow del Script**
+
+1. **Validaciones Iniciales**
+   - Verifica existencia del directorio objetivo
+   - Valida instalación de herramientas en `vendor/bin/`
+   - Muestra configuración de ejecución
+
+2. **Ejecución Secuencial**
+   - **PHP CS Fixer**: Formato y modernización básica
+   - **PHP_CodeSniffer**: Verificación de estándares PSR-12
+     - Si hay errores y `Mode=Fix`, ejecuta PHPCBF automáticamente
+   - **Rector**: Refactoring y modernización avanzada
+   - **PHPStan**: Análisis estático final
+
+3. **Reporte Final**
+   - Resumen de herramientas exitosas/fallidas
+   - Tiempo de ejecución por herramienta
+   - Sugerencias específicas para resolver problemas
+
+#### **Códigos de Salida**
+- **`0`**: Todas las herramientas completaron sin errores
+- **`1`**: Una o más herramientas encontraron problemas
+
+### 🔧 **Comandos Composer (Alternativos)**
+
+#### **Corrección Automática**
 ```bash
 # Aplicar PHP CS Fixer
 composer cs-fix
@@ -57,7 +156,7 @@ composer rector
 composer fix
 ```
 
-### ✅ **Verificación**
+#### **Verificación**
 ```bash
 # Verificar estándares con phpcs
 composer lint
@@ -186,45 +285,103 @@ composer quality:check
 
 ## 🎯 Uso Diario Recomendado
 
-### Durante desarrollo:
+### **Con PowerShell Script (Recomendado)**
+
+#### Durante desarrollo:
+```powershell
+.\quality_check.ps1 -Mode Fix  # Corregir automáticamente
+```
+
+#### Antes de commit:
+```powershell
+.\quality_check.ps1  # Solo verificar sin modificar
+```
+
+#### Análisis específico:
+```powershell
+# Solo el directorio modificado
+.\quality_check.ps1 -Path "app/Models/" -Mode Fix
+
+# Verificación rápida con PHPStan
+.\quality_check.ps1 -Tools Stan -Level 3
+```
+
+#### Debug detallado:
+```powershell
+.\quality_check.ps1 -ShowVerbose  # Output completo de todas las herramientas
+```
+
+### **Con Comandos Composer (Alternativo)**
+
+#### Durante desarrollo:
 ```bash
 composer quality  # Una vez al día
 ```
 
-### Antes de commit:
+#### Antes de commit:
 ```bash
 composer quality:check  # Verificar estado
 ```
 
-### Limpieza semanal:
+#### Limpieza semanal:
 ```bash
 composer quality:full  # Limpieza profunda
 ```
 
-### Comandos rápidos:
+#### Comandos rápidos:
 - `composer fix` → Formato rápido
 - `composer check` → Estado general
 
 ## 🔧 Troubleshooting
 
-### Cache corrupto:
+### **Problemas con PowerShell Script**
+
+#### Script no ejecuta:
+```powershell
+# Verificar política de ejecución
+Get-ExecutionPolicy
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Ejecutar con bypass temporal
+powershell -ExecutionPolicy Bypass -File .\quality_check.ps1
+```
+
+#### Herramientas faltantes:
+```powershell
+# El script mostrará qué herramientas faltan
+# Instalar dependencias faltantes:
+composer require --dev friendsofphp/php-cs-fixer
+composer require --dev phpstan/phpstan squizlabs/php_codesniffer rector/rector
+```
+
+#### Debug de problemas específicos:
+```powershell
+# Ejecutar herramienta individual con verbose
+.\quality_check.ps1 -Tools Fixer -ShowVerbose
+.\quality_check.ps1 -Tools Sniffer -ShowVerbose
+.\quality_check.ps1 -Tools Stan -ShowVerbose
+```
+
+### **Problemas Generales**
+
+#### Cache corrupto:
 ```bash
 composer analyse:clear
 rm -rf .phpcs-cache .php-cs-fixer.cache
 ```
 
-### Demasiados errores:
+#### Demasiados errores:
 ```bash
 # Crear baseline y trabajar incrementalmente
 composer analyse:baseline
 ```
 
-### Conflictos entre herramientas:
-```bash
+#### Conflictos entre herramientas:
+```powershell
 # Ejecutar por separado para identificar origen
-composer cs-fix:dry
-composer lint
-composer analyse
+.\quality_check.ps1 -Tools Fixer
+.\quality_check.ps1 -Tools Sniffer  
+.\quality_check.ps1 -Tools Stan
 ```
 
 ## 📈 Niveles de PHPStan
@@ -248,6 +405,39 @@ composer analyse:level  # Probar nivel 5
 - ✅ **Cumplimiento** de estándares PSR-12
 - ✅ **Integración** con CI/CD
 - ✅ **Workflow** automatizado y eficiente
+
+---
+
+## 📚 Referencia Rápida - PowerShell Script
+
+### **Comandos Más Usados**
+```powershell
+# Verificación rápida
+.\quality_check.ps1
+
+# Corrección automática
+.\quality_check.ps1 -Mode Fix
+
+# Solo PHPStan
+.\quality_check.ps1 -Tools Stan
+
+# Directorio específico
+.\quality_check.ps1 -Path "app/Models/" -Mode Fix
+
+# Debug completo
+.\quality_check.ps1 -ShowVerbose
+```
+
+### **Parámetros Válidos**
+- **Path:** `app/`, `tests/`, `app/Models/`, `app/Http/Controllers/`
+- **Mode:** `Check`, `Fix`
+- **Tools:** `All`, `Fixer`, `Sniffer`, `Rector`, `Stan`
+- **Level:** `1-9` (solo con PHPStan)
+- **ShowVerbose:** Switch para output detallado
+
+### **Códigos de Salida**
+- **0:** ✅ Todo OK
+- **1:** ❌ Errores encontrados
 
 ---
 

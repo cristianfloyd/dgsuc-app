@@ -16,7 +16,7 @@ class UnidadAcademicaData extends Data
 
     public static function fromCodigo(string $codigo): ?self
     {
-        if (!$codigo) {
+        if ($codigo === '' || $codigo === '0') {
             return null;
         }
 

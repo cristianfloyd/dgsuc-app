@@ -26,42 +26,35 @@ class ConceptoTotalAgrupacionData extends Data
      * Crea una instancia desde el resultado del repositorio.
      *
      * @param array $data
-     *
-     * @return static
+     * @return self
      */
-    public static function fromRepositoryResult(array $data): static
+    public static function fromRepositoryResult(array $data): self
     {
-        return new static(
+        return new self(
             haberes: $data['haberes'],
             descuentos: $data['descuentos'],
-            totalHaberes: (float)$data['total_haberes'],
-            totalDescuentos: (float)$data['total_descuentos'],
-            neto: (float)$data['neto'],
+            totalHaberes: (float) $data['total_haberes'],
+            totalDescuentos: (float) $data['total_descuentos'],
+            neto: (float) $data['neto'],
         );
     }
 
     /**
      * Convierte el DTO a un array para exportación.
-     *
-     * @return array
      */
     public function toExportArray(): array
     {
-        $haberesArray = $this->haberes->map(function ($item) {
-            return [
-                'Código' => $item->codn_conce,
-                'Concepto' => $item->desc_conce,
-                'Importe' => number_format($item->importe, 2, ',', '.'),
-            ];
-        })->toArray();
+        $haberesArray = $this->haberes->map(fn($item): array => [
+            'Código' => $item->codn_conce,
+            'Concepto' => $item->desc_conce,
+            'Importe' => number_format($item->importe, 2, ',', '.'),
+        ])->toArray();
 
-        $descuentosArray = $this->descuentos->map(function ($item) {
-            return [
-                'Código' => $item->codn_conce,
-                'Concepto' => $item->desc_conce,
-                'Importe' => number_format($item->importe, 2, ',', '.'),
-            ];
-        })->toArray();
+        $descuentosArray = $this->descuentos->map(fn($item): array => [
+            'Código' => $item->codn_conce,
+            'Concepto' => $item->desc_conce,
+            'Importe' => number_format($item->importe, 2, ',', '.'),
+        ])->toArray();
 
         return [
             'Haberes' => $haberesArray,

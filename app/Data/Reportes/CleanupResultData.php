@@ -104,7 +104,7 @@ class CleanupResultData extends Data
      */
     public static function nothingToClean(array $periodoFiscal): self
     {
-        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad((string) $periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
         return new self(
             success: true,
             eliminados: 0,
@@ -145,6 +145,6 @@ class CleanupResultData extends Data
      */
     public function getPeriodoFiscalString(): string
     {
-        return $this->periodoFiscal['year'] . '-' . str_pad($this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        return $this->periodoFiscal['year'] . '-' . str_pad((string) $this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
     }
 }
