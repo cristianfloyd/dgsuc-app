@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\Date;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
+use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
@@ -23,37 +24,37 @@ class Dh09Data extends Data
         public readonly ?int $vig_otmes,
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab02,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_estcv,
         #[BooleanType]
         public readonly bool $sino_embargo,
-        #[StringType(max: 1), Nullable]
+        #[StringType, Max(1), Nullable]
         public readonly ?string $sino_otsal,
-        #[StringType(max: 1), Nullable]
+        #[StringType, Max(1), Nullable]
         public readonly ?string $sino_jubil,
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab08,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_bprev,
         #[IntegerType, Nullable]
         public readonly ?int $nro_tab09,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_obsoc,
-        #[StringType(max: 15), Nullable]
+        #[StringType, Max(15), Nullable]
         public readonly ?string $nro_afili,
         #[Date, Nullable]
         public readonly ?Carbon $fec_altos,
         #[Date, Nullable]
         public readonly ?Carbon $fec_endjp,
-        #[StringType(max: 20), Nullable]
+        #[StringType, Max(20), Nullable]
         public readonly ?string $desc_envio,
         #[IntegerType, Nullable]
         public readonly ?int $cant_cargo,
-        #[StringType(max: 40), Nullable]
+        #[StringType, Max(40), Nullable]
         public readonly ?string $desc_tarea,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_regio,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_uacad,
         #[Date, Nullable]
         public readonly ?Carbon $fec_vtosf,
@@ -69,29 +70,29 @@ class Dh09Data extends Data
         public readonly ?int $nro_agremiacion,
         #[Date, Nullable]
         public readonly ?Carbon $fecha_permanencia,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $ua_asigfamiliar,
         #[Date, Nullable]
         public readonly ?Carbon $fechadjur894,
-        #[StringType(max: 1), Nullable]
+        #[StringType,Max(1), Nullable]
         public readonly ?string $renunciadj894,
         #[Date, Nullable]
         public readonly ?Carbon $fechadechere,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $coddependesemp,
         #[IntegerType, Nullable]
         public readonly ?int $conyugedependiente,
         #[Date, Nullable]
         public readonly ?Carbon $fec_ingreso,
-        #[StringType(max: 4), Nullable]
+        #[StringType, Max(4), Nullable]
         public readonly ?string $codc_uacad_seguro,
         #[Date, Nullable]
         public readonly ?Carbon $fecha_recibo,
-        #[StringType(max: 20), Nullable]
+        #[StringType, Max(20), Nullable]
         public readonly ?string $tipo_norma,
         #[IntegerType, Nullable]
         public readonly ?int $nro_norma,
-        #[StringType(max: 20), Nullable]
+        #[StringType, Max(20), Nullable]
         public readonly ?string $tipo_emite,
         #[Date, Nullable]
         public readonly ?Carbon $fec_norma,
@@ -100,7 +101,7 @@ class Dh09Data extends Data
     ) {
     }
 
-    public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context): array
+    public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context = null): array
     {
         return [
             'nro_legaj' => ['required', 'integer'],

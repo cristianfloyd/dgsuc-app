@@ -12,6 +12,34 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $nro_legaj
+ * @property string $desc_appat
+ * @property string $desc_apmat
+ * @property string $desc_apcas
+ * @property string $desc_nombr
+ * @property int $nro_tabla
+ * @property string $tipo_docum
+ * @property string $nro_docum
+ * @property string $nro_cuil1
+ * @property string $nro_cuil
+ * @property string $nro_cuil2
+ * @property string $tipo_sexo
+ * @property string $fec_nacim
+ * @property string $tipo_facto
+ * @property string $tipo_rh
+ * @property string $nro_ficha
+ * @property string $tipo_estad
+ * @property string $nombrelugarnac
+ * @property string $periodoalta
+ * @property string $anioalta
+ * @property string $periodoactualizacion
+ * @property string $anioactualizacion
+ * @property string $pcia_nacim
+ * @property string $pais_nacim
+ * @property string $cuil
+ * @property string $cuil_completo
+ */
 class Dh01 extends Model
 {
     use MapucheConnectionTrait;
@@ -74,7 +102,7 @@ class Dh01 extends Model
 
     public function dh03()
     {
-        return $this->hasMany(dh03::class, 'nro_legaj', 'nro_legaj');
+        return $this->hasMany(Dh03::class, 'nro_legaj', 'nro_legaj');
     }
 
     public function cargos()
@@ -120,10 +148,7 @@ class Dh01 extends Model
      * - No tienen cargos activos en dh03
      * - Cumplen con la condición adicional especificada en $where
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Query builder instance
-     * @param string $where Condición SQL adicional para filtrar los resultados (default: '1=1')
-     *
-     * @return \Illuminate\Database\Eloquent\Builder Query builder con los siguientes campos:
+     *  Query builder con los siguientes campos:
      *                                               - nro_legaj: Número de legajo
      *                                               - nro_docum: Número de documento formateado (tipo + número con separadores)
      *                                               - cuil: CUIL formateado con guiones (XX-XXXXXXXX-X)

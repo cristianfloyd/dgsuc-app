@@ -147,8 +147,7 @@ class Dh03 extends Model
         static::saving(function ($model): void {
             // Validar porcentajes
             if (
-                $model->porcdedicdocente + $model->porcdedicinvestig +
-                $model->porcdedicagestion + $model->porcdedicaextens > 100
+                (float)$model->porcdedicdocente + (float)$model->porcdedicinvestig + (float)$model->porcdedicagestion + (float)$model->porcdedicaextens > 100
             ) {
                 throw new \Exception('La suma de porcentajes de dedicación no puede superar 100%');
             }
@@ -216,8 +215,8 @@ class Dh03 extends Model
      * Scope para validar la combinación legajo-cargo.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $nroLegaj
-     * @param int $nroCargo
+     * @param int $nro_legaj
+     * @param int $nro_cargo
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -227,14 +226,7 @@ class Dh03 extends Model
             ->where('nro_cargo', $nro_cargo);
     }
 
-    /**
-     * Scope para obtener cargos activos de un legajo.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $nroLegajo
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
+    
     public function scopeCargosActivos($query, int $nroLegajo)
     {
         $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
@@ -245,8 +237,8 @@ class Dh03 extends Model
                 WHEN (codc_categ = '' OR codc_categ IS NULL)
                 THEN nro_cargo::TEXT
                 ELSE codc_categ
-            END AS codc_categ"),
-        ])
+                END AS codc_categ"),
+            ])
             ->where(function ($query) use ($fecha): void {
                 $query->whereNull('fec_baja')
                     ->orWhere('fec_baja', '>=', $fecha);
@@ -283,9 +275,9 @@ class Dh03 extends Model
         return $this->belongsTo(Dhd7::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
     }
 
-    public function spuDisc(): BelongsTo
+    public function spuDisc()
     {
-        return $this->belongsTo(SpuDisc::class, 'rama', 'rama')
+        return $this->hasOne(SpuDisc::class, 'rama', 'rama')
             ->where('disciplina', $this->disciplina)
             ->where('area', $this->area);
     }
@@ -298,11 +290,11 @@ class Dh03 extends Model
     /**
      * Obtiene la unidad académica asociada al cargo.
      *
-     * @return BelongsTo
+     * 
      */
-    public function dh30(): BelongsTo
+    public function dh30()
     {
-        return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
+        return $this->hasOne(Dh30::class, 'desc_abrev', 'codc_uacad')
             ->where('nro_tabla', 13);
     }
 

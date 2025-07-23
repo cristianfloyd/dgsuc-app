@@ -13,7 +13,8 @@ class Dh15Data extends Data
     ) {
     }
 
-    public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context): array
+    
+    public static function rules($contexte = null): array
     {
         return [
             'codn_grupo' => ['required', 'integer'],

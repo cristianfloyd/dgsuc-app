@@ -20,7 +20,7 @@ class Dh16Data extends Data
     ) {
     }
 
-    public static function rules(): array
+    public static function rules($context = null): array
     {
         return [
             'codn_grupo' => ['required', 'integer'],
@@ -28,7 +28,7 @@ class Dh16Data extends Data
         ];
     }
 
-    public static function messages(): array
+    public static function messages(...$args): array
     {
         return [
             'codn_grupo.required' => 'El código de grupo es requerido',
