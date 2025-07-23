@@ -21,13 +21,12 @@ class FilamentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Registrar el componente Livewire (Livewire 3 no necesita registro explícito)
-        // Log::info('FilamentServiceProvider boot render hook');
-        // Añadir el componente a la barra de navegación
-        // FilamentView::registerRenderHook(
-        //     PanelsRenderHook::TOPBAR_END,
-        //     fn (): string => '<livewire:database-connection-selector />'
-        // );
+        // Registrar el selector de conexión de BD en todos los paneles
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::TOPBAR_END,
+            fn (): string => Blade::render('@livewire(\'database-connection-selector-badge\')')
+        );
+
         // Registrar el renderHook para el footer
         FilamentView::registerRenderHook(
             PanelsRenderHook::FOOTER,

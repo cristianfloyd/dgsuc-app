@@ -79,10 +79,6 @@ class AfipPanelProvider extends PanelProvider
             ])
             ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth('full')
-            ->font('Poppins')
-            ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
-                fn (): string => Blade::render('@livewire(\'database-connection-selector\')'),
-            );
+            ->font('Poppins');
     }
 }

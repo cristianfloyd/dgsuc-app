@@ -10,7 +10,7 @@ use Filament\Forms\Form;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-class DatabaseConnectionSelector extends Component implements HasForms
+class DatabaseConnectionSelectorBadge extends Component implements HasForms
 {
     use InteractsWithForms;
 
@@ -22,10 +22,6 @@ class DatabaseConnectionSelector extends Component implements HasForms
 
         $currentConnection = $service->getCurrentConnection();
         $this->connection = \is_string($currentConnection) ? $currentConnection : null;
-
-        // Log::debug("DatabaseConnectionSelector montado", [
-        //     'connection' => $this->connection
-        // ]);
 
         $this->form->fill([
             'connection' => $this->connection,
@@ -49,7 +45,7 @@ class DatabaseConnectionSelector extends Component implements HasForms
                             'pgsql-liqui' => 'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400',
                         ];
                         return [
-                            'class' => 'text-xs font-medium h-9 ' . ($colorClasses[$state] ?? ''),
+                            'class' => 'text-xs font-medium h-8 ' . ($colorClasses[$state] ?? ''),
                         ];
                     })
                     ->afterStateUpdated(function ($state) use ($service): void {
@@ -74,6 +70,6 @@ class DatabaseConnectionSelector extends Component implements HasForms
 
     public function render()
     {
-        return view('livewire.database-connection-selector');
+        return view('livewire.database-connection-selector-badge');
     }
-}
+} 
