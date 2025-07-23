@@ -22,6 +22,11 @@ enum TipoNove: string
      */
     case TRANSITORIO = 'T';
 
+    /**
+     * Obtiene la descripción del tipo de novedad.
+     *
+     * @return string La descripción del tipo de novedad.
+     */
     public function getDescription(): string
     {
         return match ($this) {
@@ -31,6 +36,13 @@ enum TipoNove: string
         };
     }
 
+    /**
+     * Obtiene los tipos de valores permitidos para cada tipo de novedad.
+     *
+     * Los tipos de valores pueden ser 'Importe', 'Porcentaje' y 'Cantidad'.
+     *
+     * @return array<string> Un array con los tipos de valores permitidos.
+     */
     public function getTiposValores(): array
     {
         return match ($this) {

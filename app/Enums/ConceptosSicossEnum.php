@@ -101,6 +101,11 @@ enum ConceptosSicossEnum: int
         ];
     }
 
+    /**
+     * Obtiene todos los códigos de contribuciones ART.
+     *
+     * @return array<int> Array con los códigos de contribuciones ART.
+     */
     public static function getContribucionesArtCodes(): array
     {
         return [

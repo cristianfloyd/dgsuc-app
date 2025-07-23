@@ -49,6 +49,7 @@ enum BloqueosEstadoEnum: string
     public function getColor(): string
     {
         return match ($this) {
+            self::PENDIENTE => 'warning',
             self::IMPORTADO => 'gray',
             self::DUPLICADO => 'warning',
             self::VALIDADO => 'success',

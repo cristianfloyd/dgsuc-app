@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use function in_array;
+
 enum ConceptoGrupo: string
 {
     case DOSUBA = 'dosuba';
@@ -20,8 +22,12 @@ enum ConceptoGrupo: string
 
     case APORTES_AFIP = 'aportes_afip';
 
+
+
     /**
-     * Obtiene los códigos de conceptos asociados a cada grupo.
+     * Obtiene los códigos de conceptos que pertenecen al grupo.
+     *
+     * @return array<int> Array de códigos de conceptos
      */
     public function getConceptos(): array
     {
@@ -64,18 +70,24 @@ enum ConceptoGrupo: string
      */
     public function containsConcepto(int $codn_conce): bool
     {
-        return \in_array($codn_conce, $this->getConceptos());
+        return in_array($codn_conce, $this->getConceptos());
     }
 
     /**
      * Obtiene la descripción del grupo.
+     * @return string
      */
     public function getDescripcion(): string
     {
         return match ($this) {
             self::DOSUBA => 'Conceptos DOSUBA',
             self::AFIP => 'Conceptos AFIP',
-            self::APORTES_Y_CONTRIBUCIONES => 'Aportes y Contribuciones'
+            self::APORTES_Y_CONTRIBUCIONES => 'Aportes y Contribuciones',
+            self::DOSUBASIN310 => 'Dosuba sin 310',
+            self::CONTRIBUCIONES_AFIP => 'Contribuciones AFIP',
+            self::SEGURO_CONTRIBUCION_AFIP => 'Seguro Contribucion AFIP',
+            self::ART_AFIP => 'ART AFIP',
+            self::APORTES_AFIP => 'Aportes AFIP',
         };
     }
 }

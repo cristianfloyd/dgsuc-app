@@ -16,6 +16,11 @@ enum PuestoDesempenado: string
 
     case ENFERMERO = '2230';
 
+    /**
+     * Retorna la descripción del puesto desempeñado.
+     *
+     * @return string
+     */
     public function descripcion(): string
     {
         return match ($this) {
@@ -28,6 +33,11 @@ enum PuestoDesempenado: string
         };
     }
 
+    /**
+     * Retorna el escalafón correspondiente al puesto desempeñado.
+     *
+     * @return string
+     */
     public function escalafon(): string
     {
         return match ($this) {
@@ -40,6 +50,12 @@ enum PuestoDesempenado: string
         };
     }
 
+    /**
+     * Retorna la instancia del enum correspondiente al código proporcionado.
+     *
+     * @param string $codigo
+     * @return self|null
+     */
     public static function fromCodigo(string $codigo): ?self
     {
         return match ($codigo) {
@@ -53,9 +69,18 @@ enum PuestoDesempenado: string
         };
     }
 
+   
+    /**
+     * Retorna un array asociativo con todos los casos del enum.
+     *
+     * El array resultante tiene como clave el valor del caso y como valor
+     * otro array con la información del código, la descripción y el escalafón.
+     *
+     * @return array<string, array{codigo: string, descripcion: string, escalafon: string}>
+     */
     public static function toArray(): array
     {
-        return array_reduce(self::cases(), function ($carry, $enum) {
+        return array_reduce(self::cases(), function (array $carry, $enum) {
             $carry[$enum->value] = [
                 'codigo' => $enum->value,
                 'descripcion' => $enum->descripcion(),

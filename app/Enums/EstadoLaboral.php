@@ -28,6 +28,12 @@ enum EstadoLaboral: string
         };
     }
 
+    /**
+     * Devuelve un array asociativo donde las claves son los valores del enum
+     * y los valores son las descripciones.
+     *
+     * @return array<string, string>
+     */
     public static function toArray(): array
     {
         return collect(self::cases())->mapWithKeys(fn ($estado) => [
