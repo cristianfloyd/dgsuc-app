@@ -17,7 +17,7 @@ class SacLegajoData extends Data
         public string $dependencia,
         /** @var DataCollection<SacCargoData> */
         public DataCollection $cargos,
-        /** @var DataCollection<SacCargoVigenteData> */
+        /** @var DataCollection<SacCargoData> */
         public DataCollection $cargos_vigentes,
     ) {
     }

@@ -13,8 +13,8 @@ class LicenciaVigenteData extends Data
 {
     /**
      * @param int $nro_legaj Número de legajo del agente
-     * @param int $inicio Día de inicio de la licencia en el periodo
-     * @param int $final Día final de la licencia en el periodo
+     * @param int|null $inicio Día de inicio de la licencia en el periodo
+     * @param int|null $final Día final de la licencia en el periodo
      * @param bool $es_legajo Indica si la licencia está asociada directamente al legajo (true) o a un cargo (false)
      * @param int $condicion Código numérico que representa el tipo de condición/licencia
      * @param string|null $descripcion_licencia Descripción del tipo de licencia
@@ -25,8 +25,8 @@ class LicenciaVigenteData extends Data
      */
     public function __construct(
         public int $nro_legaj,
-        public int $inicio,
-        public int $final,
+        public ?int $inicio,
+        public ?int $final,
         public bool $es_legajo,
         public int $condicion,
         public ?string $descripcion_licencia = null,

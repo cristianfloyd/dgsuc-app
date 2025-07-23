@@ -17,7 +17,7 @@ class GrupoPermisoData extends Data
     ) {
     }
 
-    public static function rules(ValidationContext $context): array
+    public static function rules(ValidationContext $context = null): array
     {
         return [
             'usuario' => ['required', 'string'],

@@ -22,9 +22,9 @@ class ConceptoTotalItemData extends Data
      *
      *
      */
-    public static function fromRowData(object $rowData): static
+    public static function fromRowData(object $rowData): self
     {
-        return new static(
+        return new self(
             codigoConcepto: $rowData->codn_conce,
             descripcionConcepto: $rowData->desc_conce,
             importe: (float) $rowData->importe,

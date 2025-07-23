@@ -22,7 +22,7 @@ class FallecidoData extends Data
     ) {
     }
 
-    public static function rules(): array
+    public static function rules($context = null): array
     {
         return [
             'nro_legaj' => ['required', 'integer'],
@@ -34,7 +34,7 @@ class FallecidoData extends Data
         ];
     }
 
-    public static function messages(): array
+    public static function messages(...$args): array
     {
         return [
             'cuil.regex' => 'El CUIL debe tener el formato XX-XXXXXXXX-X',

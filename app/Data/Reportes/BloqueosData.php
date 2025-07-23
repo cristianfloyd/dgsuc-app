@@ -78,7 +78,7 @@ class BloqueosData extends Data
             fecha_de_baja: self::processFechaBaja($row, $tipoMovimiento),
             tipo: $tipoMovimiento,
             observaciones: trim($row['observaciones'] ?? ''),
-            chkstopliq: $tipoMovimiento === 'Licencia',
+            chkstopliq: strtolower($tipoMovimiento) === strtolower('Licencia'),
             nro_liqui: $nroLiqui,
         );
     }

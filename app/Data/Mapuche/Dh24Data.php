@@ -27,7 +27,7 @@ class Dh24Data extends Data
     ) {
     }
 
-    public static function rules($context): array
+    public static function rules($context = null): array
     {
         return [
             'nro_cargo' => ['required', 'integer'],

@@ -20,7 +20,7 @@ class Dh35Data extends Data
     ) {
     }
 
-    public static function rules($context): array
+    public static function rules($context = null): array
     {
         return [
             'tipo_escal' => ['required', 'string', 'size:1'],

@@ -16,7 +16,7 @@ class GrupoLegajoData extends Data
     ) {
     }
 
-    public static function rules(ValidationContext $context): array
+    public static function rules(ValidationContext $context = null): array
     {
         return [
             'id_grupo' => ['required', 'integer', 'exists:mapuche.grupo,id_grupo'],

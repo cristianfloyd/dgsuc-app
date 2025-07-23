@@ -5,6 +5,7 @@ namespace App\Repositories\Mapuche;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Data\Mapuche\Dh21hData;
 use App\Models\Mapuche\Dh21h;
+use Illuminate\Support\Facades\Log;
 
 class Dh21hRepository implements Dh21hRepositoryInterface
 {
@@ -44,7 +45,14 @@ class Dh21hRepository implements Dh21hRepositoryInterface
      */
     public function delete($id): bool
     {
-        return $this->model->destroy($id);
+        try {
+            $deletedRows = $this->model->destroy($id);
+
+            return $deletedRows > 0;
+        } catch (\Exception $e) {
+            Log::error("Error deleting Dh21h with id {$id}: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

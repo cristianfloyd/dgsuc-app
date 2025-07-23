@@ -28,7 +28,7 @@ class RepGerencialFinalData extends Data
     ) {
     }
 
-    public static function rules(ValidationContext $context): array
+    public static function rules(ValidationContext $context = null): array
     {
         return [
             'codn_fuent' => ['required', 'integer'],

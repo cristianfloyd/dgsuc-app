@@ -16,7 +16,7 @@ class Dh17Data extends Data
     ) {
     }
 
-    public static function rules($context): array
+    public static function rules($context = null): array
     {
         return [
             'codn_conce' => ['required', 'integer'],
