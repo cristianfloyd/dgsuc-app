@@ -10,7 +10,7 @@ use Spatie\LaravelData\Attributes\Validation\Size;
 use Spatie\LaravelData\Data;
 
 /**
- * Data Object para la tabla dh90.
+ * Data Object para la tabla dh90. 
  */
 class Dh90Data extends Data
 {

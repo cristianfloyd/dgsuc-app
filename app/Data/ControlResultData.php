@@ -25,7 +25,7 @@ class ControlResultData extends Data
     ) {
         // Si no se proporciona un count explícito, intentamos calcularlo desde los datos
         if ($this->count === null) {
-            $this->count = is_countable($this->data) ? \count($this->data) : 0;
+            $this->count = \count($this->data);
         }
     }
 

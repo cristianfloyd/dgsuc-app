@@ -11,6 +11,37 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Modelo para las relaciones activas de AFIP.
+ * 
+ * @property int $id
+ * @property string $periodo_fiscal
+ * @property string $codigo_movimiento
+ * @property string $tipo_registro
+ * @property string $cuil
+ * @property string $marca_trabajador_agropecuario
+ * @property string $modalidad_contrato
+ * @property string $fecha_inicio_relacion_laboral
+ * @property string $fecha_fin_relacion_laboral
+ * @property string $codigo_o_social
+ * @property string $cod_situacion_baja
+ * @property string $fecha_telegrama_renuncia
+ * @property string $retribucion_pactada
+ * @property string $modalidad_liquidacion
+ * @property string $suc_domicilio_desem
+ * @property string $actividad_domicilio_desem
+ * @property string $puesto_desem
+ * @property string $rectificacion
+ * @property string $numero_formulario_agro
+ * @property string $tipo_servicio
+ * @property string $categoria_profesional
+ * @property string $ccct
+ * @property string $no_hay_datos
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $nro_cuil
+ */
 class AfipRelacionesActivas extends Model
 {
     use MapucheConnectionTrait;
@@ -65,7 +96,7 @@ class AfipRelacionesActivas extends Model
 
         // Nombre de la conexión de base de datos a utilizar
         $conexion = self::getConexionNombre();
-
+        
         // Iniciar la transacion en la conexion especificada
         DB::connection($conexion)->beginTransaction();
 
@@ -92,7 +123,7 @@ class AfipRelacionesActivas extends Model
     }
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
-     * @param array $datosProcessados Los datos procesados.
+     * @param array $datosProcesados Los datos procesados.
      *
      * @return array Los datos mapeados al modelo AfipRelacionesActivas.
      */

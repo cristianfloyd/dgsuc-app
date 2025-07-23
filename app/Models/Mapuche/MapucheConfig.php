@@ -274,7 +274,7 @@ class MapucheConfig
      */
     public static function getStaticConnectionName(): string
     {
-        $instance = new static();
+        $instance = new self();
         return $instance->getConnectionName();
     }
 
