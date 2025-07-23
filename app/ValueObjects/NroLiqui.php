@@ -2,13 +2,17 @@
 
 namespace App\ValueObjects;
 
+use InvalidArgumentException;
+use JsonSerializable;
+use Stringable;
+
 /**
  * Value Object que representa un número de liquidación en el sistema Mapuche.
  *
  * Este objeto garantiza que el número de liquidación siempre sea un valor válido
  * según las reglas de negocio establecidas.
  */
-class NroLiqui implements \JsonSerializable, \Stringable
+class NroLiqui implements JsonSerializable, Stringable
 {
     /**
      * @var int El valor del número de liquidación
@@ -20,7 +24,7 @@ class NroLiqui implements \JsonSerializable, \Stringable
      *
      * @param int $value El número de liquidación
      *
-     * @throws \InvalidArgumentException Si el valor no cumple con las reglas de validación
+     * @throws InvalidArgumentException Si el valor no cumple con las reglas de validación
      */
     public function __construct(int $value)
     {
@@ -51,12 +55,12 @@ class NroLiqui implements \JsonSerializable, \Stringable
      *
      * @param string $value El número de liquidación como string
      *
-     * @throws \InvalidArgumentException Si el valor no puede convertirse a entero o no es válido
+     * @throws InvalidArgumentException Si el valor no puede convertirse a entero o no es válido
      */
     public static function fromString(string $value): self
     {
         if (!is_numeric($value)) {
-            throw new \InvalidArgumentException('El número de liquidación debe ser numérico');
+            throw new InvalidArgumentException('El número de liquidación debe ser numérico');
         }
 
         return new self((int) $value);
@@ -93,12 +97,12 @@ class NroLiqui implements \JsonSerializable, \Stringable
      *
      * @param int $value El valor a validar
      *
-     * @throws \InvalidArgumentException Si el valor no es válido
+     * @throws InvalidArgumentException Si el valor no es válido
      */
     private function validate(int $value): void
     {
         if ($value <= 0) {
-            throw new \InvalidArgumentException('El número de liquidación debe ser positivo');
+            throw new InvalidArgumentException('El número de liquidación debe ser positivo');
         }
     }
 }

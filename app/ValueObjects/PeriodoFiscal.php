@@ -1,9 +1,10 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace App\ValueObjects;
 
 use Carbon\Carbon;
-use JsonSerializable;
+use InvalidArgumentException;
+use const STR_PAD_LEFT;
 
 /**
  * Value Object que representa un período fiscal en el sistema.
@@ -52,12 +53,12 @@ class PeriodoFiscal implements \JsonSerializable, \Stringable
      *
      * @param string $periodoFiscal El período fiscal en formato YYYYMM
      *
-     * @throws \InvalidArgumentException Si el formato no es válido
+     * @throws InvalidArgumentException Si el formato no es válido
      */
     public static function fromString(string $periodoFiscal): self
     {
         if (!preg_match('/^(\d{4})(\d{2})$/', $periodoFiscal, $matches)) {
-            throw new \InvalidArgumentException('El período fiscal debe tener el formato YYYYMM');
+            throw new InvalidArgumentException('El período fiscal debe tener el formato YYYYMM');
         }
 
         $year = (int) $matches[1];
@@ -106,7 +107,7 @@ class PeriodoFiscal implements \JsonSerializable, \Stringable
      */
     public function formattedMonth(): string
     {
-        return str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT);
+        return str_pad((string) $this->month, 2, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -189,8 +190,11 @@ class PeriodoFiscal implements \JsonSerializable, \Stringable
         return $this->year === $other->year && $this->month > $other->month;
     }
 
+
     /**
-     * Implementación de JsonSerializable para permitir la serialización directa.
+     * Serializa el objeto para ser utilizado en json_encode.
+     *
+     * @return array<string, int|string>
      */
     public function jsonSerialize(): array
     {
@@ -201,8 +205,11 @@ class PeriodoFiscal implements \JsonSerializable, \Stringable
         ];
     }
 
+
     /**
-     * Devuelve un array con el año y mes para usar en modelos.
+     * Convierte el objeto a un array asociativo.
+     *
+     * @return array<string, int>
      */
     public function toArray(): array
     {

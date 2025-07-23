@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
-readonly class CategoryIdentifier implements \Stringable
+use InvalidArgumentException;
+use Stringable;
+use function sprintf;
+
+readonly class CategoryIdentifier implements Stringable
 {
     private const int CATEGORY_LENGTH = 4;
 
@@ -18,7 +22,7 @@ readonly class CategoryIdentifier implements \Stringable
 
     public function __toString(): string
     {
-        return \sprintf(
+        return sprintf(
             '%s-%d-%d',
             $this->getNormalizedCategory(),
             $this->year,
@@ -51,8 +55,8 @@ readonly class CategoryIdentifier implements \Stringable
     {
         $parts = explode('-', $value);
 
-        if (\count($parts) !== 3) {
-            throw new \InvalidArgumentException(
+        if (count($parts) !== 3) {
+            throw new InvalidArgumentException(
                 'El formato del identificador debe ser: categoria-año-mes',
             );
         }
@@ -69,21 +73,21 @@ readonly class CategoryIdentifier implements \Stringable
         $trimmedCategory = trim($this->category);
 
         if ($trimmedCategory === '' || $trimmedCategory === '0') {
-            throw new \InvalidArgumentException('La categoría es requerida');
+            throw new InvalidArgumentException('La categoría es requerida');
         }
 
-        if (\strlen($trimmedCategory) > self::CATEGORY_LENGTH) {
-            throw new \InvalidArgumentException(
+        if (strlen($trimmedCategory) > self::CATEGORY_LENGTH) {
+            throw new InvalidArgumentException(
                 'La categoría no puede exceder {self::CATEGORY_LENGTH} caracteres',
             );
         }
 
         if ($this->year < 1900 || $this->year > 2100) {
-            throw new \InvalidArgumentException('El año debe estar entre 1900 y 2100');
+            throw new InvalidArgumentException('El año debe estar entre 1900 y 2100');
         }
 
         if ($this->month < 1 || $this->month > 12) {
-            throw new \InvalidArgumentException('El mes debe estar entre 1 y 12');
+            throw new InvalidArgumentException('El mes debe estar entre 1 y 12');
         }
     }
 }
