@@ -12,17 +12,17 @@ use JsonSerializable;
  * permitiendo su representación tanto en formato combinado (YYYYMM) como
  * en componentes separados (año y mes).
  */
-class PeriodoFiscal implements \JsonSerializable
+class PeriodoFiscal implements \JsonSerializable, \Stringable
 {
     /**
      * @var int El año del período fiscal
      */
-    private int $year;
+    private readonly int $year;
 
     /**
      * @var int El mes del período fiscal (1-12)
      */
-    private int $month;
+    private readonly int $month;
 
     /**
      * Constructor que valida y establece el año y mes del período fiscal.
@@ -41,8 +41,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Representación en string del período fiscal.
-     *
-     * @return string
      */
     public function __toString(): string
     {
@@ -55,8 +53,6 @@ class PeriodoFiscal implements \JsonSerializable
      * @param string $periodoFiscal El período fiscal en formato YYYYMM
      *
      * @throws \InvalidArgumentException Si el formato no es válido
-     *
-     * @return self
      */
     public static function fromString(string $periodoFiscal): self
     {
@@ -64,8 +60,8 @@ class PeriodoFiscal implements \JsonSerializable
             throw new \InvalidArgumentException('El período fiscal debe tener el formato YYYYMM');
         }
 
-        $year = (int)$matches[1];
-        $month = (int)$matches[2];
+        $year = (int) $matches[1];
+        $month = (int) $matches[2];
 
         return new self($year, $month);
     }
@@ -74,8 +70,6 @@ class PeriodoFiscal implements \JsonSerializable
      * Crea una instancia a partir de un objeto Carbon.
      *
      * @param Carbon $date La fecha de la que se extraerá el período fiscal
-     *
-     * @return self
      */
     public static function fromCarbon(Carbon $date): self
     {
@@ -84,8 +78,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Crea una instancia para el período fiscal actual.
-     *
-     * @return self
      */
     public static function current(): self
     {
@@ -95,8 +87,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el año del período fiscal.
-     *
-     * @return int
      */
     public function year(): int
     {
@@ -105,8 +95,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el mes del período fiscal.
-     *
-     * @return int
      */
     public function month(): int
     {
@@ -115,18 +103,14 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el mes del período fiscal con formato de dos dígitos.
-     *
-     * @return string
      */
     public function formattedMonth(): string
     {
-        return str_pad($this->month, 2, '0', \STR_PAD_LEFT);
+        return str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT);
     }
 
     /**
      * Devuelve el período fiscal en formato YYYYMM.
-     *
-     * @return string
      */
     public function toString(): string
     {
@@ -135,8 +119,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el período fiscal en formato legible (MM/YYYY).
-     *
-     * @return string
      */
     public function toReadableString(): string
     {
@@ -145,8 +127,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Convierte el período fiscal a un objeto Carbon (primer día del mes).
-     *
-     * @return Carbon
      */
     public function toCarbon(): Carbon
     {
@@ -155,8 +135,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el período fiscal anterior.
-     *
-     * @return self
      */
     public function previous(): self
     {
@@ -166,8 +144,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve el período fiscal siguiente.
-     *
-     * @return self
      */
     public function next(): self
     {
@@ -179,8 +155,6 @@ class PeriodoFiscal implements \JsonSerializable
      * Compara si este período fiscal es igual a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
-     *
-     * @return bool
      */
     public function equals(PeriodoFiscal $other): bool
     {
@@ -191,8 +165,6 @@ class PeriodoFiscal implements \JsonSerializable
      * Compara si este período fiscal es anterior a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
-     *
-     * @return bool
      */
     public function isBefore(PeriodoFiscal $other): bool
     {
@@ -207,8 +179,6 @@ class PeriodoFiscal implements \JsonSerializable
      * Compara si este período fiscal es posterior a otro.
      *
      * @param PeriodoFiscal $other El otro período fiscal a comparar
-     *
-     * @return bool
      */
     public function isAfter(PeriodoFiscal $other): bool
     {
@@ -221,8 +191,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Implementación de JsonSerializable para permitir la serialización directa.
-     *
-     * @return array
      */
     public function jsonSerialize(): array
     {
@@ -235,8 +203,6 @@ class PeriodoFiscal implements \JsonSerializable
 
     /**
      * Devuelve un array con el año y mes para usar en modelos.
-     *
-     * @return array
      */
     public function toArray(): array
     {

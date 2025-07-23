@@ -6,7 +6,7 @@ namespace App\ValueObjects;
 
 readonly class CategoryIdentifier implements \Stringable
 {
-    private const CATEGORY_LENGTH = 4;
+    private const int CATEGORY_LENGTH = 4;
 
     public function __construct(
         private string $category,
@@ -59,8 +59,8 @@ readonly class CategoryIdentifier implements \Stringable
 
         return new self(
             category: $parts[0],
-            year: (int)$parts[1],
-            month: (int)$parts[2],
+            year: (int) $parts[1],
+            month: (int) $parts[2],
         );
     }
 
@@ -68,7 +68,7 @@ readonly class CategoryIdentifier implements \Stringable
     {
         $trimmedCategory = trim($this->category);
 
-        if (empty($trimmedCategory)) {
+        if ($trimmedCategory === '' || $trimmedCategory === '0') {
             throw new \InvalidArgumentException('La categoría es requerida');
         }
 

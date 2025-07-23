@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class PeriodoLiquidacion
 {
-    private Carbon $fecha;
+    private readonly Carbon $fecha;
 
     public function __construct(string $year, string $month)
     {

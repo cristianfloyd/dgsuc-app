@@ -7,9 +7,9 @@ namespace App\ValueObjects;
  *
  * Esta clase encapsula la validación y el acceso al valor del periodo.
  */
-class Periodo
+class Periodo implements \Stringable
 {
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $periodo)
     {

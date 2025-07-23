@@ -2,20 +2,18 @@
 
 namespace App\ValueObjects;
 
-use JsonSerializable;
-
 /**
  * Value Object que representa un número de liquidación en el sistema Mapuche.
  *
  * Este objeto garantiza que el número de liquidación siempre sea un valor válido
  * según las reglas de negocio establecidas.
  */
-class NroLiqui implements \JsonSerializable
+class NroLiqui implements \JsonSerializable, \Stringable
 {
     /**
      * @var int El valor del número de liquidación
      */
-    private int $value;
+    private readonly int $value;
 
     /**
      * Constructor que valida y establece el valor del número de liquidación.
@@ -32,20 +30,16 @@ class NroLiqui implements \JsonSerializable
 
     /**
      * Representación en string del número de liquidación.
-     *
-     * @return string
      */
     public function __toString(): string
     {
-        return (string)$this->value;
+        return (string) $this->value;
     }
 
     /**
      * Crea una nueva instancia a partir de un valor primitivo.
      *
      * @param int $value El número de liquidación
-     *
-     * @return self
      */
     public static function fromInt(int $value): self
     {
@@ -58,8 +52,6 @@ class NroLiqui implements \JsonSerializable
      * @param string $value El número de liquidación como string
      *
      * @throws \InvalidArgumentException Si el valor no puede convertirse a entero o no es válido
-     *
-     * @return self
      */
     public static function fromString(string $value): self
     {
@@ -67,13 +59,11 @@ class NroLiqui implements \JsonSerializable
             throw new \InvalidArgumentException('El número de liquidación debe ser numérico');
         }
 
-        return new self((int)$value);
+        return new self((int) $value);
     }
 
     /**
      * Devuelve el valor primitivo del número de liquidación.
-     *
-     * @return int
      */
     public function value(): int
     {
@@ -84,8 +74,6 @@ class NroLiqui implements \JsonSerializable
      * Compara si este número de liquidación es igual a otro.
      *
      * @param NroLiqui $other El otro número de liquidación a comparar
-     *
-     * @return bool
      */
     public function equals(NroLiqui $other): bool
     {
@@ -94,8 +82,6 @@ class NroLiqui implements \JsonSerializable
 
     /**
      * Implementación de JsonSerializable para permitir la serialización directa.
-     *
-     * @return int
      */
     public function jsonSerialize(): int
     {
