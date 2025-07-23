@@ -16,7 +16,7 @@ class UpdateDh13DTO extends Dh13DTO
      * @param int $codn_conce Código de concepto existente
      * @param int $nro_orden_formula Número de orden existente
      *
-     * @return static Nueva instancia del DTO
+     * @return self Nueva instancia del DTO
      */
     public static function fromRequest(
         Request $request,

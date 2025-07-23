@@ -14,14 +14,11 @@ class RetResultadoDTO
 
     public string $periodo;
 
-    public float $montoTotal;
-
-    public function __construct(RetResultado $retResultado, float $montoTotal)
+    public function __construct(RetResultado $retResultado, public float $montoTotal)
     {
         $this->nroLegaj = $retResultado->nro_legaj;
         $this->nroCargoAnt = $retResultado->nro_cargo_ant;
-        $this->fechaRetDesde = $retResultado->fecha_ret_desde->format('Y-m-d');
+        $this->fechaRetDesde = (string) $retResultado->fecha_ret_desde;
         $this->periodo = $retResultado->periodo;
-        $this->montoTotal = $montoTotal;
     }
 }

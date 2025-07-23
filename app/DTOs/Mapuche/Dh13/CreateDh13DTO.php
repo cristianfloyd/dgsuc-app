@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
  */
 class CreateDh13DTO extends Dh13DTO
 {
-    public static function rules($context): array
+    public static function rules($context = null): array
     {
         return [
             'codn_conce' => ['required', 'integer', 'min:1'],
@@ -21,8 +21,6 @@ class CreateDh13DTO extends Dh13DTO
 
     /**
      * Define mensajes personalizados para las reglas de validación.
-     *
-     * @return array
      */
     public static function messages(...$args): array
     {
