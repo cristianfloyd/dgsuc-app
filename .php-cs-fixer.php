@@ -37,7 +37,7 @@ return (new PhpCsFixer\Config())
         // === STRINGS Y CONCATENACIÓN ===
         'concat_space' => ['spacing' => 'one'], // 'Hello' . 'World'
         'single_quote' => true,
-        'escape_implicit_backslashes' => true,
+        // 'escape_implicit_backslashes' => true,
         
         // === CLASES Y MÉTODOS ===
         'class_attributes_separation' => [
@@ -132,7 +132,6 @@ return (new PhpCsFixer\Config())
         // === OPTIMIZACIONES ===
         'dir_constant' => true, // dirname(__FILE__) -> __DIR__
         'function_to_constant' => true, // phpversion() -> PHP_VERSION
-        'is_null' => true,
         'logical_operators' => true, // and/or -> &&/||
         
     ])

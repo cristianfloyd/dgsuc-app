@@ -18,7 +18,7 @@ class RetResultadoDTO
     {
         $this->nroLegaj = $retResultado->nro_legaj;
         $this->nroCargoAnt = $retResultado->nro_cargo_ant;
-        $this->fechaRetDesde = (string) $retResultado->fecha_ret_desde;
+        $this->fechaRetDesde = (string)$retResultado->fecha_ret_desde;
         $this->periodo = $retResultado->periodo;
     }
 }
