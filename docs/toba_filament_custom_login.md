@@ -1,60 +1,108 @@
-# Implementación de Login Toba con Estilos FilamentPHP
+# Implementación de Panel Toba con FilamentPHP
 
-Este documento detalla cómo crear una página de login profesional para el sistema de autenticación Toba utilizando componentes y estilos de FilamentPHP 3.x.
+Este documento detalla la implementación completa de un panel FilamentPHP dedicado para el sistema de autenticación Toba con página de login profesional y funcionalidades avanzadas.
 
-## Resumen del Sistema Actual
+## Resumen del Sistema Final
 
-La aplicación cuenta con un sistema de autenticación dual:
+La aplicación cuenta con un sistema de autenticación dual completamente integrado:
 - **Laravel Eloquent**: Guard `web` para usuarios de Laravel (`/login`)
-- **Toba**: Guard `toba` para usuarios del sistema Toba (`/toba/login`)
+- **Panel Toba FilamentPHP**: Sistema completo en `/toba` con login personalizado
 
-### Componentes Existentes
+### Componentes del Sistema
 
 - **TobaGuard**: Implementa la lógica de autenticación personalizada
 - **TobaUserProvider**: Maneja la sincronización entre usuarios Toba y Laravel
-- **TobaLoginController**: Controlador que autentica en ambos guards simultáneamente
-- **Vista actual**: `resources/views/auth/toba-login.blade.php` (básica sin estilos)
+- **Panel Toba**: Panel FilamentPHP completo con todas las características avanzadas
+- **Login Personalizado**: Página de login integrada con componentes Filament
 
-## Estrategia de Implementación
+## Arquitectura Final Implementada
 
-### 1. Creación de Página de Login Personalizada con FilamentPHP
+### 1. Panel Toba FilamentPHP
 
-Basándose en la documentación oficial de FilamentPHP, implementaremos una página de login que:
+Se creó un panel completo de FilamentPHP dedicado exclusivamente para Toba que incluye:
 
-- Extienda las clases base de autenticación de Filament
-- Utilice componentes de formulario de Filament para consistencia visual
-- Mantenga la compatibilidad con el sistema Toba existente
-- Implemente el flujo de autenticación dual (toba + web guards)
+- **Panel Provider**: `TobaPanelProvider` configurado con todas las características
+- **Login Personalizado**: Página de autenticación específica para credenciales Toba
+- **Respuesta Personalizada**: Redirección automática a `/selector-panel`
+- **Guard Específico**: Usa el guard `toba` para autenticación
+- **Branding Personalizado**: "Sistema Toba - UBA" con colores específicos
 
-### 2. Estructura de Archivos Propuesta
+### 2. Estructura de Archivos Implementada
 
 ```
-app/Filament/Auth/
-├── TobaLogin.php                    # Página de login personalizada
-└── TobaLoginController.php          # Controlador específico para Filament
+app/Providers/Filament/
+└── TobaPanelProvider.php            # Provider del panel Toba
 
-resources/views/filament/auth/
-└── toba-login.blade.php             # Vista Blade con componentes Filament
+app/Filament/Toba/Auth/
+└── Login.php                        # Página de login FilamentPHP
+
+app/Http/Responses/Auth/
+└── TobaLoginResponse.php            # Respuesta personalizada de login
+
+resources/views/filament/toba/auth/
+└── login.blade.php                  # Vista personalizada con enlace a Laravel
 ```
 
 ### 3. Implementación Detallada
 
-#### A. Página de Login Personalizada (`app/Filament/Auth/TobaLogin.php`)
+#### A. Panel Provider (`app/Providers/Filament/TobaPanelProvider.php`)
 
 ```php
 <?php
 
-namespace App\Filament\Auth;
+namespace App\Providers\Filament;
 
+use App\Filament\Toba\Auth\Login;
+use App\Http\Responses\Auth\TobaLoginResponse;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+
+class TobaPanelProvider extends PanelProvider
+{
+    public function register(): void
+    {
+        parent::register();
+        
+        // Registrar respuesta personalizada de login para el panel Toba
+        $this->app->bind(LoginResponse::class, TobaLoginResponse::class);
+    }
+    
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id('toba')
+            ->path('toba')
+            ->login(Login::class)
+            ->authGuard('toba')
+            ->colors([
+                'primary' => Color::Blue,
+            ])
+            ->brandName('Sistema Toba - UBA')
+            // ... resto de configuración
+    }
+}
+```
+
+#### B. Página de Login Personalizada (`app/Filament/Toba/Auth/Login.php`)
+
+```php
+<?php
+
+namespace App\Filament\Toba\Auth;
+
+use App\Http\Responses\Auth\TobaLoginResponse;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class TobaLogin extends BaseLogin
+class Login extends BaseLogin
 {
-    protected static string $view = 'filament.auth.toba-login';
+    protected static string $view = 'filament.toba.auth.login';
     
     public function form(Form $form): Form
     {
@@ -76,7 +124,7 @@ class TobaLogin extends BaseLogin
             ->statePath('data');
     }
     
-    public function authenticate(): ?string
+    public function authenticate(): ?LoginResponse
     {
         $data = $this->form->getState();
         
@@ -89,12 +137,13 @@ class TobaLogin extends BaseLogin
         if (Auth::guard('toba')->attempt($credentials)) {
             $tobaUser = Auth::guard('toba')->user();
             
-            // Sincronizar con guard web
+            // Sincronizar con guard web para compatibilidad
             Auth::guard('web')->login($tobaUser);
             
             session()->regenerate();
             
-            return '/'; // Redirección exitosa
+            // Usar respuesta personalizada que redirige a selector-panel
+            return app(TobaLoginResponse::class);
         }
         
         throw ValidationException::withMessages([
@@ -102,27 +151,43 @@ class TobaLogin extends BaseLogin
         ]);
     }
     
-    protected function getHeading(): string
+    public function getHeading(): string
     {
         return 'Iniciar Sesión - Sistema Toba';
     }
     
-    protected function getSubheading(): ?string
+    public function getSubheading(): ?string
     {
         return 'Accede con tus credenciales del sistema Toba';
     }
 }
 ```
 
-#### B. Vista Blade Personalizada (`resources/views/filament/auth/toba-login.blade.php`)
+#### C. Respuesta Personalizada de Login (`app/Http/Responses/Auth/TobaLoginResponse.php`)
+
+```php
+<?php
+
+namespace App\Http\Responses\Auth;
+
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+
+class TobaLoginResponse implements LoginResponse
+{
+    public function toResponse($request)
+    {
+        return redirect('/selector-panel');
+    }
+}
+```
+
+#### D. Vista Blade Personalizada (`resources/views/filament/toba/auth/login.blade.php`)
 
 ```blade
 <x-filament-panels::page.simple>
-    @if (filament()->hasLogin())
-        <x-slot name="subheading">
-            {{ $this->getSubheading() }}
-        </x-slot>
-    @endif
+    <x-slot name="subheading">
+        {{ $this->getSubheading() }}
+    </x-slot>
 
     {{ \Filament\Support\Facades\FilamentView::renderHook('panels::auth.login.form.before') }}
 
@@ -137,97 +202,63 @@ class TobaLogin extends BaseLogin
 
     {{ \Filament\Support\Facades\FilamentView::renderHook('panels::auth.login.form.after') }}
 
-    <div class="text-center">
+    <div class="text-center mt-6 space-y-3">
+        <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                    o
+                </span>
+            </div>
+        </div>
+
         <x-filament::link
             href="{{ route('login') }}"
             size="sm"
+            color="gray"
+            class="block"
         >
-            ¿Prefieres usar tu cuenta Laravel?
+            Iniciar sesión con usuario Laravel
         </x-filament::link>
+    </div>
+
+    <div class="text-center mt-6">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+            Sistema de Gestión Universitaria - Universidad de Buenos Aires
+        </p>
     </div>
 </x-filament-panels::page.simple>
 ```
 
-#### C. Actualización del Controlador (`app/Http/Controllers/Auth/TobaLoginController.php`)
-
-```php
-<?php
-
-namespace App\Http\Controllers\Auth;
-
-use App\Filament\Auth\TobaLogin;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
-
-class TobaLoginController extends Controller
-{
-    public function showLoginForm()
-    {
-        // Renderizar la página de Filament
-        return app(TobaLogin::class)->render();
-    }
-    
-    public function login(Request $request)
-    {
-        $request->validate([
-            'usuario' => 'required|string',
-            'clave' => 'required|string',
-        ]);
-        
-        $credentials = $request->only('usuario', 'clave');
-        
-        if (Auth::guard('toba')->attempt($credentials)) {
-            $tobaUser = Auth::guard('toba')->user();
-            Auth::guard('web')->login($tobaUser);
-            
-            $request->session()->regenerate();
-            
-            return redirect()->intended('/');
-        }
-        
-        throw ValidationException::withMessages([
-            'usuario' => 'Las credenciales no coinciden con nuestros registros.',
-        ]);
-    }
-    
-    public function logout(Request $request)
-    {
-        Auth::guard('toba')->logout();
-        Auth::guard('web')->logout();
-        
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        
-        return redirect('/toba/login');
-    }
-}
-```
-
 ### 4. Configuración de Rutas
 
-Actualizar `routes/web.php` para usar la nueva implementación:
+Las rutas del panel se gestionan automáticamente por FilamentPHP. Las rutas legacy se mantienen para compatibilidad:
 
 ```php
-// Rutas de autenticación Toba con prefijo
-Route::prefix('toba')->group(function () {
-    Route::get('/login', [TobaLoginController::class, 'showLoginForm'])
-        ->name('toba.login.form');
-    Route::post('/login', [TobaLoginController::class, 'login'])
-        ->name('toba.login');
-    Route::post('/logout', [TobaLoginController::class, 'logout'])
-        ->name('toba.logout');
+// Rutas de autenticación Toba con prefijo (para compatibilidad con código existente)
+Route::prefix('toba-legacy')->group(function () {
+    Route::get('/login', [TobaLoginController::class, 'showLoginForm'])->name('toba.login.form');
+    Route::post('/login', [TobaLoginController::class, 'login'])->name('toba.login');
+    Route::post('/logout', [TobaLoginController::class, 'logout'])->name('toba.logout');
+    
+    // Rutas adicionales Toba
+    Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordForm'])->name('toba.password.change');
+    Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('toba.two-factor.verify');
 });
+
+// Panel Toba ahora está disponible en /toba (manejado por FilamentPHP)
 ```
 
-### 5. Características del Diseño
+### 5. Características del Sistema Final
 
-#### Componentes FilamentPHP Utilizados
-- **TextInput**: Campos de usuario y contraseña con estilos consistentes
+#### Componentes FilamentPHP Implementados
+- **Panel Completo**: Sistema FilamentPHP completo con todas las características
+- **TextInput**: Campos de usuario y contraseña con estilos consistentes  
 - **Form**: Contenedor de formulario con validación integrada
 - **Page Layout**: Layout simple y profesional
-- **Link Components**: Enlaces estilizados
+- **Link Components**: Enlaces estilizados con separador visual
 - **Actions**: Botones con estilos uniformes
 
 #### Elementos de UX/UI
@@ -237,64 +268,70 @@ Route::prefix('toba')->group(function () {
 - **Validación en tiempo real**: Errores mostrados inmediatamente
 - **Mensajes localizados**: Textos en español
 - **Responsive**: Adaptable a dispositivos móviles
+- **Separador Visual**: División elegante entre opciones de login
+- **Enlace Laravel**: Opción clara para usar login tradicional
 
-### 6. Funcionalidades Avanzadas Opcionales
+### 6. Funcionalidades Avanzadas Implementadas
 
-#### A. Tema Personalizado
-```php
-// En TobaLogin.php
-protected function getViewData(): array
-{
-    return [
-        'brandName' => config('app.name'),
-        'brandLogo' => asset('images/logo-uba.png'),
-    ];
-}
-```
+#### A. Respuesta Personalizada de Login
+- **Redirección Automática**: Lleva directamente a `/selector-panel`
+- **Sesión Correcta**: Mantiene `user_id` en la tabla sessions
+- **Compatibilidad FilamentPHP**: Usa el sistema de respuestas de Filament
 
-#### B. Recordar Sesión
-```php
-// Agregar checkbox "Recordarme"
-Checkbox::make('remember')
-    ->label('Recordarme')
-```
+#### B. Autenticación Dual
+- **Guard Toba**: Autenticación principal con credenciales Toba
+- **Guard Web**: Sincronización para compatibilidad con Laravel
+- **Sesión Unificada**: Mismo usuario autenticado en ambos guards
 
-#### C. Redirección Inteligente
-```php
-// En authenticate()
-$intended = session()->pull('url.intended', '/');
-return $intended;
-```
+#### C. Branding Personalizado
+- **Nombre**: "Sistema Toba - UBA"
+- **Colores**: Esquema azul profesional
+- **Subtítulo**: Texto descriptivo específico
 
-## Beneficios de la Implementación
+## Beneficios de la Implementación Final
 
-1. **Consistencia Visual**: Usa el sistema de diseño de FilamentPHP
-2. **Experiencia Profesional**: Login moderno y pulido
-3. **Mantenibilidad**: Código organizado siguiendo patrones de Filament
+1. **Panel Completo**: Sistema FilamentPHP completo con todas las características avanzadas
+2. **Experiencia Profesional**: Login moderno y dashboard integrado
+3. **Mantenibilidad**: Código organizado siguiendo patrones oficiales de Filament
 4. **Accesibilidad**: Componentes accesibles por defecto
-5. **Responsivo**: Funciona en todos los dispositivos
-6. **Validación Robusta**: Sistema de validación integrado
-7. **Compatibilidad**: Mantiene toda la funcionalidad Toba existente
+5. **Responsivo**: Funciona perfectamente en todos los dispositivos
+6. **Validación Robusta**: Sistema de validación integrado de FilamentPHP
+7. **Compatibilidad Total**: Mantiene toda la funcionalidad Toba existente
+8. **Sesión Correcta**: Resuelve problemas de `user_id` null en sessions
+9. **Doble Opción**: Permite elegir entre login Toba y Laravel
+10. **Redirección Inteligente**: Lleva automáticamente al selector de panel
 
-## Consideraciones de Implementación
+### Archivos Creados/Modificados
 
-### Dependencias
-- FilamentPHP 3.2+ (ya instalado según composer.json)
-- Laravel 11 (ya configurado)
-- Sistema Toba existente (ya implementado)
+#### Archivos Nuevos:
+- `app/Providers/Filament/TobaPanelProvider.php`
+- `app/Filament/Toba/Auth/Login.php`
+- `app/Http/Responses/Auth/TobaLoginResponse.php`
+- `resources/views/filament/toba/auth/login.blade.php`
 
-### Archivos a Modificar
-1. Crear: `app/Filament/Auth/TobaLogin.php`
-2. Crear: `resources/views/filament/auth/toba-login.blade.php`
-3. Actualizar: `app/Http/Controllers/Auth/TobaLoginController.php`
-4. Opcional: Actualizar estilos CSS personalizados
+#### Archivos Modificados:
+- `routes/web.php` - Rutas legacy movidas a prefijo `toba-legacy`
+- `bootstrap/providers.php` - Registro automático del TobaPanelProvider
 
-### Testing
-- Verificar autenticación dual funciona correctamente
-- Validar estilos en diferentes navegadores
-- Probar responsividad en dispositivos móviles
-- Confirmar accesibilidad con lectores de pantalla
+### URLs del Sistema
+
+- **Panel Toba**: `/toba` - Panel FilamentPHP completo
+- **Login Toba**: `/toba/login` - Página de login profesional
+- **Login Laravel**: `/login` - Login tradicional Laravel
+- **Selector Panel**: `/selector-panel` - Destino después del login
+
+### Estado del Sistema
+
+✅ **Completamente Funcional:**
+- Autenticación dual (Toba + Laravel) funcionando
+- Sesiones correctas (`user_id` almacenado correctamente)
+- Panel FilamentPHP completo disponible
+- Redirección automática al selector de panel
+- Enlace bidireccional entre sistemas de login
+- Branding y diseño profesional implementado
 
 ## Conclusión
 
-Esta implementación combina la robustez del sistema de autenticación Toba existente con la elegancia y profesionalismo de FilamentPHP, creando una experiencia de usuario superior sin comprometer la funcionalidad técnica.
+La implementación final proporciona un **panel FilamentPHP completo y profesional** para el sistema Toba, manteniendo total compatibilidad con el sistema Laravel existente. Los usuarios pueden acceder a un sistema moderno y completo mientras se preserva toda la funcionalidad técnica previa.
+
+**Resultado:** Sistema dual completamente integrado con experiencia de usuario profesional.
