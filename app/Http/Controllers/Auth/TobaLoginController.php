@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Filament\Auth\TobaLogin;
 use App\Models\TobaUser;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -12,7 +13,8 @@ class TobaLoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.toba-login');
+        // Renderizar la página de Filament
+        return app(TobaLogin::class)->render();
     }
 
     public function login(Request $request)
@@ -67,7 +69,7 @@ class TobaLoginController extends Controller
                     ->with('info', 'Ingrese su segundo factor de autenticación.');
             }
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
@@ -78,8 +80,11 @@ class TobaLoginController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('toba')->logout();
+        Auth::guard('web')->logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        
+        return redirect('/toba/login');
     }
 }

@@ -38,8 +38,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
-// Rutas de autenticación Toba con prefijo
-Route::prefix('toba')->group(function () {
+// Rutas de autenticación Toba con prefijo (para compatibilidad con código existente)
+Route::prefix('toba-legacy')->group(function () {
     Route::get('/login', [TobaLoginController::class, 'showLoginForm'])->name('toba.login.form');
     Route::post('/login', [TobaLoginController::class, 'login'])->name('toba.login');
     Route::post('/logout', [TobaLoginController::class, 'logout'])->name('toba.logout');
@@ -48,6 +48,8 @@ Route::prefix('toba')->group(function () {
     Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordForm'])->name('toba.password.change');
     Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('toba.two-factor.verify');
 });
+
+// Panel Toba ahora está disponible en /toba (manejado por FilamentPHP)
 
 
 
