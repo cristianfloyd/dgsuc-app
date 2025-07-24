@@ -2,30 +2,30 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Afip\Pages\SicossControles;
-use App\Filament\Afip\Pages\SicossReportePage;
-use App\Filament\Afip\Pages\SicossUpdates;
-use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
-use App\Filament\Pages\DashboardSelector;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
+use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
+use App\Filament\Pages\DashboardSelector;
+use App\Filament\Afip\Pages\SicossUpdates;
+use Filament\Http\Middleware\Authenticate;
+use App\Filament\Afip\Pages\SicossControles;
+use App\Filament\Afip\Pages\SicossReportePage;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Filament\Http\Middleware\AuthenticateSession;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use App\Filament\Afip\Widgets\AfipRelacionesActivasStats;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
 class AfipPanelProvider extends PanelProvider
 {
@@ -77,7 +77,8 @@ class AfipPanelProvider extends PanelProvider
                 'AFIP',
                 'Configuración',
             ])
-            ->sidebarFullyCollapsibleOnDesktop()
+            ->topNavigation()
+            // ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->font('Poppins');
     }
