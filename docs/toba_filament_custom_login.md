@@ -4,9 +4,9 @@ Este documento detalla la implementación completa de un panel FilamentPHP dedic
 
 ## Resumen del Sistema Final
 
-La aplicación cuenta con un sistema de autenticación dual completamente integrado:
-- **Laravel Eloquent**: Guard `web` para usuarios de Laravel (`/login`)
-- **Panel Toba FilamentPHP**: Sistema completo en `/toba` con login personalizado
+La aplicación cuenta con un sistema de autenticación dual **completamente bidireccional**:
+- **Laravel Eloquent**: Guard `web` para usuarios de Laravel (`/login`) - **Incluye enlace a Toba**
+- **Panel Toba FilamentPHP**: Sistema completo en `/toba` con login personalizado - **Incluye enlace a Laravel**
 
 ### Componentes del Sistema
 
@@ -288,6 +288,12 @@ Route::prefix('toba-legacy')->group(function () {
 - **Colores**: Esquema azul profesional
 - **Subtítulo**: Texto descriptivo específico
 
+#### D. Sistema Bidireccional
+- **Login Laravel**: Incluye botón "Sistema Toba" que lleva a `/toba`
+- **Login Toba**: Incluye enlace "Iniciar sesión con usuario Laravel"
+- **Separadores Visuales**: Divisores elegantes en ambas páginas
+- **Iconografía Consistente**: Iconos SVG para identificar cada sistema
+
 ## Beneficios de la Implementación Final
 
 1. **Panel Completo**: Sistema FilamentPHP completo con todas las características avanzadas
@@ -298,8 +304,9 @@ Route::prefix('toba-legacy')->group(function () {
 6. **Validación Robusta**: Sistema de validación integrado de FilamentPHP
 7. **Compatibilidad Total**: Mantiene toda la funcionalidad Toba existente
 8. **Sesión Correcta**: Resuelve problemas de `user_id` null en sessions
-9. **Doble Opción**: Permite elegir entre login Toba y Laravel
+9. **Sistema Bidireccional**: Navegación fluida entre ambos sistemas de login
 10. **Redirección Inteligente**: Lleva automáticamente al selector de panel
+11. **Experiencia Unificada**: Diseño consistente y profesional en ambas páginas
 
 ### Archivos Creados/Modificados
 
@@ -312,6 +319,7 @@ Route::prefix('toba-legacy')->group(function () {
 #### Archivos Modificados:
 - `routes/web.php` - Rutas legacy movidas a prefijo `toba-legacy`
 - `bootstrap/providers.php` - Registro automático del TobaPanelProvider
+- `resources/views/auth/login.blade.php` - **Agregado enlace bidireccional a Toba**
 
 ### URLs del Sistema
 
@@ -327,11 +335,32 @@ Route::prefix('toba-legacy')->group(function () {
 - Sesiones correctas (`user_id` almacenado correctamente)
 - Panel FilamentPHP completo disponible
 - Redirección automática al selector de panel
-- Enlace bidireccional entre sistemas de login
+- **Sistema completamente bidireccional** entre login Laravel y Toba
 - Branding y diseño profesional implementado
+- Navegación fluida con separadores visuales elegantes
 
 ## Conclusión
 
 La implementación final proporciona un **panel FilamentPHP completo y profesional** para el sistema Toba, manteniendo total compatibilidad con el sistema Laravel existente. Los usuarios pueden acceder a un sistema moderno y completo mientras se preserva toda la funcionalidad técnica previa.
 
-**Resultado:** Sistema dual completamente integrado con experiencia de usuario profesional.
+**Resultado:** Sistema dual completamente integrado y **bidireccional** con experiencia de usuario profesional.
+
+### Flujo de Navegación Bidireccional
+
+#### Desde Login Laravel (`/login`):
+1. Usuario ve formulario de login Laravel estándar
+2. Separador visual: "o continúa con"
+3. Botón "UBA account" (Office365)
+4. **Botón "Sistema Toba"** → Lleva a `/toba`
+
+#### Desde Login Toba (`/toba/login`):
+1. Usuario ve formulario de login Toba (usuario/clave)
+2. Separador visual elegante
+3. **Enlace "Iniciar sesión con usuario Laravel"** → Lleva a `/login`
+4. Texto descriptivo de la universidad
+
+#### Experiencia del Usuario:
+- **Navegación fluida** entre ambos sistemas
+- **Diseño consistente** con separadores visuales
+- **Iconografía clara** para identificar cada sistema
+- **Sin interrupciones** en la experiencia de usuario

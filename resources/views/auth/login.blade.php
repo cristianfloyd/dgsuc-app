@@ -40,8 +40,8 @@
                         <div class="divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-300">
                             <div class="py-8 text-base leading-6 space-y-4 text-gray-700 dark:text-gray-300 sm:text-lg sm:leading-7">
                                 <div class="text-center mb-8">
-                                    <x-authentication-card-logo class="mx-auto h-12 w-auto" />
-                                    <h1 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 ease-in-out">Bienvenido</h1>
+                                    <img src="{{ asset('images/logofooter.png') }}" alt="Logo UBA" class="mx-auto h-16 w-auto mb-4" />
+                                    <h1 class="mt-4 text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300 ease-in-out">Bienvenido</h1>
                                 </div>
 
                                 <x-validation-errors class="mb-4" />
@@ -84,9 +84,30 @@
                                     </div>
                                 </form>
 
-                                <div class="mt-6">
+                                <div class="mt-6 space-y-3">
+                                    <div class="relative">
+                                        <div class="absolute inset-0 flex items-center">
+                                            <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                                        </div>
+                                        <div class="relative flex justify-center text-sm">
+                                            <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                                o continúa con
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <a href="{{ route('auth.office365') }}" class="w-full justify-center inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.5 12c0-6.351-5.149-11.5-11.5-11.5s-11.5 5.149-11.5 11.5 5.149 11.5 11.5 11.5 11.5-5.149 11.5-11.5zm-6.5 0c0 2.761-2.239 5-5 5s-5-2.239-5-5 2.239-5 5-5 5 2.239 5 5z"/>
+                                        </svg>
                                         {{ __('UBA account') }}
+                                    </a>
+
+                                    <a href="/toba" class="w-full justify-center inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        </svg>
+                                        Sistema Toba
                                     </a>
                                 </div>
                             </div>

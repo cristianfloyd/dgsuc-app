@@ -42,6 +42,8 @@ class TobaPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->brandName('DGSUC - UBA')
+            ->brandLogo(asset('images/logofooter.png'))
+            ->brandLogoHeight('3rem')
             ->discoverResources(in: app_path('Filament/Toba/Resources'), for: 'App\\Filament\\Toba\\Resources')
             ->discoverPages(in: app_path('Filament/Toba/Pages'), for: 'App\\Filament\\Toba\\Pages')
             ->pages([
