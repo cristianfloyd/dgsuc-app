@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
+use App\Auth\TobaGuard;
 use App\Auth\TobaUserProvider;
-use App\Services\TobaApiService;
+use App\Services\TobaAuthService;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,15 +15,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // $this->registerPolicies();
-
-        Auth::provider('toba', function ($app, array $config) {
-            return new TobaUserProvider(
-                $app->make(TobaApiService::class),
-                $app['hash'],
-                $config['model'],
-            );
-        });
+        //
     }
 
     /**
@@ -30,8 +23,20 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Gate::before(function (User $user, string $ability) {
-        //     return $user->isSuperAdmin() ? true: null;
-        // });
+        $this->registerPolicies();
+
+        // Registrar el provider personalizado
+        Auth::provider('toba', function ($app, array $config) {
+            return new TobaUserProvider($app->make(TobaAuthService::class));
+        });
+
+        // Registrar el guard personalizado
+        Auth::extend('toba', function ($app, $name, array $config) {
+            return new TobaGuard(
+                $name,
+                Auth::createUserProvider($config['provider']),
+                $app['session.store']
+            );
+        });
     }
 }

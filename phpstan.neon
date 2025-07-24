@@ -21,6 +21,7 @@ parameters:
         - public/
         - resources/
         - '*/migrations/*_create_*_table.php'
+        - *.blade.php
     
     # Bootstrap files para Laravel
     bootstrapFiles:

@@ -331,6 +331,18 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'toba' => [
+            'driver' => 'pgsql',
+            'host' => env('TOBA_DB_HOST'),
+            'port' => env('TOBA_DB_PORT'),
+            'database' => env('TOBA_DB_DATABASE'),
+            'username' => env('TOBA_DB_USERNAME'),
+            'password' => env('TOBA_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'toba_mapuche',
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),

@@ -2,71 +2,154 @@
 
 namespace App\Auth;
 
+use App\Models\TobaUser;
 use App\Models\User;
-use App\Services\TobaApiService;
+use App\Services\TobaAuthService;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Support\Facades\Log;
 
 class TobaUserProvider implements UserProvider
 {
-    protected $tobaApi;
+    protected $tobaAuthService;
 
-    protected $hasher;
-
-    protected $model;
-
-    public function __construct(TobaApiService $tobaApi, $hasher, $model)
+    public function __construct(TobaAuthService $tobaAuthService)
     {
-        $this->tobaApi = $tobaApi;
-        $this->hasher = $hasher;
-        $this->model = $model;
+        $this->tobaAuthService = $tobaAuthService;
     }
 
-    public function retrieveById($identifier): void
+    public function retrieveById($identifier)
     {
-        // Implementa la lógica para recuperar un usuario por ID desde Toba
+        // Buscar en la tabla users de Laravel por ID numérico
+        return User::find($identifier);
     }
 
-    public function retrieveByToken($identifier, $token): void
+    public function retrieveByToken($identifier, $token)
     {
-        // No es necesario implementar si no usas "remember me"
+        // No implementado para este caso
+        return null;
     }
 
-    public function updateRememberToken(Authenticatable $user, $token): void
+    public function updateRememberToken(Authenticatable $user, $token)
     {
-        // No es necesario implementar si no usas "remember me"
+        // No implementado para este caso
     }
 
     public function retrieveByCredentials(array $credentials)
     {
-        $response = $this->tobaApi->login($credentials['username'], $credentials['password']);
+        Log::debug('TobaUserProvider retrieveByCredentials start', ['usuario' => $credentials['usuario'] ?? 'not_set']);
+        
+        if (!isset($credentials['usuario'])) {
+            Log::debug('TobaUserProvider: usuario not set in credentials');
+            return null;
+        }
 
-        if ($response && isset($response['token'])) {
-            $userInfo = $this->tobaApi->getUserInfo($response['token']);
+        // Buscar usuario de Toba
+        $tobaUser = TobaUser::where('usuario', $credentials['usuario'])->first();
+        if (!$tobaUser) {
+            Log::debug('TobaUserProvider: Toba user not found', ['usuario' => $credentials['usuario']]);
+            return null;
+        }
+        
+        Log::debug('TobaUserProvider: Toba user found', ['usuario' => $credentials['usuario']]);
 
-            if ($userInfo) {
-                return new User([
-                    'id' => $userInfo['id'],
-                    'name' => $userInfo['name'],
-                    'email' => $userInfo['email'],
-                    'toba_token' => $response['token'],
+        // Buscar usuario en Laravel: primero por toba_usuario, luego por name
+        $laravelUser = User::where('toba_usuario', $credentials['usuario'])->first();
+        
+        if (!$laravelUser) {
+            // Si no existe por toba_usuario, buscar por name o username (usuario existente de Laravel)
+            $laravelUser = User::where('name', $credentials['usuario'])
+                              ->orWhere('username', $credentials['usuario'])
+                              ->first();
+            
+            if ($laravelUser) {
+                // Usuario existente en Laravel: agregar toba_usuario
+                $laravelUser->update([
+                    'toba_usuario' => $credentials['usuario'],
+                    'name' => $credentials['usuario'], // Asegurar que sean iguales
+                    'username' => $credentials['usuario'], // username = toba_usuario
+                    'email' => $tobaUser->email ?: $laravelUser->email, // Mantener email si Toba no lo tiene
+                ]);
+                
+                Log::debug('Updated existing Laravel user with Toba data', [
+                    'toba_usuario' => $credentials['usuario'],
+                    'laravel_user_id' => $laravelUser->id
+                ]);
+            } else {
+                // Crear nuevo usuario en Laravel basado en datos de Toba
+                $laravelUser = User::create([
+                    'name' => $credentials['usuario'], // name = toba_usuario
+                    'username' => $credentials['usuario'], // username = toba_usuario
+                    'email' => $tobaUser->email ?? $credentials['usuario'] . '@toba.local',
+                    'password' => bcrypt('toba_user'), // Password dummy, no se usa
+                    'toba_usuario' => $credentials['usuario'],
+                    'email_verified_at' => now(),
+                ]);
+                
+                Log::debug('Created new Laravel user for Toba user', [
+                    'toba_usuario' => $credentials['usuario'],
+                    'laravel_user_id' => $laravelUser->id
+                ]);
+            }
+        } else {
+            // Usuario ya sincronizado: actualizar datos si es necesario
+            $updates = [];
+            
+            if ($laravelUser->name !== $credentials['usuario']) {
+                $updates['name'] = $credentials['usuario'];
+            }
+            
+            if ($laravelUser->username !== $credentials['usuario']) {
+                $updates['username'] = $credentials['usuario'];
+            }
+            
+            if ($tobaUser->email && $laravelUser->email !== $tobaUser->email) {
+                $updates['email'] = $tobaUser->email;
+            }
+            
+            if (!empty($updates)) {
+                $laravelUser->update($updates);
+                Log::debug('Updated synchronized Laravel user', [
+                    'toba_usuario' => $credentials['usuario'],
+                    'updates' => $updates
                 ]);
             }
         }
 
-        return null;
+        // Agregar datos de Toba al usuario de Laravel para acceso posterior
+        $laravelUser->toba_data = $tobaUser;
+        
+        Log::debug('TobaUserProvider retrieveByCredentials success', [
+            'laravel_user_id' => $laravelUser->id,
+            'usuario' => $credentials['usuario']
+        ]);
+        
+        return $laravelUser;
     }
 
     public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        // Implementa la lógica para validar las credenciales contra Toba
-        return true;
+        Log::debug('TobaUserProvider validateCredentials start', [
+            'user_id' => $user->id,
+            'usuario' => $credentials['usuario'] ?? 'not_set'
+        ]);
+        
+        $result = $this->tobaAuthService->autenticar(
+            $credentials['usuario'],
+            $credentials['clave']
+        );
+        
+        Log::debug('TobaUserProvider validateCredentials result', [
+            'result' => $result,
+            'usuario' => $credentials['usuario']
+        ]);
+        
+        return $result;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false): void
+    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
     {
+        // No necesario para Toba
     }
 }

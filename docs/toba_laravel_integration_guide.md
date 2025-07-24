@@ -1,6 +1,6 @@
 # Guía de Integración Laravel-Toba Authentication
 
-Esta guía te permitirá integrar la autenticación de usuarios de Toba en una aplicación Laravel 11, permitiendo que los usuarios se autentiquen usando sus credenciales existentes en Toba.
+Esta guía te permitirá integrar la autenticación de usuarios de Toba en una aplicación Laravel 11, manteniendo compatibilidad con la autenticación de Laravel existente y permitiendo que los usuarios se autentiquen usando sus credenciales de Toba.
 
 ## 📋 Prerrequisitos
 
@@ -42,9 +42,43 @@ Agregar la siguiente configuración en el array `connections`:
 ],
 ```
 
-### 2. Creación de Archivos
+### 2. Preparación de Base de Datos Laravel
 
-#### 2.1 Crear servicios de autenticación
+#### 2.1 Migración para columna toba_usuario
+
+```bash
+# Crear migración para agregar campo toba_usuario a tabla users
+php artisan make:migration add_toba_usuario_to_users_table
+```
+
+Implementar la migración:
+
+```php
+public function up(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('toba_usuario')->nullable()->unique()->after('email');
+        $table->index('toba_usuario');
+    });
+}
+
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->dropIndex(['toba_usuario']);
+        $table->dropColumn('toba_usuario');
+    });
+}
+```
+
+```bash
+# Ejecutar migración
+php artisan migrate
+```
+
+### 3. Creación de Archivos
+
+#### 3.1 Crear servicios de autenticación
 
 ```bash
 # Crear adaptador para toba_hash
@@ -54,14 +88,14 @@ php artisan make:class Services/TobaHashAdapter
 php artisan make:class Services/TobaAuthService
 ```
 
-#### 2.2 Crear modelo de usuario
+#### 3.2 Crear modelo de usuario
 
 ```bash
 # Crear modelo para usuarios de Toba
 php artisan make:model TobaUser
 ```
 
-#### 2.3 Crear providers y guards de autenticación
+#### 3.3 Crear providers y guards de autenticación
 
 ```bash
 # Crear provider personalizado
@@ -71,30 +105,30 @@ php artisan make:class Auth/TobaUserProvider
 php artisan make:class Auth/TobaGuard
 ```
 
-#### 2.4 Crear controlador de autenticación
+#### 3.4 Crear controlador de autenticación
 
 ```bash
 # Crear controlador de login
 php artisan make:controller Auth/TobaLoginController
 ```
 
-#### 2.5 Crear vista de login
+#### 3.5 Crear vista de login
 
 ```bash
 # Crear vista de login
 php artisan make:view auth.toba-login
 ```
 
-#### 2.6 Crear middleware (opcional)
+#### 3.6 Crear middleware (opcional)
 
 ```bash
 # Crear middleware para validaciones adicionales
 php artisan make:middleware TobaAuthMiddleware
 ```
 
-### 3. Configuración de Autenticación
+### 4. Configuración de Autenticación
 
-#### 3.1 Registrar providers en AuthServiceProvider
+#### 4.1 Registrar providers en AuthServiceProvider
 
 Modificar `app/Providers/AuthServiceProvider.php` y agregar en el método `boot()`:
 
@@ -119,13 +153,17 @@ public function boot()
 }
 ```
 
-#### 3.2 Configurar guards y providers
+#### 4.2 Configurar guards y providers
 
-Modificar `config/auth.php`:
+Modificar `config/auth.php` para mantener compatibilidad con ambos sistemas:
 
 ```php
 'guards' => [
     'web' => [
+        'driver' => 'session',
+        'provider' => 'users', // Mantener guard por defecto
+    ],
+    'toba' => [
         'driver' => 'toba',
         'provider' => 'toba_users',
     ],
@@ -133,17 +171,21 @@ Modificar `config/auth.php`:
 ],
 
 'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class, // Guard por defecto usa User
+    ],
     'toba_users' => [
         'driver' => 'toba',
-        'model' => App\Models\TobaUser::class,
+        'model' => App\Models\User::class, // Toba también usa User (sincronizado)
     ],
     // ... otros providers
 ],
 ```
 
-### 4. Configuración de Rutas
+### 5. Configuración de Rutas
 
-#### 4.1 Agregar rutas de autenticación
+#### 5.1 Agregar rutas de autenticación
 
 En `routes/web.php`:
 
@@ -160,21 +202,76 @@ Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordF
 Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('two-factor.verify');
 ```
 
-### 5. Archivos a Implementar
+### 6. Archivos a Implementar
 
 Después de ejecutar los comandos anteriores, deberás implementar el código en los siguientes archivos:
 
 - ✅ `app/Services/TobaHashAdapter.php` - Implementación de toba_hash
 - ✅ `app/Services/TobaAuthService.php` - Lógica de autenticación
-- ✅ `app/Models/TobaUser.php` - Modelo de usuario Toba
-- ✅ `app/Auth/TobaUserProvider.php` - Provider de autenticación
-- ✅ `app/Auth/TobaGuard.php` - Guard personalizado
-- ✅ `app/Http/Controllers/Auth/TobaLoginController.php` - Controlador de login
+- ✅ `app/Models/TobaUser.php` - Modelo de usuario Toba (para conexión a BD Toba)
+- ✅ `app/Auth/TobaUserProvider.php` - Provider que sincroniza Toba con Users de Laravel
+- ✅ `app/Auth/TobaGuard.php` - Guard personalizado con sincronización
+- ✅ `app/Http/Controllers/Auth/TobaLoginController.php` - Controlador con dual-guard login
 - ✅ `resources/views/auth/toba-login.blade.php` - Vista de login
 
-### 6. Testing y Verificación
+## 🔧 Arquitectura de la Integración
 
-#### 6.1 Verificar conexión a base de datos
+### Sistema Dual de Autenticación
+
+La integración funciona manteniendo **dos sistemas de autenticación simultáneos**:
+
+1. **Laravel Eloquent** (Guard 'web'): Autenticación tradicional con tabla `users`
+2. **Toba Integration** (Guard 'toba'): Autenticación contra Toba con sincronización
+
+### Flujo de Autenticación Toba
+
+```mermaid
+graph TD
+    A[Usuario ingresa credenciales] --> B[TobaLoginController]
+    B --> C[Auth::guard('toba')->attempt()]
+    C --> D[TobaUserProvider->retrieveByCredentials()]
+    D --> E{¿Usuario existe en BD Toba?}
+    E -->|No| F[Return null - Login fallido]
+    E -->|Sí| G[¿Usuario existe en Laravel users?]
+    G -->|No| H[Crear nuevo usuario en users]
+    G -->|Sí| I[Actualizar usuario existente]
+    H --> J[User con ID numérico]
+    I --> J
+    J --> K[TobaUserProvider->validateCredentials()]
+    K --> L[TobaAuthService->autenticar()]
+    L --> M{¿Credenciales válidas?}
+    M -->|No| N[Return false - Login fallido]
+    M -->|Sí| O[Return User model]
+    O --> P[Guard 'toba' autentica usuario]
+    P --> Q[Sincronizar con Guard 'web']
+    Q --> R[DatabaseSessionHandler guarda user_id numérico]
+    R --> S[Login exitoso - Ambos guards activos]
+```
+
+### Sincronización de Usuarios
+
+```php
+// TobaUserProvider lógica de sincronización
+1. Buscar por toba_usuario (ya sincronizado)
+2. Si no existe, buscar por name o username (usuario Laravel existente)  
+3. Si existe Laravel user: actualizar con toba_usuario
+4. Si no existe: crear nuevo user con name = username = toba_usuario
+5. Devolver User model con ID numérico para compatibilidad con sessions
+```
+
+### Compatibilidad con Sessions
+
+```php
+// TobaLoginController sincronización de guards
+Auth::guard('toba')->attempt($credentials);        // Autentica con Toba
+$tobaUser = Auth::guard('toba')->user();           // Usuario autenticado
+Auth::guard('web')->login($tobaUser);              // Sincroniza con guard por defecto
+// DatabaseSessionHandler usa Auth::user() (guard web) -> user_id numérico
+```
+
+### 7. Testing y Verificación
+
+#### 7.1 Verificar conexión a base de datos
 
 ```bash
 # Verificar que Laravel puede conectarse a Toba
@@ -186,7 +283,7 @@ En tinker:
 DB::connection('toba')->table('apex_usuario')->count();
 ```
 
-#### 6.2 Probar autenticación
+#### 7.2 Probar autenticación
 
 ```bash
 # Verificar que el servicio funciona
@@ -200,9 +297,30 @@ $result = $service->autenticar('usuario_prueba', 'contraseña_prueba');
 var_dump($result);
 ```
 
-### 7. Comandos Adicionales (Opcional)
+#### 7.3 Verificar sincronización
 
-#### 7.1 Para desarrollo y testing
+```bash
+# Verificar usuarios sincronizados
+php artisan tinker
+```
+
+En tinker:
+```php
+// Verificar usuarios con toba_usuario
+use App\Models\User;
+User::whereNotNull('toba_usuario')->get(['id', 'name', 'username', 'toba_usuario']);
+
+// Verificar que guard toba funciona
+Auth::guard('toba')->attempt(['usuario' => 'tu_usuario', 'clave' => 'tu_password']);
+Auth::guard('toba')->user(); // Debe mostrar User model con ID numérico
+
+// Verificar que guard web también funciona
+Auth::user(); // Debe mostrar el mismo usuario
+```
+
+### 8. Comandos Adicionales (Opcional)
+
+#### 8.1 Para desarrollo y testing
 
 ```bash
 # Crear tests unitarios
@@ -216,7 +334,7 @@ php artisan make:request TobaLoginRequest
 php artisan make:seeder TobaUserSeeder
 ```
 
-#### 7.2 Para migración de datos (si es necesario)
+#### 8.2 Para migración de datos (si es necesario)
 
 ```bash
 # Crear migración para tabla auxiliar
@@ -226,7 +344,7 @@ php artisan make:migration create_toba_sync_table
 php artisan make:job SyncTobaUsers
 ```
 
-### 8. Consideraciones de Seguridad
+### 9. Consideraciones de Seguridad
 
 - ✅ **Validación de usuarios bloqueados**
 - ✅ **Soporte para todos los algoritmos de hash de Toba**
@@ -234,8 +352,12 @@ php artisan make:job SyncTobaUsers
 - ✅ **Detección de cambio forzado de contraseña**
 - ✅ **Protección contra timing attacks con `hash_equals()`**
 
-### 9. Funcionalidades Implementadas
+### 10. Funcionalidades Implementadas
 
+- ✅ **Autenticación dual**: Laravel Eloquent + Toba simultáneos
+- ✅ **Sincronización automática**: Usuarios Toba → Laravel Users
+- ✅ **Compatibilidad con sessions**: user_id numérico en base de datos
+- ✅ **Sin duplicados**: Fusión inteligente de usuarios existentes
 - ✅ **Autenticación con credenciales de Toba**
 - ✅ **Soporte para algoritmos**: plano, md5, sha1, sha256, sha512, bcrypt
 - ✅ **Validación de usuarios bloqueados**
@@ -243,7 +365,7 @@ php artisan make:job SyncTobaUsers
 - ✅ **Soporte para segundo factor**
 - ✅ **Detección de cambio forzado de contraseña**
 
-### 10. Troubleshooting
+### 11. Troubleshooting
 
 #### Problemas comunes:
 
@@ -259,7 +381,22 @@ php artisan make:job SyncTobaUsers
    - Revisar logs en `storage/logs/laravel.log`
    - Verificar algoritmo de hash en BD
 
-### 11. Logs y Debugging
+4. **user_id null en sessions:**
+   - Verificar que TobaLoginController sincroniza guards
+   - Confirmar que Auth::guard('web')->login($user) se ejecuta
+   - Verificar que usuario tiene ID numérico válido
+
+5. **Error "Unique violation" en username:**
+   - Usuario ya existe en Laravel con mismo username
+   - TobaUserProvider debe buscar por name OR username
+   - Verificar que migración add_toba_usuario_to_users se ejecutó
+
+6. **Guards no sincronizados:**
+   - Auth::guard('toba')->user() funciona pero Auth::user() es null
+   - Falta sincronización en TobaLoginController
+   - Verificar que ambos guards usan mismo User model
+
+### 12. Logs y Debugging
 
 Para habilitar logs detallados, agregar en `.env`:
 
@@ -269,23 +406,58 @@ APP_DEBUG=true
 ```
 
 Los logs de autenticación se guardarán automáticamente y mostrarán:
+- Proceso completo de TobaUserProvider (retrieveByCredentials, validateCredentials)
+- Sincronización de usuarios (creación, actualización, fusión)
+- Estado de guards después del login (toba_user, default_user)
 - Intentos de login fallidos
 - Usuarios bloqueados
 - Errores de conexión
+
+#### Logs esperados en login exitoso:
+```
+TobaUserProvider retrieveByCredentials start {"usuario":"tu_usuario"}
+TobaUserProvider: Toba user found {"usuario":"tu_usuario"}
+Updated existing Laravel user with Toba data {"toba_usuario":"tu_usuario","laravel_user_id":1}
+TobaGuard login exitoso {"user_id":1,"username":"id","user_class":"App\\Models\\User"}
+Post-login state {"toba_user":1,"default_user":1,"session_id_before_check":"..."}
+```
 
 ---
 
 ## ✅ Checklist de Implementación
 
-- [ ] Configurar variables de entorno
-- [ ] Configurar conexión de BD en `config/database.php`
+### Configuración Inicial
+- [ ] Configurar variables de entorno (.env)
+- [ ] Configurar conexión de BD Toba en `config/database.php`
+- [ ] Crear y ejecutar migración `add_toba_usuario_to_users_table`
 - [ ] Ejecutar comandos artisan para crear archivos
-- [ ] Implementar código en cada archivo creado
-- [ ] Modificar `AuthServiceProvider.php`
-- [ ] Actualizar `config/auth.php`
-- [ ] Configurar rutas en `web.php`
-- [ ] Probar conexión a BD de Toba
-- [ ] Verificar autenticación con usuario de prueba
-- [ ] Revisar logs para errores
 
-Una vez completados todos estos pasos, tendrás una integración completa entre Laravel y Toba que permitirá a los usuarios autenticarse usando sus credenciales existentes en Toba.
+### Implementación de Código
+- [ ] Implementar `TobaHashAdapter.php`
+- [ ] Implementar `TobaAuthService.php` 
+- [ ] Implementar `TobaUser.php` (modelo para BD Toba)
+- [ ] Implementar `TobaUserProvider.php` (con lógica de sincronización)
+- [ ] Implementar `TobaGuard.php` 
+- [ ] Implementar `TobaLoginController.php` (con dual-guard sync)
+- [ ] Crear vista `toba-login.blade.php`
+
+### Configuración de Autenticación
+- [ ] Modificar `AuthServiceProvider.php` (registrar en boot())
+- [ ] Actualizar `config/auth.php` (mantener web + agregar toba)
+- [ ] Configurar rutas en `web.php`
+
+### Testing y Verificación
+- [ ] Probar conexión a BD de Toba
+- [ ] Verificar que usuarios se sincronizan correctamente
+- [ ] Confirmar que login funciona con ambos guards
+- [ ] Verificar que sessions tienen user_id numérico (no null)
+- [ ] Probar funcionalidades Toba (bloqueos, segundo factor, etc.)
+- [ ] Revisar logs para confirmar flujo correcto
+
+### Resultado Final
+✅ **Sistema dual funcional**: Laravel Eloquent + Toba Authentication  
+✅ **Sin duplicados**: Usuarios existentes se fusionan automáticamente  
+✅ **Sessions compatibles**: user_id numérico en base de datos  
+✅ **Funcionalidades Toba**: Todas las validaciones y características preservadas  
+
+Una vez completados todos estos pasos, tendrás una integración completa entre Laravel y Toba que permite autenticación dual sin conflictos y con total compatibilidad.

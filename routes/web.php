@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\Office365Controller;
+use App\Http\Controllers\Auth\TobaLoginController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\UsersController;
 use App\Livewire\AfipImportCrudo;
@@ -31,14 +32,20 @@ use App\Livewire\TodoList;
 use App\Livewire\Uploadtxt;
 use App\Livewire\UserList;
 use App\Livewire\UsersTable;
-use App\services\ColumnMetadata;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
+// Rutas de autenticación Toba
+Route::get('/login', [TobaLoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [TobaLoginController::class, 'login'])->name('toba.login');
+Route::post('/logout', [TobaLoginController::class, 'logout'])->name('logout');
 
+// Rutas adicionales (opcional)
+Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordForm'])->name('password.change');
+Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('two-factor.verify');
 
 
 
@@ -52,18 +59,14 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddle
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', ])->group(function (): void {
     Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
     Route::get('/clicker', Clicker::class)->name('clicker');
-    Route::get('/suc', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/suc', function () {return view('dashboard');})->name('dashboard');
     Route::get('/todos', TodoList::class)->name('todos');
     Route::post('/todos', [TodoList::class, 'create'])->name('todos.create');
     Route::get('/user/list', UserList::class)->name('userlist');
     Route::get('/contactus', ContactUs::class)->name('contact-us');
     Route::get('/modal', Modal::class)->name('modal');
     Route::get('/userstable', UsersTable::class)->name('datatable');
-    Route::get('/', function () {
-        return view('index');
-    })->name('index');
+    Route::get('/', function () {return view('index');})->name('index');
     Route::get('/imputacion', AsignacionForm::class)->name('imputacion');
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
@@ -77,9 +80,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
     })->name('reporte-orden-pago-pdf');
-    Route::get('/test-column-metadata', function (): void {
-        $columnMetadata = app(ColumnMetadata::class);
-    });
+    
 
 
     Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
