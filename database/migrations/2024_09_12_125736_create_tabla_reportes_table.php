@@ -13,6 +13,8 @@ return new class extends Migration
 
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.rep_orden_pago');
+
         Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table) {
             $table->id();
             $table->integer('nro_liqui')->nullable();

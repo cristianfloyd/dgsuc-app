@@ -9,11 +9,14 @@ return new class extends Migration
 {
     use MapucheConnectionTrait;
 
+
     /**
      * Ejecuta la migración.
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_resultado');
+
         Schema::connection($this->getConnectionName())->create('suc.ret_resultado', function (Blueprint $table) {
             $table->integer('nro_legaj');
             $table->integer('nro_cargo_nuevo');
