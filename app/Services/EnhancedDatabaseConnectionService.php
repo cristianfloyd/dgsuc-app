@@ -68,7 +68,7 @@ class EnhancedDatabaseConnectionService
         // Si no se encontró en ningún lado, usar el valor predeterminado
         if (!\is_string($connection) || !\array_key_exists($connection, $this->getAvailableConnections())) {
             $connection = self::DEFAULT_CONNECTION;
-            Log::debug('Usando conexión predeterminada', ['connection' => $connection]);
+            Log::debug('Usando conexión secundaria predeterminada para usuario nuevo', ['connection' => $connection]);
         }
 
         return $connection;

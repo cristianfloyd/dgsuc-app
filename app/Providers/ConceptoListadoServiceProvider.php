@@ -16,6 +16,11 @@ class ConceptoListadoServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // No registrar servicios durante comandos de consola para evitar problemas con migraciones
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
         // Registrar el servicio de consulta
         $this->app->singleton(ConceptoListadoQueryService::class, function ($app) {
             return new ConceptoListadoQueryService();
