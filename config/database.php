@@ -270,6 +270,7 @@ return [
 
         'pgsql-prod-old' => [
             'driver' => 'pgsql',
+            // @phpstan-ignore larastan.noEnvCallsOutsideOfConfig
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB5_PORT', '5434'),
             'database' => env('DB5_DATABASE', 'mapuche'),

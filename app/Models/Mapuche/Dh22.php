@@ -69,6 +69,13 @@ class Dh22 extends Model
     ];
 
     /**
+     * Atributos que deben agregarse automáticamente al array/JSON del modelo.
+     *
+     * @var array
+     */
+    protected $appends = ['descripcion_completa'];
+
+    /**
      * Campos que requieren conversión de codificación.
      */
     protected $encodedFields = [
@@ -99,7 +106,7 @@ class Dh22 extends Model
      *
      * @return Builder Consulta de liquidaciones preparada para ser ejecutada
      */
-    public static function getLiquidacionesForWidget(): Builder
+    public static function getLiquidacionesForWidget($periodoFiscal = null): Builder
     {
         return self::query()
             ->select('nro_liqui')
@@ -212,6 +219,14 @@ class Dh22 extends Model
             get: fn ($value): ?string => EncodingService::toUtf8($value),
             set: fn ($value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
         );
+    }
+
+    /**
+     * Accessor para descripcion_completa que combina nro_liqui y desc_liqui con encoding seguro.
+     */
+    public function getDescripcionCompletaAttribute(): string
+    {
+        return $this->nro_liqui . ' - ' . ($this->desc_liqui ?? '');
     }
 
     // ########################## SCOPES ###############################################
@@ -358,7 +373,7 @@ class Dh22 extends Model
      */
     public function scopeFormateadoParaSelect($query)
     {
-        return $query->selectRaw("nro_liqui, CONCAT(nro_liqui, ' - ', desc_liqui) as descripcion_completa");
+        return $query->select('nro_liqui', 'desc_liqui');
     }
 
     /**
@@ -369,10 +384,17 @@ class Dh22 extends Model
      */
     public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null)
     {
-        return static::getLiquidacionesForWidget()
+        return static::query()
+            ->select('nro_liqui', 'desc_liqui')
             ->filterByPeriodoFiscal($periodoFiscal)
-            ->formateadoParaSelect()
-            ->pluck('descripcion_completa', 'nro_liqui');
+            ->orderByDesc('nro_liqui')
+            ->get()
+            ->mapWithKeys(function ($liquidacion) {
+                $descripcion = trim($liquidacion->desc_liqui ?: '');
+                return [
+                    $liquidacion->nro_liqui => $liquidacion->nro_liqui . ' - ' . $descripcion
+                ];
+            });
     }
 
     /**

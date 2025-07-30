@@ -83,7 +83,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ->options(
                         Dh22::getLiquidacionesForWidget($periodoFiscalActual)
                             ->formateadoParaSelect()
-                            ->pluck('descripcion_completa', 'nro_liqui'),
+                            ->pluck('desc_liqui', 'nro_liqui'),
                     ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')
@@ -91,10 +91,10 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ->options(
                         Dh22::getLiquidacionesForWidget()
                             ->formateadoParaSelect()
-                            ->pluck('descripcion_completa', 'nro_liqui'),
+                            ->pluck('desc_liqui', 'nro_liqui'),
                     ),
                 Toggle::make('insertIntoDh25')
-                    ->label('Insertar en DH25'),
+                    ->label('Insertar en DH20'),
             ]))
             ->columns(2);
     }
