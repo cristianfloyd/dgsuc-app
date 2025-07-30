@@ -31,10 +31,6 @@ class MapucheSicossReporte extends Model
      * Scope para obtener el reporte SICOSS.
      *
      * @param Builder $query
-     * @param string $anio
-     * @param string $mes
-     *
-     * @return Builder
      */
     public function scopeGetReporte($query, string $anio, string $mes): Builder
     {
@@ -73,10 +69,6 @@ class MapucheSicossReporte extends Model
      * Scope para obtener los totales del reporte SICOSS.
      *
      * @param Builder $query
-     * @param string $anio
-     * @param string $mes
-     *
-     * @return array
      */
     public function scopeGetTotales($query, string $anio, string $mes): array
     {
@@ -152,7 +144,7 @@ class MapucheSicossReporte extends Model
             $periodoFiscalService = app(PeriodoFiscalService::class);
             $periodoActual = $periodoFiscalService->getPeriodoFiscalFromDatabase();
 
-            return ((int)$periodoActual['year'] === (int)$anio && (int)$periodoActual['month'] === (int)$mes)
+            return ((int) $periodoActual['year'] === (int) $anio && (int) $periodoActual['month'] === (int) $mes)
                 ? 'mapuche.dh21'
                 : 'mapuche.dh21h';
         } catch (\Exception $e) {

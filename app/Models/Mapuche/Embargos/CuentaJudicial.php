@@ -64,26 +64,13 @@ class CuentaJudicial extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'nro_cuenta_judicial' => 'string',
-        'tipo_cuenta' => 'string',
-        'digito_verificador' => 'integer',
-        'cbu' => 'string',
-        'titular' => 'string',
-        'codigo_sucursal' => 'integer',
-        'nrovalorpago' => 'integer',
-        'nroentidadbancaria' => 'integer',
-    ];
-
-    /**
      * Obtener la clave primaria compuesta.
      */
+    #[\Override]
     public function getKey()
     {
         $attributes = [];
-        foreach ((array)$this->primaryKey as $key) {
+        foreach ((array) $this->primaryKey as $key) {
             $attributes[$key] = $this->getAttribute($key);
         }
         return $attributes;
@@ -102,5 +89,22 @@ class CuentaJudicial extends Model
             'codigo_sucursal' => $this->codigo_sucursal,
             'nroentidadbancaria' => $this->nroentidadbancaria,
         ]);
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_cuenta_judicial' => 'string',
+            'tipo_cuenta' => 'string',
+            'digito_verificador' => 'integer',
+            'cbu' => 'string',
+            'titular' => 'string',
+            'codigo_sucursal' => 'integer',
+            'nrovalorpago' => 'integer',
+            'nroentidadbancaria' => 'integer',
+        ];
     }
 }

@@ -48,19 +48,6 @@ class Dh35 extends Model
         'caracter_concursado',
     ];
 
-    protected $casts = [
-        'tipo_escal' => 'string',
-        'codc_carac' => 'string',
-        'desc_grupo' => 'string',
-        'tipo_carac' => 'string',
-        'nro_orden' => 'integer',
-        'nro_subpc' => 'integer',
-        'controlcargos' => 'integer',
-        'controlhoras' => 'integer',
-        'controlpuntos' => 'integer',
-        'caracter_concursado' => 'boolean',
-    ];
-
     /**
      * Scope para filtrar por tipo de escalafón.
      */
@@ -75,5 +62,21 @@ class Dh35 extends Model
     public function scopeConcursados($query)
     {
         return $query->where('caracter_concursado', true);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'tipo_escal' => 'string',
+            'codc_carac' => 'string',
+            'desc_grupo' => 'string',
+            'tipo_carac' => 'string',
+            'nro_orden' => 'integer',
+            'nro_subpc' => 'integer',
+            'controlcargos' => 'integer',
+            'controlhoras' => 'integer',
+            'controlpuntos' => 'integer',
+            'caracter_concursado' => 'boolean',
+        ];
     }
 }

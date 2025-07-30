@@ -46,18 +46,21 @@ class Juzgado extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_juzgado' => 'integer',
-        'nom_juzgado' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_juzgado');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_juzgado' => 'integer',
+            'nom_juzgado' => 'string',
+        ];
     }
 }

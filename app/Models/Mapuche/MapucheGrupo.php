@@ -26,11 +26,6 @@ class MapucheGrupo extends Model
         'tipo',
     ];
 
-    protected $casts = [
-        'fec_modificacion' => 'datetime',
-        'id_grupo' => 'integer',
-    ];
-
     /**
      * Los permisos asociados al grupo.
      */
@@ -87,11 +82,20 @@ class MapucheGrupo extends Model
     /**
      * Boot the model.
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
         static::saving(function ($model): void {
             $model->fec_modificacion = now();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'fec_modificacion' => 'datetime',
+            'id_grupo' => 'integer',
+        ];
     }
 }

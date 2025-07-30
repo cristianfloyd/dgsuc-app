@@ -46,18 +46,21 @@ class TipoExpediente extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_tipo_expediente' => 'integer',
-        'desc_tipo_expediente' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_tipo_expediente');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_tipo_expediente' => 'integer',
+            'desc_tipo_expediente' => 'string',
+        ];
     }
 }

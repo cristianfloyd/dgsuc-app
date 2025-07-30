@@ -24,11 +24,6 @@ class MapucheGrupoLegajo extends Model
         'nro_legaj',
     ];
 
-    protected $casts = [
-        'id_grupo' => 'integer',
-        'nro_legaj' => 'integer',
-    ];
-
     /**
      * El grupo al que pertenece este legajo.
      */
@@ -43,5 +38,13 @@ class MapucheGrupoLegajo extends Model
     public function legajo(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'id_grupo' => 'integer',
+            'nro_legaj' => 'integer',
+        ];
     }
 }

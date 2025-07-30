@@ -44,26 +44,6 @@ class Dhr2 extends Model
     ];
 
     /**
-     * Casteos de atributos.
-     */
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'nro_legaj' => 'integer',
-        'nro_cargo' => 'integer',
-        'desc_apyno' => 'string',
-        'nro_docum' => 'integer',
-        'nro_cuil1' => 'integer',
-        'nro_cuil' => 'integer',
-        'nro_cuil2' => 'integer',
-        'tot_haber' => 'float',
-        'tot_reten' => 'float',
-        'tot_neto' => 'float',
-        'hs_dedica' => 'float',
-        'anulado' => 'boolean',
-        'impreso' => 'boolean',
-    ];
-
-    /**
      * Relación con la liquidación principal.
      */
     public function liquidacion(): BelongsTo
@@ -82,8 +62,31 @@ class Dhr2 extends Model
     /**
      * Mutados para desc_apyno en mayusculas.
      */
-    public function getDescApynoAttribute($value)
+    protected function descApyno(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return mb_strtoupper($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value) => mb_strtoupper((string) $value));
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'nro_legaj' => 'integer',
+            'nro_cargo' => 'integer',
+            'desc_apyno' => 'string',
+            'nro_docum' => 'integer',
+            'nro_cuil1' => 'integer',
+            'nro_cuil' => 'integer',
+            'nro_cuil2' => 'integer',
+            'tot_haber' => 'float',
+            'tot_reten' => 'float',
+            'tot_neto' => 'float',
+            'hs_dedica' => 'float',
+            'anulado' => 'boolean',
+            'impreso' => 'boolean',
+        ];
     }
 }

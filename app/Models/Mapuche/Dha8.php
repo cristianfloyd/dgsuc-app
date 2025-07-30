@@ -57,24 +57,27 @@ class Dha8 extends Model
     ];
 
     /**
-     * Casteos de atributos.
-     */
-    protected $casts = [
-        'nro_legajo' => 'integer',
-        'codigosituacion' => 'integer',
-        'codigocondicion' => 'integer',
-        'codigoactividad' => 'integer',
-        'codigozona' => 'integer',
-        'porcaporteadicss' => 'float',
-        'codigomodalcontrat' => 'integer',
-        'provincialocalidad' => 'string',
-    ];
-
-    /**
      * Convierte el modelo a un DTO.
      */
     public function toData(): Dha8Data
     {
         return Dha8Data::from($this);
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_legajo' => 'integer',
+            'codigosituacion' => 'integer',
+            'codigocondicion' => 'integer',
+            'codigoactividad' => 'integer',
+            'codigozona' => 'integer',
+            'porcaporteadicss' => 'float',
+            'codigomodalcontrat' => 'integer',
+            'provincialocalidad' => 'string',
+        ];
     }
 }

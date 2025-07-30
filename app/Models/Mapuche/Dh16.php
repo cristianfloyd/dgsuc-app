@@ -47,20 +47,23 @@ class Dh16 extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'codn_grupo' => 'integer',
-        'codn_conce' => 'integer',
-    ];
-
-    /**
      * Create a new factory instance for the model.
      */
     protected static function newFactory(): Dh16Factory
     {
         return Dh16Factory::new();
+    }
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'codn_grupo' => 'integer',
+            'codn_conce' => 'integer',
+        ];
     }
 }

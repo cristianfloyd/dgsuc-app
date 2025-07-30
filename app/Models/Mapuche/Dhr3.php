@@ -48,24 +48,6 @@ class Dhr3 extends Model
         'ano_retro', 'mes_retro', 'nro_recibo', 'observa', 'tipo_conce',
     ];
 
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'nro_legaj' => 'integer',
-        'nro_cargo' => 'integer',
-        'codc_hhdd' => 'string',
-        'nro_renglo' => 'integer',
-        'nro_conce' => 'integer',
-        'desc_conc' => 'string',
-        'novedad1' => 'float',
-        'novedad2' => 'float',
-        'impo_conc' => 'float',
-        'ano_retro' => 'integer',
-        'mes_retro' => 'integer',
-        'nro_recibo' => 'integer',
-        'observa' => 'string',
-        'tipo_conce' => 'string',
-    ];
-
     /**
      * Relación con la tabla dh12 (conceptos).
      */
@@ -82,5 +64,26 @@ class Dhr3 extends Model
         return $this->belongsTo(Dhr2::class, 'nro_liqui', 'nro_liqui')
             ->where('nro_leagj', $this->nro_legaj)
             ->where('nro_cargo', $this->nro_cargo);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'nro_legaj' => 'integer',
+            'nro_cargo' => 'integer',
+            'codc_hhdd' => 'string',
+            'nro_renglo' => 'integer',
+            'nro_conce' => 'integer',
+            'desc_conc' => 'string',
+            'novedad1' => 'float',
+            'novedad2' => 'float',
+            'impo_conc' => 'float',
+            'ano_retro' => 'integer',
+            'mes_retro' => 'integer',
+            'nro_recibo' => 'integer',
+            'observa' => 'string',
+            'tipo_conce' => 'string',
+        ];
     }
 }

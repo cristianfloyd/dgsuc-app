@@ -13,6 +13,7 @@ abstract class MapucheBase extends Model
     /**
      * Override del getConnectionName para permitir fallback a conexión dinámica.
      */
+    #[\Override]
     public function getConnectionName(): string
     {
         // Si estamos en el contexto del panel AFIP, usar conexión dinámica
@@ -31,8 +32,12 @@ abstract class MapucheBase extends Model
     protected function shouldUseDynamicConnection(): bool
     {
         // Verificar si estamos en el panel de AFIP o cualquier otro contexto que requiera conexión dinámica
-        return str_contains(request()->path(), 'afip-panel') ||
-            session()->has('using_dynamic_connection') ||
-            config('app.use_dynamic_connection', false);
+        if (str_contains(request()->path(), 'afip-panel')) {
+            return true;
+        }
+        if (session()->has('using_dynamic_connection')) {
+            return true;
+        }
+        return (bool) config('app.use_dynamic_connection', false);
     }
 }

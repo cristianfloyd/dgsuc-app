@@ -151,61 +151,6 @@ class Dh09 extends Model
     ];
 
     /**
-     * Configuración de casting de tipos de datos
-     * Organizado por tipos para mejor mantenimiento.
-     */
-    protected $casts = [
-        // Enteros
-        'nro_legaj' => 'integer',
-        'vig_otano' => 'integer',
-        'vig_otmes' => 'integer',
-        'nro_tab02' => 'integer',
-        'nro_tab08' => 'integer',
-        'nro_tab09' => 'integer',
-        'cant_cargo' => 'integer',
-        'nro_agremiacion' => 'integer',
-        'conyugedependiente' => 'integer',
-        'nro_norma' => 'integer',
-
-        // Strings
-        'codc_estcv' => 'string',
-        'sino_otsal' => 'string',
-        'sino_jubil' => 'string',
-        'codc_bprev' => 'string',
-        'codc_obsoc' => 'string',
-        'nro_afili' => 'string',
-        'desc_envio' => 'string',
-        'desc_tarea' => 'string',
-        'codc_regio' => 'string',
-        'codc_uacad' => 'string',
-        'ua_asigfamiliar' => 'string',
-        'renunciadj894' => 'string',
-        'coddependesemp' => 'string',
-        'codc_uacad_seguro' => 'string',
-        'tipo_norma' => 'string',
-        'tipo_emite' => 'string',
-
-        // Fechas
-        'fec_altos' => 'date',
-        'fec_endjp' => 'date',
-        'fec_vtosf' => 'date',
-        'fec_reasf' => 'date',
-        'fec_defun' => 'date',
-        'fecha_jubilacion' => 'date',
-        'fecha_grado' => 'date',
-        'fecha_permanencia' => 'date',
-        'fechadjur894' => 'date',
-        'fechadechere' => 'date',
-        'fec_ingreso' => 'date',
-        'fecha_recibo' => 'date',
-        'fec_norma' => 'date',
-
-        // Booleanos
-        'sino_embargo' => 'boolean',
-        'fuerza_reparto' => 'boolean',
-    ];
-
-    /**
      * Atributos que deben ser ocultados en arrays/JSON.
      */
     protected $hidden = [
@@ -270,53 +215,6 @@ class Dh09 extends Model
     public function scopePorDependencia(Builder $query, string $codigoDependencia): Builder
     {
         return $query->where('codc_uacad', $codigoDependencia);
-    }
-
-    // ========================================
-    // ACCESSORS Y MUTATORS
-    // ========================================
-
-    /**
-     * Accessor para obtener el estado de jubilación como booleano.
-     */
-    public function getEsJubiladoAttribute(): bool
-    {
-        return $this->sino_jubil === 'S';
-    }
-
-    /**
-     * Accessor para obtener si tiene salario familiar en otro organismo.
-     */
-    public function getTieneSalarioFamiliarExternoAttribute(): bool
-    {
-        return $this->sino_otsal === 'S';
-    }
-
-    /**
-     * Accessor para obtener la edad aproximada basada en fecha de ingreso.
-     */
-    public function getAntiguedadAttribute(): ?int
-    {
-        if (!$this->fec_ingreso) {
-            return null;
-        }
-
-        try {
-            return (int)$this->fec_ingreso->diffInYears(now());
-        } catch (\Exception $e) {
-            Log::warning('Error calculando antigüedad para legajo: ' . $this->nro_legaj, [
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-    /**
-     * Accessor para verificar si el empleado está fallecido.
-     */
-    public function getEstaFallecidoAttribute(): bool
-    {
-        return $this->fec_defun !== null;
     }
 
     // ========================================
@@ -528,7 +426,7 @@ class Dh09 extends Model
     public function esValidoParaProcesamiento(): bool
     {
         $errores = $this->validarConsistencia();
-        return empty($errores);
+        return $errores === [];
     }
 
     // ========================================
@@ -712,6 +610,50 @@ class Dh09 extends Model
         }
     }
 
+    /**
+     * Accessor para obtener el estado de jubilación como booleano.
+     */
+    protected function esJubilado(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_jubil === 'S');
+    }
+
+    /**
+     * Accessor para obtener si tiene salario familiar en otro organismo.
+     */
+    protected function tieneSalarioFamiliarExterno(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_otsal === 'S');
+    }
+
+    /**
+     * Accessor para obtener la edad aproximada basada en fecha de ingreso.
+     */
+    protected function antiguedad(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): ?int {
+            if (!$this->fec_ingreso) {
+                return null;
+            }
+            try {
+                return (int) $this->fec_ingreso->diffInYears(now());
+            } catch (\Exception $e) {
+                Log::warning('Error calculando antigüedad para legajo: ' . $this->nro_legaj, [
+                    'error' => $e->getMessage(),
+                ]);
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Accessor para verificar si el empleado está fallecido.
+     */
+    protected function estaFallecido(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->fec_defun !== null);
+    }
+
     // ========================================
     // EVENTOS DEL MODELO
     // ========================================
@@ -719,6 +661,7 @@ class Dh09 extends Model
     /**
      * Configuración de eventos del modelo.
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -752,7 +695,7 @@ class Dh09 extends Model
                 Log::info("Actualizando registro DH09 para legajo: {$model->nro_legaj}");
 
                 // Validaciones adicionales si es necesario
-                if ($model->isDirty('fec_defun') && !($model->fec_defun === null)) {
+                if ($model->isDirty('fec_defun') && $model->fec_defun !== null) {
                     Log::warning('Se está registrando fecha de defunción para legajo: ' . $model->nro_legaj);
                 }
             } catch (\Exception $e) {
@@ -771,5 +714,63 @@ class Dh09 extends Model
                 'periodo' => $model->getPeriodoVigenciaFormateado(),
             ]);
         });
+    }
+
+    /**
+     * Configuración de casting de tipos de datos
+     * Organizado por tipos para mejor mantenimiento.
+     */
+    protected function casts(): array
+    {
+        return [
+            // Enteros
+            'nro_legaj' => 'integer',
+            'vig_otano' => 'integer',
+            'vig_otmes' => 'integer',
+            'nro_tab02' => 'integer',
+            'nro_tab08' => 'integer',
+            'nro_tab09' => 'integer',
+            'cant_cargo' => 'integer',
+            'nro_agremiacion' => 'integer',
+            'conyugedependiente' => 'integer',
+            'nro_norma' => 'integer',
+
+            // Strings
+            'codc_estcv' => 'string',
+            'sino_otsal' => 'string',
+            'sino_jubil' => 'string',
+            'codc_bprev' => 'string',
+            'codc_obsoc' => 'string',
+            'nro_afili' => 'string',
+            'desc_envio' => 'string',
+            'desc_tarea' => 'string',
+            'codc_regio' => 'string',
+            'codc_uacad' => 'string',
+            'ua_asigfamiliar' => 'string',
+            'renunciadj894' => 'string',
+            'coddependesemp' => 'string',
+            'codc_uacad_seguro' => 'string',
+            'tipo_norma' => 'string',
+            'tipo_emite' => 'string',
+
+            // Fechas
+            'fec_altos' => 'date',
+            'fec_endjp' => 'date',
+            'fec_vtosf' => 'date',
+            'fec_reasf' => 'date',
+            'fec_defun' => 'date',
+            'fecha_jubilacion' => 'date',
+            'fecha_grado' => 'date',
+            'fecha_permanencia' => 'date',
+            'fechadjur894' => 'date',
+            'fechadechere' => 'date',
+            'fec_ingreso' => 'date',
+            'fecha_recibo' => 'date',
+            'fec_norma' => 'date',
+
+            // Booleanos
+            'sino_embargo' => 'boolean',
+            'fuerza_reparto' => 'boolean',
+        ];
     }
 }

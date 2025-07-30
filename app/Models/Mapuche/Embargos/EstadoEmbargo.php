@@ -46,18 +46,21 @@ class EstadoEmbargo extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_estado_embargo' => 'integer',
-        'desc_estado_embargo' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_estado_embargo');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_estado_embargo' => 'integer',
+            'desc_estado_embargo' => 'string',
+        ];
     }
 }

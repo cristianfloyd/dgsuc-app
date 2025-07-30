@@ -55,18 +55,21 @@ class Beneficiario extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'cuit' => 'string',
-        'nom_beneficiario' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'cuit', 'cuit');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'cuit' => 'string',
+            'nom_beneficiario' => 'string',
+        ];
     }
 }

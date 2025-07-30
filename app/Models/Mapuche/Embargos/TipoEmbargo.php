@@ -57,18 +57,6 @@ class TipoEmbargo extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_tipo_embargo' => 'integer',
-        'desc_tipo_embargo' => 'string',
-        'codn_tipogrupo' => 'integer',
-        'codn_conce' => 'integer',
-        'mov_inicial_cta_cte' => 'integer',
-        'id_tipo_remuneracion' => 'integer',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
@@ -95,6 +83,7 @@ class TipoEmbargo extends Model
     /**
      * Reglas de validación para mov_inicial_cta_cte.
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -104,5 +93,20 @@ class TipoEmbargo extends Model
                 throw new \InvalidArgumentException('mov_inicial_cta_cte debe ser 0, 1 o 2');
             }
         });
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_tipo_embargo' => 'integer',
+            'desc_tipo_embargo' => 'string',
+            'codn_tipogrupo' => 'integer',
+            'codn_conce' => 'integer',
+            'mov_inicial_cta_cte' => 'integer',
+            'id_tipo_remuneracion' => 'integer',
+        ];
     }
 }

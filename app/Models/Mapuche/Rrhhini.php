@@ -69,9 +69,8 @@ class Rrhhini extends Model
 
     /**
      * Get the route key for the model.
-     *
-     * @return string
      */
+    #[\Override]
     public function getRouteKeyName(): string
     {
         return 'nombre_seccion'; // Utilizamos uno de los campos de la clave compuesta como identificador principal
@@ -85,6 +84,7 @@ class Rrhhini extends Model
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
+    #[\Override]
     public function resolveRouteBinding($value, $field = null)
     {
         return $this->where('nombre_seccion', $value)
@@ -96,6 +96,7 @@ class Rrhhini extends Model
      * Get the value of the model's primary key.
      * This is required for Filament to work with composite keys.
      */
+    #[\Override]
     public function getKey(): string
     {
         return $this->nombre_seccion . '|' . $this->nombre_parametro;
@@ -104,6 +105,7 @@ class Rrhhini extends Model
     /**
      * Get the value of the model's route key.
      */
+    #[\Override]
     public function getRouteKey(): string
     {
         return $this->getKey();
@@ -111,10 +113,6 @@ class Rrhhini extends Model
 
     /**
      * Decode the composite key.
-     *
-     * @param string $key
-     *
-     * @return array
      */
     public static function decodeKey(string $key): array
     {
@@ -143,24 +141,24 @@ class Rrhhini extends Model
     protected function nombreSeccion(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn ($value): ?string => EncodingService::toUtf8($value),
+            set: fn ($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function nombreParametro(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn ($value): ?string => EncodingService::toUtf8($value),
+            set: fn ($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function datoParametro(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn ($value): ?string => EncodingService::toUtf8($value),
+            set: fn ($value): ?string => EncodingService::toLatin1($value),
         );
     }
 }

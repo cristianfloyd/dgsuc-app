@@ -123,34 +123,16 @@ class Embargo extends Model
         'id_tipo_expediente',
     ];
 
-    /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'fec_inicio' => 'date',
-        'fec_finalizacion' => 'date',
-        'fec_ingreso_expediente' => 'date',
-        'fec_oficio' => 'date',
-        'imp_embargo' => 'float',
-        'cuota_embargo' => 'float',
-        'cuit' => 'string',
-        'nro_expediente_original' => 'string',
-        'nro_expediente_ampliatorio' => 'string',
-        'nro_cuenta_judicial' => 'string',
-    ];
-
     public function detallenovedad(): Attribute
     {
         return new Attribute(
-            get: function () {
-                return "{$this->codn_conce}-{$this->nro_oficio}";
-            },
+            get: fn (): string => "{$this->codn_conce}-{$this->nro_oficio}",
         );
     }
 
     public function getImporteDescontado(int $nro_liqui): Collection
     {
-        $importe = Dh21::query()
+        return  Dh21::query()
             ->where('nro_liqui', $nro_liqui)
             ->where('nro_legaj', $this->nro_legaj)
             ->where('codn_conce', $this->codn_conce)
@@ -158,20 +140,6 @@ class Embargo extends Model
             ->where('impp_conce', '>', 0)
             ->orderBy('nro_legaj', 'desc')
             ->get(['nro_cargo', 'impp_conce']);
-
-
-        return  $importe;
-    }
-
-    // ############### ACCESORES Y MUTADORES ####################
-    public function getCaratulaAttribute($value)
-    {
-        return EncodingService::toUtf8($value);
-    }
-
-    public function getNomDemandadoAttribute()
-    {
-        return EncodingService::toUtf8($this->nom_demandado);
     }
 
     // ############### RELACIONES ####################
@@ -252,8 +220,6 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de liquidaciones asociadas al embargo.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function liquidaciones(): HasMany
     {
@@ -262,8 +228,6 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de cargos asociados al embargo.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function cargo(): HasMany
     {
@@ -283,6 +247,35 @@ class Embargo extends Model
             'datosPersonales.desc_apcas',
             'datosPersonales.desc_nombr',
             'datosPersonales.nombre_completo',
+        ];
+    }
+
+    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8($value));
+    }
+
+    protected function nomDemandado(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): ?string => EncodingService::toUtf8($this->nom_demandado));
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'fec_inicio' => 'date',
+            'fec_finalizacion' => 'date',
+            'fec_ingreso_expediente' => 'date',
+            'fec_oficio' => 'date',
+            'imp_embargo' => 'float',
+            'cuota_embargo' => 'float',
+            'cuit' => 'string',
+            'nro_expediente_original' => 'string',
+            'nro_expediente_ampliatorio' => 'string',
+            'nro_cuenta_judicial' => 'string',
         ];
     }
 }

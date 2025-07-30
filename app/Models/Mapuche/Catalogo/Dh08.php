@@ -40,18 +40,13 @@ class Dh08 extends Model
         'nacio_principal',
     ];
 
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'nro_tab03' => 'integer',
-        'codc_nacio' => 'string',
-        'nacio_principal' => 'boolean',
-    ];
-
+    #[\Override]
     public function getKeyName(): array
     {
         return ['nro_legaj', 'codc_nacio'];
     }
 
+    #[\Override]
     public function getIncrementing(): false
     {
         return false;
@@ -69,9 +64,20 @@ class Dh08 extends Model
             ->where('desc_abrev', $this->codc_nacio);
     }
 
+    #[\Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_legaj', $this->getAttribute('nro_legaj'))
             ->where('codc_nacio', $this->getAttribute('codc_nacio'));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'nro_tab03' => 'integer',
+            'codc_nacio' => 'string',
+            'nacio_principal' => 'boolean',
+        ];
     }
 }

@@ -49,10 +49,13 @@ class Dh17 extends Model
     /**
      * Casteos de atributos.
      */
-    protected $casts = [
-        'codn_conce' => 'integer',
-        'objt_gtope' => 'string',
-        'objt_gtote' => 'string',
-        'nro_prove' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'codn_conce' => 'integer',
+            'objt_gtope' => 'string',
+            'objt_gtote' => 'string',
+            'nro_prove' => 'integer',
+        ];
+    }
 }

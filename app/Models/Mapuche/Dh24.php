@@ -75,27 +75,6 @@ class Dh24 extends Model
     ];
 
     /**
-     * Conversión de tipos de atributos.
-     */
-    protected $casts = [
-        'nro_cargo' => 'integer',
-        'codn_progr' => 'integer',
-        'codn_subpr' => 'integer',
-        'codn_proye' => 'integer',
-        'codn_activ' => 'integer',
-        'codn_obra' => 'integer',
-        'codn_fuent' => 'integer',
-        'porc_ipres' => 'decimal:2',
-        'codn_area' => 'integer',
-        'codn_subar' => 'integer',
-        'codn_final' => 'integer',
-        'codn_funci' => 'integer',
-        'codn_grupo_presup' => 'integer',
-        'tipo_ejercicio' => 'string',
-        'codn_subsubar' => 'integer',
-    ];
-
-    /**
      * Relación con el cargo.
      */
     public function cargo(): BelongsTo
@@ -109,5 +88,29 @@ class Dh24 extends Model
     public function scopeActivo($query)
     {
         return $query->where('tipo_ejercicio', 'A');
+    }
+
+    /**
+     * Conversión de tipos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_cargo' => 'integer',
+            'codn_progr' => 'integer',
+            'codn_subpr' => 'integer',
+            'codn_proye' => 'integer',
+            'codn_activ' => 'integer',
+            'codn_obra' => 'integer',
+            'codn_fuent' => 'integer',
+            'porc_ipres' => 'decimal:2',
+            'codn_area' => 'integer',
+            'codn_subar' => 'integer',
+            'codn_final' => 'integer',
+            'codn_funci' => 'integer',
+            'codn_grupo_presup' => 'integer',
+            'tipo_ejercicio' => 'string',
+            'codn_subsubar' => 'integer',
+        ];
     }
 }

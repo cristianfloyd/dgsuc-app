@@ -69,21 +69,6 @@ class Dh22 extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'fec_ultap' => 'date',
-        'fec_emisi' => 'date',
-        'sino_aguin' => 'boolean',
-        'sino_reten' => 'boolean',
-        'sino_genimp' => 'boolean',
-        'per_liano' => 'integer',
-        'per_limes' => 'integer',
-    ];
-
-    /**
      * Campos que requieren conversión de codificación.
      */
     protected $encodedFields = [
@@ -153,8 +138,6 @@ class Dh22 extends Model
 
     /**
      * Obtiene las últimas tres liquidaciones definitivas.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getUltimasTresLiquidacionesDefinitivas(): Collection
     {
@@ -167,8 +150,6 @@ class Dh22 extends Model
 
     /**
      * Obtiene el último nro_liqui de la tabla dh22.
-     *
-     * @return int
      */
     public static function getLastIdLiquidacion(): int
     {
@@ -189,8 +170,6 @@ class Dh22 extends Model
 
     /**
      * Obtiene los distintos períodos fiscales formateados como YYYYMM.
-     *
-     * @return array
      */
     public static function getPeriodosFiscales(): array
     {
@@ -222,16 +201,16 @@ class Dh22 extends Model
     /**
      * Mutador para convertir desc_liqui a UTF-8 al obtener el valor.
      */
-    public function getDescLiquiAttribute($value)
+    public function getDescLiquiAttribute($value): ?string
     {
-        return EncodingService::toUtf8(trim($value));
+        return EncodingService::toUtf8(trim((string) $value));
     }
 
     public function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
+            get: fn ($value): ?string => EncodingService::toUtf8($value),
+            set: fn ($value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
         );
     }
 
@@ -327,7 +306,6 @@ class Dh22 extends Model
      *
      * @param Builder $query
      * @param int|PeriodoFiscal $year
-     * @param int $month
      *
      * @return Builder
      */
@@ -366,7 +344,7 @@ class Dh22 extends Model
         return $query->whereRaw(
             "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
             [
-                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
+                $periodoFiscal['year'] . str_pad((string) $periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
             ],
         );
     }
@@ -386,7 +364,6 @@ class Dh22 extends Model
     /**
      * Obtiene liquidaciones filtradas por periodo fiscal y formateadas para un select.
      *
-     * @param array|null $periodoFiscal
      *
      * @return \Illuminate\Support\Collection
      */
@@ -405,7 +382,7 @@ class Dh22 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
+            get: fn (): string => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
         );
     }
 
@@ -415,7 +392,7 @@ class Dh22 extends Model
     protected function periodoFiscalObject(): Attribute
     {
         return Attribute::make(
-            get: fn () => new PeriodoFiscal($this->per_liano, $this->per_limes),
+            get: fn (): \App\ValueObjects\PeriodoFiscal => new PeriodoFiscal($this->per_liano, $this->per_limes),
         );
     }
 
@@ -428,8 +405,8 @@ class Dh22 extends Model
     protected function periodo(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
-            set: function ($value) {
+            get: fn (): string => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
+            set: function ($value): array {
                 if ($value instanceof PeriodoFiscal) {
                     return [
                         'per_liano' => $value->year(),
@@ -443,5 +420,21 @@ class Dh22 extends Model
                 ];
             },
         );
+    }
+
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'fec_ultap' => 'date',
+            'fec_emisi' => 'date',
+            'sino_aguin' => 'boolean',
+            'sino_reten' => 'boolean',
+            'sino_genimp' => 'boolean',
+            'per_liano' => 'integer',
+            'per_limes' => 'integer',
+        ];
     }
 }
