@@ -138,12 +138,16 @@ class SicossCpto205Repository
             UPDATE suc.afip_mapuche_sicoss
             SET cpto_no_remun = cpto_no_remun - b.monto,
                 sueldo_adicc = sueldo_adicc + b.monto,
-                rem_impo1 = rem_impo1 + b.monto,
+                rem_impo1 = case when rem_total < rem_impo1 then rem_impo1 + monto end,
                 rem_impo2 = rem_impo2 + b.monto,
                 rem_impo3 = rem_impo3 + b.monto,
                 rem_dec_788 = rem_dec_788 + b.monto
+            SELECT *
             FROM tcpto205 b
             WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
+            and rem_impo1 <=
+            (select importe * 1 from mapuche.constante_unica where id_constante in 
+            (select max(id_constante) from mapuche.constante where nombre = 'TOPAMAX'))
         ");
     }
 
