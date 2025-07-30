@@ -181,7 +181,7 @@ class AfipMapucheSicoss extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return intval(substr($this->cuil, 2, 8));
                 }
-            return null;
+                return null;
             }
         );
     }
@@ -315,7 +315,7 @@ class AfipMapucheSicoss extends Model
     protected function diferenciaRem(): Attribute
     {
         return Attribute::make(
-            get: function($value) {
+            get: function ($value) {
                 // Convertir a números y manejar valores nulos o vacíos
                 $remTotal = is_numeric($this->rem_total) ? (float)$this->rem_total : 0;
                 $remImpo6 = is_numeric($this->rem_impo6) ? (float)$this->rem_impo6 : 0;

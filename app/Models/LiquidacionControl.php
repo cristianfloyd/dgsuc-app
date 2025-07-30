@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LiquidacionControl extends Model
 {
     use MapucheConnectionTrait;
+
     protected $table = 'suc.controles_liquidacion';
 
     protected $fillable = [

@@ -24,7 +24,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dha8 extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
     use Dha8Queries;
 
 

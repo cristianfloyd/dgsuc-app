@@ -17,7 +17,7 @@ class Dh21 extends Model
 {
     use MapucheConnectionTrait;
 
-    private Dh21RepositoryInterface  $repository;
+    private Dh21RepositoryInterface $repository;
     protected $table = 'dh21';
     public $timestamps = false;
     protected $primaryKey = 'id_liquidacion';
@@ -57,7 +57,7 @@ class Dh21 extends Model
 
     public function __construct(Dh21RepositoryInterface $repository = null)
     {
-        if($repository){
+        if ($repository) {
             $this->repository = $repository;
         }
 
@@ -144,7 +144,7 @@ class Dh21 extends Model
 
     public function scopeConLiquidacionDefinitiva($query)
     {
-        return $query->whereHas('dh22', function($q) {
+        return $query->whereHas('dh22', function ($q) {
             $q->definitiva();
         });
     }
@@ -158,7 +158,7 @@ class Dh21 extends Model
 
     public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
     {
-        return $query->whereHas('dh22', function($query) use ($fechaInicio, $fechaFin) {
+        return $query->whereHas('dh22', function ($query) use ($fechaInicio, $fechaFin) {
             $query->scopeBetweenPeriodoLiquidacion($fechaInicio, $fechaFin);
         });
     }
@@ -172,8 +172,8 @@ class Dh21 extends Model
      */
     public function scopeConDefinitiva($query)
     {
-        return $query->whereHas('dh22', function($q) {
+        return $query->whereHas('dh22', function ($q) {
                 $q->definitiva();
-            });
+        });
     }
 }

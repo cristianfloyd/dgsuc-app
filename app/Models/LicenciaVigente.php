@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
+use App\Data\Responses\LicenciaVigenteData;
 use App\Services\EncodingService;
+use App\Services\Mapuche\LicenciaService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
-use App\Services\Mapuche\LicenciaService;
-use Illuminate\Database\Schema\Blueprint;
-use App\Data\Responses\LicenciaVigenteData;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class LicenciaVigente extends Model
 {
@@ -105,7 +105,7 @@ class LicenciaVigente extends Model
      */
     public static function crearTablaTemporal(): void
     {
-        if (!self::tablaExiste()) {
+        if (! self::tablaExiste()) {
             Schema::connection(self::getMapucheConnection())->create('licencias_vigentes_temp', function (Blueprint $table) {
                 $table->id();
                 $table->integer('nro_legaj');
@@ -162,41 +162,41 @@ class LicenciaVigente extends Model
     public static function cargarLicenciasVigentes(array $legajos, string $sessionId): \Illuminate\Database\Eloquent\Builder
     {
         try {
-        // Limpiar registros anteriores de esta sesión
-        //self::where('session_id', $sessionId)->delete();
+            // Limpiar registros anteriores de esta sesión
+            //self::where('session_id', $sessionId)->delete();
 
-        if (empty($legajos)) {
-            return self::query()->where('session_id', $sessionId);
-        }
-
-        // Verificar si ya existen registros para esta sesión
-        $existingCount = self::where('session_id', $sessionId)->count();
-
-        // Si ya hay registros para esta sesión y son los mismos legajos, no recargar
-        if ($existingCount > 0) {
-            $cachedLegajos = Cache::get("licencias_legajos_{$sessionId}", []);
-            sort($legajos);
-            sort($cachedLegajos);
-
-            if ($cachedLegajos == $legajos) {
-                Log::info('Usando licencias ya cargadas en la base de datos temporal', [
-                    'session_id' => $sessionId,
-                    'count' => $existingCount
-                ]);
+            if (empty($legajos)) {
                 return self::query()->where('session_id', $sessionId);
             }
 
-            // Si son diferentes legajos, eliminar los registros anteriores
-            self::where('session_id', $sessionId)->delete();
-            Log::info('Eliminando licencias anteriores para cargar nuevas', [
-                'session_id' => $sessionId
-            ]);
-        }
+            // Verificar si ya existen registros para esta sesión
+            $existingCount = self::where('session_id', $sessionId)->count();
 
-        // Guardar los legajos actuales en caché
-        Cache::put("licencias_legajos_{$sessionId}", $legajos, 3600);
+            // Si ya hay registros para esta sesión y son los mismos legajos, no recargar
+            if ($existingCount > 0) {
+                $cachedLegajos = Cache::get("licencias_legajos_{$sessionId}", []);
+                sort($legajos);
+                sort($cachedLegajos);
 
-        // Obtener las licencias vigentes desde el servicio
+                if ($cachedLegajos == $legajos) {
+                    Log::info('Usando licencias ya cargadas en la base de datos temporal', [
+                        'session_id' => $sessionId,
+                        'count' => $existingCount
+                    ]);
+                    return self::query()->where('session_id', $sessionId);
+                }
+
+                // Si son diferentes legajos, eliminar los registros anteriores
+                self::where('session_id', $sessionId)->delete();
+                Log::info('Eliminando licencias anteriores para cargar nuevas', [
+                    'session_id' => $sessionId
+                ]);
+            }
+
+            // Guardar los legajos actuales en caché
+            Cache::put("licencias_legajos_{$sessionId}", $legajos, 3600);
+
+            // Obtener las licencias vigentes desde el servicio
             $licenciaService = app(LicenciaService::class);
             $licencias = $licenciaService->getLicenciasVigentes($legajos);
 
@@ -256,7 +256,7 @@ class LicenciaVigente extends Model
      */
     public function getDescripcionCondicionAttribute(): string
     {
-        return match($this->condicion) {
+        return match ($this->condicion) {
             5 => 'Maternidad',
             10 => 'Excedencia',
             11 => 'Maternidad Down',

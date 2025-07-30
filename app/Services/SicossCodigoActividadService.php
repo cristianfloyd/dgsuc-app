@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 
 class SicossCodigoActividadService
 {
     use MapucheConnectionTrait;
 
-
     /**
-     * Genera la tabla temporal con los conceptos liquidados del período actual
+     * Genera la tabla temporal con los conceptos liquidados del período actual.
      *
      * @param int $anio Año del período
      * @param int $mes Mes del período
      * @param string $where Condición adicional para filtrar
+     *
      * @return bool Éxito de la operación
      */
     public function generarTablaConceptosLiquidados(int $anio, int $mes, string $where = 'true'): bool
@@ -70,7 +70,7 @@ class SicossCodigoActividadService
             ", [$anio, $mes]);
 
             // Crear índice para optimizar consultas
-            DB::connection($this->getConnectionName())->statement("CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion)");
+            DB::connection($this->getConnectionName())->statement('CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion)');
 
             return true;
         } catch (\Exception $e) {
@@ -80,9 +80,10 @@ class SicossCodigoActividadService
     }
 
     /**
-     * Filtra los conceptos liquidados y genera una tabla específica para un período retro
+     * Filtra los conceptos liquidados y genera una tabla específica para un período retro.
      *
      * @param string $wherePeriodoRetro Condición para filtrar por período retro
+     *
      * @return bool Éxito de la operación
      */
     public function filtrarConceptosPorPeriodoRetro(string $wherePeriodoRetro = 'true'): bool
@@ -100,8 +101,8 @@ class SicossCodigoActividadService
             ");
 
             // Crear índices para optimizar consultas
-            DB::connection($this->getConnectionName())->statement("CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos)");
-            DB::connection($this->getConnectionName())->statement("CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce)");
+            DB::connection($this->getConnectionName())->statement('CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos)');
+            DB::connection($this->getConnectionName())->statement('CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce)');
 
             return true;
         } catch (\Exception $e) {
@@ -111,10 +112,11 @@ class SicossCodigoActividadService
     }
 
     /**
-     * Obtiene los conceptos liquidados para un legajo específico
+     * Obtiene los conceptos liquidados para un legajo específico.
      *
      * @param int $nroLegajo Número de legajo
      * @param string $condicion Condición adicional para filtrar los conceptos (opcional)
+     *
      * @return array Conceptos liquidados con sus tipos de grupos
      */
     public function obtenerConceptosLiquidados(int $nroLegajo, string $condicion = 'true'): array
@@ -127,7 +129,7 @@ class SicossCodigoActividadService
                 'codn_conce',
                 'tipos_grupos',
                 'nro_cargo',
-                'codigoescalafon'
+                'codigoescalafon',
             ])
             ->whereRaw("nro_legaj = ? AND tipos_grupos IS NOT NULL AND {$condicion}", [$nroLegajo])
             ->get();
@@ -141,7 +143,7 @@ class SicossCodigoActividadService
                 'codn_conce' => $item->codn_conce,
                 'tipos_grupos' => $item->tipos_grupos,
                 'nro_cargo' => $item->nro_cargo,
-                'codigoescalafon' => $item->codigoescalafon
+                'codigoescalafon' => $item->codigoescalafon,
             ];
         }, $resultados->all());
 
@@ -166,10 +168,11 @@ class SicossCodigoActividadService
     }
 
     /**
-     * Calcula el tipo de actividad para SICOSS basado en los conceptos liquidados
+     * Calcula el tipo de actividad para SICOSS basado en los conceptos liquidados.
      *
      * @param array $conceptosLiquidados Lista de conceptos liquidados del legajo
      * @param string|null $codigoActividadDefault Código de actividad por defecto de la tabla dha8
+     *
      * @return int Código de tipo de actividad para SICOSS
      */
     public function calcularTipoActividad(array $conceptosLiquidados, ?string $codigoActividadDefault = null): int
@@ -247,7 +250,8 @@ class SicossCodigoActividadService
         // Determinar el tipo de actividad final según la prioridad calculada
         if ($prioridadTipoActividad == 38 || $prioridadTipoActividad == 0) {
             return $codigoActividadDefault ?? 0;
-        } elseif (($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37) ||
+        }
+        if (($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37) ||
             $prioridadTipoActividad == 87 || $prioridadTipoActividad == 88
         ) {
             return $prioridadTipoActividad;
@@ -258,7 +262,7 @@ class SicossCodigoActividadService
     }
 
     /**
-     * Limpia las tablas temporales creadas
+     * Limpia las tablas temporales creadas.
      */
     public function limpiarTablasTemporales(): void
     {

@@ -28,7 +28,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class AfipMapucheSicossCalculo extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     /**
      * Schema y tabla

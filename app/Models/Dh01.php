@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Dh01 extends Model
 {
-    use MapucheConnectionTrait, EncodingTrait;
+    use MapucheConnectionTrait;
+    use EncodingTrait;
 
 
     protected $table = 'dh01';

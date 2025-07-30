@@ -2,9 +2,9 @@
 
 namespace App\Filament\Liquidaciones\Pages;
 
+use App\Services\LiquidacionControlService;
 use Filament\Forms;
 use Filament\Pages\Page;
-use App\Services\LiquidacionControlService;
 
 class EjecutarControlesPostLiquidacion extends Page
 {
@@ -20,7 +20,7 @@ class EjecutarControlesPostLiquidacion extends Page
             Forms\Components\Select::make('nroLiqui')
                 ->label('Número de Liquidación')
                 ->required()
-                ->options(function() {
+                ->options(function () {
                     // Obtener liquidaciones disponibles
                     return [/* ... */];
                 }),
@@ -40,7 +40,7 @@ class EjecutarControlesPostLiquidacion extends Page
         $service = new LiquidacionControlService();
 
         foreach ($this->controles as $control) {
-            $this->resultados[$control] = match($control) {
+            $this->resultados[$control] = match ($control) {
                 'cargos_liquidados' => $service->controlarCargosLiquidados($this->nroLiqui),
                 'negativos' => $service->controlarNegativos($this->nroLiqui),
                 // ... más controles

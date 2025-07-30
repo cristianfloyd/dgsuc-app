@@ -306,7 +306,7 @@ class Dl02 extends Model
      */
     public function aplicaACualquierCaracter(): bool
     {
-        return (bool) $this->seapacualcaracter;
+        return (bool)$this->seapacualcaracter;
     }
 
     /**
@@ -314,7 +314,7 @@ class Dl02 extends Model
      */
     public function aplicaACualquierDedicacion(): bool
     {
-        return (bool) $this->seapacualdedic;
+        return (bool)$this->seapacualdedic;
     }
 
     /**

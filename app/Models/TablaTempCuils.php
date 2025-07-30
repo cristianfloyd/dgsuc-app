@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TablaTempCuils extends Model
 {
     use MapucheConnectionTrait;
+
     protected $table = 'afip_tabla_temp_cuils';
     protected $primaryKey = 'id';
     protected $schema = 'suc';
@@ -23,7 +24,7 @@ class TablaTempCuils extends Model
 
     protected static function getConnectionNombre(): string
     {
-        $instance = new self;
+        $instance = new self();
         return $instance->getConnectionName();
     }
 

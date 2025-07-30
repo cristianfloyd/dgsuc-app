@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 /**
  * Representa un modelo de la tabla 'mapuche.dh08' en la base de datos PostgreSQL.
  *

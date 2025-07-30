@@ -26,4 +26,3 @@ class Dh31 extends Model
         'cant_horas' => 'integer'
     ];
 }
-

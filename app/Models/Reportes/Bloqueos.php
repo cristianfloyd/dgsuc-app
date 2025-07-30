@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Bloqueos extends Model
 {
-    use SoftDeletes, MapucheConnectionTrait;
+    use SoftDeletes;
+    use MapucheConnectionTrait;
 
     /**
      * The table associated with the model.

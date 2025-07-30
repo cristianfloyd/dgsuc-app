@@ -13,7 +13,6 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-
 /**
  * Modelo para representar los datos de AFIP SICOSS desde Mapuche.
  *
@@ -22,7 +21,6 @@ use Illuminate\Support\Facades\Storage;
  */
 class AfipSicossDesdeMapuche extends Model
 {
-
     use MapucheConnectionTrait;
 
 
@@ -521,7 +519,7 @@ class AfipSicossDesdeMapuche extends Model
      * @param int $chunkSize El tamaño de los chunks a insertar (predeterminado: 1000).
      * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
      */
-    private  function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
+    private function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
     {
         // Nombre de la conexión de base de datos a utilizar
         $conexion = $this->connection;

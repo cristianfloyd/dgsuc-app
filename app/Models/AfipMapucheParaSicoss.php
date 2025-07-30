@@ -84,7 +84,7 @@ class AfipMapucheParaSicoss extends Model
      * La consulta filtra los registros donde `d.tipo_conce` es 'C' y `d3.chkstopliq` es 0, y los agrupa por los campos mencionados anteriormente.
      */
     public static function scopeSicossAll($query)
-        {
+    {
         // Consulta SQL
         return $query->selectRaw("
                 d4.nro_liqui,
@@ -121,7 +121,7 @@ class AfipMapucheParaSicoss extends Model
             ->join('mapuche.estado_liquidacion as el', 'd4.sino_cerra', '=', 'el.cod_estado_liquidacion')
             ->where('d.tipo_conce', 'C')
             ->where('d3.chkstopliq', 0)
-            ->groupBy('d.nro_legaj', 'd4.nro_liqui', 'el.desc_estado_liquidacion', 'd.nro_cargo','d2.nro_cuil1', 'd2.nro_cuil', 'd2.nro_cuil2', 'd3.fec_alta', 'd3.fec_baja', 'd3.codc_uacad')
+            ->groupBy('d.nro_legaj', 'd4.nro_liqui', 'el.desc_estado_liquidacion', 'd.nro_cargo', 'd2.nro_cuil1', 'd2.nro_cuil', 'd2.nro_cuil2', 'd3.fec_alta', 'd3.fec_baja', 'd3.codc_uacad')
             ->orderBy('d.nro_legaj', 'asc')
             ->orderBy('d.nro_cargo', 'asc');
     }

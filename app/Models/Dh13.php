@@ -26,12 +26,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Dh13 extends Model
 {
     use MapucheConnectionTrait;
+
     private static $connectionInstance = null;
 
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static;
+            $model = new static();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
         return self::$connectionInstance;

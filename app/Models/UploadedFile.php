@@ -53,10 +53,10 @@ class UploadedFile extends Model
      *
      * @return string El nombre de la tabla.
      */
-	public function get(): mixed
+    public function get(): mixed
     {
-		return $this->table;
-	}
+        return $this->table;
+    }
 
     /**
      * Obtiene un registro por su ID.
@@ -64,7 +64,8 @@ class UploadedFile extends Model
      * @param int $id El ID del registro a buscar.
      * @return UploadedFile|null El registro encontrado o null si no existe.
      */
-    public function getById($id) {
+    public function getById($id)
+    {
         return $this->where('id', $id)->first();
     }
 

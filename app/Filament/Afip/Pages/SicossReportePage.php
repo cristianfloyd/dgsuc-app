@@ -2,30 +2,30 @@
 
 namespace App\Filament\Afip\Pages;
 
-use Filament\Forms\Form;
-use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\HtmlString;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Support\Facades\Log;
 use App\Exports\SicossReporteExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Filament\Forms\Components\Select;
-use Filament\Support\Enums\Alignment;
-use Illuminate\Support\Facades\Blade;
-use Filament\Forms\Components\Section;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Filament\Tables\Enums\FiltersLayout;
+use App\Filament\Afip\Pages\Widgets\SicossTotalesWidget;
 use App\Models\Mapuche\MapucheSicossReporte;
 use App\Services\Reports\SicossReporteService;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Support\Enums\Alignment;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
-use App\Filament\Afip\Pages\Widgets\SicossTotalesWidget;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTable
 {
@@ -112,7 +112,8 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
                                 Blade::render(
                                     '<div wire:loading wire:target="periodoFiscal">
                                             <x-filament::loading-indicator class="h-5 w-5" />
-                                            </div>'),
+                                            </div>'
+                                ),
                             ),
                         )
                         ->afterStateUpdated(function ($state) {
@@ -175,7 +176,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             Log::info('SicossReportePage:: No se pudo obtener los totales', ['anio' => $this->anio, 'mes' => $this->mes]);
             return [];
         }
-        
+
         return $this->sicossReporteService->getTotales($this->anio, $this->mes)->toArray();
     }
 

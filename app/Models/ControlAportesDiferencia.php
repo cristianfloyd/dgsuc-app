@@ -56,7 +56,7 @@ class ControlAportesDiferencia extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return intval(substr($this->cuil, 2, 8));
                 }
-            return null;
+                return null;
             }
         );
     }

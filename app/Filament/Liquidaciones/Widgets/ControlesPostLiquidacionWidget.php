@@ -3,15 +3,15 @@
 namespace App\Filament\Liquidaciones\Widgets;
 
 use App\Models\LiquidacionControl;
-use Illuminate\Support\Facades\Log;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Log;
 
 class ControlesPostLiquidacionWidget extends BaseWidget
 {
     /**
      * Define las estadísticas que se mostrarán en el widget
-     * 
+     *
      * @return array Array de objetos Stat para mostrar en el widget
      */
     protected function getStats(): array
@@ -22,12 +22,12 @@ class ControlesPostLiquidacionWidget extends BaseWidget
                     ->description('Controles que aún no se han ejecutado')
                     ->descriptionIcon('heroicon-o-clock')
                     ->color('warning'),
-                    
+
                 Stat::make('Controles con Error', $this->getControlesConError())
                     ->description('Controles que fallaron en su ejecución')
                     ->descriptionIcon('heroicon-o-exclamation-circle')
                     ->color('danger'),
-                    
+
                 Stat::make('Controles Completados', $this->getControlesCompletados())
                     ->description('Controles ejecutados correctamente')
                     ->descriptionIcon('heroicon-o-check-circle')
@@ -38,7 +38,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             // Devolver estadísticas vacías en caso de error
             return [
                 Stat::make('Controles Pendientes', 0)->color('warning'),
@@ -50,7 +50,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
 
     /**
      * Obtiene la cantidad de controles pendientes
-     * 
+     *
      * @return int Número de controles pendientes
      */
     protected function getControlesPendientes(): int
@@ -67,7 +67,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
 
     /**
      * Obtiene la cantidad de controles con error
-     * 
+     *
      * @return int Número de controles con error
      */
     protected function getControlesConError(): int
@@ -84,7 +84,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
 
     /**
      * Obtiene la cantidad de controles completados
-     * 
+     *
      * @return int Número de controles completados
      */
     protected function getControlesCompletados(): int

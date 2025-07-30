@@ -2,13 +2,14 @@
 
 namespace App\Filament\Admin\Widgets;
 
+use App\Traits\MapucheConnectionTrait;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 
 class SystemStatusWidget extends Widget
 {
     use MapucheConnectionTrait;
+
     protected static string $view = 'filament.widgets.system-status-widget';
     protected static bool $isLazy = true;
     protected static ?int $sort = 3;

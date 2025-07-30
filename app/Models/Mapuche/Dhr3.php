@@ -32,7 +32,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Dhr3 extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     protected $table = 'dhr3';
     public $timestamps = false;

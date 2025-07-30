@@ -39,4 +39,3 @@ class Dhd7 extends Model
         return $this->hasMany(Dh03::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
     }
 }
-

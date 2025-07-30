@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RetUda extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
 
 

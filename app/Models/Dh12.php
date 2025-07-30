@@ -138,7 +138,7 @@ class Dh12 extends Model
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static;
+            $model = new static();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
         return self::$connectionInstance;

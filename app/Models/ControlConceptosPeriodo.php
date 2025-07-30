@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ControlConceptosPeriodo extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     protected $primaryKey = 'id';
     protected $table = 'control_conceptos_periodos';

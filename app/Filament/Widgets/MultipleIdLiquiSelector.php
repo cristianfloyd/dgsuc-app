@@ -31,6 +31,10 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
         $this->form->fill();
     }
 
+
+    /**
+     * @return Form
+     */
     #[Computed]
     public function form(): Form
     {
@@ -77,5 +81,4 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
 
         Log::debug("PeriodoFiscalSelected en MultipleIdLiquiSelector", ['periodoFiscal' => $periodoFiscal]);
     }
-
 }

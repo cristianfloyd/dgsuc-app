@@ -60,8 +60,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function scopeSearch($query, $val)
     {
-        return $query->where('name', 'like', '%'.$val.'%')
-            ->orWhere('email', 'like', '%'.$val.'%');
+        return $query->where('name', 'like', '%' . $val . '%')
+            ->orWhere('email', 'like', '%' . $val . '%');
     }
 
     /**

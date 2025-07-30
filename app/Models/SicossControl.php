@@ -11,7 +11,7 @@ class SicossControl extends Model
 
     protected $table = 'suc.sicoss_controles';
     protected $primaryKey = 'id';
-    
+
 
     protected $fillable = [
         'periodo',

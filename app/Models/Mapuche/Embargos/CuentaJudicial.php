@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
-
 
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
@@ -26,7 +26,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class CuentaJudicial extends Model
 {
-    use HasFactory, MapucheConnectionTrait;
+    use HasFactory;
+    use MapucheConnectionTrait;
 
     /**
      * Nombre de la tabla en la base de datos
@@ -82,7 +83,7 @@ class CuentaJudicial extends Model
     public function getKey()
     {
         $attributes = [];
-        foreach ((array) $this->primaryKey as $key) {
+        foreach ((array)$this->primaryKey as $key) {
             $attributes[$key] = $this->getAttribute($key);
         }
         return $attributes;
@@ -93,7 +94,8 @@ class CuentaJudicial extends Model
      */
     public function embargos(): HasMany
     {
-        return $this->hasMany(Embargo::class,
+        return $this->hasMany(
+            Embargo::class,
             'nro_cuenta_judicial',
             'nro_cuenta_judicial'
         )->where([

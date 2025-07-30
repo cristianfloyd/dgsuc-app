@@ -59,7 +59,7 @@ class Dh36 extends Model
         DB::statement("SET client_encoding TO 'SQL_ASCII'");
 
         static::retrieved(function ($model) {
-            if(isset($model->descdependesemp)) {
+            if (isset($model->descdependesemp)) {
                 $model->descdependesemp = EncodingService::toUtf8($model->descdependesemp);
             }
         });

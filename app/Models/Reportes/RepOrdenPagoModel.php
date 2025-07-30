@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models\Reportes;
@@ -17,7 +18,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RepOrdenPagoModel extends Model implements HasLabel
 {
-    use MapucheConnectionTrait, HasFactory;
+    use MapucheConnectionTrait;
+    use HasFactory;
 
     public const TABLA_UNIDAD_ACADEMICA = 13;
     protected static ?string $label = 'Orden de Pago';

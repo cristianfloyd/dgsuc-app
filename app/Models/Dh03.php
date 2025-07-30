@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 class Dh03 extends Model
 {
     use MapucheConnectionTrait;
@@ -167,12 +166,12 @@ class Dh03 extends Model
 
     protected function setCodigocontratoAttribute($value)
     {
-        $this->attributes['codigocontrato'] = (int) $value;
+        $this->attributes['codigocontrato'] = (int)$value;
     }
 
     protected function setChkstopliqAttribute($value)
     {
-        $this->attributes['chkstopliq'] = (int) $value;
+        $this->attributes['chkstopliq'] = (int)$value;
     }
 
     /* ############################### GETTERS ############################## */
@@ -193,7 +192,7 @@ class Dh03 extends Model
         $cargo = static::validarLegajoCargo($nroLegaj, $nroCargo)->first();
 
         return [
-            'existe' => (bool) $cargo,
+            'existe' => (bool)$cargo,
             'detalles' => $cargo ? [
                 'legajo' => $cargo->nro_legaj,
                 'cargo' => $cargo->nro_cargo,
@@ -215,7 +214,7 @@ class Dh03 extends Model
         return static::cargosActivos($nroLegajo)->get()->toArray();
     }
 
-    
+
 
     /** ############################## SCOPES ############################## */
 

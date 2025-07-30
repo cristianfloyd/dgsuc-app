@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    use MapucheConnectionTrait, HasPuestoDesempenado, HasUnidadAcademica;
+    use MapucheConnectionTrait;
+    use HasPuestoDesempenado;
+    use HasUnidadAcademica;
 
     protected $table = 'afip_mapuche_mi_simplificacion';
     protected $schema = 'suc';
@@ -119,7 +121,7 @@ class AfipMapucheMiSimplificacion extends Model
             get: fn ($value, $attributes) => $attributes['puesto'],
         );
     }
-    
+
 
     protected function puesto(): Attribute
     {

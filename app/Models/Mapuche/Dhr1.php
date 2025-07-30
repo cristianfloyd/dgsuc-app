@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
 /**
  * Modelo Dhr1 para gestión de liquidaciones Mapuche
  *
@@ -92,8 +91,8 @@ class Dhr1 extends Model
     protected function plantilla(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? (string) $value : null,
-            set: fn ($value) => $value ? (string) $value : null
+            get: fn ($value) => $value ? (string)$value : null,
+            set: fn ($value) => $value ? (string)$value : null
         );
     }
 

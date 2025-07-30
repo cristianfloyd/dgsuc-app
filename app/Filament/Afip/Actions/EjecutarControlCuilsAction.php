@@ -2,11 +2,11 @@
 
 namespace App\Filament\Afip\Actions;
 
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Log;
-use App\Services\SicossControlService;
-use Filament\Notifications\Notification;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Services\SicossControlService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class EjecutarControlCuilsAction extends Action
 {
@@ -70,7 +70,6 @@ class EjecutarControlCuilsAction extends Action
                 ->title('Control de CUILs Ejecutado')
                 ->body("Se completó el control de CUILs para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
                 ->send();
-
         } catch (\Exception $e) {
             Log::error('Error en control de CUILs', [
                 'error' => $e->getMessage(),

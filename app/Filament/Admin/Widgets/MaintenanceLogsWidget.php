@@ -2,13 +2,14 @@
 
 namespace App\Filament\Admin\Widgets;
 
+use App\Traits\MapucheConnectionTrait;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 
 class MaintenanceLogsWidget extends Widget
 {
     use MapucheConnectionTrait;
+
     protected static string $view = 'filament.widgets.maintenance-logs-widget';
     protected static bool $isLazy = true;
     protected static ?int $sort = 5;
@@ -81,5 +82,4 @@ class MaintenanceLogsWidget extends Widget
                 LIMIT 5
             ");
     }
-
 }

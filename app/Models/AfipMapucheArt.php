@@ -18,6 +18,7 @@ class AfipMapucheArt extends Model
 {
     use MapucheConnectionTrait;
     use MapucheConnectionTrait;
+
     protected $table = 'afip_art';
     protected $schema = 'suc';
 
@@ -50,7 +51,7 @@ class AfipMapucheArt extends Model
      */
     public static function getMapucheConnection()
     {
-        return (new static)->getConnectionFromTrait();
+        return (new static())->getConnectionFromTrait();
     }
 
     /**

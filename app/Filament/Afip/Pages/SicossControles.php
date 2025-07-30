@@ -2,41 +2,41 @@
 
 namespace App\Filament\Afip\Pages;
 
-use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use Filament\Actions\Action;
 use App\Enums\ConceptosSicossEnum;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Log;
-use Filament\Support\Enums\MaxWidth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Models\ControlCuilsDiferencia;
-use App\Services\SicossControlService;
-use App\Traits\MapucheConnectionTrait;
-use App\Exports\Sicoss\ConceptosExport;
-use App\Models\ControlConceptosPeriodo;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use App\Models\ControlAportesDiferencia;
-use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
-use App\Exports\Sicoss\CuilsDiferenciasExport;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Models\ControlContribucionesDiferencia;
 use App\Exports\Sicoss\AportesDiferenciasExport;
-use Filament\Tables\Concerns\InteractsWithTable;
-use App\Exports\Sicoss\ResumenDependenciasExport;
-use Filament\Tables\Actions\Action as TableAction;
-use Illuminate\Support\Facades\View as ViewFacade;
+use App\Exports\Sicoss\ConceptosExport;
 use App\Exports\Sicoss\ContribucionesDiferenciasExport;
-use App\Filament\Afip\Actions\EjecutarControlCuilsAction;
-use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
+use App\Exports\Sicoss\CuilsDiferenciasExport;
+use App\Exports\Sicoss\ResumenDependenciasExport;
 use App\Filament\Afip\Actions\EjecutarControlAportesAction;
 use App\Filament\Afip\Actions\EjecutarControlConceptosAction;
-use Filament\Notifications\Actions\Action as NotificationAction;
 use App\Filament\Afip\Actions\EjecutarControlContribucionesAction;
+use App\Filament\Afip\Actions\EjecutarControlCuilsAction;
+use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
+use App\Models\ControlAportesDiferencia;
+use App\Models\ControlConceptosPeriodo;
+use App\Models\ControlContribucionesDiferencia;
+use App\Models\ControlCuilsDiferencia;
+use App\Services\Mapuche\PeriodoFiscalService;
+use App\Services\SicossControlService;
+use App\Traits\MapucheConnectionTrait;
+use Filament\Actions\Action;
+use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View as ViewFacade;
+use Livewire\Attributes\On;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SicossControles extends Page implements HasTable
 {
@@ -249,7 +249,7 @@ class SicossControles extends Page implements HasTable
 
     protected function hasResults(): bool
     {
-        return !is_null($this->resultadosControles) &&
+        return $this->resultadosControles !== null &&
             isset($this->resultadosControles['aportes_contribuciones']);
     }
 
@@ -393,7 +393,7 @@ class SicossControles extends Page implements HasTable
                             'relacionActiva' => $record->relacionActiva,
                             'dh01' => $record->dh01,
                             ]);
-                        })
+                    })
                     ->modalHeading(fn($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -408,7 +408,7 @@ class SicossControles extends Page implements HasTable
                             'relacionActiva' => $record->relacionActiva,
                             'dh01' => $record->dh01,
                             ]);
-                        })
+                    })
                     ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -420,7 +420,7 @@ class SicossControles extends Page implements HasTable
                             return view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
                             'record' => $record,
                             ]);
-                        })
+                    })
                     ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -432,7 +432,7 @@ class SicossControles extends Page implements HasTable
                             return view('filament.afip.pages.partials.sicoss-detalle-conceptos-modal', [
                             'record' => $record,
                             ]);
-                        })
+                    })
                     ->modalHeading(fn($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
                     ->modalWidth(MaxWidth::SevenExtraLarge),
             ],
@@ -489,7 +489,7 @@ class SicossControles extends Page implements HasTable
                     ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function () {
                             $this->ejecutarControles();
-                        })
+                    })
             ],
         };
 

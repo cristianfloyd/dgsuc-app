@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Modelo para la tabla de Otros Datos del Empleado (DH09)
- * 
+ *
  * Esta clase representa los datos adicionales de empleados en el sistema Mapuche,
  * incluyendo información sobre estado civil, jubilación, obra social, y otros
  * datos relevantes para la gestión de recursos humanos.
@@ -84,45 +84,45 @@ class Dh09 extends Model
         // Datos de vigencia
         'vig_otano',
         'vig_otmes',
-        
+
         // Referencias a tablas
         'nro_tab02',
         'nro_tab08',
         'nro_tab09',
-        
+
         // Estado civil y personal
         'codc_estcv',
         'sino_embargo',
         'sino_otsal',
         'sino_jubil',
-        
+
         // Beneficios previsionales
         'codc_bprev',
-        
+
         // Obra social
         'codc_obsoc',
         'nro_afili',
         'fec_altos',
-        
+
         // Declaraciones juradas
         'fec_endjp',
         'desc_envio',
         'fechadjur894',
         'renunciadj894',
         'fechadechere',
-        
+
         // Información familiar y laboral
         'cant_cargo',
         'desc_tarea',
         'conyugedependiente',
-        
+
         // Dependencias y regiones
         'codc_regio',
         'codc_uacad',
         'coddependesemp',
         'ua_asigfamiliar',
         'codc_uacad_seguro',
-        
+
         // Fechas importantes
         'fec_vtosf',
         'fec_reasf',
@@ -132,16 +132,16 @@ class Dh09 extends Model
         'fecha_permanencia',
         'fec_ingreso',
         'fecha_recibo',
-        
+
         // Agremiación
         'nro_agremiacion',
-        
+
         // Normas
         'tipo_norma',
         'nro_norma',
         'tipo_emite',
         'fec_norma',
-        
+
         // Configuraciones especiales
         'fuerza_reparto'
     ];
@@ -162,7 +162,7 @@ class Dh09 extends Model
         'nro_agremiacion' => 'integer',
         'conyugedependiente' => 'integer',
         'nro_norma' => 'integer',
-        
+
         // Strings
         'codc_estcv' => 'string',
         'sino_otsal' => 'string',
@@ -180,7 +180,7 @@ class Dh09 extends Model
         'codc_uacad_seguro' => 'string',
         'tipo_norma' => 'string',
         'tipo_emite' => 'string',
-        
+
         // Fechas
         'fec_altos' => 'date',
         'fec_endjp' => 'date',
@@ -195,7 +195,7 @@ class Dh09 extends Model
         'fec_ingreso' => 'date',
         'fecha_recibo' => 'date',
         'fec_norma' => 'date',
-        
+
         // Booleanos
         'sino_embargo' => 'boolean',
         'fuerza_reparto' => 'boolean',
@@ -391,7 +391,7 @@ class Dh09 extends Model
                 'mes' => $mes,
                 'error' => $e->getMessage()
             ]);
-            
+
             // Retornar paginador vacío en caso de error
             return static::query()->paginate(0);
         }
@@ -404,7 +404,7 @@ class Dh09 extends Model
     {
         try {
             $query = static::porPeriodo($ano, $mes);
-            
+
             return [
                 'total_empleados' => $query->count(),
                 'empleados_activos' => $query->activos()->count(),
@@ -419,7 +419,7 @@ class Dh09 extends Model
                 'mes' => $mes,
                 'error' => $e->getMessage()
             ]);
-            
+
             return [
                 'total_empleados' => 0,
                 'empleados_activos' => 0,
@@ -493,7 +493,6 @@ class Dh09 extends Model
                 }
 
                 Log::info('Creando registro DH09 para legajo: ' . $model->nro_legaj);
-                
             } catch (\Exception $e) {
                 Log::error('Error en evento creating de DH09', [
                     'legajo' => $model->nro_legaj ?? 'null',
@@ -507,12 +506,11 @@ class Dh09 extends Model
         static::updating(function ($model) {
             try {
                 Log::info("Actualizando registro DH09 para legajo: {$model->nro_legaj}");
-                
+
                 // Validaciones adicionales si es necesario
-                if ($model->isDirty('fec_defun') && !($model->fec_defun===null)) {
+                if ($model->isDirty('fec_defun') && !($model->fec_defun === null)) {
                     Log::warning('Se está registrando fecha de defunción para legajo: ' . $model->nro_legaj);
                 }
-                
             } catch (\Exception $e) {
                 Log::error('Error en evento updating de DH09', [
                     'legajo' => $model->nro_legaj,
@@ -570,7 +568,6 @@ class Dh09 extends Model
             if (!is_null($this->vig_otano) && $this->vig_otano < 1900) {
                 $errores[] = 'El año de vigencia debe ser mayor a 1900';
             }
-
         } catch (\Exception $e) {
             Log::error('Error validando consistencia de DH09', [
                 'legajo' => $this->nro_legaj,
@@ -693,7 +690,6 @@ class Dh09 extends Model
             if (!empty($criterios['fecha_ingreso_hasta'])) {
                 $query->where('fec_ingreso', '<=', $criterios['fecha_ingreso_hasta']);
             }
-
         } catch (\Exception $e) {
             Log::error('Error en búsqueda avanzada de DH09', [
                 'criterios' => $criterios,
@@ -726,13 +722,12 @@ class Dh09 extends Model
 
             if ($registrosLimpiados > 0) {
                 Log::warning("Se encontraron {$registrosLimpiados} registros inconsistentes en DH09");
-                
+
                 // Aquí implementar la lógica de limpieza
                 // Por seguridad, solo registramos el problema
             }
 
             return $registrosLimpiados;
-
         } catch (\Exception $e) {
             Log::error('Error limpiando registros inconsistentes de DH09', [
                 'error' => $e->getMessage()
@@ -762,12 +757,11 @@ class Dh09 extends Model
                 'registros_sin_fecha_ingreso' => static::whereNull('fec_ingreso')->count(),
                 'ultima_actualizacion' => static::max('updated_at') ?? 'No disponible',
             ];
-
         } catch (\Exception $e) {
             Log::error('Error generando reporte de salud de DH09', [
                 'error' => $e->getMessage()
             ]);
-            
+
             return [
                 'error' => 'No se pudo generar el reporte de salud',
                 'mensaje' => $e->getMessage()
