@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $cuit CUIT del beneficiario (PK)
  * @property string $nom_beneficiario Nombre del beneficiario
  *
- * @method static \Database\Factories\BeneficiarioFactory factory()
  */
 class Beneficiario extends Model
 {

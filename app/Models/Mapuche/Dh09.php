@@ -382,37 +382,50 @@ class Dh09 extends Model
         $errores = [];
 
         try {
-            // Validar fechas lógicas
-            if ($this->fec_defun && $this->fec_ingreso && $this->fec_defun < $this->fec_ingreso) {
+            // Validar fechas lógicas con conversión segura
+            $fechaIngreso = $this->fec_ingreso ? Carbon::parse($this->fec_ingreso) : null;
+            $fechaDefuncion = $this->fec_defun ? Carbon::parse($this->fec_defun) : null;
+            $fechaJubilacion = $this->fecha_jubilacion ? Carbon::parse($this->fecha_jubilacion) : null;
+
+            if ($fechaDefuncion && $fechaIngreso && $fechaDefuncion->lt($fechaIngreso)) {
                 $errores[] = 'La fecha de defunción no puede ser anterior a la fecha de ingreso';
             }
 
-            if ($this->fecha_jubilacion && $this->fec_ingreso && $this->fecha_jubilacion < $this->fec_ingreso) {
+            if ($fechaJubilacion && $fechaIngreso && $fechaJubilacion->lt($fechaIngreso)) {
                 $errores[] = 'La fecha de jubilación no puede ser anterior a la fecha de ingreso';
             }
 
-            // Validar coherencia de estado de jubilación
-            if ($this->sino_jubil === 'S' && $this->fecha_jubilacion === null) {
+            // Validar coherencia de estado de jubilación (case-insensitive)
+            if (strtoupper(trim($this->sino_jubil ?? '')) === 'S' && !$fechaJubilacion) {
                 $errores[] = 'Si está marcado como jubilado, debe tener fecha de jubilación';
             }
 
-            // Validar obra social
-            if (!empty($this->codc_obsoc) && empty($this->nro_afili)) {
+            // Validar obra social con mejor manejo de valores nulos/vacíos
+            if (!is_null($this->codc_obsoc) && trim($this->codc_obsoc) !== '' && 
+                (is_null($this->nro_afili) || trim($this->nro_afili) === '')) {
                 $errores[] = 'Si tiene código de obra social, debe tener número de afiliado';
             }
 
-            // Validar período de vigencia
-            if ($this->vig_otmes !== null && ($this->vig_otmes < 1 || $this->vig_otmes > 12)) {
+            // Validar período de vigencia con rangos más estrictos
+            if ($this->vig_otmes !== null && !in_array($this->vig_otmes, range(1, 12), true)) {
                 $errores[] = 'El mes de vigencia debe estar entre 1 y 12';
             }
 
-            if ($this->vig_otano !== null && $this->vig_otano < 1900) {
-                $errores[] = 'El año de vigencia debe ser mayor a 1900';
+            $currentYear = now()->year;
+            if ($this->vig_otano !== null && ($this->vig_otano < 1900 || $this->vig_otano > $currentYear + 5)) {
+                $errores[] = "El año de vigencia debe estar entre 1900 y {$currentYear + 5}";
             }
+
+            // Validar campos requeridos básicos
+            if (empty($this->nro_legaj)) {
+                $errores[] = 'El número de legajo es requerido';
+            }
+
         } catch (\Exception $e) {
             Log::error('Error validando consistencia de DH09', [
-                'legajo' => $this->nro_legaj,
+                'legajo' => $this->nro_legaj ?? 'N/A',
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             $errores[] = 'Error interno durante la validación';
         }
@@ -426,7 +439,7 @@ class Dh09 extends Model
     public function esValidoParaProcesamiento(): bool
     {
         $errores = $this->validarConsistencia();
-        return $errores === [];
+        return empty($errores);
     }
 
     // ========================================

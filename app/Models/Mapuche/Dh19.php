@@ -18,12 +18,14 @@ class Dh19 extends Model
 
     protected $table = 'mapuche.dh19';
 
+    // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['nro_legaj', 'codn_conce', 'tipo_docum', 'nro_docum'];
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'nro_legaj',

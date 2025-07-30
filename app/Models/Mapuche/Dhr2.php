@@ -27,6 +27,7 @@ class Dhr2 extends Model
 
     protected $table = 'mapuche.dhr2';
 
+    // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo'];
 
     /**

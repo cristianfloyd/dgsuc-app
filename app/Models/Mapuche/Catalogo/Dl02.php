@@ -256,7 +256,7 @@ class Dl02 extends Model
     /**
      * Verifica si aplica para cualquier carácter.
      */
-    public function aplicaACualquierCaracter(): bool
+    public function aplicaCualquierCaracter(): bool
     {
         return (bool) $this->seapacualcaracter;
     }
@@ -264,7 +264,7 @@ class Dl02 extends Model
     /**
      * Verifica si aplica para cualquier dedicación.
      */
-    public function aplicaACualquierDedicacion(): bool
+    public function aplicaCualquierDedicacion(): bool
     {
         return (bool) $this->seapacualdedic;
     }

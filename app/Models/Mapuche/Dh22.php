@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -60,6 +59,7 @@ class Dh22 extends Model
      * Los atributos que son asignables en masa.
      *
      * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'per_liano', 'per_limes', 'desc_liqui', 'fec_ultap', 'per_anoap', 'per_mesap',
@@ -186,11 +186,11 @@ class Dh22 extends Model
     /**
      *  Metodo estatico para verificar si existe un nro_liqui en la tabla dh22.
      *
-     * @param int|NroLiqui $nroLiqui
+     * @param NroLiqui|int $nroLiqui
      *
      * @return bool True si la función se ejecutó correctamente, false en caso contrario.
      */
-    public static function verificarNroLiqui(int $nroLiqui): bool
+    public static function verificarNroLiqui($nroLiqui): bool
     {
         $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
 
@@ -309,7 +309,7 @@ class Dh22 extends Model
      *
      * @return Builder
      */
-    public function scopeFilterByYearMonth($query, int $year, int $month)
+    public function scopeFilterByYearMonth($query,PeriodoFiscal|int $year, PeriodoFiscal|int $month)
     {
         if ($year instanceof PeriodoFiscal) {
             return $query->where('per_liano', $year->year())
@@ -328,7 +328,7 @@ class Dh22 extends Model
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFilterByPeriodoFiscal($query, ?array $periodoFiscal)
+    public function scopeFilterByPeriodoFiscal($query, $periodoFiscal = null)
     {
         if (!$periodoFiscal) {
             return $query;
@@ -382,7 +382,7 @@ class Dh22 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
+            get: fn (): string => "{(string)$this->per_liano}" . str_pad((string)$this->per_limes, 2, '0', \STR_PAD_LEFT),
         );
     }
 
@@ -405,7 +405,7 @@ class Dh22 extends Model
     protected function periodo(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => "{$this->per_liano}" . str_pad($this->per_limes, 2, '0', \STR_PAD_LEFT),
+            get: fn (): string => "{(string)$this->per_liano}" . str_pad((string)$this->per_limes, 2, '0', \STR_PAD_LEFT),
             set: function ($value): array {
                 if ($value instanceof PeriodoFiscal) {
                     return [

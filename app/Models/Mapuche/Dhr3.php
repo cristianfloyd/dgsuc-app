@@ -40,6 +40,7 @@ class Dhr3 extends Model
 
     protected $table = 'dhr3';
 
+    // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['nro_liqui', 'nro_legaj', 'nro_cargo', 'codc_hhdd', 'nro_renglo'];
 
     protected $fillable = [

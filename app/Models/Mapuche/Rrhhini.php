@@ -36,15 +36,14 @@ class Rrhhini extends Model
 
     /**
      * The primary key for the model.
-     *
      * @var array
      */
-    protected $primaryKey = ['nombre_seccion', 'nombre_parametro'];
+    protected $primaryKey = ['nombre_seccion', 'nombre_parametro']; // @phpstan-ignore property.phpDocType
 
     /**
      * The attributes that are mass assignable.
-     *
      * @var array<string>
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'nombre_seccion',
@@ -122,7 +121,7 @@ class Rrhhini extends Model
     /**
      * Find a model by its primary key.
      *
-     * @param string $key
+     * @param string|int $key
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */

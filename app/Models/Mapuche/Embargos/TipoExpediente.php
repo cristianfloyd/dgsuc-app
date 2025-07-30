@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_tipo_expediente ID del tipo de expediente (PK)
  * @property string $desc_tipo_expediente Descripción del tipo de expediente
  *
- * @method static \Database\Factories\TipoExpedienteFactory factory()
  */
 class TipoExpediente extends Model
 {

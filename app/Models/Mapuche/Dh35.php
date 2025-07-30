@@ -33,6 +33,7 @@ class Dh35 extends Model
 
     protected $table = 'mapuche.dh35';
 
+    // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['tipo_escal', 'codc_carac'];
 
     protected $fillable = [

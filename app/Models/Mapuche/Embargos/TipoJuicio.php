@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_tipo_juicio ID del tipo de juicio (PK)
  * @property string $desc_tipo_juicio Descripción del tipo de juicio
  *
- * @method static \Database\Factories\TipoJuicioFactory factory()
  */
 class TipoJuicio extends Model
 {

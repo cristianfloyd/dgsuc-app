@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $titular Titular de la cuenta
  * @property int $nrovalorpago Número valor pago
  *
- * @method static \Database\Factories\CuentaJudicialFactory factory()
  */
 class CuentaJudicial extends Model
 {
@@ -46,6 +45,8 @@ class CuentaJudicial extends Model
 
     /**
      * Definir clave primaria compuesta.
+     * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $primaryKey = ['nro_cuenta_judicial', 'codigo_sucursal', 'nroentidadbancaria'];
 

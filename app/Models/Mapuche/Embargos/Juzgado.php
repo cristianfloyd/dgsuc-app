@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_juzgado ID del juzgado (PK)
  * @property string $nom_juzgado Nombre del juzgado
  *
- * @method static \Database\Factories\JuzgadoFactory factory()
  */
 class Juzgado extends Model
 {

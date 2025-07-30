@@ -40,6 +40,7 @@ class Dh16 extends Model
      * The attributes that are mass assignable.
      *
      * @var array<string>
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'codn_grupo',
