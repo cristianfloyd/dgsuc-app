@@ -79,19 +79,17 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     })
                     ->required(),
                 Select::make('nroLiquiProxima')
+                    ->label('Proxima Liquidacion')
                     ->required()
+                    ->searchable()
                     ->options(
-                        Dh22::getLiquidacionesForWidget($periodoFiscalActual)
-                            ->formateadoParaSelect()
-                            ->pluck('desc_liqui', 'nro_liqui'),
+                        Dh22::getLiquidacionesByPeriodoFiscal(),
                     ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')
                     ->multiple()
                     ->options(
-                        Dh22::getLiquidacionesForWidget()
-                            ->formateadoParaSelect()
-                            ->pluck('desc_liqui', 'nro_liqui'),
+                        Dh22::getLiquidacionesByPeriodoFiscal(),
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH20'),

@@ -397,6 +397,23 @@ class Dh22 extends Model
             });
     }
 
+    
+    /**
+     * Obtiene liquidaciones filtradas por periodo fiscal y formateadas para un select.
+     *
+     * @return \Illuminate\Support\Collection  Ejemplo: [35 => "35 - Liquidación Mayo 2025"]
+     */
+    public static function getLiquidacionesByPeriodoFiscal2(?array $periodoFiscal = null): \Illuminate\Support\Collection
+    {
+        return static::query()
+            ->filterByPeriodoFiscal($periodoFiscal)
+            ->orderByDesc('nro_liqui')
+            ->get()                       // ← ahora sí tenemos modelos completos
+            ->mapWithKeys(fn (self $l) => [
+                $l->nro_liqui => $l->descripcion_completa,
+            ]);
+    }
+
     /**
      * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
      * Accesor para el atributo 'periodo_fiscal'.
