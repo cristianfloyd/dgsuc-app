@@ -401,13 +401,15 @@ class Dh09 extends Model
             }
 
             // Validar obra social con mejor manejo de valores nulos/vacíos
-            if (!is_null($this->codc_obsoc) && trim($this->codc_obsoc) !== '' && 
-                (is_null($this->nro_afili) || trim($this->nro_afili) === '')) {
+            if (
+                $this->codc_obsoc !== null && trim($this->codc_obsoc) !== '' &&
+                ($this->nro_afili === null || trim($this->nro_afili) === '')
+            ) {
                 $errores[] = 'Si tiene código de obra social, debe tener número de afiliado';
             }
 
             // Validar período de vigencia con rangos más estrictos
-            if ($this->vig_otmes !== null && !in_array($this->vig_otmes, range(1, 12), true)) {
+            if ($this->vig_otmes !== null && !\in_array($this->vig_otmes, range(1, 12), true)) {
                 $errores[] = 'El mes de vigencia debe estar entre 1 y 12';
             }
 
@@ -421,7 +423,6 @@ class Dh09 extends Model
             if (empty($this->nro_legaj)) {
                 $errores[] = 'El número de legajo es requerido';
             }
-
         } catch (\Exception $e) {
             Log::error('Error validando consistencia de DH09', [
                 'legajo' => $this->nro_legaj ?? 'N/A',
@@ -440,7 +441,7 @@ class Dh09 extends Model
     public function esValidoParaProcesamiento(): bool
     {
         $errores = $this->validarConsistencia();
-        return empty($errores);
+        return $errores === [];
     }
 
     // ========================================
@@ -625,7 +626,8 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para obtener el estado de jubilación como booleano.
+     * Summary of esJubilado
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function esJubilado(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -633,7 +635,8 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para obtener si tiene salario familiar en otro organismo.
+     * Summary of tieneSalarioFamiliarExterno
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function tieneSalarioFamiliarExterno(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -641,7 +644,8 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para obtener la edad aproximada basada en fecha de ingreso.
+     * Summary of antiguedad
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function antiguedad(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -652,7 +656,7 @@ class Dh09 extends Model
             try {
                 return (int) $this->fec_ingreso->diffInYears(now());
             } catch (\Exception $e) {
-                Log::warning('Error calculando antigüedad para legajo: ' . $this->nro_legaj, [
+                Log::warning("Error calculando antigüedad para legajo: {$this->nro_legaj}", [
                     'error' => $e->getMessage(),
                 ]);
                 return null;
@@ -661,7 +665,8 @@ class Dh09 extends Model
     }
 
     /**
-     * Accessor para verificar si el empleado está fallecido.
+     * Summary of estaFallecido
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function estaFallecido(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
