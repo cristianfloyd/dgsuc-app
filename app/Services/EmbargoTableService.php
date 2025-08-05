@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class EmbargoTableService
 {
@@ -59,10 +59,11 @@ class EmbargoTableService
                 $table->integer('nro_legaj');
                 $table->decimal('remunerativo', 15, 2);
                 $table->decimal('no_remunerativo', 15, 2);
-                $table->decimal('total', 15, 2);
+                $table->decimal('total', 20, 2);
                 $table->integer('codn_conce');
                 $table->string('tipo_foran', 1)->nullable();
                 $table->string('clas_noved', 1)->nullable();
+                $table->json('nros_liqui_json')->nullable();
                 $table->index(['nro_legaj', 'tipo_embargo']);
             });
     }

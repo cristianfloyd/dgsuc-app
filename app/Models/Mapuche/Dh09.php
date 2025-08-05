@@ -412,8 +412,9 @@ class Dh09 extends Model
             }
 
             $currentYear = now()->year;
+            $maxYear = $currentYear + 5;
             if ($this->vig_otano !== null && ($this->vig_otano < 1900 || $this->vig_otano > $currentYear + 5)) {
-                $errores[] = "El año de vigencia debe estar entre 1900 y {$currentYear + 5}";
+                $errores[] = "El año de vigencia debe estar entre 1900 y {$maxYear}";
             }
 
             // Validar campos requeridos básicos
