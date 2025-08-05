@@ -5,6 +5,7 @@ namespace App\Models;
 use Sushi\Sushi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EmbargoProcesoResult extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, EncodingTrait;
 
     protected $table = 'suc.embargo_proceso_results';
 
@@ -61,6 +62,11 @@ class EmbargoProcesoResult extends Model
         'clas_noved' => 'string'
     ];
 
+    protected array $encodedFields = [
+        'tipo_noved',
+        'tipo_foran',
+        'clas_noved'
+    ];
 
 
     /**

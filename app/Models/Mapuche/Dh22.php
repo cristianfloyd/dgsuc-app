@@ -86,6 +86,8 @@ class Dh22 extends Model
      */
     protected $encodedFields = [
         'desc_liqui',
+        'desc_lugap',
+        'desc_emisi'
     ];
 
 
@@ -435,9 +437,19 @@ class Dh22 extends Model
      */
     public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null)
     {
-        return static::getLiquidacionesForWidget()
+        $liquidaciones = static::getLiquidacionesForWidget()
             ->filterByPeriodoFiscal($periodoFiscal)
             ->formateadoParaSelect()
-            ->pluck('descripcion_completa', 'nro_liqui');
+            ->get();
+
+        // Procesar los datos con codificación manual para asegurar que funcione
+        return $liquidaciones->mapWithKeys(function ($liquidacion) {
+            // Procesar la codificación manualmente para el campo descripcion_completa
+            $descripcionCodificada = \App\Services\EncodingService::toUtf8($liquidacion->descripcion_completa);
+
+            return [
+                $liquidacion->nro_liqui => $descripcionCodificada
+            ];
+        });
     }
 }
