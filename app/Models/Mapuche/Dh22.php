@@ -8,7 +8,6 @@ use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\NroLiqui;
 use App\ValueObjects\PeriodoFiscal;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -403,7 +402,7 @@ class Dh22 extends Model
      *
      * @return \Illuminate\Support\Collection  Ejemplo: [35 => "35 - Liquidación Mayo 2025"]
      */
-    public static function getLiquidacionesByPeriodoFiscal2(?array $periodoFiscal = null): \Illuminate\Support\Collection
+    public static function getLiquidacionesByPeriodoFiscal2(?array $periodoFiscal = null): Collection
     {
         return static::query()
             ->filterByPeriodoFiscal($periodoFiscal)

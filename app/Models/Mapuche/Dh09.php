@@ -9,9 +9,12 @@ use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\Mapuche\Dh09Queries;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -235,7 +238,7 @@ class Dh09 extends Model
      */
     public function puedeJubilarse(): bool
     {
-        return $this->es_jubilado || $this->fecha_jubilacion !== null;
+        return $this->sino_jubil || $this->fecha_jubilacion !== null;
     }
 
     /**
@@ -278,10 +281,16 @@ class Dh09 extends Model
         }
     }
 
+    
     /**
-     * Obtiene empleados por período con paginación.
+     * Obtiene un listado paginado de empleados por período.
+     *
+     * @param int $ano Año del período.
+     * @param int $mes Mes del período.
+     * @param int $limite Cantidad de registros por página.
+     * @return LengthAwarePaginator
      */
-    public static function obtenerPorPeriodo(int $ano, int $mes, int $limite = 100): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public static function obtenerPorPeriodo(int $ano, int $mes, int $limite = 100): LengthAwarePaginator
     {
         try {
             return static::porPeriodo($ano, $mes)
@@ -341,7 +350,7 @@ class Dh09 extends Model
      * Relación con la tabla de empleados (DH01)
      * Un empleado tiene un registro de otros datos.
      */
-    public function empleado()
+    public function empleado(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
@@ -349,7 +358,7 @@ class Dh09 extends Model
     /**
      * Relación con tabla múltiple DH30 (nro_tab02).
      */
-    public function tablaMultiple02()
+    public function tablaMultiple02(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'nro_tab02', 'nro_tabla');
     }
@@ -357,7 +366,7 @@ class Dh09 extends Model
     /**
      * Relación con tabla múltiple DH30 (nro_tab08).
      */
-    public function tablaMultiple08()
+    public function tablaMultiple08(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'nro_tab08', 'nro_tabla');
     }
@@ -365,7 +374,7 @@ class Dh09 extends Model
     /**
      * Relación con tabla múltiple DH30 (nro_tab09).
      */
-    public function tablaMultiple09()
+    public function tablaMultiple09(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'nro_tab09', 'nro_tabla');
     }
@@ -457,7 +466,7 @@ class Dh09 extends Model
             'legajo' => $this->nro_legaj,
             'periodo_vigencia' => $this->getPeriodoVigenciaFormateado(),
             'estado_civil' => $this->codc_estcv,
-            'es_jubilado' => $this->es_jubilado,
+            'es_jubilado' => $this->sino_jubil,
             'tiene_embargo' => $this->sino_embargo,
             'obra_social' => [
                 'codigo' => $this->codc_obsoc,
@@ -479,7 +488,7 @@ class Dh09 extends Model
                 'conyuge_dependiente' => $this->conyugedependiente,
             ],
             'antiguedad_años' => $this->antiguedad,
-            'esta_activo' => !$this->esta_fallecido,
+            'esta_activo' => !$this->fec_defun,
         ];
     }
 
@@ -487,8 +496,34 @@ class Dh09 extends Model
     // MÉTODOS DE BÚSQUEDA AVANZADA
     // ========================================
 
+    
     /**
-     * Búsqueda avanzada con múltiples criterios.
+     * Realiza una búsqueda avanzada de registros DH09 basada en los criterios proporcionados.
+     *
+     * Este método permite filtrar los registros DH09 utilizando una variedad de criterios,
+     * incluyendo número de legajo, período de vigencia, estado de jubilación, estado activo,
+     * obra social, dependencia, embargos y rango de fechas de ingreso.
+     *
+     * @param array $criterios Un array asociativo de criterios de búsqueda. Los criterios
+     *                           posibles incluyen:
+     *                           - 'legajo' (int): Número de legajo del empleado.
+     *                           - 'ano' (int): Año del período de vigencia.
+     *                           - 'mes' (int): Mes del período de vigencia.
+     *                           - 'jubilado' (bool): Indica si se deben buscar empleados jubilados (true)
+     *                             o no jubilados (false).
+     *                           - 'activo' (bool): Indica si se deben buscar empleados activos (true) o
+     *                             inactivos (false).
+     *                           - 'obra_social' (string): Código de la obra social.
+     *                           - 'dependencia' (string): Código de la dependencia.
+     *                           - 'con_embargo' (bool): Indica si se deben buscar empleados con embargo (true).
+     *                           - 'fecha_ingreso_desde' (string|Carbon): Fecha de inicio del rango de fechas de ingreso.
+     *                           - 'fecha_ingreso_hasta' (string|Carbon): Fecha de fin del rango de fechas de ingreso.
+     *
+     * @return Builder Una instancia de Illuminate\Database\Eloquent\Builder configurada con los
+     *               criterios de búsqueda especificados.
+     *
+     * @throws \Exception Si ocurre algún error durante la ejecución de la búsqueda, se registrará
+     *                     un error en el log.
      */
     public static function busquedaAvanzada(array $criterios): Builder
     {
@@ -592,8 +627,27 @@ class Dh09 extends Model
         }
     }
 
+    
     /**
-     * Genera reporte de salud de los datos.
+     * Genera un reporte de salud de los datos en la tabla DH09.
+     *
+     * Este reporte proporciona estadísticas generales sobre la calidad y
+     * completitud de los datos, incluyendo totales, registros con información
+     * relevante (período válido, obra social), y conteos de empleados en
+     * diferentes estados (jubilados, fallecidos, con embargo).
+     *
+     * @return array Un array asociativo con las siguientes claves:
+     *   - 'total_registros' (int): Total de registros en la tabla.
+     *   - 'registros_con_periodo_valido' (int): Registros con año y mes de vigencia válidos (mes entre 1 y 12).
+     *   - 'registros_con_obra_social' (int): Registros con código de obra social y número de afiliado.
+     *   - 'empleados_jubilados' (int): Cantidad de empleados jubilados.
+     *   - 'empleados_fallecidos' (int): Cantidad de empleados fallecidos (con fecha de defunción).
+     *   - 'empleados_con_embargo' (int): Cantidad de empleados con embargo.
+     *   - 'registros_sin_fecha_ingreso' (int): Cantidad de registros sin fecha de ingreso.
+     *   - 'ultima_actualizacion' (string): Fecha y hora de la última actualización en la tabla,
+     *     o 'No disponible' si no hay registros.
+     *   - 'error' (string, opcional): Mensaje de error en caso de fallo durante la generación del reporte.
+     *   - 'mensaje' (string, opcional): Detalles del mensaje de error en caso de fallo.
      */
     public static function generarReporteSalud(): array
     {
@@ -611,7 +665,7 @@ class Dh09 extends Model
                 'empleados_fallecidos' => static::whereNotNull('fec_defun')->count(),
                 'empleados_con_embargo' => static::conEmbargo()->count(),
                 'registros_sin_fecha_ingreso' => static::whereNull('fec_ingreso')->count(),
-                'ultima_actualizacion' => static::max('updated_at') ?? 'No disponible',
+                'ultima_actualizacion' => now()->format('Y-m-d H:i:s'),
             ];
         } catch (\Exception $e) {
             Log::error('Error generando reporte de salud de DH09', [
@@ -627,29 +681,26 @@ class Dh09 extends Model
 
     /**
      * Summary of esJubilado
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    protected function esJubilado(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function esJubilado(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_jubil === 'S');
+        return Attribute::make(get: fn (): bool => $this->sino_jubil === 'S');
     }
 
     /**
      * Summary of tieneSalarioFamiliarExterno
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    protected function tieneSalarioFamiliarExterno(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function tieneSalarioFamiliarExterno(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_otsal === 'S');
+        return Attribute::make(get: fn (): bool => $this->sino_otsal === 'S');
     }
 
     /**
      * Summary of antiguedad
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    protected function antiguedad(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function antiguedad(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): ?int {
+        return Attribute::make(get: function (): ?int {
             if (!$this->fec_ingreso) {
                 return null;
             }
@@ -666,11 +717,10 @@ class Dh09 extends Model
 
     /**
      * Summary of estaFallecido
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    protected function estaFallecido(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function estaFallecido(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->fec_defun !== null);
+        return Attribute::make(get: fn (): bool => $this->fec_defun !== null);
     }
 
     // ========================================
@@ -735,6 +785,7 @@ class Dh09 extends Model
         });
     }
 
+    
     /**
      * Configuración de casting de tipos de datos
      * Organizado por tipos para mejor mantenimiento.
