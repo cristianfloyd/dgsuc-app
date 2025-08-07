@@ -262,11 +262,11 @@ class Dh22 extends Model
     /**
      * Scope para filtrar liquidaciones por rango de fechas.
      *
-     * @param Builder $query
+     * @param Builder<Dh22> $query
      * @param Carbon $fechaInicio
      * @param Carbon $fechaFin
      *
-     * @return Builder
+     * @return Builder<Dh22>
      */
     public function scopeBetweenPeriodoLiquidacion($query, $fechaInicio, $fechaFin)
     {
@@ -298,9 +298,9 @@ class Dh22 extends Model
     /**
      * Scope para filtrar liquidaciones que generan datos impositivos.
      *
-     * @param Builder $query
+     * @param Builder<Dh22> $query
      *
-     * @return Builder
+     * @return Builder<Dh22>
      */
     public function scopeGeneraImpositivo($query)
     {
@@ -310,9 +310,9 @@ class Dh22 extends Model
     /**
      * Scope para filtrar liquidaciones por período fiscal.
      *
-     * @param Builder $query
+     * @param Builder<Dh22> $query
      *
-     * @return Builder
+     * @return Builder<Dh22>
      */
     public function scopeFilterByYearMonth($query, PeriodoFiscal|int $year, PeriodoFiscal|int $month)
     {
@@ -329,11 +329,11 @@ class Dh22 extends Model
      * Filtra las liquidaciones por un periodo fiscal específico en formato año/mes.
      *
      * @param \Illuminate\Database\Eloquent\Builder<self> $query
-     * @param array|PeriodoFiscal|null $periodoFiscal Array con ['year' => año, 'month' => mes]
+     * @param array<string> $periodoFiscal
      *
      * @return \Illuminate\Database\Eloquent\Builder<self>
      */
-    public function scopeFilterByPeriodoFiscal($query,array|PeriodoFiscal|null $periodoFiscal = null): Builder
+    public function scopeFilterByPeriodoFiscal($query, array|PeriodoFiscal|null $periodoFiscal = null): Builder
     {
         if (!$periodoFiscal) {
             return $query;
