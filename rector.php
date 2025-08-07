@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
+use Rector\Set\ValueObject\LevelSetList;
+use RectorLaravel\Set\LaravelLevelSetList;
+use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -52,4 +54,6 @@ return RectorConfig::configure()
     ->withRules([
         // Agrega aquí solo reglas específicas que no estén en los sets
         // La mayoría de reglas ya están cubiertas por los sets
+        ReadOnlyPropertyRector::class,
+        ClassPropertyAssignToConstructorPromotionRector::class,
     ]);
