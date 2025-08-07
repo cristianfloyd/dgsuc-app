@@ -33,6 +33,7 @@ class Dh35 extends Model
 
     protected $table = 'mapuche.dh35';
 
+    // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['tipo_escal', 'codc_carac'];
 
     protected $fillable = [
@@ -46,19 +47,6 @@ class Dh35 extends Model
         'controlhoras',
         'controlpuntos',
         'caracter_concursado',
-    ];
-
-    protected $casts = [
-        'tipo_escal' => 'string',
-        'codc_carac' => 'string',
-        'desc_grupo' => 'string',
-        'tipo_carac' => 'string',
-        'nro_orden' => 'integer',
-        'nro_subpc' => 'integer',
-        'controlcargos' => 'integer',
-        'controlhoras' => 'integer',
-        'controlpuntos' => 'integer',
-        'caracter_concursado' => 'boolean',
     ];
 
     /**
@@ -75,5 +63,21 @@ class Dh35 extends Model
     public function scopeConcursados($query)
     {
         return $query->where('caracter_concursado', true);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'tipo_escal' => 'string',
+            'codc_carac' => 'string',
+            'desc_grupo' => 'string',
+            'tipo_carac' => 'string',
+            'nro_orden' => 'integer',
+            'nro_subpc' => 'integer',
+            'controlcargos' => 'integer',
+            'controlhoras' => 'integer',
+            'controlpuntos' => 'integer',
+            'caracter_concursado' => 'boolean',
+        ];
     }
 }

@@ -44,12 +44,7 @@ class Dh30 extends Model
         'desc_item',
     ];
 
-    protected $casts = [
-        'nro_tabla' => 'integer',
-        'desc_abrev' => 'string',
-        'desc_item' => 'string',
-    ];
-
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -80,7 +75,7 @@ class Dh30 extends Model
 
     public function handleMixedEncoding($value)
     {
-        if (mb_detect_encoding($value) === 'ASCII') {
+        if (mb_detect_encoding((string) $value) === 'ASCII') {
             return EncodingService::toUtf8($value);
         }
         return $value;
@@ -95,14 +90,16 @@ class Dh30 extends Model
     {
         return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
             ->get()
-            ->filter(fn ($item) => mb_detect_encoding($item->desc_item) === $encoding);
+            ->filter(fn ($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
     }
 
+    #[\Override]
     public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
     }
 
+    #[\Override]
     public function getIncrementing(): false
     {
         return false;
@@ -145,14 +142,14 @@ class Dh30 extends Model
     protected function descAbrev(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function ($value): ?string {
                 if (!$value) {
                     return null;
                 }
                 $value = $this->handleMixedEncoding($value);
                 return trim($value);
             },
-            set: function ($value) {
+            set: function ($value): ?string {
                 if (!$value) {
                     return null;
                 }
@@ -165,14 +162,14 @@ class Dh30 extends Model
     protected function descItem(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function ($value): ?string {
                 if (!$value) {
                     return null;
                 }
                 $value = $this->handleMixedEncoding($value);
                 return trim($value);
             },
-            set: function ($value) {
+            set: function ($value): ?string {
                 if (!$value) {
                     return null;
                 }
@@ -182,9 +179,19 @@ class Dh30 extends Model
         );
     }
 
+    #[\Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))
             ->where('desc_abrev', $this->getAttribute('desc_abrev'));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_tabla' => 'integer',
+            'desc_abrev' => 'string',
+            'desc_item' => 'string',
+        ];
     }
 }

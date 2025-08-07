@@ -41,11 +41,13 @@ class Dh24 extends Model
 
     /**
      * Indica si el modelo debe tener timestamps.
+     * @var bool
      */
     public $timestamps = false;
 
     /**
      * Indica si la clave primaria es auto-incrementable.
+     * @var bool
      */
     public $incrementing = false;
 
@@ -56,6 +58,8 @@ class Dh24 extends Model
 
     /**
      * La clave primaria compuesta del modelo.
+     * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $primaryKey = [
         'nro_cargo', 'codn_area', 'codn_subar', 'codn_progr',
@@ -75,27 +79,6 @@ class Dh24 extends Model
     ];
 
     /**
-     * Conversión de tipos de atributos.
-     */
-    protected $casts = [
-        'nro_cargo' => 'integer',
-        'codn_progr' => 'integer',
-        'codn_subpr' => 'integer',
-        'codn_proye' => 'integer',
-        'codn_activ' => 'integer',
-        'codn_obra' => 'integer',
-        'codn_fuent' => 'integer',
-        'porc_ipres' => 'decimal:2',
-        'codn_area' => 'integer',
-        'codn_subar' => 'integer',
-        'codn_final' => 'integer',
-        'codn_funci' => 'integer',
-        'codn_grupo_presup' => 'integer',
-        'tipo_ejercicio' => 'string',
-        'codn_subsubar' => 'integer',
-    ];
-
-    /**
      * Relación con el cargo.
      */
     public function cargo(): BelongsTo
@@ -109,5 +92,29 @@ class Dh24 extends Model
     public function scopeActivo($query)
     {
         return $query->where('tipo_ejercicio', 'A');
+    }
+
+    /**
+     * Conversión de tipos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_cargo' => 'integer',
+            'codn_progr' => 'integer',
+            'codn_subpr' => 'integer',
+            'codn_proye' => 'integer',
+            'codn_activ' => 'integer',
+            'codn_obra' => 'integer',
+            'codn_fuent' => 'integer',
+            'porc_ipres' => 'decimal:2',
+            'codn_area' => 'integer',
+            'codn_subar' => 'integer',
+            'codn_final' => 'integer',
+            'codn_funci' => 'integer',
+            'codn_grupo_presup' => 'integer',
+            'tipo_ejercicio' => 'string',
+            'codn_subsubar' => 'integer',
+        ];
     }
 }

@@ -63,22 +63,6 @@ class Dhr1 extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'per_liano' => 'integer',
-        'per_limes' => 'integer',
-        'desc_liqui' => 'string',
-        'fec_emisi' => 'date',
-        'fec_ultap' => 'date',
-        'per_anoap' => 'integer',
-        'per_mesap' => 'integer',
-        'desc_lugap' => 'string',
-        'plantilla' => AsStringable::class,
-    ];
-
-    /**
      * Relación con la tabla dh22.
      */
     public function dh22(): BelongsTo
@@ -94,8 +78,27 @@ class Dhr1 extends Model
     protected function plantilla(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? (string)$value : null,
-            set: fn ($value) => $value ? (string)$value : null,
+            get: fn ($value) => $value ? (string) $value : null,
+            set: fn ($value) => $value ? (string) $value : null,
         );
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'per_liano' => 'integer',
+            'per_limes' => 'integer',
+            'desc_liqui' => 'string',
+            'fec_emisi' => 'date',
+            'fec_ultap' => 'date',
+            'per_anoap' => 'integer',
+            'per_mesap' => 'integer',
+            'desc_lugap' => 'string',
+            'plantilla' => AsStringable::class,
+        ];
     }
 }

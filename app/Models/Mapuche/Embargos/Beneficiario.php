@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $cuit CUIT del beneficiario (PK)
  * @property string $nom_beneficiario Nombre del beneficiario
  *
- * @method static \Database\Factories\BeneficiarioFactory factory()
  */
 class Beneficiario extends Model
 {
@@ -55,18 +54,21 @@ class Beneficiario extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'cuit' => 'string',
-        'nom_beneficiario' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'cuit', 'cuit');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'cuit' => 'string',
+            'nom_beneficiario' => 'string',
+        ];
     }
 }

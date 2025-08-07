@@ -38,27 +38,29 @@ class BackupBloqueo extends Model
     ];
 
     /**
-     * Los atributos que deben convertirse.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'nro_cargo' => 'integer',
-        'nro_legaj' => 'integer',
-        'fec_baja' => 'date',
-        'fecha_baja_nueva' => 'date',
-        'chkstopliq' => 'boolean',
-        'fecha_backup' => 'datetime',
-    ];
-
-    /**
      * Get the route key for the model.
-     *
-     * @return string
      */
+    #[\Override]
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Los atributos que deben convertirse.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'nro_cargo' => 'integer',
+            'nro_legaj' => 'integer',
+            'fec_baja' => 'date',
+            'fecha_baja_nueva' => 'date',
+            'chkstopliq' => 'boolean',
+            'fecha_backup' => 'datetime',
+        ];
     }
 }

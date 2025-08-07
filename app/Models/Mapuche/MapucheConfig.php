@@ -34,8 +34,6 @@ class MapucheConfig
      * @param string $section Sección principal
      * @param string $parameter Nombre del parámetro
      * @param mixed $value Valor a establecer
-     *
-     * @return bool
      */
     public static function setParametroRrhh(string $section, string $parameter, $value): bool
     {
@@ -59,7 +57,7 @@ class MapucheConfig
      */
     public static function getPorcentajeAporteDiferencialJubilacion(): float
     {
-        return (float)(self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
+        return (float) (self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
     }
 
     /**
@@ -71,7 +69,7 @@ class MapucheConfig
      */
     public static function getSicossInformarBecarios(): bool
     {
-        return (bool)self::getParametroRrhh('Sicoss', 'InformarBecario', 0);
+        return (bool) self::getParametroRrhh('Sicoss', 'InformarBecario', 0);
     }
 
     /**
@@ -119,7 +117,7 @@ class MapucheConfig
      */
     public static function getSicossHorasExtrasNovedades(): int
     {
-        return (int)self::getParametroRrhh('Sicoss', 'HorasExtrasNovedades', 0);
+        return (int) self::getParametroRrhh('Sicoss', 'HorasExtrasNovedades', 0);
     }
 
     /**
@@ -136,8 +134,6 @@ class MapucheConfig
 
     /**
      * Obtener el año fiscal actual.
-     *
-     * @return string
      */
     public static function getAnioFiscal(): string
     {
@@ -147,8 +143,6 @@ class MapucheConfig
 
     /**
      * Obtener el mes fiscal actual.
-     *
-     * @return string
      */
     public static function getMesFiscal(): string
     {
@@ -170,7 +164,7 @@ class MapucheConfig
         return $periodoService->getYear() . $periodoService->getMonth();
     }
 
-    public static function getPeriodoCorriente()
+    public static function getPeriodoCorriente(): array
     {
         $periodoService = app(PeriodoFiscalService::class);
 

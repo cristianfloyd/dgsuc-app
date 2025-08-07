@@ -46,14 +46,11 @@ class Dh36 extends Model
         'cod_ubic_geografica_sirhu',
     ];
 
-    protected $casts = [
-        'descdependesemp' => 'string',
-    ];
-
     protected array $encodedFields = [
         'descdependesemp',
     ];
 
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -103,8 +100,15 @@ class Dh36 extends Model
     protected function descdependesemp(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => EncodingService::toUtf8($value),
-            set: fn (string $value) => EncodingService::toLatin1($value),
+            get: fn (string $value): ?string => EncodingService::toUtf8($value),
+            set: fn (string $value): ?string => EncodingService::toLatin1($value),
         );
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'descdependesemp' => 'string',
+        ];
     }
 }

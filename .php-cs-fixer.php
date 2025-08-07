@@ -95,7 +95,7 @@ return (new PhpCsFixer\Config())
         
         // === ESPACIOS Y FORMATO ===
         'binary_operator_spaces' => ['default' => 'single_space'],
-        'cast_spaces' => ['space' => 'none'], // (string)$var
+        'cast_spaces' => ['space' => 'single'], // (string) $var
         'no_spaces_around_offset' => true,
         'ternary_operator_spaces' => true,
         'unary_operator_spaces' => true,

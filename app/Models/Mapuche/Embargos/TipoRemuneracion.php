@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_tipo_remuneracion ID del tipo de remuneración (PK)
  * @property string $desc_tipo_remuneracion Descripción del tipo de remuneración
  *
- * @method static \Database\Factories\TipoRemuneracionFactory factory()
  */
 class TipoRemuneracion extends Model
 {
@@ -46,18 +45,21 @@ class TipoRemuneracion extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_tipo_remuneracion' => 'integer',
-        'desc_tipo_remuneracion' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_tipo_remuneracion');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_tipo_remuneracion' => 'integer',
+            'desc_tipo_remuneracion' => 'string',
+        ];
     }
 }

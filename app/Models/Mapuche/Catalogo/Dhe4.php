@@ -71,8 +71,6 @@ class Dhe4 extends Model
 
     /**
      * Relación de uno a muchos entre el modelo Dhe4 y el modelo Dhe2, donde cada Dhe4 puede tener múltiples Dhe2.
-     *
-     * @return HasMany
      */
     public function dhe2(): HasMany
     {
@@ -81,8 +79,6 @@ class Dhe4 extends Model
 
     /**
      * Relación de muchos a muchos entre el modelo Dhe4 y el modelo Dh30 a través de la tabla pivote dhe2.
-     *
-     * @return BelongsToMany
      */
     public function dh30Items(): BelongsToMany
     {

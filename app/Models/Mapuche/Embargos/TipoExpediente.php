@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_tipo_expediente ID del tipo de expediente (PK)
  * @property string $desc_tipo_expediente Descripción del tipo de expediente
  *
- * @method static \Database\Factories\TipoExpedienteFactory factory()
  */
 class TipoExpediente extends Model
 {
@@ -46,18 +45,21 @@ class TipoExpediente extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_tipo_expediente' => 'integer',
-        'desc_tipo_expediente' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_tipo_expediente');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_tipo_expediente' => 'integer',
+            'desc_tipo_expediente' => 'string',
+        ];
     }
 }

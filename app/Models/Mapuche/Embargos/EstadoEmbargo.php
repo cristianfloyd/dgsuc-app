@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id_estado_embargo ID del estado de embargo (PK)
  * @property string $desc_estado_embargo Descripción del estado
  *
- * @method static \Database\Factories\EstadoEmbargoFactory factory()
  */
 class EstadoEmbargo extends Model
 {
@@ -46,18 +45,21 @@ class EstadoEmbargo extends Model
     ];
 
     /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'id_estado_embargo' => 'integer',
-        'desc_estado_embargo' => 'string',
-    ];
-
-    /**
      * Relación con embargos.
      */
     public function embargos(): HasMany
     {
         return $this->hasMany(Embargo::class, 'id_estado_embargo');
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'id_estado_embargo' => 'integer',
+            'desc_estado_embargo' => 'string',
+        ];
     }
 }

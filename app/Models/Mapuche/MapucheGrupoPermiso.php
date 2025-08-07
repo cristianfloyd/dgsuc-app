@@ -24,15 +24,18 @@ class MapucheGrupoPermiso extends Model
         'tipo_permiso',
     ];
 
-    protected $casts = [
-        'id_grupo' => 'integer',
-    ];
-
     /**
      * El grupo al que pertenece este permiso.
      */
     public function grupo(): BelongsTo
     {
         return $this->belongsTo(MapucheGrupo::class, 'id_grupo', 'id_grupo');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'id_grupo' => 'integer',
+        ];
     }
 }

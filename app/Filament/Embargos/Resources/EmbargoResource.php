@@ -85,16 +85,16 @@ class EmbargoResource extends Resource
 
             ])
             ->actions([
-
+                // 
             ])
             ->bulkActions([
-
+                //
             ]);
     }
 
     public static function actualizarDatos(array $data = []): void
     {
-        $instance = new static();
+        $instance = new self;
         $instance->setPropertyValues($data);
 
         // Actualizamos las propiedades del recurso
@@ -106,7 +106,7 @@ class EmbargoResource extends Resource
 
         // Obtener el periodo fiscal del recurso con validación adicional
         $periodoFiscal = 0;
-        if (isset($instance->periodoFiscal, $instance->periodoFiscal['year'], $instance->periodoFiscal['month'])) {
+        if (isset($instance->periodoFiscal['year'], $instance->periodoFiscal['month'])) {
             $year = $instance->periodoFiscal['year'];
             $month = str_pad($instance->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
             $periodoFiscal = (int)"{$year}{$month}";
@@ -214,5 +214,15 @@ class EmbargoResource extends Resource
             'insertIntoDh25' => $this->insertIntoDh25,
             'periodoFiscal' => $this->periodoFiscalService->getPeriodoFiscalFromDatabase(),
         ];
+    }
+
+    
+    /**
+     * getter para verificar si esta seteado el periodo fiscal
+     * @return bool
+     */
+    public function getPeriodoFiscalAttribute(): bool
+    {
+        return isset($this->periodoFiscal['year'], $this->periodoFiscal['month']) ? true : false;
     }
 }

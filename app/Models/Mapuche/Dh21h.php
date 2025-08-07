@@ -84,19 +84,6 @@ class Dh21h extends Model
         'codn_subsubar',
     ];
 
-    /**
-     * Casteos de atributos.
-     */
-    protected $casts = [
-        'impp_conce' => 'float',
-        'nov1_conce' => 'float',
-        'nov2_conce' => 'float',
-        'tipo_conce' => 'string',
-        'tipoescalafon' => 'string',
-        'codigoescalafon' => 'string',
-        'tipo_ejercicio' => 'string',
-    ];
-
 
 
     /**####################### SCOPES ################################### **/
@@ -160,7 +147,23 @@ class Dh21h extends Model
     {
         return Attribute::make(
             get: fn () => $this->impp_conce,
-            set: fn ($value) => round($value, 2),
+            set: fn ($value): float => round($value, 2),
         );
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'impp_conce' => 'float',
+            'nov1_conce' => 'float',
+            'nov2_conce' => 'float',
+            'tipo_conce' => 'string',
+            'tipoescalafon' => 'string',
+            'codigoescalafon' => 'string',
+            'tipo_ejercicio' => 'string',
+        ];
     }
 }

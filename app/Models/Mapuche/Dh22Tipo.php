@@ -46,6 +46,7 @@ class Dh22Tipo extends Model
      * Los atributos que son asignables en masa.
      *
      * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'id',

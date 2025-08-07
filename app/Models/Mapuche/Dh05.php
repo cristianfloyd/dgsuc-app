@@ -33,28 +33,6 @@ class Dh05 extends Model
         'codmotivolic', 'trab_fer',
     ];
 
-    // Especificar los tipos de datos para los campos
-    protected $casts = [
-        'nro_licencia' => 'integer',
-        'nro_legaj' => 'integer',
-        'nro_cargo' => 'integer',
-        'fec_desde' => 'date',
-        'fec_hasta' => 'date',
-        'fecha_finalorig' => 'date',
-        'nrovarlicencia' => 'integer',
-        'fecha_norma_alta' => 'date',
-        'nro_norma_alta' => 'integer',
-        'fecha_norma_baja' => 'date',
-        'nro_norma_baja' => 'integer',
-        'mes_actualizacion' => 'integer',
-        'anio_actualizacion' => 'integer',
-        'trab_sab' => 'integer',
-        'trab_dom' => 'integer',
-        'presentismo' => 'integer',
-        'codmotivolic' => 'integer',
-        'trab_fer' => 'integer',
-    ];
-
     /**
      * Relación con el modelo Dh01.
      */
@@ -85,5 +63,29 @@ class Dh05 extends Model
     public function dl10(): BelongsTo
     {
         return $this->belongsTo(Dl10::class, 'emite_norma_alta', 'quien_emite_norma');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_licencia' => 'integer',
+            'nro_legaj' => 'integer',
+            'nro_cargo' => 'integer',
+            'fec_desde' => 'date',
+            'fec_hasta' => 'date',
+            'fecha_finalorig' => 'date',
+            'nrovarlicencia' => 'integer',
+            'fecha_norma_alta' => 'date',
+            'nro_norma_alta' => 'integer',
+            'fecha_norma_baja' => 'date',
+            'nro_norma_baja' => 'integer',
+            'mes_actualizacion' => 'integer',
+            'anio_actualizacion' => 'integer',
+            'trab_sab' => 'integer',
+            'trab_dom' => 'integer',
+            'presentismo' => 'integer',
+            'codmotivolic' => 'integer',
+            'trab_fer' => 'integer',
+        ];
     }
 }

@@ -131,54 +131,6 @@ class Dl02 extends Model
     ];
 
     /**
-     * Casteos de atributos.
-     */
-    protected $casts = [
-        'nrovarlicencia' => 'integer',
-        'nrodefiniclicencia' => 'integer',
-        'codn_tipo_lic' => 'string',
-        'es_remunerada' => 'boolean',
-        'porcremuneracion' => 'decimal:2',
-        'seaplicaa' => 'string',
-        'escalafon' => 'string',
-        'seapacualcaracter' => 'boolean',
-        'seapacualdedic' => 'boolean',
-        'sexo' => 'string',
-        'control_fechas' => 'boolean',
-        'unidad_tiempo' => 'string',
-        'duracionenunidades' => 'integer',
-        'tipo_dias' => 'string',
-        'cantfragmentosmax' => 'integer',
-        'min_dias_fragmento' => 'integer',
-        'max_dias_fragmento' => 'integer',
-        'periodicidad' => 'string',
-        'cantunidadesperiod' => 'integer',
-        'unidadtiempoantig' => 'string',
-        'antigdesdeenunidad' => 'integer',
-        'antighastaenunidad' => 'integer',
-        'nroordenaplicacion' => 'integer',
-        'computa_antiguedad' => 'boolean',
-        'computa_antig_ordi' => 'boolean',
-        'es_absorcion' => 'boolean',
-        'es_maternidad' => 'boolean',
-        'genera_vacante' => 'boolean',
-        'libera_horas' => 'boolean',
-        'libera_puntos' => 'integer',
-        'observacion' => 'string',
-        'subcontrol_fechas' => 'boolean',
-        'subcantfragmentosmax' => 'integer',
-        'submin_dias_fragmento' => 'integer',
-        'submax_dias_fragmento' => 'integer',
-        'subperiodicidad' => 'string',
-        'subcantunidadesperiod' => 'integer',
-        'subduracionenunidades' => 'integer',
-        'seapacualcateg' => 'integer',
-        'chkpresentismo' => 'integer',
-        'chkaportalao' => 'integer',
-        'cantunidadesperiodo_sinusar' => 'integer',
-    ];
-
-    /**
      * Relación con licencias (Dh05).
      */
     public function licencias(): HasMany
@@ -304,17 +256,17 @@ class Dl02 extends Model
     /**
      * Verifica si aplica para cualquier carácter.
      */
-    public function aplicaACualquierCaracter(): bool
+    public function aplicaCualquierCaracter(): bool
     {
-        return (bool)$this->seapacualcaracter;
+        return (bool) $this->seapacualcaracter;
     }
 
     /**
      * Verifica si aplica para cualquier dedicación.
      */
-    public function aplicaACualquierDedicacion(): bool
+    public function aplicaCualquierDedicacion(): bool
     {
-        return (bool)$this->seapacualdedic;
+        return (bool) $this->seapacualdedic;
     }
 
     /**
@@ -370,5 +322,56 @@ class Dl02 extends Model
         }
 
         return $sueldoBase * ($this->porcremuneracion / 100);
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nrovarlicencia' => 'integer',
+            'nrodefiniclicencia' => 'integer',
+            'codn_tipo_lic' => 'string',
+            'es_remunerada' => 'boolean',
+            'porcremuneracion' => 'decimal:2',
+            'seaplicaa' => 'string',
+            'escalafon' => 'string',
+            'seapacualcaracter' => 'boolean',
+            'seapacualdedic' => 'boolean',
+            'sexo' => 'string',
+            'control_fechas' => 'boolean',
+            'unidad_tiempo' => 'string',
+            'duracionenunidades' => 'integer',
+            'tipo_dias' => 'string',
+            'cantfragmentosmax' => 'integer',
+            'min_dias_fragmento' => 'integer',
+            'max_dias_fragmento' => 'integer',
+            'periodicidad' => 'string',
+            'cantunidadesperiod' => 'integer',
+            'unidadtiempoantig' => 'string',
+            'antigdesdeenunidad' => 'integer',
+            'antighastaenunidad' => 'integer',
+            'nroordenaplicacion' => 'integer',
+            'computa_antiguedad' => 'boolean',
+            'computa_antig_ordi' => 'boolean',
+            'es_absorcion' => 'boolean',
+            'es_maternidad' => 'boolean',
+            'genera_vacante' => 'boolean',
+            'libera_horas' => 'boolean',
+            'libera_puntos' => 'integer',
+            'observacion' => 'string',
+            'subcontrol_fechas' => 'boolean',
+            'subcantfragmentosmax' => 'integer',
+            'submin_dias_fragmento' => 'integer',
+            'submax_dias_fragmento' => 'integer',
+            'subperiodicidad' => 'string',
+            'subcantunidadesperiod' => 'integer',
+            'subduracionenunidades' => 'integer',
+            'seapacualcateg' => 'integer',
+            'chkpresentismo' => 'integer',
+            'chkaportalao' => 'integer',
+            'cantunidadesperiodo_sinusar' => 'integer',
+        ];
     }
 }
