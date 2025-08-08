@@ -6,10 +6,13 @@ use Rector\Config\RectorConfig;
 use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
 use Rector\Naming\Rector\Foreach_\RenameForeachValueVariableToMatchMethodCallReturnTypeRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
-use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
+use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromAssignsRector;
+use RectorLaravel\Rector\ClassMethod\AddArgumentDefaultValueRector;
+use RectorLaravel\Rector\ClassMethod\AddGenericReturnTypeToRelationsRector;
+use RectorLaravel\Rector\ClassMethod\AddParentBootToModelClassMethodRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
@@ -47,6 +50,8 @@ return RectorConfig::configure()
         // === CALIDAD DE CÓDIGO LARAVEL ===
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_ARRAY_STR_FUNCTION_TO_STATIC_CALL,
+        LaravelSetList::LARAVEL_COLLECTION,
+        laravelSetList::LARAVEL_ELOQUENT_MAGIC_METHOD_TO_QUERY_BUILDER,
 
         // === SETS GENERALES DE CALIDAD ===
         SetList::CODE_QUALITY,
@@ -62,4 +67,12 @@ return RectorConfig::configure()
         RenameVariableToMatchMethodCallReturnTypeRector::class,
         RenameForeachValueVariableToMatchMethodCallReturnTypeRector::class,
         ClassPropertyAssignToConstructorPromotionRector::class,
+        // NUEVO: tipar propiedades desde asignaciones (p. ej. $schema)
+        TypedPropertyFromAssignsRector::class,
+
+        // NUEVO: 
+        AddArgumentDefaultValueRector::class,
+
+        // Opcional: añade genéricos en relaciones Eloquent
+        AddGenericReturnTypeToRelationsRector::class,
     ]);

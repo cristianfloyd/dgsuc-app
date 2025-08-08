@@ -11,7 +11,6 @@ use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -30,7 +29,6 @@ use Illuminate\Support\Facades\Log;
 class Dh22 extends Model
 {
     use MapucheConnectionTrait;
-    use HasFactory;
     use EncodingTrait;
 
     /**
@@ -47,7 +45,10 @@ class Dh22 extends Model
      */
     protected $table = 'dh22';
 
-    protected $schema = 'mapuche';
+    /**
+     * Indica el esquema de la base de datos asociado al modelo.
+     */
+    protected string $schema = 'mapuche';
 
     /**
      * La clave primaria asociada con la tabla.
@@ -132,7 +133,7 @@ class Dh22 extends Model
     {
         $nroLiquiValue = $nro_liqui instanceof NroLiqui ? $nro_liqui->value() : $nro_liqui;
 
-        return static::select('desc_liqui')
+        return static::query()->select('desc_liqui')
             ->where('nro_liqui', $nroLiquiValue)
             ->first()
             ->desc_liqui;
@@ -168,7 +169,7 @@ class Dh22 extends Model
     {
         try {
             // Realiza la consulta utilizando Eloquent y DB Facade
-            $lastId = self::orderBy('nro_liqui', 'desc')
+            $lastId = self::query()->orderBy('nro_liqui', 'desc')
                 ->value('nro_liqui');
 
             // Retorna el último nro_liqui o 0 si no se encuentra ninguno
@@ -207,7 +208,7 @@ class Dh22 extends Model
     {
         $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
 
-        return static::where('nro_liqui', $nroLiquiValue)->exists();
+        return static::query()->where('nro_liqui', $nroLiquiValue)->exists();
     }
 
     /* ################################ ACCESORES Y MUTADORES ################################ */
@@ -349,7 +350,7 @@ class Dh22 extends Model
         return $query->whereRaw(
             "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
             [
-                $periodoFiscal['year'] . str_pad((string) $periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
+                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
             ],
         );
     }
