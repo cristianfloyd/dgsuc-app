@@ -53,6 +53,8 @@ class Dh01 extends Model
 
     /**
      * Campos que requieren conversión de codificación.
+     *
+     * @var array<string>
      */
     protected $encodedFields = [
         'desc_appat',
@@ -61,6 +63,11 @@ class Dh01 extends Model
         'desc_nombr',
     ];
 
+    /**
+     * Campos que se pueden llenar en masa.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'nro_legaj',
         'desc_appat',
@@ -130,14 +137,14 @@ class Dh01 extends Model
 
     public function scopeSearch($query, $val)
     {
-        $searchTerm = EncodingService::toLatin1(strtoupper($val));
+        $searchTerm = EncodingService::toLatin1(strtoupper((string) $val));
 
         return $query->where('nro_legaj', 'like', "%$val%")
             ->orWhere('nro_cuil', 'like', "%$val%")
-            ->orWhere('desc_appat', 'like', '%' . strtoupper($searchTerm) . '%')
-            ->orWhere('desc_apmat', 'like', '%' . strtoupper($searchTerm) . '%')
-            ->orWhere('desc_apcas', 'like', '%' . strtoupper($searchTerm) . '%')
-            ->orWhere('desc_nombr', 'like', '%' . strtoupper($searchTerm) . '%');
+            ->orWhere('desc_appat', 'like', '%' . strtoupper((string) $searchTerm) . '%')
+            ->orWhere('desc_apmat', 'like', '%' . strtoupper((string) $searchTerm) . '%')
+            ->orWhere('desc_apcas', 'like', '%' . strtoupper((string) $searchTerm) . '%')
+            ->orWhere('desc_nombr', 'like', '%' . strtoupper((string) $searchTerm) . '%');
     }
 
     /**
@@ -157,7 +164,7 @@ class Dh01 extends Model
      */
     public function scopeLegajosActivosSinCargosVigentes($query, $where = '1=1')
     {
-        $query = $query->select([
+        return $query->select([
             'nro_legaj',
             DB::raw("tipo_docum || ' ' || to_char(nro_docum::numeric(11,0),'9G999G999G999') AS nro_docum"),
             DB::raw("LPAD(nro_cuil1::varchar, 2, '0') || '-' || LPAD(nro_cuil::varchar, 8, '0') || '-' || nro_cuil2 AS cuil"),
@@ -173,7 +180,6 @@ class Dh01 extends Model
             })
             ->whereRaw($where)
             ->orderBy('nro_legaj');
-        return $query;
     }
 
     public function scopeByCuil($query, $cuil)
@@ -185,14 +191,15 @@ class Dh01 extends Model
         ) = ?", [$cuil]);
     }
 
-    public function getCuilCompletoAttribute()
+    protected function cuilCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        // Aseguramos que cada parte tenga el largo correcto
-        $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
-        $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
-        $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
-
-        return $cuil1 . $cuil . $cuil2;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
+            // Aseguramos que cada parte tenga el largo correcto
+            $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
+            $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
+            $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
+            return $cuil1 . $cuil . $cuil2;
+        });
     }
 
     /**
@@ -209,36 +216,27 @@ class Dh01 extends Model
             ->where('tipo_estad', 'J')
             ->exists();
     }
-
-    // ###############################################
-    // ###########  Mutadores y Accesores  ###########
-
-    public function getDescNombrAttribute($value)
+    protected function descNombr(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return EncodingService::toUtf8(trim($value));
-    }
-
-    public function setDescNombrAttribute($value): void
-    {
-        $this->attributes['desc_nombr'] = EncodingService::toLatin1($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
     }
 
     public function getCuil(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
+            get: fn(): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
         );
     }
 
-    public function getDescAppatAttribute($value)
+    protected function descAppat(): Attribute
     {
-        return EncodingService::toUtf8(trim($value));
+        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)));
     }
 
     public function NombreCompleto(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->desc_appat}, {$this->desc_nombr}",
+            get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
         );
     }
 
@@ -281,7 +279,7 @@ class Dh01 extends Model
     protected function cuil(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): string {
                 // Aseguramos que cada parte tenga el largo correcto
                 $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
                 $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);

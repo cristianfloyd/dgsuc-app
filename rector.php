@@ -3,14 +3,10 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
-use Rector\Naming\Rector\Foreach_\RenameForeachValueVariableToMatchMethodCallReturnTypeRector;
-use Rector\Php83\Rector\ClassConst\AddTypeToConstRector;
-use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
+use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Set\ValueObject\LevelSetList;
-use Rector\Set\ValueObject\SetList;
 use RectorLaravel\Set\LaravelLevelSetList;
-use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -60,4 +56,6 @@ return RectorConfig::configure()
         ExplicitNullableParamTypeRector::class,
         RenameVariableToMatchMethodCallReturnTypeRector::class,
         RenameForeachValueVariableToMatchMethodCallReturnTypeRector::class,
+        ReadOnlyPropertyRector::class,
+        ClassPropertyAssignToConstructorPromotionRector::class,
     ]);
