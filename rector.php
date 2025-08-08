@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
+use Rector\Naming\Rector\Foreach_\RenameForeachValueVariableToMatchMethodCallReturnTypeRector;
+use Rector\Php83\Rector\ClassConst\AddTypeToConstRector;
+use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use RectorLaravel\Set\LaravelLevelSetList;
@@ -37,6 +41,7 @@ return RectorConfig::configure()
         // === LARAVEL VERSION UPGRADE ===
         // Usa el set de nivel que corresponda a tu versión target
         LaravelLevelSetList::UP_TO_LARAVEL_110, // o la versión que necesites
+        LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
 
         // === CALIDAD DE CÓDIGO LARAVEL ===
         LaravelSetList::LARAVEL_CODE_QUALITY,
@@ -52,4 +57,7 @@ return RectorConfig::configure()
     ->withRules([
         // Agrega aquí solo reglas específicas que no estén en los sets
         // La mayoría de reglas ya están cubiertas por los sets
+        ExplicitNullableParamTypeRector::class,
+        RenameVariableToMatchMethodCallReturnTypeRector::class,
+        RenameForeachValueVariableToMatchMethodCallReturnTypeRector::class,
     ]);
