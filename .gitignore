@@ -24,3 +24,4 @@ phpcs-report.txt
 .php-cs-fixer.cache
 .phpcs-cache
 .php-cs-fixer.cache
+.cursorrules*
