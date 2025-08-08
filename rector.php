@@ -61,6 +61,5 @@ return RectorConfig::configure()
         ExplicitNullableParamTypeRector::class,
         RenameVariableToMatchMethodCallReturnTypeRector::class,
         RenameForeachValueVariableToMatchMethodCallReturnTypeRector::class,
-        ReadOnlyPropertyRector::class,
         ClassPropertyAssignToConstructorPromotionRector::class,
     ]);
