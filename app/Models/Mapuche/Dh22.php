@@ -83,6 +83,8 @@ class Dh22 extends Model
      */
     protected $encodedFields = [
         'desc_liqui',
+        'desc_lugap',
+        'desc_emisi'
     ];
 
     /**
@@ -376,102 +378,9 @@ class Dh22 extends Model
      */
     public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null): SupportCollection
     {
-        return static::query()
-            ->select('nro_liqui', 'desc_liqui')
+        return static::getLiquidacionesForWidget()
             ->filterByPeriodoFiscal($periodoFiscal)
-            ->orderByDesc('nro_liqui')
-            ->get()
-            ->mapWithKeys(function ($liquidacion) {
-                $descripcion = trim((string) $liquidacion->desc_liqui ?: '');
-                return [
-                    $liquidacion->nro_liqui => "{$liquidacion->nro_liqui} - {$descripcion}",
-                ];
-            });
-    }
-
-    /**
-     * Accessor para descripcion_completa que combina nro_liqui y desc_liqui con encoding seguro.
-     *
-     * @return Attribute<string, never>
-     *
-     * Este accesor devuelve una cadena que combina el número de liquidación (`nro_liqui`) y la descripción de la liquidación (`desc_liqui`).
-     * Si `desc_liqui` es nulo, se utiliza una cadena vacía por defecto.
-     * La descripción completa se formatea como "nro_liqui - desc_liqui".
-     *
-     * @see EncodingService::toUtf8()
-     * @see EncodingService::toLatin1()
-     */
-    protected function descripcionCompleta(): Attribute
-    {
-        return Attribute::make(get: fn (): string => "{$this->nro_liqui} - " . ($this->desc_liqui ?? ''));
-    }
-
-    /**
-     * Atributo que obtiene el período fiscal en formato YYYYMM a partir de las propiedades `perli_ano` y *`perli_mes` del modelo.
-     * Accesor para el atributo 'periodo_fiscal'.
-     *
-     * @return Attribute<string, never>
-     **/
-    protected function periodoFiscal(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): string => "(string) $this->per_liano" . str_pad((string) $this->per_limes, 2, '0', \STR_PAD_LEFT),
-        );
-    }
-
-    /**
-     * Atributo que obtiene el período fiscal como un objeto PeriodoFiscal.
-     *
-     * @return Attribute<PeriodoFiscal, never>
-     */
-    protected function periodoFiscalObject(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): PeriodoFiscal => new PeriodoFiscal($this->per_liano, $this->per_limes),
-        );
-    }
-
-    /**
-     * Atributo que obtiene y establece el período fiscal en formato YYYYMM a partir de las propiedades `per_liano` y `per_limes` del modelo.
-     *
-     * El método `get` (Accessor) devuelve el período fiscal en formato YYYYMM concatenando los valores de `per_liano` y `per_limes` con el formato adecuado.
-     * El método `set` (Mutator) establece los valores de `per_liano` y `per_limes` a partir de un valor de período fiscal en formato YYYYMM.
-     *
-     * @return Attribute<string, array{per_liano: int, per_limes: int}>
-     */
-    protected function periodo(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): string => "{(string)$this->per_liano}" . str_pad((string) $this->per_limes, 2, '0', \STR_PAD_LEFT),
-            set: function ($value): array {
-                if ($value instanceof PeriodoFiscal) {
-                    return [
-                        'per_liano' => $value->year(),
-                        'per_limes' => $value->month(),
-                    ];
-                }
-
-                return [
-                    'per_liano' => substr($value, 0, 4),
-                    'per_limes' => substr($value, 4, 2),
-                ];
-            },
-        );
-    }
-
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     */
-    protected function casts(): array
-    {
-        return [
-            'fec_ultap' => 'date',
-            'fec_emisi' => 'date',
-            'sino_aguin' => 'boolean',
-            'sino_reten' => 'boolean',
-            'sino_genimp' => 'boolean',
-            'per_liano' => 'integer',
-            'per_limes' => 'integer',
-        ];
+            ->formateadoParaSelect()
+            ->pluck('descripcion_completa', 'nro_liqui');
     }
 }

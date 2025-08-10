@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static hydrate(array $results)
@@ -14,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  */
 class EmbargoProcesoResult extends Model
 {
-    use MapucheConnectionTrait;
+    use MapucheConnectionTrait, EncodingTrait;
 
     public $incrementing = true;
 
@@ -58,6 +61,8 @@ class EmbargoProcesoResult extends Model
         'tipo_foran' => 'string',
         'clas_noved' => 'string',
     ];
+
+
 
     /**
      * Obtiene una consulta vacía.
