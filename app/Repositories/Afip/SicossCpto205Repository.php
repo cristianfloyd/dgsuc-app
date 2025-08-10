@@ -47,56 +47,6 @@ class SicossCpto205Repository
         ');
     }
 
-    /**
-     * Cuenta los registros en la tabla temporal.
-     *
-     * @return int Número de registros
-     */
-    public function contarRegistros(): int
-    {
-        $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto205');
-        return (int)$resultado->total;
-    }
-
-    /**
-     * Inicia una transacción en la conexión Mapuche.
-     *
-     * Este método inicia una nueva transacción en la base de datos,
-     * permitiendo realizar múltiples operaciones que serán confirmadas
-     * o revertidas como una unidad atómica.
-     *
-     * @return void
-     */
-    public function iniciarTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->beginTransaction();
-    }
-
-    /**
-     * Confirma una transacción en la conexión Mapuche.
-     *
-     * Este método confirma todos los cambios realizados dentro de la transacción actual
-     * y los hace permanentes en la base de datos.
-     *
-     * @return void
-     */
-    public function confirmarTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->commit();
-    }
-
-    /**
-     * Revierte una transacción en la conexión Mapuche.
-     *
-     * Este método deshace todos los cambios realizados dentro de la transacción actual
-     * y restaura el estado de la base de datos al punto anterior al inicio de la transacción.
-     *
-     * @return void
-     */
-    public function revertirTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->rollBack();
-    }
 
     private function crearTablaCargosAsociados(array $liquidaciones): void
     {
@@ -200,33 +150,24 @@ class SicossCpto205Repository
             UPDATE suc.afip_mapuche_sicoss
             SET cpto_no_remun = cpto_no_remun - b.monto,
                 sueldo_adicc = sueldo_adicc + b.monto,
-                rem_impo1 = case when rem_total < rem_impo1 then rem_impo1 + monto end,
+                rem_impo1 = CASE WHEN rem_total < rem_impo1 THEN rem_impo1 + b.monto ELSE rem_impo1 END,
                 rem_impo2 = rem_impo2 + b.monto,
                 rem_impo3 = rem_impo3 + b.monto,
                 rem_dec_788 = rem_dec_788 + b.monto
-            SELECT *
             FROM tcpto205 b
             WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
-            and rem_impo1 <=
-            (select importe * 1 from mapuche.constante_unica where id_constante in 
-            (select max(id_constante) from mapuche.constante where nombre = 'TOPAMAX'))
-        ");
+            AND suc.afip_mapuche_sicoss.rem_impo1 <= (
+                SELECT importe * 1
+                FROM mapuche.constante_unica
+                WHERE id_constante = (
+                    SELECT max(id_constante)
+                    FROM mapuche.constante
+                    WHERE nombre = \'TOPAMAX\'
+                )
+            )
+        ');
     }
 
-
-    /**
-     * Elimina la tabla temporal si existe
-     */
-    public function eliminarTablaTemporal(): void
-    {
-        DB::connection($this->getConnectionName())->statement("
-            DROP TABLE IF EXISTS resultado_cargos_asoc;
-            DROP TABLE IF EXISTS resultado_cargos_aut;
-            DROP TABLE IF EXISTS resultado_cargos_nod;
-            DROP TABLE IF EXISTS tcpto;
-            DROP TABLE IF EXISTS tcpto205;
-        ");
-    }
 
 
 
