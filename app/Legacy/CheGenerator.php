@@ -2,67 +2,77 @@
 
 namespace App\Legacy;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 class CheGenerator
 {
     use MapucheConnectionTrait;
-    protected $mensaje = null;
+
+    protected $mensaje;
+
     protected $diferencias = [];
-    protected $totales = null;
+
+    protected $totales;
+
     protected $archivos;
+
     protected $liquidaciones = [];
+
     protected $liqui_actual;
+
     protected $log;
+
     protected $porc_parcial;
+
     protected $netos;
-    protected $campo = null;
+
+    protected $campo;
 
     /**
-     * Rellena valores numéricos con ceros a la izquierda
+     * Rellena valores numéricos con ceros a la izquierda.
      */
     public function llenaImportes($valor, $longitud): string
     {
-        if (strlen(trim($valor)) > $longitud) {
-            return substr($valor, - ($longitud));
+        if (\strlen(trim($valor)) > $longitud) {
+            return substr($valor, -($longitud));
         }
-        return str_pad($valor, $longitud, "0", STR_PAD_LEFT);
+        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
     }
 
     /**
-     * Rellena texto con espacios a la derecha
+     * Rellena texto con espacios a la derecha.
      */
     public function llenaBlancos($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, - ($longitud));
+        if (\strlen(trim($texto)) > $longitud) {
+            return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, " ", STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
     }
 
     /**
-     * Rellena texto con espacios a la izquierda
+     * Rellena texto con espacios a la izquierda.
      */
     public function llenaBlancoIzq($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, - ($longitud));
+        if (\strlen(trim($texto)) > $longitud) {
+            return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, " ", STR_PAD_LEFT);
+        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
     }
 
     /**
-     * Obtiene los datos base para el archivo CHE
+     * Obtiene los datos base para el archivo CHE.
      */
     public function getDatos($liquidacion): void
     {
         // Limpieza inicial de tablas temporales
-        DB::connection($this->getConnectionName())->statement("DROP TABLE if exists l");
-        DB::connection($this->getConnectionName())->statement("DROP TABLE if exists l2");
-        DB::connection($this->getConnectionName())->statement("DROP TABLE if exists d21tmp");
-        DB::connection($this->getConnectionName())->statement("DROP TABLE if exists che");
+        DB::connection($this->getConnectionName())->statement('DROP TABLE if exists l');
+        DB::connection($this->getConnectionName())->statement('DROP TABLE if exists l2');
+        DB::connection($this->getConnectionName())->statement('DROP TABLE if exists d21tmp');
+        DB::connection($this->getConnectionName())->statement('DROP TABLE if exists che');
 
         // Primera tabla temporal 'l' con datos base
         if (MapucheConfig::getParametrosAjustesImpContable() == 'Deshabilitada') {
@@ -76,7 +86,7 @@ class CheGenerator
 
         // Actualización de escalafones
         DB::connection($this->getConnectionName())->statement(
-            "UPDATE d21tmp SET tipoescalafon = 'S' WHERE tipoescalafon = 'C';"
+            "UPDATE d21tmp SET tipoescalafon = 'S' WHERE tipoescalafon = 'C';",
         );
 
         // Creación de segunda tabla temporal l2
@@ -84,7 +94,7 @@ class CheGenerator
 
         // Inserción de registros no duplicados
         DB::connection($this->getConnectionName())->statement(
-            "INSERT INTO l SELECT * FROM l2 WHERE id_liquidacion NOT IN (SELECT id_liquidacion FROM l);"
+            'INSERT INTO l SELECT * FROM l2 WHERE id_liquidacion NOT IN (SELECT id_liquidacion FROM l);',
         );
 
         // Creación de tabla temporal che para aportes
@@ -99,7 +109,7 @@ class CheGenerator
 
     public function createBasicTempTable($liquidacion): void
     {
-        $sql = "SELECT
+        $sql = 'SELECT
                         dh21.*,
                         dh22.codn_econo,
                         dh22.nrovalorpago
@@ -113,14 +123,14 @@ class CheGenerator
                         dh21.nro_orimp > 0 AND
                         dh21.codn_conce > 0
                     ORDER BY
-                        dh21.codc_uacad";
+                        dh21.codc_uacad';
 
         DB::connection($this->getConnectionName())->statement($sql, [$liquidacion]);
     }
 
     public function createExtendedTempTable($liquidacion): void
     {
-        $sql = "SELECT
+        $sql = 'SELECT
                         imp_liq.*,
                         dh22.codn_econo,
                         dh22.nrovalorpago,
@@ -157,117 +167,26 @@ class CheGenerator
                         imp_liq.nro_orimp > 0 AND
                         imp_liq.codn_conce > 0
                     ORDER BY
-                        imp_liq.codc_uacad";
+                        imp_liq.codc_uacad';
 
         DB::connection($this->getConnectionName())->statement($sql, [$liquidacion]);
     }
 
     /**
-     * Crea la tabla temporal che para el procesamiento de aportes y retenciones
-     */
-    protected function createCheTable(): void
-    {
-        $sql = "SELECT
-        codn_area,
-        codn_subar,
-        tipo_conce,
-        dh46.codn_grupo,
-        LPAD(' ',50,' ') as desc_grupo,
-        'S'::char(1) AS sino_cheque,
-        sum(impp_conce::NUMERIC) as importe
-    INTO TEMP che
-    FROM
-        l
-        LEFT OUTER JOIN mapuche.dh46 ON l.codn_conce = dh46.cod_conce
-    GROUP BY
-        codn_area,
-        codn_subar,
-        tipo_conce,
-        codn_grupo
-    ORDER BY
-        codn_area,
-        codn_subar;";
-
-        DB::connection($this->getConnectionName())->statement($sql);
-    }
-
-    /**
-     * Actualiza las descripciones de grupo en la tabla che
-     */
-    protected function updateCheGroupDescriptions(): void
-    {
-        $sql = "UPDATE che
-            SET desc_grupo = dh45.desc_grupo
-            FROM
-                mapuche.dh45
-            WHERE
-                che.codn_grupo = dh45.codn_grupo;";
-
-        DB::connection($this->getConnectionName())->statement($sql);
-
-        $sql = "UPDATE che
-            SET sino_cheque = 'N'
-            FROM
-                mapuche.dh45
-            WHERE
-                che.codn_grupo = dh45.codn_grupo AND
-                not(dh45.sino_sipefco);";
-
-        DB::connection($this->getConnectionName())->statement($sql);
-    }
-
-    /**
-     * Crea la tabla temporal d21tmp con información de cargos
-     */
-    protected function createD21TempTable(): void
-    {
-        $sql = "SELECT
-        l.*,
-        dh03.codc_carac
-    INTO TEMP d21tmp
-    FROM
-        l,
-        mapuche.dh03
-    WHERE
-        l.nro_cargo = dh03.nro_cargo AND
-        l.nro_legaj = dh03.nro_legaj;";
-
-        DB::connection($this->getConnectionName())->statement($sql);
-    }
-
-    /**
-     * Crea la tabla temporal l2 con información adicional
-     */
-    protected function createL2TempTable(): void
-    {
-        $sql = "SELECT
-        d21tmp.*,
-        dh89.tipo_perm_tran AS tipo_carac
-    INTO TEMP l2
-    FROM
-        d21tmp,
-        mapuche.dh89
-    WHERE
-        d21tmp.codigoescalafon = dh89.codigoescalafon;";
-
-        DB::connection($this->getConnectionName())->statement($sql);
-    }
-
-    /**
-     * Obtiene los netos liquidados
+     * Obtiene los netos liquidados.
      */
     public function getNetosLiquidados(): array
     {
         return [
             'neto_liquidado' => $this->llenaBlancoIzq(
                 number_format($this->netos, 2, '.', ''),
-                16
-            )
+                16,
+            ),
         ];
     }
 
     /**
-     * Genera el contenido del archivo CHE
+     * Genera el contenido del archivo CHE.
      */
     public function generateCheContent(array $liquidaciones, int $anio, int $mes, int $indice): array
     {
@@ -276,27 +195,27 @@ class CheGenerator
 
         foreach ($aportes as $aporte) {
             $grupo_aportes_retenciones[] = [
-                "codigo" => $this->llenaImportes($aporte['grupo'], 3),
-                "descripcion" => $this->llenaBlancos($aporte['desc_grupo'], 50),
-                "importe" => $this->llenaBlancoIzq(
+                'codigo' => $this->llenaImportes($aporte['grupo'], 3),
+                'descripcion' => $this->llenaBlancos($aporte['desc_grupo'], 50),
+                'importe' => $this->llenaBlancoIzq(
                     number_format($aporte['total'], 2, '.', ''),
-                    16
-                )
+                    16,
+                ),
             ];
         }
 
         return [
             'neto_liquidado' => $this->llenaBlancoIzq(
                 number_format($this->netos, 2, '.', ''),
-                16
+                16,
             ),
             'accion' => 'O',
-            'grupo_aportes_retenciones' => $grupo_aportes_retenciones
+            'grupo_aportes_retenciones' => $grupo_aportes_retenciones,
         ];
     }
 
     /**
-     * Obtiene los aportes y retenciones agrupados
+     * Obtiene los aportes y retenciones agrupados.
      */
     public function getAportes(): array
     {
@@ -325,7 +244,98 @@ class CheGenerator
     }
 
     /**
-     * Actualiza los importes negativos para tipo de concepto D
+     * Crea la tabla temporal che para el procesamiento de aportes y retenciones.
+     */
+    protected function createCheTable(): void
+    {
+        $sql = "SELECT
+        codn_area,
+        codn_subar,
+        tipo_conce,
+        dh46.codn_grupo,
+        LPAD(' ',50,' ') as desc_grupo,
+        'S'::char(1) AS sino_cheque,
+        sum(impp_conce::NUMERIC) as importe
+    INTO TEMP che
+    FROM
+        l
+        LEFT OUTER JOIN mapuche.dh46 ON l.codn_conce = dh46.cod_conce
+    GROUP BY
+        codn_area,
+        codn_subar,
+        tipo_conce,
+        codn_grupo
+    ORDER BY
+        codn_area,
+        codn_subar;";
+
+        DB::connection($this->getConnectionName())->statement($sql);
+    }
+
+    /**
+     * Actualiza las descripciones de grupo en la tabla che.
+     */
+    protected function updateCheGroupDescriptions(): void
+    {
+        $sql = 'UPDATE che
+            SET desc_grupo = dh45.desc_grupo
+            FROM
+                mapuche.dh45
+            WHERE
+                che.codn_grupo = dh45.codn_grupo;';
+
+        DB::connection($this->getConnectionName())->statement($sql);
+
+        $sql = "UPDATE che
+            SET sino_cheque = 'N'
+            FROM
+                mapuche.dh45
+            WHERE
+                che.codn_grupo = dh45.codn_grupo AND
+                not(dh45.sino_sipefco);";
+
+        DB::connection($this->getConnectionName())->statement($sql);
+    }
+
+    /**
+     * Crea la tabla temporal d21tmp con información de cargos.
+     */
+    protected function createD21TempTable(): void
+    {
+        $sql = 'SELECT
+        l.*,
+        dh03.codc_carac
+    INTO TEMP d21tmp
+    FROM
+        l,
+        mapuche.dh03
+    WHERE
+        l.nro_cargo = dh03.nro_cargo AND
+        l.nro_legaj = dh03.nro_legaj;';
+
+        DB::connection($this->getConnectionName())->statement($sql);
+    }
+
+    /**
+     * Crea la tabla temporal l2 con información adicional.
+     */
+    protected function createL2TempTable(): void
+    {
+        $sql = 'SELECT
+        d21tmp.*,
+        dh89.tipo_perm_tran AS tipo_carac
+    INTO TEMP l2
+    FROM
+        d21tmp,
+        mapuche.dh89
+    WHERE
+        d21tmp.codigoescalafon = dh89.codigoescalafon;';
+
+        DB::connection($this->getConnectionName())->statement($sql);
+    }
+
+    /**
+     * Actualiza los importes negativos para tipo de concepto D.
      */
     protected function updateImportesNegativos(): void
     {
@@ -351,7 +361,7 @@ class CheGenerator
                 'tipo_pago' => 'CHE', // O el tipo de pago que corresponda
                 'importe' => $this->llenaBlancoIzq(
                     number_format($aporte['total'], 2, '.', ''),
-                    16
+                    16,
                 ),
                 'area_administrativa' => $aporte['area_administrativa'], // Asegúrate de que este campo esté disponible
                 'subarea_administrativa' => $aporte['subarea_administrativa'], // Asegúrate de que este campo esté disponible
@@ -371,7 +381,7 @@ class CheGenerator
             'tipo_pago' => 'CHE',
             'importe' => $this->llenaBlancoIzq(
                 number_format($this->netos, 2, '.', ''),
-                16
+                16,
             ),
             'area_administrativa' => null, // O el valor correspondiente
             'subarea_administrativa' => null, // O el valor correspondiente

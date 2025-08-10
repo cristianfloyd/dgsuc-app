@@ -15,7 +15,8 @@ class UploadController extends Controller
         $archivos = UploadedFile::all();
         return view('uploads.index', compact('archivos'));
     }
-   //Muestra el formulario de cargado de archivos
+
+    //Muestra el formulario de cargado de archivos
     public function create()
     {
         return view('uploads.create');
@@ -33,12 +34,12 @@ class UploadController extends Controller
     //     return redirect()->route('uploads.index');
     // }
 
-       //almacena el archivo cargado en el servidor
+    //almacena el archivo cargado en el servidor
     public function store(Request $request): RedirectResponse
     {
         //Validar el archivo que se recibe. Rechazar si no es de tipo txt y si el tamaño es mayor a 20MB
         $request->validate([
-            'file_upload' =>'required|file|max:20000'
+            'file_upload' => 'required|file|max:20000',
         ]);
         $file = $request->file('file_upload');
         $filename = $file->getClientOriginalName();
@@ -71,5 +72,4 @@ class UploadController extends Controller
         return redirect()->route('uploads.index')
             ->with('status', "Archivo '{$archivoCargado->original_name}' cargado correctamente.");
     }
-
 }

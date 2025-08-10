@@ -2,24 +2,24 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Panel;
-use Filament\PanelProvider;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Colors\Color;
-use Filament\Navigation\NavigationGroup;
-use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\AuthenticateSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\Dh03Resource\Widgets\CargosOverTime;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationGroup;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class SucPanelProvider extends PanelProvider
 {
@@ -33,9 +33,9 @@ class SucPanelProvider extends PanelProvider
             ->profile()
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
-                ->label('Cambiar Panel')
-                ->icon('heroicon-o-arrows-right-left')
-                ->url(fn (): string => '/selector-panel'),
+                    ->label('Cambiar Panel')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->url(fn (): string => '/selector-panel'),
             ])
             ->colors([
                 'primary' => Color::Amber,
@@ -43,7 +43,7 @@ class SucPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                //
+
             ])
             ->profile()
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
@@ -76,7 +76,7 @@ class SucPanelProvider extends PanelProvider
                     ->label(fn (): string => __('navigation.settings'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
-                NavigationGroup::make('Usuarios')
+                NavigationGroup::make('Usuarios'),
             ])
             ->topNavigation()
             ->breadcrumbs(true)

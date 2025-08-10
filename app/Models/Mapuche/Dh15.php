@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Mapuche;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasMapucheSchema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo para la tabla de Grupos de Conceptos del schema Mapuche
+ * Modelo para la tabla de Grupos de Conceptos del schema Mapuche.
  *
  * @property int $codn_grupo Identificador único del grupo
  * @property string $desc_grupo Descripción del grupo
@@ -25,38 +24,41 @@ class Dh15 extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre real de la tabla en la base de datos
-     */
-    protected $table = 'dh15';
-
-    /**
-     * Indicamos que no use timestamps
+     * Indicamos que no use timestamps.
      */
     public $timestamps = false;
 
     /**
-     * Campos que pueden ser asignados masivamente
+     * Nombre real de la tabla en la base de datos.
+     */
+    protected $table = 'dh15';
+
+    /**
+     * Campos que pueden ser asignados masivamente.
      */
     protected $fillable = [
         'codn_grupo',
         'desc_grupo',
-        'codn_tipogrupo'
+        'codn_tipogrupo',
     ];
 
     /**
-     * Casteos de atributos
-     */
-    protected $casts = [
-        'codn_grupo' => 'integer',
-        'desc_grupo' => 'string',
-        'codn_tipogrupo' => 'integer'
-    ];
-
-    /**
-     * Scope para filtrar por tipo de grupo
+     * Scope para filtrar por tipo de grupo.
      */
     public function scopePorTipoGrupo(Builder $query, int $tipoGrupo): Builder
     {
         return $query->where('codn_tipogrupo', $tipoGrupo);
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'codn_grupo' => 'integer',
+            'desc_grupo' => 'string',
+            'codn_tipogrupo' => 'integer',
+        ];
     }
 }

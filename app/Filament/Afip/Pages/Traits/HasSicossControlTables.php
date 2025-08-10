@@ -3,11 +3,10 @@
 namespace App\Filament\Afip\Pages\Traits;
 
 use Carbon\Carbon;
-use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
 use Filament\Support\Enums\Alignment;
-use Illuminate\Database\Query\Builder;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 
 trait HasSicossControlTables
 {
@@ -35,11 +34,11 @@ trait HasSicossControlTables
                 ->copyMessageDuration(1500),
             TextColumn::make('origen')
                 ->badge()
-                ->color(fn(string $state): string => match ($state) {
+                ->color(fn (string $state): string => match ($state) {
                     'DH21' => 'warning',
                     'SICOSS' => 'danger',
                 })
-                ->description(fn(string $state): string => match ($state) {
+                ->description(fn (string $state): string => match ($state) {
                     'DH21' => 'Existe en DH21 pero no en SICOSS',
                     'SICOSS' => 'Existe en SICOSS pero no en DH21',
                     default => ''
@@ -104,8 +103,8 @@ trait HasSicossControlTables
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall)
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->tooltip(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
+                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
+                ->tooltip(fn ($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
         ];
     }
 
@@ -143,8 +142,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
+                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
+                ->description(fn ($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
         ];
     }
 
@@ -168,8 +167,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn($state) => abs($state)),
+                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
+                ->description(fn ($state) => abs($state)),
         ];
     }
 
@@ -186,7 +185,7 @@ trait HasSicossControlTables
             TextColumn::make('origen')
                 ->label('Origen')
                 ->badge()
-                ->color(fn(string $state): string => match ($state) {
+                ->color(fn (string $state): string => match ($state) {
                     'DH21' => 'warning',
                     'SICOSS' => 'danger',
                     default => '',
@@ -222,6 +221,7 @@ trait HasSicossControlTables
                 ->sortable(),
         ];
     }
+
     protected function getQueryForActiveTab(): Builder
     {
         return match ($this->activeTab) {

@@ -3,7 +3,7 @@
 namespace App\Enums;
 
 /**
- * Enum para los códigos de conceptos utilizados en SICOSS
+ * Enum para los códigos de conceptos utilizados en SICOSS.
  *
  * Este enum centraliza todos los códigos de conceptos utilizados en los cálculos
  * de aportes y contribuciones para SICOSS, asegurando coherencia en toda la aplicación.
@@ -12,25 +12,39 @@ enum ConceptosSicossEnum: int
 {
     // Códigos de Aportes SIJP
     case APORTE_SIJP_201 = 201;
+
     case APORTE_SIJP_202 = 202;
+
     case APORTE_SIJP_203 = 203;
+
     case APORTE_SIJP_403 = 403; // Agregado
+
     case APORTE_SIJP_204 = 204;
+
     case APORTE_SIJP_205 = 205;
 
     // Códigos de Aportes INSSJP
     case APORTE_INSSJP_247 = 247;
+
     case APORTE_INSSJP_447 = 447; // Agregado
+
     case APORTE_INSSJP_248 = 248;
 
     // Códigos de Contribuciones SIJP
     case CONTRIBUCION_SIJP_301 = 301;
+
     case CONTRIBUCION_SIJP_302 = 302;
+
     case CONTRIBUCION_SIJP_303 = 303;
+
     case CONTRIBUCION_SIJP_304 = 304;
+
     case CONTRIBUCION_SIJP_305 = 305;
+
     case CONTRIBUCION_SIJP_306 = 306;
+
     case CONTRIBUCION_SIJP_307 = 307;
+
     case CONTRIBUCION_SIJP_308 = 308;
 
     // Códigos de Contribuciones INSSJP
@@ -41,7 +55,7 @@ enum ConceptosSicossEnum: int
     case EXCLUSION_123 = 123;
 
     /**
-     * Obtiene todos los códigos de aportes SIJP
+     * Obtiene todos los códigos de aportes SIJP.
      *
      * @return array<int> Array con los códigos de aportes SIJP
      */
@@ -58,7 +72,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Obtiene todos los códigos de aportes INSSJP
+     * Obtiene todos los códigos de aportes INSSJP.
      *
      * @return array<int> Array con los códigos de aportes INSSJP
      */
@@ -72,7 +86,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Obtiene todos los códigos de contribuciones SIJP
+     * Obtiene todos los códigos de contribuciones SIJP.
      *
      * @return array<int> Array con los códigos de contribuciones SIJP
      */
@@ -86,7 +100,12 @@ enum ConceptosSicossEnum: int
             self::CONTRIBUCION_SIJP_307->value,
         ];
     }
-    
+
+    /**
+     * Obtiene todos los códigos de contribuciones ART.
+     *
+     * @return array<int> Array con los códigos de contribuciones ART.
+     */
     public static function getContribucionesArtCodes(): array
     {
         return [
@@ -97,7 +116,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Obtiene todos los códigos de contribuciones INSSJP
+     * Obtiene todos los códigos de contribuciones INSSJP.
      *
      * @return array<int> Array con los códigos de contribuciones INSSJP
      */
@@ -110,7 +129,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Obtiene todos los códigos de exclusión
+     * Obtiene todos los códigos de exclusión.
      *
      * @return array<int> Array con los códigos de exclusión
      */
@@ -123,7 +142,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Obtiene todos los códigos de aportes (SIJP + INSSJP)
+     * Obtiene todos los códigos de aportes (SIJP + INSSJP).
      *
      * @return array<int> Array con todos los códigos de aportes
      */
@@ -131,12 +150,12 @@ enum ConceptosSicossEnum: int
     {
         return array_merge(
             self::getAportesSijpCodes(),
-            self::getAportesInssjpCodes()
+            self::getAportesInssjpCodes(),
         );
     }
 
     /**
-     * Obtiene todos los códigos de contribuciones (SIJP + INSSJP)
+     * Obtiene todos los códigos de contribuciones (SIJP + INSSJP).
      *
      * @return array<int> Array con todos los códigos de contribuciones
      */
@@ -144,12 +163,12 @@ enum ConceptosSicossEnum: int
     {
         return array_merge(
             self::getContribucionesSijpCodes(),
-            self::getContribucionesInssjpCodes()
+            self::getContribucionesInssjpCodes(),
         );
     }
 
     /**
-     * Genera la condición SQL para aportes SIJP
+     * Genera la condición SQL para aportes SIJP.
      *
      * @return string Condición SQL para aportes SIJP
      */
@@ -160,7 +179,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Genera la condición SQL para aportes INSSJP
+     * Genera la condición SQL para aportes INSSJP.
      *
      * @return string Condición SQL para aportes INSSJP
      */
@@ -171,7 +190,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Genera la condición SQL para contribuciones SIJP
+     * Genera la condición SQL para contribuciones SIJP.
      *
      * @return string Condición SQL para contribuciones SIJP
      */
@@ -182,7 +201,7 @@ enum ConceptosSicossEnum: int
     }
 
     /**
-     * Genera la condición SQL para contribuciones INSSJP
+     * Genera la condición SQL para contribuciones INSSJP.
      *
      * @return string Condición SQL para contribuciones INSSJP
      */

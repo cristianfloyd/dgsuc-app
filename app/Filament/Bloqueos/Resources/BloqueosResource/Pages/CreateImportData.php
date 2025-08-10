@@ -2,20 +2,17 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
-use Filament\Actions;
-use Livewire\WithFileUploads;
-use App\Imports\BloqueosImport;
-use Maatwebsite\Excel\Facades\Excel;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Bloqueos\Resources\BloqueosResource;
+use Filament\Resources\Pages\CreateRecord;
+use Livewire\WithFileUploads;
 
 class CreateImportData extends CreateRecord
 {
     use WithFileUploads;
-    protected static string $resource = BloqueosResource::class;
 
-    public $excel_file = null;
+    public $excel_file;
+
+    protected static string $resource = BloqueosResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

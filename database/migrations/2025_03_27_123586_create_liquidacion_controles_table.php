@@ -11,6 +11,8 @@ return new class extends Migration
 
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.controles_liquidacion');
+
         Schema::connection($this->getConnectionName())->create('suc.controles_liquidacion', function (Blueprint $table) {
             $table->id();
             $table->string('nombre_control');

@@ -2,20 +2,19 @@
 
 namespace App\Filament\Afip\Pages\Widgets;
 
-use Livewire\Attributes\On;
 use Filament\Widgets\Widget;
-use Filament\Support\Colors\Color;
+use Livewire\Attributes\On;
 
 class SicossTotalesWidget extends Widget
 {
-    protected static string $view = 'filament.afip.pages.widgets.sicoss-totales-widget';
-
     /**
      * @var array<string, float>
      */
     public array $totales = [];
 
     public bool $isCollapsed = true;
+
+    protected static string $view = 'filament.afip.pages.widgets.sicoss-totales-widget';
 
     protected int | string | array $columnSpan = 'full';
 

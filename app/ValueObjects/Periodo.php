@@ -1,18 +1,18 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace App\ValueObjects;
 
 use InvalidArgumentException;
-
+use Stringable;
 
 /**
  * Representa un periodo de tiempo en formato YYYYMM.
  *
  * Esta clase encapsula la validación y el acceso al valor del periodo.
  */
-class Periodo
+class Periodo implements Stringable
 {
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $periodo)
     {
@@ -22,14 +22,21 @@ class Periodo
         $this->value = $periodo;
     }
 
-    /// Obtiene el valor del periodo como una cadena de texto.
-    public function getValue(): string
+
+    /**
+     * Devuelve la representación en string del periodo.
+     */
+    public function __toString(): string
     {
         return $this->value;
     }
 
-    /// Devuelve el valor del periodo como una cadena de texto.
-    public function __toString(): string
+    /**
+     * Obtiene el valor del periodo.
+     *
+     * @return string El valor del periodo en formato YYYYMM
+     */
+    public function getValue(): string
     {
         return $this->value;
     }

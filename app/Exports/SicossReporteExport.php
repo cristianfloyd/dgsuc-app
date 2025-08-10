@@ -2,36 +2,38 @@
 
 namespace App\Exports;
 
-use Exception;
-use App\Helpers\MoneyFormatter;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use App\Services\Reports\SicossReporteService;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithBackgroundColor;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\WithBackgroundColor;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class SicossReporteExport implements WithMultipleSheets
 {
     use Exportable;
 
     protected string $anio;
+
     protected string $mes;
+
     protected ?Collection $records;
+
     protected ?SicossTotalesData $totales;
+
     protected SicossReporteService $sicossReporteService;
 
     public function __construct(string $anio, string $mes, ?Collection $records = null, ?array $totales = null)
@@ -46,12 +48,15 @@ class SicossReporteExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            'Detalle' => new class($this->anio, $this->mes, $this->records, $this->sicossReporteService) implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles, WithCustomStartCell, WithBackgroundColor, WithTitle {
+            'Detalle' => new class ($this->anio, $this->mes, $this->records, $this->sicossReporteService) implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles, WithCustomStartCell, WithBackgroundColor, WithTitle {
                 use Exportable;
 
                 protected string $anio;
+
                 protected string $mes;
+
                 protected ?Collection $records;
+
                 protected SicossReporteService $sicossReporteService;
 
                 public function __construct(string $anio, string $mes, ?Collection $records, SicossReporteService $sicossReporteService)
@@ -74,16 +79,16 @@ class SicossReporteExport implements WithMultipleSheets
                 {
                     try {
                         if ($this->records) {
-                            $records = $this->records->map(fn($item) => SicossReporteData::fromModel($item));
+                            $records = $this->records->map(fn ($item) => SicossReporteData::fromModel($item));
                             return $records;
                         }
 
                         return $this->sicossReporteService->getReporteData($this->anio, $this->mes);
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         Log::error('Error al obtener datos para el reporte SICOSS', [
                             'error' => $e->getMessage(),
                             'anio' => $this->anio,
-                            'mes' => $this->mes
+                            'mes' => $this->mes,
                         ]);
                         return new Collection(); // Devolver colección vacía en caso de error
                     }
@@ -112,6 +117,7 @@ class SicossReporteExport implements WithMultipleSheets
                  * proporcionando valores predeterminados en caso de que algún campo sea nulo.
                  *
                  * @param mixed $row Fila de datos a mapear
+                 *
                  * @return array Array con los valores mapeados de la fila
                  */
                 public function map($row): array
@@ -129,10 +135,10 @@ class SicossReporteExport implements WithMultipleSheets
                             $row->contribucionesSijp ?? 0,
                             $row->contribucionesInssjp ?? 0,
                         ];
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         Log::error('Error al mapear fila para el reporte SICOSS', [
                             'error' => $e->getMessage(),
-                            'row' => json_encode($row)
+                            'row' => json_encode($row),
                         ]);
                         // Devolver valores por defecto en caso de error
                         return ['', '', 0, 0, 0, 0, 0, 0, 0];
@@ -189,7 +195,7 @@ class SicossReporteExport implements WithMultipleSheets
                     return 'Detalle';
                 }
             },
-            'Totales' => new class($this->totales) implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithBackgroundColor, WithTitle {
+            'Totales' => new class ($this->totales) implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithBackgroundColor, WithTitle {
                 use Exportable;
 
                 protected SicossTotalesData $totales;
@@ -225,7 +231,7 @@ class SicossReporteExport implements WithMultipleSheets
                         [
                             'concepto' => 'Total ART',
                             'monto' => $this->totales->totalC306,
-                        ]
+                        ],
                     ]);
                 }
 

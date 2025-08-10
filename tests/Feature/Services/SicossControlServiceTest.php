@@ -2,10 +2,9 @@
 
 namespace Tests\Feature\Services;
 
-use Illuminate\Support\Facades\DB;
 use App\Services\SicossControlService;
-use App\Models\ControlAportesDiferencia;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
 {
@@ -14,7 +13,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     protected SicossControlService $service;
 
     /**
-     * Configuración inicial para cada test
+     * Configuración inicial para cada test.
      */
     protected function setUp(): void
     {
@@ -24,7 +23,18 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test de creación de tabla temporal
+     * Limpieza después de cada test.
+     */
+    protected function tearDown(): void
+    {
+        DB::connection('pgsql-test')
+            ->unprepared('DROP TABLE IF EXISTS dh21aporte');
+
+        parent::tearDown();
+    }
+
+    /**
+     * Test de creación de tabla temporal.
      */
     public function test_puede_crear_tabla_temporal(): void
     {
@@ -32,12 +42,12 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue(
             $this->checkTableExists('dh21aporte'),
-            'La tabla temporal debería existir'
+            'La tabla temporal debería existir',
         );
     }
 
     /**
-     * Test de obtención de diferencias
+     * Test de obtención de diferencias.
      */
     public function test_puede_obtener_diferencias(): void
     {
@@ -51,7 +61,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test del proceso completo
+     * Test del proceso completo.
      */
     public function test_puede_ejecutar_proceso_completo(): void
     {
@@ -62,7 +72,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test de guardado de diferencias
+     * Test de guardado de diferencias.
      */
     public function test_puede_guardar_diferencias(): void
     {
@@ -71,12 +81,12 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
         $this->service->ejecutarControlesPostImportacion();
 
         $this->assertDatabaseHas('control_aportes_diferencias', [
-            'estado' => 'pendiente'
+            'estado' => 'pendiente',
         ]);
     }
 
     /**
-     * Métodos auxiliares para los tests
+     * Métodos auxiliares para los tests.
      */
     private function checkTableExists(string $tableName): bool
     {
@@ -94,16 +104,5 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
             'remuneracion' => 100000.00,
             // Otros campos necesarios
         ]);
-    }
-
-    /**
-     * Limpieza después de cada test
-     */
-    protected function tearDown(): void
-    {
-        DB::connection('pgsql-test')
-            ->unprepared('DROP TABLE IF EXISTS dh21aporte');
-
-        parent::tearDown();
     }
 }

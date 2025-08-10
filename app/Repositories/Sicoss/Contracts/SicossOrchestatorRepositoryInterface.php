@@ -8,7 +8,7 @@ interface SicossOrchestatorRepositoryInterface
 {
     /**
      * Ejecuta el proceso completo de generación SICOSS
-     * Orquesta todo el flujo principal según configuración
+     * Orquesta todo el flujo principal según configuración.
      *
      * @param SicossProcessData $datos Datos de configuración
      * @param array $periodo_fiscal Período fiscal
@@ -16,6 +16,7 @@ interface SicossOrchestatorRepositoryInterface
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Si debe retornar datos
+     *
      * @return array
      */
     public function ejecutarProcesoCompleto(
@@ -24,12 +25,12 @@ interface SicossOrchestatorRepositoryInterface
         array $filtros,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     ): array;
 
     /**
      * Procesa SICOSS sin períodos retro
-     * Flujo simplificado para período vigente únicamente
+     * Flujo simplificado para período vigente únicamente.
      *
      * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
@@ -39,6 +40,7 @@ interface SicossOrchestatorRepositoryInterface
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Si debe retornar datos
+     *
      * @return mixed
      */
     public function procesarSinRetro(
@@ -49,12 +51,12 @@ interface SicossOrchestatorRepositoryInterface
         string $where,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     );
 
     /**
      * Procesa SICOSS con períodos retro
-     * Flujo complejo que incluye períodos históricos
+     * Flujo complejo que incluye períodos históricos.
      *
      * @param SicossProcessData $datos Datos de configuración
      * @param int $per_anoct Año del período
@@ -63,6 +65,7 @@ interface SicossOrchestatorRepositoryInterface
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Si debe retornar datos
+     *
      * @return array
      */
     public function procesarConRetro(
@@ -72,34 +75,36 @@ interface SicossOrchestatorRepositoryInterface
         string $where,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     ): array;
 
     /**
      * Procesa el resultado final del proceso SICOSS
-     * Maneja archivos, paths y resultado según configuración
+     * Maneja archivos, paths y resultado según configuración.
      *
      * @param array $totales Totales calculados
      * @param string $testeo_directorio_salida Directorio de testeo
      * @param string $testeo_prefijo_archivos Prefijo de archivos de testeo
+     *
      * @return mixed
      */
     public function procesarResultadoFinal(
         array $totales,
         string $testeo_directorio_salida = '',
-        string $testeo_prefijo_archivos = ''
+        string $testeo_prefijo_archivos = '',
     );
 
     /**
-     * Establece el código de reparto para el procesamiento SICOSS
+     * Establece el código de reparto para el procesamiento SICOSS.
      *
      * @param string $codc_reparto Código de reparto
+     *
      * @return void
      */
     public function setCodigoReparto(string $codc_reparto): void;
 
     /**
-     * Obtiene la lista de archivos generados durante el proceso
+     * Obtiene la lista de archivos generados durante el proceso.
      *
      * @return array Array con los archivos generados por período
      */

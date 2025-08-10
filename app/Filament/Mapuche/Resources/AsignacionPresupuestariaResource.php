@@ -2,16 +2,12 @@
 
 namespace App\Filament\Mapuche\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\Mapuche\Dh24;
-use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Mapuche\Resources\AsignacionPresupuestariaResource\Pages;
-use App\Filament\Mapuche\Resources\AsignacionPresupuestariaResource\RelationManagers;
+use App\Models\Mapuche\Dh24;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsignacionPresupuestariaResource extends Resource
 {
@@ -27,7 +23,7 @@ class AsignacionPresupuestariaResource extends Resource
                     ->label('Unidad')
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         $dh24 = new Dh24();
                         $total = $dh24->getTotalAllocationByUnit($state);
                         $set('total_allocated', $total);
@@ -41,7 +37,7 @@ class AsignacionPresupuestariaResource extends Resource
                         'numeric',
                         'min:0',
                         'max:100',
-                        function($attribute, $value, $fail) use ($form) {
+                        function ($attribute, $value, $fail) use ($form): void {
                             $dh24 = new Dh24();
                             if (!$dh24->isAllocationWithinLimit($value)) {
                                 $fail('El porcentaje supera el límite disponible.');
@@ -70,7 +66,7 @@ class AsignacionPresupuestariaResource extends Resource
                 Tables\Filters\SelectFilter::make('codn_area')
                     ->label('Unidad'),
                 Tables\Filters\Filter::make('active')
-                    ->query(fn (Builder $query): Builder => $query->activo())
+                    ->query(fn (Builder $query): Builder => $query->activo()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -78,11 +74,10 @@ class AsignacionPresupuestariaResource extends Resource
             ]);
     }
 
-
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

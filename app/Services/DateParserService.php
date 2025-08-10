@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
 use App\Exceptions\ValidationException;
+use Carbon\Carbon;
 
 class DateParserService
 {
     /**
-     * Formatos de fecha soportados
+     * Formatos de fecha soportados.
      */
     private array $supportedFormats = [
         'd/m/Y',
@@ -19,7 +19,7 @@ class DateParserService
     ];
 
     /**
-     * Parsea una fecha en múltiples formatos
+     * Parsea una fecha en múltiples formatos.
      */
     public function parseDate($date): Carbon
     {
@@ -46,7 +46,7 @@ class DateParserService
     }
 
     /**
-     * Valida que el año esté en un rango razonable
+     * Valida que el año esté en un rango razonable.
      */
     private function isValidYear(int $year): bool
     {

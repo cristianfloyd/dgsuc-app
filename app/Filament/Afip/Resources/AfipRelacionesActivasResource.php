@@ -2,24 +2,23 @@
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use App\Models\AfipRelacionesActivas;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Afip\Resources\AfipRelacionesActivasResource\Pages;
-use App\Filament\Afip\Resources\AfipRelacionesActivasResource\RelationManagers;
-use App\Filament\Afip\Resources\AfipRelacionesActivasResource\Actions\ImportAction;
+use App\Models\AfipRelacionesActivas;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AfipRelacionesActivasResource extends Resource
 {
     protected static ?string $model = AfipRelacionesActivas::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
+
     protected static ?string $navigationGroup = 'AFIP';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -107,7 +106,6 @@ class AfipRelacionesActivasResource extends Resource
             ]);
     }
 
-
     public static function table(Table $table): Table
     {
         return $table
@@ -119,7 +117,7 @@ class AfipRelacionesActivasResource extends Resource
                 Tables\Columns\TextColumn::make('cuil')
                     ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn(string $state): string =>
+                    ->formatStateUsing(fn (string $state): string =>
                     substr($state, 0, 2) . '-' .
                         substr($state, 2, 8) . '-' .
                         substr($state, -1)),
@@ -127,7 +125,7 @@ class AfipRelacionesActivasResource extends Resource
                 Tables\Columns\TextColumn::make('codigo_movimiento')
                     ->sortable()
                     ->badge()
-                    ->color(fn(string $state): string =>
+                    ->color(fn (string $state): string =>
                     match ($state) {
                         '00' => 'success',
                         '01' => 'danger',
@@ -160,13 +158,13 @@ class AfipRelacionesActivasResource extends Resource
                         return $query
                             ->when(
                                 $data['desde'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
                             )
                             ->when(
                                 $data['hasta'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
                             );
-                    })
+                    }),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
@@ -182,7 +180,7 @@ class AfipRelacionesActivasResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

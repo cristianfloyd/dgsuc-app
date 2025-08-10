@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Documentation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -20,7 +20,7 @@ class DocumentationController extends Controller
             ->get();
 
         $pdf = PDF::loadView('pdf.documentation', [
-            'documentation' => $documentation
+            'documentation' => $documentation,
         ]);
 
         return $pdf->download('documentacion.pdf');
@@ -56,11 +56,11 @@ class DocumentationController extends Controller
         $htmlContent = $converter->convert($documentation->content);
 
         // Extraer los encabezados para el TOC lateral
-        preg_match_all('/<h([2-4]).*?id="(.*?)".*?>(.*?)<\/h[2-4]>/i', $htmlContent, $matches, PREG_SET_ORDER);
+        preg_match_all('/<h([2-4]).*?id="(.*?)".*?>(.*?)<\/h[2-4]>/i', $htmlContent, $matches, \PREG_SET_ORDER);
 
         $tableOfContents = collect($matches)->map(function ($match) {
             return [
-                'level' => (int) $match[1],
+                'level' => (int)$match[1],
                 'id' => $match[2],
                 'title' => strip_tags($match[3]),
             ];

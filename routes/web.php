@@ -1,71 +1,76 @@
 <?php
 
-use App\Livewire\Dh21;
-use App\Livewire\Modal;
+use App\Http\Controllers\Auth\Office365Controller;
+use App\Http\Controllers\Auth\TobaLoginController;
+use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\UsersController;
+use App\Livewire\AfipImportCrudo;
+use App\Livewire\AfipMapucheMiSimplificacion;
+use App\Livewire\AfipMapucheMiSimplificacionTable;
+use App\Livewire\AfipMiSimplificacion;
+use App\Livewire\AfipRelacionesActivas;
+use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
+use App\Livewire\BuscarColumna;
+use App\Livewire\BuscarComentario;
 use App\Livewire\Clicker;
-use App\Livewire\TodoList;
-use App\Livewire\UserList;
+use App\Livewire\CompareCuils;
 use App\Livewire\ContactUs;
+use App\Livewire\ConvertirTabla;
+use App\Livewire\Dh21;
+use App\Livewire\FileEncoding;
+use App\Livewire\MapucheSicossTable;
+use App\Livewire\Modal;
+use App\Livewire\PanelSelector;
+use App\Livewire\ParaMiSimplificacion;
+use App\Livewire\RegisterForm;
+use App\Livewire\ReporteLiquidacion;
+use App\Livewire\Reportes\OrdenPagoReporte;
+use App\Livewire\ShowCuilDetails;
+use App\Livewire\SicossImporter;
 use App\Livewire\TestCuils;
+use App\Livewire\TodoList;
 use App\Livewire\Uploadtxt;
+use App\Livewire\UserList;
 use App\Livewire\UsersTable;
 use Illuminate\Http\Request;
-use App\Livewire\CompareCuils;
-use App\Livewire\FileEncoding;
-use App\Livewire\RegisterForm;
-use App\Livewire\BuscarColumna;
-use App\Livewire\PanelSelector;
-use App\Livewire\ConvertirTabla;
-use App\Livewire\SicossImporter;
-use App\services\ColumnMetadata;
-use App\Livewire\AfipImportCrudo;
-use App\Livewire\ShowCuilDetails;
-use App\Livewire\BuscarComentario;
-use App\Livewire\MapucheSicossTable;
-use App\Livewire\ReporteLiquidacion;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\AfipMiSimplificacion;
-use App\Livewire\ParaMiSimplificacion;
-use App\Livewire\AfipRelacionesActivas;
-use App\Http\Controllers\UsersController;
-use App\Livewire\Reportes\OrdenPagoReporte;
-use App\Livewire\AfipMapucheMiSimplificacion;
-use App\Http\Controllers\DocumentationController;
-use App\Http\Controllers\Auth\Office365Controller;
-use App\Livewire\AfipMapucheMiSimplificacionTable;
-use App\Livewire\AsignacionPresupuestaria\AsignacionForm;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
+// Rutas de autenticación Toba con prefijo (para compatibilidad con código existente)
+Route::prefix('toba-legacy')->group(function () {
+    Route::get('/login', [TobaLoginController::class, 'showLoginForm'])->name('toba.login.form');
+    Route::post('/login', [TobaLoginController::class, 'login'])->name('toba.login');
+    Route::post('/logout', [TobaLoginController::class, 'logout'])->name('toba.logout');
+    
+    // Rutas adicionales Toba
+    Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordForm'])->name('toba.password.change');
+    Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('toba.two-factor.verify');
+});
 
+// Panel Toba ahora está disponible en /toba (manejado por FilamentPHP)
 
 
 
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddleware::class])
-    ->group(function () {
+    ->group(function (): void {
         // Rutas protegidas que requieren autenticación y gestión de conexión BD
     });
 
 
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', ])->group(function (): void {
     Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
     Route::get('/clicker', Clicker::class)->name('clicker');
-    Route::get('/suc', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/suc', function () {return view('dashboard');})->name('dashboard');
     Route::get('/todos', TodoList::class)->name('todos');
     Route::post('/todos', [TodoList::class, 'create'])->name('todos.create');
     Route::get('/user/list', UserList::class)->name('userlist');
     Route::get('/contactus', ContactUs::class)->name('contact-us');
     Route::get('/modal', Modal::class)->name('modal');
     Route::get('/userstable', UsersTable::class)->name('datatable');
-    Route::get('/', function () {
-        return view('index');
-    })->name('index');
+    Route::get('/', function () {return view('index');})->name('index');
     Route::get('/imputacion', AsignacionForm::class)->name('imputacion');
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
@@ -79,9 +84,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
     })->name('reporte-orden-pago-pdf');
-    Route::get('/test-column-metadata', function () {
-        $columnMetadata = app(ColumnMetadata::class);
-    });
+    
 
 
     Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
@@ -120,7 +123,7 @@ Route::get('/afip/sicoss/download', function (Request $request) {
         abort(404, 'Archivo no encontrado');
     }
 
-    $extension = pathinfo($path, PATHINFO_EXTENSION);
+    $extension = pathinfo($path, \PATHINFO_EXTENSION);
     $contentType = $extension === 'txt' ? 'text/plain' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     $fileName = basename($path);
 

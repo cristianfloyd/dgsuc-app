@@ -4,24 +4,29 @@ namespace App\Enums;
 
 enum TipoNove: string
 {
-/**
+    /**
      * General: El concepto no necesita una novedad para liquidarse,
      * sólo puede forzarse o anularse.
      */
     case GENERAL = 'G';
 
-/**
+    /**
      * Permanente: El concepto necesita una novedad para ser liquidado.
-     * Puede incluir valores que afectan la fórmula (Importe, Porcentaje, Cantidad)
+     * Puede incluir valores que afectan la fórmula (Importe, Porcentaje, Cantidad).
      */
     case PERMANENTE = 'P';
 
-/**
+    /**
      * Transitorio: Necesita novedad para ser liquidado.
-     * Puede ser forzado o anulado por un período de tiempo (ej: Horas Extras)
+     * Puede ser forzado o anulado por un período de tiempo (ej: Horas Extras).
      */
     case TRANSITORIO = 'T';
 
+    /**
+     * Obtiene la descripción del tipo de novedad.
+     *
+     * @return string La descripción del tipo de novedad.
+     */
     public function getDescription(): string
     {
         return match ($this) {
@@ -31,6 +36,13 @@ enum TipoNove: string
         };
     }
 
+    /**
+     * Obtiene los tipos de valores permitidos para cada tipo de novedad.
+     *
+     * Los tipos de valores pueden ser 'Importe', 'Porcentaje' y 'Cantidad'.
+     *
+     * @return array<string> Un array con los tipos de valores permitidos.
+     */
     public function getTiposValores(): array
     {
         return match ($this) {

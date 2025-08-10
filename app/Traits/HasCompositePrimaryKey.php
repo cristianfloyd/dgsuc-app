@@ -12,13 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 trait HasCompositePrimaryKey
 {
-
     /**
      * Devuelve un array con los valores de los campos que componen la clave primaria del modelo.
      *
      * @return array Valores de los campos que componen la clave primaria.
      */
-    public function getKey()
+    public function getKey(): array
     {
         $attributes = [];
         foreach ($this->getKeyName() as $key) {
@@ -49,20 +48,18 @@ trait HasCompositePrimaryKey
      * @param array $foreignKeys Nombres de los campos que componen la clave primaria del modelo relacionado.
      * @param array $localKeys Nombres de los campos que componen la clave primaria del modelo actual.
      * @param string|null $relation Nombre de la relación (opcional).
+     *
      * @return BelongsTo Instancia de la relación BelongsTo con las restricciones necesarias.
      */
-    public function compositeBelongsTo(string $related, array $foreignKeys, array $localKeys, string $relation = null): BelongsTo
+    public function compositeBelongsTo(string $related, array $foreignKeys, array $localKeys, ?string $relation = null): BelongsTo
     {
-        if (is_null($relation)) {
+        if ($relation === null) {
             $relation = $this->guessBelongsToRelation();
         }
 
         $instance = $this->newRelatedInstance($related);
 
-        return new class($instance->newQuery(), $this, $foreignKeys, $localKeys, $relation) extends BelongsTo {
-            protected array $foreignKeys;
-            protected array $localKeys;
-
+        return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys, $relation) extends BelongsTo {
             /**
              * Construye una nueva instancia de la relación BelongsTo con claves primarias compuestas.
              *
@@ -77,10 +74,8 @@ trait HasCompositePrimaryKey
              * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
              * @param string|null $relation El nombre de la relación (opcional).
              */
-            public function __construct(Builder $query, $child, $foreignKeys, $localKeys, $relation)
+            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $child, protected array $foreignKeys, protected array $localKeys, $relation)
             {
-                $this->foreignKeys = $foreignKeys;
-                $this->localKeys = $localKeys;
                 parent::__construct($query, $child, null, null, $relation);
             }
 
@@ -95,13 +90,11 @@ trait HasCompositePrimaryKey
             public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $foreignValues = array_map(function ($key) {
-                        return $this->child->{$key};
-                    }, $this->localKeys);
+                    $foreignValues = array_map(fn ($key) => $this->child->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
-                        $this->wrapValuesInArray($foreignValues)
+                        $this->wrapValuesInArray($foreignValues),
                     );
                 }
             }
@@ -114,12 +107,13 @@ trait HasCompositePrimaryKey
              * of the underlying query builder.
              *
              * @param array|string $columns The column name or list of column names to qualify.
+             *
              * @return string|array The qualified column name or list of qualified column names.
              */
             public function qualifySubSelectColumn(array|string $columns): array|string
             {
-                if (is_array($columns)) {
-                    return array_map([$this->query, 'qualifyColumn'], $columns);
+                if (\is_array($columns)) {
+                    return array_map($this->query->qualifyColumn(...), $columns);
                 }
                 return $this->query->qualifyColumn($columns);
             }
@@ -147,11 +141,12 @@ trait HasCompositePrimaryKey
              * necesario para que la consulta se ejecute correctamente.
              *
              * @param mixed $values Los valores a envolver en un array.
+             *
              * @return array Los valores envueltos en un array si es necesario.
              */
             protected function wrapValuesInArray(mixed $values): array
             {
-                return count($this->foreignKeys) > 1 ? [$values] : $values;
+                return \count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }
@@ -166,20 +161,16 @@ trait HasCompositePrimaryKey
      * @param string $related El nombre de la clase del modelo relacionado.
      * @param array $foreignKeys Los nombres de los campos que componen la clave primaria del modelo relacionado.
      * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany La relación HasMany con clave primaria compuesta.
      */
-    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys)
+    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         $instance = $this->newRelatedInstance($related);
 
-        return new class($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
-            protected array $foreignKeys;
-            protected $localKeys;
-
-            public function __construct(Builder $query, $parent, $foreignKeys, $localKeys)
+        return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
+            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $parent, protected array $foreignKeys, protected $localKeys)
             {
-                $this->foreignKeys = $foreignKeys;
-                $this->localKeys = $localKeys;
                 parent::__construct($query, $parent, null, null);
             }
 
@@ -189,19 +180,15 @@ trait HasCompositePrimaryKey
              * Este método se encarga de agregar las restricciones necesarias a la consulta de la relación
              * HasMany, utilizando los valores de los campos locales (`$this->localKeys`) del modelo padre
              * para filtrar los registros del modelo relacionado que cumplan con esas condiciones.
-             *
-             * @return void
              */
-            public function addConstraints()
+            public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $parentValues = array_map(function ($key) {
-                        return $this->parent->{$key};
-                    }, $this->localKeys);
+                    $parentValues = array_map(fn ($key) => $this->parent->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
-                        $this->wrapValuesInArray($parentValues)
+                        $this->wrapValuesInArray($parentValues),
                     );
                 }
             }
@@ -212,11 +199,12 @@ trait HasCompositePrimaryKey
              * se realice correctamente, independientemente de si la clave primaria tiene una o más columnas.
              *
              * @param array $values Los valores a envolver en un array.
+             *
              * @return array Los valores envueltos en un array si es necesario.
              */
             protected function wrapValuesInArray($values)
             {
-                return count($this->foreignKeys) > 1 ? [$values] : $values;
+                return \count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }
@@ -230,6 +218,7 @@ trait HasCompositePrimaryKey
      * valores de clave primaria correspondientes.
      *
      * @param Builder $query La consulta a la que se agregarán las condiciones WHERE.
+     *
      * @return Builder La consulta con las condiciones WHERE agregadas.
      */
     protected function setKeysForSaveQuery($query): Builder

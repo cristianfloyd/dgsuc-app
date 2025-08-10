@@ -2,13 +2,12 @@
 
 namespace App\Models\Mapuche;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini
+ * Clase de configuración Helper para el sistema Mapuche usando el modelo Rrhhini.
  */
 class MapucheConfig
 {
@@ -20,6 +19,7 @@ class MapucheConfig
      * @param string $section Sección principal
      * @param string $parameter Nombre del parámetro
      * @param mixed $default Valor por defecto si el parámetro no se encuentra
+     *
      * @return mixed
      */
     public static function getParametroRrhh(string $section, string $parameter, $default = null)
@@ -34,18 +34,17 @@ class MapucheConfig
      * @param string $section Sección principal
      * @param string $parameter Nombre del parámetro
      * @param mixed $value Valor a establecer
-     * @return bool
      */
     public static function setParametroRrhh(string $section, string $parameter, $value): bool
     {
         return Rrhhini::updateOrCreate(
             [
                 'nombre_seccion' => $section,
-                'nombre_parametro' => $parameter
+                'nombre_parametro' => $parameter,
             ],
             [
-                'dato_parametro' => $value
-            ]
+                'dato_parametro' => $value,
+            ],
         )->exists;
     }
 
@@ -58,7 +57,7 @@ class MapucheConfig
      */
     public static function getPorcentajeAporteDiferencialJubilacion(): float
     {
-        return floatval(self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
+        return (float) (self::getParametroRrhh('Porcentaje', 'PorcAporteDiferencialJubilacion', 0));
     }
 
     /**
@@ -70,7 +69,7 @@ class MapucheConfig
      */
     public static function getSicossInformarBecarios(): bool
     {
-        return (bool)self::getParametroRrhh('Sicoss', 'InformarBecario', 0);
+        return (bool) self::getParametroRrhh('Sicoss', 'InformarBecario', 0);
     }
 
     /**
@@ -118,7 +117,7 @@ class MapucheConfig
      */
     public static function getSicossHorasExtrasNovedades(): int
     {
-        return (int)self::getParametroRrhh('Sicoss', 'HorasExtrasNovedades', 0);
+        return (int) self::getParametroRrhh('Sicoss', 'HorasExtrasNovedades', 0);
     }
 
     /**
@@ -135,8 +134,6 @@ class MapucheConfig
 
     /**
      * Obtener el año fiscal actual.
-     *
-     * @return string
      */
     public static function getAnioFiscal(): string
     {
@@ -146,8 +143,6 @@ class MapucheConfig
 
     /**
      * Obtener el mes fiscal actual.
-     *
-     * @return string
      */
     public static function getMesFiscal(): string
     {
@@ -169,7 +164,7 @@ class MapucheConfig
         return $periodoService->getYear() . $periodoService->getMonth();
     }
 
-    public static function getPeriodoCorriente()
+    public static function getPeriodoCorriente(): array
     {
         $periodoService = app(PeriodoFiscalService::class);
 
@@ -184,7 +179,7 @@ class MapucheConfig
     public static function getFechaInicioPeriodoCorriente(): string
     {
         return DB::connection(self::getStaticConnectionName())
-        ->select('SELECT map_get_fecha_inicio_periodo() as fecha_inicio')[0]->fecha_inicio;
+            ->select('SELECT map_get_fecha_inicio_periodo() as fecha_inicio')[0]->fecha_inicio;
     }
 
     /**
@@ -195,7 +190,7 @@ class MapucheConfig
     public static function getFechaFinPeriodoCorriente(): string
     {
         return DB::connection(self::getStaticConnectionName())
-        ->select('SELECT map_get_fecha_fin_periodo() as fecha_fin')[0]->fecha_fin;
+            ->select('SELECT map_get_fecha_fin_periodo() as fecha_fin')[0]->fecha_fin;
     }
 
     /**
@@ -263,8 +258,6 @@ class MapucheConfig
         return self::getParametroRrhh('Sicoss', 'CategoriaDiferencial');
     }
 
-
-
     /**
      * Obtiene el nombre de la conexión de base de datos de forma estática.
      *
@@ -275,7 +268,7 @@ class MapucheConfig
      */
     public static function getStaticConnectionName(): string
     {
-        $instance = new static();
+        $instance = new self();
         return $instance->getConnectionName();
     }
 
@@ -304,13 +297,10 @@ class MapucheConfig
         return self::getParametroRrhh('Conceptos', 'ObraSocial');
     }
 
-
-
     public static function getTopesJubilacionVoluntario()
     {
         return self::getParametroRrhh('Conceptos', 'JubilacionVoluntario');
     }
-
 
     public static function getTopesJubilatorioPatronal()
     {
@@ -371,6 +361,7 @@ class MapucheConfig
     {
         return self::getParametroRrhh('Conceptos', 'AdherenteSicossDesdeH09', 0);
     }
+
     public static function getConceptosAcumularAsigFamiliar()
     {
         return self::getParametroRrhh('Conceptos', 'AcumularAsigFamiliar', 1);

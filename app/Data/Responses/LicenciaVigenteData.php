@@ -3,18 +3,18 @@
 namespace App\Data\Responses;
 
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 
 class LicenciaVigenteData extends Data
 {
     /**
      * @param int $nro_legaj Número de legajo del agente
-     * @param int $inicio Día de inicio de la licencia en el periodo
-     * @param int $final Día final de la licencia en el periodo
+     * @param int|null $inicio Día de inicio de la licencia en el periodo
+     * @param int|null $final Día final de la licencia en el periodo
      * @param bool $es_legajo Indica si la licencia está asociada directamente al legajo (true) o a un cargo (false)
      * @param int $condicion Código numérico que representa el tipo de condición/licencia
      * @param string|null $descripcion_licencia Descripción del tipo de licencia
@@ -25,8 +25,8 @@ class LicenciaVigenteData extends Data
      */
     public function __construct(
         public int $nro_legaj,
-        public int $inicio,
-        public int $final,
+        public ?int $inicio,
+        public ?int $final,
         public bool $es_legajo,
         public int $condicion,
         public ?string $descripcion_licencia = null,
@@ -44,13 +44,11 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Obtiene la descripción legible del tipo de condición/licencia
-     *
-     * @return string
+     * Obtiene la descripción legible del tipo de condición/licencia.
      */
     public function getDescripcionCondicion(): string
     {
-        return match($this->condicion) {
+        return match ($this->condicion) {
             5 => 'Maternidad',
             10 => 'Excedencia',
             11 => 'Maternidad Down',
@@ -64,52 +62,46 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Determina si la licencia es de maternidad
-     *
-     * @return bool
+     * Determina si la licencia es de maternidad.
      */
     public function esLicenciaMaternidad(): bool
     {
-        return in_array($this->condicion, [5, 11]);
+        return \in_array($this->condicion, [5, 11]);
     }
 
     /**
-     * Determina si la licencia es por enfermedad
-     *
-     * @return bool
+     * Determina si la licencia es por enfermedad.
      */
     public function esLicenciaEnfermedad(): bool
     {
-        return in_array($this->condicion, [18, 19]);
+        return \in_array($this->condicion, [18, 19]);
     }
 
     /**
-     * Crear una colección tipada desde un conjunto de resultados
+     * Crear una colección tipada desde un conjunto de resultados.
      *
      * @param Collection|array $resultados
-     * @return DataCollection
      */
     public static function fromResultados($resultados): DataCollection
     {
-        if (is_array($resultados)) {
+        if (\is_array($resultados)) {
             $resultados = collect($resultados);
         }
 
         return new DataCollection(
             LicenciaVigenteData::class,
-            $resultados->map(fn($row) => self::fromRow($row))
+            $resultados->map(fn ($row): \App\Data\Responses\LicenciaVigenteData => self::fromRow($row)),
         );
     }
 
     /**
-     * Crear una instancia desde una fila de resultados
+     * Crear una instancia desde una fila de resultados.
      *
      * @param object|array $row
-     * @return self
      */
     public static function fromRow($row): self
     {
-        $row = (object)$row;
+        $row = (object) $row;
 
         return new self(
             nro_legaj: $row->nro_legaj,
@@ -125,9 +117,7 @@ class LicenciaVigenteData extends Data
     }
 
     /**
-     * Convierte el DTO a un array para exportación Excel
-     *
-     * @return array
+     * Convierte el DTO a un array para exportación Excel.
      */
     public function toExcelRow(): array
     {

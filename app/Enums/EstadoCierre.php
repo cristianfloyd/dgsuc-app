@@ -5,6 +5,7 @@ namespace App\Enums;
 enum EstadoCierre: string
 {
     case CERRADO = 'S';
+
     case ABIERTO = 'N';
 
     public function getLabel(): string
@@ -15,6 +16,12 @@ enum EstadoCierre: string
         };
     }
 
+    
+    /**
+     * Returns an array suitable for use in a select element.
+     *
+     * @return array<string, string>
+     */
     public static function asSelectArray(): array
     {
         return collect(self::cases())

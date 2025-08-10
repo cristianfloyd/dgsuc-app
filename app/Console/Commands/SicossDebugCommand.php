@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\ValueObjects\PeriodoFiscal;
-use Illuminate\Support\Facades\Log;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossOptimizado;
+use App\ValueObjects\PeriodoFiscal;
+use Illuminate\Console\Command;
 
 class SicossDebugCommand extends Command
 {
@@ -21,10 +20,10 @@ class SicossDebugCommand extends Command
 
     public function handle()
     {
-        $legajo = (int) $this->argument('legajo');
+        $legajo = (int)$this->argument('legajo');
         $periodo = $this->option('periodo') ?? date('Y-m');
         $connection = $this->option('connection') ?? 'pgsql-prod';
-        $check_retro = (int) $this->option('retro');
+        $check_retro = (int)$this->option('retro');
         $codc_reparto = $this->option('codc_reparto');
 
         // Configurar conexión
@@ -36,8 +35,8 @@ class SicossDebugCommand extends Command
         // Configurar período
         [$anio_input, $mes_input] = explode('-', $periodo);
 
-        $this->info("🚀 Probando SicossOptimizado::genera_sicoss directamente");
-        $this->info("📋 Configuración:");
+        $this->info('🚀 Probando SicossOptimizado::genera_sicoss directamente');
+        $this->info('📋 Configuración:');
         $this->table(
             ['Parámetro', 'Valor'],
             [
@@ -46,7 +45,7 @@ class SicossDebugCommand extends Command
                 ['Conexión', $connection],
                 ['Check retro', $check_retro],
                 ['Código reparto', $codc_reparto],
-            ]
+            ],
         );
 
         try {
@@ -64,7 +63,7 @@ class SicossDebugCommand extends Command
             $periodo_fiscal = new PeriodoFiscal($periodo_corriente['year'], $periodo_corriente['month']);
 
             $this->info("\n🔄 Llamando a SicossOptimizado::genera_sicoss...");
-            $this->info("📊 Datos de entrada:");
+            $this->info('📊 Datos de entrada:');
             foreach ($datos as $key => $value) {
                 $this->line("   - {$key}: {$value}");
             }
@@ -79,23 +78,22 @@ class SicossDebugCommand extends Command
                 testeo_prefijo_archivos: '',
                 retornar_datos: true,
                 guardar_en_bd: true,
-                periodo_fiscal: $periodo_fiscal
+                periodo_fiscal: $periodo_fiscal,
             );
 
             $tiempo_total = microtime(true) - $inicio;
 
-            $this->info("✅ Método ejecutado exitosamente");
-            $this->info("⏱️ Tiempo de ejecución: " . number_format($tiempo_total, 2) . " segundos");
+            $this->info('✅ Método ejecutado exitosamente');
+            $this->info('⏱️ Tiempo de ejecución: ' . number_format($tiempo_total, 2) . ' segundos');
 
             // Mostrar resultados
             $this->mostrarResultados($resultado);
 
             return 0;
-
         } catch (\Exception $e) {
             $this->error("\n❌ Error al ejecutar genera_sicoss:");
-            $this->error("Mensaje: " . $e->getMessage());
-            $this->error("Archivo: " . $e->getFile() . ":" . $e->getLine());
+            $this->error('Mensaje: ' . $e->getMessage());
+            $this->error('Archivo: ' . $e->getFile() . ':' . $e->getLine());
             $this->error("\nStack trace:");
             $this->line($e->getTraceAsString());
 
@@ -107,13 +105,13 @@ class SicossDebugCommand extends Command
     {
         $this->info("\n📊 Resultados de genera_sicoss:");
 
-        if (is_array($resultado)) {
-            $this->info("✅ Tipo: Array");
-            $this->info("📋 Contenido:");
+        if (\is_array($resultado)) {
+            $this->info('✅ Tipo: Array');
+            $this->info('📋 Contenido:');
 
             if (isset($resultado['legajos_procesados'])) {
                 $legajos = $resultado['legajos_procesados'];
-                $this->info("   - Legajos procesados: " . count($legajos));
+                $this->info('   - Legajos procesados: ' . \count($legajos));
 
                 if (!empty($legajos)) {
                     $legajo = $legajos[0];
@@ -128,23 +126,23 @@ class SicossDebugCommand extends Command
                             ['Días trabajados', $legajo['dias_trabajados'] ?? 'N/A'],
                             ['Importe Bruto', number_format($legajo['IMPORTE_BRUTO'] ?? 0, 2)],
                             ['Importe Imponible', number_format($legajo['IMPORTE_IMPON'] ?? 0, 2)],
-                        ]
+                        ],
                     );
                 }
             } else {
                 // Si no tiene la estructura esperada, mostrar las claves principales
-                $this->info("   - Claves encontradas: " . implode(', ', array_keys($resultado)));
+                $this->info('   - Claves encontradas: ' . implode(', ', array_keys($resultado)));
 
                 // Mostrar primeros elementos si es un array de legajos directo
-                if (isset($resultado[0]) && is_array($resultado[0])) {
-                    $this->info("   - Total elementos: " . count($resultado));
+                if (isset($resultado[0]) && \is_array($resultado[0])) {
+                    $this->info('   - Total elementos: ' . \count($resultado));
                     $primer_elemento = $resultado[0];
-                    $this->info("   - Claves del primer elemento: " . implode(', ', array_keys($primer_elemento)));
+                    $this->info('   - Claves del primer elemento: ' . implode(', ', array_keys($primer_elemento)));
                 }
             }
         } else {
-            $this->info("✅ Tipo: " . gettype($resultado));
-            $this->info("📋 Valor: " . print_r($resultado, true));
+            $this->info('✅ Tipo: ' . \gettype($resultado));
+            $this->info('📋 Valor: ' . print_r($resultado, true));
         }
     }
 }

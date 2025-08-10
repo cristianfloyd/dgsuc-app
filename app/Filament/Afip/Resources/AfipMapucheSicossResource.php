@@ -2,46 +2,44 @@
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\Mapuche\Dh22;
-use Filament\Actions\Action;
-use Filament\Resources\Resource;
-use App\Models\AfipMapucheSicoss;
-use Illuminate\Support\Collection;
-use Illuminate\Container\Container;
-use App\Services\SicossExportService;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Facades\Storage;
-use Filament\Tables\Actions\ActionGroup;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
+use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
+use App\Models\AfipMapucheSicoss;
+use App\Models\Mapuche\Dh22;
+use App\Services\Afip\SicossEmbarazadasService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Mapuche\TableSelectorService;
-use Symfony\Component\HttpFoundation\Response;
-use App\Services\Afip\SicossEmbarazadasService;
-use Filament\Tables\Actions\Action as TableAction;
+use App\Services\SicossExportService;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
-use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
-
+use Filament\Actions\Action;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class AfipMapucheSicossResource extends Resource
 {
     use FilamentAfipMapucheSicossTableTrait;
 
     protected static ?string $model = AfipMapucheSicoss::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
+
     protected static ?string $navigationGroup = 'AFIP';
+
     protected static ?string $navigationLabel = 'Mapuche SICOSS';
+
     protected static ?string $pluralLabel = 'Mapuche SICOSS';
+
     protected static ?int $navigationSort = 0;
-
-
-
-
 
     public static function table(Table $table): Table
     {
@@ -53,8 +51,7 @@ class AfipMapucheSicossResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 TextColumn::make('dh01.nro_legaj')
-                    ->label('Legajo')
-                    ,
+                    ->label('Legajo'),
                 TextColumn::make('cuil')
                     ->label('CUIL')
                     ->searchable()
@@ -62,11 +59,11 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->formatStateUsing(fn(string $state): string => strtoupper($state))
+                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cod_act')
-                        ->label('Cod. Act.')
-                        ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Cod. Act.')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('cod_cond')
                     ->label('Condición')
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -113,7 +110,7 @@ class AfipMapucheSicossResource extends Resource
                             ->pluck('periodo_fiscal', 'periodo_fiscal')
                             ->toArray();
                     })
-                    ->searchable()
+                    ->searchable(),
             ])
             ->headerActions([
                 ActionGroup::make([
@@ -124,7 +121,7 @@ class AfipMapucheSicossResource extends Resource
                         ->requiresConfirmation()
                         ->modalHeading('Actualizar Situación de Embarazadas')
                         ->modalDescription('¿Está seguro que desea actualizar la situación de revista de embarazadas para el período fiscal actual? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.')
-                        ->action(function (PeriodoFiscalService $periodoFiscalService, TableSelectorService $tableSelectorService) {
+                        ->action(function (PeriodoFiscalService $periodoFiscalService, TableSelectorService $tableSelectorService): void {
                             $sicossEmbarazadasService = new SicossEmbarazadasService($tableSelectorService, $periodoFiscalService);
 
                             $periodoFiscal = $periodoFiscalService->getPeriodoFiscal();
@@ -151,7 +148,7 @@ class AfipMapucheSicossResource extends Resource
                                 'year' => $year,
                                 'month' => $month,
                                 'liquidaciones' => $liquidaciones,
-                                'nro_liqui' => $liquidaciones[0]
+                                'nro_liqui' => $liquidaciones[0],
                             ]);
 
                             if ($resultado['status'] === 'success') {
@@ -194,12 +191,12 @@ class AfipMapucheSicossResource extends Resource
                         ->color('success'),
                     Action::make('exportarAvanzado')
                         ->label('Exportación Avanzada')
-                        ->url(fn(): string => self::getUrl('export'))
+                        ->url(fn (): string => self::getUrl('export'))
                         ->color('success')
                         ->icon('heroicon-o-adjustments-horizontal'),
                     Action::make('importar')
                         ->label('Importar')
-                        ->url(fn(): string => self::getUrl('import'))
+                        ->url(fn (): string => self::getUrl('import'))
                         ->color('success')
                         ->icon('heroicon-o-arrow-up-tray'),
                     PoblarAfipArtAction::make('poblar_art')
@@ -221,12 +218,12 @@ class AfipMapucheSicossResource extends Resource
                     Action::make('exportarFiltradosTxt')
                         ->label('Exportar Filtrados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
+                        ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
                         ->color('success'),
                     Action::make('exportarFiltradosExcel')
                         ->label('Exportar Filtrados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
+                        ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
                         ->color('success'),
                 ])
                     ->icon('heroicon-o-cog-8-tooth')
@@ -241,13 +238,13 @@ class AfipMapucheSicossResource extends Resource
                     Tables\Actions\BulkAction::make('exportarSeleccionadosTxt')
                         ->label('Exportar Seleccionados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'txt'))
+                        ->action(fn (Collection $records) => static::exportarRegistros($records, 'txt'))
                         ->color('success'),
                     Tables\Actions\BulkAction::make('exportarSeleccionadosExcel')
                         ->label('Exportar Seleccionados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'excel'))
-                        ->color('success')
+                        ->action(fn (Collection $records) => static::exportarRegistros($records, 'excel'))
+                        ->color('success'),
                 ]),
             ])
             ->defaultPaginationPageOption(5)
@@ -256,16 +253,16 @@ class AfipMapucheSicossResource extends Resource
             ->emptyStateActions([
                 TableAction::make('importar')
                     ->label('Importar')
-                    ->url(fn(): string => self::getUrl('import'))
+                    ->url(fn (): string => self::getUrl('import'))
                     ->color('success')
-                    ->icon('heroicon-o-arrow-up-tray')
+                    ->icon('heroicon-o-arrow-up-tray'),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -290,6 +287,148 @@ class AfipMapucheSicossResource extends Resource
     }
 
     /**
+     * Genera un archivo SICOSS con los datos de los registros proporcionados.
+     *
+     * Esta función toma una colección de registros y genera un archivo de texto con el formato
+     * requerido por el sistema SICOSS. El archivo se guarda en el directorio temporal y se
+     * devuelve la ruta completa del archivo generado.
+     *
+     * @param ?Collection $registros Una colección de registros a incluir en el archivo SICOSS.
+     *                               Si no se proporciona, se utilizarán todos los registros.
+     *
+     * @return string La ruta completa del archivo SICOSS generado.
+     */
+    public static function generarArchivoSicoss(?Collection $registros = null): string
+    {
+        $registros ??= static::getModel()::all();
+        $contenido = '';
+
+        // Función auxiliar para formatear decimales con 2 decimales
+        $formatearDecimal = function ($valor, $longitud) {
+            $valor ??= 0;
+            // Formatea el número con 2 decimales y punto como separador
+            $numeroFormateado = number_format($valor, 2, '.', '');
+            // Rellena con ceros a la izquierda hasta alcanzar la longitud deseada
+            return str_pad($numeroFormateado, $longitud, '0', \STR_PAD_LEFT);
+        };
+
+        // Nueva función para manejar strings con caracteres especiales
+        $formatearString = function ($valor, $longitud) {
+            $valor ??= '';
+            // Convertir a ISO-8859-1 (Latin1) para manejar acentos
+            $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
+            // Limitar la longitud considerando caracteres especiales
+            $valor = substr($valor, 0, $longitud);
+            // Rellenar con espacios hasta alcanzar la longitud exacta
+            return str_pad($valor, $longitud, ' ', \STR_PAD_RIGHT);
+        };
+
+        foreach ($registros as $registro) {
+            $linea = '';
+
+            // Datos de identificación personal
+            $linea .= str_pad($registro->cuil ?? '0', 11, '0', \STR_PAD_LEFT);
+            $linea .= $formatearString($registro->apnom, 30);
+
+            // Datos familiares
+            $linea .= $registro->conyuge ? '1' : '0';
+            $linea .= str_pad($registro->cant_hijos ?? '0', 2, '0', \STR_PAD_LEFT);
+
+            // Datos situación laboral
+            $linea .= str_pad($registro->cod_situacion ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_cond ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_act ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', \STR_PAD_LEFT);
+
+            // Datos aportes y obra social
+
+            $linea .= $formatearDecimal($registro->porc_aporte, 5);
+            $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_os ?? '0', 6, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cant_adh ?? '0', 2, '0', \STR_PAD_LEFT);
+
+            // Remuneraciones principales
+            $linea .= $formatearDecimal($registro->rem_total, 12);
+            $linea .= $formatearDecimal($registro->rem_impo1, 12);
+            $linea .= $formatearDecimal($registro->asig_fam_pag, 9);
+            $linea .= $formatearDecimal($registro->aporte_vol, 9);
+            $linea .= $formatearDecimal($registro->imp_adic_os, 9);
+            $linea .= $formatearDecimal($registro->exc_aport_ss, 9);
+            $linea .= $formatearDecimal($registro->exc_aport_os, 9);
+            $linea .= str_pad($registro->prov ?? 'CABA', 50, ' ', \STR_PAD_RIGHT);
+
+            // Remuneraciones adicionales
+            $linea .= $formatearDecimal($registro->rem_impo2, 12);
+            $linea .= $formatearDecimal($registro->rem_impo3, 12);
+            $linea .= $formatearDecimal($registro->rem_impo4, 12);
+
+            // Datos siniestros y tipo empresa
+            $linea .= str_pad($registro->cod_siniestrado ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= $registro->marca_reduccion ? '1' : '0';
+            $linea .= $formatearDecimal($registro->recomp_lrt, 9);
+            $linea .= $registro->tipo_empresa ?? '0';
+            $linea .= $formatearDecimal($registro->aporte_adic_os, 9);
+            $linea .= $registro->regimen ?? '0';
+
+            // Situaciones de revista
+            $linea .= str_pad($registro->sit_rev1 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev1 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->sit_rev2 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev2 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->sit_rev3 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev3 ?? '0', 2, '0', \STR_PAD_LEFT);
+
+            // Conceptos salariales
+            $linea .= $formatearDecimal($registro->sueldo_adicc, 12);
+            $linea .= $formatearDecimal($registro->sac, 12);
+            $linea .= $formatearDecimal($registro->horas_extras, 12);
+            $linea .= $formatearDecimal($registro->zona_desfav, 12);
+            $linea .= $formatearDecimal($registro->vacaciones, 12);
+
+            // Datos laborales
+            $linea .= str_pad($registro->cant_dias_trab ?? '0', 9, '0', \STR_PAD_LEFT);
+            $linea .= $formatearDecimal($registro->rem_impo5, 12);
+            $linea .= $registro->convencionado ? '1' : '0';
+            $linea .= $formatearDecimal($registro->rem_impo6, 12);
+            $linea .= $registro->tipo_oper ?? '0';
+
+            // Conceptos adicionales
+            $linea .= $formatearDecimal($registro->adicionales, 12);
+            $linea .= $formatearDecimal($registro->premios, 12);
+            $linea .= $formatearDecimal($registro->rem_dec_788, 12);
+            $linea .= $formatearDecimal($registro->rem_imp7, 12);
+            $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= $formatearDecimal($registro->cpto_no_remun, 12);
+
+            // Conceptos especiales
+            $linea .= $formatearDecimal($registro->maternidad, 12);
+            $linea .= $formatearDecimal($registro->rectificacion_remun, 9);
+            $linea .= $formatearDecimal($registro->rem_imp9, 12);
+            $linea .= $formatearDecimal($registro->contrib_dif, 9);
+
+            // Datos finales
+            $linea .= str_pad($registro->hstrab ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= $registro->seguro ? '1' : '0';
+            $linea .= $formatearDecimal($registro->ley, 12);
+            $linea .= $formatearDecimal($registro->incsalarial, 12);
+            $linea .= $formatearDecimal($registro->remimp11, 12);
+
+            // Asegurar que la línea tenga exactamente 500 caracteres
+            if (\strlen($linea) > 500) {
+                $linea = substr($linea, 0, 500);
+            } else {
+                $linea = str_pad($linea, 500, ' ', \STR_PAD_RIGHT);
+            }
+
+            $contenido .= $linea . \PHP_EOL;
+        }
+
+        $nombreArchivo = 'SICOSS_' . date('Ym') . '.txt';
+        Storage::disk('local')->put('tmp/' . $nombreArchivo, $contenido);
+        return storage_path('app/tmp/' . $nombreArchivo);
+    }
+
+    /**
      * Exporta los registros filtrados a un archivo.
      *
      * Esta función utiliza el query builder de Livewire para obtener los registros filtrados
@@ -297,6 +436,7 @@ class AfipMapucheSicossResource extends Resource
      *
      * @param $livewire El objeto Livewire que contiene el query builder filtrado.
      * @param string $formato El formato de exportación ('txt' o 'excel').
+     *
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistrosFiltrados($livewire, string $formato = 'txt'): Response
@@ -310,6 +450,7 @@ class AfipMapucheSicossResource extends Resource
      *
      * @param Collection $registros Los registros a exportar.
      * @param string $formato El formato de exportación ('txt' o 'excel').
+     *
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistros(Collection $registros, string $formato = 'txt'): Response
@@ -326,146 +467,5 @@ class AfipMapucheSicossResource extends Resource
         $path = $exportService->generarArchivo($registros, $formato, $periodoFiscal);
 
         return response()->download($path)->deleteFileAfterSend();
-    }
-
-    /**
-     * Genera un archivo SICOSS con los datos de los registros proporcionados.
-     *
-     * Esta función toma una colección de registros y genera un archivo de texto con el formato
-     * requerido por el sistema SICOSS. El archivo se guarda en el directorio temporal y se
-     * devuelve la ruta completa del archivo generado.
-     *
-     * @param ?Collection $registros Una colección de registros a incluir en el archivo SICOSS.
-     *                               Si no se proporciona, se utilizarán todos los registros.
-     * @return string La ruta completa del archivo SICOSS generado.
-     */
-    public static function generarArchivoSicoss(?Collection $registros = null): string
-    {
-        $registros ??= static::getModel()::all();
-        $contenido = '';
-
-        // Función auxiliar para formatear decimales con 2 decimales
-        $formatearDecimal = function ($valor, $longitud) {
-            $valor = $valor ?? 0;
-            // Formatea el número con 2 decimales y punto como separador
-            $numeroFormateado = number_format($valor, 2, '.', '');
-            // Rellena con ceros a la izquierda hasta alcanzar la longitud deseada
-            return str_pad($numeroFormateado, $longitud, '0', STR_PAD_LEFT);
-        };
-
-        // Nueva función para manejar strings con caracteres especiales
-        $formatearString = function ($valor, $longitud) {
-            $valor = $valor ?? '';
-            // Convertir a ISO-8859-1 (Latin1) para manejar acentos
-            $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
-            // Limitar la longitud considerando caracteres especiales
-            $valor = substr($valor, 0, $longitud);
-            // Rellenar con espacios hasta alcanzar la longitud exacta
-            return str_pad($valor, $longitud, ' ', STR_PAD_RIGHT);
-        };
-
-        foreach ($registros as $registro) {
-            $linea = '';
-
-            // Datos de identificación personal
-            $linea .= str_pad($registro->cuil ?? '0', 11, '0', STR_PAD_LEFT);
-            $linea .= $formatearString($registro->apnom, 30);;
-
-            // Datos familiares
-            $linea .= $registro->conyuge ? '1' : '0';
-            $linea .= str_pad($registro->cant_hijos ?? '0', 2, '0', STR_PAD_LEFT);
-
-            // Datos situación laboral
-            $linea .= str_pad($registro->cod_situacion ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_cond ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_act ?? '0', 3, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', STR_PAD_LEFT);
-
-            // Datos aportes y obra social
-
-            $linea .= $formatearDecimal($registro->porc_aporte, 5);
-            $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_os ?? '0', 6, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->cant_adh ?? '0', 2, '0', STR_PAD_LEFT);
-
-            // Remuneraciones principales
-            $linea .= $formatearDecimal($registro->rem_total, 12);
-            $linea .= $formatearDecimal($registro->rem_impo1, 12);
-            $linea .= $formatearDecimal($registro->asig_fam_pag, 9);
-            $linea .= $formatearDecimal($registro->aporte_vol, 9);
-            $linea .= $formatearDecimal($registro->imp_adic_os, 9);
-            $linea .= $formatearDecimal($registro->exc_aport_ss, 9);
-            $linea .= $formatearDecimal($registro->exc_aport_os, 9);
-            $linea .= str_pad($registro->prov ?? 'CABA', 50, ' ', STR_PAD_RIGHT);
-
-            // Remuneraciones adicionales
-            $linea .= $formatearDecimal($registro->rem_impo2, 12);
-            $linea .= $formatearDecimal($registro->rem_impo3, 12);
-            $linea .= $formatearDecimal($registro->rem_impo4, 12);
-
-            // Datos siniestros y tipo empresa
-            $linea .= str_pad($registro->cod_siniestrado ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= $registro->marca_reduccion ? '1' : '0';
-            $linea .= $formatearDecimal($registro->recomp_lrt, 9);
-            $linea .= $registro->tipo_empresa ?? '0';
-            $linea .= $formatearDecimal($registro->aporte_adic_os, 9);
-            $linea .= $registro->regimen ?? '0';
-
-            // Situaciones de revista
-            $linea .= str_pad($registro->sit_rev1 ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev1 ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->sit_rev2 ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev2 ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->sit_rev3 ?? '0', 2, '0', STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev3 ?? '0', 2, '0', STR_PAD_LEFT);
-
-            // Conceptos salariales
-            $linea .= $formatearDecimal($registro->sueldo_adicc, 12);
-            $linea .= $formatearDecimal($registro->sac, 12);
-            $linea .= $formatearDecimal($registro->horas_extras, 12);
-            $linea .= $formatearDecimal($registro->zona_desfav, 12);
-            $linea .= $formatearDecimal($registro->vacaciones, 12);
-
-            // Datos laborales
-            $linea .= str_pad($registro->cant_dias_trab ?? '0', 9, '0', STR_PAD_LEFT);
-            $linea .= $formatearDecimal($registro->rem_impo5, 12);
-            $linea .= $registro->convencionado ? '1' : '0';
-            $linea .= $formatearDecimal($registro->rem_impo6, 12);
-            $linea .= $registro->tipo_oper ?? '0';
-
-            // Conceptos adicionales
-            $linea .= $formatearDecimal($registro->adicionales, 12);
-            $linea .= $formatearDecimal($registro->premios, 12);
-            $linea .= $formatearDecimal($registro->rem_dec_788, 12);
-            $linea .= $formatearDecimal($registro->rem_imp7, 12);
-            $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', STR_PAD_LEFT);
-            $linea .= $formatearDecimal($registro->cpto_no_remun, 12);
-
-            // Conceptos especiales
-            $linea .= $formatearDecimal($registro->maternidad, 12);
-            $linea .= $formatearDecimal($registro->rectificacion_remun, 9);
-            $linea .= $formatearDecimal($registro->rem_imp9, 12);
-            $linea .= $formatearDecimal($registro->contrib_dif, 9);
-
-            // Datos finales
-            $linea .= str_pad($registro->hstrab ?? '0', 3, '0', STR_PAD_LEFT);
-            $linea .= $registro->seguro ? '1' : '0';
-            $linea .= $formatearDecimal($registro->ley, 12);
-            $linea .= $formatearDecimal($registro->incsalarial, 12);
-            $linea .= $formatearDecimal($registro->remimp11, 12);
-
-            // Asegurar que la línea tenga exactamente 500 caracteres
-            if (strlen($linea) > 500) {
-                $linea = substr($linea, 0, 500);
-            } else {
-                $linea = str_pad($linea, 500, ' ', STR_PAD_RIGHT);
-            }
-
-            $contenido .= $linea . PHP_EOL;
-        }
-
-        $nombreArchivo = 'SICOSS_' . date('Ym') . '.txt';
-        Storage::disk('local')->put('tmp/' . $nombreArchivo, $contenido);
-        return storage_path('app/tmp/' . $nombreArchivo);
     }
 }

@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Collection;
 class CuilCompareService
 {
     protected $cuilRepository;
+
     public function __construct(CuilRepositoryInterface $cuilRepository)
     {
         $this->cuilRepository = $cuilRepository;
     }
 
-
     /**
      * Compara los CUILs y devuelve los que no se encuentran en AFIP.
      *
      * @param int $perPage Número de resultados a devolver por página.
+     *
      * @return Collection Una colección de los CUILs que no se encuentran en AFIP.
      */
     public function compareCuils($perPage = 10): Collection

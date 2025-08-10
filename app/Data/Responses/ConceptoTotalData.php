@@ -2,31 +2,28 @@
 
 namespace App\Data\Responses;
 
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\MapName;
-use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 class ConceptoTotalData extends Data
 {
     public function __construct(
         #[MapName('id_liquidacion')]
         public readonly int $idLiquidacion,
-        
         #[MapName('codn_conce')]
         public readonly int $codigoConcepto,
-        
         #[MapName('total_impp')]
         public readonly float $importeTotal,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia de ConceptoTotalData desde un array de datos.
      *
      * @param array $data
-     * @return static
+     * @return self
      */
-    public static function fromArray(array $data): static
+    public static function fromArray(array $data): self
     {
         return new self(
             idLiquidacion: $data['id_liquidacion'],
@@ -35,10 +32,9 @@ class ConceptoTotalData extends Data
         );
     }
 
+
     /**
      * Convierte el DTO a un array para exportación.
-     *
-     * @return array
      */
     public function toExportArray(): array
     {
@@ -48,4 +44,4 @@ class ConceptoTotalData extends Data
             'Importe Total' => number_format($this->importeTotal, 2, ',', '.'),
         ];
     }
-} 
+}

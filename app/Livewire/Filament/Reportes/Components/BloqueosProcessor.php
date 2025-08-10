@@ -2,46 +2,45 @@
 
 namespace App\Livewire\Filament\Reportes\Components;
 
-use Livewire\Component;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Filament\Notifications\Notification;
 use App\Models\Reportes\BloqueosDataModel;
-use App\Data\Reportes\BloqueoProcesadoData;
 use App\Services\Reportes\BloqueosProcessService;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class BloqueosProcessor extends Component
 {
     /**
-     * Registro individual a procesar
+     * Registro individual a procesar.
      */
     public ?BloqueosDataModel $registro = null;
 
     /**
-     * Colección de registros para procesamiento masivo
+     * Colección de registros para procesamiento masivo.
      */
     public ?Collection $registros = null;
 
     /**
-     * Almacena los resultados del procesamiento
+     * Almacena los resultados del procesamiento.
      */
     public ?Collection $resultados = null;
 
     /**
-     * Indicador de procesamiento en curso
+     * Indicador de procesamiento en curso.
      */
     public bool $isProcessing = false;
 
-
-    public function mount(BloqueosDataModel $registro = null, Collection $records = null): void
+    public function mount(?BloqueosDataModel $registro = null, ?Collection $records = null): void
     {
         $this->registro = $registro;
         $this->registros = $records;
     }
 
     /**
-     * Inicia el procesamiento de bloqueos
+     * Inicia el procesamiento de bloqueos.
+     *
      * @return void
      */
     public function procesarBloqueos(): void
@@ -59,8 +58,8 @@ class BloqueosProcessor extends Component
             } elseif ($this->registros instanceof Collection) {
                 // Procesamiento masivo de registros seleccionados
                 $this->resultados = $this->registros
-                    ->filter(fn(  $reg) => $reg instanceof BloqueosDataModel)
-                    ->map(fn(  $registro) => $service->procesarRegistro($registro));
+                    ->filter(fn ($reg) => $reg instanceof BloqueosDataModel)
+                    ->map(fn ($registro) => $service->procesarRegistro($registro));
             } else {
                 // Procesamiento de todos los registros pendientes
                 $this->resultados = $service->procesarBloqueos();
@@ -69,7 +68,6 @@ class BloqueosProcessor extends Component
 
             $this->guardarResultadosEnCache();
             $this->notificarResultados();
-
         } catch (\Exception $e) {
             $this->manejarError($e);
         } finally {
@@ -78,7 +76,8 @@ class BloqueosProcessor extends Component
     }
 
     /**
-     * Obtiene los resultados del cache o procesa nuevamente
+     * Obtiene los resultados del cache o procesa nuevamente.
+     *
      * @return Collection
      */
     public function getResultados(): Collection
@@ -86,14 +85,13 @@ class BloqueosProcessor extends Component
         return Cache::remember(
             $this->getCacheKey(),
             now()->addHour(),
-            fn() => $this->resultados ?? collect()
+            fn () => $this->resultados ?? collect(),
         );
     }
 
-
-
     /**
-     * Genera estadísticas del procesamiento
+     * Genera estadísticas del procesamiento.
+     *
      * @return array
      */
     public function getEstadisticas(): array
@@ -105,8 +103,16 @@ class BloqueosProcessor extends Component
             'exitosos' => $resultados->where('success', true)->count(),
             'fallidos' => $resultados->where('success', false)->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn($grupo) => $grupo->count())
+                ->map(fn ($grupo) => $grupo->count()),
         ];
+    }
+
+    public function render()
+    {
+        Log::info('BloqueosProcessor render');
+        return view('livewire.filament.reportes.components.bloqueos-processor', [
+            'estadisticas' => $this->getEstadisticas(),
+        ]);
     }
 
     private function guardarResultadosEnCache(): void
@@ -114,7 +120,7 @@ class BloqueosProcessor extends Component
         Cache::put(
             $this->getCacheKey(),
             $this->resultados,
-            now()->addHour()
+            now()->addHour(),
         );
     }
 
@@ -141,13 +147,5 @@ class BloqueosProcessor extends Component
             ->body($e->getMessage())
             ->danger()
             ->send();
-    }
-
-    public function render()
-    {
-        Log::info('BloqueosProcessor render');
-        return view('livewire.filament.reportes.components.bloqueos-processor', [
-            'estadisticas' => $this->getEstadisticas()
-        ]);
     }
 }

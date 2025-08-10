@@ -2,14 +2,14 @@
 
 namespace App\Filament\Liquidaciones\Resources\Dh21Resource\Pages;
 
-use Filament\Actions;
-use Livewire\Livewire;
-use Filament\Actions\Action;
-use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Resources\Pages\ListRecords;
-use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Filament\Liquidaciones\Resources\Dh21Resource;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
+use App\Filament\Widgets\IdLiquiSelector;
+use App\Livewire\Reportes\OrdenPagoReporte;
+use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ListRecords;
+use Livewire\Livewire;
 
 class ListDh21s extends ListRecords
 {
@@ -18,23 +18,23 @@ class ListDh21s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-                // Actions\CreateAction::make(),
-                Action::make('conceptos-totales')
+            // Actions\CreateAction::make(),
+            Action::make('conceptos-totales')
                 ->label('Ver Conceptos Totales')
                 ->url(static::getResource()::getUrl('conceptos-totales')),
-                Action::make('abrirModal')
-                    ->label('Orden de Pago')
-                    ->icon('heroicon-o-plus')
-                    ->modalContent(function () {
-                        return view('modals.orden-pago-reporte', ['liquidacionId' => 1]);
-                    })
-                    ->modalFooterActions([
-                        Action::make('descargarPDF')
+            Action::make('abrirModal')
+                ->label('Orden de Pago')
+                ->icon('heroicon-o-plus')
+                ->modalContent(function () {
+                    return view('modals.orden-pago-reporte', ['liquidacionId' => 1]);
+                })
+                ->modalFooterActions([
+                    Action::make('descargarPDF')
                         ->label('Descargar PDF')
-                        ->action(fn() => static::descargarReportePDF(1))
-                    ])
-                    ->modalDescription('Orden de pago') // Contenido vacío
-                    ->modalWidth('7xl'), // Ancho del modal
+                        ->action(fn () => static::descargarReportePDF(1)),
+                ])
+                ->modalDescription('Orden de pago') // Contenido vacío
+                ->modalWidth('7xl'), // Ancho del modal
         ];
     }
 
@@ -52,5 +52,4 @@ class ListDh21s extends ListRecords
         $component = Livewire::test(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
         return $component->call('descargarPDF');
     }
-    
 }

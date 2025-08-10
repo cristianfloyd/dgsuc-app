@@ -30,33 +30,11 @@ class Dh05 extends Model
         'nrovarlicencia', 'observacion', 'tipo_norma_alta', 'emite_norma_alta', 'fecha_norma_alta',
         'nro_norma_alta', 'tipo_norma_baja', 'emite_norma_baja', 'fecha_norma_baja', 'nro_norma_baja',
         'mes_actualizacion', 'anio_actualizacion', 'trab_sab', 'trab_dom', 'presentismo',
-        'codmotivolic', 'trab_fer'
-    ];
-
-    // Especificar los tipos de datos para los campos
-    protected $casts = [
-        'nro_licencia' => 'integer',
-        'nro_legaj' => 'integer',
-        'nro_cargo' => 'integer',
-        'fec_desde' => 'date',
-        'fec_hasta' => 'date',
-        'fecha_finalorig' => 'date',
-        'nrovarlicencia' => 'integer',
-        'fecha_norma_alta' => 'date',
-        'nro_norma_alta' => 'integer',
-        'fecha_norma_baja' => 'date',
-        'nro_norma_baja' => 'integer',
-        'mes_actualizacion' => 'integer',
-        'anio_actualizacion' => 'integer',
-        'trab_sab' => 'integer',
-        'trab_dom' => 'integer',
-        'presentismo' => 'integer',
-        'codmotivolic' => 'integer',
-        'trab_fer' => 'integer',
+        'codmotivolic', 'trab_fer',
     ];
 
     /**
-     * Relación con el modelo Dh01
+     * Relación con el modelo Dh01.
      */
     public function dh01(): BelongsTo
     {
@@ -64,7 +42,7 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dh03
+     * Relación con el modelo Dh03.
      */
     public function dh03(): BelongsTo
     {
@@ -72,7 +50,7 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dl09 (tipo_norma_alta)
+     * Relación con el modelo Dl09 (tipo_norma_alta).
      */
     public function dl09(): BelongsTo
     {
@@ -80,10 +58,34 @@ class Dh05 extends Model
     }
 
     /**
-     * Relación con el modelo Dl10 (emite_norma_alta)
+     * Relación con el modelo Dl10 (emite_norma_alta).
      */
     public function dl10(): BelongsTo
     {
         return $this->belongsTo(Dl10::class, 'emite_norma_alta', 'quien_emite_norma');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_licencia' => 'integer',
+            'nro_legaj' => 'integer',
+            'nro_cargo' => 'integer',
+            'fec_desde' => 'date',
+            'fec_hasta' => 'date',
+            'fecha_finalorig' => 'date',
+            'nrovarlicencia' => 'integer',
+            'fecha_norma_alta' => 'date',
+            'nro_norma_alta' => 'integer',
+            'fecha_norma_baja' => 'date',
+            'nro_norma_baja' => 'integer',
+            'mes_actualizacion' => 'integer',
+            'anio_actualizacion' => 'integer',
+            'trab_sab' => 'integer',
+            'trab_dom' => 'integer',
+            'presentismo' => 'integer',
+            'codmotivolic' => 'integer',
+            'trab_fer' => 'integer',
+        ];
     }
 }

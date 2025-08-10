@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 class RefreshFallecidosData extends Command
 {
     protected $signature = 'fallecidos:refresh';
+
     protected $description = 'Actualiza los datos de la tabla rep_fallecidos desde Mapuche';
 
     public function handle(FallecidoService $service): int

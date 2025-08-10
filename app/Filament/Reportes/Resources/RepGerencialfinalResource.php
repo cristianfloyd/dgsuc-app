@@ -2,50 +2,38 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\DB;
-use Filament\Tables\Filters\Filter;
+use App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
-use App\Models\Mapuche\Catalogo\Dhe4;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use App\Models\Reportes\RepGerencialFinal;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Reportes\Resources\RepGerencialfinalResource\Pages;
-use App\Filament\Reportes\Resources\RepGerencialfinalResource\RelationManagers;
+use App\Traits\MapucheConnectionTrait;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class RepGerencialFinalResource extends Resource
 {
     use MapucheConnectionTrait;
-    private static $connectionInstance = null;
+
     protected static ?string $model = RepGerencialFinal::class;
+
     protected static ?string $label = 'Reporte Gerencial';
+
     protected static ?string $pluralLabel = 'Reporte Gerencial';
+
     protected static ?string $navigationGroup = 'Informes';
+
     protected static ?string $navigationLabel = 'Reporte Gerencial';
+
     protected static ?int $navigationSort = 1;
 
-
-    protected static function getMapucheConnection()
-    {
-        if (self::$connectionInstance === null) {
-            $model = new static;
-            self::$connectionInstance = $model->getConnectionFromTrait();
-        }
-        return self::$connectionInstance;
-    }
-
-
-
+    private static $connectionInstance;
 
     public static function table(Table $table): Table
     {
@@ -89,23 +77,24 @@ class RepGerencialFinalResource extends Resource
                     ->optionsLimit(50)
                     ->getSearchResultsUsing(
                         fn (string $search): array => Dh36::query()
-                                    ->select('coddependesemp', 'descdependesemp')
-                                    ->where('descdependesemp', 'like', "%{$search}%")
-                                    ->orderBy('descdependesemp')
-                                    ->limit(50)
-                                    ->pluck('descdependesemp', 'coddependesemp')
-                                    ->toArray()
+                            ->select('coddependesemp', 'descdependesemp')
+                            ->where('descdependesemp', 'like', "%{$search}%")
+                            ->orderBy('descdependesemp')
+                            ->limit(50)
+                            ->pluck('descdependesemp', 'coddependesemp')
+                            ->toArray(),
                     )
                     ->getOptionLabelUsing(fn ($value): ?string => Dh36::find($value)?->descdependesemp),
 
                 SelectFilter::make('codc_uacad')
                     ->label('Unidad Académica')
-                    ->options(fn() => Dh30::query()
-                        ->where('nro_tabla', 13)
-                        ->select('desc_abrev', 'desc_item')
-                        ->orderBy('desc_item')
-                        ->pluck('desc_item', 'desc_abrev')
-                        ->toArray()
+                    ->options(
+                        fn () => Dh30::query()
+                            ->where('nro_tabla', 13)
+                            ->select('desc_abrev', 'desc_item')
+                            ->orderBy('desc_item')
+                            ->pluck('desc_item', 'desc_abrev')
+                            ->toArray(),
                     )
                     ->searchable()
                     ->preload(),
@@ -126,7 +115,7 @@ class RepGerencialFinalResource extends Resource
                     ->options([
                         'S' => 'Simple',
                         'D' => 'Docente',
-                        'N' => 'Nodocente'
+                        'N' => 'Nodocente',
                     ]),
 
 
@@ -134,13 +123,14 @@ class RepGerencialFinalResource extends Resource
                     ->form([
                         TextInput::make('legajo')
                             ->numeric()
-                            ->label('Número de Legajo')
+                            ->label('Número de Legajo'),
                     ])
-                    ->query(fn (Builder $query, array $data): Builder =>
+                    ->query(
+                        fn (Builder $query, array $data): Builder =>
                         $query->when(
                             isset($data['legajo']) && $data['legajo'],
-                            fn (Builder $query, $value): Builder => $query->where('nro_legaj', $data['legajo'])
-                        )
+                            fn (Builder $query, $value): Builder => $query->where('nro_legaj', $data['legajo']),
+                        ),
                     ),
 
                 Filter::make('en_banco')
@@ -153,7 +143,7 @@ class RepGerencialFinalResource extends Resource
                     ->label('Liquidación')
                     ->multiple()
                     ->preload()
-                    ->options(fn() => DB::connection(self::getMapucheConnection()->getName())
+                    ->options(fn () => DB::connection(self::getMapucheConnection()->getName())
                         ->table('mapuche.dh22')
                         ->orderBy('nro_liqui', 'desc')
                         ->pluck('desc_liqui', 'nro_liqui')
@@ -161,7 +151,7 @@ class RepGerencialFinalResource extends Resource
             ])
             ->filtersFormColumns(3)
             ->actions([
-                //
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -173,7 +163,7 @@ class RepGerencialFinalResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -182,5 +172,14 @@ class RepGerencialFinalResource extends Resource
         return [
             'index' => Pages\ListRepGerencialfinal::route('/'),
         ];
+    }
+
+    protected static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new static();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+        return self::$connectionInstance;
     }
 }

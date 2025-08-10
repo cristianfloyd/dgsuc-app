@@ -2,25 +2,26 @@
 
 namespace App\Repositories;
 
-use App\Traits\MapucheConnectionTrait;
 use App\Contracts\Dh01RepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
 
 class Dh01Repository implements Dh01RepositoryInterface
 {
     use MapucheConnectionTrait;
 
     /**
-     * Obtiene SQL parametrizado para consultar legajos con sus datos relacionados
+     * Obtiene SQL parametrizado para consultar legajos con sus datos relacionados.
      *
      * @param string $tabla Tabla base para la consulta (conceptos_liquidados o mapuche.dh01)
      * @param int $valor Valor para el campo licencia
      * @param string $where Condición WHERE adicional
      * @param string $codc_reparto Código de reparto para la condición de régimen
+     *
      * @return string SQL query string
      */
     public function getSqlLegajos(string $tabla, int $valor, string $where = 'true', string $codc_reparto = ''): string
     {
-        $vacio = "";
+        $vacio = '';
         $sql = "
                 SELECT
                         DISTINCT(dh01.nro_legaj),
@@ -63,7 +64,7 @@ class Dh01Repository implements Dh01RepositoryInterface
                         LEFT OUTER JOIN mapuche.dhe9 ON dhe9.nro_legaj = {$tabla}.nro_legaj ";
 
         // Si la tabla es dh01 no necesito el join con la misma tabla
-        if ($tabla != "mapuche.dh01") {
+        if ($tabla != 'mapuche.dh01') {
             $sql .= " LEFT OUTER JOIN mapuche.dh01 ON {$tabla}.nro_legaj = dh01.nro_legaj ";
         }
 

@@ -2,31 +2,30 @@
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\AfipMapucheArt;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AfipMapucheArtExport;
-use Filament\Resources\Components\Tab;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Actions\PoblarAfipArtAction;
 use App\Filament\Afip\Resources\AfipMapucheArtResource\Pages;
+use App\Models\AfipMapucheArt;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AfipMapucheArtResource extends Resource
 {
     protected static ?string $model = AfipMapucheArt::class;
-    protected static ?string $modelLabel = 'Afip Art';
-    protected static ?string $pluralModelLabel = 'Afip Art';
-    protected static ?string $navigationGroup = 'AFIP';
-    protected static ?int $navigationSort = 4;
 
+    protected static ?string $modelLabel = 'Afip Art';
+
+    protected static ?string $pluralModelLabel = 'Afip Art';
+
+    protected static ?string $navigationGroup = 'AFIP';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -49,9 +48,9 @@ class AfipMapucheArtResource extends Resource
                 TextColumn::make('apellido_y_nombre')
                     ->label('Apellido y Nombre')
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where(function($query) use ($search) {
+                        return $query->where(function ($query) use ($search): void {
                             $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
-                                  ->orWhere('cuil', 'ilike', '%' . $search . '%');
+                                ->orWhere('cuil', 'ilike', '%' . $search . '%');
                         });
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),
@@ -80,7 +79,7 @@ class AfipMapucheArtResource extends Resource
                         return $query
                             ->when(
                                 $data['monto'],
-                                fn(Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
+                                fn (Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
                             );
                     }),
             ])
@@ -91,14 +90,10 @@ class AfipMapucheArtResource extends Resource
                 ]),
             ])
             ->headerActions([
-                //
+
             ])
             ->defaultPaginationPageOption(5);
     }
-
-
-
-
 
     public static function getActions(): array
     {

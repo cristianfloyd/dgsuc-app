@@ -29,49 +29,49 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
     use InteractsWithActions;
 
     /**
-     * Array de datos del formulario
+     * Array de datos del formulario.
      *
      * @var array<string, mixed>|null
      */
     public ?array $data = [];
 
     /**
-     * ID del trabajo de copia actual
+     * ID del trabajo de copia actual.
      *
      * @var int|null
      */
     public ?int $copyJobId = null;
 
     /**
-     * Instancia de seguimiento del trabajo de copia
+     * Instancia de seguimiento del trabajo de copia.
      *
      * @var CopyJob|null
      */
     public ?CopyJob $tracking = null;
 
     /**
-     * Icono de navegación para la página
+     * Icono de navegación para la página.
      *
      * @var string|null
      */
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
 
     /**
-     * Título de la página
+     * Título de la página.
      *
      * @var string|null
      */
     protected static ?string $title = 'Copia Masiva DH21';
 
     /**
-     * Plantilla de vista para la página
+     * Plantilla de vista para la página.
      *
      * @var string
      */
     protected static string $view = 'filament.procesos-panel.pages.copia-masiva-dh21';
 
     /**
-     * Inicializa el componente de página
+     * Inicializa el componente de página.
      *
      * @return void
      */
@@ -81,9 +81,10 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
     }
 
     /**
-     * Configura el esquema del formulario
+     * Configura el esquema del formulario.
      *
-     * @param  Form $form La instancia del formulario
+     * @param Form $form La instancia del formulario
+     *
      * @return Form $form Formulario Configurado
      */
     public function form(Form $form): Form
@@ -101,55 +102,25 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                                 ->get(['nro_liqui', 'desc_liqui'])
                                 ->mapWithKeys(
                                     fn ($liq) => [
-                                        $liq->nro_liqui => "{$liq->nro_liqui} - {$liq->desc_liqui}"
-                                    ]
-                                )
+                                        $liq->nro_liqui => "{$liq->nro_liqui} - {$liq->desc_liqui}",
+                                    ],
+                                ),
                         )
                         ->required()
                         ->searchable()
                         ->disabled(
-                            $this->tracking && in_array(
+                            $this->tracking && \in_array(
                                 $this->tracking->status,
-                                ['running', 'pending']
-                            )
+                                ['running', 'pending'],
+                            ),
                         ),
-                ]
+                ],
             )
             ->statePath('data');
     }
 
     /**
-     * Obtiene las acciones del formulario
-     *
-     * @return array<Action> Array de acciones del formulario
-     */
-    protected function getFormActions(): array
-    {
-        return [
-            Action::make('startCopy')
-                ->label('Iniciar Copia Masiva')
-                ->color('primary')
-                ->disabled(
-                    $this->tracking && in_array(
-                        $this->tracking->status,
-                        ['running', 'pending']
-                    )
-                )
-                ->requiresConfirmation()
-                ->modalHeading('Confirmar Copia Masiva')
-                ->modalDescription(
-                    '¿Estás seguro de que quieres iniciar la copia masiva de la liquidación seleccionada?'
-                )
-                ->action(
-                    function (): void {
-                        $this->startCopy();
-                    }
-                ),
-        ];
-    }
-
-    /**
-     * Inicia el proceso de copia masiva
+     * Inicia el proceso de copia masiva.
      *
      * Crea un nuevo trabajo de copia y despacha el trabajo en segundo plano para realizar
      * la copia masiva de registros DH21 desde la liquidación seleccionada.
@@ -169,7 +140,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                 'total_records' => 0,
                 'copied_records' => 0,
                 'status' => 'pending',
-            ]
+            ],
         );
         $copyJob->save();
 
@@ -178,7 +149,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
 
         CopyDh21ToConsultaJob::dispatch(
             $copyJob->getKey(),
-            $data['nro_liqui']
+            $data['nro_liqui'],
         );
 
         Notification::make()
@@ -189,7 +160,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
     }
 
     /**
-     * Sondea las actualizaciones de seguimiento
+     * Sondea las actualizaciones de seguimiento.
      *
      * Refresca la información de seguimiento para el trabajo de copia actual
      * para mostrar actualizaciones de progreso en tiempo real al usuario.
@@ -202,5 +173,35 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
         if ($this->copyJobId) {
             $this->tracking = CopyJob::find($this->copyJobId);
         }
+    }
+
+    /**
+     * Obtiene las acciones del formulario.
+     *
+     * @return array<Action> Array de acciones del formulario
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('startCopy')
+                ->label('Iniciar Copia Masiva')
+                ->color('primary')
+                ->disabled(
+                    $this->tracking && \in_array(
+                        $this->tracking->status,
+                        ['running', 'pending'],
+                    ),
+                )
+                ->requiresConfirmation()
+                ->modalHeading('Confirmar Copia Masiva')
+                ->modalDescription(
+                    '¿Estás seguro de que quieres iniciar la copia masiva de la liquidación seleccionada?',
+                )
+                ->action(
+                    function (): void {
+                        $this->startCopy();
+                    },
+                ),
+        ];
     }
 }

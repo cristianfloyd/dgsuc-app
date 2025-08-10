@@ -2,16 +2,16 @@
 
 namespace App\Data\Reportes;
 
-use Carbon\Carbon;
 use App\Models\Dh03;
-use Spatie\LaravelData\Data;
-use App\Rules\LegajoCargoExistsRule;
 use App\Models\Reportes\BloqueosDataModel;
-use Spatie\LaravelData\Attributes\WithCast;
+use App\Rules\LegajoCargoExistsRule;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
-use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class BloqueoProcesadoData extends Data
@@ -19,22 +19,17 @@ class BloqueoProcesadoData extends Data
     public function __construct(
         #[Required]
         public readonly bool $success,
-
         #[Required]
         #[StringType]
         public readonly string $message,
-
         public readonly ?BloqueosDataModel $bloqueo,
-
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly ?Carbon $processed_at,
-
         public readonly ?array $metadata = [],
-
         public bool $cambiosRealizados = false,
-
-        public array $datosOriginales = []
-    ) {}
+        public array $datosOriginales = [],
+    ) {
+    }
 
     public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {
@@ -46,9 +41,9 @@ class BloqueoProcesadoData extends Data
             metadata: array_merge($metadata, [
                 'validacion' => Dh03::getDetallesValidacion(
                     $bloqueo->nro_legaj,
-                    $bloqueo->nro_cargo
-                )
-            ])
+                    $bloqueo->nro_cargo,
+                ),
+            ]),
         );
     }
 
@@ -56,7 +51,7 @@ class BloqueoProcesadoData extends Data
     {
         if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
             throw ValidationException::withMessages([
-                'legajo_cargo' => 'Combinación legajo-cargo inválida'
+                'legajo_cargo' => 'Combinación legajo-cargo inválida',
             ]);
         }
 
@@ -68,9 +63,9 @@ class BloqueoProcesadoData extends Data
             metadata: [
                 'validacion' => Dh03::getDetallesValidacion(
                     $bloqueo->nro_legaj,
-                    $bloqueo->nro_cargo
-                )
-            ]
+                    $bloqueo->nro_cargo,
+                ),
+            ],
         );
     }
 
@@ -80,13 +75,13 @@ class BloqueoProcesadoData extends Data
             'bloqueo.nro_cargo' => [
                 'required',
                 'integer',
-                function ($attribute, $value, $fail) use ($context) {
+                function ($attribute, $value, $fail) use ($context): void {
                     $nroLegaj = $context->payload['bloqueo']['nro_legaj'] ?? null;
                     if ($nroLegaj) {
                         $rule = new LegajoCargoExistsRule($nroLegaj, $value);
                         $rule->validate($attribute, $value, $fail);
                     }
-                }
+                },
             ],
             'bloqueo.nro_legaj' => ['required', 'integer'],
             'bloqueo.fecha_baja' => ['required', 'date'],
@@ -103,7 +98,7 @@ class BloqueoProcesadoData extends Data
             'legajo' => $this->bloqueo?->nro_legaj,
             'tipo_bloqueo' => $this->bloqueo?->tipo,
             'fecha_proceso' => $this->processed_at?->format('Y-m-d H:i:s'),
-            'metadata' => $this->metadata
+            'metadata' => $this->metadata,
         ];
     }
 
@@ -117,7 +112,7 @@ class BloqueoProcesadoData extends Data
             'tipo_bloqueo' => $this->bloqueo?->tipo,
             'fecha_baja' => $this->bloqueo?->fecha_baja,
             'fecha_proceso' => $this->processed_at?->format('Y-m-d H:i:s'),
-            'metadata' => $this->metadata
+            'metadata' => $this->metadata,
         ];
     }
 
@@ -131,8 +126,8 @@ class BloqueoProcesadoData extends Data
             metadata: [
                 'tipo_operacion' => $bloqueo->tipo,
                 'estado_anterior' => $bloqueo->cargo?->chkstopliq,
-                'fecha_proceso' => now()->toDateTimeString()
-            ]
+                'fecha_proceso' => now()->toDateTimeString(),
+            ],
         );
     }
 
@@ -145,7 +140,7 @@ class BloqueoProcesadoData extends Data
             'tipo_bloqueo' => $this->bloqueo?->tipo,
             'estado' => $this->success ? 'Procesado' : 'Error',
             'fecha_proceso' => $this->processed_at,
-            'resultado' => $this->message
+            'resultado' => $this->message,
         ];
     }
 }

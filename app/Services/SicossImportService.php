@@ -3,24 +3,27 @@
 namespace App\Services;
 
 use App\Contracts\DatabaseServiceInterface;
+use App\Contracts\FileProcessorInterface;
+use App\Contracts\TableManagementServiceInterface;
+use App\Contracts\WorkflowServiceInterface;
 use App\Models\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use App\Contracts\FileProcessorInterface;
-use App\Contracts\WorkflowServiceInterface;
-use App\Contracts\TableManagementServiceInterface;
 
 class SicossImportService
 {
     private $fileProcessor;
+
     private $workflowService;
+
     private $tableManagementService;
+
     private $databaseService;
 
     public function __construct(
         FileProcessorInterface $fileProcessor,
         WorkflowServiceInterface $workflowService,
         TableManagementServiceInterface $tableManagementService,
-        DatabaseServiceInterface $databaseService
+        DatabaseServiceInterface $databaseService,
     ) {
         $this->fileProcessor = $fileProcessor;
         $this->workflowService = $workflowService;
@@ -34,6 +37,7 @@ class SicossImportService
      * @param UploadedFile $file El archivo a importar.
      * @param string $tableName El nombre de la tabla donde se insertarán los datos.
      * @param string $step El paso del flujo de trabajo actual.
+     *
      * @return array Un array con información sobre el resultado de la importación.
      */
     public function importarArchivo(UploadedFile $file, string $tableName, string $step): array
@@ -50,7 +54,7 @@ class SicossImportService
                 return [
                     'success' => false,
                     'message' => 'No se encontraron datos para procesar',
-                    'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step]
+                    'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step],
                 ];
             }
 
@@ -63,7 +67,7 @@ class SicossImportService
                     'success' => false,
                     'message' => 'Error al verificar y preparar la tabla: ' . $tableResult['message'],
                     'data' => array_merge(['file' => $file->id, 'step' => $step], $tableResult['data']),
-                    'error' => $tableResult['error'] ?? null
+                    'error' => $tableResult['error'] ?? null,
                 ];
             }
 
@@ -82,16 +86,15 @@ class SicossImportService
                         'file' => $file->id,
                         'tableName' => $tableName,
                         'step' => $step,
-                        'recordsProcessed' => $mappedData->count()
-                    ]
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'message' => 'Error al insertar los datos en la base de datos',
-                    'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step]
+                        'recordsProcessed' => $mappedData->count(),
+                    ],
                 ];
             }
+            return [
+                'success' => false,
+                'message' => 'Error al insertar los datos en la base de datos',
+                'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step],
+            ];
         } catch (\Exception $e) {
             Log::error('Error durante la importación: ' . $e->getMessage());
             return [
@@ -101,8 +104,8 @@ class SicossImportService
                     'file' => $file->id,
                     'tableName' => $tableName,
                     'step' => $step,
-                    'error' => $e->getMessage()
-                ]
+                    'error' => $e->getMessage(),
+                ],
             ];
         }
     }

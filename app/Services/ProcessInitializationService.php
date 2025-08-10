@@ -3,12 +3,13 @@
 namespace app\Services;
 
 use App\Models\ProcessLog;
-use App\Services\WorkflowService;
 use App\Services\ProcessLogService;
+use App\Services\WorkflowService;
 
 class ProcessInitializationService
 {
     protected $workflowService;
+
     protected $processLogService;
 
     public function __construct(WorkflowService $workflowService, ProcessLogService $processLogService)

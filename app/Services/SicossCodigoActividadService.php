@@ -251,7 +251,8 @@ class SicossCodigoActividadService
         if ($prioridadTipoActividad == 38 || $prioridadTipoActividad == 0) {
             return $codigoActividadDefault ?? 0;
         }
-        if (($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37) ||
+        if (
+            ($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37) ||
             $prioridadTipoActividad == 87 || $prioridadTipoActividad == 88
         ) {
             return $prioridadTipoActividad;

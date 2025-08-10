@@ -41,7 +41,7 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'informes_app,suc_app',
+            'search_path' => env('DB_SCHEMA', 'suc_app') . ',informes_app',
             'sslmode' => 'prefer',
         ],
 
@@ -270,6 +270,7 @@ return [
 
         'pgsql-prod-old' => [
             'driver' => 'pgsql',
+            // @phpstan-ignore larastan.noEnvCallsOutsideOfConfig
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB5_PORT', '5434'),
             'database' => env('DB5_DATABASE', 'mapuche'),
@@ -331,6 +332,18 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'toba' => [
+            'driver' => 'pgsql',
+            'host' => env('TOBA_DB_HOST'),
+            'port' => env('TOBA_DB_PORT'),
+            'database' => env('TOBA_DB_DATABASE'),
+            'username' => env('TOBA_DB_USERNAME'),
+            'password' => env('TOBA_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'toba_mapuche',
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
@@ -354,7 +367,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
+            'options' => \extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
@@ -374,7 +387,7 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
+            'options' => \extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],

@@ -4,7 +4,6 @@ namespace App\Data;
 
 use App\Enums\TipoActividad;
 use Spatie\LaravelData\Data;
-use Illuminate\Support\Facades\Log;
 
 class UnidadAcademicaData extends Data
 {
@@ -12,11 +11,14 @@ class UnidadAcademicaData extends Data
         public readonly string $codigo,
         public readonly string $sucursal,
         public readonly TipoActividad $actividad,
-    ) {}
+    ) {
+    }
 
     public static function fromCodigo(string $codigo): ?self
     {
-        if(!$codigo) return null;
+        if ($codigo === '' || $codigo === '0') {
+            return null;
+        }
 
         $codigo = trim(strtoupper($codigo));
 

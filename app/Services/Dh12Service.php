@@ -8,7 +8,6 @@ class Dh12Service
 {
     protected $dh12;
 
-
     /**
      * Create a new class instance.
      */

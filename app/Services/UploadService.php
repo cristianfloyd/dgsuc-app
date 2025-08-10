@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\UploadedFile;
+use Illuminate\Http\UploadedFile as HttpUploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile as HttpUploadedFile;
-use Illuminate\Contracts\Filesystem\Filesystem;
 
 class UploadService
 {
@@ -18,6 +16,7 @@ class UploadService
      * @param \Illuminate\Http\UploadedFile $file The uploaded file.
      * @param string $folder The folder to upload the file to.
      * @param string|null $disk The disk to use for the upload, defaults to 'public'.
+     *
      * @return string The path where the file was stored.
      */
     public static function uploadFile(HttpUploadedFile $file, string $folder, $disk = self::DEFAULT_DISK): string
@@ -26,13 +25,13 @@ class UploadService
 
 
         //filename without extension
-        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $filename = pathinfo($file->getClientOriginalName(), \PATHINFO_FILENAME);
 
         //extension
         $extension = $file->getClientOriginalExtension();
 
         //filename to store
-        $fileNameToStore= $filename.'_'. time().'.'.$extension;
+        $fileNameToStore = $filename . '_' . time() . '.' . $extension;
         // limpiar fileName
         $fileNameLimpio = static::sanitizeFileName($fileNameToStore);
         //upload the file
@@ -51,6 +50,7 @@ class UploadService
      *
      * @param string $path La ruta del archivo a eliminar.
      * @param string $disk The disk to use for the deletion, defaults to 'public'.
+     *
      * @return bool True if the file was deleted successfully, false otherwise.
      */
     public static function deleteFile(string $path, string $disk = 'public'): bool
@@ -69,6 +69,7 @@ class UploadService
     /** Valida el nombre de la carpeta especificada para garantizar que solo contenga caracteres permitidos.
      *
      * @param string $folder El nombre de la carpeta a validar.
+     *
      * @throws \InvalidArgumentException Si el nombre de la carpeta contiene caracteres no permitidos.
      */
     private static function validateFolders(string $folder): void
@@ -81,6 +82,7 @@ class UploadService
     /** Limpiar un nombre de archivo reemplazando cualquier carácter no alfanumérico, sin guión, sin punto y sin guión por un guión bajo.
      *
      * @param string $fileName El nombre del archivo a limpiar.
+     *
      * @return string El nombre del archivo limpio.
      */
     private static function sanitizeFileName(string $fileName): string

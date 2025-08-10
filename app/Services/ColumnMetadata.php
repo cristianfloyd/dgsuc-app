@@ -4,14 +4,6 @@ namespace App\Services;
 
 class ColumnMetadata
 {
-     /** @var array<int, int> */
-    private array $widthsAfip;
-    private array $widthsMapuche;
-    private array $widthsMiSimplificacion;
-    private string $currentSystem;
-    private array $widthsSicossCalculo;
-    private array $startPositionsSicossCalculo;
-
     /**
      * @var array<string, int> Mapeo de nombres de columnas a índices
      */
@@ -38,9 +30,21 @@ class ColumnMetadata
         'TIPO_SERVICIO' => 19,
         'FECHA_SUSP_SERVICIOS_TEMPORARIOS' => 20,
         'NUMERO_FORMULARIO_AGROPECUARIO' => 21,
-        'COVID' => 22
+        'COVID' => 22,
     ];
 
+    /** @var array<int, int> */
+    private array $widthsAfip;
+
+    private array $widthsMapuche;
+
+    private array $widthsMiSimplificacion;
+
+    private string $currentSystem;
+
+    private array $widthsSicossCalculo;
+
+    private array $startPositionsSicossCalculo;
 
     public function __construct()
     {
@@ -48,8 +52,84 @@ class ColumnMetadata
         $this->currentSystem = 'afip'; // Por defecto
     }
 
+    public function setSystem(string $system): void
+    {
+        if (!\in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
+            throw new \InvalidArgumentException('Sistema no válido');
+        }
+        $this->currentSystem = $system;
+    }
+
     /**
-     * Inicializa los anchos de las columnas
+     * Obtiene los anchos de todas las columnas.
+     *
+     * @return array<int, int>
+     */
+    public function getWidths(): array
+    {
+        switch ($this->currentSystem) {
+            case 'afip':
+                return $this->widthsAfip;
+            case 'mapuche':
+                return $this->widthsMapuche;
+            case 'miSimplificacion':
+                return $this->widthsMiSimplificacion;
+            case 'sicossCalculo':
+                return $this->widthsSicossCalculo;
+            default:
+                throw new \InvalidArgumentException('Sistema no válido');
+        }
+    }
+
+    /**
+     * Obtiene el ancho de una columna específica.
+     *
+     * @param int $index Índice de la columna
+     *
+     * @return int Ancho de la columna
+     */
+    public function getColumnWidth(int $index): int
+    {
+        $widths = $this->getWidths();
+        return $widths[$index] ?? 0;
+    }
+
+    /**
+     * Establece el ancho de una columna específica.
+     *
+     * @param int|string $identifier Índice o nombre de la columna
+     * @param int $width Nuevo ancho de la columna
+     */
+    public function setColumnWidth(int|string $identifier, int $width): void
+    {
+        $index = \is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
+        $this->widthsAfip[$index] = $width;
+    }
+
+    /**
+     * Calcula el ancho total de todas las columnas.
+     *
+     * @return int Suma total de los anchos de todas las columnas
+     */
+    public function getTotalWidth(): int
+    {
+        return array_sum($this->widthsAfip);
+    }
+
+    /**
+     * Obtiene la posición de inicio de un campo específico en el sistema 'sicossCalculo'.
+     *
+     * @param string $field Nombre del campo
+     *
+     * @return int Posición de inicio del campo, o 0 si no se encuentra
+     */
+    public function getStartPosition(string $field): int
+    {
+        return $this->startPositionsSicossCalculo[$field] ?? 0;
+    }
+
+    /**
+     * Inicializa los anchos de las columnas.
      */
     private function initializeWidths(): void
     {
@@ -81,7 +161,7 @@ class ColumnMetadata
 
         $this->widthsMapuche = [
             // Anchos pra Mapuche
-            6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12
+            6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12,
         ];
 
         $this->widthsMiSimplificacion = [
@@ -107,7 +187,7 @@ class ColumnMetadata
             3,
             10,
             10,
-            1
+            1,
         ];
 
         $this->widthsSicossCalculo = [
@@ -135,79 +215,5 @@ class ColumnMetadata
             'aportediferencialsijp' => 704,
             'aportesres33_41re' => 798,
         ];
-    }
-
-    public function setSystem(string $system): void
-    {
-        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
-            throw new \InvalidArgumentException('Sistema no válido');
-        }
-        $this->currentSystem = $system;
-    }
-
-    /**
-     * Obtiene los anchos de todas las columnas
-     *
-     * @return array<int, int>
-     */
-    public function getWidths(): array
-    {
-        switch ($this->currentSystem) {
-            case 'afip':
-                return $this->widthsAfip;
-            case 'mapuche':
-                return $this->widthsMapuche;
-            case 'miSimplificacion':
-                return $this->widthsMiSimplificacion;
-            case 'sicossCalculo':
-                return $this->widthsSicossCalculo;
-            default:
-                throw new \InvalidArgumentException('Sistema no válido');
-        }
-    }
-
-    /**
-     * Obtiene el ancho de una columna específica.
-     *
-     * @param int $index Índice de la columna
-     * @return int Ancho de la columna
-     */
-    public function getColumnWidth(int $index): int
-    {
-        $widths = $this->getWidths();
-        return $widths[$index] ?? 0;
-    }
-
-    /**
-     * Establece el ancho de una columna específica
-     *
-     * @param int|string $identifier Índice o nombre de la columna
-     * @param int $width Nuevo ancho de la columna
-     */
-    public function setColumnWidth(int|string $identifier, int $width): void
-    {
-        $index = is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
-        $this->widthsAfip[$index] = $width;
-    }
-
-    /**
-     * Calcula el ancho total de todas las columnas
-     *
-     * @return int Suma total de los anchos de todas las columnas
-     */
-    public function getTotalWidth(): int
-    {
-        return array_sum($this->widthsAfip);
-    }
-
-    /**
-     * Obtiene la posición de inicio de un campo específico en el sistema 'sicossCalculo'.
-     *
-     * @param string $field Nombre del campo
-     * @return int Posición de inicio del campo, o 0 si no se encuentra
-     */
-    public function getStartPosition(string $field): int
-    {
-        return $this->startPositionsSicossCalculo[$field] ?? 0;
     }
 }

@@ -11,7 +11,6 @@ class LiquidacionService
      */
     public function __construct()
     {
-        //
     }
 
     /**
@@ -20,6 +19,7 @@ class LiquidacionService
      *
      * @param string $year Año del período fiscal
      * @param string $month Mes del período fiscal
+     *
      * @return array Array asociativo con nro_liqui => desc_liqui
      */
     public function getLiquidacionesForSelect(string $year, string $month): array
@@ -29,7 +29,7 @@ class LiquidacionService
             ->where('per_limes', $month)
             ->pluck('desc_liqui', 'nro_liqui')
             ->toArray();
-        
+
         return $resultado;
     }
 
@@ -38,6 +38,7 @@ class LiquidacionService
      *
      * @param string $year
      * @param string $month
+     *
      * @return Dh22|null
      */
     public function getLiquidacionDefinitiva(string $year, string $month): ?Dh22

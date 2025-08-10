@@ -22,6 +22,5 @@ class ValidationServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

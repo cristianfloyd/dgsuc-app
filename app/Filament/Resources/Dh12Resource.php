@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\Dh12Resource\Pages;
-use App\Filament\Resources\Dh12Resource\RelationManagers;
 use App\Models\Dh12;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -14,9 +13,11 @@ use Filament\Tables\Table;
 class Dh12Resource extends Resource
 {
     protected static ?string $model = Dh12::class;
+
     protected static ?string $navigationLabel = 'Conceptos';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $activeNavigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationGroup = 'Conceptos';
@@ -166,7 +167,7 @@ class Dh12Resource extends Resource
                         'O' => 'Tipo O',
                         'F' => 'Tipo F',
                         'A' => 'Tipo A',
-                    ])
+                    ]),
 
             ])
             ->actions([
@@ -183,7 +184,7 @@ class Dh12Resource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

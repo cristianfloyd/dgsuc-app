@@ -1,16 +1,14 @@
 <?php
-declare(strict_types= 1);
+
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Data\RepOrdenPagoDtoData;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use App\Models\Reportes\RepOrdenPagoModel;
 use Illuminate\Database\Eloquent\Collection;
-use App\Contracts\RepOrdenPagoRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Proporciona una capa de servicio para administrar registros de RepOrdenPago.
@@ -21,13 +19,11 @@ use App\Contracts\RepOrdenPagoRepositoryInterface;
  *  actualizar un registro existente y eliminar un registro.
  *
  * La clase de servicio utiliza una clase de repositorio para manejar la lógica de acceso a datos.
- *
  */
 class RepOrdenPagoService
 {
-
     /**
-     * Crear una nueva instancia
+     * Crear una nueva instancia.
      */
     public function __construct(protected RepOrdenPagoRepositoryInterface $repository)
     {
@@ -47,6 +43,7 @@ class RepOrdenPagoService
      * Obtiene RepOrdenPago por nro_liqui.
      *
      * @param int $nroLiqui
+     *
      * @return RepOrdenPagoModel|null
      */
     public function getRepOrdenPagoByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
@@ -55,27 +52,28 @@ class RepOrdenPagoService
     }
 
     /**
- * Crea un nuevo registro de RepOrdenPago.
- *
- * @param RepOrdenPagoDtoData $data DTO con los datos para crear la orden de pago
- * @return RepOrdenPagoModel
- */
-public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
-{
-    try {
-        return $this->repository->create($data->toArray());
-    } catch (\Exception $e) {
-        Log::error('Error al crear orden de pago: ' . $e->getMessage());
-        throw $e;
+     * Crea un nuevo registro de RepOrdenPago.
+     *
+     * @param RepOrdenPagoDtoData $data DTO con los datos para crear la orden de pago
+     *
+     * @return RepOrdenPagoModel
+     */
+    public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
+    {
+        try {
+            return $this->repository->create($data->toArray());
+        } catch (\Exception $e) {
+            Log::error('Error al crear orden de pago: ' . $e->getMessage());
+            throw $e;
+        }
     }
-}
 
-    
     /**
      * Actualiza un registro existente de RepOrdenPago.
      *
      * @param RepOrdenPagoModel $repOrdenPago
      * @param RepOrdenPagoDtoData $data
+     *
      * @return bool
      */
     public function updateRepOrdenPago(RepOrdenPagoModel $repOrdenPago, RepOrdenPagoDtoData $data): bool
@@ -87,6 +85,7 @@ public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
      * Elimina un registro de RepOrdenPago.
      *
      * @param RepOrdenPagoModel $repOrdenPago
+     *
      * @return bool
      */
     public function deleteRepOrdenPago(RepOrdenPagoModel $repOrdenPago): bool
@@ -103,11 +102,11 @@ public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
         $this->repository->ensureStoredProcedure();
     }
 
-
     /**
      * Genera un reporte para las liquidaciones proporcionadas.
      *
      * @param array $liquidaciones
+     *
      * @return void
      */
     public function generateReport(array $liquidaciones): void
@@ -121,12 +120,12 @@ public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
         }
     }
 
-
     /**
-     * Trunca la tabla rep_orden_pago
+     * Trunca la tabla rep_orden_pago.
+     *
+     * @throws \Exception
      *
      * @return bool
-     * @throws \Exception
      */
     public function truncateTable(): bool
     {

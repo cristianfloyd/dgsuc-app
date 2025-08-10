@@ -3,15 +3,15 @@
 namespace App\Exports;
 
 use Illuminate\Support\LazyCollection;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LazyReportDetailSheet implements
@@ -23,7 +23,9 @@ class LazyReportDetailSheet implements
     WithTitle
 {
     protected $query;
+
     protected $lazyCollection;
+
     protected $columns;
 
     public function __construct($query)
@@ -39,7 +41,7 @@ class LazyReportDetailSheet implements
             'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe'
+            'impp_conce' => 'Importe',
         ];
 
         $this->lazyCollection = LazyCollection::make(function () {
@@ -67,7 +69,7 @@ class LazyReportDetailSheet implements
 
             switch ($column) {
                 case 'cuil':
-                    if (strlen($value) >= 3) {
+                    if (\strlen($value) >= 3) {
                         $value = substr($value, 2, -1);
                     }
                     break;

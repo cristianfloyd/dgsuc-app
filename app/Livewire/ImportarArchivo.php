@@ -4,17 +4,24 @@ namespace App\Livewire;
 
 use App\Models\afipImportacionCrudaModel;
 use App\Models\UploadedFile;
-use Illuminate\Http\Request;
 use Livewire\Component;
 
 class ImportarArchivo extends Component
 {
     public $modelo = 'afip_importacion_cruda';
+
     public $archivo;
+
     public $selectedArchivoId;
+
     public $lineasImportadas = 0;
+
     public $archivoModel;
-    public $title, $content; //Variables de prueba
+
+    public $title;
+
+    public $content; //Variables de prueba
+
     public $importaciones;
 
     public function render()
@@ -23,7 +30,7 @@ class ImportarArchivo extends Component
         return view('importar.index', compact('archivos'));
     }
 
-    public function importaciones()
+    public function importaciones(): void
     {
         $archivos = UploadedFile::all();
         $this->importaciones = $archivos;
@@ -46,7 +53,7 @@ class ImportarArchivo extends Component
         return view('importar.show');
     }
 
-    public function mount()
+    public function mount(): void
     {
         $model = new afipImportacionCrudaModel();
         $this->lineasImportadas = $model->getDatosImportados();

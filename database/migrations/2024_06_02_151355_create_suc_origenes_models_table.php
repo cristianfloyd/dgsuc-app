@@ -15,6 +15,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.origenes_models');
+        
         Schema::connection($this->getConnectionName())->create('suc.origenes_models', function (Blueprint $table) {
             $table->id();
             $table->string('name');

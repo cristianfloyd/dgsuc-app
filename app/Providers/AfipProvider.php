@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Models\OrigenesModel;
-use Illuminate\Support\ServiceProvider;
-use App\Repositories\FileUploadRepository;
-use App\Contracts\OrigenRepositoryInterface;
 use App\Contracts\FileUploadRepositoryInterface;
+use App\Contracts\OrigenRepositoryInterface;
+use App\Models\OrigenesModel;
+use App\Repositories\FileUploadRepository;
+use Illuminate\Support\ServiceProvider;
 
 class AfipProvider extends ServiceProvider
 {
@@ -24,6 +24,5 @@ class AfipProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

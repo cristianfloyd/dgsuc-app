@@ -3,12 +3,11 @@
 namespace App\Livewire;
 
 use App\Data\Dh90Data;
-use Livewire\Component;
+use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
+use Livewire\Component;
 use Livewire\WithPagination;
-use Dotenv\Repository\RepositoryInterface;
-use App\Repositories\Interfaces\Dh90RepositoryInterface;
 
 /**
  * Componente Livewire para gestionar registros Dh90.
@@ -64,25 +63,11 @@ class Dh90Component extends Component
     protected Dh90RepositoryInterface $repository;
 
     /**
-     * Reglas de validación.
-     *
-     * @return array
-     */
-    protected function rules(): array
-    {
-        return [
-            'form.nro_cargo' => 'required|integer|min:1',
-            'form.nro_cargoasociado' => 'nullable|integer|min:1',
-            'form.tipoasociacion' => 'nullable|string|size:1',
-        ];
-    }
-
-    /**
      * Constructor del componente.
      *
      * @param Dh90RepositoryInterface $repository
      */
-    public function boot(Dh90RepositoryInterface $repository)
+    public function boot(Dh90RepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -119,8 +104,8 @@ class Dh90Component extends Component
 
         try {
             $data = Dh90Data::from([
-                'nroCargo' => (int) $this->form['nro_cargo'],
-                'nroCargoasociado' => $this->form['nro_cargoasociado'] ? (int) $this->form['nro_cargoasociado'] : null,
+                'nroCargo' => (int)$this->form['nro_cargo'],
+                'nroCargoasociado' => $this->form['nro_cargoasociado'] ? (int)$this->form['nro_cargoasociado'] : null,
                 'tipoasociacion' => $this->form['tipoasociacion'],
             ]);
 
@@ -143,6 +128,7 @@ class Dh90Component extends Component
      * Prepara el formulario para editar un registro.
      *
      * @param int $id
+     *
      * @return void
      */
     public function edit(int $id): void
@@ -170,6 +156,7 @@ class Dh90Component extends Component
      * Confirma la eliminación de un registro.
      *
      * @param int $id
+     *
      * @return void
      */
     public function confirmarEliminacion(int $id): void
@@ -234,6 +221,7 @@ class Dh90Component extends Component
      * Aplica filtro por tipo de asociación.
      *
      * @param string $tipo
+     *
      * @return void
      */
     public function filtrarPorTipo(string $tipo): void
@@ -260,8 +248,9 @@ class Dh90Component extends Component
     public function mostrarConAsociacion(): void
     {
         try {
-            $this->dispatch('actualizar-listado',
-                registros: $this->repository->getCargosConAsociaciones()->toArray()
+            $this->dispatch(
+                'actualizar-listado',
+                registros: $this->repository->getCargosConAsociaciones()->toArray(),
             );
         } catch (\Exception $e) {
             session()->flash('error', 'Error al cargar cargos asociados: ' . $e->getMessage());
@@ -272,6 +261,7 @@ class Dh90Component extends Component
      * Busca relaciones para un cargo específico.
      *
      * @param int $nroCargo
+     *
      * @return void
      */
     #[On('buscar-relaciones')]
@@ -279,9 +269,10 @@ class Dh90Component extends Component
     {
         try {
             $relaciones = $this->repository->getRelacionesPorCargo($nroCargo);
-            $this->dispatch('mostrar-relaciones',
+            $this->dispatch(
+                'mostrar-relaciones',
                 relaciones: $relaciones->toArray(),
-                nroCargo: $nroCargo
+                nroCargo: $nroCargo,
             );
         } catch (\Exception $e) {
             session()->flash('error', 'Error al buscar relaciones: ' . $e->getMessage());
@@ -303,9 +294,9 @@ class Dh90Component extends Component
 
         try {
             $this->repository->crearOActualizarRelacion(
-                (int) $this->form['nro_cargo'],
-                (int) $this->form['nro_cargoasociado'],
-                $this->form['tipoasociacion']
+                (int)$this->form['nro_cargo'],
+                (int)$this->form['nro_cargoasociado'],
+                $this->form['tipoasociacion'],
             );
 
             session()->flash('message', 'Relación creada correctamente.');
@@ -314,5 +305,19 @@ class Dh90Component extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Error al crear relación: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Reglas de validación.
+     *
+     * @return array
+     */
+    protected function rules(): array
+    {
+        return [
+            'form.nro_cargo' => 'required|integer|min:1',
+            'form.nro_cargoasociado' => 'nullable|integer|min:1',
+            'form.tipoasociacion' => 'nullable|string|size:1',
+        ];
     }
 }

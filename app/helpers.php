@@ -2,17 +2,17 @@
 
 use App\Helpers\MoneyFormatter;
 
-if (!function_exists('money')) {
+if (!\function_exists('money')) {
     function money($value)
     {
         return MoneyFormatter::format($value);
     }
 }
 
-if (!function_exists('nombreMes')) {
+if (!\function_exists('nombreMes')) {
     function nombreMes(int $mes): string
     {
-        return match($mes) {
+        return match ($mes) {
             1 => 'Enero',
             2 => 'Febrero',
             3 => 'Marzo',
@@ -30,60 +30,60 @@ if (!function_exists('nombreMes')) {
     }
 }
 
-if (!function_exists('formatoImporte')) {
+if (!\function_exists('formatoImporte')) {
     function formatoImporte(float $importe, int $decimales = 2): string
     {
         return number_format($importe, $decimales, ',', '.');
     }
 }
 
-if (!function_exists('formatoPeriodo')) {
+if (!\function_exists('formatoPeriodo')) {
     function formatoPeriodo(int $mes, int $anio): string
     {
         return nombreMes($mes) . ' ' . $anio;
     }
 }
 
-if (!function_exists('formatoLiquidacion')) {
+if (!\function_exists('formatoLiquidacion')) {
     function formatoLiquidacion(int $numero): string
     {
-        return str_pad($numero, 4, '0', STR_PAD_LEFT);
+        return str_pad($numero, 4, '0', \STR_PAD_LEFT);
     }
 }
 
-if (!function_exists('validarPeriodo')) {
+if (!\function_exists('validarPeriodo')) {
     function validarPeriodo(int $mes, int $anio): bool
     {
         return $mes >= 1 && $mes <= 12 && $anio >= 2000;
     }
 }
 
-if (!function_exists('limpiarTexto')) {
-    function limpiarTexto(string $texto, int $longitud = null): string
+if (!\function_exists('limpiarTexto')) {
+    function limpiarTexto(string $texto, ?int $longitud = null): string
     {
         $texto = trim($texto);
         return $longitud ? substr($texto, 0, $longitud) : $texto;
     }
 }
 
-if (!function_exists('formatoArea')) {
+if (!\function_exists('formatoArea')) {
     function formatoArea(string $area): string
     {
-        return str_pad($area, 3, '0', STR_PAD_LEFT);
+        return str_pad($area, 3, '0', \STR_PAD_LEFT);
     }
 }
 
-if (!function_exists('esRetencion')) {
+if (!\function_exists('esRetencion')) {
     function esRetencion(?string $tipo): bool
     {
-        return in_array($tipo, ['A', 'D']);
+        return \in_array($tipo, ['A', 'D']);
     }
 }
 
-if (!function_exists('tipoComprobanteTexto')) {
+if (!\function_exists('tipoComprobanteTexto')) {
     function tipoComprobanteTexto(string $tipo): string
     {
-        return match($tipo) {
+        return match ($tipo) {
             'A' => 'Aporte',
             'D' => 'Descuento',
             'N' => 'Neto',
@@ -92,10 +92,9 @@ if (!function_exists('tipoComprobanteTexto')) {
     }
 }
 
-if (!function_exists('estadoComprobante')) {
+if (!\function_exists('estadoComprobante')) {
     function estadoComprobante(bool $requiere_cheque): string
     {
         return $requiere_cheque ? 'Requiere Cheque' : 'Sin Cheque';
     }
 }
-

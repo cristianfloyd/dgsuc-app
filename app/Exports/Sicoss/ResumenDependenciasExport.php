@@ -3,16 +3,18 @@
 namespace App\Exports\Sicoss;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
 class ResumenDependenciasExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize
 {
     protected Collection $data;
+
     protected int $year;
+
     protected int $month;
 
     public function __construct(Collection $data, int $year, int $month)

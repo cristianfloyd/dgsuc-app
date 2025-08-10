@@ -10,15 +10,17 @@ use Livewire\Component;
 class PanelSelector extends Component
 {
     public string $search = '';
+
     public string $selectedCategory = 'all';
+
     public bool $darkMode = true;
 
-    public function mount()
+    public function mount(): void
     {
         $this->darkMode = session('darkMode', true);
     }
 
-    public function toggleTheme()
+    public function toggleTheme(): void
     {
         $this->darkMode = !$this->darkMode;
         session(['darkMode' => $this->darkMode]);
@@ -29,12 +31,12 @@ class PanelSelector extends Component
     {
         return view('livewire.panel-selector', [
             'panels' => $this->getFilteredPanels(),
-            'categories' => PanelRegistry::getCategories()
+            'categories' => PanelRegistry::getCategories(),
         ]);
     }
 
     /**
-     * Obtiene una colección de paneles filtrados 
+     * Obtiene una colección de paneles filtrados
      * según los criterios de búsqueda y categoría seleccionada.
      *
      * @return Collection Una colección de paneles filtrados.
@@ -44,17 +46,17 @@ class PanelSelector extends Component
         return PanelRegistry::getAllPanels()
             ->when(
                 $this->search,
-                fn($panels) =>
+                fn ($panels) =>
                 $panels->filter(
-                    fn($panel) =>
+                    fn ($panel) =>
                     str_contains(strtolower($panel['name']), strtolower($this->search)) ||
-                    str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search))
-                )
+                    str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search)),
+                ),
             )
             ->when(
                 $this->selectedCategory !== 'all',
-                fn($panels) =>
-                $panels->where('category', $this->selectedCategory)
+                fn ($panels) =>
+                $panels->where('category', $this->selectedCategory),
             );
     }
 }

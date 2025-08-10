@@ -2,18 +2,17 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use App\Data\Reportes\ArchiveProcessData;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
 use App\Services\Reportes\Interfaces\BloqueosCleanupServiceInterface;
 use App\Services\Reportes\Interfaces\BloqueosHistorialServiceInterface;
-use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Servicio orquestador para el proceso completo de archivado de bloqueos
+ * Servicio orquestador para el proceso completo de archivado de bloqueos.
  *
  * Responsabilidad: Coordinar la transferencia al historial y limpieza de la tabla de trabajo
  */
@@ -23,18 +22,19 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
     public function __construct(
         private readonly BloqueosHistorialServiceInterface $historialService,
-        private readonly BloqueosCleanupServiceInterface $cleanupService
-    ) {}
+        private readonly BloqueosCleanupServiceInterface $cleanupService,
+    ) {
+    }
 
     /**
-     * Archiva un período fiscal completo (transferencia + limpieza)
+     * Archiva un período fiscal completo (transferencia + limpieza).
      */
     public function archivarPeriodoCompleto(array $periodoFiscal): ArchiveProcessData
     {
         $startTime = microtime(true);
 
         Log::info('Iniciando proceso completo de archivado', [
-            'periodo_fiscal' => $periodoFiscal
+            'periodo_fiscal' => $periodoFiscal,
         ]);
 
         try {
@@ -42,7 +42,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             if (!$this->validarArchivado($periodoFiscal)) {
                 return ArchiveProcessData::error(
                     $periodoFiscal,
-                    'No se puede realizar el archivado del período fiscal'
+                    'No se puede realizar el archivado del período fiscal',
                 );
             }
 
@@ -53,20 +53,20 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
                 if ($registrosParaProcesar->isEmpty()) {
                     Log::info('No hay registros para archivar', [
-                        'periodo_fiscal' => $periodoFiscal
+                        'periodo_fiscal' => $periodoFiscal,
                     ]);
 
                     return ArchiveProcessData::success(
                         $periodoFiscal,
                         \App\Data\Reportes\TransferResultData::success(0, $periodoFiscal),
                         \App\Data\Reportes\CleanupResultData::nothingToClean($periodoFiscal),
-                        microtime(true) - $startTime
+                        microtime(true) - $startTime,
                     );
                 }
 
                 Log::info('Registros encontrados para archivar', [
                     'periodo_fiscal' => $periodoFiscal,
-                    'cantidad' => $registrosParaProcesar->count()
+                    'cantidad' => $registrosParaProcesar->count(),
                 ]);
 
                 // Paso 2: Transferir al historial
@@ -76,19 +76,19 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 if (!$transferResult->success) {
                     Log::error('Error en la transferencia al historial', [
                         'periodo_fiscal' => $periodoFiscal,
-                        'mensaje' => $transferResult->mensaje
+                        'mensaje' => $transferResult->mensaje,
                     ]);
 
                     return ArchiveProcessData::error(
                         $periodoFiscal,
                         "Error en transferencia: {$transferResult->mensaje}",
-                        $transferResult
+                        $transferResult,
                     );
                 }
 
                 Log::info('Transferencia al historial completada', [
                     'transferidos' => $transferResult->transferidos,
-                    'fallidos' => $transferResult->fallidos
+                    'fallidos' => $transferResult->fallidos,
                 ]);
 
                 // Paso 3: Limpiar tabla de trabajo
@@ -98,20 +98,20 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 if (!$cleanupResult->success) {
                     Log::warning('Error en la limpieza, pero transferencia fue exitosa', [
                         'periodo_fiscal' => $periodoFiscal,
-                        'mensaje_limpieza' => $cleanupResult->mensaje
+                        'mensaje_limpieza' => $cleanupResult->mensaje,
                     ]);
 
                     return ArchiveProcessData::partial(
                         $periodoFiscal,
                         $transferResult,
                         $cleanupResult,
-                        'Transferencia exitosa pero limpieza falló parcialmente'
+                        'Transferencia exitosa pero limpieza falló parcialmente',
                     );
                 }
 
                 Log::info('Limpieza de tabla de trabajo completada', [
                     'eliminados' => $cleanupResult->eliminados,
-                    'no_eliminados' => $cleanupResult->noEliminados
+                    'no_eliminados' => $cleanupResult->noEliminados,
                 ]);
 
                 $endTime = microtime(true);
@@ -121,46 +121,45 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                     'periodo_fiscal' => $periodoFiscal,
                     'transferidos' => $transferResult->transferidos,
                     'eliminados' => $cleanupResult->eliminados,
-                    'duracion_segundos' => $duration
+                    'duracion_segundos' => $duration,
                 ]);
 
                 return ArchiveProcessData::success(
                     $periodoFiscal,
                     $transferResult,
                     $cleanupResult,
-                    $duration
+                    $duration,
                 );
             });
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error general en proceso de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return ArchiveProcessData::error(
                 $periodoFiscal,
-                "Error en el proceso de archivado: {$e->getMessage()}"
+                "Error en el proceso de archivado: {$e->getMessage()}",
             );
         }
     }
 
     /**
-     * Valida que se pueda realizar el archivado completo
+     * Valida que se pueda realizar el archivado completo.
      */
     public function validarArchivado(array $periodoFiscal): bool
     {
         try {
             Log::info('Validando archivado para período fiscal', [
-                'periodo_fiscal' => $periodoFiscal
+                'periodo_fiscal' => $periodoFiscal,
             ]);
 
             // Verificar que existan registros para el período
             $totalRegistros = BloqueosDataModel::where('nro_liqui', $periodoFiscal)->count();
             if ($totalRegistros === 0) {
                 Log::info('No existen registros para archivar', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoFiscal,
                 ]);
                 return true; // No hay nada que archivar, es válido
             }
@@ -168,7 +167,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             // Verificar que no esté ya archivado
             if ($this->periodoYaArchivado($periodoFiscal)) {
                 Log::warning('El período ya fue archivado previamente', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoFiscal,
                 ]);
                 return false;
             }
@@ -181,7 +180,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             if ($registrosProcesados === 0) {
                 Log::error('No hay registros procesados para archivar', [
                     'periodo_fiscal' => $periodoFiscal,
-                    'total_registros' => $totalRegistros
+                    'total_registros' => $totalRegistros,
                 ]);
                 return false;
             }
@@ -191,36 +190,35 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
             if (!$this->historialService->validarTransferencia($registrosParaProcesar)) {
                 Log::error('Validación de transferencia falló', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoFiscal,
                 ]);
                 return false;
             }
 
             if (!$this->cleanupService->validarLimpieza($periodoFiscal)) {
                 Log::error('Validación de limpieza falló', [
-                    'periodo_fiscal' => $periodoFiscal
+                    'periodo_fiscal' => $periodoFiscal,
                 ]);
                 return false;
             }
 
             Log::info('Validación de archivado exitosa', [
                 'periodo_fiscal' => $periodoFiscal,
-                'registros_a_procesar' => $registrosParaProcesar->count()
+                'registros_a_procesar' => $registrosParaProcesar->count(),
             ]);
 
             return true;
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error en validación de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return false;
         }
     }
 
     /**
-     * Obtiene un resumen del estado actual para archivado
+     * Obtiene un resumen del estado actual para archivado.
      */
     public function getResumenEstadoArchivado(array $periodoFiscal): array
     {
@@ -244,29 +242,28 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                     'pendientes' => $registrosPendientes,
                     'en_historial' => $registrosEnHistorial,
                     'ya_archivado' => $yaArchivado,
-                    'puede_archivar' => $this->validarArchivado($periodoFiscal)
+                    'puede_archivar' => $this->validarArchivado($periodoFiscal),
                 ],
                 'estadisticas_historial' => $estadisticasHistorial,
                 'estadisticas_trabajo' => $estadisticasLimpieza,
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ];
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al obtener resumen de estado', [
                 'periodo_fiscal' => $periodoFiscal,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return [
                 'error' => true,
                 'mensaje' => $e->getMessage(),
-                'periodo_fiscal' => $periodoFiscal
+                'periodo_fiscal' => $periodoFiscal,
             ];
         }
     }
 
     /**
-     * Verifica si un período ya fue archivado
+     * Verifica si un período ya fue archivado.
      */
     public function periodoYaArchivado(array $periodoFiscal): bool
     {
@@ -281,18 +278,17 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 ->count();
 
             return $registrosEnHistorial > 0 && $registrosProcesadosEnTrabajo === 0;
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al verificar si período ya fue archivado', [
                 'periodo_fiscal' => $periodoFiscal,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             return false;
         }
     }
 
     /**
-     * Obtiene los registros que están listos para ser procesados
+     * Obtiene los registros que están listos para ser procesados.
      */
     private function obtenerRegistrosParaProcesar(array $periodoFiscal): \Illuminate\Support\Collection
     {
@@ -311,7 +307,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             ->where('esta_procesado', true)
             ->whereIn('estado', [
                 \App\Enums\BloqueosEstadoEnum::PROCESADO,
-                \App\Enums\BloqueosEstadoEnum::VALIDADO
+                \App\Enums\BloqueosEstadoEnum::VALIDADO,
             ])
             ->get();
     }

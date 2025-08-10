@@ -10,6 +10,7 @@ class SicossControlDetalle extends Model
     use MapucheConnectionTrait;
 
     protected $table = 'suc.sicoss_controles_detalle';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -20,6 +21,6 @@ class SicossControlDetalle extends Model
         'valor_mapuche',
         'diferencia',
         'estado',
-        'observaciones'
+        'observaciones',
     ];
 }

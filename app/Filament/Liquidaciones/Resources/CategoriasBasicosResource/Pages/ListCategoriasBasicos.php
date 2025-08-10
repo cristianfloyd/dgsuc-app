@@ -2,11 +2,10 @@
 
 namespace App\Filament\Liquidaciones\Resources\CategoriasBasicosResource\Pages;
 
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Filament\Liquidaciones\Resources\CategoriasBasicosResource;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Filament\Resources\Pages\ListRecords;
 
 class ListCategoriasBasicos extends ListRecords
 {
@@ -15,7 +14,7 @@ class ListCategoriasBasicos extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            //
+
         ];
     }
 

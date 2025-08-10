@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Todo;
-use Livewire\Component;
 use Livewire\Attributes\Rule;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 class TodoList extends Component
@@ -16,11 +16,13 @@ class TodoList extends Component
 
     public $search;
 
-    public $editingTodoId = null;
-    #[Rule('required|min:3|max:50')]
-    public $editingName = null;
+    public $editingTodoId;
 
-    public function create(){
+    #[Rule('required|min:3|max:50')]
+    public $editingName;
+
+    public function create(): void
+    {
         //validate the input
         $validated = $this->validateOnly('name');
 
@@ -35,7 +37,8 @@ class TodoList extends Component
         $this->resetPage();
     }
 
-    public function edit($id){
+    public function edit($id): void
+    {
         //find the todo
         $this->editingTodoId = $id;
         $todo = Todo::findOrFail($id);
@@ -44,7 +47,8 @@ class TodoList extends Component
         $this->editingName = $todo->name;
     }
 
-    public function update(){
+    public function update(): void
+    {
 
         //find the todo
         $todo = Todo::findOrFail($this->editingTodoId);
@@ -54,7 +58,7 @@ class TodoList extends Component
 
         //update the todo
         $todo->update([
-            'name' => $validated['editingName']
+            'name' => $validated['editingName'],
         ]);
 
         $this->cancelEdit();
@@ -63,33 +67,35 @@ class TodoList extends Component
         session()->flash('success', 'Todo Updated Successfully');
     }
 
-    public function cancelEdit(){
+    public function cancelEdit(): void
+    {
         //reset the input field
         $this->reset('editingName', 'editingTodoId');
     }
 
-    public function delete($id){
-        try{
-
+    public function delete($id): void
+    {
+        try {
             //find the todo
             $todo = Todo::findOrFail($id);
             //delete the todo
             $todo->delete();
             //send a message to the user
             session()->flash('success', 'Todo Deleted Successfully');
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             //send a message to the user
             session()->flash('error', 'Todo Deletion Failed');
         }
     }
 
-    public function toggle($id){
+    public function toggle($id): void
+    {
         //find the todo
         $todo = Todo::findOrFail($id);
 
         //toggle the status
         $todo->update([
-            'completed' => !$todo->completed
+            'completed' => !$todo->completed,
         ]);
 
         //send a message to the user
@@ -99,10 +105,10 @@ class TodoList extends Component
     public function render()
     {
         $todoList = Todo::latest()
-            ->where('name', 'like', '%'.$this->search.'%')
+            ->where('name', 'like', '%' . $this->search . '%')
             ->paginate(5);
-        return view('livewire.todo-list',[
-            'todoList' => $todoList
+        return view('livewire.todo-list', [
+            'todoList' => $todoList,
         ]);
     }
 }

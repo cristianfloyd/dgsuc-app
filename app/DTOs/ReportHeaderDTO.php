@@ -9,6 +9,7 @@ class ReportHeaderDTO
         public string $orderNumber,
         public string $liquidationNumber,
         public string $liquidationDescription,
-        public string $generationDate
-    ) {}
+        public string $generationDate,
+    ) {
+    }
 }

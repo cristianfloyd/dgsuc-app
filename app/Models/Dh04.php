@@ -2,22 +2,24 @@
 
 namespace App\Models;
 
-use App\Models\Dhb3;
-use App\Models\Dhe5;
-use App\Models\Dhe6;
-use App\Models\Dhe7;
-use App\Models\Dhe8;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo Eloquent para la tabla mapuche.dh04
+ * Modelo Eloquent para la tabla mapuche.dh04.
  *
  * Esta clase representa las otras actividades de los empleados en el sistema Mapuche.
  */
 class Dh04 extends Model
 {
     use MapucheConnectionTrait;
+
+    /**
+     * Indica si el modelo debe ser timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * Nombre de la tabla asociada al modelo.
@@ -34,13 +36,6 @@ class Dh04 extends Model
     protected $primaryKey = 'nro_otra_actividad';
 
     /**
-     * Indica si el modelo debe ser timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
      * Los atributos que son asignables en masa.
      *
      * @var array
@@ -50,7 +45,7 @@ class Dh04 extends Model
         'cant_hs', 'fec_ingre', 'fec_egres', 'codc_dedic', 'vig_otano',
         'vig_otmes', 'dominstitucion', 'relprofesion', 'aporta_antig_remun',
         'aporta_antig_lao', 'aporta_ant_jubil', 'mes_vigencia', 'anio_vigencia',
-        'codmotivobaja', 'codescalafonoa', 'codcategoriaoa', 'codsistemaacceso', 'codgradooa'
+        'codmotivobaja', 'codescalafonoa', 'codcategoriaoa', 'codsistemaacceso', 'codgradooa',
     ];
 
     /**

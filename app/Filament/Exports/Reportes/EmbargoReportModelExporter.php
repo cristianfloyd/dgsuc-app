@@ -2,9 +2,9 @@
 
 namespace App\Filament\Exports\Reportes;
 
-use Filament\Actions\Exports\Exporter;
-use Filament\Actions\Exports\ExportColumn;
 use App\Models\Reportes\EmbargoReportModel;
+use Filament\Actions\Exports\ExportColumn;
+use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
 class EmbargoReportModelExporter extends Exporter

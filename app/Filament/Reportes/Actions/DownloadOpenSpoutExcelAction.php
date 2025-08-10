@@ -2,9 +2,8 @@
 
 namespace App\Filament\Reportes\Actions;
 
-use Filament\Actions\Action;
 use App\Exports\OpenSpoutReportExport;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Actions\Action;
 
 class DownloadOpenSpoutExcelAction extends Action
 {
@@ -36,7 +35,7 @@ class DownloadOpenSpoutExcelAction extends Action
                     'nro_cargo',
                     'codc_uacad',
                     'codn_conce',
-                    'impp_conce'
+                    'impp_conce',
                 ]);
 
                 return (new OpenSpoutReportExport($query))

@@ -11,6 +11,7 @@ return new class extends Migration
 
     public function up()
     {
+        DB::connection($this->getConnectionName())->unprepared('DROP FUNCTION IF EXISTS suc.get_mi_simplificacion_tt');
         DB::connection($this->getConnectionName())->unprepared("
             CREATE OR REPLACE FUNCTION suc.get_mi_simplificacion_tt(
                 nro_liqui_param INT,

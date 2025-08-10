@@ -15,11 +15,10 @@ use Illuminate\Database\Eloquent\Builder;
 class EmbargoReportResource extends Resource
 {
     protected static ?string $model = Embargo::class;
+
     protected static ?string $label = 'Reporte Embargos';
 
     protected static ?string $navigationGroup = 'Informes';
-
-
 
     public static function table(Table $table): Table
     {
@@ -30,11 +29,11 @@ class EmbargoReportResource extends Resource
                 TextColumn::make('datosPersonales.nombre_completo')
                     ->label('Nombre Completo')
                     ->limit(10)
-                    ->tooltip(fn(TextColumn $column): string => $column->getState())
+                    ->tooltip(fn (TextColumn $column): string => $column->getState())
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         $searchTerm = strtoupper($search);
-                        return $query->whereHas('datosPersonales', function ($query) use ($searchTerm) {
+                        return $query->whereHas('datosPersonales', function ($query) use ($searchTerm): void {
                             $query->where('desc_appat', 'like', "%{$searchTerm}%")
                                 ->orWhere('desc_apmat', 'like', "%{$searchTerm}%")
                                 ->orWhere('desc_apcas', 'like', "%{$searchTerm}%")
@@ -67,16 +66,15 @@ class EmbargoReportResource extends Resource
                     ->state(function (Embargo $record): float {
                         $importes = $record->getImporteDescontado(3);
                         return $record->imp_embargo - $importes->sum('impp_conce');
-                    })
-                ,
+                    }),
                 TextColumn::make('estado.desc_estado_embargo')->label('estado')->sortable(),
                 TextColumn::make('beneficiario.nom_beneficiario')->label('beneficiario')->sortable(),
                 TextColumn::make('juzgado.nom_juzgado')->sortable()
                     ->limit(15)
-                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
+                    ->tooltip(fn (TextColumn $column): string => $column->getState()),
                 TextColumn::make('tipoEmbargo.desc_tipo_embargo')->sortable()
                     ->limit(10)
-                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
+                    ->tooltip(fn (TextColumn $column): string => $column->getState()),
                 TextColumn::make('tipoJuicio.desc_tipo_juicio')->label('Tipo Juicio'),
                 TextColumn::make('imp_embargo')
                     ->money('ARS')
@@ -87,7 +85,7 @@ class EmbargoReportResource extends Resource
                 TextColumn::make('caratula')->sortable(),
             ])
             ->headerActions([
-                //
+
             ])
             ->filters([
                 SelectFilter::make('id_estado_embargo')
@@ -96,17 +94,17 @@ class EmbargoReportResource extends Resource
                     ->default(2),
             ])
             ->actions([
-                //
+
             ])
             ->bulkActions([
-                //
+
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -121,7 +119,7 @@ class EmbargoReportResource extends Resource
     protected function getHeaderActions(): array
     {
         return [
-            //
+
         ];
     }
 }

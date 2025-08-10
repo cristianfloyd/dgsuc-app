@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use Livewire\Livewire;
+use App\Services\DatabaseConnectionService;
+use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
-use Filament\Support\Facades\FilamentView;
-use App\Services\DatabaseConnectionService;
-use App\Livewire\DatabaseConnectionSelector;
+use Livewire\Livewire;
 
 class FilamentServiceProvider extends ServiceProvider
 {
@@ -21,17 +21,16 @@ class FilamentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Registrar el componente Livewire (Livewire 3 no necesita registro explícito)
-        // Log::info('FilamentServiceProvider boot render hook');
-        // Añadir el componente a la barra de navegación
-        // FilamentView::registerRenderHook(
-        //     PanelsRenderHook::TOPBAR_END,
-        //     fn (): string => '<livewire:database-connection-selector />'
-        // );
+        // Registrar el selector de conexión de BD en todos los paneles
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::TOPBAR_END,
+            fn (): string => Blade::render('@livewire(\'database-connection-selector-badge\')')
+        );
+
         // Registrar el renderHook para el footer
         FilamentView::registerRenderHook(
             PanelsRenderHook::FOOTER,
-            fn (): string => view('components.filament.footer-branding')->render()
+            fn (): string => Blade::render('@livewire(\'components.filament-footer\')')
         );
     }
 }

@@ -22,10 +22,10 @@ class Dh19Repository implements Dh19RepositoryInterface
     public function findByPrimaryKey(int $nroLegaj, int $codnConce, string $tipoDocum, int $nroDocum): ?Dh19
     {
         return Dh19::where('nro_legaj', $nroLegaj)
-                   ->where('codn_conce', $codnConce)
-                   ->where('tipo_docum', $tipoDocum)
-                   ->where('nro_docum', $nroDocum)
-                   ->first();
+            ->where('codn_conce', $codnConce)
+            ->where('tipo_docum', $tipoDocum)
+            ->where('nro_docum', $nroDocum)
+            ->first();
     }
 
     /**

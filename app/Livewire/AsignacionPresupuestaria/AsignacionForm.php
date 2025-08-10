@@ -2,17 +2,16 @@
 
 namespace App\Livewire\AsignacionPresupuestaria;
 
-use Exception;
-use Livewire\Component;
-use App\Models\Mapuche\Dh24;
-use Livewire\WithPagination;
-use Livewire\Attributes\Rule;
 use App\Data\Mapuche\Dh24Data;
-use Livewire\Attributes\Computed;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Application;
+use App\Models\Mapuche\Dh24;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Rule;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class AsignacionForm extends Component
 {
@@ -46,22 +45,28 @@ class AsignacionForm extends Component
     #[Rule('required|integer|min:1')]
     public int $codn_fuent = 0;
 
-
     // Estados del componente
     public bool $isEditing = false;
+
     public ?int $editingId = null;
+
     public string $search = '';
+
     public string $sortField = 'nro_cargo';
+
     public string $sortDirection = 'asc';
 
     // Eventos personalizados
     protected $listeners = ['refreshAllocations' => '$refresh'];
+
     protected int $codn_subar;
+
     protected int $codn_final;
+
     protected int $codn_funci;
 
     /**
-     * Inicializa el formulario de edición
+     * Inicializa el formulario de edición.
      */
     public function edit(Dh24 $allocation): void
     {
@@ -81,11 +86,10 @@ class AsignacionForm extends Component
         $this->codn_subar = $allocation->codn_subar;
         $this->codn_final = $allocation->codn_final;
         $this->codn_funci = $allocation->codn_funci;
-
     }
 
     /**
-     * Guarda o actualiza una imputación
+     * Guarda o actualiza una imputación.
      */
     public function save(): void
     {
@@ -104,7 +108,7 @@ class AsignacionForm extends Component
                 $this->codn_area,
                 $this->codn_subar,
                 $this->codn_final,
-                $this->codn_funci
+                $this->codn_funci,
             );
 
             if ($this->isEditing) {
@@ -118,38 +122,26 @@ class AsignacionForm extends Component
 
             $this->reset();
             $this->dispatch('allocation-saved');
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->notification('Error al procesar la imputación' . $e, 'error');
         }
     }
 
     /**
-     * Notificaciones del sistema
-     */
-    private function notification(string $message, string $type = 'success'): void
-    {
-        $this->dispatch('notify', [
-            'message' => $message,
-            'type' => $type
-        ]);
-    }
-
-    /**
-     * Elimina una imputación
+     * Elimina una imputación.
      */
     public function delete(Dh24 $allocation): void
     {
         try {
             $allocation->delete();
             $this->notification('Imputación eliminada correctamente');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->notification('Error al eliminar la imputación ' . $e, 'error');
         }
     }
 
     /**
-     * Calcula el total asignado para la unidad actual
+     * Calcula el total asignado para la unidad actual.
      */
     #[Computed]
     public function totalAllocated(): float
@@ -163,7 +155,7 @@ class AsignacionForm extends Component
     }
 
     /**
-     * Calcula el porcentaje disponible
+     * Calcula el porcentaje disponible.
      */
     #[Computed]
     public function availablePercentage(): float
@@ -172,13 +164,13 @@ class AsignacionForm extends Component
     }
 
     /**
-     * Obtiene las imputaciones filtradas y ordenadas
+     * Obtiene las imputaciones filtradas y ordenadas.
      */
     #[Computed]
     public function allocations(): LengthAwarePaginator
     {
         return Dh24::query()
-            ->when($this->search, function ($query) {
+            ->when($this->search, function ($query): void {
                 $query->where('nro_cargo', 'like', "%$this->search%");
             })
             ->orderBy($this->sortField, $this->sortDirection)
@@ -186,7 +178,7 @@ class AsignacionForm extends Component
     }
 
     /**
-     * Renderiza el componente
+     * Renderiza el componente.
      */
     public function render(): View|Factory|Application
     {
@@ -198,7 +190,7 @@ class AsignacionForm extends Component
     }
 
     /**
-     * Reglas de validación dinámicas
+     * Reglas de validación dinámicas.
      */
     protected function rules(): array
     {
@@ -208,7 +200,7 @@ class AsignacionForm extends Component
                 'required',
                 'numeric',
                 'between:0,100',
-                function($attribute, $value, $fail) {
+                function ($attribute, $value, $fail): void {
                     $dh24 = new Dh24();
                     if (!$dh24->isAllocationWithinLimit($value)) {
                         $fail('La suma de porcentajes no puede superar el 100%.');
@@ -220,7 +212,7 @@ class AsignacionForm extends Component
     }
 
     /**
-     * Mensajes de validación personalizados
+     * Mensajes de validación personalizados.
      */
     protected function messages(): array
     {
@@ -229,5 +221,16 @@ class AsignacionForm extends Component
             'porc_ipres.between' => 'El porcentaje debe estar entre 0 y 100.',
             // ... otros mensajes
         ];
+    }
+
+    /**
+     * Notificaciones del sistema.
+     */
+    private function notification(string $message, string $type = 'success'): void
+    {
+        $this->dispatch('notify', [
+            'message' => $message,
+            'type' => $type,
+        ]);
     }
 }

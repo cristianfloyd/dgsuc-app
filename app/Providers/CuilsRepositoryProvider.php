@@ -2,13 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\CuilRepositoryInterface;
 use App\Repositories\CuilRepository;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\CuilRepositoryInterface;
 
 class CuilsRepositoryProvider extends ServiceProvider
 {
-
     public function register(): void
     {
         $this->app->bind(CuilRepositoryInterface::class, CuilRepository::class);
@@ -19,6 +18,5 @@ class CuilsRepositoryProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

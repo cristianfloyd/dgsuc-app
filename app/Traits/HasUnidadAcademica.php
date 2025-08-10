@@ -6,7 +6,6 @@ use App\Data\UnidadAcademicaData;
 
 trait HasUnidadAcademica
 {
-
     /**
      * Determina los códigos de la unidad académica basado en el código proporcionado.
      *
@@ -16,18 +15,20 @@ trait HasUnidadAcademica
      */
     public function determinarCodigosUnidadAcademica(?string $codigo): void
     {
-        if (!$codigo) return;
+        if (!$codigo) {
+            return;
+        }
 
         $unidad = UnidadAcademicaData::fromCodigo($codigo);
 
-        if ($unidad) {
+        if ($unidad instanceof \App\Data\UnidadAcademicaData) {
             $this->attributes['domicilio'] = $unidad->sucursal;
             $this->attributes['actividad'] = $unidad->actividad->value;
         }
     }
 
     /**
-     * Obtiene la unidad académica actual
+     * Obtiene la unidad académica actual.
      */
     public function getUnidadAcademica(): ?UnidadAcademicaData
     {

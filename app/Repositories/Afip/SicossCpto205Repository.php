@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Repositories\Afip;
 
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 class SicossCpto205Repository
 {
     use MapucheConnectionTrait;
-
-
 
     public function procesarConceptos(array $liquidaciones): int
     {
@@ -33,6 +31,71 @@ class SicossCpto205Repository
 
             return $this->contarRegistros();
         });
+    }
+
+    /**
+     * Elimina la tabla temporal si existe.
+     */
+    public function eliminarTablaTemporal(): void
+    {
+        DB::connection($this->getConnectionName())->statement('
+            DROP TABLE IF EXISTS resultado_cargos_asoc;
+            DROP TABLE IF EXISTS resultado_cargos_aut;
+            DROP TABLE IF EXISTS resultado_cargos_nod;
+            DROP TABLE IF EXISTS tcpto;
+            DROP TABLE IF EXISTS tcpto205;
+        ');
+    }
+
+    /**
+     * Cuenta los registros en la tabla temporal.
+     *
+     * @return int Número de registros
+     */
+    public function contarRegistros(): int
+    {
+        $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto205');
+        return (int)$resultado->total;
+    }
+
+    /**
+     * Inicia una transacción en la conexión Mapuche.
+     *
+     * Este método inicia una nueva transacción en la base de datos,
+     * permitiendo realizar múltiples operaciones que serán confirmadas
+     * o revertidas como una unidad atómica.
+     *
+     * @return void
+     */
+    public function iniciarTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->beginTransaction();
+    }
+
+    /**
+     * Confirma una transacción en la conexión Mapuche.
+     *
+     * Este método confirma todos los cambios realizados dentro de la transacción actual
+     * y los hace permanentes en la base de datos.
+     *
+     * @return void
+     */
+    public function confirmarTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->commit();
+    }
+
+    /**
+     * Revierte una transacción en la conexión Mapuche.
+     *
+     * Este método deshace todos los cambios realizados dentro de la transacción actual
+     * y restaura el estado de la base de datos al punto anterior al inicio de la transacción.
+     *
+     * @return void
+     */
+    public function revertirTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->rollBack();
     }
 
     private function crearTablaCargosAsociados(array $liquidaciones): void
@@ -94,19 +157,18 @@ class SicossCpto205Repository
     }
 
     /**
-     * Crea tabla temporal con la unión de resultados
+     * Crea tabla temporal con la unión de resultados.
      */
     private function crearTablaResultados(): void
     {
-        DB::connection($this->getConnectionName())->statement("
+        DB::connection($this->getConnectionName())->statement('
             CREATE TEMP TABLE tcpto AS
             SELECT nro_legaj FROM resultado_cargos_aut
             UNION ALL
             SELECT nro_legaj FROM resultado_cargos_nod
             ORDER BY nro_legaj
-        ");
+        ');
     }
-
 
     private function calcularMontosYActualizar(array $liquidaciones): void
     {
@@ -134,7 +196,7 @@ class SicossCpto205Repository
         ");
 
         // Luego actualizamos la tabla final
-        DB::connection($this->getConnectionName())->statement("
+        DB::connection($this->getConnectionName())->statement('
             UPDATE suc.afip_mapuche_sicoss
             SET cpto_no_remun = cpto_no_remun - b.monto,
                 sueldo_adicc = sueldo_adicc + b.monto,

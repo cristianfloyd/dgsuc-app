@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\EmbargoRequest;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
+use App\Http\Requests\EmbargoRequest;
 
 class EmbargoController extends Controller
 {
@@ -13,7 +13,7 @@ class EmbargoController extends Controller
     protected EmbargoRepositoryInterface $embargoRepository;
 
     /**
-     * Constructor del controller
+     * Constructor del controller.
      *
      * @param EmbargoRepositoryInterface $embargoRepository
      */
@@ -23,9 +23,10 @@ class EmbargoController extends Controller
     }
 
     /**
-     * Procesa los embargos
+     * Procesa los embargos.
      *
      * @param EmbargoRequest $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function process(EmbargoRequest $request)
@@ -34,7 +35,7 @@ class EmbargoController extends Controller
             $request->nroComplementarias,
             $request->nroLiquiDefinitiva,
             $request->nroLiquiProxima,
-            $request->insertIntoDh25
+            $request->insertIntoDh25,
         );
 
         return response()->json($results);

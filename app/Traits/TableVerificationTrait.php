@@ -19,7 +19,7 @@ trait TableVerificationTrait
 
             return true;
         } catch (\Exception $e) {
-            Log::error("Error al inicializar tabla: " . $e->getMessage());
+            Log::error('Error al inicializar tabla: ' . $e->getMessage());
             return false;
         }
     }

@@ -7,9 +7,9 @@ use Ramsey\Uuid\Uuid;
 class CreateUuid
 {
     protected $uuid;
+
     public function __construct()
     {
-        //
     }
 
     public function getUuid()

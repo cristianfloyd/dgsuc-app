@@ -2,22 +2,22 @@
 
 namespace App\Imports;
 
+use App\Data\Reportes\BloqueosData;
 use App\DTOs\ImportResultDTO;
 use App\Enums\BloqueosEstadoEnum;
-use Illuminate\Support\Collection;
-use App\Data\Reportes\BloqueosData;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Imports\DuplicateValidationService;
+use App\Services\Imports\ImportNotificationService;
+use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
+use App\Services\Validation\ExcelRowValidationService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
-use App\Services\Imports\ImportNotificationService;
-use App\Services\Imports\DuplicateValidationService;
-use App\Services\Validation\ExcelRowValidationService;
-use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 
 class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, WithChunkReading
 {
@@ -27,6 +27,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
     public $connection;
 
     private Collection $processedRows;
+
     private ImportResultDTO $importResult;
 
     /**
@@ -42,12 +43,12 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
         private readonly DuplicateValidationService $duplicateValidator,
         private readonly BloqueosServiceInterface $bloqueosService,
         private readonly ImportNotificationService $notificationService,
-        private readonly ExcelRowValidationService $rowValidator
+        private readonly ExcelRowValidationService $rowValidator,
     ) {
         $this->connection = $this->getConnectionFromTrait();
         $this->processedRows = collect();
         $this->importResult = new ImportResultDTO(
-            message: 'Iniciando importación de bloqueos'
+            message: 'Iniciando importación de bloqueos',
         );
 
         Log::debug('BloqueosImport constructor called', [
@@ -55,16 +56,12 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
         ]);
     }
 
-
-
-
-
     public function collection(Collection $rows): void
     {
         try {
             // Procesamiento por lotes dentro de una transacción
-            $this->connection->transaction(function () use ($rows) {
-                $rows->chunk($this->chunkSize())->each(function ($chunk) {
+            $this->connection->transaction(function () use ($rows): void {
+                $rows->chunk($this->chunkSize())->each(function ($chunk): void {
                     $this->processChunk($chunk);
                 });
             });
@@ -77,22 +74,74 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
             $this->importResult->error = $e;
             $this->importResult->message = 'Error en la importación: ' . $e->getMessage();
             $this->importResult->addError($e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             throw $e;
         }
     }
 
+    /**
+     * Define la fila que contiene los encabezados.
+     *
+     * @return int
+     */
+    public function headingRow(): int
+    {
+        return 1;
+    }
+
+    public function chunkSize(): int
+    {
+        return 1000;
+    }
+
+    public function rules(): array
+    {
+        return BloqueosData::rules();
+    }
+
+    public function getProcessedRowsCount(): int
+    {
+        return $this->processedRows->count();
+    }
+
+    public function getImportResult(): ImportResultDTO
+    {
+        return $this->importResult;
+    }
+
+    /**
+     * Mensajes personalizados para las validaciones.
+     *
+     * @return array
+     */
+    public function customValidationMessages(): array
+    {
+        return [
+            'correo_electronico.required' => 'El campo email es obligatorio',
+            'correo_electronico.email' => 'El email debe tener un formato válido',
+            'nombre.required' => 'El campo nombre es obligatorio',
+            'usuario_mapuche_solicitante.required' => 'El usuario Mapuche es obligatorio',
+            'dependencia.required' => 'La dependencia es obligatoria',
+            'legajo.required' => 'El número de legajo es obligatorio',
+            'legajo.numeric' => 'El número de legajo debe ser numérico',
+            'n_de_cargo.required' => 'El número de cargo es obligatorio',
+            'n_de_cargo.numeric' => 'El número de cargo debe ser numérico',
+            'tipo_de_movimiento.required' => 'El tipo es obligatorio',
+            'tipo_de_movimiento.in' => 'El tipo debe ser: Licencia, Fallecido o Renuncia',
+        ];
+    }
+
     private function processChunk(Collection $chunk): void
     {
-            // Validación de duplicados
-            $validatedChunk = $this->validateChunk($chunk);
+        // Validación de duplicados
+        $validatedChunk = $this->validateChunk($chunk);
 
-            // Procesamiento de registros válidos
-            $validatedChunk->each(function ($row) {
-                $this->processRow($row->toArray());
-            });
+        // Procesamiento de registros válidos
+        $validatedChunk->each(function ($row): void {
+            $this->processRow($row->toArray());
+        });
     }
 
     private function validateChunk(Collection $chunk): Collection
@@ -128,61 +177,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
         Log::info('Importación completada', [
             'processed' => $this->importResult->getProcessedCount(),
             'duplicates' => $this->importResult->getDuplicateCount(),
-            'errors' => $this->importResult->getErrorCount()
+            'errors' => $this->importResult->getErrorCount(),
         ]);
-    }
-
-
-
-
-
-    /**
-     * Define la fila que contiene los encabezados
-     * @return int
-     */
-    public function headingRow(): int
-    {
-        return 1;
-    }
-
-    public function chunkSize(): int
-    {
-        return 1000;
-    }
-
-    public function rules(): array
-    {
-        return BloqueosData::rules();
-    }
-
-    public function getProcessedRowsCount(): int
-    {
-        return $this->processedRows->count();
-    }
-
-    public function getImportResult(): ImportResultDTO
-    {
-        return $this->importResult;
-    }
-
-    /**
-     * Mensajes personalizados para las validaciones
-     * @return array
-     */
-    public function customValidationMessages(): array
-    {
-        return [
-            'correo_electronico.required' => 'El campo email es obligatorio',
-            'correo_electronico.email' => 'El email debe tener un formato válido',
-            'nombre.required' => 'El campo nombre es obligatorio',
-            'usuario_mapuche_solicitante.required' => 'El usuario Mapuche es obligatorio',
-            'dependencia.required' => 'La dependencia es obligatoria',
-            'legajo.required' => 'El número de legajo es obligatorio',
-            'legajo.numeric' => 'El número de legajo debe ser numérico',
-            'n_de_cargo.required' => 'El número de cargo es obligatorio',
-            'n_de_cargo.numeric' => 'El número de cargo debe ser numérico',
-            'tipo_de_movimiento.required' => 'El tipo es obligatorio',
-            'tipo_de_movimiento.in' => 'El tipo debe ser: Licencia, Fallecido o Renuncia',
-        ];
     }
 }

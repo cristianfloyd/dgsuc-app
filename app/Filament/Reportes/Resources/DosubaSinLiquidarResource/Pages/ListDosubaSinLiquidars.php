@@ -2,16 +2,15 @@
 
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
-use Filament\Actions;
+use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
+use App\Models\Reportes\DosubaSinLiquidarModel;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\File;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use App\Models\Reportes\DosubaSinLiquidarModel;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\HtmlString;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
-use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
 
 class ListDosubaSinLiquidars extends ListRecords
 {
@@ -66,7 +65,7 @@ class ListDosubaSinLiquidars extends ListRecords
                 ->modalIcon('heroicon-o-information-circle'),
             Action::make('vaciarTabla')
                 ->label('Vaciar Tabla')
-                ->action(function () {
+                ->action(function (): void {
                     DosubaSinLiquidarModel::clearSessionData();
                     Notification::make()->success()->title('La tabla ha sido vaciada exitosamente.')->send();
                 })
@@ -74,7 +73,7 @@ class ListDosubaSinLiquidars extends ListRecords
                 ->requiresConfirmation() // Solicita confirmación antes de ejecutar la acción
                 ->modalHeading('Confirmar Vaciar Tabla')
                 ->modalDescription('¿Estás seguro de que deseas vaciar la tabla? Esta acción no se puede deshacer.')
-                ->modalSubmitActionLabel('Vaciar')
+                ->modalSubmitActionLabel('Vaciar'),
         ];
     }
 }

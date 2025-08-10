@@ -2,28 +2,30 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Models\ComprobanteNominaModel;
-use Filament\Forms\Components\Section;
-use Filament\Notifications\Notification;
 use App\Exports\ComprobantesNominaExport;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Filters\SelectFilter;
-use App\Services\ComprobanteNominaService;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
+use App\Models\ComprobanteNominaModel;
+use App\Services\ComprobanteNominaService;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ComprobanteNominaModelResource extends Resource
 {
     protected static ?string $model = ComprobanteNominaModel::class;
 
     protected static ?string $navigationGroup = 'Informes';
+
     protected static ?string $modelLabel = 'CHE';
+
     protected static ?string $pluralModelLabel = 'CHE';
 
     public static function form(Form $form): Form
@@ -38,8 +40,8 @@ class ComprobanteNominaModelResource extends Resource
                             ->required()
                             ->maxSize(5120)
                             ->directory('comprobantes-temp')
-                            ->preserveFilenames()
-                    ])
+                            ->preserveFilenames(),
+                    ]),
             ]);
     }
 
@@ -48,17 +50,19 @@ class ComprobanteNominaModelResource extends Resource
         return $table
             ->headerActions([
                 Action::make('exportar_pdf_barry')
-                ->label('PDF')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
-                ->action(function (array $data): StreamedResponse {
-                    $liquidacion = ComprobanteNominaModel::first();
+                    ->label('PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function (array $data): StreamedResponse {
+                        $liquidacion = ComprobanteNominaModel::first();
 
-                    return response()->streamDownload(function () use ($liquidacion) {
-                        echo ComprobanteNominaService::exportarPdf($liquidacion);
-                    },
-                    "comprobantes_{$liquidacion->nro_liqui}.pdf");
-                }),
+                        return response()->streamDownload(
+                            function () use ($liquidacion): void {
+                                echo ComprobanteNominaService::exportarPdf($liquidacion);
+                            },
+                            "comprobantes_{$liquidacion->nro_liqui}.pdf",
+                        );
+                    }),
                 Action::make('exportar')
                     ->label('Excel')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -69,9 +73,9 @@ class ComprobanteNominaModelResource extends Resource
                         return Excel::download(
                             new ComprobantesNominaExport(
                                 $liquidacion->nro_liqui,
-                                $liquidacion->desc_liqui
+                                $liquidacion->desc_liqui,
                             ),
-                                "comprobantes_{$liquidacion->nro_liqui}.xlsx"
+                            "comprobantes_{$liquidacion->nro_liqui}.xlsx",
                         );
                     }),
                 Action::make('importar')
@@ -85,7 +89,7 @@ class ComprobanteNominaModelResource extends Resource
                             ->maxSize(5120)
                             ->directory('comprobantes-temp')
                             ->preserveFilenames()
-                            ->helperText('Seleccione el archivo CHE para procesar')
+                            ->helperText('Seleccione el archivo CHE para procesar'),
                     ])
                     ->action(function (array $data, ComprobanteNominaService $service): void {
                         try {
@@ -94,7 +98,7 @@ class ComprobanteNominaModelResource extends Resource
                             }
 
                             $stats = $service->processFile(
-                                storage_path('app/public/' . $data['archivo'])
+                                storage_path('app/public/' . $data['archivo']),
                             );
 
                             Notification::make()
@@ -114,11 +118,11 @@ class ComprobanteNominaModelResource extends Resource
                     ->label('Importacion Avanzada')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('warning')
-                    ->url(fn() => static::getUrl('import')),
+                    ->url(fn () => static::getUrl('import')),
                 Action::make('generate')
                     ->label('Generar Comprobantes')
                     ->icon('heroicon-o-document-check')
-                    ->url(fn(): string => static::getUrl('generate'))
+                    ->url(fn (): string => static::getUrl('generate')),
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('anio_periodo')
@@ -127,7 +131,7 @@ class ComprobanteNominaModelResource extends Resource
 
                 Tables\Columns\TextColumn::make('mes_periodo')
                     ->label('Mes')
-                    ->formatStateUsing(fn($state) => nombreMes($state)),
+                    ->formatStateUsing(fn ($state) => nombreMes($state)),
 
                 Tables\Columns\TextColumn::make('nro_liqui')
                     ->label('Nro Liqui')
@@ -136,7 +140,7 @@ class ComprobanteNominaModelResource extends Resource
                 Tables\Columns\TextColumn::make('desc_liqui')
                     ->label('Desc. Liquidación')
                     ->limit(20)
-                    ->tooltip(fn($record) => $record->desc_liqui)
+                    ->tooltip(fn ($record) => $record->desc_liqui)
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('importe')
@@ -159,15 +163,15 @@ class ComprobanteNominaModelResource extends Resource
             ->filters([
                 SelectFilter::make('anio_periodo')
                     ->label('Año')
-                    ->options(fn() => ComprobanteNominaModel::distinct()
+                    ->options(fn () => ComprobanteNominaModel::distinct()
                         ->pluck('anio_periodo', 'anio_periodo')
                         ->toArray()),
 
                 SelectFilter::make('mes_periodo')
                     ->label('Mes')
-                    ->options(fn() => collect(range(1, 12))->mapWithKeys(
-                        fn($mes) =>
-                        [$mes => nombreMes($mes)]
+                    ->options(fn () => collect(range(1, 12))->mapWithKeys(
+                        fn ($mes) =>
+                        [$mes => nombreMes($mes)],
                     )->toArray()),
 
             ])
@@ -183,7 +187,7 @@ class ComprobanteNominaModelResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

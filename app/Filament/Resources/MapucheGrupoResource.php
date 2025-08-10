@@ -2,20 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use App\Models\Mapuche\MapucheGrupo;
-use Filament\Resources\RelationManagers;
-use App\Filament\Resources\MapucheGrupoResource\Pages\EditMapucheGrupo;
-use App\Filament\Resources\MapucheGrupoResource\Pages\ViewMapucheGrupo;
-use App\Filament\Resources\MapucheGrupoResource\Pages\ListMapucheGrupos;
 use App\Filament\Resources\MapucheGrupoResource\Pages\CreateMapucheGrupo;
+use App\Filament\Resources\MapucheGrupoResource\Pages\EditMapucheGrupo;
+use App\Filament\Resources\MapucheGrupoResource\Pages\ListMapucheGrupos;
 use App\Filament\Resources\MapucheGrupoResource\Pages\ManageMapucheGrupoLegajos;
+use App\Filament\Resources\MapucheGrupoResource\Pages\ViewMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\RelationManagers\LegajosRelationManager;
+use App\Models\Mapuche\MapucheGrupo;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
 
 class MapucheGrupoResource extends Resource
 {
@@ -82,7 +81,7 @@ class MapucheGrupoResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('tipo')
-                    ->options(fn() => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
+                    ->options(fn () => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
                     ->label('Filtrar por Tipo'),
             ])
             ->actions([
@@ -92,7 +91,7 @@ class MapucheGrupoResource extends Resource
                 Action::make('administrar_legajos')
                     ->label('Administrar Legajos')
                     ->icon('heroicon-o-users')
-                    ->url(fn(MapucheGrupo $record): string => static::getUrl('manage-legajos', ['record' => $record])),
+                    ->url(fn (MapucheGrupo $record): string => static::getUrl('manage-legajos', ['record' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -104,7 +103,7 @@ class MapucheGrupoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            LegajosRelationManager::class
+            LegajosRelationManager::class,
         ];
     }
 

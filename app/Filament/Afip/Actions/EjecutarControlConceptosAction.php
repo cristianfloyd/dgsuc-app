@@ -15,21 +15,7 @@ use Illuminate\Support\Facades\View as ViewFacade;
 class EjecutarControlConceptosAction extends Action
 {
     /**
-     * Obtiene el nombre por defecto de la acción
-     *
-     * Este método define el nombre por defecto de la acción, que se utiliza
-     * para identificarla en el sistema. En este caso, se define como
-     * 'ejecutar_control_conceptos', lo cual facilita su identificación y uso.
-     *
-     * @return string|null El nombre por defecto de la acción
-     */
-    public static function getDefaultName(): ?string
-    {
-        return 'ejecutar_control_conceptos';
-    }
-
-    /**
-     * Configura la acción de control de conceptos SICOSS
+     * Configura la acción de control de conceptos SICOSS.
      *
      * Este método configura todos los aspectos visuales y funcionales de la acción:
      * - Etiqueta e icono del botón
@@ -63,21 +49,52 @@ class EjecutarControlConceptosAction extends Action
                     ->label('Conceptos a controlar')
                     ->options(
                         collect(ConceptosSicossEnum::cases())
-                            ->mapWithKeys(fn($case) => [$case->value => (string) $case->value])
-                            ->toArray()
+                            ->mapWithKeys(fn ($case) => [$case->value => (string)$case->value])
+                            ->toArray(),
                     )
                     ->default(array_merge(
                         ConceptosSicossEnum::getAllAportesCodes(),
                         ConceptosSicossEnum::getAllContribucionesCodes(),
-                        ConceptosSicossEnum::getContribucionesArtCodes()
+                        ConceptosSicossEnum::getContribucionesArtCodes(),
                     ))
                     ->columns(3),
             ]);
     }
 
+    /**
+     * Obtiene el nombre por defecto de la acción.
+     *
+     * Este método define el nombre por defecto de la acción, que se utiliza
+     * para identificarla en el sistema. En este caso, se define como
+     * 'ejecutar_control_conceptos', lo cual facilita su identificación y uso.
+     *
+     * @return string|null El nombre por defecto de la acción
+     */
+    public static function getDefaultName(): ?string
+    {
+        return 'ejecutar_control_conceptos';
+    }
 
     /**
-     * Ejecuta el control de conceptos SICOSS para el período fiscal actual
+     * Agrega un badge que muestra el período fiscal actual en formato YYYY-MM.
+     *
+     * Este método crea un badge visual que indica el año y mes del período
+     * fiscal actual, formateado como "YYYY-MM" (ej: "2024-03"). El badge
+     * se obtiene del componente Livewire padre que contiene las propiedades
+     * year y month del período fiscal.
+     *
+     * @return static Retorna la instancia actual del action para permitir method chaining
+     */
+    public function withPeriodBadge(): static
+    {
+        return $this->badge(function () {
+            $livewire = $this->getLivewire();
+            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
+        });
+    }
+
+    /**
+     * Ejecuta el control de conceptos SICOSS para el período fiscal actual.
      *
      * Este método realiza las siguientes operaciones:
      * 1. Obtiene el período fiscal actual (año y mes)
@@ -91,8 +108,10 @@ class EjecutarControlConceptosAction extends Action
      * configurada en el componente Livewire padre.
      *
      * @param array $data Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
-     * @return void
+     *
      * @throws \Exception Cuando ocurre un error durante la ejecución del control
+     *
+     * @return void
      */
     protected function ejecutarControl(array $data = []): void
     {
@@ -101,7 +120,7 @@ class EjecutarControlConceptosAction extends Action
         $conceptos = $data['conceptos'] ?? array_merge(
             ConceptosSicossEnum::getAllAportesCodes(),
             ConceptosSicossEnum::getAllContribucionesCodes(),
-            ConceptosSicossEnum::getContribucionesArtCodes()
+            ConceptosSicossEnum::getContribucionesArtCodes(),
         );
 
         try {
@@ -117,7 +136,7 @@ class EjecutarControlConceptosAction extends Action
             Log::info('Iniciando control de conceptos', [
                 'year' => $year,
                 'month' => $month,
-                'connection' => $livewire->getConnectionName()
+                'connection' => $livewire->getConnectionName(),
             ]);
 
             // Ejecutar control
@@ -148,14 +167,14 @@ class EjecutarControlConceptosAction extends Action
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $livewire->activeTab = 'conceptos'),
+                        ->action(fn () => $livewire->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();
         } catch (\Exception $e) {
             Log::error('Error en control de conceptos', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -167,24 +186,5 @@ class EjecutarControlConceptosAction extends Action
         } finally {
             $livewire->loading = false;
         }
-    }
-
-
-    /**
-     * Agrega un badge que muestra el período fiscal actual en formato YYYY-MM
-     *
-     * Este método crea un badge visual que indica el año y mes del período
-     * fiscal actual, formateado como "YYYY-MM" (ej: "2024-03"). El badge
-     * se obtiene del componente Livewire padre que contiene las propiedades
-     * year y month del período fiscal.
-     *
-     * @return static Retorna la instancia actual del action para permitir method chaining
-     */
-    public function withPeriodBadge(): static
-    {
-        return $this->badge(function () {
-            $livewire = $this->getLivewire();
-            return sprintf('%d-%02d', $livewire->year, $livewire->month);
-        });
     }
 }

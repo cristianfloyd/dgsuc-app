@@ -2,38 +2,42 @@
 
 namespace App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 
-use Exception;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use Filament\Actions\Action;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Services\RepOrdenPagoService;
-use Illuminate\Support\Facades\Cache;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Notifications\Notification;
-use App\Models\Reportes\RepOrdenPagoModel;
-use Filament\Tables\Concerns\InteractsWithTable;
-use App\Filament\Widgets\MultipleIdLiquiSelector;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Filament\Reportes\Resources\OrdenDePagoResource;
+use App\Filament\Widgets\MultipleIdLiquiSelector;
+use App\Models\Reportes\RepOrdenPagoModel;
+use App\Services\RepOrdenPagoService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class ReporteOrdenPago extends Page implements HasTable
 {
     use InteractsWithTable;
-    protected static string $resource = OrdenDePagoResource::class;
-    protected static ?string $title = 'Crear Reporte de Ordenes de Pago';
-    protected static string $view = 'filament.resources.orden-de-pago-resource.pages.reporte-orden-pago';
-    protected static ?string $slug = 'crear';
-    protected Table $table;
 
     public bool $reporteGenerado = false;
+
     public ?array $idLiquiSelected = null;
+
+    protected static string $resource = OrdenDePagoResource::class;
+
+    protected static ?string $title = 'Crear Reporte de Ordenes de Pago';
+
+    protected static string $view = 'filament.resources.orden-de-pago-resource.pages.reporte-orden-pago';
+
+    protected static ?string $slug = 'crear';
+
+    protected Table $table;
+
     protected RepOrdenPagoService $ordenPagoService;
 
-    public function boot(RepOrdenPagoService $ordenPagoService)
+    public function boot(RepOrdenPagoService $ordenPagoService): void
     {
         $this->ordenPagoService = $ordenPagoService;
         $this->ordenPagoService->ensureTableAndFunction();
@@ -42,7 +46,7 @@ class ReporteOrdenPago extends Page implements HasTable
         Log::info('ReporteOrdenPago: Se ha inicializado la página');
     }
 
-    public function mount()
+    public function mount(): void
     {
         Log::info('ReporteOrdenPago: Se ha montado la página');
         // Limpiar la session anterior
@@ -52,8 +56,8 @@ class ReporteOrdenPago extends Page implements HasTable
         $this->reporteGenerado = RepOrdenPagoModel::whereNotNull('nro_liqui')->exists();
 
         Log::debug('Estado inicial del reporte', [
-            'reporteGenerado' => $this->reporteGenerado
-    ]);
+            'reporteGenerado' => $this->reporteGenerado,
+        ]);
 
     }
 
@@ -90,35 +94,7 @@ class ReporteOrdenPago extends Page implements HasTable
             ->defaultSort('nro_liqui', 'desc');
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('verOP')
-                ->label('Ver OP')
-                ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn() => $this->reporteGenerado),
-            Action::make('generarReporte')
-                ->label('Generar OP')
-                ->action(function () {
-                    if ($this->generarReporte()) {
-                        Notification::make()->title('Reporte generado')->success()->send();
-                    }
-                }),
-            Action::make('limpiar')
-                ->label('Limpiar')
-                ->color('danger')
-                ->icon('heroicon-o-trash')
-                ->requiresConfirmation()
-                ->modalHeading('¿Está seguro de limpiar la tabla?')
-                ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
-                ->modalSubmitActionLabel('Sí, limpiar tabla')
-                ->action(function () {
-                    $this->limpiar();
-                }),
-        ];
-    }
-
-    public function limpiar()
+    public function limpiar(): void
     {
         $this->reporteGenerado = false;
         session()->forget('idsLiquiSelected');
@@ -130,7 +106,7 @@ class ReporteOrdenPago extends Page implements HasTable
     {
         session(['idsLiquiSelected' => $liquidaciones]);
         $this->idLiquiSelected = $liquidaciones;
-        Log::debug("Liquidaciones seleccionadas guardadas en sesión", ['liquidaciones' => $liquidaciones]);
+        Log::debug('Liquidaciones seleccionadas guardadas en sesión', ['liquidaciones' => $liquidaciones]);
     }
 
     public function generarReporte(): bool
@@ -149,7 +125,7 @@ class ReporteOrdenPago extends Page implements HasTable
             app(RepOrdenPagoService::class)->generateReport($selectedLiquidaciones);
             $this->reporteGenerado = true;
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al generar el reporte: ' . $e->getMessage());
             Notification::make()
                 ->title('Error al generar el reporte')
@@ -157,6 +133,34 @@ class ReporteOrdenPago extends Page implements HasTable
                 ->send();
             return false;
         }
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('verOP')
+                ->label('Ver OP')
+                ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
+                ->visible(fn () => $this->reporteGenerado),
+            Action::make('generarReporte')
+                ->label('Generar OP')
+                ->action(function (): void {
+                    if ($this->generarReporte()) {
+                        Notification::make()->title('Reporte generado')->success()->send();
+                    }
+                }),
+            Action::make('limpiar')
+                ->label('Limpiar')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('¿Está seguro de limpiar la tabla?')
+                ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
+                ->modalSubmitActionLabel('Sí, limpiar tabla')
+                ->action(function (): void {
+                    $this->limpiar();
+                }),
+        ];
     }
 
     protected function getHeaderWidgets(): array
@@ -171,4 +175,3 @@ class ReporteOrdenPago extends Page implements HasTable
         return RepOrdenPagoModel::query();
     }
 }
-

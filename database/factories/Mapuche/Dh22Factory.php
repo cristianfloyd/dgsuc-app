@@ -12,7 +12,6 @@ class Dh22Factory extends Factory
 {
     protected $model = Dh22::class;
 
-
     public function definition(): array
     {
         // Obtener el último nro_liqui y sumar 1
@@ -24,7 +23,7 @@ class Dh22Factory extends Factory
             'desc_liqui' => 'Liquidación Definitiva ' . fake()->monthName(),
             'periodo' => fake()->date(),
             'sino_cerra' => 'N',
-            'id_tipo_liqui' => 1
+            'id_tipo_liqui' => 1,
         ];
     }
 }

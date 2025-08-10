@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\AfipMapucheSicoss;
-use Illuminate\Support\Facades\DB;
 use App\Traits\DynamicConnectionTrait;
-use App\Traits\MapucheConnectionTrait;
-use App\Models\AfipMapucheSicossCalculo;
+use Illuminate\Support\Facades\DB;
 
 class AfipMapucheSicossCalculoUpdateService
 {
     use DynamicConnectionTrait;
-
 
     public function updateUacadAndCaracter(string $table = 'afip_mapuche_sicoss_calculos'): array
     {
@@ -41,13 +37,13 @@ class AfipMapucheSicossCalculoUpdateService
             return [
                 'success' => true,
                 'affected' => $affected,
-                'message' => "Se actualizaron {$affected} registros correctamente"
+                'message' => "Se actualizaron {$affected} registros correctamente",
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'affected' => 0,
-                'message' => "Error en la actualización: {$e->getMessage()}"
+                'message' => "Error en la actualización: {$e->getMessage()}",
             ];
         }
     }

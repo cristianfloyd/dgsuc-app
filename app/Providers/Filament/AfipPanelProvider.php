@@ -50,7 +50,7 @@ class AfipPanelProvider extends PanelProvider
                 'panel-selector' => MenuItem::make()
                     ->label('Cambiar Panel')
                     ->icon('heroicon-o-arrows-right-left')
-                    ->url(fn(): string => '/selector-panel'),
+                    ->url(fn (): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Afip/Widgets'), for: 'App\\Filament\\Afip\\Widgets')
             ->widgets([
@@ -77,12 +77,9 @@ class AfipPanelProvider extends PanelProvider
                 'AFIP',
                 'Configuración',
             ])
-            ->sidebarFullyCollapsibleOnDesktop()
+            ->topNavigation()
+            // ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth('full')
-            ->font('Poppins')
-            ->renderHook(
-                PanelsRenderHook::TOPBAR_END,
-                fn (): string => Blade::render('@livewire(\'database-connection-selector\')')
-            );
+            ->font('Poppins');
     }
 }

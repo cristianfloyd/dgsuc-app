@@ -5,11 +5,12 @@ namespace App\Services;
 class SubsetSumFinder
 {
     /**
-     * Encuentra las combinaciones de elementos cuya suma se acerca al valor objetivo
+     * Encuentra las combinaciones de elementos cuya suma se acerca al valor objetivo.
      *
      * @param array $items Array de elementos con sus valores
      * @param float $targetSum Valor objetivo a alcanzar
      * @param float $tolerance Tolerancia permitida (diferencia máxima aceptable)
+     *
      * @return array Las combinaciones encontradas que cumplen con el criterio
      */
     public function findCombinations(array $items, float $targetSum, float $tolerance = 0.01): array
@@ -33,7 +34,7 @@ class SubsetSumFinder
     }
 
     /**
-     * Método recursivo para encontrar subconjuntos que sumen cerca del valor objetivo
+     * Método recursivo para encontrar subconjuntos que sumen cerca del valor objetivo.
      *
      * @param array $items Elementos disponibles
      * @param float $targetSum Valor objetivo
@@ -50,24 +51,24 @@ class SubsetSumFinder
         int $index,
         float $currentSum,
         array &$results,
-        float $tolerance
+        float $tolerance,
     ): void {
         // Si la diferencia está dentro de la tolerancia, guardamos el resultado
         if (abs($currentSum - $targetSum) <= $tolerance) {
             $results[] = [
                 'items' => $currentSubset,
-                'total' => $currentSum
+                'total' => $currentSum,
             ];
         }
 
         // Si ya procesamos todos los elementos o la suma excede demasiado el objetivo, terminamos
-        if ($index >= count($items) || $currentSum > $targetSum * 1.5) {
+        if ($index >= \count($items) || $currentSum > $targetSum * 1.5) {
             return;
         }
 
         // Optimización: si con todos los elementos restantes no llegamos al objetivo, terminamos
         $remainingSum = 0;
-        for ($i = $index; $i < count($items); $i++) {
+        for ($i = $index; $i < \count($items); $i++) {
             $remainingSum += $items[$i]['importe'];
         }
 
@@ -83,7 +84,7 @@ class SubsetSumFinder
             $index + 1,
             $currentSum + $items[$index]['importe'],
             $results,
-            $tolerance
+            $tolerance,
         );
 
         // Probamos sin incluir el elemento actual
@@ -94,7 +95,7 @@ class SubsetSumFinder
             $index + 1,
             $currentSum,
             $results,
-            $tolerance
+            $tolerance,
         );
     }
 }

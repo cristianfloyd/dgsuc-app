@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Esta clase representa los datos parseados de un TXT
@@ -76,33 +76,33 @@ class NovedadesCargoImportModel extends Model
         // Campos numéricos: si se desea preservar ceros a la izquierda,
         // conviene dejarlos como string. Ejemplo: 'numLegajo'
         // se deja sin casting. Para year/month, sí podemos castear a integer.
-        'yearVigencia'            => 'integer',
-        'monthVigencia'           => 'integer',
-        'numeroLiquidacion'       => 'integer',
-        'yearFinalizacion'        => 'integer',
-        'monthFinalizacion'       => 'integer',
-        'yearRetro'               => 'integer',
-        'monthRetro'              => 'integer',
-        'yearComienzo'            => 'integer',
-        'monthComienzo'           => 'integer',
-        'grupoPresupuestario'     => 'integer',
-        'unidadPrincipal'         => 'integer',
-        'unidadSubPrincipal'      => 'integer',
-        'unidadSubSubPrincipal'   => 'integer',
-        'fuenteFondos'            => 'integer',
-        'programa'                => 'integer',
-        'subPrograma'             => 'integer',
-        'proyecto'                => 'integer',
-        'actividad'               => 'integer',
-        'obra'                    => 'integer',
-        'finalidad'               => 'integer',
-        'funcion'                 => 'integer',
+        'yearVigencia' => 'integer',
+        'monthVigencia' => 'integer',
+        'numeroLiquidacion' => 'integer',
+        'yearFinalizacion' => 'integer',
+        'monthFinalizacion' => 'integer',
+        'yearRetro' => 'integer',
+        'monthRetro' => 'integer',
+        'yearComienzo' => 'integer',
+        'monthComienzo' => 'integer',
+        'grupoPresupuestario' => 'integer',
+        'unidadPrincipal' => 'integer',
+        'unidadSubPrincipal' => 'integer',
+        'unidadSubSubPrincipal' => 'integer',
+        'fuenteFondos' => 'integer',
+        'programa' => 'integer',
+        'subPrograma' => 'integer',
+        'proyecto' => 'integer',
+        'actividad' => 'integer',
+        'obra' => 'integer',
+        'finalidad' => 'integer',
+        'funcion' => 'integer',
 
         // Banderas booleanas
-        'conActualizacion'        => 'boolean',
-        'nuevosIdentificadores'   => 'boolean',
+        'conActualizacion' => 'boolean',
+        'nuevosIdentificadores' => 'boolean',
 
         // Lista de errores en formato array
-        'errors'                  => 'array',
+        'errors' => 'array',
     ];
 }

@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Services\Mapuche;
 
+use App\Data\Mapuche\{SacCargoData, SacLegajoData};
+use App\Repositories\Mapuche\SacRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use App\Repositories\Mapuche\SacRepository;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Data\Mapuche\{SacCargoData, SacLegajoData};
 
 class ModernCargoSacService
 {
     public function __construct(
         private SacRepository $sacRepository,
         private PeriodoFiscalService $periodoService,
-        private VinculoCargoService $vinculoService
-    ) {}
+        private VinculoCargoService $vinculoService,
+    ) {
+    }
 
     /**
-     * Obtiene los datos de brutos SAC para un cargo específico
+     * Obtiene los datos de brutos SAC para un cargo específico.
      */
     public function obtenerBrutosSacCargo(int $legajo, int $nroCargo): ?SacCargoData
     {
@@ -34,19 +34,19 @@ class ModernCargoSacService
     }
 
     /**
-     * Procesa los datos SAC aplicando filtros y devuelve legajos procesados
+     * Procesa los datos SAC aplicando filtros y devuelve legajos procesados.
      */
     public function procesarBrutosParaSac(array $filtros, string $orderBy = ''): Collection
     {
         $datosRaw = $this->sacRepository->getBrutosParaSac($filtros, $orderBy);
 
         return $this->agruparPorLegajo($datosRaw)
-            ->map(fn($grupo) => $this->procesarLegajo($grupo))
+            ->map(fn ($grupo) => $this->procesarLegajo($grupo))
             ->values();
     }
 
     /**
-     * Actualiza los importes de un cargo
+     * Actualiza los importes de un cargo.
      */
     public function actualizarCargo(int $nroCargo, array $datos): bool
     {
@@ -57,7 +57,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Obtiene información de un mes específico con cache
+     * Obtiene información de un mes específico con cache.
      */
     public function obtenerInfoMes(int $mes, int $anio): array
     {
@@ -81,7 +81,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Valida parámetros de fecha
+     * Valida parámetros de fecha.
      */
     private function validarParametrosFecha(int $mes, int $anio): void
     {
@@ -95,7 +95,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Procesa los vínculos de un cargo
+     * Procesa los vínculos de un cargo.
      */
     private function procesarVinculos(SacCargoData $datos): SacCargoData
     {
@@ -107,7 +107,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Agrupa los datos por legajo
+     * Agrupa los datos por legajo.
      */
     private function agruparPorLegajo(Collection $datos): Collection
     {
@@ -115,7 +115,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Procesa un legajo individual
+     * Procesa un legajo individual.
      */
     private function procesarLegajo(Collection $grupoLegajo): SacLegajoData
     {
@@ -133,7 +133,7 @@ class ModernCargoSacService
     }
 
     /**
-     * Valida los datos del cargo antes de actualizar
+     * Valida los datos del cargo antes de actualizar.
      */
     private function validarDatosCargo(array $datos): array
     {
@@ -142,7 +142,7 @@ class ModernCargoSacService
         for ($i = 1; $i <= 12; $i++) {
             $campo = "imp_bruto_{$i}";
             if (isset($datos[$campo])) {
-                $datosValidados[$campo] = (float) $datos[$campo];
+                $datosValidados[$campo] = (float)$datos[$campo];
             }
         }
 

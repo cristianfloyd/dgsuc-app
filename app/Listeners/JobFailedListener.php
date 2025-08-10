@@ -2,11 +2,9 @@
 
 namespace App\Listeners;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Queue\Events\JobFailed;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Jobs\ImportAfipRelacionesActivasJob;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Log;
 
 class JobFailedListener
 {
@@ -15,10 +13,9 @@ class JobFailedListener
      */
     public function __construct()
     {
-        //
     }
 
-    public function handle(JobFailed $event)
+    public function handle(JobFailed $event): void
     {
         if ($event->job instanceof ImportAfipRelacionesActivasJob) {
             Log::error('Error en ImportAfipRelacionesActivasJob', [

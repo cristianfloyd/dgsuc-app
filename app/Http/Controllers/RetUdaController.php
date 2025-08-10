@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\DTOs\RetUdaDTO;
-use Illuminate\Http\Request;
 use App\Services\RetUdaService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RetUdaController extends Controller
 {
@@ -38,6 +38,7 @@ class RetUdaController extends Controller
      * @param int $nroLegaj
      * @param int $nroCargo
      * @param string $periodo
+     *
      * @return JsonResponse
      */
     public function show(int $nroLegaj, int $nroCargo, string $periodo): JsonResponse
@@ -53,6 +54,7 @@ class RetUdaController extends Controller
      * Almacena un nuevo RetUda.
      *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
@@ -73,6 +75,7 @@ class RetUdaController extends Controller
      * @param int $nroLegaj
      * @param int $nroCargo
      * @param string $periodo
+     *
      * @return JsonResponse
      */
     public function update(Request $request, int $nroLegaj, int $nroCargo, string $periodo): JsonResponse
@@ -95,6 +98,7 @@ class RetUdaController extends Controller
      * @param int $nroLegaj
      * @param int $nroCargo
      * @param string $periodo
+     *
      * @return JsonResponse
      */
     public function destroy(int $nroLegaj, int $nroCargo, string $periodo): JsonResponse

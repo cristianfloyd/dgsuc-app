@@ -3,29 +3,30 @@
 namespace App\Models\Reportes;
 
 use App\Services\EncodingService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Eloquent\Collection;
-use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class EmbargoReportModel extends Model
 {
     use MapucheConnectionTrait;
+
+    public $incrementing = true;
+
+    // Deshabilitamos timestamps si no los necesitamos
+    public $timestamps = false;
 
     // Definimos la tabla asociada al modelo
     protected $table = 'suc.embargo_reports';
 
     // Definimos la clave primaria y el tipo de incremento
     protected $primaryKey = 'id';
-    public $incrementing = true;
-    protected $keyType = 'integer';
 
-    // Deshabilitamos timestamps si no los necesitamos
-    public $timestamps = false;
+    protected $keyType = 'integer';
 
     // Definimos los campos asignables en masa
     protected $fillable = [
@@ -43,7 +44,7 @@ class EmbargoReportModel extends Model
         'codc_uacad',
         'session_id',
         'nro_liqui',
-        '861'
+        '861',
     ];
 
     // Definimos los tipos de datos para cada columna
@@ -64,7 +65,7 @@ class EmbargoReportModel extends Model
         'session_id' => 'string',
         'nro_liqui' => 'integer',
         '861' => 'decimal:2',
-        'created_at' => 'datetime'
+        'created_at' => 'datetime',
     ];
 
 
@@ -74,30 +75,35 @@ class EmbargoReportModel extends Model
     {
         return trim($value);
     }
+
     public function geImporteDescontadoAttribute($value)
     {
         return number_format($value, 2, ',', '.');
     }
+
     public function getCaratulaAttribute($value)
     {
         return EncodingService::toUtf8($value);
     }
-    public function setCaratulaAttribute($value)
+
+    public function setCaratulaAttribute($value): void
     {
         $this->attributes['caratula'] = EncodingService::toLatin1($value);
     }
+
     public function getNombreCompletoAttribute($value)
     {
         return EncodingService::toUtf8($value);
     }
-    public function setNombreCompletoAttribute($value)
+
+    public function setNombreCompletoAttribute($value): void
     {
         $this->attributes['nombre_completo'] = EncodingService::toLatin1($value);
     }
 
-// ######################################################################
+    // ######################################################################
     /**
-     * Crea la tabla en la base de datos si no existe
+     * Crea la tabla en la base de datos si no existe.
      *
      * @return void
      */
@@ -136,7 +142,7 @@ class EmbargoReportModel extends Model
     }
 
     /**
-     * Limpia los datos de la sesión actual en la tabla
+     * Limpia los datos de la sesión actual en la tabla.
      *
      * @return void
      */
@@ -147,8 +153,6 @@ class EmbargoReportModel extends Model
 
         $connection->table('suc.embargo_reports')->where('session_id', $sessionId)->delete();
     }
-
-
 
     /**
      * Elimina los registros antiguos de la tabla 'embargo_reports' que tienen una antigüedad mayor al tiempo de vida de la sesión.
@@ -164,8 +168,6 @@ class EmbargoReportModel extends Model
             WHERE created_at < NOW() - INTERVAL '{$sessionLifetime} seconds'
         ");
     }
-
-
 
     public static function setReportData(Collection $data, ?int $nro_liqui = 2): void
     {
@@ -200,7 +202,7 @@ class EmbargoReportModel extends Model
                     'codc_uacad' => $item->codc_uacad,
                     'session_id' => $sessionId,
                     'nro_liqui' => $nro_liqui,
-                    '861' => $item->{'861'}
+                    '861' => $item->{'861'},
                 ];
             })->toArray();
 
@@ -221,7 +223,7 @@ class EmbargoReportModel extends Model
     }
 
     /**
-     * Obtiene los datos del reporte para la sesión actual
+     * Obtiene los datos del reporte para la sesión actual.
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
@@ -232,12 +234,12 @@ class EmbargoReportModel extends Model
     }
 
     /**
-     * Actualiza la estructura de la tabla temporal para la sesión actual
+     * Actualiza la estructura de la tabla temporal para la sesión actual.
      */
     public static function updateTableStructure(): void
     {
         try {
-            Schema::table('embargo_reports', function (Blueprint $table) {
+            Schema::table('embargo_reports', function (Blueprint $table): void {
                 // Verificamos si la columna no existe antes de agregarla
                 if (!Schema::hasColumn('embargo_reports', 'nro_liqui')) {
                     $table->string('nro_liqui')->nullable()->after('session_id');

@@ -40,9 +40,9 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-    'toba' => [
-        'driver' => 'session',
-        'provider' => 'toba',
+        'toba' => [
+            'driver' => 'toba',
+            'provider' => 'toba_users',
         ],
     ],
 
@@ -72,9 +72,9 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
-        'toba' => [
+        'toba_users' => [
             'driver' => 'toba',
-            'model' => App\Models\User::class,
+            'model' => App\Models\TobaUser::class,
         ],
     ],
 

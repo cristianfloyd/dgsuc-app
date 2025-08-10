@@ -32,7 +32,7 @@ class Dl09 extends Model
     ];
 
     /**
-     * Relación con el modelo Dh05
+     * Relación con el modelo Dh05.
      */
     public function dh05s(): HasMany
     {

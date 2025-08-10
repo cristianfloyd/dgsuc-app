@@ -2,25 +2,27 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Forms\Form;
-use Filament\Pages\Page;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use Illuminate\Support\Facades\Session;
-use Filament\Notifications\Notification;
 use App\Services\DatabaseConnectionService;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
 
 class SelectDatabaseConnection extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?string $navigationLabel = 'Cambiar Base de Datos';
-    protected static ?string $title = 'Seleccionar Base de Datos';
-    protected static ?int $navigationSort = 100;
-
     public ?string $selectedConnection = null;
+
+    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
+
+    protected static ?string $navigationLabel = 'Cambiar Base de Datos';
+
+    protected static ?string $title = 'Seleccionar Base de Datos';
+
+    protected static ?int $navigationSort = 100;
 
     public function mount(): void
     {
@@ -42,7 +44,7 @@ class SelectDatabaseConnection extends Page implements HasForms
                     ->options($service->getAvailableConnections())
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function ($state) use ($service) {
+                    ->afterStateUpdated(function ($state) use ($service): void {
                         $service->setConnection($state);
 
                         Notification::make()

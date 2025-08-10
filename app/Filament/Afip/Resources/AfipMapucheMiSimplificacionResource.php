@@ -2,47 +2,42 @@
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
 use App\Enums\EstadoCierre;
-use Filament\Actions\Action;
 use App\Enums\PuestoDesempenado;
-use Filament\Resources\Resource;
-use App\Models\AfipMapucheSicoss;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Repositories\CuilRepository;
-use App\Models\AfipRelacionesActivas;
-use Filament\Forms\Components\Select;
-use App\Traits\MapucheConnectionTrait;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
+use App\Models\AfipMapucheMiSimplificacion;
 use App\Services\AfipMapucheExportService;
 use App\Services\AfipMapucheSicossService;
-use App\Models\AfipMapucheMiSimplificacion;
 use App\Services\Mapuche\LiquidacionService;
 use App\Services\MapucheMiSimplificacionService;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Actions\Action as TableAction;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\RelationManagers;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
 
 class AfipMapucheMiSimplificacionResource extends Resource
 {
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
+
     protected static ?string $navigationGroup = 'AFIP';
+
     protected static ?string $navigationLabel = 'Mi Simplificación';
+
     protected static ?string $pluralNavigationLabel = 'Mi Simplificación';
+
     protected static ?string $label = 'Mi Simplificación';
+
     protected static ?string $pluralLabel = 'Mi Simplificación';
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-right-circle';
-    protected static ?int $navigationSort = 3;
 
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -84,15 +79,15 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->badge()
                     ->label('Puesto')
                     ->colors([
-                        'primary' => fn($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
-                        'secondary' => fn($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
-                        'warning' => fn($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
-                        'success' => fn($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
+                        'primary' => fn ($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
+                        'secondary' => fn ($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
+                        'warning' => fn ($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
+                        'success' => fn ($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
                     ]),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('sino_cerra')
-                        ->options(EstadoCierre::asSelectArray()),
+                    ->options(EstadoCierre::asSelectArray()),
                 Tables\Filters\Filter::make('periodo_fiscal')
                     ->form([
                         TextInput::make('periodo_fiscal')
@@ -128,7 +123,9 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->label('Número de Liquidación')
                             ->options(function (callable $get, LiquidacionService $liquidacionService): array {
                                 $periodoFiscal = $get('periodo_fiscal');
-                                if (!$periodoFiscal){ return [];}
+                                if (!$periodoFiscal) {
+                                    return [];
+                                }
                                 $year = substr($periodoFiscal, 0, 4);
                                 $month = substr($periodoFiscal, 4, 2);
                                 $liquidaciones = $liquidacionService->getLiquidacionesForSelect($year, $month);
@@ -140,13 +137,13 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             })
                             ->required()
                             ->searchable()
-                            ->reactive()
+                            ->reactive(),
                     ])
-                    ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService) {
+                    ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService): void {
                         try {
                             $processedCount = $mapucheMiSimplificacionService->poblarMiSimplificacion(
                                 (int)$data['periodo_fiscal'],
-                                (int)$data['nro_liqui']
+                                (int)$data['nro_liqui'],
                             );
 
                             if ($processedCount > 0) {
@@ -177,7 +174,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                         }
                     })
                     ->icon('heroicon-o-arrow-path')
-                    ->color('success')
+                    ->color('success'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -191,11 +188,10 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ->defaultSort('periodo_fiscal', 'desc');
     }
 
-
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

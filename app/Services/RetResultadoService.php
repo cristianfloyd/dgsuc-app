@@ -24,6 +24,7 @@ class RetResultadoService
      * @param int $nroCargoAnt
      * @param \DateTime $fechaRetDesde
      * @param Periodo $periodo
+     *
      * @return RetResultadoDTO|null
      */
     public function calcularRetroactivo(int $nroLegaj, int $nroCargoAnt, \DateTime $fechaRetDesde, Periodo $periodo): ?RetResultadoDTO
@@ -42,22 +43,10 @@ class RetResultadoService
     }
 
     /**
-     * Calcula el monto total del retroactivo.
-     *
-     * @param RetResultado $retResultado
-     * @return float
-     */
-    private function calcularMontoTotal(RetResultado $retResultado): float
-    {
-        // Aquí iría la lógica de cálculo del monto total
-        // Este es solo un ejemplo simplificado
-        return $retResultado->c101_n + $retResultado->c103_n + $retResultado->c106_n;
-    }
-
-    /**
      * Crea un nuevo resultado de retroactivo.
      *
      * @param array $datos
+     *
      * @return RetResultado
      */
     public function crearRetResultado(array $datos): RetResultado
@@ -71,6 +60,7 @@ class RetResultadoService
      *
      * @param RetResultado $retResultado
      * @param array $datos
+     *
      * @return bool
      */
     public function actualizarRetResultado(RetResultado $retResultado, array $datos): bool
@@ -83,6 +73,7 @@ class RetResultadoService
      * Obtiene todos los resultados de retroactivo para un tipo específico.
      *
      * @param TipoRetro $tipoRetro
+     *
      * @return array
      */
     public function obtenerPorTipoRetro(TipoRetro $tipoRetro): array
@@ -91,5 +82,19 @@ class RetResultadoService
         return $resultados->map(function ($resultado) {
             return new RetResultadoDTO($resultado, $this->calcularMontoTotal($resultado));
         })->toArray();
+    }
+
+    /**
+     * Calcula el monto total del retroactivo.
+     *
+     * @param RetResultado $retResultado
+     *
+     * @return float
+     */
+    private function calcularMontoTotal(RetResultado $retResultado): float
+    {
+        // Aquí iría la lógica de cálculo del monto total
+        // Este es solo un ejemplo simplificado
+        return $retResultado->c101_n + $retResultado->c103_n + $retResultado->c106_n;
     }
 }

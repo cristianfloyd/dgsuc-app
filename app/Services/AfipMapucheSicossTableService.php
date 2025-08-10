@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Services\Abstract\AbstractTableService;
 use App\Tables\Definitions\AfipMapucheSicossTableDefinition;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AfipMapucheSicossTableService extends AbstractTableService
 {
@@ -17,25 +17,7 @@ class AfipMapucheSicossTableService extends AbstractTableService
     }
 
     /**
-     * Obtiene la definición de la tabla
-     */
-    protected function getTableDefinition(): array
-    {
-        return $this->definition->getColumns();
-    }
-
-
-
-    /**
-     * Obtiene los índices de la tabla
-     */
-    protected function getIndexes(): array
-    {
-        return $this->definition->getIndexes();
-    }
-
-    /**
-     * Obtiene el nombre de la tabla
+     * Obtiene el nombre de la tabla.
      */
     public function getTableName(): string
     {
@@ -43,16 +25,7 @@ class AfipMapucheSicossTableService extends AbstractTableService
     }
 
     /**
-     * Query para poblar la tabla desde Mapuche
-     */
-    protected function getTablePopulationQuery(): string
-    {
-        return " ";
-    }
-
-
-    /**
-     * Método para sincronizar datos específicos de un período
+     * Método para sincronizar datos específicos de un período.
      */
     public function syncPeriodo(string $periodoFiscal): void
     {
@@ -66,22 +39,46 @@ class AfipMapucheSicossTableService extends AbstractTableService
 
             // Ejecutar query de población con parámetro
             DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery(), [
-                'periodo_fiscal' => $periodoFiscal
+                'periodo_fiscal' => $periodoFiscal,
             ]);
 
             DB::connection($this->getConnectionName())->commit();
 
-            Log::info("Sincronización SICOSS completada", [
+            Log::info('Sincronización SICOSS completada', [
                 'periodo' => $periodoFiscal,
-                'tabla' => $this->getTableName()
+                'tabla' => $this->getTableName(),
             ]);
         } catch (\Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
-            Log::error("Error en sincronización SICOSS", [
+            Log::error('Error en sincronización SICOSS', [
                 'periodo' => $periodoFiscal,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Obtiene la definición de la tabla.
+     */
+    protected function getTableDefinition(): array
+    {
+        return $this->definition->getColumns();
+    }
+
+    /**
+     * Obtiene los índices de la tabla.
+     */
+    protected function getIndexes(): array
+    {
+        return $this->definition->getIndexes();
+    }
+
+    /**
+     * Query para poblar la tabla desde Mapuche.
+     */
+    protected function getTablePopulationQuery(): string
+    {
+        return ' ';
     }
 }

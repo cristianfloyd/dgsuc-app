@@ -11,7 +11,6 @@ class AfipMapucheArtProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
     }
 
     /**
@@ -19,6 +18,5 @@ class AfipMapucheArtProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

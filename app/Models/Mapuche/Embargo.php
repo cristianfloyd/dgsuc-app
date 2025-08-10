@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Dh21;
-use App\Traits\EmbargoQueries;
+use App\Models\Mapuche\Embargos\Beneficiario;
+use App\Models\Mapuche\Embargos\CuentaJudicial;
+use App\Models\Mapuche\Embargos\EstadoEmbargo;
+use App\Models\Mapuche\Embargos\Juzgado;
+use App\Models\Mapuche\Embargos\TipoEmbargo;
+use App\Models\Mapuche\Embargos\TipoExpediente;
+use App\Models\Mapuche\Embargos\TipoJuicio;
+use App\Models\Mapuche\Embargos\TipoRemuneracion;
 use App\Services\EncodingService;
+use App\Traits\EmbargoQueries;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Mapuche\Embargos\Juzgado;
-use App\Models\Mapuche\Embargos\TipoJuicio;
-use App\Models\Mapuche\Embargos\TipoEmbargo;
-use Illuminate\Database\Eloquent\Collection;
-use App\Models\Mapuche\Embargos\Beneficiario;
-use App\Models\Mapuche\Embargos\EstadoEmbargo;
-use App\Models\Mapuche\Embargos\CuentaJudicial;
-use App\Models\Mapuche\Embargos\TipoExpediente;
-use App\Models\Mapuche\Embargos\TipoRemuneracion;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Modelo Eloquent para la tabla mapuche.emb_embargo
+ * Modelo Eloquent para la tabla mapuche.emb_embargo.
  *
  * @property int $nro_embargo Número de embargo (PK)
  * @property int $nro_legaj Número de legajo
@@ -68,19 +68,19 @@ class Embargo extends Model
     use EncodingTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
+     * Desactivar timestamps de Laravel.
+     */
+    public $timestamps = false;
+
+    /**
+     * Nombre de la tabla en la base de datos.
      */
     protected $table = 'mapuche.emb_embargo';
 
     /**
-     * Clave primaria
+     * Clave primaria.
      */
     protected $primaryKey = 'nro_embargo';
-
-    /**
-     * Desactivar timestamps de Laravel
-     */
-    public $timestamps = false;
 
     protected $encodedFields = [
         'lugar_pago',
@@ -90,7 +90,7 @@ class Embargo extends Model
     ];
 
     /**
-     * Atributos que se pueden asignar masivamente
+     * Atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
         'nro_legaj',
@@ -120,38 +120,19 @@ class Embargo extends Model
         'id_tipo_juicio',
         'nom_demandado',
         'fec_oficio',
-        'id_tipo_expediente'
+        'id_tipo_expediente',
     ];
-
-    /**
-     * Casting de atributos
-     */
-    protected $casts = [
-        'fec_inicio' => 'date',
-        'fec_finalizacion' => 'date',
-        'fec_ingreso_expediente' => 'date',
-        'fec_oficio' => 'date',
-        'imp_embargo' => 'float',
-        'cuota_embargo' => 'float',
-        'cuit' => 'string',
-        'nro_expediente_original' => 'string',
-        'nro_expediente_ampliatorio' => 'string',
-        'nro_cuenta_judicial' => 'string'
-    ];
-
 
     public function detallenovedad(): Attribute
     {
         return new Attribute(
-            get: function () {
-                return "{$this->codn_conce}-{$this->nro_oficio}";
-            }
+            get: fn (): string => "{$this->codn_conce}-{$this->nro_oficio}",
         );
     }
 
     public function getImporteDescontado(int $nro_liqui): Collection
     {
-        $importe = Dh21::query()
+        return  Dh21::query()
             ->where('nro_liqui', $nro_liqui)
             ->where('nro_legaj', $this->nro_legaj)
             ->where('codn_conce', $this->codn_conce)
@@ -159,34 +140,19 @@ class Embargo extends Model
             ->where('impp_conce', '>', 0)
             ->orderBy('nro_legaj', 'desc')
             ->get(['nro_cargo', 'impp_conce']);
-
-
-        return  $importe;
-    }
-
-    // ############### ACCESORES Y MUTADORES ####################
-    public function getCaratulaAttribute($value)
-    {
-        return EncodingService::toUtf8($value);
-    }
-
-    public function getNomDemandadoAttribute()
-    {
-        return EncodingService::toUtf8($this->nom_demandado);
     }
 
     // ############### RELACIONES ####################
     /**
-     * Relación con el beneficiario
+     * Relación con el beneficiario.
      */
     public function beneficiario(): BelongsTo
     {
         return $this->belongsTo(Beneficiario::class, 'cuit', 'cuit');
     }
 
-
     /**
-     * Relación con el estado del embargo
+     * Relación con el estado del embargo.
      */
     public function estado(): BelongsTo
     {
@@ -194,7 +160,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con el tipo de remuneración
+     * Relación con el tipo de remuneración.
      */
     public function tipoRemuneracion(): BelongsTo
     {
@@ -202,7 +168,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con el tipo de embargo
+     * Relación con el tipo de embargo.
      */
     public function tipoEmbargo(): BelongsTo
     {
@@ -210,7 +176,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con el juzgado
+     * Relación con el juzgado.
      */
     public function juzgado(): BelongsTo
     {
@@ -218,7 +184,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con la cuenta judicial
+     * Relación con la cuenta judicial.
      */
     public function cuentaJudicial(): BelongsTo
     {
@@ -229,7 +195,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con el tipo de juicio
+     * Relación con el tipo de juicio.
      */
     public function tipoJuicio(): BelongsTo
     {
@@ -237,7 +203,7 @@ class Embargo extends Model
     }
 
     /**
-     * Relación con el tipo de expediente
+     * Relación con el tipo de expediente.
      */
     public function tipoExpediente(): BelongsTo
     {
@@ -254,8 +220,6 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de liquidaciones asociadas al embargo.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function liquidaciones(): HasMany
     {
@@ -264,8 +228,6 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de cargos asociados al embargo.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function cargo(): HasMany
     {
@@ -273,7 +235,7 @@ class Embargo extends Model
     }
 
     /**
-     * Definir los campos de búsqueda globales
+     * Definir los campos de búsqueda globales.
      */
     public static function getGloballySearchableAttributes(): array
     {
@@ -285,6 +247,35 @@ class Embargo extends Model
             'datosPersonales.desc_apcas',
             'datosPersonales.desc_nombr',
             'datosPersonales.nombre_completo',
+        ];
+    }
+
+    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8($value));
+    }
+
+    protected function nomDemandado(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): ?string => EncodingService::toUtf8($this->nom_demandado));
+    }
+
+    /**
+     * Casting de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'fec_inicio' => 'date',
+            'fec_finalizacion' => 'date',
+            'fec_ingreso_expediente' => 'date',
+            'fec_oficio' => 'date',
+            'imp_embargo' => 'float',
+            'cuota_embargo' => 'float',
+            'cuit' => 'string',
+            'nro_expediente_original' => 'string',
+            'nro_expediente_ampliatorio' => 'string',
+            'nro_cuenta_judicial' => 'string',
         ];
     }
 }

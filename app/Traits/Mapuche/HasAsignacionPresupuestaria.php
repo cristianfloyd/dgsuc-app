@@ -5,12 +5,12 @@ namespace App\Traits\Mapuche;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Trait para manejar la lógica de imputación presupuestaria
+ * Trait para manejar la lógica de imputación presupuestaria.
  */
 trait HasAsignacionPresupuestaria
 {
     /**
-     * Calcula el total de imputación por unidad
+     * Calcula el total de imputación por unidad.
      */
     public function getTotalAllocationByUnit(int $codnArea): float
     {
@@ -19,16 +19,16 @@ trait HasAsignacionPresupuestaria
     }
 
     /**
-     * Scope para filtrar imputaciones por programa y subprograma
+     * Scope para filtrar imputaciones por programa y subprograma.
      */
     public function scopeByProgram(Builder $query, int $program, int $subProgram): Builder
     {
         return $query->where('codn_progr', $program)
-                    ->where('codn_subpr', $subProgram);
+            ->where('codn_subpr', $subProgram);
     }
 
     /**
-     * Verifica si la imputación está dentro del límite permitido
+     * Verifica si la imputación está dentro del límite permitido.
      */
     public function isAllocationWithinLimit(float $percentage): bool
     {
@@ -37,7 +37,7 @@ trait HasAsignacionPresupuestaria
     }
 
     /**
-     * Obtiene las imputaciones agrupadas por fuente de financiamiento
+     * Obtiene las imputaciones agrupadas por fuente de financiamiento.
      */
     public function getAllocationsBySource(): array
     {
@@ -49,7 +49,7 @@ trait HasAsignacionPresupuestaria
     }
 
     /**
-     * Valida la estructura completa de imputación
+     * Valida la estructura completa de imputación.
      */
     public function validateBudgetStructure(): bool
     {

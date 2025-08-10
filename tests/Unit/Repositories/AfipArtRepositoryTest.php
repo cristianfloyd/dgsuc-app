@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\Repositories\AfipArtRepository;
 use App\Models\AfipMapucheArt as AfipArt;
-use Illuminate\Foundation\Testing\TestCase;
+use App\Repositories\AfipArtRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase;
 
 class AfipArtRepositoryTest extends TestCase
 {
@@ -13,8 +13,14 @@ class AfipArtRepositoryTest extends TestCase
 
     protected $afipArtRepository;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->afipArtRepository = new AfipArtRepository();
+    }
+
     /** @test */
-    public function it_can_get_all_afip_art()
+    public function it_can_get_all_afip_art(): void
     {
         AfipArt::factory()->count(3)->create();
 
@@ -24,7 +30,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_find_afip_art_by_cuil()
+    public function it_can_find_afip_art_by_cuil(): void
     {
         $afipArt = AfipArt::factory()->create();
 
@@ -34,7 +40,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_create_afip_art()
+    public function it_can_create_afip_art(): void
     {
         $data = [
             'cuil_formateado' => '20-12345678-9',
@@ -55,7 +61,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_update_afip_art()
+    public function it_can_update_afip_art(): void
     {
         $afipArt = AfipArt::factory()->create();
 
@@ -70,7 +76,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_delete_afip_art()
+    public function it_can_delete_afip_art(): void
     {
         $afipArt = AfipArt::factory()->create();
 
@@ -78,11 +84,5 @@ class AfipArtRepositoryTest extends TestCase
 
         $this->assertTrue($deleted);
         $this->assertDatabaseMissing('suc.afip_art', ['cuil_original' => $afipArt->cuil_original]);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->afipArtRepository = new AfipArtRepository();
     }
 }

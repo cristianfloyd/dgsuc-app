@@ -2,14 +2,11 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\RelationManagers;
 
-use Filament\Forms;
-use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class CargosRelationManager extends RelationManager
 {
@@ -19,7 +16,7 @@ class CargosRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                //
+
             ]);
     }
 
@@ -34,7 +31,7 @@ class CargosRelationManager extends RelationManager
                 TextColumn::make('fec_baja')->date(),
             ])
             ->filters([
-                //
+
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

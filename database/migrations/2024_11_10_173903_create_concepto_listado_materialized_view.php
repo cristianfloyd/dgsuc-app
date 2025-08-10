@@ -9,6 +9,7 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration
 {
     use MapucheConnectionTrait;
+
     /**
      * Run the migrations.
      */
@@ -55,7 +56,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::connection($this->getConnectionName())->statement('DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado');
+        //DB::connection($this->getConnectionName())->statement('DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado');
         DB::connection($this->getConnectionName())->statement('DROP SEQUENCE IF EXISTS suc.concepto_listado_id_seq');
     }
 };

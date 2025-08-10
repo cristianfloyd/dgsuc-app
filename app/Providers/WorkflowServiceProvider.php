@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use App\Services\WorkflowService;
-use App\Services\ProcessLogService;
-use Illuminate\Support\ServiceProvider;
-use App\Services\WorkflowExecutionService;
 use App\Contracts\WorkflowExecutionInterface;
 use app\Services\ProcessInitializationService;
+use App\Services\ProcessLogService;
+use App\Services\WorkflowExecutionService;
+use App\Services\WorkflowService;
 use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Support\ServiceProvider;
 
 class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -26,8 +26,9 @@ class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvi
 
         $this->app->singleton(ProcessInitializationService::class, function ($app) {
             return new ProcessInitializationService(
-            $app->make(WorkflowService::class),
-            $app->make(ProcessLogService::class));
+                $app->make(WorkflowService::class),
+                $app->make(ProcessLogService::class),
+            );
         });
 
         $this->app->bind(WorkflowExecutionInterface::class, WorkflowExecutionService::class);
@@ -38,7 +39,6 @@ class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvi
      */
     public function boot(): void
     {
-        //
     }
 
     /**

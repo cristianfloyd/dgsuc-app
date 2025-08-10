@@ -2,12 +2,11 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Auth;
-use Filament\Support\Exceptions\Halt;
-use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class PanelSwitcherModal extends Component
 {
@@ -20,8 +19,18 @@ class PanelSwitcherModal extends Component
     public function render()
     {
         return view('livewire.panel-switcher-modal', [
-            'panels' => $this->getAvailablePanels()
+            'panels' => $this->getAvailablePanels(),
         ]);
+    }
+
+    // Método para cambiar de panel
+    public function switchPanel(string $panelId): void
+    {
+        try {
+            redirect()->to($this->getAvailablePanels()->firstWhere('id', $panelId)['url']);
+        } catch (Halt $exception) {
+            return;
+        }
     }
 
     // Método para obtener los paneles disponibles
@@ -42,17 +51,6 @@ class PanelSwitcherModal extends Component
                 'icon' => 'heroicon-o-document-text',
                 'color' => 'success',
             ],
-        ])//->filter(fn ($panel) => Auth::user()->hasPermissionToAccessPanel($panel['id']))
-        ;
-    }
-
-    // Método para cambiar de panel
-    public function switchPanel(string $panelId): void
-    {
-        try {
-            redirect()->to($this->getAvailablePanels()->firstWhere('id', $panelId)['url']);
-        } catch (Halt $exception) {
-            return;
-        }
+        ]);//->filter(fn ($panel) => Auth::user()->hasPermissionToAccessPanel($panel['id']))
     }
 }

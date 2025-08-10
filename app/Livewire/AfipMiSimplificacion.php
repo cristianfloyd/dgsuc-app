@@ -2,37 +2,48 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\ProcessLog;
-use Livewire\Attributes\On;
-use App\Enums\WorkflowStatus;
-use Livewire\Attributes\Computed;
-use illuminate\Support\Facades\Log;
-use App\Services\FileProcessingService;
-use App\Contracts\MessageManagerInterface;
-use App\Contracts\WorkflowServiceInterface;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
+use App\Contracts\MessageManagerInterface;
+use App\Contracts\WorkflowServiceInterface;
+use App\Models\ProcessLog;
+use App\Services\FileProcessingService;
+use illuminate\Support\Facades\Log;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class AfipMiSimplificacion extends Component
 {
     // use MessageTrait;
     public $showGenerateRelationsButton = false;
-    public $processLogId;
-    public $currentProcess;
-    public $currentStep;
-    public $currentStepUrl;
-    public $steps;
-    public $stepUrl;
-    public $processFinished = false;
-    public $ButtonMiSimplificacion = false;
-    public $message = null;
 
+    public $processLogId;
+
+    public $currentProcess;
+
+    public $currentStep;
+
+    public $currentStepUrl;
+
+    public $steps;
+
+    public $stepUrl;
+
+    public $processFinished = false;
+
+    public $ButtonMiSimplificacion = false;
+
+    public $message;
 
     private WorkflowServiceInterface $workflowService;
+
     private MessageManagerInterface $messageManager;
+
     private FileUploadRepositoryInterface $fileUploadRepository;
+
     private FileProcessingService $fileProcessingService;
+
     private MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService;
 
     public function boot(
@@ -41,8 +52,7 @@ class AfipMiSimplificacion extends Component
         FileUploadRepositoryInterface $fileUploadRepository,
         FileProcessingService $fileProcessingService,
         MapucheMiSimplificacionServiceInterface $mapucheMiSimplificacionService,
-        )
-    {
+    ): void {
         $this->workflowService = $workflowService;
         $this->messageManager = $messageManager;
         $this->fileUploadRepository = $fileUploadRepository;
@@ -50,7 +60,7 @@ class AfipMiSimplificacion extends Component
         $this->mapucheMiSimplificacionService = $mapucheMiSimplificacionService;
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->currentProcess = $this->workflowService->getLatestWorkflow();
         if (!$this->currentProcess) {
@@ -69,6 +79,7 @@ class AfipMiSimplificacion extends Component
      *
      * @param string $message El mensaje a mostrar.
      * @param string $type El tipo de mensaje (por ejemplo, 'info', 'error', etc.).
+     *
      * @return void
      */
     public function showMessage($message, $type = 'info'): void
@@ -77,7 +88,7 @@ class AfipMiSimplificacion extends Component
         $this->dispatch('show-message', ['message' => $message, 'type' => $type]);
     }
 
-    public function checkMiSimplificacion()
+    public function checkMiSimplificacion(): void
     {
         // este metodo verifica si la tabla afip_mi_simplificacion tiene datos, y si tiene datos, muestra el boton de mi simplificacion
         $hasDatos = $this->mapucheMiSimplificacionService->isNotEmpty();
@@ -89,7 +100,6 @@ class AfipMiSimplificacion extends Component
             $this->ButtonMiSimplificacion = false;
             $this->showMessage('No se encontraron datos en Mi Simplificación', 'info');
         }
-
     }
 
     #[On('proceso-iniciado')]
@@ -145,7 +155,6 @@ class AfipMiSimplificacion extends Component
         }
     }
 
-
     /** Finaliza el proceso actual.
      *
      * Este método verifica si se puede finalizar el proceso actual, y si es así, marca el proceso como completado,
@@ -174,7 +183,7 @@ class AfipMiSimplificacion extends Component
      */
     public function resetWorkflow(): void
     {
-        Log::info("AfipMiSimplificacion->resetWorkflow");
+        Log::info('AfipMiSimplificacion->resetWorkflow');
         Log::info($this->currentProcess);
         if ($this->currentProcess) {
             $this->workflowService->resetWorkflow($this->currentProcess);
@@ -185,15 +194,13 @@ class AfipMiSimplificacion extends Component
         Log::info($this->currentProcess);
     }
 
-
-
-
     /**
      * Redirige al usuario al URL del paso actual del proceso.
      *
      * Este método establece el paso actual y luego redirige al usuario al URL correspondiente a ese paso.
      *
      * @param int $step El ID del paso actual del proceso.
+     *
      * @return void
      */
     public function goToCurrentStep($step): void
@@ -228,29 +235,6 @@ class AfipMiSimplificacion extends Component
         }
     }
 
-    /**
-     * Determina si se puede iniciar un nuevo proceso.
-     *
-     * @return bool Verdadero si se puede iniciar un nuevo proceso, falso en caso contrario.
-     */
-    private function isNewProcessAllowed(): bool
-    {
-        return !$this->currentProcess || $this->currentProcess->status === 'completed';
-    }
-
-    /** Verifica si se puede finalizar el proceso actual.
-     *
-     * Este método verifica si el proceso actual existe, está en progreso y todos los pasos han sido completados.
-     *
-     * @return bool Verdadero si se puede finalizar el proceso actual, falso en caso contrario.
-     */
-    private function canEndProcess(): bool
-    {
-        $status = $this->currentProcess && $this->currentProcess->status === 'in_progress' || $this->allStepsCompleted();
-        // dd($this->currentProcess->status, $this->currentStep);
-        return $status;
-    }
-
     /** Determina si el proceso actual ha sido completado.
      *
      * Este método utiliza el servicio de flujo de trabajo (WorkflowService) para verificar si el proceso actual ha sido completado.
@@ -270,23 +254,6 @@ class AfipMiSimplificacion extends Component
         return $this->workflowService->getStepUrl($step);
     }
 
-
-
-
-    /** Verifica si todos los pasos del proceso actual han sido completados.
-     *
-     * Este método utiliza la colección de pasos del proceso actual y verifica si todos ellos tienen el estado 'completed'.
-     *
-     * @return bool Verdadero si todos los pasos han sido completados, falso en caso contrario.
-     */
-    private function allStepsCompleted(): bool
-    {
-        if ($this->currentProcess->steps === null) {
-            return false;
-        }
-        return collect($this->currentProcess->steps)->every(fn($step) => $step === 'completed');
-    }
-
     /** Retorna la lista de pasos del proceso actual.
      *
      * Este método devuelve la colección de pasos del proceso actual, que se utiliza para mostrar la progresión del proceso.
@@ -302,9 +269,8 @@ class AfipMiSimplificacion extends Component
     public function showResetButton()
     {
         $currentStepIndex = $this->getCurrentStepIndex();
-        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== count($this->steps) - 1;
+        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== \count($this->steps) - 1;
     }
-
 
     public function getCurrentStepIndex()
     {
@@ -320,8 +286,6 @@ class AfipMiSimplificacion extends Component
 
         return null; // si no se encuentra el paso actual
     }
-
-
 
     /** Muestra el proceso de para mi simplificación si el proceso actual ha sido completado.
      *
@@ -350,11 +314,11 @@ class AfipMiSimplificacion extends Component
      */
     public function generateRelations(): void
     {
-        Log::info("AfipMiSimplificacion->generateRelations");
+        Log::info('AfipMiSimplificacion->generateRelations');
         $this->fileProcessingService->processFiles();
     }
 
-    public function generateAfipArt():void
+    public function generateAfipArt(): void
     {
         // va a ejecutar la funcion almacenada
     }
@@ -370,5 +334,42 @@ class AfipMiSimplificacion extends Component
             'processLogId' => $this->processLogId,
             'messages' => $this->messageManager->getMessages(),
         ]);
+    }
+
+    /**
+     * Determina si se puede iniciar un nuevo proceso.
+     *
+     * @return bool Verdadero si se puede iniciar un nuevo proceso, falso en caso contrario.
+     */
+    private function isNewProcessAllowed(): bool
+    {
+        return !$this->currentProcess || $this->currentProcess->status === 'completed';
+    }
+
+    /** Verifica si se puede finalizar el proceso actual.
+     *
+     * Este método verifica si el proceso actual existe, está en progreso y todos los pasos han sido completados.
+     *
+     * @return bool Verdadero si se puede finalizar el proceso actual, falso en caso contrario.
+     */
+    private function canEndProcess(): bool
+    {
+        $status = $this->currentProcess && $this->currentProcess->status === 'in_progress' || $this->allStepsCompleted();
+        // dd($this->currentProcess->status, $this->currentStep);
+        return $status;
+    }
+
+    /** Verifica si todos los pasos del proceso actual han sido completados.
+     *
+     * Este método utiliza la colección de pasos del proceso actual y verifica si todos ellos tienen el estado 'completed'.
+     *
+     * @return bool Verdadero si todos los pasos han sido completados, falso en caso contrario.
+     */
+    private function allStepsCompleted(): bool
+    {
+        if ($this->currentProcess->steps === null) {
+            return false;
+        }
+        return collect($this->currentProcess->steps)->every(fn ($step) => $step === 'completed');
     }
 }

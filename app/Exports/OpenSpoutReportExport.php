@@ -2,25 +2,27 @@
 
 namespace App\Exports;
 
-use OpenSpout\Common\Entity\Row;
-use OpenSpout\Writer\XLSX\Writer;
-use OpenSpout\Writer\XLSX\Options;
-use OpenSpout\Writer\XLSX\Properties;
-use Illuminate\Support\LazyCollection;
-use Illuminate\Support\Facades\Storage;
-use OpenSpout\Common\Entity\Style\Color;
-use OpenSpout\Common\Entity\Style\Style;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Border;
 use OpenSpout\Common\Entity\Style\BorderPart;
 use OpenSpout\Common\Entity\Style\CellAlignment;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Writer\XLSX\Options;
+use OpenSpout\Writer\XLSX\Properties;
+use OpenSpout\Writer\XLSX\Writer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OpenSpoutReportExport
 {
     protected $query;
+
     protected $columns;
+
     protected $tempFile;
+
     protected $summaryData;
 
     public function __construct(Builder $query)
@@ -36,7 +38,7 @@ class OpenSpoutReportExport
             'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe'
+            'impp_conce' => 'Importe',
         ];
         $this->tempFile = 'temp/export_' . uniqid() . '.xlsx';
 
@@ -55,7 +57,7 @@ class OpenSpoutReportExport
         $this->buildExcelFile();
 
         // Crear una respuesta HTTP que fluye el archivo y lo elimina después
-        return new StreamedResponse(function () use ($fileName) {
+        return new StreamedResponse(function () use ($fileName): void {
             $outputStream = fopen('php://output', 'wb');
             $fileStream = Storage::readStream($this->tempFile);
             stream_copy_to_stream($fileStream, $outputStream);
@@ -81,7 +83,7 @@ class OpenSpoutReportExport
             lastModifiedBy: 'Informes App',
             description: 'Reporte generado a través de OpenSpout para manejo de archivos de gran volumen',
             keywords: 'conceptos, liquidación, reportes',
-            category: 'Reportes'
+            category: 'Reportes',
         );
 
         // Crear opciones para el escritor
@@ -114,7 +116,7 @@ class OpenSpoutReportExport
             new BorderPart(Border::LEFT, Color::BLACK, Border::WIDTH_THIN),
             new BorderPart(Border::RIGHT, Color::BLACK, Border::WIDTH_THIN),
             new BorderPart(Border::TOP, Color::BLACK, Border::WIDTH_THIN),
-            new BorderPart(Border::BOTTOM, Color::BLACK, Border::WIDTH_THIN)
+            new BorderPart(Border::BOTTOM, Color::BLACK, Border::WIDTH_THIN),
         );
 
         // Crear estilo para la cabecera
@@ -131,7 +133,7 @@ class OpenSpoutReportExport
 
         // Procesar los datos en chunks para optimizar memoria
         $rowIndex = 2; // Las filas se inician en 1, y la primera es el encabezado
-        $this->query->cursor()->each(function ($record) use ($writer, $borderStyle, &$rowIndex) {
+        $this->query->cursor()->each(function ($record) use ($writer, $borderStyle, &$rowIndex): void {
             $rowData = [];
 
             // Crear estilo para las filas de datos (alternadas)
@@ -153,7 +155,7 @@ class OpenSpoutReportExport
 
                 switch ($column) {
                     case 'cuil':
-                        if (strlen($value) >= 3) {
+                        if (\strlen($value) >= 3) {
                             $value = substr($value, 2, -1);
                         }
                         break;
@@ -234,7 +236,7 @@ class OpenSpoutReportExport
             $writer->addRow(Row::fromValues([
                 $dep['dependencia'],
                 $dep['registros'],
-                number_format($dep['total'], 2, ',', '.')
+                number_format($dep['total'], 2, ',', '.'),
             ], $rowStyle));
         }
     }
@@ -254,7 +256,7 @@ class OpenSpoutReportExport
                 $dependencyTotals[$record->codc_uacad] = [
                     'dependencia' => $record->codc_uacad,
                     'total' => 0,
-                    'registros' => 0
+                    'registros' => 0,
                 ];
             }
 
@@ -270,7 +272,7 @@ class OpenSpoutReportExport
         $this->summaryData = [
             'totalGeneral' => $totalGeneral,
             'totalsByDependency' => array_values($dependencyTotals),
-            'totalRegistros' => $totalRegistros
+            'totalRegistros' => $totalRegistros,
         ];
     }
 }

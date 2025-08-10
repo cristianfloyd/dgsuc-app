@@ -9,14 +9,55 @@ class OrdenPagoReporteExportable extends Component
     public $totalGeneral;
 
     public $reportData;
+
     public $reportHeader;
+
     public $totalesPorFormaPago;
 
-    public function mount($reportData, $reportHeader, $totalesPorFormaPago)
+    public function mount($reportData, $reportHeader, $totalesPorFormaPago): void
     {
         $this->reportData = $reportData;
         $this->reportHeader = $reportHeader;
         $this->totalesPorFormaPago = $totalesPorFormaPago;
+    }
+
+    /**
+     * Calcula el total por función sumando los totales de todas las fuentes de financiamiento.
+     *
+     * @param array $porFuncion Array con los datos de una función específica
+     *
+     * @return array Array con los totales calculados para la función
+     */
+    public function calcularTotalPorFuncion($porFuncion): array
+    {
+        $total = $this->initializeTotals();
+        foreach ($porFuncion as $fuenteTotals) {
+            $this->addTotals($total, $fuenteTotals);
+        }
+        return $total;
+    }
+
+    /**
+     * Calcula el total por forma de pago sumando los totales de todas las funciones.
+     *
+     * @param array $formaPagoData Array con los datos de una forma de pago específica
+     *
+     * @return array Array con los totales calculados para la forma de pago
+     */
+    public function calcularTotalPorFormaPago($formaPagoData): array
+    {
+        $total = $this->initializeTotals();
+        foreach ($formaPagoData as $funcionData) {
+            foreach ($funcionData as $fuenteTotals) {
+                $this->addTotals($total, $fuenteTotals);
+            }
+        }
+        return $total;
+    }
+
+    public function render()
+    {
+        return view('livewire.reportes.orden-pago-reporte-exportable');
     }
 
     /**
@@ -38,7 +79,7 @@ class OrdenPagoReporteExportable extends Component
             'med_resid' => 0,
             'sal_fam' => 0,
             'hs_extras' => 0,
-            'total' => 0
+            'total' => 0,
         ];
     }
 
@@ -48,47 +89,10 @@ class OrdenPagoReporteExportable extends Component
      * @param array &$totalAcumulado Array donde se acumularán los totales
      * @param array $totalsToAdd Array con los totales a sumar
      */
-    private function addTotals(&$totalAcumulado, $totalsToAdd)
+    private function addTotals(&$totalAcumulado, $totalsToAdd): void
     {
         foreach ($totalAcumulado as $key => $value) {
             $totalAcumulado[$key] += $totalsToAdd[$key];
         }
-    }
-
-    /**
-     * Calcula el total por función sumando los totales de todas las fuentes de financiamiento.
-     *
-     * @param array $porFuncion Array con los datos de una función específica
-     * @return array Array con los totales calculados para la función
-     */
-    public function calcularTotalPorFuncion($porFuncion): array
-    {
-        $total = $this->initializeTotals();
-        foreach ($porFuncion as $fuenteTotals) {
-            $this->addTotals($total, $fuenteTotals);
-        }
-        return $total;
-    }
-
-    /**
-     * Calcula el total por forma de pago sumando los totales de todas las funciones.
-     *
-     * @param array $formaPagoData Array con los datos de una forma de pago específica
-     * @return array Array con los totales calculados para la forma de pago
-     */
-    public function calcularTotalPorFormaPago($formaPagoData): array
-    {
-        $total = $this->initializeTotals();
-        foreach ($formaPagoData as $funcionData) {
-            foreach ($funcionData as $fuenteTotals) {
-                $this->addTotals($total, $fuenteTotals);
-            }
-        }
-        return $total;
-    }
-
-    public function render()
-    {
-        return view('livewire.reportes.orden-pago-reporte-exportable');
     }
 }

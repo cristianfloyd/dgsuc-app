@@ -2,8 +2,9 @@
 
 namespace App\ValueObjects;
 
-use JsonSerializable;
 use InvalidArgumentException;
+use JsonSerializable;
+use Stringable;
 
 /**
  * Value Object que representa un número de liquidación en el sistema Mapuche.
@@ -11,17 +12,18 @@ use InvalidArgumentException;
  * Este objeto garantiza que el número de liquidación siempre sea un valor válido
  * según las reglas de negocio establecidas.
  */
-class NroLiqui implements JsonSerializable
+class NroLiqui implements JsonSerializable, Stringable
 {
     /**
      * @var int El valor del número de liquidación
      */
-    private int $value;
+    private readonly int $value;
 
     /**
      * Constructor que valida y establece el valor del número de liquidación.
      *
      * @param int $value El número de liquidación
+     *
      * @throws InvalidArgumentException Si el valor no cumple con las reglas de validación
      */
     public function __construct(int $value)
@@ -31,23 +33,17 @@ class NroLiqui implements JsonSerializable
     }
 
     /**
-     * Valida que el número de liquidación cumpla con las reglas de negocio.
-     *
-     * @param int $value El valor a validar
-     * @throws InvalidArgumentException Si el valor no es válido
+     * Representación en string del número de liquidación.
      */
-    private function validate(int $value): void
+    public function __toString(): string
     {
-        if ($value <= 0) {
-            throw new InvalidArgumentException('El número de liquidación debe ser positivo');
-        }
+        return (string) $this->value;
     }
 
     /**
      * Crea una nueva instancia a partir de un valor primitivo.
      *
      * @param int $value El número de liquidación
-     * @return self
      */
     public static function fromInt(int $value): self
     {
@@ -58,7 +54,7 @@ class NroLiqui implements JsonSerializable
      * Crea una nueva instancia a partir de un string, realizando la conversión adecuada.
      *
      * @param string $value El número de liquidación como string
-     * @return self
+     *
      * @throws InvalidArgumentException Si el valor no puede convertirse a entero o no es válido
      */
     public static function fromString(string $value): self
@@ -72,8 +68,6 @@ class NroLiqui implements JsonSerializable
 
     /**
      * Devuelve el valor primitivo del número de liquidación.
-     *
-     * @return int
      */
     public function value(): int
     {
@@ -84,7 +78,6 @@ class NroLiqui implements JsonSerializable
      * Compara si este número de liquidación es igual a otro.
      *
      * @param NroLiqui $other El otro número de liquidación a comparar
-     * @return bool
      */
     public function equals(NroLiqui $other): bool
     {
@@ -93,8 +86,6 @@ class NroLiqui implements JsonSerializable
 
     /**
      * Implementación de JsonSerializable para permitir la serialización directa.
-     *
-     * @return int
      */
     public function jsonSerialize(): int
     {
@@ -102,12 +93,16 @@ class NroLiqui implements JsonSerializable
     }
 
     /**
-     * Representación en string del número de liquidación.
+     * Valida que el número de liquidación cumpla con las reglas de negocio.
      *
-     * @return string
+     * @param int $value El valor a validar
+     *
+     * @throws InvalidArgumentException Si el valor no es válido
      */
-    public function __toString(): string
+    private function validate(int $value): void
     {
-        return (string) $this->value;
+        if ($value <= 0) {
+            throw new InvalidArgumentException('El número de liquidación debe ser positivo');
+        }
     }
 }

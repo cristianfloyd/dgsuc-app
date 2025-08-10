@@ -18,5 +18,6 @@ class Dhr2Data extends Data
         public readonly ?float $tot_neto = null,
         public readonly ?bool $anulado = false,
         public readonly ?bool $impreso = false,
-    ) {}
+    ) {
+    }
 }

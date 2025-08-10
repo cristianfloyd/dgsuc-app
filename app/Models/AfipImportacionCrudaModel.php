@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AfipImportacionCrudaModel extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'suc.afip_importacion_cruda';
     public $timestamps = false;
+
+    protected $table = 'suc.afip_importacion_cruda';
+
     protected $fillable = ['linea_completa'];
-
-
 
     /**
      * Importa un archivo de datos de AFIP y los inserta en la tabla 'afip_importacion_cruda'.
@@ -26,8 +26,10 @@ class AfipImportacionCrudaModel extends Model
      * archivo actual.
      *
      * @param Request $request Solicitud HTTP que contiene la ruta del archivo a importar.
-     * @return int Número de líneas procesadas.
+     *
      * @throws \Exception Si no se puede abrir el archivo.
+     *
+     * @return int Número de líneas procesadas.
      */
     public function importarArchivo(string $filePath)
     {
@@ -35,11 +37,11 @@ class AfipImportacionCrudaModel extends Model
         $this->truncateTableIfNotEmpty();
 
         // Abrir el archivo en modo lectura
-        $archivo = fopen($filePath, "r");
+        $archivo = fopen($filePath, 'r');
 
         // Verificar que el archivo se abrió correctamente
         if (!$archivo) {
-            throw new \Exception("No se pudo abrir el archivo");
+            throw new \Exception('No se pudo abrir el archivo');
         }
 
         // Desactivar temporalmente las restricciones de la base de datos
@@ -58,7 +60,7 @@ class AfipImportacionCrudaModel extends Model
                 $batchData[] = ['linea_completa' => $lineaUtf8];
 
                 // Insertar en lotes
-                if (count($batchData) >= $batchSize) {
+                if (\count($batchData) >= $batchSize) {
                     DB::connection($this->connection)
                         ->table($this->table)
                         ->insert($batchData);
@@ -91,24 +93,25 @@ class AfipImportacionCrudaModel extends Model
         return $this->count();
     }
 
-
     /**
-    * Obtiene los datos importados de la tabla 'afip_importacion_cruda'.
-    * Retorna los datos de la tabla afip_importacion_cruda.
-    * @return \Illuminate\Support\Collection
-    */
+     * Obtiene los datos importados de la tabla 'afip_importacion_cruda'.
+     * Retorna los datos de la tabla afip_importacion_cruda.
+     *
+     * @return \Illuminate\Support\Collection
+     */
     public function getDatosImportados()
     {
         return DB::connection($this->connection)
             ->table($this->table)
             ->get();
     }
+
     public function getQuery()
     {
         return $this->query();
     }
 
-    private function truncateTableIfNotEmpty()
+    private function truncateTableIfNotEmpty(): void
     {
         // Verificar si la tabla existe
         if (DB::connection($this->connection)->getSchemaBuilder()->hasTable($this->table)) {

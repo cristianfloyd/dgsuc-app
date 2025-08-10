@@ -3,18 +3,19 @@
 namespace App\Jobs;
 
 use App\Models\AfipMapucheArt;
-use App\Models\AfipMapucheSicoss;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessPoblarAfipArt implements ShouldQueue
 {
-    use Dispatchable, Queueable;
+    use Dispatchable;
+    use Queueable;
 
     protected string $periodoFiscal;
+
     protected int $chunkSize = 1000;
 
     /**
@@ -44,7 +45,7 @@ class ProcessPoblarAfipArt implements ShouldQueue
             Log::info("Proceso completado exitosamente. Registros procesados: {$registrosProcesados}");
         } catch (\Exception $e) {
             DB::connection(AfipMapucheArt::getMapucheConnection()->getName())->rollBack();
-            Log::error("Error en el proceso de poblado ART: " . $e->getMessage());
+            Log::error('Error en el proceso de poblado ART: ' . $e->getMessage());
             throw $e;
         }
     }

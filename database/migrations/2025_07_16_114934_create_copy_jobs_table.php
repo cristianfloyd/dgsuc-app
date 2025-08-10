@@ -14,6 +14,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.copy_jobs');
+
         Schema::connection($this->getConnectionName())->create('suc.copy_jobs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id'); // sin ->constrained('users')

@@ -2,33 +2,46 @@
 
 namespace App\Enums;
 
+use function in_array;
+
 enum ConceptoGrupo: string
 {
     case DOSUBA = 'dosuba';
+
     case DOSUBASIN310 = 'dosubasin310';
+
     case AFIP = 'afip';
+
     case APORTES_Y_CONTRIBUCIONES = 'aportes_y_contribuciones';
+
     case CONTRIBUCIONES_AFIP = 'contribuciones_afip';
+
     case SEGURO_CONTRIBUCION_AFIP = 'seguro_contribucion_afip';
+
     case ART_AFIP = 'art_afip';
+
     case APORTES_AFIP = 'aportes_afip';
 
+
+
     /**
-     * Obtiene los códigos de conceptos asociados a cada grupo
+     * Obtiene los códigos de conceptos que pertenecen al grupo.
+     *
+     * @return array<int> Array de códigos de conceptos
      */
     public function getConceptos(): array
     {
-        return match($this) {
+        return match ($this) {
             self::DOSUBA => [
                 // Rango de conceptos DOSUBA
-                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287, 310
+                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287, 310,
             ],
             self::DOSUBASIN310 => [
-                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287
+                207, 210, 211, 213, 214, 246, 252, 283, 285, 286, 287,
             ],
             self::CONTRIBUCIONES_AFIP => [
                 // Rango de conceptos AFIP
-                301, 302, 303, 304, 307, 308, 347, 348
+                301, 302, 303, 304, 307, 308, 347, 348,
             ],
             self::SEGURO_CONTRIBUCION_AFIP => [
                 305,
@@ -47,13 +60,13 @@ enum ConceptoGrupo: string
             ],
             self::APORTES_Y_CONTRIBUCIONES => [
                 ...self::DOSUBA->getConceptos(),
-                ...self::AFIP->getConceptos()
+                ...self::AFIP->getConceptos(),
             ]
         };
     }
 
     /**
-     * Verifica si un concepto pertenece al grupo
+     * Verifica si un concepto pertenece al grupo.
      */
     public function containsConcepto(int $codn_conce): bool
     {
@@ -61,14 +74,20 @@ enum ConceptoGrupo: string
     }
 
     /**
-     * Obtiene la descripción del grupo
+     * Obtiene la descripción del grupo.
+     * @return string
      */
     public function getDescripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DOSUBA => 'Conceptos DOSUBA',
             self::AFIP => 'Conceptos AFIP',
-            self::APORTES_Y_CONTRIBUCIONES => 'Aportes y Contribuciones'
+            self::APORTES_Y_CONTRIBUCIONES => 'Aportes y Contribuciones',
+            self::DOSUBASIN310 => 'Dosuba sin 310',
+            self::CONTRIBUCIONES_AFIP => 'Contribuciones AFIP',
+            self::SEGURO_CONTRIBUCION_AFIP => 'Seguro Contribucion AFIP',
+            self::ART_AFIP => 'ART AFIP',
+            self::APORTES_AFIP => 'Aportes AFIP',
         };
     }
 }

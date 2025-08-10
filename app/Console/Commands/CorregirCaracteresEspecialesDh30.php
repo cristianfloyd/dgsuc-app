@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Mapuche\Catalogo\Dh30;
 use Illuminate\Console\Command;
-use App\Services\EncodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Mapuche\Catalogo\Dh30;
 
 class CorregirCaracteresEspecialesDh30 extends Command
 {
@@ -60,10 +59,10 @@ class CorregirCaracteresEspecialesDh30 extends Command
                 // Patrones para Ü
                 'UE%', 'U�', 'U%E',
                 // Otros acentos
-                'I%', 'A%', 'E%', 'O%', 'U%'
+                'I%', 'A%', 'E%', 'O%', 'U%',
             ];
 
-            $query->where(function($q) use ($patronesBusqueda, $camposACorregir) {
+            $query->where(function ($q) use ($patronesBusqueda, $camposACorregir): void {
                 foreach ($camposACorregir as $campo) {
                     foreach ($patronesBusqueda as $patron) {
                         $q->orWhere($campo, 'like', "%$patron%");
@@ -92,7 +91,9 @@ class CorregirCaracteresEspecialesDh30 extends Command
                 // Obtener el valor original sin procesar
                 $valorOriginal = $registro->getRawOriginal($campo);
 
-                if (!$valorOriginal) continue;
+                if (!$valorOriginal) {
+                    continue;
+                }
 
                 // Aplicar corrección de codificación
                 $valorCorregido = $this->corregirCaracteresDh30($valorOriginal);
@@ -102,14 +103,14 @@ class CorregirCaracteresEspecialesDh30 extends Command
                         'original' => $valorOriginal,
                         'original_hex' => $this->bytesToHex($valorOriginal),
                         'corregido' => $valorCorregido,
-                        'corregido_hex' => $this->bytesToHex($valorCorregido)
+                        'corregido_hex' => $this->bytesToHex($valorCorregido),
                     ];
                 }
             }
 
             if (!empty($cambios)) {
                 $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: " .
-                             json_encode($cambios, JSON_UNESCAPED_UNICODE));
+                             json_encode($cambios, \JSON_UNESCAPED_UNICODE));
 
                 if (!$dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();
@@ -126,13 +127,13 @@ class CorregirCaracteresEspecialesDh30 extends Command
 
                         DB::connection($registro->getConnectionName())->commit();
                         $cambiosRealizados++;
-                        $this->info("✓ Registro actualizado correctamente.");
+                        $this->info('✓ Registro actualizado correctamente.');
                     } catch (\Exception $e) {
                         DB::connection($registro->getConnectionName())->rollBack();
                         $this->error("Error al actualizar registro: {$e->getMessage()}");
                         Log::error("Error al corregir caracteres en Dh30 #{$registro->nro_tabla}, {$registro->desc_abrev}", [
                             'error' => $e->getMessage(),
-                            'cambios' => $cambios
+                            'cambios' => $cambios,
                         ]);
                     }
                 }
@@ -140,7 +141,7 @@ class CorregirCaracteresEspecialesDh30 extends Command
         }
 
         if ($dryRun) {
-            $this->info("Modo simulación: No se realizaron cambios en la base de datos.");
+            $this->info('Modo simulación: No se realizaron cambios en la base de datos.');
         } else {
             $this->info("Corrección finalizada. Se actualizaron {$cambiosRealizados} registros.");
         }
@@ -149,9 +150,10 @@ class CorregirCaracteresEspecialesDh30 extends Command
     }
 
     /**
-     * Función especializada para corregir caracteres en registros de Dh30
+     * Función especializada para corregir caracteres en registros de Dh30.
      *
      * @param string $texto Texto a corregir
+     *
      * @return string Texto corregido
      */
     private function corregirCaracteresDh30(string $texto): string
@@ -159,34 +161,34 @@ class CorregirCaracteresEspecialesDh30 extends Command
         // Caracteres especiales y sus equivalentes correctos
         $char_map = [
             // Vocales con acento
-            "\xCD" => "Í", // I con acento
-            "\xC1" => "Á", // A con acento
-            "\xC9" => "É", // E con acento
-            "\xD3" => "Ó", // O con acento
-            "\xDA" => "Ú", // U con acento
+            "\xCD" => 'Í', // I con acento
+            "\xC1" => 'Á', // A con acento
+            "\xC9" => 'É', // E con acento
+            "\xD3" => 'Ó', // O con acento
+            "\xDA" => 'Ú', // U con acento
 
             // Letra Ñ y variaciones problemáticas
-            "\xD1" => "Ñ", // Ñ correcta
-            "NI\xD1" => "NIÑ", // Casos como NIÑO/NIÑA
-            "N~" => "Ñ", // Otra representación común
+            "\xD1" => 'Ñ', // Ñ correcta
+            "NI\xD1" => 'NIÑ', // Casos como NIÑO/NIÑA
+            'N~' => 'Ñ', // Otra representación común
 
             // Vocales con diéresis
-            "\xDC" => "Ü", // U con diéresis
-            "UE\xDC" => "UEÜ", // Para casos como VERGÜENZA
-            "AGU\xDC" => "AGÜE", // Para AGÜERO
-            "\xC4" => "Ä", // A con diéresis
-            "\xCB" => "Ë", // E con diéresis
-            "\xCF" => "Ï", // I con diéresis
-            "\xD6" => "Ö", // O con diéresis
+            "\xDC" => 'Ü', // U con diéresis
+            "UE\xDC" => 'UEÜ', // Para casos como VERGÜENZA
+            "AGU\xDC" => 'AGÜE', // Para AGÜERO
+            "\xC4" => 'Ä', // A con diéresis
+            "\xCB" => 'Ë', // E con diéresis
+            "\xCF" => 'Ï', // I con diéresis
+            "\xD6" => 'Ö', // O con diéresis
 
             // Versiones minúsculas
-            "\xED" => "í",
-            "\xF1" => "ñ",
-            "\xE1" => "á",
-            "\xE9" => "é",
-            "\xF3" => "ó",
-            "\xFA" => "ú",
-            "\xFC" => "ü"
+            "\xED" => 'í',
+            "\xF1" => 'ñ',
+            "\xE1" => 'á',
+            "\xE9" => 'é',
+            "\xF3" => 'ó',
+            "\xFA" => 'ú',
+            "\xFC" => 'ü',
         ];
 
         // Aplicar mapeo directo
@@ -194,21 +196,21 @@ class CorregirCaracteresEspecialesDh30 extends Command
 
         // Palabras comunes con correcciones conocidas para Dh30
         $palabrasComunes = [
-            "SECCION" => "SECCIÓN",
-            "DIRECCION" => "DIRECCIÓN",
-            "ADMINISTRACION" => "ADMINISTRACIÓN",
-            "EDUCACION" => "EDUCACIÓN",
-            "INVESTIGACION" => "INVESTIGACIÓN",
-            "SECRETARIA" => "SECRETARÍA",
-            "QUIMICA" => "QUÍMICA",
-            "INFORMATICA" => "INFORMÁTICA",
-            "ECONOMICA" => "ECONÓMICA",
-            "MEDICO" => "MÉDICO",
-            "TECNOLOGICO" => "TECNOLÓGICO",
-            "BASICO" => "BÁSICO",
-            "ESTADISTICA" => "ESTADÍSTICA",
-            "OCEANOGRAFIA" => "OCEANOGRAFÍA",
-            "ESPANOL" => "ESPAÑOL"
+            'SECCION' => 'SECCIÓN',
+            'DIRECCION' => 'DIRECCIÓN',
+            'ADMINISTRACION' => 'ADMINISTRACIÓN',
+            'EDUCACION' => 'EDUCACIÓN',
+            'INVESTIGACION' => 'INVESTIGACIÓN',
+            'SECRETARIA' => 'SECRETARÍA',
+            'QUIMICA' => 'QUÍMICA',
+            'INFORMATICA' => 'INFORMÁTICA',
+            'ECONOMICA' => 'ECONÓMICA',
+            'MEDICO' => 'MÉDICO',
+            'TECNOLOGICO' => 'TECNOLÓGICO',
+            'BASICO' => 'BÁSICO',
+            'ESTADISTICA' => 'ESTADÍSTICA',
+            'OCEANOGRAFIA' => 'OCEANOGRAFÍA',
+            'ESPANOL' => 'ESPAÑOL',
         ];
 
         foreach ($palabrasComunes as $mal => $bien) {
@@ -220,12 +222,12 @@ class CorregirCaracteresEspecialesDh30 extends Command
     }
 
     /**
-     * Convierte una cadena a su representación hexadecimal
+     * Convierte una cadena a su representación hexadecimal.
      */
     private function bytesToHex(string $text): string
     {
         $hex = '';
-        for ($i = 0; $i < strlen($text); $i++) {
+        for ($i = 0; $i < \strlen($text); $i++) {
             $hex .= bin2hex($text[$i]) . ' ';
         }
         return trim($hex);

@@ -2,29 +2,25 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
-use Filament\Actions;
-use Filament\Actions\Action;
-use App\Enums\BloqueosTipoEnum;
 use App\Enums\BloqueosEstadoEnum;
-use App\Models\BloqueosDataModel;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\Log;
-use Filament\Resources\Components\Tab;
+use App\Enums\BloqueosTipoEnum;
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Services\ImportDataTableService;
-use Filament\Notifications\Notification;
-use League\CommonMark\MarkdownConverter;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
-use App\Services\Reportes\BloqueosService;
 use App\Services\Reportes\BloqueosDataService;
-use League\CommonMark\Environment\Environment;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
-use App\Filament\Bloqueos\Resources\BloqueosResource;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
-use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
+use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
+use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
-use App\Filament\Bloqueos\Resources\BloqueosResource\Widgets\ColorReferenceWidget;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
+use League\CommonMark\MarkdownConverter;
 
 class ListImportData extends ListRecords
 {
@@ -34,6 +30,38 @@ class ListImportData extends ListRecords
     {
         app(ImportDataTableService::class)->ensureTableExists();
         parent::mount();
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'Todo' => Tab::make()
+                ->badge(fn () => $this->getModel()::count()),
+            'valido' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
+                ->badgeColor(BloqueosEstadoEnum::VALIDADO->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::VALIDADO->value)),
+            'Duplicados' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
+                ->badgeColor(BloqueosEstadoEnum::DUPLICADO->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::DUPLICADO->value)),
+            'Licencia' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
+                ->badgeColor(BloqueosTipoEnum::LICENCIA->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::LICENCIA->value)),
+            'Fallecido' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
+                ->badgeColor(BloqueosTipoEnum::FALLECIDO->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::FALLECIDO->value)),
+            'Renuncia' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
+                ->badgeColor(BloqueosTipoEnum::RENUNCIA->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::RENUNCIA->value)),
+            'error_validacion' => Tab::make()
+                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
+                ->badgeColor(BloqueosEstadoEnum::ERROR_VALIDACION->getColor())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)),
+        ];
     }
 
     protected function getHeaderActions(): array
@@ -54,8 +82,8 @@ class ListImportData extends ListRecords
                 ->modalDescription('Se validarán todos los registros contra Mapuche y se verificará si cada uno tiene un cargo asociado. Esta operación puede tomar tiempo.')
                 ->action(function (
                     BloqueosValidationService $validationService,
-                    ValidacionCargoAsociadoService $cargoService
-                ) {
+                    ValidacionCargoAsociadoService $cargoService,
+                ): void {
                     try {
                         // 1. Validar todos los registros
                         $estadisticasValidacion = $validationService->validarTodosLosRegistros();
@@ -74,7 +102,7 @@ class ListImportData extends ListRecords
                                 Validación de cargos:<br>
                                 Total: {$estadisticasCargos['total']}<br>
                                 Con cargo: {$estadisticasCargos['con_cargo']}<br>
-                                Sin cargo: {$estadisticasCargos['sin_cargo']}"
+                                Sin cargo: {$estadisticasCargos['sin_cargo']}",
                             )
                             ->success()
                             ->send();
@@ -99,7 +127,7 @@ class ListImportData extends ListRecords
                 ->requiresConfirmation()
                 ->modalHeading('¿Procesar bloqueos y duplicados?')
                 ->modalDescription('Esta acción procesará los bloqueos validados y luego los duplicados, generando un resumen de ambas operaciones.')
-                ->action(function (BloqueosProcessService $service) {
+                ->action(function (BloqueosProcessService $service): void {
                     try {
                         // Procesar bloqueos validados
                         $resBloqueos = $service->procesarBloqueos();
@@ -111,13 +139,13 @@ class ListImportData extends ListRecords
                         Notification::make()
                             ->title('Procesamiento completo')
                             ->body(
-                                "Bloqueos procesados:<br>" .
-                                "Total procesados: " . ($resBloqueos['procesados'] ?? '-') . "<br>" .
-                                "Errores: " . ($resBloqueos['errores'] ?? '0') . "<br>" .
-                                "<br>" .
-                                "Duplicados procesados:<br>" .
-                                "Grupos detectados: " . ($resDuplicados['grupos'] ?? '-') . "<br>" .
-                                "Registros eliminados: " . ($resDuplicados['eliminados'] ?? '-')
+                                'Bloqueos procesados:<br>' .
+                                'Total procesados: ' . ($resBloqueos['procesados'] ?? '-') . '<br>' .
+                                'Errores: ' . ($resBloqueos['errores'] ?? '0') . '<br>' .
+                                '<br>' .
+                                'Duplicados procesados:<br>' .
+                                'Grupos detectados: ' . ($resDuplicados['grupos'] ?? '-') . '<br>' .
+                                'Registros eliminados: ' . ($resDuplicados['eliminados'] ?? '-'),
                             )
                             ->success()
                             ->send();
@@ -142,7 +170,7 @@ class ListImportData extends ListRecords
                 ->requiresConfirmation()
                 ->modalHeading('¿Restaurar cambios en DH03?')
                 ->modalDescription('Esta acción revertirá los últimos cambios realizados en la tabla DH03.')
-                ->action(function (BloqueosProcessService $service) {
+                ->action(function (BloqueosProcessService $service): void {
                     try {
                         $service->restaurarBackup();
 
@@ -171,7 +199,7 @@ class ListImportData extends ListRecords
                 ->modalHeading('¿Vaciar tabla de bloqueos?')
                 ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
                 ->modalSubmitActionLabel('Sí, vaciar tabla')
-                ->action(function (BloqueosDataService $service) {
+                ->action(function (BloqueosDataService $service): void {
                     try {
                         $service->truncateTable();
 
@@ -221,7 +249,7 @@ class ListImportData extends ListRecords
                                 <span><strong>Nota:</strong>$1</span>
                             </p>
                         </div>',
-                        $html
+                        $html,
                     );
 
                     // 2. Mejorar secciones importantes
@@ -235,7 +263,7 @@ class ListImportData extends ListRecords
                                 Mejores Prácticas
                             </h2>
                         </div>',
-                        $html
+                        $html,
                     );
 
                     $html = str_replace(
@@ -248,52 +276,20 @@ class ListImportData extends ListRecords
                                 Resolución de Problemas Comunes
                             </h2>
                         </div>',
-                        $html
+                        $html,
                     );
 
                     return view('filament.documentation-modal', [
-                        'documentacionHtml' => $html
+                        'documentacionHtml' => $html,
                     ]);
                 }),
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'Todo' => Tab::make()
-                ->badge(fn() => $this->getModel()::count()),
-            'valido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
-                ->badgeColor(BloqueosEstadoEnum::VALIDADO->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::VALIDADO->value)),
-            'Duplicados' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
-                ->badgeColor(BloqueosEstadoEnum::DUPLICADO->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::DUPLICADO->value)),
-            'Licencia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
-                ->badgeColor(BloqueosTipoEnum::LICENCIA->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::LICENCIA->value)),
-            'Fallecido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
-                ->badgeColor(BloqueosTipoEnum::FALLECIDO->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::FALLECIDO->value)),
-            'Renuncia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
-                ->badgeColor(BloqueosTipoEnum::RENUNCIA->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::RENUNCIA->value)),
-            'error_validacion' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
-                ->badgeColor(BloqueosEstadoEnum::ERROR_VALIDACION->getColor())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)),
         ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
-            //
+
         ];
     }
 }

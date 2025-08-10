@@ -2,24 +2,23 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Panel;
-use Filament\PanelProvider;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Colors\Color;
 use App\Filament\Admin\Pages\Profile;
-use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use App\Filament\Widgets\DatabaseConnectionWidget;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\AuthenticateSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Pages\DocumentationPage;
+use App\Filament\Widgets\DatabaseConnectionWidget;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,9 +40,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
-                ->label('Cambiar Panel')
-                ->icon('heroicon-o-arrows-right-left')
-                ->url(fn (): string => '/selector-panel'),
+                    ->label('Cambiar Panel')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->url(fn (): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
@@ -69,6 +68,6 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->breadcrumbs(true)
             ->maxContentWidth('full')
-            ->sidebarFullyCollapsibleOnDesktop();;
+            ->sidebarFullyCollapsibleOnDesktop();
     }
 }

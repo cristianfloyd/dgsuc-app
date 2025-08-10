@@ -6,7 +6,7 @@ return [
      * is an array, it will try to convert from the first format that works,
      * and will serialize dates using the first format from the array.
      */
-    'date_format' => DATE_ATOM,
+    'date_format' => \DATE_ATOM,
 
     /**
      * When transforming or casting dates, the following timezone will be used to
@@ -48,7 +48,7 @@ return [
     'casts' => [
         DateTimeInterface::class => Spatie\LaravelData\Casts\DateTimeInterfaceCast::class,
         BackedEnum::class => Spatie\LaravelData\Casts\EnumCast::class,
-//        Enumerable::class => Spatie\LaravelData\Casts\EnumerableCast::class,
+        //        Enumerable::class => Spatie\LaravelData\Casts\EnumerableCast::class,
     ],
 
     /**
@@ -158,14 +158,14 @@ return [
     'throw_when_max_transformation_depth_reached' => true,
 
     /**
-    * When using the `make:data` command, the package will use these settings to generate
-    * the data classes. You can override these settings by passing options to the command.
-    */
+     * When using the `make:data` command, the package will use these settings to generate
+     * the data classes. You can override these settings by passing options to the command.
+     */
     'commands' => [
         /**
          * Provides default configuration for the `make:data` command. These settings can be overridden with options
          * passed directly to the `make:data` command for generating single Data classes, or if not set they will
-         * automatically fall back to these defaults. See `php artisan make:data --help` for more information
+         * automatically fall back to these defaults. See `php artisan make:data --help` for more information.
          */
         'make' => [
             /**

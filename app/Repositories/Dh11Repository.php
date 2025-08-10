@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\Dh11;
@@ -10,11 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
-
     public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model)
     {
     }
-
 
     /**
      * Actualiza el campo impp_basic de un registro Dh11 con un nuevo valor, y actualiza los campos vig_caano y vig_cames con los valores proporcionados.
@@ -22,9 +21,10 @@ class Dh11Repository implements Dh11RepositoryInterface
      * @param Dh11 $category El registro Dh11 a actualizar.
      * @param float $percentage El porcentaje de incremento a aplicar al campo impp_basic.
      * @param array|null $periodoFiscal Un array opcional con los valores de año y mes para actualizar los campos vig_caano y vig_cames.
+     *
      * @return bool Verdadero si se guardaron los cambios correctamente, falso en caso contrario.
      */
-    public function updateImppBasic(Dh11 $category, float $percentage, array $periodoFiscal = null): bool
+    public function updateImppBasic(Dh11 $category, float $percentage, ?array $periodoFiscal = null): bool
     {
         // Calcular el factor de incremento con 4 decimales de precisión
         $factor = $percentage / 100 + 1;
@@ -49,9 +49,10 @@ class Dh11Repository implements Dh11RepositoryInterface
      * @param Dh11 $category El registro Dh11 a actualizar.
      * @param array $newImppBasic Un array con el nuevo valor de impp_basic.
      * @param array|null $periodoFiscal Un array opcional con los valores de año y mes para actualizar los campos vig_caano y vig_cames.
+     *
      * @return bool Verdadero si se guardaron los cambios correctamente, falso en caso contrario.
      */
-    public function updateImppBasicWithHistoryNew(Dh11 $category, array $newImppBasic, array $periodoFiscal = null): bool
+    public function updateImppBasicWithHistoryNew(Dh11 $category, array $newImppBasic, ?array $periodoFiscal = null): bool
     {
         // Actualizar el campo impp_basic
         $category->impp_basic = $newImppBasic['impp_basic'];
@@ -69,6 +70,7 @@ class Dh11Repository implements Dh11RepositoryInterface
      *
      * @param array $attributes Atributos para buscar o crear el registro.
      * @param array $values Valores para actualizar el registro.
+     *
      * @return Dh11 El registro Dh11 actualizado o creado.
      */
     public function updateOrCreate(array $attributes, array $values = []): Dh11
@@ -96,11 +98,12 @@ class Dh11Repository implements Dh11RepositoryInterface
      *
      * @param array $attributes Atributos para identificar el registro.
      * @param DH61 $values Valores a actualizar.
+     *
      * @return bool
      */
     public function update(array $attributes, Dh61 $values): bool
     {
-        $dh11 = Dh11::where('codc_categ','=', $attributes['codc_categ'])->first();
+        $dh11 = Dh11::where('codc_categ', '=', $attributes['codc_categ'])->first();
 
         if ($dh11) {
             return $dh11->update($values->toArray());
@@ -145,7 +148,7 @@ class Dh11Repository implements Dh11RepositoryInterface
         return $this->model->create($data);
     }
 
-    public function delete(string $codcCateg)
+    public function delete(string $codcCateg): void
     {
         // TODO: trow Exception "metodo no implementado"
     }

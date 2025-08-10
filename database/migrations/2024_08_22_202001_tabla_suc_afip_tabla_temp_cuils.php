@@ -11,6 +11,8 @@ return new class extends Migration
 
     public function up()
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.afip_tabla_temp_cuils');
+
         Schema::connection($this->getConnectionName())->create('suc.afip_tabla_temp_cuils', function (Blueprint $table) {
             $table->id();
             $table->string('cuil', 11)->unique();

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,7 +12,7 @@ class ProcessLog extends Model
         'status',
         'steps',
         'started_at',
-        'completed_at'
+        'completed_at',
     ];
 
     protected $casts = [

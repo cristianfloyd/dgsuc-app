@@ -10,20 +10,20 @@ class Dhd7 extends Model
 {
     use MapucheConnectionTrait;
 
+    // Indicar que la clave primaria no es auto-incremental
+    public $incrementing = false;
+
+    // Deshabilitar timestamps si no existen en la tabla
+    public $timestamps = false;
+
     // Especificar la tabla asociada al modelo
     protected $table = 'dhd7';
 
     // Especificar la clave primaria
     protected $primaryKey = 'cod_clasif_cargo';
 
-    // Indicar que la clave primaria no es auto-incremental
-    public $incrementing = false;
-
     // Indicar que la clave primaria es de tipo entero
     protected $keyType = 'int';
-
-    // Deshabilitar timestamps si no existen en la tabla
-    public $timestamps = false;
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [
@@ -32,7 +32,7 @@ class Dhd7 extends Model
     ];
 
     /**
-     * Relación con el modelo Dh03
+     * Relación con el modelo Dh03.
      */
     public function dh03s(): HasMany
     {

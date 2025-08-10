@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
-use App\Models\Dh84;
-use App\Models\Dha9;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dh92 extends Model
 {
+    /**
+     * Indica si el modelo debe ser timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
     /**
      * La tabla asociada con el modelo.
      *
@@ -22,13 +27,6 @@ class Dh92 extends Model
      * @var string
      */
     protected $primaryKey = 'autonum';
-
-    /**
-     * Indica si el modelo debe ser timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
 
     /**
      * Los atributos que son asignables en masa.

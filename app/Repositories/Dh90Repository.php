@@ -2,11 +2,10 @@
 
 namespace App\Repositories;
 
-use App\Models\Dh90;
 use App\Data\Dh90Data;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Dh90;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Implementación del repositorio para Dh90.
@@ -36,6 +35,7 @@ class Dh90Repository implements Dh90RepositoryInterface
      * Buscar por número de cargo.
      *
      * @param int $nroCargo
+     *
      * @return Dh90|null
      */
     public function findByNroCargo(int $nroCargo): ?Dh90
@@ -47,6 +47,7 @@ class Dh90Repository implements Dh90RepositoryInterface
      * Crear un nuevo registro.
      *
      * @param Dh90Data $data
+     *
      * @return Dh90
      */
     public function create(Dh90Data $data): Dh90
@@ -56,7 +57,7 @@ class Dh90Repository implements Dh90RepositoryInterface
             $model->save();
             return $model;
         } catch (\Exception $e) {
-            throw new \Exception("Error al crear el registro: " . $e->getMessage());
+            throw new \Exception('Error al crear el registro: ' . $e->getMessage());
         }
     }
 
@@ -65,6 +66,7 @@ class Dh90Repository implements Dh90RepositoryInterface
      *
      * @param int $nroCargo
      * @param Dh90Data $data
+     *
      * @return Dh90|null
      */
     public function update(int $nroCargo, Dh90Data $data): ?Dh90
@@ -81,7 +83,7 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model;
         } catch (\Exception $e) {
-            throw new \Exception("Error al actualizar el registro: " . $e->getMessage());
+            throw new \Exception('Error al actualizar el registro: ' . $e->getMessage());
         }
     }
 
@@ -89,6 +91,7 @@ class Dh90Repository implements Dh90RepositoryInterface
      * Eliminar un registro.
      *
      * @param int $nroCargo
+     *
      * @return bool
      */
     public function delete(int $nroCargo): bool
@@ -102,9 +105,10 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model->delete();
         } catch (\Exception $e) {
-            throw new \Exception("Error al eliminar el registro: " . $e->getMessage());
+            throw new \Exception('Error al eliminar el registro: ' . $e->getMessage());
         }
     }
+
     /**
      * @inheritDoc
      */

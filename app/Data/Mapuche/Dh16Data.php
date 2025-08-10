@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Mapuche;
 
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Data;
 
 class Dh16Data extends Data
 {
@@ -14,13 +14,13 @@ class Dh16Data extends Data
         #[Required]
         #[IntegerType]
         public readonly int $codn_grupo,
-
         #[Required]
         #[IntegerType]
         public readonly int $codn_conce,
-    ) {}
+    ) {
+    }
 
-    public static function rules(): array
+    public static function rules($context = null): array
     {
         return [
             'codn_grupo' => ['required', 'integer'],
@@ -28,7 +28,7 @@ class Dh16Data extends Data
         ];
     }
 
-    public static function messages(): array
+    public static function messages(...$args): array
     {
         return [
             'codn_grupo.required' => 'El código de grupo es requerido',

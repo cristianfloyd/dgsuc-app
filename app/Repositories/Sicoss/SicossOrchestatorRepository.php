@@ -2,33 +2,34 @@
 
 namespace App\Repositories\Sicoss;
 
-use Illuminate\Support\Facades\Log;
-use App\Data\Sicoss\SicossProcessData;
-use App\Traits\MapucheConnectionTrait;
-use App\Contracts\Dh21RepositoryInterface;
 use App\Contracts\DatabaseOperationInterface;
-use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
+use App\Contracts\Dh21RepositoryInterface;
+use App\Data\Sicoss\SicossProcessData;
 use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Log;
 
 class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterface
 {
     use MapucheConnectionTrait;
 
     protected string $codc_reparto;
+
     protected array $archivos = [];
 
     public function __construct(
         protected SicossLegajoFilterRepositoryInterface $sicossLegajoFilterRepository,
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected Dh21RepositoryInterface $dh21Repository,
-        protected DatabaseOperationInterface $databaseOperation
-    ) {}
-
+        protected DatabaseOperationInterface $databaseOperation,
+    ) {
+    }
 
     /**
      * Ejecuta el proceso completo de generación SICOSS
-     * Orquesta todo el flujo principal según configuración
+     * Orquesta todo el flujo principal según configuración.
      *
      * @param SicossProcessData $datos Datos de configuración del proceso
      * @param array $periodo_fiscal Período fiscal con formato ['mes' => int, 'ano' => int]
@@ -36,8 +37,10 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param string $path Ruta donde se guardarán los archivos generados
      * @param array $licencias_agentes Lista de agentes con licencias
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
-     * @return array Resultado del proceso según el flujo ejecutado
+     *
      * @throws \Exception Si ocurre un error durante el proceso
+     *
+     * @return array Resultado del proceso según el flujo ejecutado
      */
     public function ejecutarProcesoCompleto(
         SicossProcessData $datos,
@@ -45,7 +48,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         array $filtros,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     ): array {
         try {
             $per_mesct = $periodo_fiscal['mes'];
@@ -64,33 +67,30 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $where,
                     $path,
                     $licencias_agentes,
-                    $retornar_datos
-                );
-            } else {
-                return $this->procesarConRetro(
-                    $datos,
-                    $per_anoct,
-                    $per_mesct,
-                    $where,
-                    $path,
-                    $licencias_agentes,
-                    $retornar_datos
+                    $retornar_datos,
                 );
             }
-
+            return $this->procesarConRetro(
+                $datos,
+                $per_anoct,
+                $per_mesct,
+                $where,
+                $path,
+                $licencias_agentes,
+                $retornar_datos,
+            );
         } catch (\Exception $e) {
             Log::error('Error en orquestación de proceso SICOSS', [
                 'error' => $e->getMessage(),
-                'datos' => $datos
+                'datos' => $datos,
             ]);
             throw $e;
         }
     }
 
-
     /**
      * Procesa SICOSS sin períodos retro
-     * Flujo simplificado para período vigente únicamente
+     * Flujo simplificado para período vigente únicamente.
      *
      * @param SicossProcessData $datos Datos de configuración del proceso
      * @param int $per_anoct Año del período
@@ -100,8 +100,10 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
-     * @return array Resultado del proceso según el flujo ejecutado
+     *
      * @throws \Exception Si ocurre un error durante el proceso
+     *
+     * @return array Resultado del proceso según el flujo ejecutado
      */
     public function procesarSinRetro(
         SicossProcessData $datos,
@@ -111,7 +113,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         string $where,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     ) {
         try {
             $nombre_arch = 'sicoss';
@@ -123,7 +125,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $where_periodo,
                 $where,
                 $datos->check_lic,
-                $datos->check_sin_activo
+                $datos->check_sin_activo,
             );
 
             $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
@@ -138,7 +140,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $licencias_agentes,
                     $datos->check_retro,
                     $datos->check_sin_activo,
-                    $retornar_datos
+                    $retornar_datos,
                 );
             }
 
@@ -151,7 +153,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $licencias_agentes,
                 $datos->check_retro,
                 $datos->check_sin_activo,
-                $retornar_datos
+                $retornar_datos,
             );
 
             // Limpiar tabla temporal usando la nueva abstracción
@@ -159,15 +161,14 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
             Log::info('Procesamiento sin retro completado', [
                 'archivo' => $nombre_arch,
-                'legajos_procesados' => count($legajos)
+                'legajos_procesados' => \count($legajos),
             ]);
 
             return $totales;
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento sin retro', [
                 'error' => $e->getMessage(),
-                'periodo' => "{$per_mesct}/{$per_anoct}"
+                'periodo' => "{$per_mesct}/{$per_anoct}",
             ]);
             throw $e;
         }
@@ -175,7 +176,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
     /**
      * Procesa SICOSS con períodos retro
-     * Flujo complejo que incluye períodos históricos
+     * Flujo complejo que incluye períodos históricos.
      *
      * @param SicossProcessData $datos Datos de configuración del proceso
      * @param int $per_anoct Año del período
@@ -184,8 +185,10 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
-     * @return array Resultado del proceso según el flujo ejecutado
+     *
      * @throws \Exception Si ocurre un error durante el proceso
+     *
+     * @return array Resultado del proceso según el flujo ejecutado
      */
     public function procesarConRetro(
         SicossProcessData $datos,
@@ -194,7 +197,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         string $where,
         string $path,
         array $licencias_agentes,
-        bool $retornar_datos
+        bool $retornar_datos,
     ): array {
         try {
             $totales = [];
@@ -202,12 +205,12 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             // Obtener períodos retroactivos
             $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro(
                 $datos->check_lic,
-                $datos->check_retro
+                $datos->check_retro,
             );
 
             Log::info('Iniciando procesamiento con retro', [
-                'periodos_retro' => count($periodos_retro),
-                'periodo_actual' => "{$per_mesct}/{$per_anoct}"
+                'periodos_retro' => \count($periodos_retro),
+                'periodo_actual' => "{$per_mesct}/{$per_anoct}",
             ]);
 
             // Obtener legajos una sola vez para todos los períodos
@@ -216,7 +219,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 ' true ',
                 $where,
                 $datos->check_lic,
-                $datos->check_sin_activo
+                $datos->check_sin_activo,
             );
 
             // Procesar período vigente
@@ -227,7 +230,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $path,
                 $licencias_agentes,
-                $retornar_datos
+                $retornar_datos,
             );
             $totales = array_merge($totales, $totales_vigente);
 
@@ -241,7 +244,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $where,
                     $path,
                     $licencias_agentes,
-                    $retornar_datos
+                    $retornar_datos,
                 );
                 $totales = array_merge($totales, $totales_retro);
             }
@@ -250,19 +253,55 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             $this->databaseOperation->dropTemporaryTable('conceptos_liquidados');
 
             Log::info('Procesamiento con retro completado', [
-                'total_periodos' => count($totales),
-                'legajos_base' => count($legajos)
+                'total_periodos' => \count($totales),
+                'legajos_base' => \count($legajos),
             ]);
 
             return $totales;
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento con retro', [
                 'error' => $e->getMessage(),
-                'periodo' => "{$per_mesct}/{$per_anoct}"
+                'periodo' => "{$per_mesct}/{$per_anoct}",
             ]);
             throw $e;
         }
+    }
+
+    public function procesarResultadoFinal(array $totales, string $testeo_directorio_salida = '', string $testeo_prefijo_archivos = '')
+    {
+        try {
+            // Si se especifica directorio de testeo, mover archivos
+            if (!empty($testeo_directorio_salida)) {
+                $this->moverArchivosTesteo($testeo_directorio_salida, $testeo_prefijo_archivos);
+            }
+
+            Log::info('Proceso SICOSS finalizado exitosamente', [
+                'total_periodos' => \count($totales),
+                'archivos_generados' => \count($this->archivos),
+            ]);
+
+            return [
+                'totales' => $totales,
+                'archivos' => $this->archivos,
+                'status' => 'completed',
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error en procesamiento de resultado final', [
+                'error' => $e->getMessage(),
+                'totales' => \count($totales),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function setCodigoReparto(string $codc_reparto): void
+    {
+        $this->codc_reparto = $codc_reparto;
+    }
+
+    public function getArchivosGenerados(): array
+    {
+        return $this->archivos;
     }
 
     protected function procesarPeriodoRetro(array $periodo_data, SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where, string $path, array $licencias_agentes, bool $retornar_datos): array
@@ -270,18 +309,18 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         try {
             $nombre_arch = 'sicoss_retro_' . $periodo_data['ano_retro'] . '_' . $periodo_data['mes_retro'];
             $periodo = $periodo_data['ano_retro'] . $periodo_data['mes_retro'];
-            $item = $periodo_data['mes_retro'] . "/" . $periodo_data['ano_retro'];
+            $item = $periodo_data['mes_retro'] . '/' . $periodo_data['ano_retro'];
 
             $this->archivos[$periodo] = $path . $nombre_arch;
 
             // Obtener conceptos liquidados para el período específico
-            $where_periodo_retro = " ano_retro = " . $periodo_data['ano_retro'] .
-                                 " AND mes_retro = " . $periodo_data['mes_retro'];
+            $where_periodo_retro = ' ano_retro = ' . $periodo_data['ano_retro'] .
+                                 ' AND mes_retro = ' . $periodo_data['mes_retro'];
 
             $this->dh21Repository->obtenerConceptosLiquidadosSicoss(
                 $periodo_data['ano_retro'],
                 $periodo_data['mes_retro'],
-                $where
+                $where,
             );
 
             // Obtener legajos para este período específico
@@ -290,13 +329,13 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $where_periodo_retro,
                 $where,
                 $datos->check_lic,
-                $datos->check_sin_activo
+                $datos->check_sin_activo,
             );
 
             Log::info('Procesando período retro', [
                 'periodo' => $item,
                 'archivo' => $nombre_arch,
-                'legajos' => count($legajos)
+                'legajos' => \count($legajos),
             ]);
 
             $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
@@ -308,15 +347,14 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 null,
                 $datos->check_retro,
                 $datos->check_sin_activo,
-                $retornar_datos
+                $retornar_datos,
             );
 
             return [$item => $subtotal];
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento de período retro', [
                 'error' => $e->getMessage(),
-                'periodo_retro' => $periodo_data
+                'periodo_retro' => $periodo_data,
             ]);
             throw $e;
         }
@@ -334,7 +372,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             Log::info('Procesando período vigente', [
                 'periodo' => $periodo_display,
                 'archivo' => $nombre_arch,
-                'legajos' => count($legajos)
+                'legajos' => \count($legajos),
             ]);
 
             $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
@@ -346,57 +384,28 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $licencias_agentes,
                 $datos->check_retro,
                 $datos->check_sin_activo,
-                $retornar_datos
+                $retornar_datos,
             );
 
             return [$periodo_display => $subtotal];
-
         } catch (\Exception $e) {
             Log::error('Error en procesamiento de período vigente', [
                 'error' => $e->getMessage(),
-                'periodo' => "{$per_mesct}/{$per_anoct}"
-            ]);
-            throw $e;
-        }
-    }
-
-    public function procesarResultadoFinal(array $totales, string $testeo_directorio_salida = '', string $testeo_prefijo_archivos = '')
-    {
-        try {
-            // Si se especifica directorio de testeo, mover archivos
-            if (!empty($testeo_directorio_salida)) {
-                $this->moverArchivosTesteo($testeo_directorio_salida, $testeo_prefijo_archivos);
-            }
-
-            Log::info('Proceso SICOSS finalizado exitosamente', [
-                'total_periodos' => count($totales),
-                'archivos_generados' => count($this->archivos)
-            ]);
-
-            return [
-                'totales' => $totales,
-                'archivos' => $this->archivos,
-                'status' => 'completed'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Error en procesamiento de resultado final', [
-                'error' => $e->getMessage(),
-                'totales' => count($totales)
+                'periodo' => "{$per_mesct}/{$per_anoct}",
             ]);
             throw $e;
         }
     }
 
     /**
-     * Mueve archivos al directorio de testeo si se especifica
+     * Mueve archivos al directorio de testeo si se especifica.
      */
     protected function moverArchivosTesteo(string $directorio_testeo, string $prefijo = ''): void
     {
         try {
             // Crear directorio de testeo si no existe
             if (!is_dir($directorio_testeo)) {
-                mkdir($directorio_testeo, 0755, true);
+                mkdir($directorio_testeo, 0o755, true);
             }
 
             foreach ($this->archivos as $periodo => $archivo_origen) {
@@ -408,27 +417,16 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
                     Log::debug('Archivo movido para testeo', [
                         'origen' => $archivo_origen . '.txt',
-                        'destino' => $archivo_destino
+                        'destino' => $archivo_destino,
                     ]);
                 }
             }
-
         } catch (\Exception $e) {
             Log::warning('Error al mover archivos de testeo', [
                 'error' => $e->getMessage(),
-                'directorio' => $directorio_testeo
+                'directorio' => $directorio_testeo,
             ]);
             // No lanzar excepción, solo advertir
         }
-    }
-
-    public function setCodigoReparto(string $codc_reparto): void
-    {
-        $this->codc_reparto = $codc_reparto;
-    }
-
-    public function getArchivosGenerados(): array
-    {
-        return $this->archivos;
     }
 }

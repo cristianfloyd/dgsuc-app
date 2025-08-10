@@ -20,6 +20,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_tabla_basicos_conc_esp');
+
         Schema::connection($this->getConnectionName())->create('suc.ret_tabla_basicos_conc_esp', function (Blueprint $table) {
             $table->date('fecha_desde');
             $table->date('fecha_hasta');

@@ -2,8 +2,8 @@
 
 namespace App\Services\Reportes;
 
-use App\Data\Responses\ConceptoTotalItemData;
 use App\Data\Responses\ConceptoTotalAgrupacionData;
+use App\Data\Responses\ConceptoTotalItemData;
 use App\Repositories\Interfaces\ConceptosTotalesRepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -13,15 +13,17 @@ class ConceptosTotalesService
      * @param ConceptosTotalesRepositoryInterface $repository
      */
     public function __construct(
-        private readonly ConceptosTotalesRepositoryInterface $repository
-    ) {}
+        private readonly ConceptosTotalesRepositoryInterface $repository,
+    ) {
+    }
 
     /**
-     * Obtiene los totales por concepto para un período específico
+     * Obtiene los totales por concepto para un período específico.
      *
      * @param array $conceptos Códigos de conceptos a incluir
      * @param int $year Año del período
      * @param int $month Mes del período
+     *
      * @return Collection<ConceptoTotalItemData>
      */
     public function getTotalesPorConcepto(array $conceptos, int $year, int $month): Collection
@@ -34,11 +36,12 @@ class ConceptosTotalesService
     }
 
     /**
-     * Obtiene los totales por concepto con agrupación por haberes y descuentos
+     * Obtiene los totales por concepto con agrupación por haberes y descuentos.
      *
      * @param array $conceptos Códigos de conceptos a incluir
      * @param int $year Año del período
      * @param int $month Mes del período
+     *
      * @return ConceptoTotalAgrupacionData
      */
     public function getTotalesAgrupados(array $conceptos, int $year, int $month): ConceptoTotalAgrupacionData
@@ -49,11 +52,12 @@ class ConceptosTotalesService
     }
 
     /**
-     * Obtiene un reporte completo de totales por concepto
+     * Obtiene un reporte completo de totales por concepto.
      *
      * @param int $year Año del período
      * @param int $month Mes del período
      * @param array|null $conceptos Códigos de conceptos a incluir (opcional)
+     *
      * @return ConceptoTotalAgrupacionData
      */
     public function getReporteConceptos(int $year, int $month, ?array $conceptos = null): ConceptoTotalAgrupacionData
@@ -76,7 +80,7 @@ class ConceptosTotalesService
             '307',
             '308',
             '347',
-            '348'
+            '348',
         ];
 
         $conceptosAConsultar = $conceptos ?? $conceptosDefault;

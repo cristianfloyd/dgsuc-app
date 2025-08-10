@@ -3,62 +3,45 @@
 namespace App\Exports\Sheets;
 
 use App\Enums\ConceptoGrupo;
-use NumberToWords\NumberToWords;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithDrawings;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithBackgroundColor;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithDrawings;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use NumberToWords\NumberToWords;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithBackgroundColor;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
 class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHeadings, WithStyles, ShouldAutoSize, WithCustomStartCell, WithDrawings, WithBackgroundColor
 {
     protected $query;
+
     protected $resumenDosuba;
+
     protected $resumenAfip;
+
     protected $resumenContribucionesAfip;
+
     protected $resumenSeguroAfip;
+
     protected $resumenArtAfip;
+
     protected $resumenAportesAfip;
 
     public function __construct($query)
     {
         $this->query = $query;
         $this->resumenDosuba = $this->getResumenByConceptoGrupo(ConceptoGrupo::DOSUBA);
-        
+
         $this->resumenContribucionesAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::CONTRIBUCIONES_AFIP);
         $this->resumenSeguroAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::SEGURO_CONTRIBUCION_AFIP);
         $this->resumenArtAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::ART_AFIP);
         $this->resumenAportesAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::APORTES_AFIP);
-    }
-
-    private function getResumenByConceptoGrupo(ConceptoGrupo $grupo)
-    {
-        return $this->query->clone()
-            ->reorder()
-            ->whereIn('codn_conce', $grupo->getConceptos())
-            ->groupBy('nro_liqui', 'desc_liqui')
-            ->selectRaw('
-                nro_liqui,
-                desc_liqui,
-                SUM(impp_conce) as total_importe
-            ')
-            ->orderBy('nro_liqui')
-            ->get();
-    }
-
-    private function getTotalPorLiquidacion(int $nroLiqui, ConceptoGrupo $grupo): float
-    {
-        return $this->query->clone()
-            ->where('nro_liqui', $nroLiqui)
-            ->whereIn('codn_conce', $grupo->getConceptos())
-            ->sum('impp_conce');
     }
 
     public function startCell(): string
@@ -70,6 +53,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
     {
         return 'FFFFFF';
     }
+
     public function drawings()
     {
         $drawing = new Drawing();
@@ -93,7 +77,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
             ->get();
 
         // Preparamos los datos por liquidación
-        $datosMatriz = $liquidaciones->map(function($liquidacion) {
+        $datosMatriz = $liquidaciones->map(function ($liquidacion) {
             return [
                 'nro_liqui' => $liquidacion->nro_liqui,
                 'desc_liqui' => $liquidacion->desc_liqui,
@@ -145,7 +129,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
             [''], // libre
             [''], // Línea libre
             [
-                "Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de " . $totalGeneralTexto . " ($ " . number_format($totalGeneral, 2, ',', '.') . ".-)"
+                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de ' . $totalGeneralTexto . ' ($ ' . number_format($totalGeneral, 2, ',', '.') . '.-)',
             ],
             [''],
             ['Los mismo corresponden a los siguientes beneficiarios,'],
@@ -173,14 +157,14 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
             ['Liquidación', 'DOSUBA', 'Contribuciones', 'Seguro', 'ART', 'Aportes', 'Sub Totales'],
 
             // Datos por liquidación
-            ...$datosMatriz->map(fn($row) => [
+            ...$datosMatriz->map(fn ($row) => [
                 $row['desc_liqui'],
                 $row['dosuba'],
                 $row['contribuciones'],
                 $row['seguro'],
                 $row['art'],
                 $row['aportes'],
-                array_sum(array_slice($row, 2)) // Total por fila
+                array_sum(\array_slice($row, 2)), // Total por fila
             ]),
 
             // Totales
@@ -190,8 +174,8 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
                 $totales['seguro'],
                 $totales['art'],
                 $totales['aportes'],
-                $totalGeneral
-            ]
+                $totalGeneral,
+            ],
         ]);
     }
 
@@ -236,21 +220,44 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
         $sheet->getStyle('A14')->getAlignment()->setWrapText(true);
         $sheet->getStyle('A14:E14')->getAlignment()->setVertical('top');
 
-            return [
-                $inicioTabla => ['font' => ['bold' => true, 'size' => 14]],
-                $inicioTabla + 1 => ['font' => ['bold' => true]],
-                $lastRow => [
-                    'font' => ['bold' => true],
-                    'fill' => ['fillType' => 'solid', 'color' => ['rgb' => 'FFEB9C']]
-                ],
-                'B1:G'.$lastRow => [
-                    'numberFormat' => ['formatCode' => '#,##0.00']
-                ]
-            ];
+        return [
+            $inicioTabla => ['font' => ['bold' => true, 'size' => 14]],
+            $inicioTabla + 1 => ['font' => ['bold' => true]],
+            $lastRow => [
+                'font' => ['bold' => true],
+                'fill' => ['fillType' => 'solid', 'color' => ['rgb' => 'FFEB9C']],
+            ],
+            'B1:G' . $lastRow => [
+                'numberFormat' => ['formatCode' => '#,##0.00'],
+            ],
+        ];
     }
 
     public function title(): string
     {
         return 'Resumen Estadístico';
+    }
+
+    private function getResumenByConceptoGrupo(ConceptoGrupo $grupo)
+    {
+        return $this->query->clone()
+            ->reorder()
+            ->whereIn('codn_conce', $grupo->getConceptos())
+            ->groupBy('nro_liqui', 'desc_liqui')
+            ->selectRaw('
+                nro_liqui,
+                desc_liqui,
+                SUM(impp_conce) as total_importe
+            ')
+            ->orderBy('nro_liqui')
+            ->get();
+    }
+
+    private function getTotalPorLiquidacion(int $nroLiqui, ConceptoGrupo $grupo): float
+    {
+        return $this->query->clone()
+            ->where('nro_liqui', $nroLiqui)
+            ->whereIn('codn_conce', $grupo->getConceptos())
+            ->sum('impp_conce');
     }
 }

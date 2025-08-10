@@ -2,18 +2,18 @@
 
 namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use App\Services\ComprobanteNominaService;
 use Filament\Actions;
-use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use App\Services\ComprobanteNominaService;
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use Illuminate\Support\Facades\Log;
 
 class ListComprobanteNominaModels extends ListRecords
 {
     protected static string $resource = ComprobanteNominaModelResource::class;
-    protected ComprobanteNominaService $comprobanteNominaService;
 
+    protected ComprobanteNominaService $comprobanteNominaService;
 
     public function boot(ComprobanteNominaService $comprobanteNominaService): void
     {
@@ -40,7 +40,7 @@ class ListComprobanteNominaModels extends ListRecords
                 ->modalDescription('Esta acción eliminará todos los registros y reiniciará los índices. No se puede deshacer.')
                 ->modalSubmitActionLabel('Sí, limpiar tabla')
                 ->modalCancelActionLabel('Cancelar')
-                ->action(function() {
+                ->action(function (): void {
                     try {
                         $this->comprobanteNominaService->truncateTable();
 

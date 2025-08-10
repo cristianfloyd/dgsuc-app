@@ -11,7 +11,9 @@ class MaintenanceLogsWidget extends Widget
     use MapucheConnectionTrait;
 
     protected static string $view = 'filament.widgets.maintenance-logs-widget';
+
     protected static bool $isLazy = true;
+
     protected static ?int $sort = 5;
 
     public function getMaintenanceLogs(): array
@@ -42,7 +44,7 @@ class MaintenanceLogsWidget extends Widget
     private function getEstadoBackups(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     1 as ultimo_backup,
                     1 as ultima_recuperacion,
@@ -50,13 +52,13 @@ class MaintenanceLogsWidget extends Widget
                     --pg_last_xlog_receive_location() as ultimo_backup,
                     --pg_last_xlog_replay_location() as ultima_recuperacion,
                     --pg_is_in_recovery() as en_recuperacion
-            ");
+            ');
     }
 
     private function getEstadoIndices(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     schemaname,
                     relname as tablename,
@@ -65,13 +67,13 @@ class MaintenanceLogsWidget extends Widget
                 FROM pg_stat_user_indexes
                 ORDER BY pg_relation_size(indexrelid) DESC
                 LIMIT 5
-            ");
+            ');
     }
 
     private function getVacuumStatus(): array
     {
         return DB::connection($this->getConnectionName())
-            ->select("
+            ->select('
                 SELECT
                     relname,
                     last_vacuum,
@@ -80,6 +82,6 @@ class MaintenanceLogsWidget extends Widget
                 FROM pg_stat_user_tables
                 ORDER BY n_dead_tup DESC
                 LIMIT 5
-            ");
+            ');
     }
 }

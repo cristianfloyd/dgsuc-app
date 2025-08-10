@@ -2,25 +2,22 @@
 
 namespace App\Filament\Liquidaciones\Resources;
 
-use Filament\Forms;
+use App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
 use App\Models\Dh61;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
+use Filament\Tables\Table;
 
 class Dh61Resource extends Resource
 {
     protected static ?string $model = Dh61::class;
+
     protected static ?string $modelLabel = 'Basicos Historico';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationGroup = 'Personal';
-
-
 
     public static function table(Table $table): Table
     {
@@ -135,13 +132,13 @@ class Dh61Resource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
-                //
+
             ])
             ->bulkActions([
-                //
+
             ])
             ->deferLoading()
             ->defaultPaginationPageOption(5);
@@ -150,7 +147,7 @@ class Dh61Resource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -161,6 +158,4 @@ class Dh61Resource extends Resource
             'edit' => Pages\EditDh61::route('/{record}/edit'),
         ];
     }
-
-
 }

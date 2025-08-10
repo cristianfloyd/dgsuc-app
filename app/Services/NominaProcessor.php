@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 class NominaProcessor
 {
     private $temporaryTableManager;
+
     private $netos = 0;
 
     public function __construct(TemporaryTableManager $temporaryTableManager)
@@ -54,7 +55,7 @@ class NominaProcessor
                 'importe' => $neto->netos,
                 'area_administrativa' => $neto->area,
                 'subarea_administrativa' => $neto->subarea,
-                'tipo_pago' => 'N'
+                'tipo_pago' => 'N',
             ]);
 
             $comprobante->save();

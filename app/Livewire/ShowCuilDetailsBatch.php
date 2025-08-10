@@ -2,32 +2,41 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ShowCuilDetailsBatch extends Component
 {
-    use WithPagination, MapucheConnectionTrait;
+    use WithPagination;
+    use MapucheConnectionTrait;
 
-    public $cuilsNotInAfip;
-    public $failedCuils = [];
-    public $nroLiqui;
-    public $periodoFiscal;
-    public $allResults;
-    public $isLoading = true;
-    public $progress = 0;
-    public $currentPage = 1;
     private const RESULTS_PER_PAGE = 10;
     private const BATCH_SIZE = 20;
 
+    public $cuilsNotInAfip;
+
+    public $failedCuils = [];
+
+    public $nroLiqui;
+
+    public $periodoFiscal;
+
+    public $allResults;
+
+    public $isLoading = true;
+
+    public $progress = 0;
+
+    public $currentPage = 1;
+
     protected $queryString = ['currentPage' => ['except' => 1]];
 
-    public function mount($nroLiqui, $periodoFiscal, $cuilsNotInAfip)
+    public function mount($nroLiqui, $periodoFiscal, $cuilsNotInAfip): void
     {
         $this->cuilsNotInAfip = $cuilsNotInAfip;
         $this->nroLiqui = $nroLiqui;
@@ -35,42 +44,42 @@ class ShowCuilDetailsBatch extends Component
         $this->allResults = new Collection();
     }
 
-    public function loadBatch()
-{
-    $totalCuils = count($this->cuilsNotInAfip);
-    $processedCuils = $this->allResults->count() + count($this->failedCuils);
-    $remainingCuils = array_slice($this->cuilsNotInAfip, $processedCuils, self::BATCH_SIZE);
+    public function loadBatch(): void
+    {
+        $totalCuils = \count($this->cuilsNotInAfip);
+        $processedCuils = $this->allResults->count() + \count($this->failedCuils);
+        $remainingCuils = \array_slice($this->cuilsNotInAfip, $processedCuils, self::BATCH_SIZE);
 
-    $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?) WHERE cuil = ANY(?)';
-    $params = [$this->nroLiqui, $this->periodoFiscal, implode(',', $remainingCuils)];
+        $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?) WHERE cuil = ANY(?)';
+        $params = [$this->nroLiqui, $this->periodoFiscal, implode(',', $remainingCuils)];
 
-    try {
-        $results = DB::connection($this->getConnectionName())->select($query, $params);
+        try {
+            $results = DB::connection($this->getConnectionName())->select($query, $params);
 
-        foreach ($results as $result) {
-            $this->allResults->push($result);
-        }
+            foreach ($results as $result) {
+                $this->allResults->push($result);
+            }
 
-        $processedCuils += count($results);
-        $failedCuils = array_diff($remainingCuils, array_column($results, 'cuil'));
-        $this->failedCuils = array_merge($this->failedCuils, $failedCuils);
+            $processedCuils += \count($results);
+            $failedCuils = array_diff($remainingCuils, array_column($results, 'cuil'));
+            $this->failedCuils = array_merge($this->failedCuils, $failedCuils);
 
-        $this->progress = ($processedCuils / $totalCuils) * 100;
-        $this->emit('progressUpdated', $this->progress);
+            $this->progress = ($processedCuils / $totalCuils) * 100;
+            $this->emit('progressUpdated', $this->progress);
 
-        if ($processedCuils >= $totalCuils) {
+            if ($processedCuils >= $totalCuils) {
+                $this->isLoading = false;
+            }
+
+            $this->emit('batchLoaded');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error loading batch: ' . $e->getMessage());
+            $this->failedCuils = array_merge($this->failedCuils, $remainingCuils);
             $this->isLoading = false;
+            $this->emit('batchLoadingFailed');
         }
-
-        $this->emit('batchLoaded');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error loading batch: ' . $e->getMessage());
-        $this->failedCuils = array_merge($this->failedCuils, $remainingCuils);
-        $this->isLoading = false;
-        $this->emit('batchLoadingFailed');
     }
-}
 
     public function getPaginatedResults()
     {
@@ -79,11 +88,11 @@ class ShowCuilDetailsBatch extends Component
             $this->allResults->count(),
             self::RESULTS_PER_PAGE,
             $this->currentPage,
-            ['path' => '/show-cuil-details']
+            ['path' => '/show-cuil-details'],
         );
     }
 
-    public function setPage($page)
+    public function setPage($page): void
     {
         $this->currentPage = $page;
     }

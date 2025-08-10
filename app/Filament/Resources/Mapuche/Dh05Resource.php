@@ -2,23 +2,24 @@
 
 namespace App\Filament\Resources\Mapuche;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\Mapuche\Dh05;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
 use App\Filament\Resources\Mapuche\Dh05Resource\Pages;
-use App\Filament\Resources\Mapuche\Dh05Resource\RelationManagers;
+use App\Models\Mapuche\Dh05;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class Dh05Resource extends Resource
 {
     protected static ?string $model = Dh05::class;
+
     protected static ?string $label = 'Licencia de empleado/cargo';
+
     protected static ?string $pluralLabel = 'Licencias de empleados/cargos';
+
     protected static ?string $navigationLabel = 'Licencias';
 
     protected static ?string $navigationGroup = 'Personal';
@@ -139,7 +140,7 @@ class Dh05Resource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
@@ -152,13 +153,13 @@ class Dh05Resource extends Resource
             ->defaultSort('fec_desde', 'desc')
             ->paginated(5) //configurar la paginacion
             ->paginationPageOptions([5, 10, 25, 50, 100, 250])
-            ->searchable();;
+            ->searchable();
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

@@ -7,10 +7,11 @@ use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
 class SicossFormateadorRepository implements SicossFormateadorRepositoryInterface
 {
     /**
-     * Formatear un valor numérico llenando con ceros a la izquierda
+     * Formatear un valor numérico llenando con ceros a la izquierda.
      *
      * @param mixed $valor Valor a formatear
      * @param int $longitud Longitud total del campo
+     *
      * @return string Valor formateado
      */
     public function llenaImportes($valor, int $longitud): string
@@ -19,67 +20,67 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             $valor = '';
         }
 
-        if (strlen(trim($valor)) > $longitud) {
+        if (\strlen(trim($valor)) > $longitud) {
             return substr($valor, -($longitud));
-        } else {
-            return str_pad($valor, $longitud, "0", STR_PAD_LEFT);
         }
+        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
     }
 
     /**
-     * Formatear texto rellenando con espacios a la izquierda
+     * Formatear texto rellenando con espacios a la izquierda.
      *
      * @param string $texto Texto a formatear
      * @param int $longitud Longitud total del campo
+     *
      * @return string Texto formateado
      */
     public function llenaBancosIzq(string $texto, int $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
+        if (\strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_LEFT);
         }
+        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
     }
 
     /**
      * Formatear texto rellenando con espacios a la derecha (conserva iniciales)
-     * En los casos que se supera la longitud máxima con llenaBancosIzq se cortaban las iniciales en los agentes
+     * En los casos que se supera la longitud máxima con llenaBancosIzq se cortaban las iniciales en los agentes.
      *
      * @param string $texto Texto a formatear
      * @param int $longitud Longitud total del campo
+     *
      * @return string Texto formateado
      */
     public function llenaBlancosModificado(string $texto, int $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
+        if (\strlen(trim($texto)) > $longitud) {
             return substr($texto, 0, $longitud);
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_RIGHT);
         }
+        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
     }
 
     /**
-     * Formatear texto rellenando con espacios a la derecha
+     * Formatear texto rellenando con espacios a la derecha.
      *
      * @param string $texto Texto a formatear
      * @param int $longitud Longitud total del campo
+     *
      * @return string Texto formateado
      */
     public function llenaBlancos(string $texto, int $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
+        if (\strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
-        } else {
-            return str_pad($texto, $longitud, " ", STR_PAD_RIGHT);
         }
+        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
     }
 
     /**
      * Transformar totales a formato recordset para reportes
-     * Devuelve importes totales con formato adecuado para un cuadro toba
+     * Devuelve importes totales con formato adecuado para un cuadro toba.
      *
      * @param array $totalesPeriodo Array con totales por período
+     *
      * @return array Recordset formateado
      */
     public function transformarARecordset(array $totalesPeriodo): array

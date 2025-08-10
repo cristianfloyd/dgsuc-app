@@ -49,20 +49,20 @@ class GenerarSicoss extends Command
             $resultado = AfipMapucheSicoss::poblarTablaSicoss(
                 $periodoFiscal,
                 $incluirInactivos,
-                function ($data) use ($progressBar) {
+                function ($data) use ($progressBar): void {
                     if (isset($data['max'])) {
                         $progressBar->setMaxSteps($data['max']);
                         $progressBar->start();
                     } elseif (isset($data['progress'])) {
                         $progressBar->setProgress($data['progress']);
                     }
-                }
+                },
             );
 
             $progressBar->finish();
             $this->newLine(2);
 
-            $this->info("Proceso completado:");
+            $this->info('Proceso completado:');
             $this->table(
                 ['Métrica', 'Valor'],
                 [
@@ -70,21 +70,21 @@ class GenerarSicoss extends Command
                     ['Total legajos', $resultado['total_legajos']],
                     ['Período fiscal', $resultado['periodo_fiscal']],
                     ['Estado', $resultado['status']],
-                    ['Errores', count($resultado['errores'])]
-                ]
+                    ['Errores', \count($resultado['errores'])],
+                ],
             );
 
             if (!empty($resultado['errores'])) {
-                $this->warn("Se encontraron " . count($resultado['errores']) . " errores:");
+                $this->warn('Se encontraron ' . \count($resultado['errores']) . ' errores:');
                 $this->table(
                     ['Legajo', 'Error'],
                     array_map(function ($error) {
                         return [$error['legajo'], $error['error']];
-                    }, $resultado['errores'])
+                    }, $resultado['errores']),
                 );
             }
         } catch (\Exception $e) {
-            $this->error("Error al generar SICOSS: " . $e->getMessage());
+            $this->error('Error al generar SICOSS: ' . $e->getMessage());
             return 1;
         }
 

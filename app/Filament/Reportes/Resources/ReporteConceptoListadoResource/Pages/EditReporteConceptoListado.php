@@ -2,9 +2,9 @@
 
 namespace App\Filament\Reportes\Resources\ReporteConceptoListadoResource\Pages;
 
+use App\Filament\Resources\ReporteConceptoListadoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Resources\ReporteConceptoListadoResource;
 
 class EditReporteConceptoListado extends EditRecord
 {

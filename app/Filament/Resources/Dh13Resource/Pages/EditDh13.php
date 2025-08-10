@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Dh13Resource\Pages;
 
-use Filament\Actions;
-use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\Dh13Resource;
+use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class EditDh13 extends EditRecord
 {
@@ -32,6 +32,7 @@ class EditDh13 extends EditRecord
      * y luego busca el registro correspondiente en la base de datos.
      *
      * @param int|string $key La clave compuesta del registro a resolver.
+     *
      * @return \Illuminate\Database\Eloquent\Model El registro Dh13 encontrado.
      */
     protected function resolveRecord(int|string $key): Model
@@ -60,6 +61,7 @@ class EditDh13 extends EditRecord
      *
      * @param \Illuminate\Database\Eloquent\Model $record El registro a actualizar.
      * @param array $data Los datos a actualizar en el registro.
+     *
      * @return \Illuminate\Database\Eloquent\Model El registro actualizado.
      */
     protected function handleRecordUpdate(Model $record, array $data): Model

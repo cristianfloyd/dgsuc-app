@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class Dh19Service
 {
-
-
     /**
      * Constructor del servicio Dh19.
      *
@@ -36,6 +34,7 @@ class Dh19Service
      * @param int $codnConce
      * @param string $tipoDocum
      * @param int $nroDocum
+     *
      * @return Dh19|null
      */
     public function getDh19ByPrimaryKey(int $nroLegaj, int $codnConce, string $tipoDocum, int $nroDocum): ?Dh19
@@ -47,6 +46,7 @@ class Dh19Service
      * Crea un nuevo registro de Dh19.
      *
      * @param array $data
+     *
      * @return Dh19
      */
     public function createDh19(array $data): Dh19
@@ -60,6 +60,7 @@ class Dh19Service
      *
      * @param Dh19 $dh19
      * @param array $data
+     *
      * @return bool
      */
     public function updateDh19(Dh19 $dh19, array $data): bool
@@ -72,6 +73,7 @@ class Dh19Service
      * Elimina un registro de Dh19.
      *
      * @param Dh19 $dh19
+     *
      * @return bool
      */
     public function deleteDh19(Dh19 $dh19): bool

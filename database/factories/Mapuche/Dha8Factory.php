@@ -19,7 +19,7 @@ class Dha8Factory extends Factory
             'codigozona' => $this->faker->numberBetween(1, 5),
             'porcaporteadicss' => $this->faker->randomFloat(2, 0, 100),
             'codigomodalcontrat' => $this->faker->numberBetween(1, 3),
-            'provincialocalidad' => $this->faker->city()
+            'provincialocalidad' => $this->faker->city(),
         ];
     }
 }

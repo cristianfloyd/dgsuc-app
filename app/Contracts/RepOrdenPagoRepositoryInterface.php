@@ -20,6 +20,7 @@ interface RepOrdenPagoRepositoryInterface
      * Obtener un registro de RepOrdenPago por su número de liquidación.
      *
      * @param int $nroLiqui
+     *
      * @return RepOrdenPagoModel|null
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel;
@@ -28,6 +29,7 @@ interface RepOrdenPagoRepositoryInterface
      * Crear un nuevo registro de RepOrdenPago.
      *
      * @param array $data
+     *
      * @return RepOrdenPagoModel
      */
     public function create(array $data): RepOrdenPagoModel;
@@ -37,6 +39,7 @@ interface RepOrdenPagoRepositoryInterface
      *
      * @param RepOrdenPagoModel $repOrdenPago
      * @param array $data
+     *
      * @return bool
      */
     public function update(RepOrdenPagoModel $repOrdenPago, array $data): bool;
@@ -45,43 +48,49 @@ interface RepOrdenPagoRepositoryInterface
      * Eliminar un registro de RepOrdenPago.
      *
      * @param RepOrdenPagoModel $repOrdenPago
+     *
      * @return bool
      */
     public function delete(RepOrdenPagoModel $repOrdenPago): bool;
 
     /**
-     * Trunca la tabla rep_orden_pago
+     * Trunca la tabla rep_orden_pago.
+     *
+     * @throws \Exception
      *
      * @return bool
-     * @throws \Exception
      */
     public function truncate(): bool;
-    
+
     /**
      * Crea la tabla rep_orden_pago si no existe.
      *
-     * @return void
      * @throws \Exception
+     *
+     * @return void
      */
     public function createTableIfNotExists(): void;
-    
+
     /**
      * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
      *
-     * @return void
      * @throws \Exception
+     *
+     * @return void
      */
     public function ensureStoredProcedure(): void;
-    
+
     /**
      * Ejecuta el procedimiento almacenado rep_orden_pago con las liquidaciones proporcionadas.
      *
      * @param array $liquidaciones Array de números de liquidación
-     * @return void
+     *
      * @throws \Exception
+     *
+     * @return void
      */
     public function executeStoredProcedure(array $liquidaciones): void;
-    
+
     /**
      * Obtiene la definición SQL del procedimiento almacenado rep_orden_pago.
      *

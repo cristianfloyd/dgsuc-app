@@ -2,53 +2,52 @@
 
 namespace App\Providers;
 
-
-use App\Repositories\Dh01Repository;
-use App\Repositories\Dh11Repository;
-use App\Repositories\Dh19Repository;
-use App\Repositories\Dh21Repository;
-use App\Repositories\Dh61Repository;
-use App\Repositories\Dh90Repository;
-use App\Repositories\EmbargoRepository;
-use App\Services\CategoryUpdateService;
-use Illuminate\Support\ServiceProvider;
-use App\Repositories\FallecidoRepository;
+use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh19RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
-use App\Repositories\Sicoss\Dh03Repository;
-use App\Repositories\RepOrdenPagoRepository;
-use App\Repositories\Dh11RepositoryInterface;
-use App\Repositories\Dh61RepositoryInterface;
-use App\Repositories\Mapuche\Dh21hRepository;
-use App\Repositories\SicossReporteRepository;
-use App\Repositories\Sicoss\LicenciaRepository;
-use App\Contracts\CategoryUpdateServiceInterface;
-use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
-use App\Repositories\Sicoss\SicossEstadoRepository;
-use App\Repositories\Sicoss\SicossCalculoRepository;
-use App\Repositories\Interfaces\Dh90RepositoryInterface;
-use App\Repositories\Sicoss\SicossFormateadorRepository;
-use App\Repositories\Sicoss\SicossOrchestatorRepository;
-use App\Repositories\Sicoss\SicossLegajoFilterRepository;
+use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
-use App\Repositories\Sicoss\SicossConfigurationRepository;
-use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
-use App\Repositories\Interfaces\FallecidoRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
-use App\Repositories\Decorators\CachingSicossReporteRepository;
-use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
-use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
+use App\Repositories\Decorators\CachingSicossReporteRepository;
+use App\Repositories\Dh01Repository;
+use App\Repositories\Dh11Repository;
+use App\Repositories\Dh11RepositoryInterface;
+use App\Repositories\Dh19Repository;
+use App\Repositories\Dh21Repository;
+use App\Repositories\Dh61Repository;
+use App\Repositories\Dh61RepositoryInterface;
+use App\Repositories\Dh90Repository;
+use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
+use App\Repositories\EmbargoRepository;
+use App\Repositories\FallecidoRepository;
+use App\Repositories\Interfaces\Dh90RepositoryInterface;
+use App\Repositories\Interfaces\FallecidoRepositoryInterface;
+use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
+use App\Repositories\Mapuche\Dh21hRepository;
+use App\Repositories\RepOrdenPagoRepository;
+use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
-use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossConfigurationRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
+use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
+use App\Repositories\Sicoss\Dh03Repository;
+use App\Repositories\Sicoss\LicenciaRepository;
+use App\Repositories\Sicoss\SicossCalculoRepository;
+use App\Repositories\Sicoss\SicossConfigurationRepository;
+use App\Repositories\Sicoss\SicossEstadoRepository;
+use App\Repositories\Sicoss\SicossFormateadorRepository;
+use App\Repositories\Sicoss\SicossLegajoFilterRepository;
+use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
+use App\Repositories\Sicoss\SicossOrchestatorRepository;
+use App\Repositories\SicossReporteRepository;
+use App\Services\CategoryUpdateService;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -68,19 +67,19 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(EmbargoRepositoryInterface::class, EmbargoRepository::class);
         $this->app->bind(
             FallecidoRepositoryInterface::class,
-            FallecidoRepository::class
+            FallecidoRepository::class,
         );
         $this->app->bind(
             abstract: AfipMapucheSicossCalculoRepository::class,
-            concrete: EloquentAfipMapucheSicossCalculoRepository::class
+            concrete: EloquentAfipMapucheSicossCalculoRepository::class,
         );
         $this->app->bind(
             Dh90RepositoryInterface::class,
-            Dh90Repository::class
+            Dh90Repository::class,
         );
         $this->app->bind(
             SicossReporteRepositoryInterface::class,
-            SicossReporteRepository::class
+            SicossReporteRepository::class,
         );
         $this->app->bind(LicenciaRepositoryInterface::class, LicenciaRepository::class);
         $this->app->bind(Dh03RepositoryInterface::class, Dh03Repository::class);
@@ -96,13 +95,14 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             SicossReporteRepository::class,
             function ($app) {
-            // Aquí puedes inyectar dependencias específicas de SicossReporteRepository si las tuviera
-            // Por ejemplo, si necesitara PeriodoFiscalService directamente:
-            // return new SicossReporteRepository($app->make(PeriodoFiscalService::class));
-            return new SicossReporteRepository(
-                $app->make(\App\Services\Mapuche\PeriodoFiscalService::class) // Asumiendo que SicossReporteRepository lo necesita
-            );
-        });
+                // Aquí puedes inyectar dependencias específicas de SicossReporteRepository si las tuviera
+                // Por ejemplo, si necesitara PeriodoFiscalService directamente:
+                // return new SicossReporteRepository($app->make(PeriodoFiscalService::class));
+                return new SicossReporteRepository(
+                    $app->make(\App\Services\Mapuche\PeriodoFiscalService::class), // Asumiendo que SicossReporteRepository lo necesita
+                );
+            },
+        );
 
         // Registrar el decorador para la interfaz
         $this->app->bind(SicossReporteRepositoryInterface::class, function ($app) {
@@ -119,6 +119,5 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

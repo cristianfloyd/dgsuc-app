@@ -5,8 +5,11 @@ namespace App\Enums;
 enum SicossCodigoActividad: int
 {
     case DOCENTE_INVESTIGADOR = 37;
+
     case DOCENTE_UNIVERSITARIO = 35;
+
     case DOCENTE_ESPECIAL = 88;
+
     case DOCENTE_ADMINISTRATIVO = 17;
 
     public function descripcion(): string

@@ -2,22 +2,20 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Collection;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportExport implements
     FromQuery,
@@ -32,7 +30,9 @@ class ReportExport implements
     use Exportable;
 
     protected $query;
+
     protected $columns;
+
     protected $summaryData;
 
     public function __construct(Builder $query)
@@ -48,7 +48,7 @@ class ReportExport implements
             'nro_cargo' => 'Secuencia',
             'codc_uacad' => 'Dependencia',
             'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe'
+            'impp_conce' => 'Importe',
         ];
 
         // Preparar los datos de resumen
@@ -70,7 +70,7 @@ class ReportExport implements
             switch ($column) {
                 case 'cuil':
                     // Procesar el CUIL: eliminar los primeros 2 dígitos y el último dígito
-                    if (strlen($value) >= 3) {
+                    if (\strlen($value) >= 3) {
                         $value = substr($value, 2, -1);
                     }
                     break;
@@ -175,7 +175,7 @@ class ReportExport implements
     {
         return [
             'Reporte de Conceptos' => new ReportDetailSheet($this->query),
-            'Resumen' => new ReportSummarySheet($this->summaryData)
+            'Resumen' => new ReportSummarySheet($this->summaryData),
         ];
     }
 
@@ -193,7 +193,7 @@ class ReportExport implements
                 return [
                     'dependencia' => $group->first()->codc_uacad,
                     'total' => $group->sum('impp_conce'),
-                    'registros' => $group->count()
+                    'registros' => $group->count(),
                 ];
             })
             ->sortByDesc('total')
@@ -202,7 +202,7 @@ class ReportExport implements
         $this->summaryData = [
             'totalGeneral' => $totalGeneral,
             'totalsByDependency' => $totalsByDependency,
-            'totalRegistros' => $data->count()
+            'totalRegistros' => $data->count(),
         ];
     }
 }

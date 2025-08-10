@@ -2,29 +2,30 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Services\WorkflowService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
+use App\Services\WorkflowService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class TablaTempCuils extends Component
 {
     use MapucheConnectionTrait;
 
-
     public $cuils = [];
-    public $selectedCuil = null;
+
+    public $selectedCuil;
+
     public $cuilsNotInAfipLoaded;
 
     protected $tablaTempCuil;
-    protected $workflowService;
 
+    protected $workflowService;
 
     #[On('iniciar-poblado-tabla-temp')]
     /**
@@ -35,15 +36,15 @@ class TablaTempCuils extends Component
      * @param int $nroLiqui Número de liquidación.
      * @param int $periodoFiscal Período fiscal.
      * @param array $cuils Lista de CUIL a procesar.
+     *
      * @return void
      */
     public function iniciarPobladoTablaTemp($nroLiqui, $periodoFiscal, $cuils): void
     {
         if ($cuils === null) {
-            log::info("iniciarPobladoTablaTemp: cuils es null");
+            log::info('iniciarPobladoTablaTemp: cuils es null');
             $this->cuils = TableModel::all();
             dd($nroLiqui, $periodoFiscal, $cuils);
-
         } else {
             $this->cuils = TableModel::whereIn('cuil', $cuils)->get();
         }
@@ -61,16 +62,13 @@ class TablaTempCuils extends Component
         $this->dispatch('success-poblado-tabla-temp-cuils');
     }
 
-
-
-
-
     /** simplificación de AFIP Mapuche.
      *
      * Este método se encarga de verificar la existencia de la tabla 'suc.afip_mapuche_mi_simplificacion', crearla si no existe, y luego vaciar y llenar la tabla con los datos proporcionados.
      *
      * @param int $nroLiqui Número de liquidación.
      * @param int $periodoFiscal Período fiscal.
+     *
      * @return void
      */
     #[On('mapuche-mi-simplificacion')]
@@ -106,14 +104,101 @@ class TablaTempCuils extends Component
         }
     }
 
+    /** Verifica si la tabla existe en la base de datos.
+     *
+     * @return bool Verdadero si la tabla existe, falso en caso contrario.
+     */
+    public function verificarExistenciaTabla(): bool
+    {
+        $model = new TableModel();
+        $tableName = $model->getTable();
+        $schema = $model->getSchemaName();
+        $fullTableName = "{$schema}.{$tableName}";
 
+        $exists = Schema::connection($this->getConnectionName())->hasTable($fullTableName);
+        Log::info("Verificación de existencia de tabla {$fullTableName}: " . ($exists ? 'Existe' : 'No existe'));
+        return $exists;
+    }
 
+    /** Verifica si la tabla existe en la base de datos y, si no existe, la crea.
+     *
+     * @return bool Verdadero si la tabla se creó exitosamente, falso si ya existía.
+     */
+    public function crearTablaSiNoExiste(): bool
+    {
+        if (!$this->verificarExistenciaTabla()) {
+            $model = new TableModel();
+            $tableName = $model->getTable();
+            $schema = $model->getSchemaName();
+            $fullTableName = "{$schema}.{$tableName}";
+
+            Schema::connection($this->getConnectionName())->create($fullTableName, function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('cuil', 11);
+            });
+            Log::info("Tabla {$fullTableName} creada exitosamente");
+            return true;
+        }
+
+        $model = new TableModel();
+        $fullTableName = "{$model->getSchemaName()}.{$model->getTable()}";
+        Log::info("La tabla {$fullTableName} ya existe, no se requiere creación");
+        return false;
+    }
+
+    /** Borra todos los registros de la tabla si existe.
+     *
+     * @return bool Verdadero si la tabla existía y se borraron los registros, falso en caso contrario.
+     */
+    public function borrarDatosSiExisten(): bool
+    {
+        if ($this->verificarExistenciaTabla()) {
+            $model = new TableModel();
+            $fullTableName = "{$model->getSchemaName()}.{$model->getTable()}";
+
+            $count = DB::connection($this->getConnectionName())
+                ->table($fullTableName)
+                ->count();
+
+            if ($count > 0) {
+                DB::connection($this->getConnectionName())
+                    ->table($fullTableName)
+                    ->truncate();
+                Log::info("Se borraron {$count} registros de la tabla {$fullTableName}");
+                return true;
+            }
+
+            Log::info("La tabla {$fullTableName} está vacía");
+            return false;
+        }
+
+        Log::info('La tabla no existe, no se requiere borrar datos');
+        return false;
+    }
+
+    public function boot(WorkflowService $workflowService): void
+    {
+        $this->workflowService = $workflowService;
+        Log::info('TablaTempCuils boot');
+    }
+
+    public function mount(): void
+    {
+        log::info('TablaTempCuils mout');
+    }
+
+    public function render()
+    {
+        Log::info('render TablaTempCuils');
+        return view('livewire.tabla-temp-cuils');
+    }
 
     /** Valida que los parámetros 'nroLiqui' y 'periodoFiscal' no estén vacíos.
      *
      *
      * @param int $nroLiqui Número de liquidación.
      * @param int $periodoFiscal Período fiscal.
+     *
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario.
      */
     private function validarParametros($nroLiqui, $periodoFiscal)
@@ -129,6 +214,7 @@ class TablaTempCuils extends Component
      *
      * @param AfipMapucheMiSimplificacion $instance Instancia del modelo de la tabla 'suc.afip_mapuche_mi_simplificacion'.
      * @param string $table Nombre de la tabla a verificar y crear.
+     *
      * @return bool Verdadero si la tabla existe o se creó correctamente, falso en caso contrario.
      */
     private function verificarYCrearTabla($instance, $table): bool
@@ -150,6 +236,7 @@ class TablaTempCuils extends Component
     /** Verifica si la tabla 'suc.afip_mapuche_mi_simplificacion' tiene datos y, si es así, la vacía.
      *
      * @param AfipMapucheMiSimplificacion $instance Instancia del modelo de la tabla 'suc.afip_mapuche_mi_simplificacion'.
+     *
      * @return void
      */
     private function verificarYVaciarTabla($instance): void
@@ -161,12 +248,12 @@ class TablaTempCuils extends Component
         }
     }
 
-
     /** Inserta datos en la tabla 'suc.afip_tabla_temp_cuils'.
      *
      * @param string $nroLiqui Número de liquidación.
      * @param int $periodoFiscal Período fiscal.
      * @param array|null $cuils Lista de CUILs a insertar.
+     *
      * @return bool Verdadero si la inserción se completó correctamente, falso en caso contrario.
      */
     private function insertarDatos($nroLiqui, $periodoFiscal, $cuils = null): bool
@@ -178,109 +265,14 @@ class TablaTempCuils extends Component
                 $this->dispatch('success-tabla-temp-cuils', 'Inserción en suc.afip_tabla_temp_cuils exitosa');
                 Log::info('Inserción en suc.afip_tabla_temp_cuils completada');
                 return true;
-            } else {
-                $this->dispatch('error-tabla-temp-cuils', 'Fallo en la inserción en suc.afip_tabla_temp_cuils');
-                Log::error('Fallo en la inserción en suc.afip_tabla_temp_cuils');
-                return false;
             }
+            $this->dispatch('error-tabla-temp-cuils', 'Fallo en la inserción en suc.afip_tabla_temp_cuils');
+            Log::error('Fallo en la inserción en suc.afip_tabla_temp_cuils');
+            return false;
         } catch (\Exception $e) {
             Log::error('Error al insertar datos en afip_tabla_temp_cuils: ' . $e->getMessage());
             $this->dispatch('error-tabla-temp-cuils', 'Error al insertar datos en afip_tabla_temp_cuils');
             return false;
         }
-    }
-
-    /** Verifica si la tabla existe en la base de datos.
-     *
-     * @return bool Verdadero si la tabla existe, falso en caso contrario.
-     */
-    public function verificarExistenciaTabla(): bool
-    {
-        $model = new TableModel();
-        $tableName = $model->getTable();
-        $schema = $model->getSchemaName();
-        $fullTableName = "{$schema}.{$tableName}";
-
-        $exists = Schema::connection($this->getConnectionName())->hasTable($fullTableName);
-        Log::info("Verificación de existencia de tabla {$fullTableName}: " . ($exists ? 'Existe' : 'No existe'));
-        return $exists;
-    }
-
-
-
-    /** Verifica si la tabla existe en la base de datos y, si no existe, la crea.
-     *
-     * @return bool Verdadero si la tabla se creó exitosamente, falso si ya existía.
-     */
-    public function crearTablaSiNoExiste(): bool
-    {
-        if (!$this->verificarExistenciaTabla()) {
-            $model = new TableModel();
-            $tableName = $model->getTable();
-            $schema = $model->getSchemaName();
-            $fullTableName = "{$schema}.{$tableName}";
-
-            Schema::connection($this->getConnectionName())->create($fullTableName, function (Blueprint $table) {
-                $table->bigIncrements('id');
-                $table->string('cuil', 11);
-            });
-            Log::info("Tabla {$fullTableName} creada exitosamente");
-            return true;
-        }
-
-        $model = new TableModel();
-        $fullTableName = "{$model->getSchemaName()}.{$model->getTable()}";
-        Log::info("La tabla {$fullTableName} ya existe, no se requiere creación");
-        return false;
-    }
-
-
-    /** Borra todos los registros de la tabla si existe.
-     *
-     * @return bool Verdadero si la tabla existía y se borraron los registros, falso en caso contrario.
-     */
-    public function borrarDatosSiExisten(): bool
-    {
-        if ($this->verificarExistenciaTabla()) {
-            $model = new TableModel();
-            $fullTableName = "{$model->getSchemaName()}.{$model->getTable()}";
-
-            $count = DB::connection($this->getConnectionName())
-                      ->table($fullTableName)
-                      ->count();
-
-            if ($count > 0) {
-                DB::connection($this->getConnectionName())
-                  ->table($fullTableName)
-                  ->truncate();
-                Log::info("Se borraron {$count} registros de la tabla {$fullTableName}");
-                return true;
-            }
-
-            Log::info("La tabla {$fullTableName} está vacía");
-            return false;
-        }
-
-        Log::info("La tabla no existe, no se requiere borrar datos");
-        return false;
-    }
-
-
-
-
-    public function boot(WorkflowService $workflowService)
-    {
-        $this->workflowService = $workflowService;
-        Log::info('TablaTempCuils boot');
-    }
-    public function mount()
-    {
-        log::info('TablaTempCuils mout');
-    }
-
-    public function render()
-    {
-        Log::info('render TablaTempCuils');
-        return view('livewire.tabla-temp-cuils');
     }
 }

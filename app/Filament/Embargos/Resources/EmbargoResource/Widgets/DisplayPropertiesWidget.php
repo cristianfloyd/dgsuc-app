@@ -2,18 +2,15 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoResource\Widgets;
 
-use Livewire\Attributes\On;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Log;
-
-
+use Livewire\Attributes\On;
 
 class DisplayPropertiesWidget extends Widget
 {
     protected static string $view = 'filament.widgets.display-properties-widget';
 
-    protected array $properties =  [];
-
+    protected array $properties = [];
 
     public function mount($properties): void
     {
@@ -29,18 +26,16 @@ class DisplayPropertiesWidget extends Widget
         ]);
     }
 
-
-
-    protected function getInitialProperties(): array
-    {
-        // Este método puede ser sobrescrito por cada recurso para proporcionar las propiedades iniciales
-        return [];
-    }
-
     #[On('propertiesUpdated')]
     public function updatedProperties(array $properties): void
     {
         $this->properties = $properties;
         Log::info('evento escuchado en el widget', $this->properties);
+    }
+
+    protected function getInitialProperties(): array
+    {
+        // Este método puede ser sobrescrito por cada recurso para proporcionar las propiedades iniciales
+        return [];
     }
 }

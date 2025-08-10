@@ -3,21 +3,22 @@
 namespace App\Exports;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles
 {
     protected Collection $registros;
+
     protected string $periodoFiscal;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param Collection $registros Registros a exportar
      * @param string|null $periodoFiscal Periodo fiscal (formato YYYYMM)
@@ -102,12 +103,13 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
             'Ley',
             'Inc. Salarial',
             'Rem. Imponible 11',
-            'Diferencia Rem.'
+            'Diferencia Rem.',
         ];
     }
 
     /**
      * @param mixed $row
+     *
      * @return array
      */
     public function map($row): array
@@ -173,7 +175,7 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $row->ley,
             $row->incsalarial,
             $row->remimp11,
-            $row->diferencia_rem
+            $row->diferencia_rem,
         ];
     }
 
@@ -187,6 +189,7 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
 
     /**
      * @param Worksheet $sheet
+     *
      * @return array
      */
     public function styles(Worksheet $sheet): array
@@ -197,8 +200,8 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
                 'font' => ['bold' => true, 'size' => 12],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'E2EFDA']
-                ]
+                    'startColor' => ['rgb' => 'E2EFDA'],
+                ],
             ],
             // Estilo para las columnas monetarias
             'M:N' => ['numberFormat' => ['formatCode' => '#,##0.00']],
@@ -210,7 +213,7 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
             'AS:AW' => ['numberFormat' => ['formatCode' => '#,##0.00']],
             'AY:BC' => ['numberFormat' => ['formatCode' => '#,##0.00']],
             'BF:BH' => ['numberFormat' => ['formatCode' => '#,##0.00']],
-            'BJ:BJ' => ['numberFormat' => ['formatCode' => '#,##0.00']]
+            'BJ:BJ' => ['numberFormat' => ['formatCode' => '#,##0.00']],
         ];
     }
 }

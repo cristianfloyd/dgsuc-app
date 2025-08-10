@@ -16,7 +16,7 @@ class CuilsDiferenciasExport extends BaseSicossExport
         return [
             'CUIL',
             'Origen',
-            'Fecha de Control'
+            'Fecha de Control',
         ];
     }
 
@@ -25,7 +25,7 @@ class CuilsDiferenciasExport extends BaseSicossExport
         return [
             $row->cuil,
             $row->origen,
-            $row->fecha_control
+            $row->fecha_control,
         ];
     }
 }

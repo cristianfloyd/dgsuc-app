@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
-use Livewire\Livewire;
-use Filament\Actions\Action;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Filament\Resources\Dh21Resource;
-use App\Filament\Widgets\IdLiquiSelector;
-use Filament\Resources\Pages\ListRecords;
-use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
+use App\Filament\Widgets\IdLiquiSelector;
+use App\Livewire\Reportes\OrdenPagoReporte;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\ListRecords;
+use Livewire\Livewire;
 
 class ListDh21s extends ListRecords
 {
@@ -20,8 +19,8 @@ class ListDh21s extends ListRecords
         return [
             // Actions\CreateAction::make(),
             Action::make('conceptos-totales')
-            ->label('Ver Conceptos Totales')
-            ->url(static::getResource()::getUrl('conceptos-totales')),
+                ->label('Ver Conceptos Totales')
+                ->url(static::getResource()::getUrl('conceptos-totales')),
             Action::make('abrirModal')
                 ->label('Orden de Pago')
                 ->icon('heroicon-o-plus')
@@ -30,8 +29,8 @@ class ListDh21s extends ListRecords
                 })
                 ->modalFooterActions([
                     Action::make('descargarPDF')
-                    ->label('Descargar PDF')
-                    ->action(fn() => static::descargarReportePDF(1))
+                        ->label('Descargar PDF')
+                        ->action(fn () => static::descargarReportePDF(1)),
                 ])
                 ->modalDescription('Orden de pago') // Contenido vacío
                 ->modalWidth('7xl'), // Ancho del modal

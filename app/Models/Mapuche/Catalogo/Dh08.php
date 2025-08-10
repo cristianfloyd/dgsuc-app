@@ -5,8 +5,8 @@ namespace App\Models\Mapuche\Catalogo;
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh08' en la base de datos PostgreSQL.
@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $nro_tab03
  * @property string $codc_nacio
  * @property bool $nacio_principal
- *
  * @property-read Dh30 $dh30
  * @property-read Dh01 $dh01
  */
@@ -27,9 +26,13 @@ class Dh08 extends Model
     use MapucheConnectionTrait;
 
     public $timestamps = false;
+
     public $incrementing = false;
+
     protected $table = 'dh08';
+
     protected $primaryKey = ['nro_legaj', 'codc_nacio'];
+
     protected $fillable = [
         'nro_legaj',
         'nro_tab03',
@@ -37,18 +40,13 @@ class Dh08 extends Model
         'nacio_principal',
     ];
 
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'nro_tab03' => 'integer',
-        'codc_nacio' => 'string',
-        'nacio_principal' => 'boolean',
-    ];
-
+    #[\Override]
     public function getKeyName(): array
     {
         return ['nro_legaj', 'codc_nacio'];
     }
 
+    #[\Override]
     public function getIncrementing(): false
     {
         return false;
@@ -63,12 +61,23 @@ class Dh08 extends Model
     {
         // return $this->belongsTo(Dh30::class, ['nro_tab03', 'codc_nacio'], ['nro_tabla', 'desc_abrev']);
         return $this->hasOne(Dh30::class, 'nro_tabla', 'nro_tab03')
-                    ->where('desc_abrev', $this->codc_nacio);
+            ->where('desc_abrev', $this->codc_nacio);
     }
 
+    #[\Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_legaj', $this->getAttribute('nro_legaj'))
-                     ->where('codc_nacio', $this->getAttribute('codc_nacio'));
+            ->where('codc_nacio', $this->getAttribute('codc_nacio'));
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'nro_tab03' => 'integer',
+            'codc_nacio' => 'string',
+            'nacio_principal' => 'boolean',
+        ];
     }
 }

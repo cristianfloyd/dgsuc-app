@@ -3,14 +3,19 @@
 namespace App\ValueObjects;
 
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 class PeriodoLiquidacion
 {
-    private Carbon $fecha;
+    private readonly Carbon $fecha;
 
     public function __construct(string $year, string $month)
     {
-        $this->fecha = Carbon::createFromFormat('Y-m', "$year-$month")->startOfMonth();
+        $fecha = Carbon::createFromFormat('Y-m', "$year-$month");
+        if (!$fecha instanceof Carbon) {
+            throw new InvalidArgumentException("Invalid date format: $year-$month");
+        }
+        $this->fecha = $fecha->startOfMonth();
     }
 
     /**
@@ -30,7 +35,7 @@ class PeriodoLiquidacion
      */
     public function getFechaInicio(): Carbon
     {
-        return $this->fecha->copy()->subMonths(1);
+        return $this->fecha->copy()->subMonths();
     }
 
     /**

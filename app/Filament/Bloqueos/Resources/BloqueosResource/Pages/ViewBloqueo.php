@@ -2,9 +2,9 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosResource\Pages;
 
+use App\Filament\Bloqueos\Resources\BloqueosResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use App\Filament\Bloqueos\Resources\BloqueosResource;
 
 class ViewBloqueo extends ViewRecord
 {

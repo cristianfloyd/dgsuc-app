@@ -9,6 +9,5 @@ class AfipMapucheArt
      */
     public function __construct()
     {
-        //
     }
 }

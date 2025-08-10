@@ -9,6 +9,5 @@ class EmbargoService
      */
     public function __construct()
     {
-        //
     }
 }

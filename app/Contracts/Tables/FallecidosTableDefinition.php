@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Contracts\Tables;
 
-
 class FallecidosTableDefinition implements AbstractTableDefinitionInterface
 {
     public function getTableName(): string
@@ -18,7 +17,7 @@ class FallecidosTableDefinition implements AbstractTableDefinitionInterface
             'id' => [
                 'type' => 'bigIncrements', // Cambiamos a bigIncrements para ID de Laravel
                 'primary' => true,
-                'unsigned' => true
+                'unsigned' => true,
             ],
             'nro_legaj' => ['type' => 'integer'],
             'apellido' => ['type' => 'string', 'length' => 20],

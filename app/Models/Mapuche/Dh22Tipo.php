@@ -6,7 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modelo Eloquent para la tabla mapuche.dh22_tipos
+ * Modelo Eloquent para la tabla mapuche.dh22_tipos.
  *
  * Esta clase representa los tipos de liquidaciones en el sistema.
  */
@@ -20,28 +20,33 @@ class Dh22Tipo extends Model
      * @var bool
      */
     public $timestamps = false;
+
     /**
      * Indica si el ID es auto-incrementable.
      *
      * @var bool
      */
     public $incrementing = false;
+
     /**
      * Indica el nombre de la tabla asociada al modelo.
      *
      * @var string
      */
     protected $table = 'dh22_tipos';
+
     /**
      * La clave primaria asociada con la tabla.
      *
      * @var string
      */
     protected $primaryKey = 'id';
+
     /**
      * Los atributos que son asignables en masa.
      *
      * @var array
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'id',

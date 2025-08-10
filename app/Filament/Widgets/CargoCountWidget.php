@@ -7,14 +7,12 @@ use App\Models\Dh11;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Symfony\Component\String\LazyString;
 
 class CargoCountWidget extends BaseWidget
 {
     use InteractsWithPageFilters;
 
     protected static ?int $sort = 3;
-
 
     protected function getStats(): array
     {

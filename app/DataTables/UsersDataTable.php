@@ -1,4 +1,5 @@
 <?php
+
 namespace App\DataTables;
 
 use App\Models\User;
@@ -24,20 +25,20 @@ class UsersDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('users-table')
-                    ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    ->orderBy(1)
-                    ->selectStyleSingle()
-                    ->buttons([
-                        Button::make('add'),
-                        Button::make('excel'),
-                        Button::make('csv'),
-                        Button::make('pdf'),
-                        Button::make('print'),
-                        Button::make('reset'),
-                        Button::make('reload'),
-                    ]);
+            ->setTableId('users-table')
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            ->orderBy(1)
+            ->selectStyleSingle()
+            ->buttons([
+                Button::make('add'),
+                Button::make('excel'),
+                Button::make('csv'),
+                Button::make('pdf'),
+                Button::make('print'),
+                Button::make('reset'),
+                Button::make('reload'),
+            ]);
     }
 
     public function getColumns(): array
@@ -53,6 +54,6 @@ class UsersDataTable extends DataTable
 
     protected function filename(): string
     {
-        return 'Users_'.date('YmdHis');
+        return 'Users_' . date('YmdHis');
     }
 }

@@ -13,7 +13,7 @@ class ViewResourcePropertiesAction extends Action
             ->label('View Properties')
             ->icon(FilamentIcon::resolve('heroicon-o-eye'))
             ->modalHeading('Resource Properties')
-            ->modalContent(fn($livewire) => view('filament.actions.view-resource-properties', [
+            ->modalContent(fn ($livewire) => view('filament.actions.view-resource-properties', [
                 'properties' => $livewire->getPropertyValues(),
             ]))
             ->modalWidth('md');

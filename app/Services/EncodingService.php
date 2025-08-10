@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use InvalidArgumentException;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 class EncodingService
 {
@@ -17,6 +17,7 @@ class EncodingService
      * Convierte el valor proporcionado a codificación UTF-8.
      *
      * @param string $value El valor a convertir.
+     *
      * @return string El valor convertido a UTF-8.
      */
     // public static function toUtf8($value)
@@ -66,6 +67,7 @@ class EncodingService
      * Convierte el valor proporcionado a codificación ISO-8859-1 (Latin1).
      *
      * @param string $value El valor a convertir.
+     *
      * @return string El valor convertido a ISO-8859-1.
      */
     // public static function toLatin1(?string $value): ?string
@@ -135,6 +137,7 @@ class EncodingService
      * Maneja específicamente caracteres latinos problemáticos.
      *
      * @param string|null $value El valor a convertir.
+     *
      * @return string|null El valor convertido a UTF-8.
      */
     public static function toUtf8(?string $value): ?string
@@ -148,38 +151,38 @@ class EncodingService
             // Caracteres especiales comunes en español y sus equivalentes UTF-8
             $char_map = [
                 // Vocales con acento
-                "\xCD" => "Í", // I con acento
-                "\xC1" => "Á", // A con acento
-                "\xC9" => "É", // E con acento
-                "\xD3" => "Ó", // O con acento
-                "\xDA" => "Ú", // U con acento
+                "\xCD" => 'Í', // I con acento
+                "\xC1" => 'Á', // A con acento
+                "\xC9" => 'É', // E con acento
+                "\xD3" => 'Ó', // O con acento
+                "\xDA" => 'Ú', // U con acento
 
                 // Letra Ñ
-                "\xD1" => "Ñ", // Ñ
+                "\xD1" => 'Ñ', // Ñ
 
                 // Vocales con diéresis
-                "\xDC" => "Ü", // U con diéresis
-                "\xC4" => "Ä", // A con diéresis
-                "\xCB" => "Ë", // E con diéresis
-                "\xCF" => "Ï", // I con diéresis
-                "\xD6" => "Ö", // O con diéresis
+                "\xDC" => 'Ü', // U con diéresis
+                "\xC4" => 'Ä', // A con diéresis
+                "\xCB" => 'Ë', // E con diéresis
+                "\xCF" => 'Ï', // I con diéresis
+                "\xD6" => 'Ö', // O con diéresis
 
                 // Versiones minúsculas - acentos
-                "\xED" => "í",
-                "\xE1" => "á",
-                "\xE9" => "é",
-                "\xF3" => "ó",
-                "\xFA" => "ú",
+                "\xED" => 'í',
+                "\xE1" => 'á',
+                "\xE9" => 'é',
+                "\xF3" => 'ó',
+                "\xFA" => 'ú',
 
                 // Versión minúscula - ñ
-                "\xF1" => "ñ",
+                "\xF1" => 'ñ',
 
                 // Versiones minúsculas - diéresis
-                "\xFC" => "ü",
-                "\xE4" => "ä",
-                "\xEB" => "ë",
-                "\xEF" => "ï",
-                "\xF6" => "ö"
+                "\xFC" => 'ü',
+                "\xE4" => 'ä',
+                "\xEB" => 'ë',
+                "\xEF" => 'ï',
+                "\xF6" => 'ö',
             ];
 
             // Aplicar mapeo directo para caracteres especiales
@@ -193,7 +196,7 @@ class EncodingService
             return $converted;
         } catch (\Exception $e) {
             Log::warning("Error al convertir a UTF-8: {$e->getMessage()}", [
-                'valor_original' => bin2hex($value)
+                'valor_original' => bin2hex($value),
             ]);
             // En caso de error, devolver el valor original
             return $value;
@@ -204,6 +207,7 @@ class EncodingService
      * Convierte el valor proporcionado a codificación ISO-8859-1 (Latin1).
      *
      * @param string|null $value El valor a convertir.
+     *
      * @return string|null El valor convertido a ISO-8859-1.
      */
     public static function toLatin1(?string $value): ?string

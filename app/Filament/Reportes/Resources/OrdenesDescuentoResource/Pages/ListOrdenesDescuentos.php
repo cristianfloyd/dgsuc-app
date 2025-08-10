@@ -2,18 +2,17 @@
 
 namespace App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
 
-use Filament\Actions;
-use Illuminate\Support\Facades\Log;
+use App\Filament\Reportes\Resources\OrdenesDescuentoResource;
+use App\Services\OrdenesDescuentoTableService;
 use App\Traits\TableVerificationTrait;
-
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use App\Services\OrdenesDescuentoTableService;
-use App\Filament\Reportes\Resources\OrdenesDescuentoResource;
+use Illuminate\Support\Facades\Log;
 
 class ListOrdenesDescuentos extends ListRecords
 {
     use TableVerificationTrait;
+
     protected static string $resource = OrdenesDescuentoResource::class;
 
     public function mount(): void

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Dh03;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Modelo para la tabla de Brutos Acumulados para SAC (dh10)
+ * Modelo para la tabla de Brutos Acumulados para SAC (dh10).
  *
  * @property int $nro_cargo Cargo del Empleado
  * @property int $vcl_cargo Vínculo Cargo Orígen
@@ -102,6 +101,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Dh10|null $cargoVinculado Relación con el cargo vinculado
  *
  * Scopes:
+ *
  * @method static Builder|self conVinculo() Cargos que tienen vínculos
  * @method static Builder|self sinVinculo() Cargos sin vínculos
  * @method static Builder|self conImportesMes(int $mes) Cargos con importes en un mes específico
@@ -112,27 +112,27 @@ class Dh10 extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
-     */
-    protected $table = 'dh10';
-
-    /**
-     * Clave primaria de la tabla
-     */
-    protected $primaryKey = 'nro_cargo';
-
-    /**
-     * Indica si el modelo debe tener timestamps
+     * Indica si el modelo debe tener timestamps.
      */
     public $timestamps = false;
 
     /**
-     * Indica si la clave primaria es auto-incrementable
+     * Indica si la clave primaria es auto-incrementable.
      */
     public $incrementing = false;
 
     /**
-     * Atributos que son asignables masivamente
+     * Nombre de la tabla en la base de datos.
+     */
+    protected $table = 'dh10';
+
+    /**
+     * Clave primaria de la tabla.
+     */
+    protected $primaryKey = 'nro_cargo';
+
+    /**
+     * Atributos que son asignables masivamente.
      */
     protected $fillable = [
         'nro_cargo',
@@ -156,43 +156,11 @@ class Dh10 extends Model
         'retroimpbrhbrpr_5', 'retroimpbrhbrpr_6', 'retroimpbrhbrpr_7', 'retroimpbrhbrpr_8',
         'retroimpbrhbrpr_9', 'retroimpbrhbrpr_10', 'retroimpbrhbrpr_11', 'retroimpbrhbrpr_12',
         'retroimpbrhbrpr_13', 'retroimpbrhbrpr_14', 'retroimpbrhbrpr_15', 'retroimpbrhbrpr_16',
-        'retroimpbrhbrpr_17', 'retroimpbrhbrpr_18'
+        'retroimpbrhbrpr_17', 'retroimpbrhbrpr_18',
     ];
 
     /**
-     * Casteos de atributos
-     */
-    protected $casts = [
-        'nro_cargo' => 'integer',
-        'vcl_cargo' => 'integer',
-        // Importes brutos mensuales
-        'imp_bruto_1' => 'decimal:2', 'imp_bruto_2' => 'decimal:2', 'imp_bruto_3' => 'decimal:2',
-        'imp_bruto_4' => 'decimal:2', 'imp_bruto_5' => 'decimal:2', 'imp_bruto_6' => 'decimal:2',
-        'imp_bruto_7' => 'decimal:2', 'imp_bruto_8' => 'decimal:2', 'imp_bruto_9' => 'decimal:2',
-        'imp_bruto_10' => 'decimal:2', 'imp_bruto_11' => 'decimal:2', 'imp_bruto_12' => 'decimal:2',
-        // Importes retroactivos mensuales
-        'importes_retro_1' => 'decimal:2', 'importes_retro_2' => 'decimal:2', 'importes_retro_3' => 'decimal:2',
-        'importes_retro_4' => 'decimal:2', 'importes_retro_5' => 'decimal:2', 'importes_retro_6' => 'decimal:2',
-        'importes_retro_7' => 'decimal:2', 'importes_retro_8' => 'decimal:2', 'importes_retro_9' => 'decimal:2',
-        'importes_retro_10' => 'decimal:2', 'importes_retro_11' => 'decimal:2', 'importes_retro_12' => 'decimal:2',
-        // Importes haber promedio (18 períodos)
-        'impbrhbrprom_1' => 'decimal:2', 'impbrhbrprom_2' => 'decimal:2', 'impbrhbrprom_3' => 'decimal:2',
-        'impbrhbrprom_4' => 'decimal:2', 'impbrhbrprom_5' => 'decimal:2', 'impbrhbrprom_6' => 'decimal:2',
-        'impbrhbrprom_7' => 'decimal:2', 'impbrhbrprom_8' => 'decimal:2', 'impbrhbrprom_9' => 'decimal:2',
-        'impbrhbrprom_10' => 'decimal:2', 'impbrhbrprom_11' => 'decimal:2', 'impbrhbrprom_12' => 'decimal:2',
-        'impbrhbrprom_13' => 'decimal:2', 'impbrhbrprom_14' => 'decimal:2', 'impbrhbrprom_15' => 'decimal:2',
-        'impbrhbrprom_16' => 'decimal:2', 'impbrhbrprom_17' => 'decimal:2', 'impbrhbrprom_18' => 'decimal:2',
-        // Retro haber promedio (18 períodos)
-        'retroimpbrhbrpr_1' => 'decimal:2', 'retroimpbrhbrpr_2' => 'decimal:2', 'retroimpbrhbrpr_3' => 'decimal:2',
-        'retroimpbrhbrpr_4' => 'decimal:2', 'retroimpbrhbrpr_5' => 'decimal:2', 'retroimpbrhbrpr_6' => 'decimal:2',
-        'retroimpbrhbrpr_7' => 'decimal:2', 'retroimpbrhbrpr_8' => 'decimal:2', 'retroimpbrhbrpr_9' => 'decimal:2',
-        'retroimpbrhbrpr_10' => 'decimal:2', 'retroimpbrhbrpr_11' => 'decimal:2', 'retroimpbrhbrpr_12' => 'decimal:2',
-        'retroimpbrhbrpr_13' => 'decimal:2', 'retroimpbrhbrpr_14' => 'decimal:2', 'retroimpbrhbrpr_15' => 'decimal:2',
-        'retroimpbrhbrpr_16' => 'decimal:2', 'retroimpbrhbrpr_17' => 'decimal:2', 'retroimpbrhbrpr_18' => 'decimal:2',
-    ];
-
-    /**
-     * Atributos que deben agregarse al array/JSON del modelo
+     * Atributos que deben agregarse al array/JSON del modelo.
      */
     protected $appends = [
         'importes_brutos_mensuales',
@@ -202,7 +170,7 @@ class Dh10 extends Model
         'total_importes_brutos',
         'total_importes_retroactivos',
         'tiene_vinculo',
-        'promedio_mensual_brutos'
+        'promedio_mensual_brutos',
     ];
 
     // ==============================================
@@ -210,7 +178,7 @@ class Dh10 extends Model
     // ==============================================
 
     /**
-     * Relación con el modelo Dh03 (cargo)
+     * Relación con el modelo Dh03 (cargo).
      */
     public function cargo(): BelongsTo
     {
@@ -218,7 +186,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Relación con cargo vinculado (auto-relación)
+     * Relación con cargo vinculado (auto-relación).
      */
     public function cargoVinculado(): BelongsTo
     {
@@ -230,7 +198,7 @@ class Dh10 extends Model
     // ==============================================
 
     /**
-     * Scope para cargos con vínculos
+     * Scope para cargos con vínculos.
      */
     public function scopeConVinculo(Builder $query): Builder
     {
@@ -238,7 +206,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Scope para cargos sin vínculos
+     * Scope para cargos sin vínculos.
      */
     public function scopeSinVinculo(Builder $query): Builder
     {
@@ -246,7 +214,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Scope para cargos con importes en un mes específico
+     * Scope para cargos con importes en un mes específico.
      */
     public function scopeConImportesMes(Builder $query, int $mes): Builder
     {
@@ -258,20 +226,20 @@ class Dh10 extends Model
     }
 
     /**
-     * Scope para filtrar por período fiscal
+     * Scope para filtrar por período fiscal.
      */
     public function scopePorPeriodoFiscal(Builder $query, int $anio, ?int $semestre = null): Builder
     {
         if ($semestre === 1) {
             // Primer semestre: enero a junio
-            $query->where(function ($q) {
+            $query->where(function ($q): void {
                 for ($mes = 1; $mes <= 6; $mes++) {
                     $q->orWhere("imp_bruto_{$mes}", '>', 0);
                 }
             });
         } elseif ($semestre === 2) {
             // Segundo semestre: julio a diciembre
-            $query->where(function ($q) {
+            $query->where(function ($q): void {
                 for ($mes = 7; $mes <= 12; $mes++) {
                     $q->orWhere("imp_bruto_{$mes}", '>', 0);
                 }
@@ -282,144 +250,11 @@ class Dh10 extends Model
     }
 
     // ==============================================
-    // ACCESSORS (ATRIBUTOS COMPUTADOS)
-    // ==============================================
-
-    /**
-     * Obtiene los importes brutos mensuales como array indexado
-     */
-    protected function importesBrutosMensuales(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => [
-                1 => $this->imp_bruto_1 ?? 0,
-                2 => $this->imp_bruto_2 ?? 0,
-                3 => $this->imp_bruto_3 ?? 0,
-                4 => $this->imp_bruto_4 ?? 0,
-                5 => $this->imp_bruto_5 ?? 0,
-                6 => $this->imp_bruto_6 ?? 0,
-                7 => $this->imp_bruto_7 ?? 0,
-                8 => $this->imp_bruto_8 ?? 0,
-                9 => $this->imp_bruto_9 ?? 0,
-                10 => $this->imp_bruto_10 ?? 0,
-                11 => $this->imp_bruto_11 ?? 0,
-                12 => $this->imp_bruto_12 ?? 0,
-            ]
-        );
-    }
-
-    /**
-     * Obtiene los importes retroactivos mensuales como array indexado
-     */
-    protected function importesRetroactivosMensuales(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => [
-                1 => $this->importes_retro_1 ?? 0,
-                2 => $this->importes_retro_2 ?? 0,
-                3 => $this->importes_retro_3 ?? 0,
-                4 => $this->importes_retro_4 ?? 0,
-                5 => $this->importes_retro_5 ?? 0,
-                6 => $this->importes_retro_6 ?? 0,
-                7 => $this->importes_retro_7 ?? 0,
-                8 => $this->importes_retro_8 ?? 0,
-                9 => $this->importes_retro_9 ?? 0,
-                10 => $this->importes_retro_10 ?? 0,
-                11 => $this->importes_retro_11 ?? 0,
-                12 => $this->importes_retro_12 ?? 0,
-            ]
-        );
-    }
-
-    /**
-     * Obtiene los importes haber promedio como array indexado
-     */
-    protected function importesHaberPromedio(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => [
-                1 => $this->impbrhbrprom_1 ?? 0, 2 => $this->impbrhbrprom_2 ?? 0,
-                3 => $this->impbrhbrprom_3 ?? 0, 4 => $this->impbrhbrprom_4 ?? 0,
-                5 => $this->impbrhbrprom_5 ?? 0, 6 => $this->impbrhbrprom_6 ?? 0,
-                7 => $this->impbrhbrprom_7 ?? 0, 8 => $this->impbrhbrprom_8 ?? 0,
-                9 => $this->impbrhbrprom_9 ?? 0, 10 => $this->impbrhbrprom_10 ?? 0,
-                11 => $this->impbrhbrprom_11 ?? 0, 12 => $this->impbrhbrprom_12 ?? 0,
-                13 => $this->impbrhbrprom_13 ?? 0, 14 => $this->impbrhbrprom_14 ?? 0,
-                15 => $this->impbrhbrprom_15 ?? 0, 16 => $this->impbrhbrprom_16 ?? 0,
-                17 => $this->impbrhbrprom_17 ?? 0, 18 => $this->impbrhbrprom_18 ?? 0,
-            ]
-        );
-    }
-
-    /**
-     * Obtiene los retro haber promedio como array indexado
-     */
-    protected function retroHaberPromedio(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => [
-                1 => $this->retroimpbrhbrpr_1 ?? 0, 2 => $this->retroimpbrhbrpr_2 ?? 0,
-                3 => $this->retroimpbrhbrpr_3 ?? 0, 4 => $this->retroimpbrhbrpr_4 ?? 0,
-                5 => $this->retroimpbrhbrpr_5 ?? 0, 6 => $this->retroimpbrhbrpr_6 ?? 0,
-                7 => $this->retroimpbrhbrpr_7 ?? 0, 8 => $this->retroimpbrhbrpr_8 ?? 0,
-                9 => $this->retroimpbrhbrpr_9 ?? 0, 10 => $this->retroimpbrhbrpr_10 ?? 0,
-                11 => $this->retroimpbrhbrpr_11 ?? 0, 12 => $this->retroimpbrhbrpr_12 ?? 0,
-                13 => $this->retroimpbrhbrpr_13 ?? 0, 14 => $this->retroimpbrhbrpr_14 ?? 0,
-                15 => $this->retroimpbrhbrpr_15 ?? 0, 16 => $this->retroimpbrhbrpr_16 ?? 0,
-                17 => $this->retroimpbrhbrpr_17 ?? 0, 18 => $this->retroimpbrhbrpr_18 ?? 0,
-            ]
-        );
-    }
-
-    /**
-     * Calcula el total de importes brutos del año
-     */
-    protected function totalImportesBrutos(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => array_sum($this->importes_brutos_mensuales)
-        );
-    }
-
-    /**
-     * Calcula el total de importes retroactivos del año
-     */
-    protected function totalImportesRetroactivos(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => array_sum($this->importes_retroactivos_mensuales)
-        );
-    }
-
-    /**
-     * Indica si el cargo tiene vínculo
-     */
-    protected function tieneVinculo(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->nro_cargo !== $this->vcl_cargo
-        );
-    }
-
-    /**
-     * Calcula el promedio mensual de importes brutos
-     */
-    protected function promedioMensualBrutos(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                $importes = array_filter($this->importes_brutos_mensuales, fn($importe) => $importe > 0);
-                return count($importes) > 0 ? array_sum($importes) / count($importes) : 0;
-            }
-        );
-    }
-
-    // ==============================================
     // MÉTODOS DE UTILIDAD
     // ==============================================
 
     /**
-     * Obtiene el importe bruto de un mes específico
+     * Obtiene el importe bruto de un mes específico.
      */
     public function getImporteBrutoMes(int $mes): float
     {
@@ -431,7 +266,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Establece el importe bruto de un mes específico
+     * Establece el importe bruto de un mes específico.
      */
     public function setImporteBrutoMes(int $mes, float $importe): self
     {
@@ -444,7 +279,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Obtiene el importe retroactivo de un mes específico
+     * Obtiene el importe retroactivo de un mes específico.
      */
     public function getImporteRetroactivoMes(int $mes): float
     {
@@ -456,7 +291,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Obtiene el mayor importe bruto del semestre
+     * Obtiene el mayor importe bruto del semestre.
      */
     public function getMayorImporteSemestre(int $semestre): array
     {
@@ -474,7 +309,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Inicializa todos los campos de importes en cero para un cargo nuevo
+     * Inicializa todos los campos de importes en cero para un cargo nuevo.
      */
     public function inicializarImportes(): self
     {
@@ -494,7 +329,7 @@ class Dh10 extends Model
     }
 
     /**
-     * Verifica si el cargo tiene importes en un rango de meses
+     * Verifica si el cargo tiene importes en un rango de meses.
      */
     public function tieneImportesEnRango(int $mesInicio, int $mesFin): bool
     {
@@ -507,23 +342,191 @@ class Dh10 extends Model
     }
 
     /**
-     * Obtiene un resumen estadístico de los importes
+     * Obtiene un resumen estadístico de los importes.
      */
     public function getResumenEstadistico(): array
     {
         $importes = $this->importes_brutos_mensuales;
-        $importesConValor = array_filter($importes, fn($importe) => $importe > 0);
+        $importesConValor = array_filter($importes, fn ($importe): bool => $importe > 0);
 
         return [
             'total_anual' => $this->total_importes_brutos,
             'promedio_mensual' => $this->promedio_mensual_brutos,
-            'meses_con_importes' => count($importesConValor),
+            'meses_con_importes' => \count($importesConValor),
             'mes_mayor_importe' => $this->getMayorImporteSemestre(1)['importe'] > $this->getMayorImporteSemestre(2)['importe']
                 ? $this->getMayorImporteSemestre(1)
                 : $this->getMayorImporteSemestre(2),
             'tiene_vinculo' => $this->tiene_vinculo,
-            'primer_semestre_total' => array_sum(array_slice($importes, 0, 6)),
-            'segundo_semestre_total' => array_sum(array_slice($importes, 6, 6)),
+            'primer_semestre_total' => array_sum(\array_slice($importes, 0, 6)),
+            'segundo_semestre_total' => array_sum(\array_slice($importes, 6, 6)),
+        ];
+    }
+
+    // ==============================================
+    // ACCESSORS (ATRIBUTOS COMPUTADOS)
+    // ==============================================
+
+    /**
+     * Obtiene los importes brutos mensuales como array indexado.
+     */
+    protected function importesBrutosMensuales(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): array => [
+                1 => $this->imp_bruto_1 ?? 0,
+                2 => $this->imp_bruto_2 ?? 0,
+                3 => $this->imp_bruto_3 ?? 0,
+                4 => $this->imp_bruto_4 ?? 0,
+                5 => $this->imp_bruto_5 ?? 0,
+                6 => $this->imp_bruto_6 ?? 0,
+                7 => $this->imp_bruto_7 ?? 0,
+                8 => $this->imp_bruto_8 ?? 0,
+                9 => $this->imp_bruto_9 ?? 0,
+                10 => $this->imp_bruto_10 ?? 0,
+                11 => $this->imp_bruto_11 ?? 0,
+                12 => $this->imp_bruto_12 ?? 0,
+            ],
+        );
+    }
+
+    /**
+     * Obtiene los importes retroactivos mensuales como array indexado.
+     */
+    protected function importesRetroactivosMensuales(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): array => [
+                1 => $this->importes_retro_1 ?? 0,
+                2 => $this->importes_retro_2 ?? 0,
+                3 => $this->importes_retro_3 ?? 0,
+                4 => $this->importes_retro_4 ?? 0,
+                5 => $this->importes_retro_5 ?? 0,
+                6 => $this->importes_retro_6 ?? 0,
+                7 => $this->importes_retro_7 ?? 0,
+                8 => $this->importes_retro_8 ?? 0,
+                9 => $this->importes_retro_9 ?? 0,
+                10 => $this->importes_retro_10 ?? 0,
+                11 => $this->importes_retro_11 ?? 0,
+                12 => $this->importes_retro_12 ?? 0,
+            ],
+        );
+    }
+
+    /**
+     * Obtiene los importes haber promedio como array indexado.
+     */
+    protected function importesHaberPromedio(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): array => [
+                1 => $this->impbrhbrprom_1 ?? 0, 2 => $this->impbrhbrprom_2 ?? 0,
+                3 => $this->impbrhbrprom_3 ?? 0, 4 => $this->impbrhbrprom_4 ?? 0,
+                5 => $this->impbrhbrprom_5 ?? 0, 6 => $this->impbrhbrprom_6 ?? 0,
+                7 => $this->impbrhbrprom_7 ?? 0, 8 => $this->impbrhbrprom_8 ?? 0,
+                9 => $this->impbrhbrprom_9 ?? 0, 10 => $this->impbrhbrprom_10 ?? 0,
+                11 => $this->impbrhbrprom_11 ?? 0, 12 => $this->impbrhbrprom_12 ?? 0,
+                13 => $this->impbrhbrprom_13 ?? 0, 14 => $this->impbrhbrprom_14 ?? 0,
+                15 => $this->impbrhbrprom_15 ?? 0, 16 => $this->impbrhbrprom_16 ?? 0,
+                17 => $this->impbrhbrprom_17 ?? 0, 18 => $this->impbrhbrprom_18 ?? 0,
+            ],
+        );
+    }
+
+    /**
+     * Obtiene los retro haber promedio como array indexado.
+     */
+    protected function retroHaberPromedio(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): array => [
+                1 => $this->retroimpbrhbrpr_1 ?? 0, 2 => $this->retroimpbrhbrpr_2 ?? 0,
+                3 => $this->retroimpbrhbrpr_3 ?? 0, 4 => $this->retroimpbrhbrpr_4 ?? 0,
+                5 => $this->retroimpbrhbrpr_5 ?? 0, 6 => $this->retroimpbrhbrpr_6 ?? 0,
+                7 => $this->retroimpbrhbrpr_7 ?? 0, 8 => $this->retroimpbrhbrpr_8 ?? 0,
+                9 => $this->retroimpbrhbrpr_9 ?? 0, 10 => $this->retroimpbrhbrpr_10 ?? 0,
+                11 => $this->retroimpbrhbrpr_11 ?? 0, 12 => $this->retroimpbrhbrpr_12 ?? 0,
+                13 => $this->retroimpbrhbrpr_13 ?? 0, 14 => $this->retroimpbrhbrpr_14 ?? 0,
+                15 => $this->retroimpbrhbrpr_15 ?? 0, 16 => $this->retroimpbrhbrpr_16 ?? 0,
+                17 => $this->retroimpbrhbrpr_17 ?? 0, 18 => $this->retroimpbrhbrpr_18 ?? 0,
+            ],
+        );
+    }
+
+    /**
+     * Calcula el total de importes brutos del año.
+     */
+    protected function totalImportesBrutos(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float|int => array_sum($this->importes_brutos_mensuales),
+        );
+    }
+
+    /**
+     * Calcula el total de importes retroactivos del año.
+     */
+    protected function totalImportesRetroactivos(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float|int => array_sum($this->importes_retroactivos_mensuales),
+        );
+    }
+
+    /**
+     * Indica si el cargo tiene vínculo.
+     */
+    protected function tieneVinculo(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->nro_cargo !== $this->vcl_cargo,
+        );
+    }
+
+    /**
+     * Calcula el promedio mensual de importes brutos.
+     */
+    protected function promedioMensualBrutos(): Attribute
+    {
+        return Attribute::make(
+            get: function (): int|float {
+                $importes = array_filter($this->importes_brutos_mensuales, fn ($importe): bool => $importe > 0);
+                return \count($importes) > 0 ? array_sum($importes) / \count($importes) : 0;
+            },
+        );
+    }
+
+    /**
+     * Casteos de atributos.
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_cargo' => 'integer',
+            'vcl_cargo' => 'integer',
+            // Importes brutos mensuales
+            'imp_bruto_1' => 'decimal:2', 'imp_bruto_2' => 'decimal:2', 'imp_bruto_3' => 'decimal:2',
+            'imp_bruto_4' => 'decimal:2', 'imp_bruto_5' => 'decimal:2', 'imp_bruto_6' => 'decimal:2',
+            'imp_bruto_7' => 'decimal:2', 'imp_bruto_8' => 'decimal:2', 'imp_bruto_9' => 'decimal:2',
+            'imp_bruto_10' => 'decimal:2', 'imp_bruto_11' => 'decimal:2', 'imp_bruto_12' => 'decimal:2',
+            // Importes retroactivos mensuales
+            'importes_retro_1' => 'decimal:2', 'importes_retro_2' => 'decimal:2', 'importes_retro_3' => 'decimal:2',
+            'importes_retro_4' => 'decimal:2', 'importes_retro_5' => 'decimal:2', 'importes_retro_6' => 'decimal:2',
+            'importes_retro_7' => 'decimal:2', 'importes_retro_8' => 'decimal:2', 'importes_retro_9' => 'decimal:2',
+            'importes_retro_10' => 'decimal:2', 'importes_retro_11' => 'decimal:2', 'importes_retro_12' => 'decimal:2',
+            // Importes haber promedio (18 períodos)
+            'impbrhbrprom_1' => 'decimal:2', 'impbrhbrprom_2' => 'decimal:2', 'impbrhbrprom_3' => 'decimal:2',
+            'impbrhbrprom_4' => 'decimal:2', 'impbrhbrprom_5' => 'decimal:2', 'impbrhbrprom_6' => 'decimal:2',
+            'impbrhbrprom_7' => 'decimal:2', 'impbrhbrprom_8' => 'decimal:2', 'impbrhbrprom_9' => 'decimal:2',
+            'impbrhbrprom_10' => 'decimal:2', 'impbrhbrprom_11' => 'decimal:2', 'impbrhbrprom_12' => 'decimal:2',
+            'impbrhbrprom_13' => 'decimal:2', 'impbrhbrprom_14' => 'decimal:2', 'impbrhbrprom_15' => 'decimal:2',
+            'impbrhbrprom_16' => 'decimal:2', 'impbrhbrprom_17' => 'decimal:2', 'impbrhbrprom_18' => 'decimal:2',
+            // Retro haber promedio (18 períodos)
+            'retroimpbrhbrpr_1' => 'decimal:2', 'retroimpbrhbrpr_2' => 'decimal:2', 'retroimpbrhbrpr_3' => 'decimal:2',
+            'retroimpbrhbrpr_4' => 'decimal:2', 'retroimpbrhbrpr_5' => 'decimal:2', 'retroimpbrhbrpr_6' => 'decimal:2',
+            'retroimpbrhbrpr_7' => 'decimal:2', 'retroimpbrhbrpr_8' => 'decimal:2', 'retroimpbrhbrpr_9' => 'decimal:2',
+            'retroimpbrhbrpr_10' => 'decimal:2', 'retroimpbrhbrpr_11' => 'decimal:2', 'retroimpbrhbrpr_12' => 'decimal:2',
+            'retroimpbrhbrpr_13' => 'decimal:2', 'retroimpbrhbrpr_14' => 'decimal:2', 'retroimpbrhbrpr_15' => 'decimal:2',
+            'retroimpbrhbrpr_16' => 'decimal:2', 'retroimpbrhbrpr_17' => 'decimal:2', 'retroimpbrhbrpr_18' => 'decimal:2',
         ];
     }
 }

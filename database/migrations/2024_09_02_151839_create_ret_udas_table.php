@@ -14,6 +14,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.ret_udas');
+
         Schema::connection($this->getConnectionName())->create('suc.ret_udas', function (Blueprint $table) {
             $table->integer('nro_legaj');
             $table->integer('nro_cargo');

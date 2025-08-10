@@ -12,6 +12,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      * Crea un nuevo registro histórico en la tabla Dh61 para la categoría especificada.
      *
      * @param Dh11 $category La categoría para la que se creará el registro histórico.
+     *
      * @return void
      */
     public function createHistoricalRecord(Dh11 $category): void
@@ -26,6 +27,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      *
      * @param int $year El año fiscal.
      * @param int $month El mes fiscal.
+     *
      * @return \Illuminate\Database\Eloquent\Collection La colección de registros históricos.
      */
     public function getRecordsByFiscalPeriod(int $year, int $month): Collection
@@ -53,6 +55,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      *
      * @param int $year El año del período.
      * @param int $month El mes del período.
+     *
      * @return Collection Colección de objetos Dh61, cada uno representando una categoría única en el período.
      */
     public function getUniqueCategoriesByPeriod(int $year, int $month): Collection
@@ -69,6 +72,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      * @param string $categoryId El código de la categoría.
      * @param int $year El año del período.
      * @param int $month El mes del período.
+     *
      * @return Collection Colección de objetos Dh61 que coinciden con los criterios.
      */
     public function getCategoryRecordsByPeriod(string $categoryId, int $year, int $month): Collection

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\ConceptoListadoTableService;
+use Illuminate\Console\Command;
 
 class SyncConceptoListadoTable extends Command
 {
@@ -11,7 +11,7 @@ class SyncConceptoListadoTable extends Command
 
     protected $signature = 'concepto-listado:sync';
 
-    public function handle(ConceptoListadoTableService $service)
+    public function handle(ConceptoListadoTableService $service): void
     {
         $this->info('Sincronizando tabla...');
         $service->createAndPopulate();

@@ -3,15 +3,15 @@
 namespace Tests\Unit\Models;
 
 use App\Models\AfipMapucheArt as AfipArt;
-use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase;
 
 class AfipArtTest extends TestCase
 {
     // use RefreshDatabase;
 
     /** @test */
-    public function it_can_create_an_afip_art()
+    public function it_can_create_an_afip_art(): void
     {
         $data = [
             'cuil_formateado' => '20-12345678-9',

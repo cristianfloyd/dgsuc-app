@@ -5,35 +5,60 @@ namespace App\Enums;
 enum SicossCodigoModalContrat: int
 {
     case CONTRATO_MODALIDAD_PROMOVIDA = 0;
+
     case TIEMPO_PARCIAL_INDETERMINADO = 1;
+
     case BECARIOS_RESIDENCIAS = 2;
+
     case APRENDIZAJE = 3;
+
     case ESPECIAL_FOMENTO_EMPLEO = 4;
+
     case FOMENTO_EMPLEO = 5;
+
     case LANZAMIENTO_NUEVA_ACTIVIDAD = 6;
+
     case PERIODO_PRUEBA = 7;
+
     case TIEMPO_COMPLETO_INDETERMINADO = 8;
+
     case PRACTICA_LABORAL_JOVENES = 9;
+
     case PASANTIAS = 10;
+
     case TRABAJO_TEMPORADA = 11;
+
     case TRABAJO_EVENTUAL = 12;
+
     case TRABAJO_FORMACION = 13;
+
     case NUEVO_PERIODO_PRUEBA = 14;
+
     case PUESTO_NUEVO_25_44 = 15;
+
     case PERIODO_PRUEBA_DISCAPACITADO = 16;
+
     case PUESTO_NUEVO_ESPECIAL = 17;
+
     case TRABAJADOR_DISCAPACITADO = 18;
+
     case PUESTO_NUEVO_25_44_DISCAPACITADO = 19;
+
     case PUESTO_NUEVO_ESPECIAL_DISCAPACITADO = 20;
+
     case TIEMPO_PARCIAL_DETERMINADO = 21;
+
     case TIEMPO_COMPLETO_DETERMINADO = 22;
+
     case PERSONAL_NO_PERMANENTE = 23;
+
     case PERSONAL_CONSTRUCCION = 24;
+
     case EMPLEO_PUBLICO_PROVINCIAL = 25;
 
     public function descripcion(): string
     {
-        return match($this) {
+        return match ($this) {
             self::CONTRATO_MODALIDAD_PROMOVIDA => 'Contrato Modalidad Promovida. Reducción 0%',
             self::TIEMPO_PARCIAL_INDETERMINADO => 'A tiempo parcial: Indeterminado /permanente',
             self::BECARIOS_RESIDENCIAS => 'Becarios- Residencias médicas Ley 22127',
@@ -64,11 +89,11 @@ enum SicossCodigoModalContrat: int
     }
 
     /**
-     * Obtiene el enum a partir de un código numérico
+     * Obtiene el enum a partir de un código numérico.
      */
     public static function fromCodigo(int $codigo): ?self
     {
-        return match($codigo) {
+        return match ($codigo) {
             0 => self::CONTRATO_MODALIDAD_PROMOVIDA,
             1 => self::TIEMPO_PARCIAL_INDETERMINADO,
             2 => self::BECARIOS_RESIDENCIAS,

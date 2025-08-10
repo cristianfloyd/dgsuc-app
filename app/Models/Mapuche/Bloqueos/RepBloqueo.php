@@ -2,7 +2,6 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
-use App\Traits\MapucheSchemaSuc;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -45,31 +44,33 @@ class RepBloqueo extends Model
     ];
 
     /**
-     * Los atributos que deben convertirse.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'fecha_registro' => 'datetime',
-        'nro_legaj' => 'integer',
-        'nro_cargo' => 'integer',
-        'fecha_baja' => 'date',
-        'chkstopliq' => 'boolean',
-        'datos_validacion' => 'json',
-        'fecha_procesamiento' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
-
-    /**
      * Get the route key for the model.
-     *
-     * @return string
      */
+    #[\Override]
     public function getRouteKeyName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Los atributos que deben convertirse.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'fecha_registro' => 'datetime',
+            'nro_legaj' => 'integer',
+            'nro_cargo' => 'integer',
+            'fecha_baja' => 'date',
+            'chkstopliq' => 'boolean',
+            'datos_validacion' => 'json',
+            'fecha_procesamiento' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
     }
 }

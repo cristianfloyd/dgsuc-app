@@ -3,17 +3,22 @@
 namespace App\Services;
 
 use Illuminate\Database\Eloquent\Collection;
-use RuntimeException;
-use InvalidArgumentException;
 use Illuminate\Support\Facades\Storage;
 
 abstract class AbstractFileProcessor
 {
+    // Método para procesar todo el archivo
+    public function processFile(string $filePath, array $columnWidths): Collection
+    {
+        return collect($this->readFileLines($filePath))
+            ->map(fn ($line) => $this->processLine($line, $columnWidths));
+    }
+
     // Método para validar el archivo
     protected function validateFile(string $filePath): void
     {
         if (empty($filePath) || !Storage::exists($filePath)) {
-            throw new InvalidArgumentException("File does not exist: $filePath");
+            throw new \InvalidArgumentException("File does not exist: $filePath");
         }
     }
 
@@ -23,7 +28,7 @@ abstract class AbstractFileProcessor
         $this->validateFile($filePath);
 
         $extractedLines = [];
-        $fileHandle = fopen($filePath, "r");
+        $fileHandle = fopen($filePath, 'r');
 
         if ($fileHandle) {
             while (($line = fgets($fileHandle)) !== false) {
@@ -32,7 +37,7 @@ abstract class AbstractFileProcessor
             }
             fclose($fileHandle);
         } else {
-            throw new RuntimeException("Unable to open file: $filePath");
+            throw new \RuntimeException("Unable to open file: $filePath");
         }
 
         return $extractedLines;
@@ -40,11 +45,4 @@ abstract class AbstractFileProcessor
 
     // Método abstracto para procesar una línea
     abstract protected function processLine(string $line, array $columnWidths): Collection;
-
-    // Método para procesar todo el archivo
-    public function processFile(string $filePath, array $columnWidths): Collection
-    {
-        return collect($this->readFileLines($filePath))
-            ->map(fn($line) => $this->processLine($line, $columnWidths));
-    }
 }

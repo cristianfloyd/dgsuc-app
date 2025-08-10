@@ -2,27 +2,26 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages;
-use Filament\Panel;
-use Filament\Widgets;
-use Filament\PanelProvider;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Colors\Color;
-use App\Filament\Pages\DatabaseSettings;
-use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
 use App\Filament\Embargos\Resources\EmbargoResource;
+use App\Filament\Pages\DashboardSelector;
+use App\Filament\Pages\DatabaseSettings;
 use App\Http\Middleware\DatabaseConnectionMiddleware;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\AuthenticateSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Filament\Navigation\MenuItem;
+use Filament\Pages;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\Pages\DashboardSelector;
-
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class MapuchePanelProvider extends PanelProvider
 {
@@ -34,9 +33,9 @@ class MapuchePanelProvider extends PanelProvider
             ->profile()
             ->userMenuItems([
                 'panel-selector' => MenuItem::make()
-                ->label('Cambiar Panel')
-                ->icon('heroicon-o-arrows-right-left')
-                ->url(fn (): string => '/selector-panel'),
+                    ->label('Cambiar Panel')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->url(fn (): string => '/selector-panel'),
             ])
             ->colors([
                 'primary' => Color::Blue,
@@ -69,7 +68,7 @@ class MapuchePanelProvider extends PanelProvider
             ->brandName('S.U.C. Mapuche Tools')
             ->navigationGroups([
                 'Configuración',
-                'Monitoreo'
+                'Monitoreo',
             ])
             ->pages([
                 // Páginas del panel
@@ -78,12 +77,10 @@ class MapuchePanelProvider extends PanelProvider
             ->resources([
                 // Recursos específicos
                 EmbargoResource::class,
-            ])
-            // ->renderHook(
-            //     'panels::body.end',
-            //     fn () => view('livewire.panel-switcher-modal')
-            // )
-            ;
-
+            ]);
+        // ->renderHook(
+        //     'panels::body.end',
+        //     fn () => view('livewire.panel-switcher-modal')
+        // )
     }
 }

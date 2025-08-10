@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AfipImportacionCrudaModel;
 use App\Models\UploadedFile;
 use Illuminate\Http\Request;
-use App\Models\AfipImportacionCrudaModel;
 use Illuminate\Support\Facades\Validator;
 
 class AfipImportacionCrudaModelController extends Controller
@@ -16,20 +16,19 @@ class AfipImportacionCrudaModelController extends Controller
         return view('importar.index', compact('archivos'));
     }
 
-    public function show(AfipImportacionCrudaModel $afip_importacion_cruda_model){
+    public function show(AfipImportacionCrudaModel $afip_importacion_cruda_model)
+    {
         return view('importar.show', compact('afip_importacion_cruda_model'));
     }
+
     public function create()
     {
         return view('importar.create');
     }
 
-
-
     public function store(Request $request)
     {
-        if ($this->VerificarArchivo($request))
-        {
+        if ($this->VerificarArchivo($request)) {
             $lineas = $this->importar($request);
             return "Se han importado $lineas lineas";
         }
@@ -47,8 +46,6 @@ class AfipImportacionCrudaModelController extends Controller
         return $lineas;
     }
 
-
-
     /*
     * maneja la importacion de un archivo txt a la base de datos
     *
@@ -58,7 +55,8 @@ class AfipImportacionCrudaModelController extends Controller
         /**
          * Valida que el archivo subido sea de tipo txt.
          *
-         * @param  \Illuminate\Http\Request  $request
+         * @param \Illuminate\Http\Request $request
+         *
          * @return void
          */
         $Validated = Validator::make($request->all(), [

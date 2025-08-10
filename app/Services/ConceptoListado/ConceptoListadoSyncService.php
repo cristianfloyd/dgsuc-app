@@ -2,12 +2,12 @@
 
 namespace App\Services\ConceptoListado;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use App\Traits\MapucheConnectionTrait;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\Mapuche\PeriodoFiscalService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
 {
@@ -17,18 +17,20 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
 
     public function __construct(
         private ConceptoListado $conceptoListado,
-        PeriodoFiscalService $periodoFiscalService
+        PeriodoFiscalService $periodoFiscalService,
     ) {
         $this->periodoFiscalService = $periodoFiscalService;
     }
 
     /**
-     * Sincroniza los datos desde Mapuche a la tabla de reportes
+     * Sincroniza los datos desde Mapuche a la tabla de reportes.
      *
      * @param string|null $periodoFiscal Período fiscal en formato 'YYYY-MM' (opcional)
      * @param int|null $nroLiqui Número de liquidación específico (opcional)
-     * @return int Número de registros insertados
+     *
      * @throws \Exception
+     *
+     * @return int Número de registros insertados
      */
     public function sync(?string $periodoFiscal = null, ?int $nroLiqui = null): int
     {
@@ -57,31 +59,43 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
             // Limpiamos el caché después de actualizar los datos
             $this->clearCache();
 
-            $periodoLog = $periodoFiscal ? " para el período $periodoFiscal" : "";
-            $liquidacionLog = $nroLiqui ? " y liquidación #$nroLiqui" : "";
+            $periodoLog = $periodoFiscal ? " para el período $periodoFiscal" : '';
+            $liquidacionLog = $nroLiqui ? " y liquidación #$nroLiqui" : '';
 
             Log::info("Tabla suc.rep_concepto_listado sincronizada exitosamente$periodoLog$liquidacionLog", [
                 'registros_insertados' => $affectedRows,
-                'tabla_origen' => $tablaOrigen
+                'tabla_origen' => $tablaOrigen,
             ]);
 
             return $affectedRows;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error en sincronización de conceptos listado", [
+            Log::error('Error en sincronización de conceptos listado', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'periodo_fiscal' => $periodoFiscal,
-                'nro_liqui' => $nroLiqui
+                'nro_liqui' => $nroLiqui,
             ]);
             throw $e;
         }
     }
 
+    // Implementación de los métodos de la interfaz
+    public function getConnectionName(): string
+    {
+        return $this->getConnectionFromTrait()->getName();
+    }
+
+    public function getConnection()
+    {
+        return $this->getConnectionFromTrait();
+    }
+
     /**
-     * Determina qué tabla usar basado en el período fiscal
+     * Determina qué tabla usar basado en el período fiscal.
      *
      * @param string|null $periodoFiscal Período fiscal en formato 'YYYY-MM'
+     *
      * @return string Nombre de la tabla a utilizar
      */
     private function determinarTablaOrigen(?string $periodoFiscal = null): string
@@ -98,17 +112,17 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
         // Comparamos el período solicitado con el actual
         if ($periodoFiscal === $periodoActualStr) {
             return 'mapuche.dh21'; // Tabla actual
-        } else {
-            return 'mapuche.dh21h'; // Tabla histórica
         }
+        return 'mapuche.dh21h'; // Tabla histórica
     }
 
     /**
-     * Construye la consulta SQL para la sincronización
+     * Construye la consulta SQL para la sincronización.
      *
      * @param string $tablaOrigen Tabla de origen (dh21 o dh21h)
      * @param string|null $periodoFiscal Período fiscal en formato 'YYYY-MM'
      * @param int|null $nroLiqui Número de liquidación específico
+     *
      * @return string Consulta SQL
      */
     private function buildSyncQuery(string $tablaOrigen, ?string $periodoFiscal = null, ?int $nroLiqui = null): string
@@ -153,21 +167,10 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
     }
 
     /**
-     * Limpia el caché relacionado
+     * Limpia el caché relacionado.
      */
     private function clearCache(): void
     {
         Cache::tags(['rep_concepto_listado'])->flush();
-    }
-
-    // Implementación de los métodos de la interfaz
-    public function getConnectionName(): string
-    {
-        return $this->getConnectionFromTrait()->getName();
-    }
-
-    public function getConnection()
-    {
-        return $this->getConnectionFromTrait();
     }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Contracts\Tables;
 
-use App\Contracts\Tables\AbstractTableDefinitionInterface;
-
 class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterface
 {
     public const TABLE = 'suc.rep_ordenes_descuento';
@@ -15,7 +13,7 @@ class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterfac
         'id' => [
             'type' => 'bigIncrements', // Cambiamos a bigIncrements para ID de Laravel
             'primary' => true,
-            'unsigned' => true
+            'unsigned' => true,
         ],
         'nro_liqui' => ['type' => 'integer'],
         'desc_liqui' => ['type' => 'string'],
@@ -30,13 +28,13 @@ class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterfac
         'codn_conce' => ['type' => 'integer'],
         'desc_conce' => ['type' => 'string'],
         'impp_conce' => ['type' => 'decimal', 'precision' => 15, 'scale' => 2],
-        'last_sync' => ['type' => 'timestamp']
+        'last_sync' => ['type' => 'timestamp'],
     ];
 
 
     public const INDEXES = [
         'codc_uacad' => ['codc_uacad'],
-        'codn_conce' => ['codn_conce']
+        'codn_conce' => ['codn_conce'],
     ];
 
     public function getTableName(): string

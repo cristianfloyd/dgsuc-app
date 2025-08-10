@@ -2,29 +2,23 @@
 
 namespace App\Filament\Liquidaciones\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use App\Filament\Liquidaciones\Resources\DH21hResource\Pages\ListDH21hs;
 use App\Models\Mapuche\DH21h;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Liquidaciones\Resources\DH21hResource\Pages\EditDH21h;
-use App\Filament\Liquidaciones\Resources\DH21hResource\Pages\ListDH21hs;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class DH21hResource extends Resource
 {
     protected static ?string $model = DH21h::class;
+
     protected static ?string $modelLabel = 'Liquidaciones Historico';
+
     protected static ?string $navigationLabel = 'Liquidaciones Historico';
 
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationGroup = 'Liquidaciones';
-
-
-
 
     public static function table(Table $table): Table
     {
@@ -115,11 +109,11 @@ class DH21hResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
-                //
-                ])
+
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                 ]),
@@ -131,7 +125,7 @@ class DH21hResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

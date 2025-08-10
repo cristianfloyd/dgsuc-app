@@ -2,16 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Dh01;
-use App\Models\Dh03;
-use App\Models\Mapuche\Dh22;
-use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\Catalogo\Dh30;
+use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AfipMapucheArt extends Model
@@ -19,13 +14,17 @@ class AfipMapucheArt extends Model
     use MapucheConnectionTrait;
     use MapucheConnectionTrait;
 
+    public $incrementing = true;
+
+    public $timestamps = false;
+
     protected $table = 'afip_art';
+
     protected $schema = 'suc';
 
     protected $primaryKey = 'id';
-    public $incrementing = true;
+
     protected $keyType = 'string';
-    public $timestamps = false;
 
     protected $fillable = [
         'nro_legaj',
@@ -43,7 +42,6 @@ class AfipMapucheArt extends Model
         'nacimiento' => 'date',
     ];
 
-
     /**
      * Obtiene la conexión de Mapuche.
      *
@@ -59,9 +57,10 @@ class AfipMapucheArt extends Model
      * Actualiza el registro obteniendo datos de:
      *  - AfipMapucheSicoss: CUIL, apellido_y_nombre y sueldo (rem_imp9)
      *  - Dh01: nacimiento (fec_nacim) y sexo (tipo_sexo),
-     *  - Dh03: establecimiento (codc_uacad) y tarea (tipo_escal)
+     *  - Dh03: establecimiento (codc_uacad) y tarea (tipo_escal).
      *
      * @param string $periodoFiscal Formato esperado: YYYYMM
+     *
      * @return bool True si se actualizó correctamente, false en caso contrario.
      */
     public function actualizarAfipArt(string $periodoFiscal): bool
@@ -78,7 +77,7 @@ class AfipMapucheArt extends Model
         }
 
         // Obtener datos desde Dh01 usando el CUIL (11 dígitos)
-        $dh01 = Dh01::whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$this->cuil])->first();
+        $dh01 = Dh01::whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$this->cuil])->first();
         if ($dh01) {
             $this->nacimiento = $dh01->fec_nacim;
             $this->sexo = $dh01->tipo_sexo;
@@ -95,30 +94,6 @@ class AfipMapucheArt extends Model
     }
 
     /**
-     * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
-     *
-     * @param string $cuil
-     * @return int|null El número de legajo si se encuentra, o null en caso contrario.
-     */
-    private function obtenerLegajoDesdeCuil(string $cuil): ?int
-    {
-        $dh01 = Dh01::whereRaw("CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?", [$cuil])->first();
-        return $dh01 ? $dh01->nro_legaj : null;
-    }
-
-    /**
-     * Método para verificar que el número de liquidación exista en la tabla mapuche.dh21.
-     *
-     * @param int $nroLiqui
-     * @return bool True si nroLiqui existe, false en caso contrario.
-     */
-    private function verificarNroLiqui($nroLiqui): bool
-    {
-        return Dh22::verificarNroLiqui($nroLiqui);
-    }
-
-
-    /**
      * Obtiene la relación de pertenencia entre el modelo AfipMapucheArt y el modelo Dh22.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -128,7 +103,7 @@ class AfipMapucheArt extends Model
         return $this->belongsTo(Dh30::class, 'establecimiento', 'desc_abrev')
             ->where('nro_tabla', 13)
             ->withoutGlobalScopes()
-            ->where(function ($query) {
+            ->where(function ($query): void {
                 if ($this->establecimiento) {
                     $query->whereRaw('TRIM("mapuche"."dh30"."desc_abrev") = TRIM(?)', [$this->establecimiento]);
                 }
@@ -139,8 +114,33 @@ class AfipMapucheArt extends Model
     protected function establecimiento(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value ? trim($value) : null,
-            set: fn($value) => $value ? trim($value) : null
+            get: fn ($value) => $value ? trim($value) : null,
+            set: fn ($value) => $value ? trim($value) : null,
         );
+    }
+
+    /**
+     * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
+     *
+     * @param string $cuil
+     *
+     * @return int|null El número de legajo si se encuentra, o null en caso contrario.
+     */
+    private function obtenerLegajoDesdeCuil(string $cuil): ?int
+    {
+        $dh01 = Dh01::whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$cuil])->first();
+        return $dh01 ? $dh01->nro_legaj : null;
+    }
+
+    /**
+     * Método para verificar que el número de liquidación exista en la tabla mapuche.dh21.
+     *
+     * @param int $nroLiqui
+     *
+     * @return bool True si nroLiqui existe, false en caso contrario.
+     */
+    private function verificarNroLiqui($nroLiqui): bool
+    {
+        return Dh22::verificarNroLiqui($nroLiqui);
     }
 }

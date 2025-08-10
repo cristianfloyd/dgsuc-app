@@ -2,54 +2,56 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use App\Models\Mapuche\Dh22;
-use Livewire\Attributes\Url;
-use Livewire\WithPagination;
-use Livewire\Attributes\Rule;
-use App\Services\WorkflowService;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\DB;
-use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Illuminate\Support\Facades\Storage;
-use Filament\Tables\Filters\SelectFilter;
 use App\Models\AfipMapucheMiSimplificacion;
+use App\Models\Mapuche\Dh22;
+use App\Services\WorkflowService;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class ParaMiSimplificacion extends Component implements HasTable, HasForms
 {
-    use InteractsWithTable, InteractsWithForms;
+    use InteractsWithTable;
+    use InteractsWithForms;
 
     #[Url(history: true, as: 's')]
     public $search = '';
+
     #[Url(history: true)]
     public int $perPage = 5;
-    public $isFinished = false;
-    protected $workflowService;
-    protected $processLog;
-    protected $step;
-    public $selectedLiquidacion = null;
 
-    public function boot(WorkflowService $workflowService)
+    public $isFinished = false;
+
+    public $selectedLiquidacion;
+
+    protected $workflowService;
+
+    protected $processLog;
+
+    protected $step;
+
+    public function boot(WorkflowService $workflowService): void
     {
         $this->workflowService = $workflowService;
     }
-    public function updateSearch()
+
+    public function updateSearch(): void
     {
         $this->resetPage();
     }
-    public function mount()
+
+    public function mount(): void
     {
-        //
     }
 
     #[Computed()]
@@ -59,32 +61,6 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
         $instance = new AfipMapucheMiSimplificacion();
         $headers = $instance->getTableHeaders();
         return $headers;
-    }
-
-    protected function getFormSchema(): array
-    {
-        return [
-            Select::make('selectedLiquidacion')
-                ->label('Liquidación')
-                ->options(function () {
-                    return Dh22::query()->where('sino_cerra', 'S')
-                        ->orderBy('nro_liqui', 'desc')
-                        ->limit(12)
-                        ->pluck('desc_liqui', 'nro_liqui');
-                })
-                ->searchable()
-                ->preload()
-                ->live()
-                ->afterStateUpdated(function ($state) {
-                    if ($state) {
-                        $this->dispatch('idLiquiSelected',
-                            nro_liqui: $state
-                        );
-                    }
-                })
-                ->placeholder('Seleccione una liquidación')
-                ->required()
-        ];
     }
 
     public function table(Table $table): Table
@@ -124,7 +100,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
                     ->numeric(
                         decimalPlaces: 2,
                         decimalSeparator: ',',
-                        thousandsSeparator: '.'
+                        thousandsSeparator: '.',
                     )
                     ->sortable(),
             ])
@@ -176,18 +152,18 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
             'categoria' => 6,
             'fecha_susp_serv_temp' => 10,
             'nro_form_agro' => 10,
-            'covid' => 1
+            'covid' => 1,
         ];
 
         $data = AfipMapucheMiSimplificacion::all(array_keys($fieldLengths))->toArray();
 
-        $txtContent = "";
+        $txtContent = '';
         foreach ($data as $row) {
-            $line = "";
+            $line = '';
             foreach ($fieldLengths as $field => $length) {
                 $value = $row[$field] ?? '';
                 $value = $value === null ? '' : $value;
-                $line .= str_pad($value, $length, '0', STR_PAD_LEFT);
+                $line .= str_pad($value, $length, '0', \STR_PAD_LEFT);
             }
             $txtContent .= $line . "\n";
         }
@@ -199,17 +175,39 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
-
-    public function toggleFinished()
+    public function toggleFinished(): void
     {
-        //
     }
-
-
-
 
     public function render()
     {
         return view('livewire.para-mi-simplificacion');
+    }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            Select::make('selectedLiquidacion')
+                ->label('Liquidación')
+                ->options(function () {
+                    return Dh22::query()->where('sino_cerra', 'S')
+                        ->orderBy('nro_liqui', 'desc')
+                        ->limit(12)
+                        ->pluck('desc_liqui', 'nro_liqui');
+                })
+                ->searchable()
+                ->preload()
+                ->live()
+                ->afterStateUpdated(function ($state): void {
+                    if ($state) {
+                        $this->dispatch(
+                            'idLiquiSelected',
+                            nro_liqui: $state,
+                        );
+                    }
+                })
+                ->placeholder('Seleccione una liquidación')
+                ->required(),
+        ];
     }
 }

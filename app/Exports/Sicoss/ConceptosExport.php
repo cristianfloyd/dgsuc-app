@@ -17,7 +17,7 @@ class ConceptosExport extends BaseSicossExport
             'Código',
             'Descripción',
             'Importe',
-            'Fecha de Control'
+            'Fecha de Control',
         ];
     }
 
@@ -27,7 +27,7 @@ class ConceptosExport extends BaseSicossExport
             $row->codn_conce,
             $row->desc_conce,
             $row->importe,
-            $row->created_at->format('d/m/Y H:i:s')
+            $row->created_at->format('d/m/Y H:i:s'),
         ];
     }
 }

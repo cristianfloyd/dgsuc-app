@@ -4,34 +4,34 @@ declare(strict_types=1);
 
 namespace App\Repositories\Mapuche;
 
-use Carbon\Carbon;
 use App\Data\Mapuche\SacCargoData;
-use Illuminate\Support\Collection;
-use App\Models\Mapuche\{Dh01, Dh03, Dh10};
+use App\Models\Mapuche\{Dh10};
 use App\Services\Mapuche\PeriodoFiscalService;
+use Illuminate\Support\Collection;
 
 class SacRepository
 {
     public function __construct(
-        private PeriodoFiscalService $periodoService
-    ) {}
+        private PeriodoFiscalService $periodoService,
+    ) {
+    }
 
     /**
-     * Obtiene los datos de brutos SAC para un cargo específico
+     * Obtiene los datos de brutos SAC para un cargo específico.
      */
     public function getBrutosSacCargo(int $legajo, int $nroCargo): ?SacCargoData
     {
         $periodo = $this->periodoService->getPeriodoActual();
 
         return Dh10::with(['cargoVinculado'])
-            ->whereHas('cargo.empleado', fn($q) => $q->where('nro_legaj', $legajo))
+            ->whereHas('cargo.empleado', fn ($q) => $q->where('nro_legaj', $legajo))
             ->where('nro_cargo', $nroCargo)
             ->first()
-            ?->pipe(fn($model) => SacCargoData::from($model));
+            ?->pipe(fn ($model) => SacCargoData::from($model));
     }
 
     /**
-     * Obtiene todos los cargos SAC con filtros aplicados
+     * Obtiene todos los cargos SAC con filtros aplicados.
      */
     public function getBrutosParaSac(array $filtros, string $orderBy = ''): Collection
     {
@@ -48,7 +48,7 @@ class SacRepository
                 'dh01.nro_docum',
                 'dh01.desc_appat',
                 'dh01.desc_nombr',
-                'dh10.*'
+                'dh10.*',
             ]);
 
         $this->aplicarFiltros($query, $filtros);
@@ -58,7 +58,7 @@ class SacRepository
     }
 
     /**
-     * Actualiza los importes de un cargo SAC
+     * Actualiza los importes de un cargo SAC.
      */
     public function actualizarCargo(int $nroCargo, array $datos): bool
     {
@@ -66,7 +66,7 @@ class SacRepository
     }
 
     /**
-     * Crea un nuevo registro SAC para un cargo
+     * Crea un nuevo registro SAC para un cargo.
      */
     public function crearCargoSac(int $nroCargo): array
     {
@@ -103,13 +103,13 @@ class SacRepository
     {
         $periodo = $this->periodoService->calcularPeriodoSac($filtroPeriodo);
 
-        $query->where(function ($q) use ($periodo) {
-            $q->where(function ($subQ) use ($periodo) {
+        $query->where(function ($q) use ($periodo): void {
+            $q->where(function ($subQ) use ($periodo): void {
                 $subQ->where('dh03.fec_alta', '<=', $periodo['fecha_inicio'])
-                     ->where(function ($dateQ) use ($periodo) {
-                         $dateQ->where('dh03.fec_baja', '>=', $periodo['fecha_fin'])
-                               ->orWhereNull('dh03.fec_baja');
-                     });
+                    ->where(function ($dateQ) use ($periodo): void {
+                        $dateQ->where('dh03.fec_baja', '>=', $periodo['fecha_fin'])
+                            ->orWhereNull('dh03.fec_baja');
+                    });
             });
             // Agregar más condiciones de período según la lógica original
         });
@@ -121,9 +121,9 @@ class SacRepository
             $query->orderByRaw("desc_appat || ', ' || desc_nombr {$orderBy}");
         } else {
             $query->orderBy('dh03.codc_uacad')
-                  ->orderByRaw("desc_appat || ', ' || desc_nombr")
-                  ->orderBy('dh03.nro_legaj')
-                  ->orderBy('dh03.fec_baja', 'desc');
+                ->orderByRaw("desc_appat || ', ' || desc_nombr")
+                ->orderBy('dh03.nro_legaj')
+                ->orderBy('dh03.fec_baja', 'desc');
         }
     }
 }

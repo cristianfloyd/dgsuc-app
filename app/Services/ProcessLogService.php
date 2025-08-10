@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessLogService
 {
-
-
     /**
      * Inicia un nuevo proceso y crea un registro en la base de datos.
      *
      * @param string $processName
+     *
      * @return ProcessLog
      */
     public function startProcess(string $processName)
@@ -29,7 +28,7 @@ class ProcessLogService
                 'poblar_tabla_temp_cuils' => 'pending',         // 5.2
                 'ejecutar_funcion_almacenada' => 'pending',     // 6
                 'obtener_cuils_no_insertados' => 'pending',     // 7
-                'exportar_txt_para_afip' => 'pending'           // 8
+                'exportar_txt_para_afip' => 'pending',           // 8
             ],
             'started_at' => now(),
         ]);
@@ -45,11 +44,12 @@ class ProcessLogService
      * @param ProcessLog $processLog
      * @param string $step
      * @param string $status
+     *
      * @return void
      */
-    public function updateStep(ProcessLog $processLog, string $step, string $status)
+    public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
-        if (!is_array($processLog->steps)) {
+        if (!\is_array($processLog->steps)) {
             throw new \InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
         }
 
@@ -68,13 +68,42 @@ class ProcessLogService
         Log::info("Paso actualizado: $step - $status", ['process_id' => $processLog->id]);
     }
 
+    /*
+    * Marca el proceso como fallido
+    *
+    * @param ProcessLog $processLog
+    * @param string $errorMessage
+    * @return void
+    */
+    public function FailProcess(ProcessLog $processLog, string $errorMessage): void
+    {
+        $processLog->update([
+            'status' => 'failed',
+            'completed_at' => now(),
+            'error_message' => $errorMessage,
+        ]);
+
+        Log::error("Proceso fallido: {$processLog->process_name} - {$errorMessage}", ['process_id' => $processLog->id]);
+    }
 
     /**
-    * Verificar si todos los pasos del proceso han sido completados
-    *
-    * @param array $steps
-    * @return bool
-    */
+     * Devuelve el último registro de ProcessLog.
+     *
+     * @return ProcessLog|null El último registro de ProcessLog, o nulo si no existe ninguno.
+     */
+    public function getLatestProcess(): ?ProcessLog
+    {
+        Log::info('Buscando el último registro de ProcessLog en ProcessLogService');
+        return ProcessLog::latest()->first();
+    }
+
+    /**
+     * Verificar si todos los pasos del proceso han sido completados.
+     *
+     * @param array $steps
+     *
+     * @return bool
+     */
     private function allStepsCompleted(array $steps): bool
     {
         return collect($steps)->every(function ($status) {
@@ -92,36 +121,7 @@ class ProcessLogService
     {
         $processLog->update([
             'status' => 'completed',
-            'completed_at' => now()
-        ]);
-    }
-
-    /*
-    * Marca el proceso como fallido
-    *
-    * @param ProcessLog $processLog
-    * @param string $errorMessage
-    * @return void
-    */
-    public function FailProcess(ProcessLog $processLog, string $errorMessage): void
-    {
-        $processLog->update([
-            'status' => 'failed',
             'completed_at' => now(),
-            'error_message' => $errorMessage
         ]);
-
-        Log::error("Proceso fallido: {$processLog->process_name} - {$errorMessage}", ['process_id' => $processLog->id]);
-    }
-
-    /**
-     * Devuelve el último registro de ProcessLog.
-     *
-     * @return ProcessLog|null El último registro de ProcessLog, o nulo si no existe ninguno.
-     */
-    public function getLatestProcess(): ?ProcessLog
-    {
-        Log::info("Buscando el último registro de ProcessLog en ProcessLogService");
-        return ProcessLog::latest()->first();
     }
 }

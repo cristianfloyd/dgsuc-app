@@ -2,29 +2,33 @@
 
 namespace App\Filament\Admin\Resources;
 
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\Documentation;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Forms\Components\MarkdownEditor;
-use App\Filament\Admin\Resources\DocumentationResource\Pages\ViewDocumentation;
-use App\Filament\Admin\Resources\DocumentationResource\Pages\ListDocumentation;
 use App\Filament\Admin\Resources\DocumentationResource\Pages\CreateDocumentation;
 use App\Filament\Admin\Resources\DocumentationResource\Pages\EditDocumentation;
-use Filament\Tables\Actions\Action;
+use App\Filament\Admin\Resources\DocumentationResource\Pages\ListDocumentation;
+use App\Filament\Admin\Resources\DocumentationResource\Pages\ViewDocumentation;
+use App\Models\Documentation;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Table;
 
 class DocumentationResource extends Resource
 {
     protected static ?string $model = Documentation::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
     protected static ?string $navigationGroup = 'Sistema';
+
     protected static ?string $label = 'Documentacion';
+
     protected static ?string $pluralLabel = 'Documentacion';
 
     public static function form(Form $form): Form
@@ -38,7 +42,7 @@ class DocumentationResource extends Resource
 
                 TextInput::make('slug')
                     ->required()
-                    ->unique(ignorable: fn($record) => $record)
+                    ->unique(ignorable: fn ($record) => $record)
                     ->maxLength(255),
 
                 Select::make('section')
@@ -98,7 +102,7 @@ class DocumentationResource extends Resource
                             ->danger()
                             ->send();
                     })
-                    ->visible(fn(Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md")))
+                    ->visible(fn (Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md"))),
             ]);
     }
 
@@ -132,12 +136,12 @@ class DocumentationResource extends Resource
                     'section' => 'filament', // You might want to adjust this
                     'is_published' => true,
                     'order' => 0, // You might want to adjust this
-                ]
+                ],
             );
         }
 
         // Optionally remove records that don't have corresponding files
-        $existingSlugs = collect($markdownFiles)->map(fn($file) => basename($file, '.md'));
+        $existingSlugs = collect($markdownFiles)->map(fn ($file) => basename($file, '.md'));
         Documentation::where('section', 'filament')
             ->whereNotIn('slug', $existingSlugs)
             ->delete();

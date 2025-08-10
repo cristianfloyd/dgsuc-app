@@ -25,6 +25,7 @@ return [
     App\Providers\Filament\MapuchePanelProvider::class,
     App\Providers\Filament\ProcesosPanelProvider::class,
     App\Providers\Filament\ReportesPanelProvider::class,
+    App\Providers\Filament\TobaPanelProvider::class,
     App\Providers\Filament\sucPanelProvider::class,
     App\Providers\FileProcessingServiceProvider::class,
     App\Providers\FileProcessorServiceProvider::class,

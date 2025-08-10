@@ -2,14 +2,15 @@
 
 namespace App\Filament\Admin\Resources\DocumentationResource\Pages;
 
+use App\Filament\Admin\Resources\DocumentationResource;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\File;
 use League\CommonMark\CommonMarkConverter;
-use App\Filament\Admin\Resources\DocumentationResource;
 
 class ViewDocumentation extends Page
 {
     protected static string $resource = DocumentationResource::class;
+
     protected static string $view = 'filament.resources.documentation.view';
 
     public function getViewData(): array

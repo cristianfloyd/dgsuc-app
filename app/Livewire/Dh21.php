@@ -11,17 +11,22 @@ class Dh21 extends Component
     use WithPagination;
 
     public $search = '';
+
     public $perPage = 5;
 
-    public function updatingSearch(){
+    public function updatingSearch(): void
+    {
         $this->resetPage();
     }
 
-    public function render(){
-        return view('livewire.dh21',[
-            'dh21s' => ModelsDh21::search($this->search)
-                ->orderBy('nro_legaj', 'desc')
-                ->paginate($this->perPage)]
-            );
+    public function render()
+    {
+        return view(
+            'livewire.dh21',
+            [
+                'dh21s' => ModelsDh21::search($this->search)
+                    ->orderBy('nro_legaj', 'desc')
+                    ->paginate($this->perPage)],
+        );
     }
 }

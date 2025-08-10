@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class Office365Controller extends Controller
@@ -40,7 +40,7 @@ class Office365Controller extends Controller
                     'email_verified_at' => now(),
                     'microsoft_id' => $microsoftUser->id,
                     'avatar' => $microsoftUser->avatar,
-                    'password' => bcrypt(rand(1000000, 9999999)),
+                    'password' => bcrypt(mt_rand(1000000, 9999999)),
                     'office_groups' => $groups,
                 ]);
             } else {

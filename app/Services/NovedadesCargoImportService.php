@@ -2,20 +2,21 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use App\Models\NovedadesCargoImportModel;
+use Illuminate\Support\Facades\Log;
 
 class NovedadesCargoImportService
 {
     /**
-     * processFile
+     * processFile.
      *
      * Lee un archivo .txt línea por línea, extrae todos los campos
      * según las posiciones definidas en la documentación SIU para "Cargo"
      * y realiza una primera validación (v. gr. numérico, rango mínimo).
      *
-     * @param  string  $path   Ruta local al archivo .txt
-     * @param  array   $params Parámetros de importación (ej. 'conActualizacion', 'nuevosIdentificadores')
+     * @param string $path Ruta local al archivo .txt
+     * @param array $params Parámetros de importación (ej. 'conActualizacion', 'nuevosIdentificadores')
+     *
      * @return void
      */
     public function processFile(string $path, array $params = []): void
@@ -27,7 +28,7 @@ class NovedadesCargoImportService
             // -----------------------------------------------------------------
             $handle = fopen($path, 'r');
 
-            if (! $handle) {
+            if (!$handle) {
                 throw new \Exception("No se puede abrir el archivo: {$path}");
             }
 
@@ -85,44 +86,44 @@ class NovedadesCargoImportService
                 // Campo 38: Tener en cta Final/Func? => [130..130]
                 // -----------------------------------------------------------------
 
-                $codigoNovedad           = trim(substr($line,  0,  9));
-                $numLegajo               = trim(substr($line,  9,  9));
-                $numCargo                = trim(substr($line, 18, 10));
-                $tipoNovedad             = trim(substr($line, 28,  1));
-                $yearVigencia            = trim(substr($line, 29,  4));
-                $monthVigencia           = trim(substr($line, 33,  2));
-                $numeroLiquidacion       = trim(substr($line, 35,  6));
-                $codigoConcepto          = trim(substr($line, 41,  3));
-                $novedad1                = trim(substr($line, 44, 10));
-                $novedad2                = trim(substr($line, 54, 10));
-                $condicionNovedad        = trim(substr($line, 64,  1));
-                $yearFinalizacion        = trim(substr($line, 65,  4));
-                $monthFinalizacion       = trim(substr($line, 69,  2));
-                $yearRetro               = trim(substr($line, 71,  4));
-                $monthRetro              = trim(substr($line, 75,  2));
-                $yearComienzo            = trim(substr($line, 77,  4));
-                $monthComienzo           = trim(substr($line, 81,  2));
-                $detalleNovedad          = trim(substr($line, 83, 10));
-                $anulaNovedadMultiple    = trim(substr($line, 93,  1));
-                $tipoEjercicio           = trim(substr($line, 94,  1));
-                $grupoPresupuestario     = trim(substr($line, 95,  4));
-                $unidadPrincipal         = trim(substr($line, 99,  3));
-                $unidadSubPrincipal      = trim(substr($line,102,  3));
-                $unidadSubSubPrincipal   = trim(substr($line,105,  3));
-                $fuenteFondos            = trim(substr($line,108,  2));
-                $programa                = trim(substr($line,110,  2));
-                $subPrograma             = trim(substr($line,112,  2));
-                $proyecto                = trim(substr($line,114,  2));
-                $actividad               = trim(substr($line,116,  2));
-                $obra                    = trim(substr($line,118,  2));
-                $finalidad               = trim(substr($line,120,  2));
-                $funcion                 = trim(substr($line,122,  2));
-                $tenerCtaEjercicio       = trim(substr($line,124,  1));
-                $tenerCtaGrupoPresup     = trim(substr($line,125,  1));
-                $tenerCtaUnidadPrincipal = trim(substr($line,126,  1));
-                $tenerCtaFuente          = trim(substr($line,127,  1));
-                $tenerCtaRedProgramatica = trim(substr($line,128,  1));
-                $tenerCtaFinalidadFuncion= trim(substr($line,129,  1));
+                $codigoNovedad = trim(substr($line, 0, 9));
+                $numLegajo = trim(substr($line, 9, 9));
+                $numCargo = trim(substr($line, 18, 10));
+                $tipoNovedad = trim(substr($line, 28, 1));
+                $yearVigencia = trim(substr($line, 29, 4));
+                $monthVigencia = trim(substr($line, 33, 2));
+                $numeroLiquidacion = trim(substr($line, 35, 6));
+                $codigoConcepto = trim(substr($line, 41, 3));
+                $novedad1 = trim(substr($line, 44, 10));
+                $novedad2 = trim(substr($line, 54, 10));
+                $condicionNovedad = trim(substr($line, 64, 1));
+                $yearFinalizacion = trim(substr($line, 65, 4));
+                $monthFinalizacion = trim(substr($line, 69, 2));
+                $yearRetro = trim(substr($line, 71, 4));
+                $monthRetro = trim(substr($line, 75, 2));
+                $yearComienzo = trim(substr($line, 77, 4));
+                $monthComienzo = trim(substr($line, 81, 2));
+                $detalleNovedad = trim(substr($line, 83, 10));
+                $anulaNovedadMultiple = trim(substr($line, 93, 1));
+                $tipoEjercicio = trim(substr($line, 94, 1));
+                $grupoPresupuestario = trim(substr($line, 95, 4));
+                $unidadPrincipal = trim(substr($line, 99, 3));
+                $unidadSubPrincipal = trim(substr($line, 102, 3));
+                $unidadSubSubPrincipal = trim(substr($line, 105, 3));
+                $fuenteFondos = trim(substr($line, 108, 2));
+                $programa = trim(substr($line, 110, 2));
+                $subPrograma = trim(substr($line, 112, 2));
+                $proyecto = trim(substr($line, 114, 2));
+                $actividad = trim(substr($line, 116, 2));
+                $obra = trim(substr($line, 118, 2));
+                $finalidad = trim(substr($line, 120, 2));
+                $funcion = trim(substr($line, 122, 2));
+                $tenerCtaEjercicio = trim(substr($line, 124, 1));
+                $tenerCtaGrupoPresup = trim(substr($line, 125, 1));
+                $tenerCtaUnidadPrincipal = trim(substr($line, 126, 1));
+                $tenerCtaFuente = trim(substr($line, 127, 1));
+                $tenerCtaRedProgramatica = trim(substr($line, 128, 1));
+                $tenerCtaFinalidadFuncion = trim(substr($line, 129, 1));
 
                 // -----------------------------------------------------------------
                 // Validaciones iniciales y recolección de errores
@@ -147,51 +148,51 @@ class NovedadesCargoImportService
                 // -----------------------------------------------------------------
                 NovedadesCargoImportModel::create([
                     // Campos obligatorios o importantes
-                    'codigoNovedad'           => $codigoNovedad,
-                    'numLegajo'               => $numLegajo,
-                    'numCargo'                => $numCargo,
-                    'tipoNovedad'             => $tipoNovedad,
-                    'yearVigencia'            => $yearVigencia,
-                    'monthVigencia'           => $monthVigencia,
-                    'numeroLiquidacion'       => $numeroLiquidacion,
-                    'codigoConcepto'          => $codigoConcepto,
-                    'novedad1'                => $novedad1,
-                    'novedad2'                => $novedad2,
-                    'condicionNovedad'        => $condicionNovedad,
-                    'yearFinalizacion'        => $yearFinalizacion,
-                    'monthFinalizacion'       => $monthFinalizacion,
-                    'yearRetro'               => $yearRetro,
-                    'monthRetro'              => $monthRetro,
-                    'yearComienzo'            => $yearComienzo,
-                    'monthComienzo'           => $monthComienzo,
-                    'detalleNovedad'          => $detalleNovedad,
-                    'anulaNovedadMultiple'    => $anulaNovedadMultiple,
-                    'tipoEjercicio'           => $tipoEjercicio,
-                    'grupoPresupuestario'     => $grupoPresupuestario,
-                    'unidadPrincipal'         => $unidadPrincipal,
-                    'unidadSubPrincipal'      => $unidadSubPrincipal,
-                    'unidadSubSubPrincipal'   => $unidadSubSubPrincipal,
-                    'fuenteFondos'            => $fuenteFondos,
-                    'programa'                => $programa,
-                    'subPrograma'             => $subPrograma,
-                    'proyecto'                => $proyecto,
-                    'actividad'               => $actividad,
-                    'obra'                    => $obra,
-                    'finalidad'               => $finalidad,
-                    'funcion'                 => $funcion,
-                    'tenerCtaEjercicio'       => $tenerCtaEjercicio,
-                    'tenerCtaGrupoPresup'     => $tenerCtaGrupoPresup,
+                    'codigoNovedad' => $codigoNovedad,
+                    'numLegajo' => $numLegajo,
+                    'numCargo' => $numCargo,
+                    'tipoNovedad' => $tipoNovedad,
+                    'yearVigencia' => $yearVigencia,
+                    'monthVigencia' => $monthVigencia,
+                    'numeroLiquidacion' => $numeroLiquidacion,
+                    'codigoConcepto' => $codigoConcepto,
+                    'novedad1' => $novedad1,
+                    'novedad2' => $novedad2,
+                    'condicionNovedad' => $condicionNovedad,
+                    'yearFinalizacion' => $yearFinalizacion,
+                    'monthFinalizacion' => $monthFinalizacion,
+                    'yearRetro' => $yearRetro,
+                    'monthRetro' => $monthRetro,
+                    'yearComienzo' => $yearComienzo,
+                    'monthComienzo' => $monthComienzo,
+                    'detalleNovedad' => $detalleNovedad,
+                    'anulaNovedadMultiple' => $anulaNovedadMultiple,
+                    'tipoEjercicio' => $tipoEjercicio,
+                    'grupoPresupuestario' => $grupoPresupuestario,
+                    'unidadPrincipal' => $unidadPrincipal,
+                    'unidadSubPrincipal' => $unidadSubPrincipal,
+                    'unidadSubSubPrincipal' => $unidadSubSubPrincipal,
+                    'fuenteFondos' => $fuenteFondos,
+                    'programa' => $programa,
+                    'subPrograma' => $subPrograma,
+                    'proyecto' => $proyecto,
+                    'actividad' => $actividad,
+                    'obra' => $obra,
+                    'finalidad' => $finalidad,
+                    'funcion' => $funcion,
+                    'tenerCtaEjercicio' => $tenerCtaEjercicio,
+                    'tenerCtaGrupoPresup' => $tenerCtaGrupoPresup,
                     'tenerCtaUnidadPrincipal' => $tenerCtaUnidadPrincipal,
-                    'tenerCtaFuente'          => $tenerCtaFuente,
+                    'tenerCtaFuente' => $tenerCtaFuente,
                     'tenerCtaRedProgramatica' => $tenerCtaRedProgramatica,
-                    'tenerCtaFinalidadFuncion'=> $tenerCtaFinalidadFuncion,
+                    'tenerCtaFinalidadFuncion' => $tenerCtaFinalidadFuncion,
 
                     // Parámetros de importación
-                    'conActualizacion'        => $params['conActualizacion'] ?? false,
-                    'nuevosIdentificadores'   => $params['nuevosIdentificadores'] ?? false,
+                    'conActualizacion' => $params['conActualizacion'] ?? false,
+                    'nuevosIdentificadores' => $params['nuevosIdentificadores'] ?? false,
 
                     // Array con los posibles errores detectados en la validación inicial
-                    'errors'                  => $errors,
+                    'errors' => $errors,
                 ]);
             }
 
@@ -199,7 +200,7 @@ class NovedadesCargoImportService
         } catch (\Throwable $th) {
             // Manejo de excepciones: se sugiere loguear y/o lanzar nuevamente
             // para notificar adecuadamente en la interfaz de usuario (Filament).
-            Log::error("Error procesando archivo Cargos: " . $th->getMessage());
+            Log::error('Error procesando archivo Cargos: ' . $th->getMessage());
             throw $th;
         }
     }

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Concerns\BelongsToMapucheSchema;
 use App\Traits\MapucheConnectionTrait;
 use Database\Factories\Dh16Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Conceptos por Grupo en sistema Mapuche
+ * Conceptos por Grupo en sistema Mapuche.
  *
  * @property int $codn_grupo Código de grupo
  * @property int $codn_conce Código de concepto
@@ -41,20 +40,11 @@ class Dh16 extends Model
      * The attributes that are mass assignable.
      *
      * @var array<string>
+     * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [
         'codn_grupo',
         'codn_conce',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'codn_grupo' => 'integer',
-        'codn_conce' => 'integer',
     ];
 
     /**
@@ -63,5 +53,18 @@ class Dh16 extends Model
     protected static function newFactory(): Dh16Factory
     {
         return Dh16Factory::new();
+    }
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'codn_grupo' => 'integer',
+            'codn_conce' => 'integer',
+        ];
     }
 }

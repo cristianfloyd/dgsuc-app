@@ -2,17 +2,18 @@
 
 namespace App\Repositories;
 
-use App\NroLiqui;
+use App\Contracts\Dh21RepositoryInterface;
 use App\Models\Dh21;
-use Illuminate\Support\Facades\DB;
+use App\NroLiqui;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
-use App\Contracts\Dh21RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Dh21Repository implements Dh21RepositoryInterface
 {
     use MapucheConnectionTrait;
+
     /**
      * Devuelve la cantidad de legajos distintos en el modelo Dh21.
      *
@@ -37,6 +38,7 @@ class Dh21Repository implements Dh21RepositoryInterface
      * Devuelve la suma total del concepto 101 para un número de liquidación dado.
      *
      * @param NroLiqui|null $nroLiqui El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
+     *
      * @return float La suma total del concepto 101.
      */
     public function getTotalConcepto101(?NroLiqui $nroLiqui = null): float
@@ -49,10 +51,11 @@ class Dh21Repository implements Dh21RepositoryInterface
     }
 
     /**
-     * Obtiene las horas y días trabajados para un legajo y cargo específico
+     * Obtiene las horas y días trabajados para un legajo y cargo específico.
      *
      * @param int $legajo
      * @param int $cargo
+     *
      * @return array{dias: int, horas: int}
      */
     public function getHorasYDias(int $legajo, int $cargo): array
@@ -63,16 +66,17 @@ class Dh21Repository implements Dh21RepositoryInterface
             ->where('codn_conce', -51)
             ->select([
                 DB::raw('MAX(nov1_conce) as dias'),
-                DB::raw('MAX(nov2_conce) as horas')
+                DB::raw('MAX(nov2_conce) as horas'),
             ])
             ->first()
             ->toArray();
     }
 
     /**
-     * Obtiene las liquidaciones con sus importes y descripciones
+     * Obtiene las liquidaciones con sus importes y descripciones.
      *
      * @param array $conditions Condiciones adicionales para filtrar
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getLiquidaciones(array $conditions = []): Collection
@@ -80,23 +84,24 @@ class Dh21Repository implements Dh21RepositoryInterface
         return Dh21::query()
             ->select('dh22.desc_liqui', 'dh21.codn_conce', 'dh21.impp_conce', 'dh21.desc_conce')
             ->with('dh22')
-            ->when(!empty($conditions), function ($query) use ($conditions) {
+            ->when(!empty($conditions), function ($query) use ($conditions): void {
                 foreach ($conditions as $column => $value) {
                     $query->where($column, $value);
                 }
             })
-            ->when(empty($conditions), function ($query) {
+            ->when(empty($conditions), function ($query): void {
                 $query->where('nro_legaj', '=', 1);
             })
             ->get();
     }
 
     /**
-     * Obtiene conceptos liquidados para procesamiento SICOSS
+     * Obtiene conceptos liquidados para procesamiento SICOSS.
      *
      * @param int $per_anoct
      * @param int $per_mesct
      * @param string $where
+     *
      * @return array
      */
     public function obtenerConceptosLiquidadosSicoss(int $per_anoct, int $per_mesct, string $where): array
@@ -172,24 +177,25 @@ class Dh21Repository implements Dh21RepositoryInterface
 
         // Crear índice en la tabla temporal
         DB::connection($this->getConnectionName())->statement(
-            "CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion);"
+            'CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion);',
         );
 
         // Obtener los datos de la tabla temporal
         $resultados = DB::connection($this->getConnectionName())
-            ->select("SELECT * FROM pre_conceptos_liquidados");
+            ->select('SELECT * FROM pre_conceptos_liquidados');
 
         // Convertir los resultados a array
         return array_map(function ($item) {
-            return (array) $item;
+            return (array)$item;
         }, $resultados);
     }
 
     /**
-     * Obtiene períodos retro disponibles de la tabla temporal pre_conceptos_liquidados
+     * Obtiene períodos retro disponibles de la tabla temporal pre_conceptos_liquidados.
      *
      * @param bool $check_lic
      * @param bool $check_retr
+     *
      * @return array
      */
     public function obtenerPeriodosRetro(bool $check_lic = false, bool $check_retr = false): array
@@ -198,27 +204,27 @@ class Dh21Repository implements Dh21RepositoryInterface
         $rs_periodos_retro = [];
 
         if ($check_lic && $check_retr) {
-            $sql_periodos_retro = "
+            $sql_periodos_retro = '
                                     SELECT
                                             DISTINCT(ano_retro),mes_retro
                                     FROM
                                             pre_conceptos_liquidados
                                     ORDER BY
                                             ano_retro desc, mes_retro desc
-                                    ";
+                                    ';
             $rs_periodos_retro = DB::connection($this->getConnectionName())->select($sql_periodos_retro);
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
             array_push($rs_periodos_retro, $temp);
         } elseif (!$check_lic) {
-            $sql_periodos_retro = "
+            $sql_periodos_retro = '
                                     SELECT
                                             DISTINCT(ano_retro),mes_retro
                                     FROM
                                             pre_conceptos_liquidados
                                     ORDER BY
                                             ano_retro desc, mes_retro desc
-                                    ";
+                                    ';
             $rs_periodos_retro = DB::connection($this->getConnectionName())->select($sql_periodos_retro);
         }
         // si tiene check de licencias solo debo tener en cuenta el periodo retro 0-0

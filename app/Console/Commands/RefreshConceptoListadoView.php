@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Jobs\RefreshMaterializedViewJob;
-use App\Services\ConceptoListadoResourceService;
+use Illuminate\Console\Command;
 
 class RefreshConceptoListadoView extends Command
 {

@@ -12,10 +12,10 @@ interface WorkflowExecutionInterface
      * Establece el número de elementos por página.
      *
      * @param int $perPage
+     *
      * @return self
      */
     public function setPerPage(int $perPage): self;
-
 
     /**
      * Obtiene el número actual de elementos por página.
@@ -28,6 +28,7 @@ interface WorkflowExecutionInterface
      * Establece el período fiscal.
      *
      * @param int $periodoFiscal
+     *
      * @return self
      */
     public function setPeriodoFiscal(int $periodoFiscal): self;
@@ -40,5 +41,6 @@ interface WorkflowExecutionInterface
     public function getPeriodoFiscal(): int;
 
     public function setNroLiqui(int $nroLiqui): self;
+
     public function getNroLiqui(): NroLiqui;
 }

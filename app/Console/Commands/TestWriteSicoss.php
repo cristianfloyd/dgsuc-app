@@ -23,11 +23,11 @@ class TestWriteSicoss extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $directorio = storage_path('comunicacion/sicoss');
         if (!file_exists($directorio)) {
-            if (mkdir($directorio, 0775, true)) {
+            if (mkdir($directorio, 0o775, true)) {
                 $this->info("Directorio creado: $directorio");
             } else {
                 $this->error("No se pudo crear el directorio: $directorio");
@@ -38,12 +38,12 @@ class TestWriteSicoss extends Command
         }
 
         $archivo = $directorio . '/test_sicoss.txt';
-        $contenido = "Prueba de escritura en " . now() . "\n";
+        $contenido = 'Prueba de escritura en ' . now() . "\n";
         $fh = @fopen($archivo, 'w');
         if (!$fh) {
             $error = error_get_last();
             $this->error("No se pudo abrir el archivo: $archivo");
-            $this->error("Error: " . $error['message']);
+            $this->error('Error: ' . $error['message']);
             return;
         }
 

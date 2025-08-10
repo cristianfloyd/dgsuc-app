@@ -35,7 +35,7 @@ class SicossFileProcessor
                 $buffer[] = $line;
 
                 // Cuando el buffer alcanza el tamaño del lote, lo enviamos
-                if (count($buffer) >= $batchSize) {
+                if (\count($buffer) >= $batchSize) {
                     yield $buffer;
                     $buffer = [];
                 }

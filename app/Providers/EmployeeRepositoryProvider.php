@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\EmployeeRepositoryInterface;
+use App\Contracts\EmployeeServiceInterface;
+use App\Repositories\EmployeeRepository;
 use App\Services\EmployeeService;
 use Illuminate\Support\ServiceProvider;
-use App\Repositories\EmployeeRepository;
-use App\Contracts\EmployeeServiceInterface;
-use App\Contracts\EmployeeRepositoryInterface;
 
 class EmployeeRepositoryProvider extends ServiceProvider
 {
@@ -24,6 +24,5 @@ class EmployeeRepositoryProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

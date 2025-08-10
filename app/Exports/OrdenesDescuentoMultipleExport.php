@@ -2,14 +2,13 @@
 
 namespace App\Exports;
 
-use App\Exports\OrdenesDescuentoSheet200;
-use App\Exports\OrdenAportesyContribuciones;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class OrdenesDescuentoMultipleExport implements WithMultipleSheets
 {
     use Exportable;
+
     protected $query;
 
     public function __construct($query)
@@ -21,7 +20,7 @@ class OrdenesDescuentoMultipleExport implements WithMultipleSheets
     {
         return [
             new OrdenesDescuentoSheet200($this->query->clone()->whereBetween('codn_conce', [200, 299])),
-            new OrdenAportesyContribuciones($this->query->clone()->whereBetween('codn_conce', [300, 399]))
+            new OrdenAportesyContribuciones($this->query->clone()->whereBetween('codn_conce', [300, 399])),
         ];
     }
 }

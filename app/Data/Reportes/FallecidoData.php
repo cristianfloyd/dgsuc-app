@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Data\Reportes;
 
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Casts\DateCast;
-use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 class FallecidoData extends Data
 {
@@ -21,9 +19,10 @@ class FallecidoData extends Data
         public readonly string $codc_uacad,
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly ?Carbon $fec_defun,
-    ) {}
+    ) {
+    }
 
-    public static function rules(): array
+    public static function rules($context = null): array
     {
         return [
             'nro_legaj' => ['required', 'integer'],
@@ -35,7 +34,7 @@ class FallecidoData extends Data
         ];
     }
 
-    public static function messages(): array
+    public static function messages(...$args): array
     {
         return [
             'cuil.regex' => 'El CUIL debe tener el formato XX-XXXXXXXX-X',

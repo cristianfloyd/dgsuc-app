@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Data\Mapuche;
@@ -12,9 +13,10 @@ class Dh17Data extends Data
         public readonly ?string $objt_gtope,
         public readonly ?string $objt_gtote,
         public readonly ?int $nro_prove,
-    ) {}
+    ) {
+    }
 
-    public static function rules($context): array
+    public static function rules($context = null): array
     {
         return [
             'codn_conce' => ['required', 'integer'],

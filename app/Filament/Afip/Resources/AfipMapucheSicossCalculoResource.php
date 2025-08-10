@@ -4,28 +4,31 @@ declare(strict_types=1);
 
 namespace App\Filament\Afip\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Actions\Action;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
-use App\Models\AfipMapucheSicossCalculo;
-use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\Action as ActionsTable;
-use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\EditAfipMapucheSicossCalculo;
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ListAfipMapucheSicossCalculos;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ImportAfipMapucheSicossCalculo;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculoResource\Pages\ListAfipMapucheSicossCalculos;
+use App\Models\AfipMapucheSicossCalculo;
+use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
+use Filament\Actions\Action;
+use Filament\Forms;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action as ActionsTable;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\TextColumn;
 
 class AfipMapucheSicossCalculoResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicossCalculo::class;
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
-    protected static ?string $navigationGroup = 'AFIP';
-    protected static ?string $navigationLabel = 'SICOSS Calculo';
-    protected static ?int $navigationSort = 2;
 
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-left-circle';
+
+    protected static ?string $navigationGroup = 'AFIP';
+
+    protected static ?string $navigationLabel = 'SICOSS Calculo';
+
+    protected static ?int $navigationSort = 2;
 
     public static function getPages(): array
     {
@@ -79,7 +82,7 @@ class AfipMapucheSicossCalculoResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('codc_uacad')
                     ->label('UA/CAD'),
-                Tables\Filters\SelectFilter::make('caracter')
+                Tables\Filters\SelectFilter::make('caracter'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -102,7 +105,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                         ->modalHeading('¿Vaciar tabla?')
                         ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
                         ->modalSubmitActionLabel('Sí, vaciar tabla')
-                        ->action(function() {
+                        ->action(function (): void {
                             app(AfipMapucheSicossCalculoRepository::class)->truncate();
                             Notification::make()
                                 ->success()
@@ -111,9 +114,9 @@ class AfipMapucheSicossCalculoResource extends Resource
                                 ->send();
                         }),
                 ])
-                ->icon('heroicon-o-cog-8-tooth')
-                ->tooltip('Acciones')
-                ->size('lg'),
+                    ->icon('heroicon-o-cog-8-tooth')
+                    ->tooltip('Acciones')
+                    ->size('lg'),
             ])
             ->defaultPaginationPageOption(5)
             ->emptyStateHeading('No se encontraron registros')
@@ -133,7 +136,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->modalHeading('¿Vaciar tabla?')
                     ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
                     ->modalSubmitActionLabel('Sí, vaciar tabla')
-                    ->action(function() {
+                    ->action(function (): void {
                         app(AfipMapucheSicossCalculoRepository::class)->truncate();
                         Notification::make()
                             ->success()

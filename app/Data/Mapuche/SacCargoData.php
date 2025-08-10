@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data\Mapuche;
 
-use Carbon\Carbon;
 use App\Models\Mapuche\Dh10;
+use Carbon\Carbon;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Attributes\MapName;
 
 class SacCargoData extends Data
 {
@@ -22,7 +21,8 @@ class SacCargoData extends Data
         public ?string $categoria = null,
         public ?Carbon $fecha_alta = null,
         public ?Carbon $fecha_baja = null,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(Dh10 $model): self
     {

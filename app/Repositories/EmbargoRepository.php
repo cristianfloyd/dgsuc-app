@@ -2,12 +2,12 @@
 
 namespace App\Repositories;
 
-use Illuminate\Support\Facades\Log;
+use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Models\EmbargoProcesoResult;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use App\Contracts\Repositories\EmbargoRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
 class EmbargoRepository implements EmbargoRepositoryInterface
 {
@@ -19,7 +19,7 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     protected EmbargoProcesoResult $model;
 
     /**
-     * Constructor del repositorio
+     * Constructor del repositorio.
      *
      * @param EmbargoProcesoResult $model
      */
@@ -35,7 +35,7 @@ class EmbargoRepository implements EmbargoRepositoryInterface
         array $nroComplementarias,
         int $nroLiquiDefinitiva,
         int $nroLiquiProxima,
-        bool $insertIntoDh25
+        bool $insertIntoDh25,
     ): Builder {
         try {
             $arrayString = $this->prepareComplementariasArray($nroComplementarias);
@@ -44,7 +44,7 @@ class EmbargoRepository implements EmbargoRepositoryInterface
                 ->select("SELECT * FROM suc.emb_proceso( $arrayString, ?, ?, ?)", [
                     $nroLiquiDefinitiva,
                     $nroLiquiProxima,
-                    $insertIntoDh25
+                    $insertIntoDh25,
                 ]);
 
             if (empty($results)) {
@@ -53,9 +53,8 @@ class EmbargoRepository implements EmbargoRepositoryInterface
 
             // Creamos una nueva instancia del modelo para usar hydrate
             return $this->model->newQuery()->setModel(
-                $this->model->newInstance()->hydrate($results)
+                $this->model->newInstance()->hydrate($results),
             );
-
         } catch (\Exception $e) {
             Log::error('Error en proceso de embargo: ' . $e->getMessage());
             return $this->model->getEmptyQuery();
@@ -79,9 +78,10 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     }
 
     /**
-     * Prepara el array de complementarias para la consulta SQL
+     * Prepara el array de complementarias para la consulta SQL.
      *
      * @param array $nroComplementarias
+     *
      * @return string
      */
     private function prepareComplementariasArray(array $nroComplementarias): string

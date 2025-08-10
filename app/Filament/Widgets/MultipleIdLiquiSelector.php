@@ -19,9 +19,12 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?int $sort = 2;
-    protected static string $view = 'filament.widgets.id-liqui-selector';
     public ?array $selectedIdLiqui = null;
+
+    protected static ?int $sort = 2;
+
+    protected static string $view = 'filament.widgets.id-liqui-selector';
+
     protected array $casts = [
         'form' => 'array',
     ];
@@ -30,7 +33,6 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
     {
         $this->form->fill();
     }
-
 
     /**
      * @return Form
@@ -41,22 +43,6 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
         return $this->makeForm();
     }
 
-    protected function makeForm(): Form
-    {
-        return Form::make($this)
-            ->schema([
-                Select::make('selectedIdLiqui')
-                    ->label('Seleccionar Liquidaciones')
-                    ->multiple()
-                    ->options(Dh22::getLiquidacionesForWidget()->pluck('desc_liqui', 'nro_liqui'))
-                    ->reactive()
-                    ->afterStateUpdated(function ($state) {
-                        $this->dispatch('idsLiquiSelected', $state);
-                        Log::debug("idsLiquiSelected", ['state' => $state]);
-                    }),
-            ]);
-    }
-
     #[On('updated-periodo-fiscal')]
     public function handlePeriodoFiscalSelected($periodoFiscal): void
     {
@@ -65,7 +51,7 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
         $liquidaciones = Dh22::getLiquidacionesForWidget()
             ->when($periodoFiscal, function ($query) use ($periodoFiscal) {
                 return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                    $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT)
+                    $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
                 ]);
             })
             ->pluck('desc_liqui', 'nro_liqui');
@@ -79,6 +65,22 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
         // Actualizar el formulario
         $this->form->fill();
 
-        Log::debug("PeriodoFiscalSelected en MultipleIdLiquiSelector", ['periodoFiscal' => $periodoFiscal]);
+        Log::debug('PeriodoFiscalSelected en MultipleIdLiquiSelector', ['periodoFiscal' => $periodoFiscal]);
+    }
+
+    protected function makeForm(): Form
+    {
+        return Form::make($this)
+            ->schema([
+                Select::make('selectedIdLiqui')
+                    ->label('Seleccionar Liquidaciones')
+                    ->multiple()
+                    ->options(Dh22::getLiquidacionesForWidget()->pluck('desc_liqui', 'nro_liqui'))
+                    ->reactive()
+                    ->afterStateUpdated(function ($state): void {
+                        $this->dispatch('idsLiquiSelected', $state);
+                        Log::debug('idsLiquiSelected', ['state' => $state]);
+                    }),
+            ]);
     }
 }

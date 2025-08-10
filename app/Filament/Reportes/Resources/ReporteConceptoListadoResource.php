@@ -2,31 +2,33 @@
 
 namespace App\Filament\Reportes\Resources;
 
+use App\Filament\Reportes\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
 use App\Models\Dh03;
-use Filament\Tables\Table;
+use App\Models\Reportes\ConceptoListado;
+use App\Services\ConceptoListado\ConceptoListadoSyncService;
+use App\Services\ConceptoListadoResourceService;
 use App\Services\Dh12Service;
+use App\Services\Mapuche\PeriodoFiscalService;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Select;
-use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Columns\TextColumn;
-use App\Models\Reportes\ConceptoListado;
-use Filament\Notifications\Notification;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Services\ConceptoListadoResourceService;
-use App\Services\ConceptoListado\ConceptoListadoSyncService;
-use App\Filament\Reportes\Resources\ReporteConceptoListadoResource\Pages\ListReporteConceptoListados;
+use Illuminate\Support\Facades\Cache;
 
 class ReporteConceptoListadoResource extends Resource
 {
     protected static ?string $model = ConceptoListado::class;
-    protected static ?string $modelLabel = 'Listado Concepto';
-    protected static ?string $slug = 'listado-concepto';
-    protected static ?string $navigationGroup = 'Informes';
 
+    protected static ?string $modelLabel = 'Listado Concepto';
+
+    protected static ?string $slug = 'listado-concepto';
+
+    protected static ?string $navigationGroup = 'Informes';
 
     public static function table(Table $table): Table
     {
@@ -45,7 +47,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->label('Periodo')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->getStateUsing(fn($record) => $record->periodo_fiscal),
+                    ->getStateUsing(fn ($record) => $record->periodo_fiscal),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('impp_conce')->label('Importe')->searchable()->sortable(),
             ])
@@ -54,37 +56,39 @@ class ReporteConceptoListadoResource extends Resource
                     ->form([
                         Select::make('periodo_fiscal')
                             ->label('Periodo')
-                            ->options(fn() => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->options(fn () => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                             ->searchable()
                             ->live()
-                            ->afterStateUpdated(fn(callable $set) => $set('nro_liqui', null)),
+                            ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
 
                         Select::make('nro_liqui')
                             ->label('Liquidación')
                             ->options(function (callable $get): array {
                                 $periodoString = $get('periodo_fiscal');
-                                if (!$periodoString) return [];
+                                if (!$periodoString) {
+                                    return [];
+                                }
 
                                 [$year, $month] = explode('-', $periodoString);
                                 return app(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
                             })
                             ->searchable()
                             ->live()
-                            ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
+                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
                         Select::make('codc_uacad')
                             ->label('Dependencia')
-                            ->options(fn() => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
-                            ->searchable()
+                            ->options(fn () => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
+                            ->searchable(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['nro_liqui'],
-                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                                fn (Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             )
                             ->when(
                                 $data['codc_uacad'],
-                                fn(Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad)
+                                fn (Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad),
                             );
                     }),
                 SelectFilter::make('codn_conce')
@@ -94,15 +98,15 @@ class ReporteConceptoListadoResource extends Resource
                     ->searchable(),
             ])
             ->filtersTriggerAction(
-                fn(Action $action) => $action
+                fn (Action $action) => $action
                     ->button()
                     ->label('Filtro'),
             )
             ->actions([
-                //
+
             ])
             ->bulkActions([
-                //
+
             ])
             ->headerActions([
                 Action::make('regenerar_reporte')
@@ -122,7 +126,9 @@ class ReporteConceptoListadoResource extends Resource
                             ->label('Liquidación (opcional)')
                             ->options(function (callable $get): array {
                                 $periodoString = $get('periodo_fiscal');
-                                if (!$periodoString) return [];
+                                if (!$periodoString) {
+                                    return [];
+                                }
 
                                 [$year, $month] = explode('-', $periodoString);
                                 return app(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
@@ -136,7 +142,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->modalDescription('Esta acción sincronizará los datos desde Mapuche para el periodo actual. Puede tardar varios minutos dependiendo del volumen de datos.')
                     ->modalSubmitActionLabel('Sí, regenerar')
                     ->modalIcon('heroicon-o-arrow-path')
-                    ->action(function (array $data) {
+                    ->action(function (array $data): void {
                         try {
                             $periodoFiscal = $data['periodo_fiscal'];
                             $nroLiqui = $data['nro_liqui'] ?? null;
@@ -145,7 +151,7 @@ class ReporteConceptoListadoResource extends Resource
                             Notification::make()
                                 ->title('Sincronización iniciada')
                                 ->body("Regenerando reporte para el período {$periodoFiscal}" .
-                                      ($nroLiqui ? " y liquidación #{$nroLiqui}" : ""))
+                                      ($nroLiqui ? " y liquidación #{$nroLiqui}" : ''))
                                 ->info()
                                 ->persistent()
                                 ->send();
@@ -163,7 +169,7 @@ class ReporteConceptoListadoResource extends Resource
                                     \Filament\Notifications\Actions\Action::make('refresh')
                                         ->label('Actualizar página')
                                         ->button()
-                                        ->url(request()->fullUrl())
+                                        ->url(request()->fullUrl()),
                                 ])
                                 ->persistent()
                                 ->send();
@@ -181,7 +187,7 @@ class ReporteConceptoListadoResource extends Resource
                                 'error' => $e->getMessage(),
                                 'trace' => $e->getTraceAsString(),
                                 'periodo_fiscal' => $periodoFiscal,
-                                'nro_liqui' => $nroLiqui
+                                'nro_liqui' => $nroLiqui,
                             ]);
                         }
                     }),
@@ -191,7 +197,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function () {
+                    ->action(function (): void {
                         try {
                             if (config('cache.default') === 'redis') {
                                 Cache::tags(['concepto_listado'])->flush();
@@ -211,7 +217,7 @@ class ReporteConceptoListadoResource extends Resource
                                 ->body('Error al limpiar la caché: ' . $e->getMessage())
                                 ->send();
                         }
-                    })
+                    }),
             ])
             ->deferLoading()
             ->persistFiltersInSession()
@@ -220,13 +226,13 @@ class ReporteConceptoListadoResource extends Resource
             ->paginationPageOptions([5, 10, 25, 50, 100])
             ->emptyStateHeading('Seleccione un concepto')
             ->emptyStateDescription('Para visualizar los datos, primero debe seleccionar un concepto del filtro superior.')
-            ->emptyStateIcon('heroicon-o-funnel')
-        ;
+            ->emptyStateIcon('heroicon-o-funnel');
     }
+
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -238,7 +244,6 @@ class ReporteConceptoListadoResource extends Resource
             //'edit' => EditReporteConceptoListado::route('/{record}/edit'),
         ];
     }
-
 
     public static function getEloquentQuery(): Builder
     {

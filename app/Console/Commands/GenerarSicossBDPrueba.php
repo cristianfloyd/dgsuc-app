@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
-use App\Models\Mapuche\MapucheConfig;
+use Illuminate\Console\Command;
 
 class GenerarSicossBDPrueba extends Command
 {
@@ -25,30 +25,6 @@ class GenerarSicossBDPrueba extends Command
      * @var string
      */
     protected $description = 'Genera SICOSS en BD (legajo específico o todos)';
-
-    /**
-     * Configuración completa requerida por genera_sicoss()
-     */
-    private function getConfiguracionCompleta($incluirInactivos = false, $legajoEspecifico = null): array
-    {
-        $datos = [
-            // Configuración básica
-            'check_retro' => 0,                    // Sin retroactivos para prueba
-            'check_lic' => false,                  // Sin licencias especiales
-            'check_sin_activo' => $incluirInactivos, // Incluir inactivos si se solicita
-            'truncaTope' => true,
-            'TopeJubilatorioPatronal' => MapucheConfig::getTopesJubilatorioPatronal(),
-            'TopeJubilatorioPersonal' => MapucheConfig::getTopesJubilatorioPersonal(), 
-            'TopeOtrosAportesPersonal' => MapucheConfig::getTopesOtrosAportesPersonales(),
-
-            'nro_legaj' => $legajoEspecifico,
-        ];
-
-        // Limpiar valores null del array
-        return array_filter($datos, function($value) {
-            return $value !== null;
-        });
-    }
 
     /**
      * Execute the console command.
@@ -85,16 +61,16 @@ class GenerarSicossBDPrueba extends Command
 
             // Ejecutar proceso completo
             $inicio = microtime(true);
-            
-            $this->info("🚀 Iniciando procesamiento SICOSS...");
-            
+
+            $this->info('🚀 Iniciando procesamiento SICOSS...');
+
             $resultado = SicossOptimizado::genera_sicoss(
                 datos: $datos,
                 testeo_directorio_salida: '',
                 testeo_prefijo_archivos: '',
                 retornar_datos: false,
                 guardar_en_bd: true,
-                periodo_fiscal: $periodoFiscal
+                periodo_fiscal: $periodoFiscal,
             );
 
             $tiempo = round(microtime(true) - $inicio, 2);
@@ -103,43 +79,66 @@ class GenerarSicossBDPrueba extends Command
             $this->mostrarResultados($resultado, $periodoFiscal, $tiempo);
 
             return 0;
-
         } catch (\Exception $e) {
-            $this->error("❌ Error: " . $e->getMessage());
-            $this->error("📍 En: " . $e->getFile() . ':' . $e->getLine());
+            $this->error('❌ Error: ' . $e->getMessage());
+            $this->error('📍 En: ' . $e->getFile() . ':' . $e->getLine());
             if ($this->option('verbose')) {
-                $this->error("Stack trace:");
+                $this->error('Stack trace:');
                 $this->error($e->getTraceAsString());
             }
             return 1;
         }
     }
 
+    /**
+     * Configuración completa requerida por genera_sicoss().
+     */
+    private function getConfiguracionCompleta($incluirInactivos = false, $legajoEspecifico = null): array
+    {
+        $datos = [
+            // Configuración básica
+            'check_retro' => 0,                    // Sin retroactivos para prueba
+            'check_lic' => false,                  // Sin licencias especiales
+            'check_sin_activo' => $incluirInactivos, // Incluir inactivos si se solicita
+            'truncaTope' => true,
+            'TopeJubilatorioPatronal' => MapucheConfig::getTopesJubilatorioPatronal(),
+            'TopeJubilatorioPersonal' => MapucheConfig::getTopesJubilatorioPersonal(),
+            'TopeOtrosAportesPersonal' => MapucheConfig::getTopesOtrosAportesPersonales(),
+
+            'nro_legaj' => $legajoEspecifico,
+        ];
+
+        // Limpiar valores null del array
+        return array_filter($datos, function ($value) {
+            return $value !== null;
+        });
+    }
+
     private function mostrarConfiguracion($datos, $periodo, $legajoEspecifico): void
     {
-        $this->info("📋 Configuración SICOSS:");
-        
+        $this->info('📋 Configuración SICOSS:');
+
         if ($legajoEspecifico) {
             $this->info("🎯 Legajo específico: {$legajoEspecifico}");
         } else {
-            $this->info("👥 Todos los legajos");
+            $this->info('👥 Todos los legajos');
         }
-        
+
         $this->info("📅 Período: {$periodo}");
-        $this->info("🔧 Incluir inactivos: " . ($datos['check_sin_activo'] ? 'Sí' : 'No'));
-        $this->info("🔧 Licencias especiales: " . ($datos['check_lic'] ? 'Sí' : 'No'));
-        $this->info("🔧 Retroactivos: " . ($datos['check_retro'] ? 'Sí' : 'No'));
-        
+        $this->info('🔧 Incluir inactivos: ' . ($datos['check_sin_activo'] ? 'Sí' : 'No'));
+        $this->info('🔧 Licencias especiales: ' . ($datos['check_lic'] ? 'Sí' : 'No'));
+        $this->info('🔧 Retroactivos: ' . ($datos['check_retro'] ? 'Sí' : 'No'));
+
         if (isset($datos['TopeJubilatorioPersonal'])) {
-            $this->info("💰 Tope Jubilatorio Personal: " . number_format($datos['TopeJubilatorioPersonal'], 2));
+            $this->info('💰 Tope Jubilatorio Personal: ' . number_format($datos['TopeJubilatorioPersonal'], 2));
         }
     }
 
     private function mostrarResultados($resultado, $periodoFiscal, $tiempo): void
     {
-        $this->info("✅ SICOSS BD completado:");
-        
-        if (is_array($resultado)) {
+        $this->info('✅ SICOSS BD completado:');
+
+        if (\is_array($resultado)) {
             $this->table(
                 ['Métrica', 'Valor'],
                 [
@@ -149,7 +148,7 @@ class GenerarSicossBDPrueba extends Command
                     ['Chunks procesados', $resultado['chunks_procesados'] ?? 'N/A'],
                     ['Errores', $resultado['errores'] ?? 'N/A'],
                     ['Tiempo total', $tiempo . 's'],
-                ]
+                ],
             );
         } else {
             // Si el resultado no es array, puede ser que el método retorne otra cosa
@@ -175,7 +174,7 @@ class GenerarSicossBDPrueba extends Command
                         ['Nombre', substr($ejemplo->apnom, 0, 30)],
                         ['Rem. Total', number_format($ejemplo->rem_total, 2)],
                         ['SAC', number_format($ejemplo->sac, 2)],
-                    ]
+                    ],
                 );
             }
         }

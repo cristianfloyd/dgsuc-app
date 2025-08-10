@@ -2,35 +2,35 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Scripts\GenerarSicossLegajo;
+use Illuminate\Console\Command;
 
 /**
- * Comando Artisan simple para generar archivos SICOSS
+ * Comando Artisan simple para generar archivos SICOSS.
  */
 class GenerarSicossCommand extends Command
 {
     /**
-     * Firma del comando - legajo es opcional
+     * Firma del comando - legajo es opcional.
      */
     protected $signature = 'sicoss:generar {legajo?}';
-    
+
     /**
-     * Descripción del comando
+     * Descripción del comando.
      */
     protected $description = 'Genera un archivo SICOSS para un legajo específico o todos los legajos';
 
     /**
-     * Ejecuta el comando
+     * Ejecuta el comando.
      */
-    public function handle()
+    public function handle(): void
     {
         // Obtener el legajo (puede ser null)
         $legajo = $this->argument('legajo');
-        
+
         // Convertir a entero si se proporciona
         $numeroLegajo = $legajo ? (int)$legajo : null;
-        
+
         // Crear instancia del generador
         $generador = new GenerarSicossLegajo();
 
@@ -38,7 +38,7 @@ class GenerarSicossCommand extends Command
         if ($numeroLegajo) {
             $this->info("🎯 Generando SICOSS para legajo: {$numeroLegajo}");
         } else {
-            $this->info("📋 Generando SICOSS para todos los legajos");
+            $this->info('📋 Generando SICOSS para todos los legajos');
         }
 
         // Ejecutar generación
@@ -53,8 +53,8 @@ class GenerarSicossCommand extends Command
     }
 
     /**
-     * Muestra el resultado exitoso con formato mejorado
-     * 
+     * Muestra el resultado exitoso con formato mejorado.
+     *
      * @param array $resultado
      */
     private function mostrarResultadoExitoso(array $resultado): void
@@ -70,16 +70,16 @@ class GenerarSicossCommand extends Command
 
         // Mostrar datos procesados según el tipo
         $datosFormateados = $resultado['data']['datos_procesados'];
-        
+
         switch ($datosFormateados['tipo']) {
             case 'legajo_individual':
                 $this->mostrarDatosLegajoIndividual($datosFormateados);
                 break;
-                
+
             case 'multiples_legajos':
                 $this->mostrarResumenMultiplesLegajos($datosFormateados);
                 break;
-                
+
             case 'sin_datos':
                 $this->warn("⚠️  {$datosFormateados['mensaje']}");
                 break;
@@ -87,8 +87,8 @@ class GenerarSicossCommand extends Command
     }
 
     /**
-     * Muestra los datos de un legajo individual
-     * 
+     * Muestra los datos de un legajo individual.
+     *
      * @param array $datos
      */
     private function mostrarDatosLegajoIndividual(array $datos): void
@@ -108,7 +108,7 @@ class GenerarSicossCommand extends Command
         // Importes principales
         $this->info('💰 Importes SICOSS:');
         $this->line("   • BRUTO:        $ {$importes['importeimponible_9']}");
-        
+
         // Solo mostrar imponibles que no sean 0
         $imponiblesRelevantes = [
             'IMPONIBLE 1' => $importes['IMPORTE_IMPON'],
@@ -123,13 +123,13 @@ class GenerarSicossCommand extends Command
         ];
 
         foreach ($imponiblesRelevantes as $concepto => $valor) {
-                $this->line("   • {$concepto}: $ {$valor}");
+            $this->line("   • {$concepto}: $ {$valor}");
         }
     }
 
     /**
-     * Muestra el resumen de múltiples legajos
-     * 
+     * Muestra el resumen de múltiples legajos.
+     *
      * @param array $datos
      */
     private function mostrarResumenMultiplesLegajos(array $datos): void
@@ -144,15 +144,15 @@ class GenerarSicossCommand extends Command
         $this->newLine();
 
         // Mostrar algunos legajos como muestra (máximo 10)
-        $legajosMuestra = array_slice($datos['legajos'], 0, 10);
-        
+        $legajosMuestra = \array_slice($datos['legajos'], 0, 10);
+
         $this->info('👥 Legajos Procesados (muestra):');
         foreach ($legajosMuestra as $legajo) {
             $this->line("   • {$legajo['legajo']} - {$legajo['apellido_nombres']} - Bruto: $ {$legajo['bruto']}");
         }
 
-        if (count($datos['legajos']) > 10) {
-            $restantes = count($datos['legajos']) - 10;
+        if (\count($datos['legajos']) > 10) {
+            $restantes = \count($datos['legajos']) - 10;
             $this->line("   ... y {$restantes} legajos más");
         }
     }

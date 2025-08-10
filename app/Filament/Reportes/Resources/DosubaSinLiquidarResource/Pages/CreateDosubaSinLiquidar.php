@@ -2,20 +2,19 @@
 
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
 
-use App\Models\Mapuche\Dh22;
-use App\Models\Mapuche\Dh21h;
-use Illuminate\Support\Facades\Log;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
+use App\Models\Reportes\DosubaSinLiquidarModel;
 use App\Services\Mapuche\DosubaReportService;
 use App\Services\Mapuche\PeriodoFiscalService;
-use App\Models\Reportes\DosubaSinLiquidarModel;
-use App\Filament\Reportes\Resources\DosubaSinLiquidarResource;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Log;
 
 class CreateDosubaSinLiquidar extends CreateRecord
 {
     public ?array $data = [
         'liquidacion_base' => null,
     ];
+
     protected static string $resource = DosubaSinLiquidarResource::class;
 
     public function mount(): void

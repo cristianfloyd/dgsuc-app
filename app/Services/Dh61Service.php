@@ -20,6 +20,7 @@ class Dh61Service
      * @param Dh11 $category La categoría a restaurar.
      * @param int $year El año del período histórico.
      * @param int $month El mes del período histórico.
+     *
      * @return bool Verdadero si la restauración fue exitosa, falso en caso contrario.
      */
     public function restoreCategoryFromHistory(Dh11 $category, int $year, int $month): bool
@@ -41,6 +42,7 @@ class Dh61Service
      *
      * @param int $year El año del período a restaurar.
      * @param int $month El mes del período a restaurar.
+     *
      * @return array Un array con el estado de la operación y un mensaje informativo.
      *               Ejemplo: ['success' => true, 'message' => 'Categorías restauradas con éxito']
      */
@@ -53,7 +55,7 @@ class Dh61Service
         if (!isset($groupedRecords[$year][$month])) {
             return [
                 'success' => false,
-                'message' => "No se encontraron registros para el período {$year}-{$month}"
+                'message' => "No se encontraron registros para el período {$year}-{$month}",
             ];
         }
 
@@ -83,12 +85,12 @@ class Dh61Service
             $message = "Se restauraron {$restoredCount} categorías con éxito.";
         } else {
             $message = "Se restauraron {$restoredCount} categorías. ";
-            $message .= "Falló la restauración de las siguientes categorías: " . implode(', ', $failedCategories);
+            $message .= 'Falló la restauración de las siguientes categorías: ' . implode(', ', $failedCategories);
         }
 
         return [
-            'success' => count($failedCategories) === 0, // Si no hay categorías fallidas, la operación es exitosa.
-            'message' => $message
+            'success' => \count($failedCategories) === 0, // Si no hay categorías fallidas, la operación es exitosa.
+            'message' => $message,
         ];
     }
 }

@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Log;
 
 class Dh22Service
 {
-
-
     /**
-     * Obtener liquidaciones definitivas con período fiscal formateado y filtros opcionales.     *
+     * Obtener liquidaciones definitivas con período fiscal formateado y filtros opcionales.     *.
+     *
      * @param int|null $year
      * @param int|null $month
+     *
      * @return Collection
      */
     public function getLiquidacionesDefinitivas(?int $year = null, ?int $month = null): Collection
@@ -24,7 +24,7 @@ class Dh22Service
                 ->select([
                     'nro_liqui',
                     'desc_liqui',
-                    DB::raw("CONCAT(per_liano, LPAD(per_limes, 2, '0')) as periodo_fiscal")
+                    DB::raw("CONCAT(per_liano, LPAD(per_limes, 2, '0')) as periodo_fiscal"),
                 ])
                 ->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
 
@@ -37,8 +37,8 @@ class Dh22Service
             }
             dd($query->toSql());
             return $query->orderBy('per_liano', 'desc')
-                         ->orderBy('per_limes', 'desc')
-                         ->get();
+                ->orderBy('per_limes', 'desc')
+                ->get();
         } catch (\Exception $e) {
             Log::error('Error getting definitive settlements: ' . $e->getMessage());
             return collect();
@@ -48,13 +48,13 @@ class Dh22Service
     public static function getLiquidacionesParaSelect(): array
     {
         return Dh22::query()
-        ->definitiva()
-        ->get()
-        ->mapWithKeys(function ($liquidacion) {
-            return [
-                $liquidacion->nro_liqui => $liquidacion->desc_liqui
-            ];
-        })
-        ->toArray();
+            ->definitiva()
+            ->get()
+            ->mapWithKeys(function ($liquidacion) {
+                return [
+                    $liquidacion->nro_liqui => $liquidacion->desc_liqui,
+                ];
+            })
+            ->toArray();
     }
 }

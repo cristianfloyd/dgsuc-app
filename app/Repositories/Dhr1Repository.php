@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Models\Mapuche\Dhr1;
-use App\Data\DataObjects\Dhr1Data;
-use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\Repositories\Dhr1RepositoryInterface;
+use App\Data\DataObjects\Dhr1Data;
+use App\Models\Mapuche\Dhr1;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dhr1Repository implements Dhr1RepositoryInterface
 {
     protected $property;
 
-  public function __construct($property){}
+    public function __construct($property)
+    {
+    }
 
-  public function find(int $nro_liqui): ?Dhr1
+    public function find(int $nro_liqui): ?Dhr1
     {
         return $this->model->find($nro_liqui);
     }

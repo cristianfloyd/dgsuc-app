@@ -12,7 +12,7 @@ class EmbargoTableService
     use MapucheConnectionTrait;
 
     /**
-     * Verifica y crea la tabla si no existe
+     * Verifica y crea la tabla si no existe.
      *
      * @return bool
      */
@@ -31,7 +31,7 @@ class EmbargoTableService
     }
 
     /**
-     * Verifica si la tabla existe
+     * Verifica si la tabla existe.
      *
      * @return bool
      */
@@ -42,14 +42,14 @@ class EmbargoTableService
     }
 
     /**
-     * Crea la tabla con su estructura
+     * Crea la tabla con su estructura.
      *
      * @return void
      */
     private function createTable(): void
     {
         Schema::connection($this->getConnectionName())
-            ->create('suc.embargo_proceso_results', function (Blueprint $table) {
+            ->create('suc.embargo_proceso_results', function (Blueprint $table): void {
                 $table->id();
                 $table->integer('nro_liqui');
                 $table->string('tipo_noved', 1)->nullable();
@@ -59,10 +59,11 @@ class EmbargoTableService
                 $table->integer('nro_legaj');
                 $table->decimal('remunerativo', 15, 2);
                 $table->decimal('no_remunerativo', 15, 2);
-                $table->decimal('total', 15, 2);
+                $table->decimal('total', 20, 2);
                 $table->integer('codn_conce');
                 $table->string('tipo_foran', 1)->nullable();
                 $table->string('clas_noved', 1)->nullable();
+                $table->json('nros_liqui_json')->nullable();
                 $table->index(['nro_legaj', 'tipo_embargo']);
             });
     }

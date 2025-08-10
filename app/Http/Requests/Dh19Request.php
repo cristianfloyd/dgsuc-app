@@ -14,7 +14,6 @@ class Dh19Request extends FormRequest
         return true;
     }
 
-
     /**
      * Reglas de validación para la solicitud Dh19.
      *

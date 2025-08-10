@@ -3,11 +3,11 @@
 namespace App\Services\Reportes;
 
 use App\Enums\BloqueosEstadoEnum;
-use Illuminate\Support\Collection;
 use App\Models\Reportes\BloqueosDataModel;
+use Illuminate\Support\Collection;
 
 /**
- * Servicio para validación de bloqueos
+ * Servicio para validación de bloqueos.
  *
  * Este servicio encapsula toda la lógica relacionada con la validación
  * de registros de bloqueos, tanto individuales como en lote.
@@ -15,9 +15,10 @@ use App\Models\Reportes\BloqueosDataModel;
 class BloqueosValidationService
 {
     /**
-     * Valida un registro de bloqueo individual
+     * Valida un registro de bloqueo individual.
      *
      * @param BloqueosDataModel $record
+     *
      * @return array Resultado de la validación con estado y mensaje
      */
     public function validarRegistro(BloqueosDataModel $record): array
@@ -45,7 +46,7 @@ class BloqueosValidationService
                 'mensaje' => $mensaje,
                 'color' => $color,
                 'estado' => $record->estado,
-                'success' => $record->estado === BloqueosEstadoEnum::VALIDADO
+                'success' => $record->estado === BloqueosEstadoEnum::VALIDADO,
             ];
         } catch (\Exception $e) {
             // Capturamos cualquier excepción no manejada
@@ -53,15 +54,16 @@ class BloqueosValidationService
                 'mensaje' => 'Error inesperado: ' . $e->getMessage(),
                 'color' => 'danger',
                 'estado' => null,
-                'success' => false
+                'success' => false,
             ];
         }
     }
 
     /**
-     * Valida múltiples registros de bloqueo
+     * Valida múltiples registros de bloqueo.
      *
      * @param Collection $records
+     *
      * @return array Estadísticas del proceso de validación
      */
     public function validarMultiplesRegistros(Collection $records): array
@@ -75,7 +77,7 @@ class BloqueosValidationService
             'licenciaYaBloqueada' => 0,
             'fechasCoincidentes' => 0,
             'conError' => 0,
-            'errores' => []
+            'errores' => [],
         ];
 
         try {
@@ -86,26 +88,26 @@ class BloqueosValidationService
                     // Actualizamos las estadísticas según el estado
                     if ($record->estado === BloqueosEstadoEnum::VALIDADO) {
                         $estadisticas['validados']++;
-                    } else if ($record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO) {
+                    } elseif ($record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO) {
                         $estadisticas['faltaCargoAsociado']++;
-                    } else if ($record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE) {
+                    } elseif ($record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE) {
                         $estadisticas['fechaCargoNoCoincide']++;
-                    } else if ($record->estado === BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA) {
+                    } elseif ($record->estado === BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA) {
                         $estadisticas['licenciaYaBloqueada']++;
-                    } else if ($record->estado === BloqueosEstadoEnum::FECHAS_COINCIDENTES) {
+                    } elseif ($record->estado === BloqueosEstadoEnum::FECHAS_COINCIDENTES) {
                         $estadisticas['fechasCoincidentes']++;
                     } else {
                         $estadisticas['conError']++;
                         $estadisticas['errores'][] = [
                             'id' => $record->id,
-                            'mensaje' => $record->mensaje_error ?? 'Error desconocido'
+                            'mensaje' => $record->mensaje_error ?? 'Error desconocido',
                         ];
                     }
                 } catch (\Exception $e) {
                     $estadisticas['conError']++;
                     $estadisticas['errores'][] = [
                         'id' => $record->id,
-                        'mensaje' => $e->getMessage()
+                        'mensaje' => $e->getMessage(),
                     ];
                 }
             }
@@ -119,9 +121,10 @@ class BloqueosValidationService
     }
 
     /**
-     * Genera un mensaje de resumen para mostrar al usuario
+     * Genera un mensaje de resumen para mostrar al usuario.
      *
      * @param array $estadisticas
+     *
      * @return string
      */
     public function generarMensajeResumen(array $estadisticas): string

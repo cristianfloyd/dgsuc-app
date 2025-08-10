@@ -2,26 +2,27 @@
 
 namespace App\Filament\Reportes\Resources;
 
+use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
+use App\Models\Reportes\RepOrdenPagoModel;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action as ActionTable;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Reportes\RepOrdenPagoModel;
-use Filament\Tables\Actions\Action as ActionTable;
-use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
-use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages\ListReportes;
+use Livewire\Attributes\On;
 
 class OrdenDePagoResource extends Resource
 {
     protected static ?string $model = RepOrdenPagoModel::class;
+
     protected static ?string $modelLabel = 'Orden de Pago';
+
     protected static ?string $navigationLabel = 'Orden de Pago';
+
     protected static ?string $navigationGroup = 'Informes';
 
     public static function form(Form $form): Form
@@ -54,25 +55,24 @@ class OrdenDePagoResource extends Resource
                 TextColumn::make('total')->money('ARS'),
             ])
             ->filters([
-                //
+
             ])
             ->actions([])
             ->bulkActions([
-                //
+
             ])
             ->emptyStateIcon('heroicon-o-document-text')
             ->emptyStateHeading('No hay reportes generados')
             ->emptyStateDescription(new \Illuminate\Support\HtmlString(
-                view('filament.reportes.orden-pago-empty-state')->render()
+                view('filament.reportes.orden-pago-empty-state')->render(),
             ))
             ->emptyStateActions([
                 ActionTable::make('generarReporte')
-                ->label('Generar Reporte')
-                ->icon('heroicon-o-document-currency-dollar')
-                ->url('/reportes/orden-de-pagos/crear')
-                ->color('success'),
-            ])
-        ;
+                    ->label('Generar Reporte')
+                    ->icon('heroicon-o-document-currency-dollar')
+                    ->url('/reportes/orden-de-pagos/crear')
+                    ->color('success'),
+            ]);
     }
 
     public static function getPages(): array
@@ -82,7 +82,6 @@ class OrdenDePagoResource extends Resource
             'reporte' => Pages\ReporteOrdenPago::route('/crear'),
         ];
     }
-
 
     public function generarReporte(): bool
     {
@@ -100,7 +99,7 @@ class OrdenDePagoResource extends Resource
     public function getLiquidacionesSeleccionadas()
     {
         $data = session('idsLiquiSelected', []);
-        Log::debug("idsLiquiSelected", ['data' => $data]);
+        Log::debug('idsLiquiSelected', ['data' => $data]);
 
         return $data;
     }
@@ -115,12 +114,11 @@ class OrdenDePagoResource extends Resource
             ->orderBy('nro_liqui', 'asc');
     }
 
-
-
     /**
      * Actualiza las liquidaciones seleccionadas en la sesión.
      *
      * @param array $liquidaciones Las liquidaciones seleccionadas.
+     *
      * @return void
      */
     #[On('liquidaciones-seleccionadas')]
@@ -129,6 +127,6 @@ class OrdenDePagoResource extends Resource
         // Almacena las liquidaciones seleccionadas en la sesión
         session(['idsLiquiSelected' => $liquidaciones]);
         // Registra información de depuración sobre las liquidaciones seleccionadas
-        Log::debug("isdLiquiSelected", ['state' => $liquidaciones]);
+        Log::debug('isdLiquiSelected', ['state' => $liquidaciones]);
     }
 }

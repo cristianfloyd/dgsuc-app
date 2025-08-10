@@ -2,9 +2,8 @@
 
 namespace App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
 
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Liquidaciones\Resources\Dh61Resource;
+use Filament\Resources\Pages\ListRecords;
 
 class ListDh61s extends ListRecords
 {
@@ -13,7 +12,7 @@ class ListDh61s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            //
+
         ];
     }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources\MapucheGrupoResource\RelationManagers;
 
-use Filament\Forms;
-use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class LegajosRelationManager extends RelationManager
 {
@@ -77,23 +76,23 @@ class LegajosRelationManager extends RelationManager
                         });
                     })
                     ->formatStateUsing(
-                        fn($state) =>
+                        fn ($state) =>
                         // Formatear el CUIL con guiones (XX-XXXXXXXX-X)
-                        preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $state)
+                        preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $state),
                     ),
             ])
             ->filters([
-                //
+
             ])
             ->headerActions([
                 Action::make('administrar')
                     ->label('Administrar Legajos')
                     ->icon('heroicon-m-users')
                     ->url(
-                        fn(RelationManager $livewire): string =>
+                        fn (RelationManager $livewire): string =>
                         route('filament.dashboard.resources.mapuche-grupos.manage-legajos', [
                             'record' => $livewire->getOwnerRecord(),
-                        ])
+                        ]),
                     ),
             ])
             ->actions([

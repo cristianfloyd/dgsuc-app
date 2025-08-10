@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /*
 * (D) Ganancias: Acum. de Empleados
@@ -16,43 +16,50 @@ class Dh41 extends Model
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla en la base de datos
-     * @var string
-     */
-    protected $table = 'mapuche.dh41';
-
-    /**
-     * Tipo de la clave primaria
-     * @var string
-     */
-    protected $keyType = 'integer';
-
-    /**
-     * Clave primaria de la tabla
-     * @var string
-     */
-    protected $primaryKey = 'nro_legaj';
-
-    /**
-     * Indica si la clave primaria es autoincremental
+     * Indica si la clave primaria es autoincremental.
+     *
      * @var bool
      */
     public $incrementing = false;
 
     /**
-     * Indica que el modelo no usa timestamps
+     * Indica que el modelo no usa timestamps.
+     *
      * @var bool
      */
     public $timestamps = false;
 
     /**
-     * Define las claves primarias compuestas
+     * Nombre de la tabla en la base de datos.
+     *
+     * @var string
+     */
+    protected $table = 'mapuche.dh41';
+
+    /**
+     * Tipo de la clave primaria.
+     *
+     * @var string
+     */
+    protected $keyType = 'integer';
+
+    /**
+     * Clave primaria de la tabla.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'nro_legaj';
+
+    /**
+     * Define las claves primarias compuestas.
+     *
      * @var array
      */
     protected $compositePrimaryKey = ['nro_legaj', 'per_anoga', 'per_mesga'];
 
     /**
-     * Atributos que son asignables en masa
+     * Atributos que son asignables en masa.
+     *
      * @var array
      */
     protected $fillable = [
@@ -184,12 +191,12 @@ class Dh41 extends Model
         'imp_gtoeduc_otact',
         'imp_gtoeduc_acum',
         'imp_locatario',
-        'imp_locador'
+        'imp_locador',
     ];
 
     /**
      * Sobreescribe el método para obtener la clave primaria
-     * para manejar claves primarias compuestas
+     * para manejar claves primarias compuestas.
      *
      * @return array
      */
@@ -199,7 +206,7 @@ class Dh41 extends Model
     }
 
     /**
-     * Relación con la tabla dh22
+     * Relación con la tabla dh22.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

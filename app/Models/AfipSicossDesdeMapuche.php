@@ -2,16 +2,13 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Http\Request;
-use InvalidArgumentException;
-use Illuminate\Support\Facades\DB;
 use App\Services\DataMapperService;
-use Illuminate\Support\Facades\Log;
 use App\Services\FileProcessorService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Modelo para representar los datos de AFIP SICOSS desde Mapuche.
@@ -24,15 +21,18 @@ class AfipSicossDesdeMapuche extends Model
     use MapucheConnectionTrait;
 
 
-    const TABLE_NAME = 'suc.afip_mapuche_sicoss';
+    public const TABLE_NAME = 'suc.afip_mapuche_sicoss';
+
+    // Asegurar que la clave primaria no es autoincremental
+    public $incrementing = false;
+
+    // No necesitas usar timestamps
+    public $timestamps = false;
 
     protected $table = self::TABLE_NAME;
 
     // Definir la clave primaria compuesta entre el perido_fiscal y el cuil
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
-    // Asegurar que la clave primaria no es autoincremental
-    public $incrementing = false;
-
 
     // Agregar las columnas que pueden ser asignadas masivamente
     protected $fillable = [
@@ -99,10 +99,8 @@ class AfipSicossDesdeMapuche extends Model
         'remimp11',
     ];
 
-    // No necesitas usar timestamps
-    public $timestamps = false;
-
     protected $contador = 0;
+
     protected $columnWidths = [
         // Anchos de columna para cada campo
         6,
@@ -165,11 +163,13 @@ class AfipSicossDesdeMapuche extends Model
         1,
         12,
         12,
-        12
+        12,
     ];
+
     protected $periodoFiscal = 202312;
 
     private FileProcessorService $fileProcessor;
+
     private DataMapperService $dataMapper;
 
     public function __construct(FileProcessorService $fileProcessor, DataMapperService $dataMapper)
@@ -187,8 +187,10 @@ class AfipSicossDesdeMapuche extends Model
      * Procesa una tabla de líneas extraídas y devuelve una tabla procesada.
      *
      * @param array $lineasExtraidas Un array de líneas extraídas de una tabla de una sola columna y ancho fijo.
+     *
+     * @throws \InvalidArgumentException Si los parámetros de entrada no son válidos.
+     *
      * @return array Un array de líneas procesadas.
-     * @throws InvalidArgumentException Si los parámetros de entrada no son válidos.
      */
     public function procesarTabla(array $lineasExtraidas, int $periodoFiscal): array
     {
@@ -197,7 +199,7 @@ class AfipSicossDesdeMapuche extends Model
         }
         // Validación de entrada
         if (empty($lineasExtraidas)) {
-            throw new InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
+            throw new \InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
         }
 
         // Inicialización de la tabla procesada
@@ -213,26 +215,27 @@ class AfipSicossDesdeMapuche extends Model
         return $tablaProcesada;
     }
 
-
     /**
      * Cuenta el número de caracteres en cada línea del archivo y devuelve el valor mínimo y máximo.
      *
      * @param string $filePath La ruta del archivo.
-     * @return array Un array con los valores mínimo y máximo de caracteres por línea.
+     *
      * @throws \Exception Si no se puede abrir el archivo.
+     *
+     * @return array Un array con los valores mínimo y máximo de caracteres por línea.
      */
     public function contarCaracteresPorLinea(string $filePath): array
     {
         // Abrir el archivo en modo lectura
-        $archivo = fopen($filePath, "r");
+        $archivo = fopen($filePath, 'r');
 
         // Verificar que el archivo se abrió correctamente
         if (!$archivo) {
-            throw new Exception("No se pudo abrir el archivo");
+            throw new \Exception('No se pudo abrir el archivo');
         }
 
-        $minCaracteres = PHP_INT_MAX;
-        $maxCaracteres = PHP_INT_MIN;
+        $minCaracteres = \PHP_INT_MAX;
+        $maxCaracteres = \PHP_INT_MIN;
         $i = 0;
         $kmin = 0;
         $kmax = 0;
@@ -258,17 +261,16 @@ class AfipSicossDesdeMapuche extends Model
         // Devolver los valores mínimo y máximo
         return [
             $kmin => $minCaracteres,
-            $kmax => $maxCaracteres
+            $kmax => $maxCaracteres,
         ];
     }
-
-
 
     /**
      * Procesa una línea de datos y devuelve un array con los datos procesados.
      *
      * @param string $line La línea de datos a procesar.
      * @param array $columnWidths Los anchos de columna para cada campo.
+     *
      * @return array Un array con los datos procesados.
      */
     public function procesar(string $line, array $columnWidths): array
@@ -280,21 +282,20 @@ class AfipSicossDesdeMapuche extends Model
         return $lineaMapeada;
     }
 
-
-
     /**
      * Procesa una línea del archivo AFIP Mapuche SICOSS.
      *
      * Esta función recibe una línea del archivo y los anchos de las columnas, y devuelve los datos procesados.
      *
      * @param Request $line La solicitud HTTP que contiene la línea y los anchos de las columnas.
+     *
      * @return [] Los datos procesados en formato Array.
      */
     public function processLine(string $line, array $columnWidths): array
     {
         // Validacion de entrada.
-        if (is_null($line) || is_null($columnWidths) || !is_array($columnWidths)) {
-            throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+        if ($line === null || $columnWidths === null || !\is_array($columnWidths)) {
+            throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
         $datosProcesados = $this->procesarlineainterna($line, $columnWidths);
@@ -302,6 +303,36 @@ class AfipSicossDesdeMapuche extends Model
         return $datosProcesados;
     }
 
+    /**
+     * Procesa los datos de la tabla afip_importacion_cruda y los inserta en la tabla afip_sicoss_desde_mapuche.
+     * Mapea los datos procesados a los campos del modelo AfipSicossDesdeMapucheModel y los guarda en la base de datos.
+     * Establece el periodo_fiscal como una constante '202405' para todos los registros.
+     *
+     * Este método crea una nueva instancia de la clase afipImportacionCrudaModel y recorre su tabla.
+     *
+     * @return void
+     */
+    public function processTable(): void
+    {
+        $AfipimportacionCruda = new afipImportacionCrudaModel();
+        $this->iterarTabla($AfipimportacionCruda);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPeriodoFiscal()
+    {
+        return $this->periodoFiscal;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
 
     /**
      * Procesa una línea interna de un archivo de datos.
@@ -310,13 +341,14 @@ class AfipSicossDesdeMapuche extends Model
      *
      * @param string $line La línea de texto a procesar.
      * @param int[] $columnWidths Un arreglo con los anchos de cada columna.
+     *
      * @return string[] Un Array con los valores de cada columna procesados.
      */
     private function procesarlineainterna($line, $columnWidths): array
     {
         //Validad la entrada
         if (empty($line) || empty($columnWidths)) {
-            throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+            throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
         // Calcular el ancho total de la línea
@@ -327,7 +359,7 @@ class AfipSicossDesdeMapuche extends Model
 
         // Validar que el ancho de la línea coincida con la suma de los anchos de columna
         if ($anchoLinea !== $sumaAnchoColumnas) {
-            throw new InvalidArgumentException('linea: ' . $this->contador  . ' El ancho de línea ' . $anchoLinea . ' no coincide con la suma de los anchos de columna ' . $sumaAnchoColumnas);
+            throw new \InvalidArgumentException('linea: ' . $this->contador . ' El ancho de línea ' . $anchoLinea . ' no coincide con la suma de los anchos de columna ' . $sumaAnchoColumnas);
         }
 
 
@@ -346,7 +378,7 @@ class AfipSicossDesdeMapuche extends Model
             $endPosition = $currentPosition + $columnWidth;
             if ($firstIteration) {
                 $firstIteration = false; // Marcar que la primera iteración ha pasado
-                $datosProcesados[$index] = $this->periodoFiscal; //
+                $datosProcesados[$index] = $this->periodoFiscal;
                 continue; // Saltar a la siguiente iteración
             }
             $startPosition = $currentPosition; // el primer valor de $starPosition es 0
@@ -366,6 +398,7 @@ class AfipSicossDesdeMapuche extends Model
      * Calcula el ancho total de una línea de texto.
      *
      * @param string $line La línea de texto.
+     *
      * @return int El ancho total de la línea.
      */
     private function calcularAnchoLinea(string $line): int
@@ -377,7 +410,6 @@ class AfipSicossDesdeMapuche extends Model
 
 
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
-
 
     private function importFromFile($filePath, $periodoFiscal): bool
     {
@@ -397,30 +429,14 @@ class AfipSicossDesdeMapuche extends Model
         }, $lineasExtraidas);
     }
 
-
-
-    /**
-     * Procesa los datos de la tabla afip_importacion_cruda y los inserta en la tabla afip_sicoss_desde_mapuche.
-     * Mapea los datos procesados a los campos del modelo AfipSicossDesdeMapucheModel y los guarda en la base de datos.
-     * Establece el periodo_fiscal como una constante '202405' para todos los registros.
-     *
-     * Este método crea una nueva instancia de la clase afipImportacionCrudaModel y recorre su tabla.
-     *
-     * @return void
-     */
-    public function processTable(): void
-    {
-        $AfipimportacionCruda = new afipImportacionCrudaModel();
-        $this->iterarTabla($AfipimportacionCruda);
-    }
-
     /**
      * Itera sobre una tabla de importación cruda de AFIP y procesa cada línea.
      *
      * @param afipImportacionCrudaModel $request El modelo de importación cruda de AFIP.
+     *
      * @return void
      */
-    private function iterartabla(afipImportacionCrudaModel $request)
+    private function iterartabla(afipImportacionCrudaModel $request): void
     {
         $AfipimportacionCruda = $request;
         foreach ($AfipimportacionCruda->all() as $lineaImportadaCruda) {
@@ -432,6 +448,7 @@ class AfipSicossDesdeMapuche extends Model
      * Procesa una línea de importación cruda y crea un nuevo registro en la tabla afip_sicoss_desde_mapuche.
      *
      * @param string $lineaImportacionCruda La línea de importación cruda a procesar.
+     *
      * @return void
      */
     private function processRow($lineaImportadaCruda): void
@@ -498,15 +515,11 @@ class AfipSicossDesdeMapuche extends Model
             1,
             12,
             12,
-            12
+            12,
         ];
         $datosProcessados = $this->processLine($lineaImportadaCruda, $columnWidths);
         $this->dataMapper->mapDataToModel($datosProcessados);
     }
-
-
-
-
 
     /**
      * Inserta datos en lotes en la tabla 'afip_sicoss_desde_mapuche'.
@@ -517,6 +530,7 @@ class AfipSicossDesdeMapuche extends Model
      *
      * @param array $mappedData Los datos mapeados a insertar.
      * @param int $chunkSize El tamaño de los chunks a insertar (predeterminado: 1000).
+     *
      * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
      */
     private function insertBulkData(array $mappedData, int $chunkSize = 1000): bool
@@ -537,7 +551,7 @@ class AfipSicossDesdeMapuche extends Model
 
             try {
                 DB::connection($conexion)->table($this->getTable())->insert($chunk);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Registro de depuración en caso de error
                 Log::error('Error al insertar los datos: ' . $e->getMessage());
             }
@@ -547,23 +561,5 @@ class AfipSicossDesdeMapuche extends Model
         // Confirmar la transaccion en la conexion especificada.
         DB::connection($conexion)->commit();
         return true;
-    }
-
-
-
-    /**
-     * @return mixed
-     */
-    public function getPeriodoFiscal()
-    {
-        return $this->periodoFiscal;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTable()
-    {
-        return $this->table;
     }
 }

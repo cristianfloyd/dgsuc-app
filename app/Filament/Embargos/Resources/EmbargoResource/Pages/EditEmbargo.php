@@ -2,9 +2,9 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoResource\Pages;
 
+use App\Filament\Embargos\Resources\EmbargoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Embargos\Resources\EmbargoResource;
 
 class EditEmbargo extends EditRecord
 {

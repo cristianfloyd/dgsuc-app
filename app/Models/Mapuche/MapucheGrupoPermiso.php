@@ -10,26 +10,32 @@ class MapucheGrupoPermiso extends Model
 {
     use MapucheConnectionTrait;
 
-    protected $table = 'grupo_permisos';
     public $timestamps = false;
-    protected $primaryKey = null;
+
     public $incrementing = false;
+
+    protected $table = 'grupo_permisos';
+
+    protected $primaryKey;
 
     protected $fillable = [
         'id_grupo',
         'usuario',
-        'tipo_permiso'
-    ];
-
-    protected $casts = [
-        'id_grupo' => 'integer'
+        'tipo_permiso',
     ];
 
     /**
-     * El grupo al que pertenece este permiso
+     * El grupo al que pertenece este permiso.
      */
     public function grupo(): BelongsTo
     {
         return $this->belongsTo(MapucheGrupo::class, 'id_grupo', 'id_grupo');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'id_grupo' => 'integer',
+        ];
     }
 }

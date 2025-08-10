@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Strategies;
+
 use App\Contracts\CuilOperationStrategy;
 use App\Contracts\CuilRepositoryInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -8,9 +9,10 @@ use App\Contracts\WorkflowServiceInterface;
 class LoadCuilsNotInAfipStrategy implements CuilOperationStrategy
 {
     private $repository;
-    private $workflowService;
-    private $processLog;
 
+    private $workflowService;
+
+    private $processLog;
 
     public function __construct(CuilRepositoryInterface $repository, WorkflowServiceInterface $workflowService, $processLog)
     {
@@ -48,7 +50,7 @@ class LoadCuilsNotInAfipStrategy implements CuilOperationStrategy
                 'showCuilsTable' => true,
                 'cuilsNotInAfipLoaded' => true,
                 'crearTablaTemp' => true,
-                'showCreateTempTableButton' => true
+                'showCreateTempTableButton' => true,
             ];
         }
 

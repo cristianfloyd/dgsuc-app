@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\TablaTempCuils;
+use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
 
 class TempTableService extends DatabaseService
@@ -31,6 +31,7 @@ class TempTableService extends DatabaseService
      * Si ocurre alguna excepción durante el proceso, se realiza un rollback de la transacción y se registra el error en el log.
      *
      * @param array $cuils Array de CUILs a insertar en la tabla temporal.
+     *
      * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
      */
     public function populateTempTable(array $cuils): bool
@@ -61,7 +62,6 @@ class TempTableService extends DatabaseService
             DB::connection($this->getConnectionName())->commit();
             Log::info("Datos insertados correctamente en la tabla {$tableName}.");
             return true;
-
         } catch (\Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error("Error al insertar datos en la tabla {$this->model->getFullTableName()}: " . $e->getMessage());
@@ -86,7 +86,6 @@ class TempTableService extends DatabaseService
 
             Log::info("Tabla {$tableName} limpiada correctamente.");
             return true;
-
         } catch (\Exception $e) {
             // Manejar la excepción aquí
             Log::error("Error al limpiar la tabla {$this->model->getFullTableName()}: " . $e->getMessage());

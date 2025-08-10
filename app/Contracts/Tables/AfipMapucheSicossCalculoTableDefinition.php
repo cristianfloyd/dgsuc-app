@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Contracts\Tables;
 
-use App\Contracts\Tables\AbstractTableDefinitionInterface;
-
 class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinitionInterface
 {
     public function getTableName(): string
@@ -105,7 +103,7 @@ class AfipMapucheSicossCalculoTableDefinition implements AbstractTableDefinition
             'primary' => ['id'],
             'idx_cuil_unique' => ['cuil'],
             'idx_periodo_fiscal_cuil' => ['periodo_fiscal', 'cuil'],
-            'idx_uacad_caracter' => ['codc_uacad', 'caracter']
+            'idx_uacad_caracter' => ['codc_uacad', 'caracter'],
         ];
     }
 }

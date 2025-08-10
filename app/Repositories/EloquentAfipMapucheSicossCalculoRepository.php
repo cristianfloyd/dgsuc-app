@@ -4,31 +4,23 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\DynamicConnectionTrait;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
-use App\Models\AfipMapucheSicossCalculo;
 use App\Data\AfipMapucheSicossCalculoData;
-use App\Services\DatabaseConnectionService;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\AfipMapucheSicossCalculo;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
+use App\Services\DatabaseConnectionService;
+use App\Traits\DynamicConnectionTrait;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCalculoRepository
 {
     use DynamicConnectionTrait;
 
     public function __construct(
-        private readonly AfipMapucheSicossCalculo $model
-    ) {}
-
-    /**
-     * Obtiene la conexión actual para las operaciones del repositorio
-     */
-    private function getConnection()
-    {
-        return $this->getConnectionFromTrait();
+        private readonly AfipMapucheSicossCalculo $model,
+    ) {
     }
 
     public function find(string $cuil): ?AfipMapucheSicossCalculoData
@@ -57,6 +49,7 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
     {
         return $this->model->paginate($perPage);
     }
+
     public function truncate(): void
     {
         try {
@@ -93,7 +86,7 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
             // Registrar éxito
             Log::info('Tabla truncada exitosamente', [
                 'tabla' => $this->model->getTable(),
-                'conexión' => $connectionName
+                'conexión' => $connectionName,
             ]);
         } catch (\Exception $e) {
             // Registrar el error detallado
@@ -102,8 +95,8 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
                 'conexión_en_sesión' => $sessionConnection ?? 'desconocida',
                 'conexión_predeterminada' => $defaultConnection ?? 'desconocida',
                 'tabla' => $this->model->getTable(),
-                'excepción' => get_class($e),
-                'traza' => $e->getTraceAsString()
+                'excepción' => $e::class,
+                'traza' => $e->getTraceAsString(),
             ]);
 
             // Dump del error para visualización en la interfaz (si está en modo debug)
@@ -122,8 +115,16 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
                 '. Conexión utilizada: ' . ($connectionName ?? 'desconocida') .
                 '. Conexión en sesión: ' . ($sessionConnection ?? 'desconocida'),
                 0,
-                $e
+                $e,
             );
         }
+    }
+
+    /**
+     * Obtiene la conexión actual para las operaciones del repositorio.
+     */
+    private function getConnection()
+    {
+        return $this->getConnectionFromTrait();
     }
 }

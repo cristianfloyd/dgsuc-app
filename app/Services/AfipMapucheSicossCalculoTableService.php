@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Services\Abstract\AbstractTableService;
 use App\Contracts\Tables\AfipMapucheSicossCalculoTableDefinition;
+use App\Services\Abstract\AbstractTableService;
 
 class AfipMapucheSicossCalculoTableService extends AbstractTableService
 {
     public function __construct(
-        private readonly AfipMapucheSicossCalculoTableDefinition $definition
-    ) {}
+        private readonly AfipMapucheSicossCalculoTableDefinition $definition,
+    ) {
+    }
 
     public function getTableDefinition(): array
     {
@@ -22,6 +23,7 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
     {
         return 'suc.afip_mapuche_sicoss_calculos';
     }
+
     /**
      * @inheritDoc
      */
@@ -35,6 +37,6 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
      */
     protected function getTablePopulationQuery(): string
     {
-        return "";
+        return '';
     }
 }

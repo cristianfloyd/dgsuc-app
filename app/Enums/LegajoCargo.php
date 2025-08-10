@@ -2,21 +2,25 @@
 
 namespace App\Enums;
 
-readonly class LegajoCargo
+readonly class LegajoCargo implements \Stringable
 {
     public function __construct(
         public ?int $legajo = null,
         public ?int $cargo = null,
-    ) {}
+    ) {
+    }
 
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
 
-
-    public function getLegajo(): int
+    public function getLegajo(): int|null
     {
         return $this->legajo;
     }
 
-    public function getCargo(): int
+    public function getCargo(): int|null
     {
         return $this->cargo;
     }
@@ -26,11 +30,6 @@ readonly class LegajoCargo
         return "{$this->legajo}-{$this->cargo}";
     }
 
-    public function __toString(): string
-    {
-        return $this->toString();
-    }
-    
     public static function from(?int $legajo = null, ?int $cargo = null): self
     {
         return new self($legajo, $cargo);
@@ -43,11 +42,11 @@ readonly class LegajoCargo
         }
 
         [$legajo, $cargo] = explode('-', $value);
-        return new self((int)$legajo, (int)$cargo);
+        return new self((int) $legajo, (int) $cargo);
     }
 
     public function isValid(): bool
     {
-        return !is_null($this->legajo) && !is_null($this->cargo);
+        return $this->legajo !== null && $this->cargo !== null;
     }
 }

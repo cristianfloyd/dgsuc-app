@@ -5,7 +5,7 @@ namespace App\Traits\Mapuche;
 trait Dh21hQueries
 {
     /**
-     * Scope para filtrar por número de legajo
+     * Scope para filtrar por número de legajo.
      */
     public function scopeByLegajo($query, int $legajo)
     {
@@ -13,7 +13,7 @@ trait Dh21hQueries
     }
 
     /**
-     * Scope para filtrar por tipo de concepto
+     * Scope para filtrar por tipo de concepto.
      */
     public function scopeByTipoConcepto($query, string $tipo)
     {

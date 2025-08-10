@@ -2,17 +2,18 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use Illuminate\Support\Collection;
 
-class ImportValidationException extends Exception
+class ImportValidationException extends \Exception
 {
     protected Collection $failures;
+
     protected array $rowData;
+
     protected int $rowNumber;
 
     /**
-     * Constructor de la excepción de validación
+     * Constructor de la excepción de validación.
      *
      * @param string $message Mensaje de error
      * @param array $rowData Datos de la fila que causó el error
@@ -25,7 +26,7 @@ class ImportValidationException extends Exception
         array $rowData = [],
         int $rowNumber = 0,
         int $code = 0,
-        \Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
 
@@ -35,7 +36,7 @@ class ImportValidationException extends Exception
     }
 
     /**
-     * Obtiene los datos de la fila que causó el error
+     * Obtiene los datos de la fila que causó el error.
      *
      * @return array
      */
@@ -45,7 +46,7 @@ class ImportValidationException extends Exception
     }
 
     /**
-     * Obtiene el número de fila donde ocurrió el error
+     * Obtiene el número de fila donde ocurrió el error.
      *
      * @return int
      */
@@ -55,10 +56,11 @@ class ImportValidationException extends Exception
     }
 
     /**
-     * Agrega un error de validación
+     * Agrega un error de validación.
      *
      * @param string $attribute
      * @param string $error
+     *
      * @return void
      */
     public function addFailure(string $attribute, string $error): void
@@ -67,12 +69,12 @@ class ImportValidationException extends Exception
             'attribute' => $attribute,
             'error' => $error,
             'row' => $this->rowNumber,
-            'values' => $this->rowData
+            'values' => $this->rowData,
         ]);
     }
 
     /**
-     * Obtiene todos los errores de validación
+     * Obtiene todos los errores de validación.
      *
      * @return Collection
      */
@@ -82,7 +84,7 @@ class ImportValidationException extends Exception
     }
 
     /**
-     * Formatea el error para logging
+     * Formatea el error para logging.
      *
      * @return array
      */
@@ -92,7 +94,7 @@ class ImportValidationException extends Exception
             'message' => $this->getMessage(),
             'row_number' => $this->rowNumber,
             'row_data' => $this->rowData,
-            'failures' => $this->failures->toArray()
+            'failures' => $this->failures->toArray(),
         ];
     }
 }

@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace App\Traits\Mapuche;
 
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
- * Trait para consultas específicas del modelo Dh09
+ * Trait para consultas específicas del modelo Dh09.
  */
 trait Dh09Queries
 {
     /**
-     * Scope para filtrar personal activo
+     * Scope para filtrar personal activo.
      */
     public function scopeActivos(Builder $query): Builder
     {
         return $query->whereNull('fec_defun')
-                    ->whereNull('fecha_jubilacion');
+            ->whereNull('fecha_jubilacion');
     }
 
     /**
-     * Scope para filtrar por unidad académica
+     * Scope para filtrar por unidad académica.
      */
     public function scopePorUnidadAcademica(Builder $query, string $codc_uacad): Builder
     {
@@ -31,7 +31,7 @@ trait Dh09Queries
     }
 
     /**
-     * Scope para filtrar por estado civil
+     * Scope para filtrar por estado civil.
      */
     public function scopePorEstadoCivil(Builder $query, string $codc_estcv): Builder
     {
@@ -39,7 +39,7 @@ trait Dh09Queries
     }
 
     /**
-     * Scope para filtrar personal con embargos
+     * Scope para filtrar personal con embargos.
      */
     public function scopeConEmbargos(Builder $query): Builder
     {
@@ -47,18 +47,18 @@ trait Dh09Queries
     }
 
     /**
-     * Scope para filtrar por rango de fechas de ingreso
+     * Scope para filtrar por rango de fechas de ingreso.
      */
     public function scopePorRangoFechaIngreso(
         Builder $query,
         Carbon $desde,
-        Carbon $hasta
+        Carbon $hasta,
     ): Builder {
         return $query->whereBetween('fec_ingreso', [$desde, $hasta]);
     }
 
     /**
-     * Scope para filtrar jubilados
+     * Scope para filtrar jubilados.
      */
     public function scopeJubilados(Builder $query): Builder
     {
@@ -66,7 +66,7 @@ trait Dh09Queries
     }
 
     /**
-     * Obtener personal por región
+     * Obtener personal por región.
      */
     public function scopePorRegion(Builder $query, string $codc_regio): Builder
     {
@@ -74,7 +74,7 @@ trait Dh09Queries
     }
 
     /**
-     * Scope para filtrar por obra social
+     * Scope para filtrar por obra social.
      */
     public function scopePorObraSocial(Builder $query, string $codc_obsoc): Builder
     {
@@ -82,7 +82,7 @@ trait Dh09Queries
     }
 
     /**
-     * Obtener personal con antigüedad mayor a X años
+     * Obtener personal con antigüedad mayor a X años.
      */
     public function scopeConAntiguedadMayorA(Builder $query, int $años): Builder
     {
@@ -91,7 +91,7 @@ trait Dh09Queries
     }
 
     /**
-     * Scope para filtrar por modalidad de contratación
+     * Scope para filtrar por modalidad de contratación.
      */
     public function scopePorModalidadContratacion(Builder $query, int $codigomodalcontrat): Builder
     {
@@ -99,7 +99,7 @@ trait Dh09Queries
     }
 
     /**
-     * Obtener personal con asignaciones familiares
+     * Obtener personal con asignaciones familiares.
      */
     public function scopeConAsignacionesFamiliares(Builder $query): Builder
     {
@@ -107,29 +107,29 @@ trait Dh09Queries
     }
 
     /**
-     * Métodos de consulta compuestos
+     * Métodos de consulta compuestos.
      */
     public function getActivosPorUnidad(string $codc_uacad): Collection
     {
         return $this->activos()
-                    ->porUnidadAcademica($codc_uacad)
-                    ->get();
+            ->porUnidadAcademica($codc_uacad)
+            ->get();
     }
 
     /**
-     * Obtener personal próximo a jubilarse
+     * Obtener personal próximo a jubilarse.
      */
     public function getProximosJubilarse(int $edadJubilacion = 65): Collection
     {
         $fechaLimite = now()->subYears($edadJubilacion - 1);
 
         return $this->activos()
-                    ->where('fec_altos', '<=', $fechaLimite)
-                    ->get();
+            ->where('fec_altos', '<=', $fechaLimite)
+            ->get();
     }
 
     /**
-     * Obtener estadísticas por unidad académica
+     * Obtener estadísticas por unidad académica.
      */
     public function getEstadisticasPorUnidad(string $codc_uacad): array
     {
@@ -140,7 +140,7 @@ trait Dh09Queries
             'activos' => $query->clone()->activos()->count(),
             'jubilados' => $query->clone()->jubilados()->count(),
             'con_embargos' => $query->clone()->conEmbargos()->count(),
-            'con_asignaciones' => $query->clone()->conAsignacionesFamiliares()->count()
+            'con_asignaciones' => $query->clone()->conAsignacionesFamiliares()->count(),
         ];
     }
 }

@@ -28,7 +28,7 @@ class AportesDiferenciasExport extends BaseSicossExport
             'Aportes INSSJP SICOSS',
             'Total Aportes DH21',
             'Total Aportes SICOSS',
-            'Diferencia'
+            'Diferencia',
         ];
     }
 
@@ -44,7 +44,7 @@ class AportesDiferenciasExport extends BaseSicossExport
             $row->aporteinssjp,
             $row->aportesijpdh21 + $row->aporteinssjpdh21,
             $row->aportesijp + $row->aporteinssjp,
-            $row->diferencia
+            $row->diferencia,
         ];
     }
 }

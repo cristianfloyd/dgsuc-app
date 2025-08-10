@@ -11,6 +11,7 @@ trait CargoQueries
      * Obtiene cargos con relaciones específicas.
      *
      * @param int|null $tipoAsociacion
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function obtenerCargosRelacionados(?string $tipoAsociacion = null)
@@ -27,7 +28,7 @@ trait CargoQueries
     /**
      * Encuentra relaciones entre cargos basadas en criterios específicos.
      *
-     * @param int $nroCargo
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function encontrarRelacionesPorCargo(int $nroCargo)

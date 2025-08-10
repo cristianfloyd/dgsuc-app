@@ -2,33 +2,36 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\Url;
-use Livewire\WithPagination;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class MapucheSicossTable extends Component
 {
-    use WithPagination, MapucheConnectionTrait;
+    use WithPagination;
+    use MapucheConnectionTrait;
 
     #[Url(as: 's')]
     public $search = '';
+
     #[Url(as: 'p')]
     public $perPage = 5;
 
     protected $paginationTheme = 'bootstrap';
 
-    public function mount(){
+    public function mount(): void
+    {
     }
 
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingPerPage()
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -59,7 +62,6 @@ class MapucheSicossTable extends Component
         ]);
     }
 
-
     /**
      * Recupera de forma segura el valor del $attribute especificado del $model.
      *
@@ -69,16 +71,18 @@ class MapucheSicossTable extends Component
      *
      * Si ocurre una excepción al recuperar el valor del attribute, devolverá un
      * mensaje de error con el mensaje de excepción.
+     *
      * @param mixed $model The model instance to retrieve the attribute from.
      * @param string $attribute The name of the attribute to retrieve.
+     *
      * @return mixed The value of the specified attribute, or an error message if an exception occurs.
      */
     private function getAttributeSafely($model, $attribute)
     {
         try {
             $value = $model->getRawOriginal($attribute);
-            if (is_object($value)) {
-                return method_exists($value, '__toString') ? (string)$value : get_class($value);
+            if (\is_object($value)) {
+                return method_exists($value, '__toString') ? (string)$value : $value::class;
             }
             return $value;
         } catch (\Exception $e) {

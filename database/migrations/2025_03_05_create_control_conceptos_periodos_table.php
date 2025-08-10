@@ -15,6 +15,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::connection($this->getConnectionName())->dropIfExists('suc.control_conceptos_periodos');
+
         Schema::connection($this->getConnectionName())->create('suc.control_conceptos_periodos', function (Blueprint $table) {
             $table->id();
             $table->integer('year');

@@ -2,35 +2,35 @@
 
 namespace App\Data;
 
-use Spatie\LaravelData\Data;
 use Illuminate\Support\Collection;
+use Spatie\LaravelData\Data;
 
 class ControlResultData extends Data
 {
     /**
-     * Constructor para los resultados de un control post-liquidación
+     * Constructor para los resultados de un control post-liquidación.
      *
-     * @param bool $success          Indica si el control fue exitoso (true) o detectó errores (false)
-     * @param string $message        Mensaje descriptivo del resultado del control
+     * @param bool $success Indica si el control fue exitoso (true) o detectó errores (false)
+     * @param string $message Mensaje descriptivo del resultado del control
      * @param array|Collection $data Datos resultantes del control para análisis posterior
-     * @param int $count             Cantidad de registros encontrados en el control
-     * @param string $tipo           Tipo de control ejecutado (categorización)
+     * @param int $count Cantidad de registros encontrados en el control
+     * @param string $tipo Tipo de control ejecutado (categorización)
      */
     public function __construct(
         public bool $success,
         public string $message,
         public array|Collection $data = [],
         public ?int $count = null,
-        public ?string $tipo = null
+        public ?string $tipo = null,
     ) {
         // Si no se proporciona un count explícito, intentamos calcularlo desde los datos
         if ($this->count === null) {
-            $this->count = is_countable($this->data) ? count($this->data) : 0;
+            $this->count = \count($this->data);
         }
     }
 
     /**
-     * Método helper para crear un resultado exitoso
+     * Método helper para crear un resultado exitoso.
      */
     public static function success(string $message, array|Collection $data = [], ?string $tipo = null): self
     {
@@ -38,12 +38,12 @@ class ControlResultData extends Data
             success: true,
             message: $message,
             data: $data,
-            tipo: $tipo
+            tipo: $tipo,
         );
     }
 
     /**
-     * Método helper para crear un resultado de error
+     * Método helper para crear un resultado de error.
      */
     public static function error(string $message, array|Collection $data = [], ?string $tipo = null): self
     {
@@ -51,12 +51,12 @@ class ControlResultData extends Data
             success: false,
             message: $message,
             data: $data,
-            tipo: $tipo
+            tipo: $tipo,
         );
     }
 
     /**
-     * Verifica si hay errores (registros) en los datos
+     * Verifica si hay errores (registros) en los datos.
      */
     public function tieneRegistros(): bool
     {
@@ -64,7 +64,7 @@ class ControlResultData extends Data
     }
 
     /**
-     * Devuelve los datos como una colección de Laravel
+     * Devuelve los datos como una colección de Laravel.
      */
     public function toCollection(): Collection
     {
@@ -76,7 +76,7 @@ class ControlResultData extends Data
     }
 
     /**
-     * Obtiene el estado como texto para mostrar en la interfaz
+     * Obtiene el estado como texto para mostrar en la interfaz.
      */
     public function getEstadoTexto(): string
     {
@@ -88,7 +88,7 @@ class ControlResultData extends Data
     }
 
     /**
-     * Obtiene el color para el badge de estado en la interfaz
+     * Obtiene el color para el badge de estado en la interfaz.
      */
     public function getEstadoColor(): string
     {

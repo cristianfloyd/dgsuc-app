@@ -8,7 +8,9 @@ class DataMapperService implements DataMapperInterface
 {
     /**
      * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     *
      * @param array $datosProcessados Linea de datos procesados.
+     *
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
     public function mapDataToModel(array $datosProcesados): array
@@ -81,7 +83,9 @@ class DataMapperService implements DataMapperInterface
 
     /**
      * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     *
      * @param array $line Los datos a mapear.
+     *
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
     public function mapLineToDatabaseModel(array $line): array
@@ -89,10 +93,11 @@ class DataMapperService implements DataMapperInterface
         return $this->mapDataToModel($line);
     }
 
-
     /**
      * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
+     *
      * @param array $datosProcessados Los datos procesados.
+     *
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
     public function mapearDatosAlModelo(array $datosProcesados): array
@@ -165,6 +170,7 @@ class DataMapperService implements DataMapperInterface
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
      * @param array $datosProcessados Los datos procesados.
+     *
      * @return array Los datos mapeados al modelo AfipRelacionesActivas.
      */
     public function mapDataToModelAfipRelacionesActivas(array $datosProcesados): array
@@ -192,7 +198,7 @@ class DataMapperService implements DataMapperInterface
             'tipo_servicio' => $datosProcesados[18], //Tipo de Servicio,3
             'categoria_profesional' => $datosProcesados[19], //Categoría Profesional,6
             'ccct' => $datosProcesados[20], //Código de Convenio Colectivo de Trabajo,7
-            'no_hay_datos' => $datosProcesados[21] // campo vacio,5
+            'no_hay_datos' => $datosProcesados[21], // campo vacio,5
         ];
         return $datosMapeados;
     }

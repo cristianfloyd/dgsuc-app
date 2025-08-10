@@ -10,11 +10,12 @@ use App\Repositories\Sicoss\Dh03Repository;
 class VinculoCargoService
 {
     public function __construct(
-        private Dh03Repository $dh03Repository
-    ) {}
+        private Dh03Repository $dh03Repository,
+    ) {
+    }
 
     /**
-     * Procesa la cadena completa de vínculos para un cargo
+     * Procesa la cadena completa de vínculos para un cargo.
      */
     public function procesarCadenaVinculos(SacCargoData $cargoData): SacCargoData
     {
@@ -56,7 +57,7 @@ class VinculoCargoService
     }
 
     /**
-     * Verifica si un cargo tiene un vínculo válido
+     * Verifica si un cargo tiene un vínculo válido.
      */
     private function tieneVinculoValido(SacCargoData $cargo): bool
     {
@@ -66,7 +67,7 @@ class VinculoCargoService
 
         return $this->dh03Repository->esVinculoValido(
             $cargo->fecha_alta?->toDateString() ?? '',
-            $cargo->vcl_cargo
+            $cargo->vcl_cargo,
         );
     }
 

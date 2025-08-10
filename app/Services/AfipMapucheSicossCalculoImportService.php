@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\AfipMapucheSicossCalculo;
+use App\Traits\DynamicConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\DynamicConnectionTrait;
-use App\Models\AfipMapucheSicossCalculo;
 
 class AfipMapucheSicossCalculoImportService
 {
@@ -28,25 +28,27 @@ class AfipMapucheSicossCalculoImportService
         $batchSize = 1000; // Procesar 1000 registros por lote
 
         while (($line = fgets($handle)) !== false) {
-            if (empty($line)) continue;
+            if (empty($line)) {
+                continue;
+            }
 
             try {
                 $batch[] = $this->parseLine($line, $periodoFiscal);
 
-                if (count($batch) >= $batchSize) {
+                if (\count($batch) >= $batchSize) {
                     DB::connection($this->getConnectionName())->beginTransaction();
                     AfipMapucheSicossCalculo::insert($batch);
                     DB::connection($this->getConnectionName())->commit();
 
-                    $imported += count($batch);
+                    $imported += \count($batch);
                     $batch = [];
                 }
             } catch (\Exception $e) {
                 DB::connection($this->getConnectionName())->rollBack();
                 $errors[] = "Error en línea {$processed}: {$e->getMessage()}";
-                Log::error("Error importando SICOSS Calculo", [
+                Log::error('Error importando SICOSS Calculo', [
                     'line' => $processed,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
 
@@ -56,7 +58,7 @@ class AfipMapucheSicossCalculoImportService
                 $progressCallback([
                     'processed' => $processed,
                     'percentage' => $this->calculateProgress($processed, $imported),
-                    'memory' => memory_get_usage(true)
+                    'memory' => memory_get_usage(true),
                 ]);
             }
         }
@@ -67,7 +69,7 @@ class AfipMapucheSicossCalculoImportService
                 DB::beginTransaction();
                 AfipMapucheSicossCalculo::insert($batch);
                 DB::commit();
-                $imported += count($batch);
+                $imported += \count($batch);
             } catch (\Exception $e) {
                 DB::rollBack();
                 $errors[] = "Error en último lote: {$e->getMessage()}";
@@ -78,57 +80,66 @@ class AfipMapucheSicossCalculoImportService
 
         return [
             'imported' => $imported,
-            'errors' => $errors
+            'errors' => $errors,
         ];
     }
-
 
     private function parseLine(string $line, string $periodoFiscal): array
     {
         return [
             'periodo_fiscal' => $periodoFiscal,
-            'cuil' => substr($line,
+            'cuil' => substr(
+                $line,
                 $this->columnMetadata->getStartPosition('cuil') - 1,
-                $this->columnMetadata->getColumnWidth(0)
+                $this->columnMetadata->getColumnWidth(0),
             ),
-            'remtotal' => (float) str_replace(',', '.', substr($line,
+            'remtotal' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('remtotal') - 1,
-                $this->columnMetadata->getColumnWidth(1)
+                $this->columnMetadata->getColumnWidth(1),
             )),
-            'rem1' => (float) str_replace(',', '.', substr($line,
+            'rem1' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('rem1') - 1,
-                $this->columnMetadata->getColumnWidth(2)
+                $this->columnMetadata->getColumnWidth(2),
             )),
-            'rem2' => (float) str_replace(',', '.', substr($line,
+            'rem2' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('rem2') - 1,
-                $this->columnMetadata->getColumnWidth(3)
+                $this->columnMetadata->getColumnWidth(3),
             )),
-            'aportesijp' => (float) str_replace(',', '.', substr($line,
+            'aportesijp' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('aportesijp') - 1,
-                $this->columnMetadata->getColumnWidth(4)
+                $this->columnMetadata->getColumnWidth(4),
             )),
-            'aporteinssjp' => (float) str_replace(',', '.', substr($line,
+            'aporteinssjp' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('aporteinssjp') - 1,
-                $this->columnMetadata->getColumnWidth(5)
+                $this->columnMetadata->getColumnWidth(5),
             )),
-            'contribucionsijp' => (float) str_replace(',', '.', substr($line,
+            'contribucionsijp' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('contribucionsijp') - 1,
-                $this->columnMetadata->getColumnWidth(6)
+                $this->columnMetadata->getColumnWidth(6),
             )),
-            'contribucioninssjp' => (float) str_replace(',', '.', substr($line,
+            'contribucioninssjp' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('contribucioninssjp') - 1,
-                $this->columnMetadata->getColumnWidth(7)
+                $this->columnMetadata->getColumnWidth(7),
             )),
-            'aportediferencialsijp' => (float) str_replace(',', '.', substr($line,
+            'aportediferencialsijp' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('aportediferencialsijp') - 1,
-                $this->columnMetadata->getColumnWidth(8)
+                $this->columnMetadata->getColumnWidth(8),
             )),
-            'aportesres33_41re' => (float) str_replace(',', '.', substr($line,
+            'aportesres33_41re' => (float)str_replace(',', '.', substr(
+                $line,
                 $this->columnMetadata->getStartPosition('aportesres33_41re') - 1,
-                $this->columnMetadata->getColumnWidth(9)
+                $this->columnMetadata->getColumnWidth(9),
             )),
             'codc_uacad' => null,
-            'caracter' => null
+            'caracter' => null,
         ];
     }
 

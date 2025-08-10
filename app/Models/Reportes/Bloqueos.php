@@ -4,10 +4,10 @@ namespace App\Models\Reportes;
 
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bloqueos extends Model
 {
@@ -20,7 +20,6 @@ class Bloqueos extends Model
      * @var string
      */
     protected $table = 'suc.rep_bloqueos';
-
 
     /**
      * The attributes that are mass assignable.
@@ -64,7 +63,7 @@ class Bloqueos extends Model
     ];
 
     /**
-     * Scope para filtrar por número de liquidación
+     * Scope para filtrar por número de liquidación.
      */
     public function scopePorLiquidacion(Builder $query, int $nroLiqui): Builder
     {
@@ -72,7 +71,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para filtrar por legajo
+     * Scope para filtrar por legajo.
      */
     public function scopePorLegajo(Builder $query, int $legajo): Builder
     {
@@ -80,7 +79,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para filtrar por tipo de bloqueo
+     * Scope para filtrar por tipo de bloqueo.
      */
     public function scopePorTipo(Builder $query, string $tipo): Builder
     {
@@ -88,7 +87,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para filtrar por estado
+     * Scope para filtrar por estado.
      */
     public function scopePorEstado(Builder $query, string $estado): Builder
     {
@@ -96,7 +95,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para obtener los bloqueos pendientes de procesar
+     * Scope para obtener los bloqueos pendientes de procesar.
      */
     public function scopePendientes(Builder $query): Builder
     {
@@ -104,7 +103,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para obtener los bloqueos procesados
+     * Scope para obtener los bloqueos procesados.
      */
     public function scopeProcesados(Builder $query): Builder
     {
@@ -112,7 +111,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para filtrar por rango de fechas de registro
+     * Scope para filtrar por rango de fechas de registro.
      */
     public function scopePorRangoFechaRegistro(Builder $query, string $desde, string $hasta): Builder
     {
@@ -120,7 +119,7 @@ class Bloqueos extends Model
     }
 
     /**
-     * Scope para filtrar bloqueos activos (con chkstopliq = true)
+     * Scope para filtrar bloqueos activos (con chkstopliq = true).
      */
     public function scopeActivos(Builder $query): Builder
     {

@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Interfaces;
 
-use App\Models\Dh90;
 use App\Data\Dh90Data;
+use App\Models\Dh90;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -22,6 +22,7 @@ interface Dh90RepositoryInterface
      * Buscar por número de cargo.
      *
      * @param int $nroCargo
+     *
      * @return Dh90|null
      */
     public function findByNroCargo(int $nroCargo): ?Dh90;
@@ -30,6 +31,7 @@ interface Dh90RepositoryInterface
      * Crear un nuevo registro.
      *
      * @param Dh90Data $data
+     *
      * @return Dh90
      */
     public function create(Dh90Data $data): Dh90;
@@ -39,6 +41,7 @@ interface Dh90RepositoryInterface
      *
      * @param int $nroCargo
      * @param Dh90Data $data
+     *
      * @return Dh90|null
      */
     public function update(int $nroCargo, Dh90Data $data): ?Dh90;
@@ -47,6 +50,7 @@ interface Dh90RepositoryInterface
      * Eliminar un registro.
      *
      * @param int $nroCargo
+     *
      * @return bool
      */
     public function delete(int $nroCargo): bool;
@@ -55,6 +59,7 @@ interface Dh90RepositoryInterface
      * Encontrar por tipo de asociación.
      *
      * @param string $tipo
+     *
      * @return Collection
      */
     public function findByTipoAsociacion(string $tipo): Collection;

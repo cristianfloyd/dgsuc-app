@@ -3,22 +3,13 @@
 namespace App\Models\Suc;
 
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RetUda extends Model
 {
     use HasFactory;
     use MapucheConnectionTrait;
-
-
-
-    /**
-     * La tabla asociada con el modelo.
-     *
-     * @var string
-     */
-    protected $table = 'suc.ret_uda';
 
     /**
      * Indica si el modelo debe ser timestamped.
@@ -28,18 +19,25 @@ class RetUda extends Model
     public $timestamps = false;
 
     /**
-     * La clave primaria compuesta para la tabla.
-     *
-     * @var array
-     */
-    protected $primaryKey = ['nro_legaj', 'nro_cargo', 'periodo'];
-
-    /**
      * Indica que la clave primaria no es auto-incrementable.
      *
      * @var bool
      */
     public $incrementing = false;
+
+    /**
+     * La tabla asociada con el modelo.
+     *
+     * @var string
+     */
+    protected $table = 'suc.ret_uda';
+
+    /**
+     * La clave primaria compuesta para la tabla.
+     *
+     * @var array
+     */
+    protected $primaryKey = ['nro_legaj', 'nro_cargo', 'periodo'];
 
     /**
      * Los atributos que son asignables en masa.

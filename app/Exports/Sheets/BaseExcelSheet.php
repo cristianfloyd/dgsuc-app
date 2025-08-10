@@ -2,16 +2,23 @@
 
 namespace App\Exports\Sheets;
 
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
-use PhpOffice\PhpSpreadsheet\Style\{Fill, Border, Alignment, Color};
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\{Alignment, Border, Color, Fill};
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
 {
     public function startCell(): string
     {
         return 'A6'; // Comenzar en A6 para dejar espacio para el encabezado
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        $this->applyCommonStyles($sheet);
+
+        return $this;
     }
 
     protected function applyHeader(Worksheet $sheet): void
@@ -99,7 +106,7 @@ abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
         for ($row = 7; $row <= $sheet->getHighestRow(); $row++) {
             if ($row % 2 == 0) {
                 $color = new Color('F8F9FA');
-                $sheet->getStyle('A'.$row.':Z'.$row)->getFill()
+                $sheet->getStyle('A' . $row . ':Z' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->setStartColor($color);
             }
@@ -109,12 +116,5 @@ abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
         foreach (range('A', $sheet->getHighestColumn()) as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        $this->applyCommonStyles($sheet);
-
-        return $this;
     }
 }

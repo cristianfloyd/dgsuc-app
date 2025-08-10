@@ -2,19 +2,20 @@
 
 namespace App\Repositories\Sicoss;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Mapuche\MapucheConfig;
-use App\Traits\MapucheConnectionTrait;
 use App\Repositories\Sicoss\Contracts\LicenciaRepositoryInterface;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 
 class LicenciaRepository implements LicenciaRepositoryInterface
 {
     use MapucheConnectionTrait;
 
     /**
-     * Obtiene licencias de protección integral y vacaciones
+     * Obtiene licencias de protección integral y vacaciones.
      *
      * @param string $where_legajos
+     *
      * @return array
      */
     public function getLicenciasProtecintegralVacaciones(string $where_legajos): array
@@ -27,7 +28,8 @@ class LicenciaRepository implements LicenciaRepositoryInterface
 
         if ($variantes_vacaciones == '' && $variantes_protecintegral == '') {
             return [];
-        } else if ($variantes_vacaciones != '' && $variantes_protecintegral != '') {
+        }
+        if ($variantes_vacaciones != '' && $variantes_protecintegral != '') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
             $variantes = $variantes_vacaciones . ',' . $variantes_protecintegral;
@@ -36,7 +38,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
             if ($variantes_vacaciones != '') {
                 $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
                 $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_vacaciones)";
-            } else if ($variantes_protecintegral != '') {
+            } elseif ($variantes_protecintegral != '') {
                 $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
                 $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_protecintegral)";
             }
@@ -107,9 +109,10 @@ class LicenciaRepository implements LicenciaRepositoryInterface
     }
 
     /**
-     * Obtiene licencias vigentes
+     * Obtiene licencias vigentes.
      *
      * @param string $where_legajos
+     *
      * @return array
      */
     public function getLicenciasVigentes(string $where_legajos): array
@@ -245,7 +248,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
                 'inicio' => $item->inicio,
                 'final' => $item->final,
                 'es_legajo' => $item->es_legajo,
-                'condicion' => $item->condicion
+                'condicion' => $item->condicion,
             ];
         }, $resultados);
     }

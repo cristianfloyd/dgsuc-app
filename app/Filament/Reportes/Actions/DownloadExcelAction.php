@@ -4,7 +4,6 @@ namespace App\Filament\Reportes\Actions;
 
 use App\Exports\ReportExport;
 use Filament\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DownloadExcelAction extends Action
@@ -35,7 +34,7 @@ class DownloadExcelAction extends Action
                     'nro_cargo',
                     'codc_uacad',
                     'codn_conce',
-                    'impp_conce'
+                    'impp_conce',
                 ]);
 
                 return Excel::download(new ReportExport($query), 'reporte_concepto_listado.xlsx');

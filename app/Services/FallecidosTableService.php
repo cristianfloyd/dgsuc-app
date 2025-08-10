@@ -11,12 +11,31 @@ use Illuminate\Support\Facades\DB;
 class FallecidosTableService extends AbstractTableService
 {
     public function __construct(
-        private readonly FallecidosTableDefinition $definition
-    ) {}
+        private readonly FallecidosTableDefinition $definition,
+    ) {
+    }
 
     public function getTableName(): string
     {
         return $this->definition->getTableName();
+    }
+
+    public function populateFromDate(string $fecha): void
+    {
+        $query = str_replace(
+            "'2024-12-01'", // fecha hardcodeada en la consulta original
+            "'{$fecha}'",   // fecha dinámica
+            $this->getTablePopulationQuery(),
+        );
+
+        DB::connection($this->getConnectionName())->statement($query);
+    }
+
+    public function truncateTable(): void
+    {
+        DB::connection($this->getConnectionName())
+            ->table($this->getTableName())
+            ->truncate();
     }
 
     protected function getTableDefinition(): array
@@ -55,23 +74,5 @@ class FallecidosTableService extends AbstractTableService
             LEFT JOIN latest_dh03 d3 ON d3.nro_legaj = d1.nro_legaj AND d3.rn = 1
             ORDER BY 1
         ";
-    }
-
-    public function populateFromDate(string $fecha): void
-    {
-        $query = str_replace(
-            "'2024-12-01'", // fecha hardcodeada en la consulta original
-            "'{$fecha}'",   // fecha dinámica
-            $this->getTablePopulationQuery()
-        );
-
-        DB::connection($this->getConnectionName())->statement($query);
-    }
-
-    public function truncateTable(): void
-    {
-        DB::connection($this->getConnectionName())
-            ->table($this->getTableName())
-            ->truncate();
     }
 }

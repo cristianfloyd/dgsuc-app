@@ -2,9 +2,7 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class AfipMapucheSicossNotFoundException extends Exception
+class AfipMapucheSicossNotFoundException extends \Exception
 {
     /**
      * Constructor de la excepción.
@@ -13,7 +11,7 @@ class AfipMapucheSicossNotFoundException extends Exception
      * @param int $code
      * @param \Throwable|null $previous
      */
-    public function __construct(string $message = "Registro de AfipMapucheSicoss no encontrado", int $code = 404, \Throwable $previous = null)
+    public function __construct(string $message = 'Registro de AfipMapucheSicoss no encontrado', int $code = 404, ?\Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

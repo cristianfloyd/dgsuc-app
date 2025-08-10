@@ -2,28 +2,28 @@
 
 namespace App\Filament\Reportes\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\RepEmbarazada;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RepEmbarazadasExport;
-use App\Services\RepEmbarazadaService;
-use Filament\Notifications\Notification;
-use Filament\Tables\Actions\ActionGroup;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Reportes\Resources\RepEmbarazadaResource\Pages;
-use App\Filament\Reportes\Resources\RepEmbarazadaResource\RelationManagers;
+use App\Models\RepEmbarazada;
+use App\Services\RepEmbarazadaService;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RepEmbarazadaResource extends Resource
 {
     protected static ?string $model = RepEmbarazada::class;
+
     protected static ?string $label = 'Reporte Embarazadas';
+
     protected static ?string $navigationLabel = 'Reporte Embarazadas';
+
     protected static ?string $navigationGroup = 'Dosuba';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -62,7 +62,7 @@ class RepEmbarazadaResource extends Resource
                         ->label('Actualizar Datos')
                         ->icon('heroicon-o-arrow-path')
                         ->requiresConfirmation()
-                        ->action(function () {
+                        ->action(function (): void {
                             $service = app(RepEmbarazadaService::class);
                             $service->populateTable();
 
@@ -76,7 +76,7 @@ class RepEmbarazadaResource extends Resource
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->action(function () {
+                        ->action(function (): void {
                             $service = app(RepEmbarazadaService::class);
                             $service->truncateTable();
 
@@ -90,15 +90,15 @@ class RepEmbarazadaResource extends Resource
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function () {
                             return Excel::download(
-                                new RepEmbarazadasExport,
-                                'personal-embarazado-' . now()->format('Y-m-d') . '.xlsx'
+                                new RepEmbarazadasExport(),
+                                'personal-embarazado-' . now()->format('Y-m-d') . '.xlsx',
                             );
                         }),
                 ])->label('Acciones de Tabla')
-                  ->icon('heroicon-o-cog')
+                    ->icon('heroicon-o-cog'),
             ])
             ->filters([
-                //
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -113,7 +113,7 @@ class RepEmbarazadaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

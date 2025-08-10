@@ -7,6 +7,7 @@ use App\Repositories\NominaRepository;
 class TemporaryTableManager
 {
     private $nominaRepository;
+
     private $tableCreated = false;
 
     public function __construct(NominaRepository $nominaRepository)
@@ -19,7 +20,7 @@ class TemporaryTableManager
         if ($this->tableCreated) {
             return;
         }
-        
+
         $this->nominaRepository->createLiquidationTable($nroLiqui);
         $this->nominaRepository->createCheTable();
         $this->nominaRepository->insertInitialCheData();

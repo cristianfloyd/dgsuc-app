@@ -36,6 +36,7 @@ class RetUdaService
      * @param int $nroLegaj
      * @param int $nroCargo
      * @param string $periodo
+     *
      * @return RetUda|null
      */
     public function getRetUda(int $nroLegaj, int $nroCargo, string $periodo): ?RetUdaDTO
@@ -48,6 +49,7 @@ class RetUdaService
      * Crea un nuevo registro de RetUda.
      *
      * @param array $data
+     *
      * @return RetUda
      */
     public function createRetUda(RetUdaDTO $dto): RetUdaDTO
@@ -63,6 +65,7 @@ class RetUdaService
      * @param int $nroCargo
      * @param string $periodo
      * @param array $data
+     *
      * @return bool
      */
     public function updateRetUda(int $nroLegaj, int $nroCargo, string $periodo, RetUdaDTO $dto): bool
@@ -80,6 +83,7 @@ class RetUdaService
      * @param int $nroLegaj
      * @param int $nroCargo
      * @param string $periodo
+     *
      * @return bool
      */
     public function deleteRetUda(int $nroLegaj, int $nroCargo, string $periodo): bool

@@ -6,14 +6,14 @@ use App\Models\Dhe8;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Class Dhe8Repository
+ * Class Dhe8Repository.
  *
  * @package App\Repositories
  */
 class Dhe8Repository
 {
     /**
-     * Obtiene todos los registros
+     * Obtiene todos los registros.
      *
      * @return Collection
      */
@@ -23,9 +23,10 @@ class Dhe8Repository
     }
 
     /**
-     * Busca un registro por su código
+     * Busca un registro por su código.
      *
      * @param string $codigo
+     *
      * @return Dhe8|null
      */
     public function findByCodigo(string $codigo): ?Dhe8
@@ -34,9 +35,10 @@ class Dhe8Repository
     }
 
     /**
-     * Crea un nuevo registro
+     * Crea un nuevo registro.
      *
      * @param array $data
+     *
      * @return Dhe8
      */
     public function create(array $data): Dhe8
@@ -45,10 +47,11 @@ class Dhe8Repository
     }
 
     /**
-     * Actualiza un registro existente
+     * Actualiza un registro existente.
      *
      * @param string $codigo
      * @param array $data
+     *
      * @return bool
      */
     public function update(string $codigo, array $data): bool
@@ -58,9 +61,10 @@ class Dhe8Repository
     }
 
     /**
-     * Elimina un registro
+     * Elimina un registro.
      *
      * @param string $codigo
+     *
      * @return bool
      */
     public function delete(string $codigo): bool

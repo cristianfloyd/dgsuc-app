@@ -5,11 +5,11 @@ namespace App\Services\Imports;
 use App\Enums\BloqueosEstadoEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\DuplicateCargoException;
 
 class DuplicateValidationService
 {
     private Collection $duplicateRecords;
+
     private Collection $validRecords;
 
     public function __construct()
@@ -26,6 +26,7 @@ class DuplicateValidationService
      * Los registros únicos se marcan como válidos.
      *
      * @param Collection $rows Los registros a procesar.
+     *
      * @return void
      */
     public function processRecords(Collection $rows): void
@@ -73,7 +74,7 @@ class DuplicateValidationService
 
     /**
      * Valida duplicados en la colección de datos del Excel
-     * Ahora solo registra los duplicados sin lanzar excepción
+     * Ahora solo registra los duplicados sin lanzar excepción.
      *
      * @param Collection $rows Filas del Excel
      */
@@ -82,7 +83,7 @@ class DuplicateValidationService
         $cargos = $rows->pluck('n_de_cargo')->toArray();
         $duplicates = array_filter(
             array_count_values($cargos),
-            fn($count) => $count > 1
+            fn ($count) => $count > 1,
         );
 
         if (!empty($duplicates)) {

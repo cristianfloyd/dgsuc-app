@@ -2,23 +2,20 @@
 
 namespace App\Exports\Sheets;
 
-use Carbon\Carbon;
-use App\Models\RepFallecido;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
 class RepFallecidosSheet implements
     FromCollection,
@@ -31,7 +28,9 @@ class RepFallecidosSheet implements
     WithColumnFormatting
 {
     protected string $periodo;
+
     protected $records;
+
     public function __construct($records, string $periodo)
     {
         $this->records = $records;
@@ -60,7 +59,7 @@ class RepFallecidosSheet implements
                 'CUIL',
                 'Unidad Académica',
                 'Fecha Defunción',
-            ]
+            ],
         ];
     }
 
@@ -83,8 +82,8 @@ class RepFallecidosSheet implements
         $sheet->getStyle($sheet->calculateWorksheetDimension())->applyFromArray([
             'font' => [
                 'name' => 'Arial',
-                'size' => 10
-            ]
+                'size' => 10,
+            ],
         ]);
 
         // Combinar celdas para el título del período
@@ -101,26 +100,26 @@ class RepFallecidosSheet implements
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'D9E1F2']
+                    'startColor' => ['rgb' => 'D9E1F2'],
                 ],
             ],
             3 => [  // La fila de encabezados ahora es la 3
                 'font' => [
                     'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF']
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
-                ]
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
             ],
             // Borde para todos los datos
             "A3:F$lastRow" => [
@@ -139,14 +138,14 @@ class RepFallecidosSheet implements
             'A' => NumberFormat::FORMAT_NUMBER, // Legajo
             'D' => '@',                         // CUIL como texto
             'E' => '@',                         // UACAD como texto
-            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY // Fecha
+            'F' => NumberFormat::FORMAT_DATE_DDMMYYYY, // Fecha
         ];
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet;
                 $lastRow = $sheet->getHighestRow();
 
@@ -160,8 +159,8 @@ class RepFallecidosSheet implements
                         $sheet->getStyle("A$row:F$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'F2F2F2'] // Gris claro
-                            ]
+                                'startColor' => ['rgb' => 'F2F2F2'], // Gris claro
+                            ],
                         ]);
                     }
                 }
@@ -173,7 +172,7 @@ class RepFallecidosSheet implements
                 $sheet->getDelegate()->getSheetView()
                     ->setZoomScale(100)
                     ->setZoomScaleNormal(100);
-            }
+            },
         ];
     }
 }

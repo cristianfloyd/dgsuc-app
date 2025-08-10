@@ -2,8 +2,8 @@
 
 namespace App\Filament\Bloqueos\Resources\BloqueosHistorialResource\Pages;
 
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Bloqueos\Resources\BloqueosHistorialResource;
+use Filament\Resources\Pages\ListRecords;
 
 class ListBloqueosHistorial extends ListRecords
 {

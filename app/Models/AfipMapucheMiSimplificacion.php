@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use App\ValueObjects\NroLiqui;
 use App\Enums\PuestoDesempenado;
-use App\Traits\HasUnidadAcademica;
-use Illuminate\Support\Facades\DB;
-use App\ValueObjects\PeriodoFiscal;
-use Illuminate\Support\Facades\Log;
 use App\Traits\HasPuestoDesempenado;
+use App\Traits\HasUnidadAcademica;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
+use App\ValueObjects\NroLiqui;
+use App\ValueObjects\PeriodoFiscal;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AfipMapucheMiSimplificacion extends Model
 {
@@ -22,12 +22,15 @@ class AfipMapucheMiSimplificacion extends Model
     use HasPuestoDesempenado;
     use HasUnidadAcademica;
 
+    public $incrementing = true;
+
+    public $timestamps = false;
+
     protected $table = 'afip_mapuche_mi_simplificacion';
+
     protected $schema = 'suc';
 
     protected $primaryKey = 'id';
-    public $incrementing = true;
-    public $timestamps = false;
 
     // Campos que se pueden asignar masivament
     protected $fillable = [
@@ -59,201 +62,14 @@ class AfipMapucheMiSimplificacion extends Model
         'categoria',
         'fecha_susp_serv_temp',
         'nro_form_agro',
-        'covid'
+        'covid',
     ];
 
     protected $appends = ['puesto_descripcion', 'puesto_escalafon'];
 
-
-
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::retrieved(function ($model) {
-            if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
-                $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
-            }
-
-            // Determinar puesto si es necesario
-            if ($model->attributes['puesto'] === null && $model->attributes['categoria']) {
-                $puestoEnum = $model->determinarPuestoDesempenado($model->attributes['categoria']);
-                if ($puestoEnum) {
-                    // Actualizar el campo puesto en la base de datos
-                    $model->puesto = $puestoEnum->value;
-                    $model->save();
-                }
-            }
-        });
-    }
-
-    // ############################ ACCESORS y MUTATORS ############################
-
-    /**
-     * Accessor para el periodo fiscal como objeto PeriodoFiscal
-     */
-    protected function periodoFiscalObject(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                $periodoStr = $this->attributes['periodo_fiscal'] ?? null;
-                if (!$periodoStr) {
-                    return null;
-                }
-
-                try {
-                    return PeriodoFiscal::fromString($periodoStr);
-                } catch (\InvalidArgumentException $e) {
-                    Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
-                    return null;
-                }
-            }
-        );
-    }
-
-    /**
-     * Accesor para obtener el valor RAW del puesto antes del casting.
-     */
-    protected function puestoRaw(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value, $attributes) => $attributes['puesto'],
-        );
-    }
-
-
-    protected function puesto(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                // Inicializar la variable para evitar problemas de scope
-                $puestoEnum = null;
-
-                // Caso 1: Si tenemos un valor de puesto en la base de datos
-                if ($value) {
-                    // Primero intentamos determinar el puesto a partir del valor
-                    $puestoEnum = $this->determinarPuestoDesempenado($value);
-
-                    // Si no funciona, intentamos convertir directamente
-                    if (!$puestoEnum) {
-                        $puestoEnum = PuestoDesempenado::tryFrom($value);
-                    }
-                }
-                // Caso 2: Si no tenemos puesto pero sí categoría, intentamos determinar el puesto
-                elseif ($this->attributes['categoria']) {
-                    $puestoEnum = $this->determinarPuestoDesempenado($this->attributes['categoria']);
-                }
-
-                return $puestoEnum;
-            },
-            set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
-        );
-    }
-
-
-    /**
-     * Accessor para la descripción del puesto
-     */
-    protected function puestoDescripcion(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                $categoria = $this->attributes['puesto'] ?? null;
-
-                if (!$categoria) {
-                    return null;
-                }
-
-                $puesto = $this->determinarPuestoDesempenado($categoria);
-                return $puesto?->descripcion();
-            }
-        );
-    }
-
-    /**
-     * Accessor para el escalafón del puesto
-     */
-    protected function puestoEscalafon(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                $categoria = $this->attributes['puesto'] ?? null;
-
-                if (!$categoria) {
-                    return null;
-                }
-
-                $puesto = $this->determinarPuestoDesempenado($categoria);
-                return $puesto?->escalafon();
-            }
-        );
-    }
-
-    /**
-     * Accessor y Mutator para el domicilio
-     */
-    protected function domicilio(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                // Si tenemos actividad null pero un código de unidad válido,
-                // intentamos determinar los códigos
-                if ($this->attributes['actividad'] === null && $value) {
-                    $this->determinarCodigosUnidadAcademica($value);
-                }
-                return str_pad($value, 5, '0', STR_PAD_LEFT);
-            },
-            set: function ($value) {
-                $this->determinarCodigosUnidadAcademica($value);
-                return $value;
-            }
-        );
-    }
-
-    /**
-     * Accessor y Mutator para la fecha de inicio de relación laboral
-     *
-     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function inicioRelLaboral(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                return str_replace('-', '/', $value);
-            },
-            set: function ($value) {
-                return str_replace('-', '/', $value);
-            }
-        );
-    }
-
-    /**
-     * Accessor y Mutator para la fecha de fin de relación laboral
-     *
-     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function finRelLaboral(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                return str_replace('-', '/', $value);
-            },
-            set: function ($value) {
-                return str_replace('-', '/', $value);
-            }
-        );
-    }
-
     // ################################################################
 
     // ################################################################
-
-
 
     public function getSchema(): string
     {
@@ -270,11 +86,8 @@ class AfipMapucheMiSimplificacion extends Model
         return "{$this->schema}.{$this->table}";
     }
 
-
-
-
     // Método para consultas grandes
-    public function scopeChunked($query, $callback, $count = 1000)
+    public function scopeChunked($query, $callback, $count = 1000): void
     {
         $query->chunk($count, $callback);
     }
@@ -282,7 +95,7 @@ class AfipMapucheMiSimplificacion extends Model
     public function createTable(): bool
     {
         if (!Schema::connection($this->getConnectionName())->hasTable($this->table)) {
-            Schema::connection($this->getConnectionName())->create($this->table, function (Blueprint $table) {
+            Schema::connection($this->getConnectionName())->create($this->table, function (Blueprint $table): void {
                 $table->id();
                 $table->integer('nro_legaj');
                 $table->char('nro_liqui', 6);
@@ -326,7 +139,7 @@ class AfipMapucheMiSimplificacion extends Model
     /**
      * Trunca la tabla y reinicia las identidades.
      */
-    public static function truncate()
+    public static function truncate(): void
     {
         $instance = new static();
         DB::connection($instance->getConnectionName())->statement('TRUNCATE TABLE ' . $instance->getSchemaName() . '.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
@@ -347,7 +160,7 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * @return string
      */
-    static function getDatabaseTableName()
+    public static function getDatabaseTableName()
     {
         return static::getTable();
     }
@@ -357,11 +170,12 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * @param Builder $query
      * @param string $value
+     *
      * @return Builder
      */
     public function scopeSearch($query, $value)
     {
-        return empty($value) ? $query :  $query->where('cuil', 'ilike', "%$value%")
+        return empty($value) ? $query : $query->where('cuil', 'ilike', "%$value%")
             ->orWhere('nro_legaj', 'ilike', "%$value%");
     }
 
@@ -370,14 +184,12 @@ class AfipMapucheMiSimplificacion extends Model
         return $this->schema;
     }
 
-
-
-
     /**
-     * Scope para filtrar por periodo fiscal
+     * Scope para filtrar por periodo fiscal.
      *
      * @param Builder $query
      * @param string|PeriodoFiscal $periodoFiscal
+     *
      * @return Builder
      */
     public function scopeByPeriodoFiscal($query, $periodoFiscal): Builder
@@ -390,7 +202,7 @@ class AfipMapucheMiSimplificacion extends Model
     }
 
     /**
-     * Scope para filtrar por tipo de puesto
+     * Scope para filtrar por tipo de puesto.
      */
     public function scopeByPuesto($query, PuestoDesempenado $puesto)
     {
@@ -398,12 +210,12 @@ class AfipMapucheMiSimplificacion extends Model
             PuestoDesempenado::PROFESOR_UNIVERSITARIO => $this->getCategoriesByGroup('DOCU'),
             PuestoDesempenado::PROFESOR_SECUNDARIO => array_merge(
                 $this->getCategoriesByGroup('DOCS'),
-                $this->getCategoriesByGroup('DOC2')
+                $this->getCategoriesByGroup('DOC2'),
             ),
             PuestoDesempenado::NODOCENTE => $this->getCategoriesByGroup('NODO'),
             PuestoDesempenado::DIRECTIVO => array_merge(
                 $this->getCategoriesByGroup('AUTU'),
-                $this->getCategoriesByGroup('AUTS')
+                $this->getCategoriesByGroup('AUTS'),
             ),
             default => [],
         };
@@ -418,6 +230,7 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * @param int|NroLiqui $nroLiqui Número de liquidación.
      * @param int|string|PeriodoFiscal $periodoFiscal Período fiscal.
+     *
      * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
      */
     public static function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): bool
@@ -439,7 +252,7 @@ class AfipMapucheMiSimplificacion extends Model
             DB::connection($connection)->statement(
                 'INSERT INTO suc.afip_mapuche_mi_simplificacion
                 SELECT * FROM suc.get_mi_simplificacion_tt(?, ?)',
-                [$nroLiquiValue, $periodoFiscalValue]
+                [$nroLiquiValue, $periodoFiscalValue],
             );
             Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
 
@@ -448,5 +261,185 @@ class AfipMapucheMiSimplificacion extends Model
             Log::error($e->getMessage());
             return false;
         }
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::retrieved(function ($model): void {
+            if ($model->attributes['actividad'] === null && $model->attributes['domicilio']) {
+                $model->determinarCodigosUnidadAcademica($model->attributes['domicilio']);
+            }
+
+            // Determinar puesto si es necesario
+            if ($model->attributes['puesto'] === null && $model->attributes['categoria']) {
+                $puestoEnum = $model->determinarPuestoDesempenado($model->attributes['categoria']);
+                if ($puestoEnum) {
+                    // Actualizar el campo puesto en la base de datos
+                    $model->puesto = $puestoEnum->value;
+                    $model->save();
+                }
+            }
+        });
+    }
+
+    // ############################ ACCESORS y MUTATORS ############################
+
+    /**
+     * Accessor para el periodo fiscal como objeto PeriodoFiscal.
+     */
+    protected function periodoFiscalObject(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $periodoStr = $this->attributes['periodo_fiscal'] ?? null;
+                if (!$periodoStr) {
+                    return null;
+                }
+
+                try {
+                    return PeriodoFiscal::fromString($periodoStr);
+                } catch (\InvalidArgumentException $e) {
+                    Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
+                    return null;
+                }
+            },
+        );
+    }
+
+    /**
+     * Accesor para obtener el valor RAW del puesto antes del casting.
+     */
+    protected function puestoRaw(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => $attributes['puesto'],
+        );
+    }
+
+    protected function puesto(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // Inicializar la variable para evitar problemas de scope
+                $puestoEnum = null;
+
+                // Caso 1: Si tenemos un valor de puesto en la base de datos
+                if ($value) {
+                    // Primero intentamos determinar el puesto a partir del valor
+                    $puestoEnum = $this->determinarPuestoDesempenado($value);
+
+                    // Si no funciona, intentamos convertir directamente
+                    if (!$puestoEnum) {
+                        $puestoEnum = PuestoDesempenado::tryFrom($value);
+                    }
+                }
+                // Caso 2: Si no tenemos puesto pero sí categoría, intentamos determinar el puesto
+                elseif ($this->attributes['categoria']) {
+                    $puestoEnum = $this->determinarPuestoDesempenado($this->attributes['categoria']);
+                }
+
+                return $puestoEnum;
+            },
+            set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
+        );
+    }
+
+    /**
+     * Accessor para la descripción del puesto.
+     */
+    protected function puestoDescripcion(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->descripcion();
+            },
+        );
+    }
+
+    /**
+     * Accessor para el escalafón del puesto.
+     */
+    protected function puestoEscalafon(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $categoria = $this->attributes['puesto'] ?? null;
+
+                if (!$categoria) {
+                    return null;
+                }
+
+                $puesto = $this->determinarPuestoDesempenado($categoria);
+                return $puesto?->escalafon();
+            },
+        );
+    }
+
+    /**
+     * Accessor y Mutator para el domicilio.
+     */
+    protected function domicilio(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // Si tenemos actividad null pero un código de unidad válido,
+                // intentamos determinar los códigos
+                if ($this->attributes['actividad'] === null && $value) {
+                    $this->determinarCodigosUnidadAcademica($value);
+                }
+                return str_pad($value, 5, '0', \STR_PAD_LEFT);
+            },
+            set: function ($value) {
+                $this->determinarCodigosUnidadAcademica($value);
+                return $value;
+            },
+        );
+    }
+
+    /**
+     * Accessor y Mutator para la fecha de inicio de relación laboral.
+     *
+     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function inicioRelLaboral(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+            set: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+        );
+    }
+
+    /**
+     * Accessor y Mutator para la fecha de fin de relación laboral.
+     *
+     * Reemplaza los guiones (-) por barras (/) en el formato de fecha
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function finRelLaboral(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+            set: function ($value) {
+                return str_replace('-', '/', $value);
+            },
+        );
     }
 }

@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class EjecutarControlAportesAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'ejecutar_control_aportes';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,8 +27,24 @@ class EjecutarControlAportesAction extends Action
             });
     }
 
+    public static function getDefaultName(): ?string
+    {
+        return 'ejecutar_control_aportes';
+    }
+
     /**
-     * Ejecuta el control de aportes
+     * Agrega badge con el período actual.
+     */
+    public function withPeriodBadge(): static
+    {
+        return $this->badge(function () {
+            $livewire = $this->getLivewire();
+            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
+        });
+    }
+
+    /**
+     * Ejecuta el control de aportes.
      */
     protected function ejecutarControl(): void
     {
@@ -52,7 +63,7 @@ class EjecutarControlAportesAction extends Action
             Log::info('Iniciando control de aportes', [
                 'year' => $year,
                 'month' => $month,
-                'connection' => $livewire->getConnectionName()
+                'connection' => $livewire->getConnectionName(),
             ]);
 
             // Ejecutar control
@@ -68,12 +79,12 @@ class EjecutarControlAportesAction extends Action
             Notification::make()
                 ->success()
                 ->title('Control de Aportes Ejecutado')
-                ->body("Se completó el control de aportes para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
+                ->body("Se completó el control de aportes para el período {$year}-" . str_pad($month, 2, '0', \STR_PAD_LEFT))
                 ->send();
         } catch (\Exception $e) {
             Log::error('Error en control de aportes', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             Notification::make()
@@ -85,16 +96,5 @@ class EjecutarControlAportesAction extends Action
         } finally {
             $livewire->loading = false;
         }
-    }
-
-    /**
-     * Agrega badge con el período actual
-     */
-    public function withPeriodBadge(): static
-    {
-        return $this->badge(function () {
-            $livewire = $this->getLivewire();
-            return sprintf('%d-%02d', $livewire->year, $livewire->month);
-        });
     }
 }

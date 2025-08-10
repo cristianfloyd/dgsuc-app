@@ -2,30 +2,39 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
 
 class FileEncoding extends Component
 {
     use MapucheConnectionTrait;
 
     public $files;
+
     public $selectedFile;
+
     public $fileEncoding;
+
     public $systemEncoding;
+
     public $databaseEncoding;
+
     public $inputString;
+
     public $convertedString;
+
     public $characterCount;
+
     public $convertedFilePath;
 
-
     /**
-     * Summary of updatedSelectedFile
+     * Summary of updatedSelectedFile.
+     *
      * @param mixed $value
+     *
      * @return void
      */
     public function updatedSelectedFile($value): void
@@ -33,44 +42,34 @@ class FileEncoding extends Component
         $file = UploadedFile::query()->findOrFail($value);
         $this->fileEncoding = $this->detectEncoding(Storage::path("/public/{$file->file_path}"));
     }
-    /**
-     *
-     * @param mixed $filePath
-     * @return bool|string
-     */
-    private function detectEncoding($filePath): bool|string
-    {
-        $fileContent = file_get_contents($filePath);
-        $encoding = mb_detect_encoding($fileContent, mb_list_encodings(), true);
-
-        return $encoding ?? 'No se pudo detectar la codificación';
-    }
 
     public function getDataBaseEncoding(): void
     {
         $result = DB::connection($this->getConnectionName())
-                    ->select("SHOW server_encoding");
+            ->select('SHOW server_encoding');
         $this->databaseEncoding = $result[0]->server_encoding;
     }
 
-    public function convertToDatabaseEncoding()
+    public function convertToDatabaseEncoding(): void
     {
         // $this->convertedString = mb_convert_encoding($this->inputString, $this->databaseEncoding);
         $this->convertedString = mb_convert_encoding($this->convertedString, $this->systemEncoding);
         $this->countCharacters($this->convertedString);
     }
-    public function countCharacters($string)
+
+    public function countCharacters($string): void
     {
         $this->characterCount = mb_strlen($string);
     }
-    public function mount()
+
+    public function mount(): void
     {
         $this->files = UploadedFile::all();
         $this->systemEncoding = mb_internal_encoding();
         $this->getDatabaseEncoding();
     }
 
-    public function convertFileToUtf8()
+    public function convertFileToUtf8(): void
     {
         $filePath = $this->uploadedFile->getRealPath();
         $fileContent = file_get_contents($filePath);
@@ -88,5 +87,18 @@ class FileEncoding extends Component
     public function render()
     {
         return view('livewire.file-encoding');
+    }
+
+    /**
+     * @param mixed $filePath
+     *
+     * @return bool|string
+     */
+    private function detectEncoding($filePath): bool|string
+    {
+        $fileContent = file_get_contents($filePath);
+        $encoding = mb_detect_encoding($fileContent, mb_list_encodings(), true);
+
+        return $encoding ?? 'No se pudo detectar la codificación';
     }
 }

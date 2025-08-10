@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Mapuche;
 
-use App\Models\Dh01;
 use App\Models\Dh03;
 
 class VerificacionMapucheService
@@ -19,7 +18,7 @@ class VerificacionMapucheService
         if (!$cargo) {
             return [
                 'existe' => false,
-                'mensaje' => "No se encontró el cargo $nroCargo para el legajo $nroLegaj"
+                'mensaje' => "No se encontró el cargo $nroCargo para el legajo $nroLegaj",
             ];
         }
 
@@ -31,8 +30,8 @@ class VerificacionMapucheService
                 'nombre' => $cargo->dh01->nombre_completo,
                 'fecha_alta' => $cargo->fec_alta?->format('d/m/Y'),
                 'fecha_baja' => $cargo->fec_baja?->format('d/m/Y'),
-                'estado' => $cargo->chkstopliq ? 'Bloqueado' : 'Activo'
-            ]
+                'estado' => $cargo->chkstopliq ? 'Bloqueado' : 'Activo',
+            ],
         ];
     }
 }

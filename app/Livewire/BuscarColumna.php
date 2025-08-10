@@ -2,22 +2,23 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class BuscarColumna extends Component
 {
     use MapucheConnectionTrait;
 
     public $columnName;
+
     public $results;
 
-    public function search()
+    public function search(): void
     {
         $this->results = DB::connection($this->getConnectionName())
             ->table('information_schema.columns')
-            ->select('table_schema','table_name', 'column_name')
+            ->select('table_schema', 'table_name', 'column_name')
             ->whereRaw('lower(column_name) like ?', ['%' . strtolower($this->columnName) . '%'])
             ->get();
     }
@@ -25,7 +26,7 @@ class BuscarColumna extends Component
     public function render()
     {
         return view('livewire.buscar-columna', [
-            'results' => $this->results
+            'results' => $this->results,
         ]);
     }
 }

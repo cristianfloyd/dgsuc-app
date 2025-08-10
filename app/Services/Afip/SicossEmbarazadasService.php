@@ -4,31 +4,33 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Mapuche\TableSelectorService;
+use App\Traits\MapucheConnectionTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SicossEmbarazadasService
 {
     use MapucheConnectionTrait;
 
     protected TableSelectorService $tableSelectorService;
+
     protected PeriodoFiscalService $periodoFiscalService;
 
     public function __construct(
         TableSelectorService $tableSelectorService,
-        PeriodoFiscalService $periodoFiscalService
+        PeriodoFiscalService $periodoFiscalService,
     ) {
         $this->tableSelectorService = $tableSelectorService;
         $this->periodoFiscalService = $periodoFiscalService;
     }
 
     /**
-     * Actualiza los datos de embarazadas en SICOSS
+     * Actualiza los datos de embarazadas en SICOSS.
      *
      * @param array $params Parámetros para la actualización
+     *
      * @return array Resultado de la operación
      */
     public function actualizarEmbarazadas(array $params = []): array
@@ -42,8 +44,8 @@ class SicossEmbarazadasService
         $month = (int)$month;
 
         // Calcular fechas de inicio y fin del mes
-        $fechaDesde = $params['fecha_desde'] ?? date("Y-m-d", mktime(0, 0, 0, $month, 1, $year));
-        $fechaHasta = $params['fecha_hasta'] ?? date("Y-m-t", mktime(0, 0, 0, $month, 1, $year));
+        $fechaDesde = $params['fecha_desde'] ?? date('Y-m-d', mktime(0, 0, 0, $month, 1, $year));
+        $fechaHasta = $params['fecha_hasta'] ?? date('Y-m-t', mktime(0, 0, 0, $month, 1, $year));
 
         // Obtener liquidaciones si no se proporcionan
         $liquidaciones = $params['liquidaciones'] ?? null;
@@ -53,7 +55,7 @@ class SicossEmbarazadasService
                 return [
                     'status' => 'warning',
                     'message' => "No se encontraron liquidaciones para el período {$year}-{$month}",
-                    'data' => null
+                    'data' => null,
                 ];
             }
         }
@@ -68,7 +70,7 @@ class SicossEmbarazadasService
             'fecha_hasta' => $fechaHasta,
             'nro_liqui' => $nroLiqui,
             'codn_conce' => $codnConce,
-            'nrovar_licencia' => $nroVarLicencia
+            'nrovar_licencia' => $nroVarLicencia,
         ]);
 
         try {
@@ -77,8 +79,8 @@ class SicossEmbarazadasService
 
             // Llamar al procedimiento almacenado
             DB::connection($this->getConnectionName())->statement(
-                "CALL suc.sicoss_mapuche_update_embarazadas(?, ?, ?, ?, ?, ?)",
-                [$fechaDesde, $fechaHasta, $nroLiqui, $codnConce, $nroVarLicencia, &$logId]
+                'CALL suc.sicoss_mapuche_update_embarazadas(?, ?, ?, ?, ?, ?)',
+                [$fechaDesde, $fechaHasta, $nroLiqui, $codnConce, $nroVarLicencia, &$logId],
             );
 
             // Obtener detalles del log si está disponible
@@ -104,7 +106,7 @@ class SicossEmbarazadasService
 
             Log::info('Actualización de embarazadas completada', [
                 'registros_afectados' => $registrosAfectados,
-                'duracion_ms' => $duracionMs
+                'duracion_ms' => $duracionMs,
             ]);
 
             return [
@@ -114,28 +116,29 @@ class SicossEmbarazadasService
                     'registros_afectados' => $registrosAfectados,
                     'duracion_ms' => $duracionMs,
                     'log_id' => $logId,
-                    'log_details' => $logDetails
-                ]
+                    'log_details' => $logDetails,
+                ],
             ];
         } catch (\Exception $e) {
             Log::error('Error en actualización de embarazadas', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage(),
-                'data' => null
+                'data' => null,
             ];
         }
     }
 
     /**
-     * Obtiene las liquidaciones disponibles para un período fiscal
+     * Obtiene las liquidaciones disponibles para un período fiscal.
      *
      * @param int $year Año
      * @param int $month Mes
+     *
      * @return array Números de liquidación
      */
     protected function obtenerLiquidaciones(int $year, int $month): array
@@ -150,7 +153,7 @@ class SicossEmbarazadasService
             Log::error('Error al obtener liquidaciones', [
                 'error' => $e->getMessage(),
                 'year' => $year,
-                'month' => $month
+                'month' => $month,
             ]);
             return [];
         }

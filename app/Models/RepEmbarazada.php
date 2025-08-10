@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Traits\HasUacadScope;
 use App\Data\RepEmbarazadaData;
 use App\Services\EncodingService;
 use App\Services\RepEmbarazadaService;
+use App\Traits\HasUacadScope;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Modelo para la gestión de embarazadas.
@@ -25,11 +25,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * - dh01: Datos personales
  * - dh03: Datos de unidad académica
  *
- * @property int    $nro_legaj    Número de legajo
- * @property string $apellido     Apellido (CHAR 20)
- * @property string $nombre       Nombre (CHAR 20)
- * @property string $cuil         CUIL
- * @property string $codc_uacad   Código de unidad académica (CHAR 4)
+ * @property int $nro_legaj Número de legajo
+ * @property string $apellido Apellido (CHAR 20)
+ * @property string $nombre Nombre (CHAR 20)
+ * @property string $cuil CUIL
+ * @property string $codc_uacad Código de unidad académica (CHAR 4)
  *
  * @method static \Illuminate\Database\Eloquent\Builder|static query()
  */
@@ -37,15 +37,9 @@ class RepEmbarazada extends Model
 {
     /** @use HasFactory<\Database\Factories\RepEmbarazadaFactory> */
     use HasFactory;
+
     use HasUacadScope;
     use MapucheConnectionTrait;
-
-    /**
-     * Nombre de la tabla en PostgreSQL.
-     *
-     * @var string
-     */
-    protected $table = 'suc.rep_embarazadas';
 
     /**
      * La clave primaria no es auto-incremental.
@@ -55,18 +49,25 @@ class RepEmbarazada extends Model
     public $incrementing = false;
 
     /**
-     * Clave primaria del modelo.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'nro_legaj';
-
-    /**
      * Deshabilitar timestamps de Laravel.
      *
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * Nombre de la tabla en PostgreSQL.
+     *
+     * @var string
+     */
+    protected $table = 'suc.rep_embarazadas';
+
+    /**
+     * Clave primaria del modelo.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'nro_legaj';
 
     /**
      * Atributos que son asignables masivamente.
@@ -94,16 +95,6 @@ class RepEmbarazada extends Model
         'codc_uacad' => 'string',
     ];
 
-    protected static function booted(): void
-    {
-        static::checktable();
-    }
-
-    protected static function checkTable(): void
-    {
-        app(RepEmbarazadaService::class)->ensureTableExists();
-    }
-
     public static function populateFromMapuche(): bool
     {
         return app(RepEmbarazadaService::class)->populateTable();
@@ -124,6 +115,16 @@ class RepEmbarazada extends Model
         return RepEmbarazadaData::from($this);
     }
 
+    protected static function booted(): void
+    {
+        static::checktable();
+    }
+
+    protected static function checkTable(): void
+    {
+        app(RepEmbarazadaService::class)->ensureTableExists();
+    }
+
     /**
      * Accessor para asegurar que apellido y nombre estén correctamente formateados.
      */
@@ -131,7 +132,7 @@ class RepEmbarazada extends Model
     {
         return Attribute::make(
             get: fn (string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn (string $value) => str_pad(substr($value, 0, 20), 20)
+            set: fn (string $value) => str_pad(substr($value, 0, 20), 20),
         );
     }
 
@@ -139,7 +140,7 @@ class RepEmbarazada extends Model
     {
         return Attribute::make(
             get: fn (string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn (string $value) => str_pad(substr($value, 0, 20), 20)
+            set: fn (string $value) => str_pad(substr($value, 0, 20), 20),
         );
     }
 }

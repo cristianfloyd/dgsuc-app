@@ -2,20 +2,20 @@
 
 namespace App\Services;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
 use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterface
 {
     public function __construct(
-        protected AfipRelacionesActivas $model
-    ) {}
+        protected AfipRelacionesActivas $model,
+    ) {
+    }
 
     /**
-     * Inserta datos masivamente en la tabla
+     * Inserta datos masivamente en la tabla.
      */
     public function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
     {
@@ -30,18 +30,18 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
 
             DB::connection($conexion)->commit();
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos masivos', [
                 'mensaje' => $e->getMessage(),
-                'exception' => $e
+                'exception' => $e,
             ]);
             return false;
         }
     }
 
     /**
-     * Mapea los datos procesados al modelo
+     * Mapea los datos procesados al modelo.
      */
     public function mapearDatosAlModelo(array $datosProcesados): array
     {
@@ -67,12 +67,12 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
             'tipo_servicio' => $datosProcesados[18],
             'categoria_profesional' => $datosProcesados[19],
             'ccct' => $datosProcesados[20],
-            'no_hay_datos' => $datosProcesados[21]
+            'no_hay_datos' => $datosProcesados[21],
         ];
     }
 
     /**
-     * Busca registros por CUIL
+     * Busca registros por CUIL.
      */
     public function buscarPorCuil(string $cuil)
     {
@@ -80,7 +80,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
     }
 
     /**
-     * Obtiene registros por periodo fiscal
+     * Obtiene registros por periodo fiscal.
      */
     public function obtenerPorPeriodoFiscal(string $periodo)
     {
@@ -88,7 +88,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
     }
 
     /**
-     * Obtiene estadísticas por periodo
+     * Obtiene estadísticas por periodo.
      */
     public function obtenerEstadisticasPorPeriodo(string $periodo): array
     {
@@ -104,7 +104,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
                 ->where('codigo_movimiento', '02')
                 ->count(),
             'retribucion_promedio' => $this->model->where('periodo_fiscal', $periodo)
-                ->avg('retribucion_pactada')
+                ->avg('retribucion_pactada'),
         ];
     }
 }

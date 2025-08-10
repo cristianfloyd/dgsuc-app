@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Repositories\Mapuche;
 
-use App\Models\Mapuche\Dh17;
 use App\Data\Mapuche\Dh17Data;
+use App\Models\Mapuche\Dh17;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh17Repository
 {
     public function __construct(
-        private readonly Dh17 $model
-    ) {}
+        private readonly Dh17 $model,
+    ) {
+    }
 
     public function find(int $id): ?Dh17
     {

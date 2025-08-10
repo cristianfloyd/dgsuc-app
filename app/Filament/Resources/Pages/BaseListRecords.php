@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Pages;
 
-use Illuminate\Support\Facades\Log;
-use Filament\Resources\Pages\ListRecords;
 use App\Services\TableManager\TableInitializationManager;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Log;
 
 abstract class BaseListRecords extends ListRecords
 {

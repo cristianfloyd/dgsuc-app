@@ -2,37 +2,31 @@
 
 namespace App\Models;
 
-use App\Data\Responses\LicenciaVigenteData;
 use App\Services\EncodingService;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
 class LicenciaVigente extends Model
 {
     use MapucheConnectionTrait;
 
     /**
-     * Nombre de la tabla temporal
+     * Indicar que no usamos timestamps para evitar errores.
+     */
+    public $timestamps = false;
+
+    /**
+     * Nombre de la tabla temporal.
      */
     protected $table = 'licencias_vigentes_temp';
 
     /**
-     * Indicar que no usamos timestamps para evitar errores
-     */
-    public $timestamps = false;
-
-
-
-    /**
-     * Propiedades para manejar los datos de licencias
+     * Propiedades para manejar los datos de licencias.
      */
     protected $fillable = [
         'nro_legaj',
@@ -49,7 +43,7 @@ class LicenciaVigente extends Model
     ];
 
     /**
-     * Casteos para las propiedades
+     * Casteos para las propiedades.
      */
     protected $casts = [
         'nro_legaj' => 'integer',
@@ -64,7 +58,7 @@ class LicenciaVigente extends Model
     ];
 
     /**
-     * Campos que requieren conversión de codificación
+     * Campos que requieren conversión de codificación.
      */
     protected $encodedFields = [
         'descripcion_licencia',
@@ -77,22 +71,10 @@ class LicenciaVigente extends Model
         return EncodingService::toUtf8($value);
     }
 
-    // ########################################################
-
     /**
-     * Obtener el nombre de la conexión de la base de datos estáticamente
-     *
-     * @return string
+     * Constructor que asegura que la tabla temporal exista.
      */
-    protected static function getMapucheConnection(): string
-    {
-        return (new static())->getConnectionName();
-    }
-
-    /**
-     * Constructor que asegura que la tabla temporal exista
-     */
-    public static function boot(array $attributes = [])
+    public static function boot(array $attributes = []): void
     {
         parent::boot();
 
@@ -101,12 +83,12 @@ class LicenciaVigente extends Model
     }
 
     /**
-     * Crea la tabla temporal si no existe
+     * Crea la tabla temporal si no existe.
      */
     public static function crearTablaTemporal(): void
     {
-        if (! self::tablaExiste()) {
-            Schema::connection(self::getMapucheConnection())->create('licencias_vigentes_temp', function (Blueprint $table) {
+        if (!self::tablaExiste()) {
+            Schema::connection(self::getMapucheConnection())->create('licencias_vigentes_temp', function (Blueprint $table): void {
                 $table->id();
                 $table->integer('nro_legaj');
                 $table->integer('inicio');
@@ -126,17 +108,6 @@ class LicenciaVigente extends Model
     }
 
     /**
-     * Verifica si la tabla temporal existe.
-     *
-     * @return bool
-     */
-    private static function tablaExiste(): bool
-    {
-        return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
-    }
-
-
-    /**
      * Limpia los registros antiguos de la tabla temporal.
      * Este método puede ser llamado desde un comando programado.
      */
@@ -150,13 +121,12 @@ class LicenciaVigente extends Model
         Log::info("Se eliminaron {$count} registros antiguos de licencias vigentes temporales");
     }
 
-
-
     /**
      * Pobla la tabla temporal con los resultados de la consulta
-     * y devuelve una consulta builder para operar sobre esos datos
+     * y devuelve una consulta builder para operar sobre esos datos.
      *
      * @param array $legajos
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public static function cargarLicenciasVigentes(array $legajos, string $sessionId): \Illuminate\Database\Eloquent\Builder
@@ -181,7 +151,7 @@ class LicenciaVigente extends Model
                 if ($cachedLegajos == $legajos) {
                     Log::info('Usando licencias ya cargadas en la base de datos temporal', [
                         'session_id' => $sessionId,
-                        'count' => $existingCount
+                        'count' => $existingCount,
                     ]);
                     return self::query()->where('session_id', $sessionId);
                 }
@@ -189,7 +159,7 @@ class LicenciaVigente extends Model
                 // Si son diferentes legajos, eliminar los registros anteriores
                 self::where('session_id', $sessionId)->delete();
                 Log::info('Eliminando licencias anteriores para cargar nuevas', [
-                    'session_id' => $sessionId
+                    'session_id' => $sessionId,
                 ]);
             }
 
@@ -202,7 +172,7 @@ class LicenciaVigente extends Model
 
             if ($licencias->count() === 0) {
                 Log::info('No se encontraron licencias vigentes para los legajos consultados', [
-                    'legajos' => $legajos
+                    'legajos' => $legajos,
                 ]);
                 return self::query()->where('session_id', $sessionId);
             }
@@ -223,7 +193,7 @@ class LicenciaVigente extends Model
                     'fecha_hasta' => $licencia->fecha_hasta,
                     'nro_cargo' => $licencia->nro_cargo,
                     'session_id' => $sessionId,
-                    'dias_totales' => $diasTotales
+                    'dias_totales' => $diasTotales,
                 ];
             }
 
@@ -232,7 +202,7 @@ class LicenciaVigente extends Model
 
             Log::info('Licencias vigentes cargadas correctamente en la base de datos temporal', [
                 'session_id' => $sessionId,
-                'count' => count($licenciasData)
+                'count' => \count($licenciasData),
             ]);
 
             // Devolver una consulta que filtra por la sesión actual
@@ -241,7 +211,7 @@ class LicenciaVigente extends Model
             Log::error('Error al cargar licencias vigentes: ' . $e->getMessage(), [
                 'legajos' => $legajos,
                 'session_id' => $sessionId,
-                'exception' => $e
+                'exception' => $e,
             ]);
 
             // En caso de error, devolver una consulta vacía
@@ -250,7 +220,7 @@ class LicenciaVigente extends Model
     }
 
     /**
-     * Obtiene la descripción legible de la condición
+     * Obtiene la descripción legible de la condición.
      *
      * @return string
      */
@@ -270,10 +240,32 @@ class LicenciaVigente extends Model
     }
 
     /**
-     * Elimina la tabla temporal (útil para pruebas o limpiezas)
+     * Elimina la tabla temporal (útil para pruebas o limpiezas).
      */
     public static function eliminarTablaTemporal(): void
     {
         Schema::connection(self::getMapucheConnection())->dropIfExists('suc.temp_licencias_vigentes');
+    }
+
+    // ########################################################
+
+    /**
+     * Obtener el nombre de la conexión de la base de datos estáticamente.
+     *
+     * @return string
+     */
+    protected static function getMapucheConnection(): string
+    {
+        return (new static())->getConnectionName();
+    }
+
+    /**
+     * Verifica si la tabla temporal existe.
+     *
+     * @return bool
+     */
+    private static function tablaExiste(): bool
+    {
+        return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
     }
 }

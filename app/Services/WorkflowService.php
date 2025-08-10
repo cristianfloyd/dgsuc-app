@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Contracts\WorkflowServiceInterface;
 use App\Models\ProcessLog;
-use App\Services\ProcessLogService;
 use Illuminate\Support\Facades\Log;
 
 /** Proporciona un servicio para gestionar el flujo de trabajo de un proceso.
@@ -20,12 +19,10 @@ class WorkflowService implements WorkflowServiceInterface
 {
     protected $processLogService;
 
-
     public function __construct(ProcessLogService $processLogService)
     {
         $this->processLogService = $processLogService;
     }
-
 
     /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
      *
@@ -47,6 +44,7 @@ class WorkflowService implements WorkflowServiceInterface
      * También se registra el evento de reinicio del flujo de trabajo en el log.
      *
      * @param ProcessLog $processLog La instancia de registro de proceso que se reiniciará.
+     *
      * @return void
      */
     public function resetWorkflow(ProcessLog $processLog): void
@@ -59,9 +57,8 @@ class WorkflowService implements WorkflowServiceInterface
         $processLog->steps = $updatedSteps;
         $processLog->save();
 
-        Log::info("Flujo de trabajo reiniciado", ['process_id' => $processLog->id]);
+        Log::info('Flujo de trabajo reiniciado', ['process_id' => $processLog->id]);
     }
-
 
     /**  Recupera el último registro del proceso de flujo de trabajo, si no se completó o falló.
      *
@@ -78,7 +75,6 @@ class WorkflowService implements WorkflowServiceInterface
         }
         return $latestProcess;
     }
-
 
     /* Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
      * Las keys son los nombres de los pasos y los valores son las descripciones de los pasos(stpes).
@@ -100,13 +96,12 @@ class WorkflowService implements WorkflowServiceInterface
         ];
     }
 
-
-
     /** Obtiene el paso actual en el proceso de flujo de trabajo.
      *
      * Este método recorre los pasos del registro de proceso proporcionado y devuelve el primer paso que no está en estado "completed". Si todos los pasos están en estado "completed", devuelve "null".
      *
      * @param ProcessLog $processLog La instancia de registro de proceso.
+     *
      * @return string|null El paso actual en el proceso de flujo de trabajo, o "null" si todos los pasos están completados.
      */
     public function getCurrentStep(ProcessLog $processLog): string|null
@@ -121,8 +116,6 @@ class WorkflowService implements WorkflowServiceInterface
         return null;
     }
 
-
-
     /* Actualiza el estado de un paso en el registro del proceso de flujo de trabajo.
      *
      * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada al estado indicado. También realiza algunas acciones adicionales, como:
@@ -133,7 +126,7 @@ class WorkflowService implements WorkflowServiceInterface
      * @param string $step El nombre del paso a actualizar.
      * @param string $status El nuevo estado del paso (por ejemplo, "completed", "in_progress", etc.).
      */
-    public function updateStep(ProcessLog $processLog, string $step, string $status)
+    public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
         // Actualiza el estado del step en el workflow
         $steps = $processLog->steps;
@@ -149,7 +142,6 @@ class WorkflowService implements WorkflowServiceInterface
         }
     }
 
-
     /** Completa un paso en el proceso de flujo de trabajo y no actualiza el siguiente paso si está disponible.
      *
      * Este método actualiza el estado del paso especificado en la instancia de ProcessLog proporcionada a "completed". Luego recupera el siguiente paso en el proceso de flujo de trabajo.
@@ -163,15 +155,15 @@ class WorkflowService implements WorkflowServiceInterface
         Log::info("Paso completado ( completeStep() ): {$step}", ['process_id' => $processLog->id]);
     }
 
-
     /** Obtiene el siguiente paso de el flujo de trabajo.
      *
      * @param string $currentStep El paso actual en el flujo de trabajo.
+     *
      * @return string|null El siguiente paso en el flujo de trabajo, o null si no hay más pasos.
      */
     public function getNextStep(?string $currentStep = 'start'): ?string
     {
-        $currentStep = $currentStep ?? 'start';
+        $currentStep ??= 'start';
 
         $workflow = [
             'start' => 'obtener_cuils_not_in_afip',
@@ -186,6 +178,7 @@ class WorkflowService implements WorkflowServiceInterface
      *
      * @param ProcessLog $processLog El registro del proceso.
      * @param string $step El paso a verificar.
+     *
      * @return bool Verdadero si el paso ha sido completado, falso en caso contrario.
      */
     public function isStepCompleted(ProcessLog $processLog, string $step): bool
@@ -193,10 +186,10 @@ class WorkflowService implements WorkflowServiceInterface
         return $processLog->steps[$step] === 'completed';
     }
 
-
     /** Obtiene la URL de un paso del flujo de trabajo.
      *
      * @param string $step El nombre del paso del flujo de trabajo.
+     *
      * @return string La URL del paso del flujo de trabajo.
      */
     public function getStepUrl(?string $step): ?string
@@ -215,13 +208,11 @@ class WorkflowService implements WorkflowServiceInterface
             'poblar_tabla_temp_cuils' => '/afip/compare-cuils',
             'ejecutar_funcion_almacenada' => '/afip/compare-cuils',
             'obtener_cuils_no_insertados' => '/afip/compare-cuils',
-            'exportar_txt_para_afip' => '/export-results'
+            'exportar_txt_para_afip' => '/export-results',
         ];
 
         return $urls[$step] ?? null;
     }
-
-
 
     /**
      * Marca un paso del flujo de trabajo como fallido.
@@ -229,7 +220,7 @@ class WorkflowService implements WorkflowServiceInterface
      * @param string $step El nombre del paso a marcar como fallido.
      * @param string $errorMessage El mensaje de error (opcional).
      */
-    public function failStep(string $step, string $errorMessage = null): void
+    public function failStep(string $step, ?string $errorMessage = null): void
     {
         $processLog = $this->getLatestWorkflow(); // Obtiene el proceso actual
         if ($processLog) {
@@ -254,6 +245,7 @@ class WorkflowService implements WorkflowServiceInterface
      * actualiza el estado a 'completed' y establece la fecha de finalización.
      *
      * @param ProcessLog $processLog El registro del proceso a verificar y potencialmente actualizar.
+     *
      * @return bool Retorna true si todos los pasos están completados, false en caso contrario.
      */
     public function isProcessCompleted(ProcessLog $processLog): bool
@@ -263,13 +255,13 @@ class WorkflowService implements WorkflowServiceInterface
             function ($carry, $step) {
                 return $carry && $step === 'completed';
             },
-            true
+            true,
         );
 
         if ($allCompleted && $processLog->status !== 'completed') {
             $processLog->update([
                 'status' => 'completed',
-                'completed_at' => now()
+                'completed_at' => now(),
             ]);
         } elseif (!$allCompleted) {
             return false;

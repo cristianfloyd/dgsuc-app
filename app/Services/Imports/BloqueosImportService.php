@@ -2,29 +2,27 @@
 
 namespace App\Services\Imports;
 
-use PDO;
-use Carbon\Carbon;
-use App\Imports\BloqueosImport;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Traits\MapucheConnectionTrait;
-use App\Services\Reportes\BloqueosService;
-use App\Exceptions\DuplicateCargoException;
 use App\Exceptions\Imports\ImportException;
 use App\Exceptions\ImportValidationException;
-use App\Services\Reportes\BloqueosProcessService;
+use App\Imports\BloqueosImport;
+use App\Traits\MapucheConnectionTrait;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BloqueosImportService
 {
     use MapucheConnectionTrait;
 
     private ImportValidationService $validationService;
+
     private ImportNotificationService $notificationService;
+
     private $connection;
 
     public function __construct(
         ImportValidationService $validationService,
-        ImportNotificationService $notificationService
+        ImportNotificationService $notificationService,
     ) {
         $this->validationService = $validationService;
         $this->notificationService = $notificationService;
@@ -43,30 +41,28 @@ class BloqueosImportService
             Log::info('Fila procesada exitosamente', [
                 'nro_liqui' => $nroLiqui,
                 'processed_data' => $processedRow,
-                'duration_ms' => now()->diffInMilliseconds($startTime)
+                'duration_ms' => now()->diffInMilliseconds($startTime),
             ]);
 
             return $processedRow;
-
-
         } catch (\Exception $e) {
             Log::error('Error procesando fila', [
                 'row' => $row,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw new ImportException(
                 'Error procesando fila: ' . $e->getMessage(),
-                previous: $e
+                previous: $e,
             );
         }
     }
 
-
-
     /**
-     * Procesa y valida los datos del archivo Excel
+     * Procesa y valida los datos del archivo Excel.
+     *
      * @param array $row Fila del Excel
+     *
      * @return array
      */
     public function processRow(array $row): array
@@ -79,13 +75,17 @@ class BloqueosImportService
     }
 
     /**
-     * Parsea y valida fechas en múltiples formatos
+     * Parsea y valida fechas en múltiples formatos.
+     *
      * @param mixed $date
+     *
      * @return string|null
      */
     private function parseDate($date): ?string
     {
-        if (empty($date)) return null;
+        if (empty($date)) {
+            return null;
+        }
 
         try {
             // Intentar diferentes formatos de fecha
@@ -93,14 +93,14 @@ class BloqueosImportService
                 'd/m/Y', 'Y-m-d', 'd-m-Y',
                 'd/m/y', 'Y/m/d',
                 // Formato Excel (número de días desde 1900)
-                function($value) {
+                function ($value) {
                     return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
-                }
+                },
             ];
 
             foreach ($formats as $format) {
                 try {
-                    if (is_callable($format)) {
+                    if (\is_callable($format)) {
                         $parsed = $format($date);
                     } else {
                         $parsed = Carbon::createFromFormat($format, $date);
@@ -114,16 +114,17 @@ class BloqueosImportService
                 }
             }
 
-            throw new \Exception("Formato de fecha no válido");
-
+            throw new \Exception('Formato de fecha no válido');
         } catch (\Exception $e) {
             throw new ImportValidationException("Error al procesar fecha: {$date}");
         }
     }
 
     /**
-     * Valida el formato del legajo
+     * Valida el formato del legajo.
+     *
      * @param mixed $legajo
+     *
      * @return int
      */
     private function validateLegajo($legajo): int
@@ -135,8 +136,10 @@ class BloqueosImportService
     }
 
     /**
-     * Valida el formato del cargo
+     * Valida el formato del cargo.
+     *
      * @param mixed $cargo
+     *
      * @return int
      */
     private function validateCargo($cargo): int
@@ -156,8 +159,6 @@ class BloqueosImportService
         ];
     }
 
-
-
     private function handleSuccessfulImport(BloqueosImport $importer, array $context): void
     {
         $processedCount = $importer->getProcessedRowsCount();
@@ -166,7 +167,7 @@ class BloqueosImportService
             ...$context,
             'processed_rows' => $processedCount,
             'duration_seconds' => now()->diffInSeconds($context['start_time']),
-            'memory_usage' => $this->getMemoryUsage()
+            'memory_usage' => $this->getMemoryUsage(),
         ]);
 
         $this->notificationService->sendSuccessNotification();
@@ -176,16 +177,16 @@ class BloqueosImportService
     {
         Log::error('Error en importación', [
             ...$context,
-            'error_type' => get_class($e),
+            'error_type' => $e::class,
             'error_message' => $e->getMessage(),
-            'error_trace' => $e->getTraceAsString()
+            'error_trace' => $e->getTraceAsString(),
         ]);
 
         $this->notificationService->sendErrorNotification($e->getMessage());
 
         throw new ImportException(
             'Error al procesar la importación: ' . $e->getMessage(),
-            previous: $e
+            previous: $e,
         );
     }
 

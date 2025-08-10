@@ -37,7 +37,7 @@ return (new PhpCsFixer\Config())
         // === STRINGS Y CONCATENACIÓN ===
         'concat_space' => ['spacing' => 'one'], // 'Hello' . 'World'
         'single_quote' => true,
-        'escape_implicit_backslashes' => true,
+        // 'escape_implicit_backslashes' => true,
         
         // === CLASES Y MÉTODOS ===
         'class_attributes_separation' => [
@@ -95,7 +95,7 @@ return (new PhpCsFixer\Config())
         
         // === ESPACIOS Y FORMATO ===
         'binary_operator_spaces' => ['default' => 'single_space'],
-        'cast_spaces' => ['space' => 'none'], // (string)$var
+        'cast_spaces' => ['space' => 'single'], // (string) $var
         'no_spaces_around_offset' => true,
         'ternary_operator_spaces' => true,
         'unary_operator_spaces' => true,
@@ -132,7 +132,6 @@ return (new PhpCsFixer\Config())
         // === OPTIMIZACIONES ===
         'dir_constant' => true, // dirname(__FILE__) -> __DIR__
         'function_to_constant' => true, // phpversion() -> PHP_VERSION
-        'is_null' => true,
         'logical_operators' => true, // and/or -> &&/||
         
     ])

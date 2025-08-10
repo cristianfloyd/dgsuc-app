@@ -2,15 +2,16 @@
 
 namespace App\Repositories\Mapuche;
 
-use App\Models\Mapuche\Dh35;
 use App\Data\Mapuche\Dh35Data;
+use App\Models\Mapuche\Dh35;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh35Repository
 {
     public function __construct(
-        private readonly Dh35 $model
-    ) {}
+        private readonly Dh35 $model,
+    ) {
+    }
 
     public function find(string $tipoEscal, string $codcCarac): ?Dh35
     {

@@ -3,10 +3,10 @@
 namespace App\Exports;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapping, WithStyles
@@ -37,7 +37,7 @@ class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapp
             'UACAD',
             'Observaciones',
             'Mensaje Error',
-            'Procesado'
+            'Procesado',
         ];
     }
 
@@ -65,7 +65,7 @@ class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapp
             $record->cargo->codc_uacad ?? '',
             $record->observaciones ?? '',
             $record->mensaje_error ?? '',
-            $record->esta_procesado ? 'Sí' : 'No'
+            $record->esta_procesado ? 'Sí' : 'No',
         ];
     }
 

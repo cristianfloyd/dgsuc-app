@@ -2,16 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\DataMapperInterface;
+use App\Contracts\FileProcessorInterface;
 use App\services\ColumnMetadata;
 use App\Services\DatabaseService;
-use App\Contracts\DataMapperInterface;
 use App\Services\FileProcessorService;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\FileProcessorInterface;
 
 class FileProcessorServiceProvider extends ServiceProvider
 {
-
     public function register(): void
     {
         $this->app->bind(FileProcessorInterface::class, function ($app) {
@@ -22,9 +21,7 @@ class FileProcessorServiceProvider extends ServiceProvider
         });
     }
 
-
     public function boot(): void
     {
-        //
     }
 }

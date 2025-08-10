@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Data;
 
 class RepOrdenPagoDtoData extends Data
 {
     /**
-     * Constructor del DTO para RepOrdenPago
-     * 
+     * Constructor del DTO para RepOrdenPago.
+     *
      * @param int $nroLiqui Número de liquidación
      * @param int $banco Código del banco
      * @param string $codnFunci Código de función
@@ -39,77 +39,54 @@ class RepOrdenPagoDtoData extends Data
     public function __construct(
         #[Required, Min(1)]
         public readonly int $nroLiqui,
-        
         #[Required, Min(1)]
         public readonly int $banco,
-        
         #[Required]
         public readonly string $codnFunci,
-        
         #[Required]
         public readonly string $codnFuent,
-        
         #[Required]
         public readonly string $codcUacad,
-        
         #[Required]
         public readonly string $caracter,
-        
         #[Required]
         public readonly string $codnProgr,
-        
         #[Required, Min(0)]
         public readonly float $remunerativo,
-        
         #[Required, Min(0)]
         public readonly float $noRemunerativo,
-        
         #[Required, Min(0)]
         public readonly float $otrosNoRemunerativo,
-        
         #[Required, Min(0)]
         public readonly float $bruto,
-        
         #[Required, Min(0)]
         public readonly float $descuentos,
-        
         #[Required, Min(0)]
         public readonly float $aportes,
-        
         #[Required, Min(0)]
         public readonly float $sueldo,
-        
         #[Required, Min(0)]
         public readonly float $neto,
-        
         #[Required, Min(0)]
         public readonly float $estipendio,
-        
         #[Required, Min(0)]
         public readonly float $medResid,
-        
         #[Required, Min(0)]
         public readonly float $productividad,
-        
         #[Required, Min(0)]
         public readonly float $salFam,
-        
         #[Required, Min(0)]
         public readonly float $hsExtras,
-        
         #[Required, Min(0)]
         public readonly float $total,
-        
         #[Required, Min(0)]
         public readonly float $impGasto,
     ) {
     }
-    
+
     /**
      * Convierte el DTO a un array con las claves en snake_case
-     * para que coincidan con los nombres de columnas en la base de datos
-     * 
-     * @return array
+     * para que coincidan con los nombres de columnas en la base de datos.
      */
     public function toArray(): array
     {
