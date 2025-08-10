@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Traits\MapucheConnectionTrait;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static hydrate(array $results)
@@ -17,7 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EmbargoProcesoResult extends Model
 {
-    use MapucheConnectionTrait, EncodingTrait;
+    use MapucheConnectionTrait;
+    use EncodingTrait;
 
     public $incrementing = true;
 
@@ -229,7 +228,7 @@ class EmbargoProcesoResult extends Model
         $connection = self::obtenerConexion();
 
         // Crear una instancia temporal para acceder a métodos no estáticos
-        $instance = new static();
+        $instance = new self();
         $tableName = $instance->getTable();
 
         // Iniciar una transacción para garantizar la integridad de los datos
@@ -363,7 +362,7 @@ class EmbargoProcesoResult extends Model
     protected static function obtenerConexion()
     {
         // Crear una instancia temporal para acceder a los métodos de instancia
-        $instance = new static();
+        $instance = new self();
 
         // Verificar si el trait implementa algún método específico para obtener la conexión
         if (method_exists($instance, 'getMapucheConnection')) {

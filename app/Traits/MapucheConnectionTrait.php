@@ -116,4 +116,53 @@ trait MapucheConnectionTrait
     {
         return $this->getTable();
     }
+
+    /**
+     * Obtiene la conexión desde el trait.
+     *
+     * @return \Illuminate\Database\Connection
+     */
+    public function getMapucheConnection()
+    {
+        $selectedConnection = Session::get(DatabaseConnectionService::SESSION_KEY);
+
+        // Verificamos si existe la conexión "secondary" configurada por el middleware
+        $hasSecondaryConnection = Config::has('database.connections.secondary');
+
+        // Determinamos la conexión predeterminada
+        $defaultConnection = \defined('DatabaseConnectionService::DEFAULT_CONNECTION')
+            ? DatabaseConnectionService::DEFAULT_CONNECTION
+            : 'pgsql-prod';
+
+        // 1. Si hay una conexión en la sesión y existe en la configuración, usamos esa
+        if ($selectedConnection && Config::has("database.connections.{$selectedConnection}")) {
+            // Verificar que la base de datos configurada existe
+            $dbConfig = Config::get("database.connections.{$selectedConnection}");
+            $dbName = $dbConfig['database'] ?? null;
+
+            if (empty($dbName)) {
+                Log::warning("La conexión '{$selectedConnection}' no tiene una base de datos configurada, usando predeterminada");
+                return DB::connection($defaultConnection);
+            }
+
+            return DB::connection($selectedConnection);
+        }
+
+        // 2. Si existe la conexión "secondary", usamos esa (configurada por el middleware)
+        if ($hasSecondaryConnection) {
+            // Verificar que la base de datos configurada existe
+            $dbConfig = Config::get('database.connections.secondary');
+            $dbName = $dbConfig['database'] ?? null;
+
+            if (empty($dbName)) {
+                Log::warning("La conexión 'secondary' no tiene una base de datos configurada, usando predeterminada");
+                return DB::connection($defaultConnection);
+            }
+
+            return DB::connection('secondary');
+        }
+
+        // 3. Como último recurso, usamos la conexión predeterminada
+        return DB::connection($defaultConnection);
+    }
 }
