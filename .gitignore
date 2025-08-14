@@ -27,3 +27,4 @@ phpcs-report.txt
 .cursorrules*
 .cursor/*
 cursor-*
+.claude.md
