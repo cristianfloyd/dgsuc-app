@@ -28,4 +28,5 @@ phpcs-report.txt
 .cursor/*
 cursor-*
 .claude.md
-app/docs/sql/*
+/docs/sql
+/docs/sql/*
