@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\DataMapperInterface;
 use App\Contracts\FileProcessorInterface;
-use App\services\ColumnMetadata;
+use App\Services\ColumnMetadata;
 use App\Services\DatabaseService;
 use App\Services\FileProcessorService;
 use Illuminate\Support\ServiceProvider;

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\services\ColumnMetadata;
+use App\Services\ColumnMetadata;
 
 class TestController extends Controller
 {
