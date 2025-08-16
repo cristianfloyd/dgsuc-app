@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Contracts;
+namespace app\Contracts;
 
-use App\Models\UploadedFile;
+use app\Models\UploadedFile;
 use Illuminate\Database\Eloquent\Collection;
 
 interface FileProcessorInterface

@@ -8,7 +8,7 @@ use App\Contracts\TableManagementServiceInterface;
 use App\Contracts\TransactionServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
-use app\Services\ColumnMetadata;
+use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
 use Illuminate\Support\ServiceProvider;
