@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\AfipMapucheMiSimplificacion as ModelsAfipMapucheMiSimplificacion;
-use App\Services\ColumnMetadata;
+use app\Services\ColumnMetadata;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\Action;

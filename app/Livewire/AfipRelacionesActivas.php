@@ -10,7 +10,7 @@ use App\Contracts\TransactionServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Jobs\ImportAfipRelacionesActivasJob;
 use App\Models\UploadedFile;
-use App\Services\ColumnMetadata;
+use app\Services\ColumnMetadata;
 use App\Services\ValidationService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
