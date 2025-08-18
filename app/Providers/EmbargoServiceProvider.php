@@ -20,7 +20,10 @@ class EmbargoServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $tableService = $this->app->make(EmbargoTableService::class);
-        $tableService->ensureTableExists();
+        // Solo ejecutar si la aplicación está completamente booteada
+        if ($this->app->isBooted()) {
+            $tableService = $this->app->make(EmbargoTableService::class);
+            $tableService->ensureTableExists();
+        }
     }
 }
