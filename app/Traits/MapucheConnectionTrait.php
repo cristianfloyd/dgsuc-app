@@ -22,11 +22,6 @@ trait MapucheConnectionTrait
      */
     public function getConnectionName(): string
     {
-        // Verificar si la aplicación está completamente booteada antes de acceder a Session y Config
-        if (!app()->isBooted()) {
-            return $this->getDefaultConnection();
-        }
-
         // Primero intentamos obtener la conexión de la sesión
         $selectedConnection = Session::get(DatabaseConnectionService::SESSION_KEY);
 
@@ -34,7 +29,7 @@ trait MapucheConnectionTrait
         $hasSecondaryConnection = Config::has('database.connections.secondary');
 
         // Determinamos la conexión predeterminada
-        $defaultConnection = $this->getDefaultConnection();
+        $defaultConnection = DatabaseConnectionService::DEFAULT_CONNECTION;
 
         // Estrategia de selección de conexión:
         // 1. Si hay una conexión en la sesión y existe en la configuración, usamos esa
@@ -68,16 +63,6 @@ trait MapucheConnectionTrait
 
         // 3. Como último recurso, usamos la conexión predeterminada
         return $defaultConnection;
-    }
-
-    /**
-     * Obtiene la conexión predeterminada de forma segura.
-     */
-    private function getDefaultConnection(): string
-    {
-        return \defined('DatabaseConnectionService::DEFAULT_CONNECTION')
-            ? DatabaseConnectionService::DEFAULT_CONNECTION
-            : 'pgsql-prod';
     }
 
     /**
@@ -126,18 +111,13 @@ trait MapucheConnectionTrait
      */
     public function getMapucheConnection()
     {
-        // Verificar si la aplicación está completamente booteada antes de acceder a Session y Config
-        if (!app()->isBooted()) {
-            return DB::connection($this->getDefaultConnection());
-        }
-
         $selectedConnection = Session::get(DatabaseConnectionService::SESSION_KEY);
 
         // Verificamos si existe la conexión "secondary" configurada por el middleware
         $hasSecondaryConnection = Config::has('database.connections.secondary');
 
         // Determinamos la conexión predeterminada
-        $defaultConnection = $this->getDefaultConnection();
+        $defaultConnection = DatabaseConnectionService::DEFAULT_CONNECTION;
 
         // 1. Si hay una conexión en la sesión y existe en la configuración, usamos esa
         if ($selectedConnection && Config::has("database.connections.{$selectedConnection}")) {
