@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\dh11RestoreService;
+use App\Services\Dh11RestoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -25,16 +25,16 @@ class RestoreCategoryFiscalPeriod extends Command
     /**
      * El servicio de restauración de categorías.
      *
-     * @var dh11RestoreService
+     * @var Dh11RestoreService
      */
     protected $restoreService;
 
     /**
      * Constructor del comando.
      *
-     * @param dh11RestoreService $restoreService
+     * @param Dh11RestoreService $restoreService
      */
-    public function __construct(dh11RestoreService $restoreService)
+    public function __construct(Dh11RestoreService $restoreService)
     {
         parent::__construct();
         $this->restoreService = $restoreService;
