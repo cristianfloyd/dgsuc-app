@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\services\ColumnMetadata;
+use App\Services\ColumnMetadata;
 use Illuminate\Support\ServiceProvider;
 
 class ColumnMetadataServiceProvider extends ServiceProvider
