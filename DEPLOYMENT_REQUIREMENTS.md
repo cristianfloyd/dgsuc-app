@@ -39,8 +39,8 @@ Backup: Sistema de backup automático
 
 ### Versión y Extensiones
 ```bash
-# PHP 8.3+ con las siguientes extensiones
-php >= 8.3
+# PHP 8.4+ con las siguientes extensiones
+php >= 8.4
 php-cli
 php-fpm
 php-common
