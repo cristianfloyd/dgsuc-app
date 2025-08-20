@@ -22,7 +22,7 @@
         </x-filament::card>
     </div>
 
-    <x-filament::table>
+    {{-- <x-filament::table>
         <x-slot name="header">
             <x-filament::table.header-cell>Cargo</x-filament::table.header-cell>
             <x-filament::table.header-cell>Legajo</x-filament::table.header-cell>
@@ -46,5 +46,5 @@
                 <x-filament::table.cell>{{ $resultado['resultado'] }}</x-filament::table.cell>
             </x-filament::table.row>
         @endforeach
-    </x-filament::table>
+    </x-filament::table> --}}
 </div>
