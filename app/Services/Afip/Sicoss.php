@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Services\Afip;
+
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Mapuche\MapucheConfig;
