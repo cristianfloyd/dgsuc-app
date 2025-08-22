@@ -335,7 +335,7 @@ SESSION_DRIVER=redis
 QUEUE_CONNECTION=redis
 
 REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
+REDIS_PASSWORD=password_para_redis_cambiarlo
 REDIS_PORT=6379
 
 # Mail Configuration
