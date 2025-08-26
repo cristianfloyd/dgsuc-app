@@ -46,6 +46,8 @@ use App\Repositories\Sicoss\SicossLegajoFilterRepository;
 use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
 use App\Repositories\Sicoss\SicossOrchestatorRepository;
 use App\Repositories\SicossReporteRepository;
+use App\Repositories\Contracts\ApexUsuarioRepositoryInterface;
+use App\Repositories\EloquentApexUsuarioRepository;
 use App\Services\CategoryUpdateService;
 use Illuminate\Support\ServiceProvider;
 
@@ -90,6 +92,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SicossLegajoFilterRepositoryInterface::class, SicossLegajoFilterRepository::class);
         $this->app->bind(SicossLegajoProcessorRepositoryInterface::class, SicossLegajoProcessorRepository::class);
         $this->app->bind(SicossOrchestatorRepositoryInterface::class, SicossOrchestatorRepository::class);
+        
+        // Repository ApexUsuario para manejo de encoding
+        $this->app->bind(ApexUsuarioRepositoryInterface::class, EloquentApexUsuarioRepository::class);
 
         // Registrar la implementación concreta primero
         $this->app->bind(

@@ -191,7 +191,7 @@ class SicossExportService
 
         // Datos finales
         $linea .= $this->formatearNumero($registro->hstrab, 3);
-        $linea .= $registro->seguro ? '1' : '0';
+        $linea .= $registro->seguro ? 'T' : 'F';
         $linea .= $this->formatearDecimal($registro->ley, 12);
         $linea .= $this->formatearDecimal($registro->incsalarial, 12);
         $linea .= $this->formatearDecimal($registro->remimp11, 12);

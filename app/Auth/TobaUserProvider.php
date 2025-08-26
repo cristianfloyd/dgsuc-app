@@ -2,7 +2,7 @@
 
 namespace App\Auth;
 
-use App\Models\TobaUser;
+use App\Models\ApexUsuario;
 use App\Models\User;
 use App\Services\TobaAuthService;
 use Illuminate\Auth\SessionGuard;
@@ -45,8 +45,8 @@ class TobaUserProvider implements UserProvider
             return null;
         }
 
-        // Buscar usuario de Toba
-        $tobaUser = TobaUser::where('usuario', $credentials['usuario'])->first();
+        // Buscar usuario de Toba con corrección de encoding automática
+        $tobaUser = ApexUsuario::where('usuario', $credentials['usuario'])->first();
         if (!$tobaUser) {
             Log::debug('TobaUserProvider: Toba user not found', ['usuario' => $credentials['usuario']]);
             return null;
