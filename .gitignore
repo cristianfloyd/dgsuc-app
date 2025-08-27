@@ -2,6 +2,7 @@
 .php-cs-fixer.cache
 .phpcs-cache
 .php-cs-fixer.cache
+.claude
 .cursorrules*
 .serena
 .cursor/*
