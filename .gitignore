@@ -32,3 +32,4 @@ cursor-*
 claude.md
 /docs/sql
 /docs/sql/*
+public/vendor
