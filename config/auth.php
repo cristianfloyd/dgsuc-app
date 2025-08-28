@@ -74,7 +74,7 @@ return [
         // ],
         'toba_users' => [
             'driver' => 'toba',
-            'model' => App\Models\TobaUser::class,
+            'model' => App\Models\ApexUsuario::class,
         ],
     ],
 

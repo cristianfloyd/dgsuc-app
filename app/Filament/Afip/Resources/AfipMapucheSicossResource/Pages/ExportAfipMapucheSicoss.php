@@ -65,6 +65,7 @@ class ExportAfipMapucheSicoss extends Page
 
     public function export(): void
     {
+        $periodoFiscal = null;
         try {
             $data = $this->form->getState();
             $periodoFiscal = $data['year'] . \sprintf('%02d', $data['month']);
@@ -109,7 +110,7 @@ class ExportAfipMapucheSicoss extends Page
         } catch (\Exception $e) {
             Log::error('Error en exportación SICOSS', [
                 'error' => $e->getMessage(),
-                'periodo' => $periodoFiscal ?? 'No especificado',
+                'periodo' => $periodoFiscal,
             ]);
 
             $this->showErrorNotification('Error durante la exportación: ' . $e->getMessage());

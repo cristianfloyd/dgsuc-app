@@ -147,7 +147,7 @@ class AfipMapucheSicoss extends Model
         'rectificacion_remun' => 'decimal:2',
         'rem_Imp9' => 'decimal:2',
         'contrib_dif' => 'decimal:2',
-        'hstrab' => 'decimal:2',
+        'hstrab' => 'integer',
         'seguro' => 'boolean',
         'ley' => 'decimal:2',
         'incsalarial' => 'decimal:2',

@@ -6,6 +6,13 @@
 *.md diff=markdown
 *.php diff=php
 
+# Asegurar que archivos de configuración tengan LF
+*.env* text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.lock text eol=lf
+
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore

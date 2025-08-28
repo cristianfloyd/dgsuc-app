@@ -171,7 +171,7 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
             $row->rem_imp9,
             $row->contrib_dif,
             $row->hstrab,
-            $row->seguro ? 'Sí' : 'No',
+            $row->seguro ? 'T' : 'F',
             $row->ley,
             $row->incsalarial,
             $row->remimp11,

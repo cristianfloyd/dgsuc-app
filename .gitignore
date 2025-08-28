@@ -1,3 +1,11 @@
+.phpcs-cache
+.php-cs-fixer.cache
+.phpcs-cache
+.php-cs-fixer.cache
+.claude
+.cursorrules*
+.serena
+.cursor/*
 /.phpunit.cache
 /node_modules
 /public/build
@@ -20,10 +28,7 @@ yarn-error.log
 app/Traits/SicossConnectionTrait.php
 app/Traits/MapucheConnectionTrait.php
 phpcs-report.txt
-.phpcs-cache
-.php-cs-fixer.cache
-.phpcs-cache
-.php-cs-fixer.cache
-.cursorrules*
-.cursor/*
 cursor-*
+claude.md
+/docs/sql
+/docs/sql/*

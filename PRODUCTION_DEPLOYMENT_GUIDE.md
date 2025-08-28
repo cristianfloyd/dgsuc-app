@@ -62,7 +62,23 @@ cd /var/www/informes-app
 git checkout production  # o main según configuración
 ```
 
-### Paso 3: Instalación de Dependencias
+### Paso 3: Instalación de Dependencias y Assets
+
+#### Opción A: Usando Docker (Recomendado)
+
+```bash
+# 3.1 Deployment completo con assets
+make prod-deploy
+
+# O paso a paso:
+# 3.2 Compilar assets para producción
+make prod-build-assets
+
+# 3.3 Verificar assets compilados
+make assets-check
+```
+
+#### Opción B: Instalación manual (sin Docker)
 
 ```bash
 # 3.1 Instalar dependencias PHP
@@ -155,7 +171,47 @@ chown -R informes-app:www-data storage
 chown -R informes-app:www-data bootstrap/cache
 ```
 
-### Paso 7: Optimizaciones Laravel
+### Paso 7: Gestión de Assets en Producción
+
+#### Verificación de Assets
+
+```bash
+# Verificar que los assets estén compilados
+ls -la public/build/
+
+# Verificar que Vite haya generado los archivos correctos
+ls -la public/build/assets/
+
+# Verificar manifest.json
+cat public/build/manifest.json
+```
+
+#### Troubleshooting de Assets
+
+```bash
+# Si los assets no se cargan correctamente
+make assets-clean          # Limpiar assets
+make prod-build-assets     # Recompilar para producción
+make assets-check          # Verificar compilación
+
+# Verificar permisos
+chmod -R 755 public/build/
+chown -R informes-app:www-data public/build/
+```
+
+#### Configuración de Nginx para Assets
+
+Asegúrate de que Nginx esté configurado para servir assets estáticos:
+
+```nginx
+location /build {
+    alias /var/www/html/public/build;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+```
+
+### Paso 8: Optimizaciones Laravel
 
 ```bash
 # 7.1 Limpiar caches existentes

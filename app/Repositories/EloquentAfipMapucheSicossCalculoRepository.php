@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Data\AfipMapucheSicossCalculoData;
-use App\Models\AfipMapucheSicossCalculo;
-use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
-use App\Services\DatabaseConnectionService;
-use App\Traits\DynamicConnectionTrait;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use App\Traits\DynamicConnectionTrait;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
+use App\Models\AfipMapucheSicossCalculo;
+use App\Data\AfipMapucheSicossCalculoData;
+use App\Services\DatabaseConnectionService;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 
 class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCalculoRepository
 {
@@ -71,13 +71,13 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
 
             // Dump para visualización en la interfaz (si está en modo debug)
             if (config('app.debug')) {
-                dump([
-                    'conexión_obtenida' => $connectionName,
-                    'conexión_en_sesión' => $sessionConnection,
-                    'conexión_predeterminada' => $defaultConnection,
-                    'existe_secondary' => $secondaryExists,
-                    'tabla' => $this->model->getTable(),
-                ]);
+                // dump([
+                    // 'conexión_obtenida' => $connectionName,
+                    // 'conexión_en_sesión' => $sessionConnection,
+                    // 'conexión_predeterminada' => $defaultConnection,
+                    // 'existe_secondary' => $secondaryExists,
+                    // 'tabla' => $this->model->getTable(),
+                // ]);
             }
 
             // Ejecutar el truncate

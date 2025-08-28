@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Filament\Auth\TobaLogin;
-use App\Models\TobaUser;
+use App\Models\ApexUsuario;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +25,7 @@ class TobaLoginController extends Controller
         ]);
 
         // Verificar si el usuario existe y no está bloqueado antes de intentar login
-        $tobaUser = TobaUser::where('usuario', $credentials['usuario'])->first();
+        $tobaUser = ApexUsuario::where('usuario', $credentials['usuario'])->first();
         
         if (!$tobaUser) {
             return back()->withErrors([
