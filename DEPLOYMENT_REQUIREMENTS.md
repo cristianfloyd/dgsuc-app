@@ -39,8 +39,8 @@ Backup: Sistema de backup automático
 
 ### Versión y Extensiones
 ```bash
-# PHP 8.3+ con las siguientes extensiones
-php >= 8.3
+# PHP 8.4+ con las siguientes extensiones
+php >= 8.4
 php-cli
 php-fpm
 php-common
@@ -335,7 +335,7 @@ SESSION_DRIVER=redis
 QUEUE_CONNECTION=redis
 
 REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
+REDIS_PASSWORD=password_para_redis_cambiarlo
 REDIS_PORT=6379
 
 # Mail Configuration
