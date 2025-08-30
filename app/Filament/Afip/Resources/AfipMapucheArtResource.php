@@ -58,7 +58,7 @@ class AfipMapucheArtResource extends Resource
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
                 TextColumn::make('sueldo')->label('Sueldo'),
                 TextColumn::make('sexo')->label('Sexo'),
-                TextColumn::make('dh30.desc_item')
+                TextColumn::make('establecimiento')
                     ->label('Establecimiento')
                     ->sortable(),
                 TextColumn::make('tarea')->label('Tarea'),

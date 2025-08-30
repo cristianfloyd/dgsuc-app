@@ -70,9 +70,10 @@ class PoblarAfipArtAction extends Action
                     SELECT DISTINCT ON (nro_legaj)
                            nro_legaj, codc_categ, codc_uacad, chkstopliq
                     FROM mapuche.dh03
+                    WHERE dh03.fec_baja IS NULL OR dh03.fec_baja >= mapuche.map_get_fecha_inicio_periodo()
                     ORDER BY nro_legaj, fec_alta DESC
                 )
-                SELECT
+                SELECT DISTINCT ON (b.cuil)
                     d.nro_legaj,
                     b.cuil,
                     TRIM(s.apnom)::VARCHAR AS apellido_y_nombre,
@@ -83,9 +84,11 @@ class PoblarAfipArtAction extends Action
                     d11.codigoescalafon AS tarea
                 FROM base_cuils b
                 LEFT JOIN suc.afip_mapuche_sicoss s ON b.cuil = s.cuil
+                    AND s.periodo_fiscal = '{$periodoFiscal}'
                 LEFT JOIN mapuche.dh01 d ON b.dni = d.nro_cuil
                 LEFT JOIN latest_dh03 d3 ON d.nro_legaj = d3.nro_legaj
                 LEFT JOIN mapuche.dh11 d11 ON d3.codc_categ = d11.codc_categ
+                ORDER BY b.cuil, s.periodo_fiscal DESC
             ");
 
             DB::connection($connection)->commit();

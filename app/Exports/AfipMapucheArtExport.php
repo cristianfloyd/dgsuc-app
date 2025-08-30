@@ -61,7 +61,7 @@ class AfipMapucheArtExport implements
             $row->nacimiento?->format('d/m/Y'),
             $row->sueldo,
             $row->sexo,
-            $row->dh30?->desc_item,
+            $row->establecimiento,
             $row->tarea,
         ];
     }
