@@ -14,6 +14,9 @@ class SicossCpto205Repository
     public function procesarConceptos(array $liquidaciones): int
     {
         return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
+            // 0 Eliminar tabla temporal si existe
+            $this->eliminarTablaTemporal();
+            
             // 1. Crear tabla temporal para cargos asociados
             $this->crearTablaCargosAsociados($liquidaciones);
 
@@ -23,7 +26,7 @@ class SicossCpto205Repository
             // 3. Crear tabla temporal para cargos nodocentes
             $this->crearTablaCargosNodocentes($liquidaciones);
 
-            // 4. Crear tabla temporal con la unión de resultados
+            // 4. Crear tabla temporal con la unión de 2 y 3
             $this->crearTablaResultados();
 
             // 5. Calcular montos y actualizar tabla final
@@ -62,8 +65,7 @@ class SicossCpto205Repository
             WHERE d1.nro_liqui IN ({$liquidacionesStr})
             AND d2.codigoescalafon = 'DOCE'
             AND d2.codc_dedic IN ('EXCL', 'SEMI')
-            AND d2.codc_categ in ('TITE','TITS', 'TITP','ASOE','ASOS','ASOP',
-                                'ADJE','ADJS','ADJP','JTPE','JTPS','JTPS')
+            AND d2.codc_categ in ('TITE','TITS', 'TITP','ASOE','ASOS','ASOP','ADJE','ADJS','ADJP','JTPE','JTPS','JTPS')
             AND d1.codn_conce = 205
             ORDER BY 2
         ");
@@ -145,31 +147,49 @@ class SicossCpto205Repository
             ORDER BY nro_legaj
         ");
 
+        //-- obtenemos los montos para todos los agentes que no estan en el archivo anterior
+        DB::connection($this->getConnectionName())->statement("
+            SELECT mapuche.dh21.nro_legaj, c.cuil, ((SUM( impp_conce ) * 100) / 2)::NUMERIC(10, 2) AS monto
+            INTO TEMP tcpto205sinaut
+            FROM mapuche.dh21,
+                vdh01 c
+            WHERE nro_liqui IN ({$liquidacionesStr})
+            AND mapuche.dh21.nro_legaj = c.nro_legaj
+            AND codn_conce = 789
+            AND mapuche.dh21.nro_legaj IN (SELECT DISTINCT nro_legaj FROM mapuche.dh21 WHERE nro_liqui in({$liquidacionesStr}) AND codn_conce = '205')
+            AND mapuche.dh21.nro_legaj NOT IN (SELECT nro_legaj FROM tcpto)
+            GROUP BY mapuche.dh21.nro_legaj, c.cuil
+            ORDER BY nro_legaj;
+        ");
+        
+
         // Luego actualizamos la tabla final
         DB::connection($this->getConnectionName())->statement('
             UPDATE suc.afip_mapuche_sicoss
-            SET cpto_no_remun = cpto_no_remun - b.monto,
-                sueldo_adicc = sueldo_adicc + b.monto,
-                rem_impo1 = CASE WHEN rem_total < rem_impo1 THEN rem_impo1 + b.monto ELSE rem_impo1 END,
-                rem_impo2 = rem_impo2 + b.monto,
-                rem_impo3 = rem_impo3 + b.monto,
-                rem_dec_788 = rem_dec_788 + b.monto
+            SET cpto_no_remun = cpto_no_remun - monto,
+                sueldo_adicc  = sueldo_adicc + monto,
+                rem_impo1     = rem_impo1 + monto,
+                rem_impo2     = rem_impo2 + monto,
+                rem_impo3     = rem_impo3 + monto,
+                rem_dec_788   = rem_dec_788 + monto
             FROM tcpto205 b
             WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
-            AND suc.afip_mapuche_sicoss.rem_impo1 <= (
-                SELECT importe * 1
-                FROM mapuche.constante_unica
-                WHERE id_constante = (
-                    SELECT max(id_constante)
-                    FROM mapuche.constante
-                    WHERE nombre = \'TOPAMAX\'
-                )
-            )
+            and rem_impo1 <
+            (select importe * 1 from mapuche.constante_unica where id_constante in 
+            (select max(id_constante) from mapuche.constante where nombre = \'TOPAMAX\'))
+        ');
+
+        DB::connection($this->getConnectionName())->statement('
+            UPDATE suc.afip_mapuche_sicoss
+            SET cpto_no_remun = cpto_no_remun - monto,
+                sueldo_adicc  = sueldo_adicc + monto,
+                rem_impo2     = rem_impo2 + monto
+            FROM tcpto205sinaut b
+            WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
         ');
     }
 
-
-
+    
 
     /**
      * Cuenta los registros en la tabla temporal
@@ -224,5 +244,107 @@ class SicossCpto205Repository
     public function revertirTransaccion(): void
     {
         DB::connection($this->getConnectionName())->rollBack();
+    }
+
+    public function procesarConcepto204(array $liquidaciones): int
+    {
+        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
+            $this->eliminarTablasTemporalesConcepto204();
+            $this->crearTablaDocentes($liquidaciones);
+            $this->crearTablaAllCargos($liquidaciones);
+            $this->actualizarConcepto204();
+            return $this->contarRegistrosConcepto204();
+        });
+    }
+
+    private function eliminarTablasTemporalesConcepto204(): void
+    {
+        DB::connection($this->getConnectionName())->statement('
+            DROP TABLE IF EXISTS tcpto204;
+            DROP TABLE IF EXISTS tcptouno;
+        ');
+    }
+
+    private function crearTablaDocentes(array $liquidaciones): void
+    {
+        $liquidacionesStr = implode(',', $liquidaciones);
+
+        DB::connection($this->getConnectionName())->statement("
+            WITH resultado_cargos_doc AS (
+                SELECT DISTINCT d.nro_legaj, d.nro_cargo, d2.codc_categ, d2.codc_dedic, d2.codigoescalafon, d.coddependesemp
+                FROM mapuche.dh03 d
+                JOIN tcptocargo d1 ON d.nro_legaj = d1.nro_legaj
+                JOIN mapuche.dh11 d2 ON d.codc_categ = d2.codc_categ
+                WHERE d1.nro_liqui IN ({$liquidacionesStr})
+                AND d2.codigoescalafon = 'DOCE'
+                AND d2.codc_dedic NOT IN ('EXCL', 'SEMI')
+                ORDER BY 2
+            ),
+            resultado_cargos_all AS (
+                SELECT DISTINCT d.nro_legaj, d.nro_cargo, d2.codc_categ, d2.codc_dedic, d2.codigoescalafon, d.coddependesemp
+                FROM mapuche.dh03 d
+                JOIN tcptocargo d1 ON d.nro_cargo = d1.nro_cargo
+                JOIN mapuche.dh11 d2 ON d.codc_categ = d2.codc_categ
+                JOIN resultado_cargos_doc a ON d.nro_legaj = a.nro_legaj
+                WHERE d1.nro_liqui IN ({$liquidacionesStr})
+                ORDER BY 2
+            )
+            SELECT * INTO TEMP tcptouno FROM resultado_cargos_all
+        ");
+    }
+
+    private function crearTablaAllCargos(array $liquidaciones): void
+    {
+        $liquidacionesStr = implode(',', $liquidaciones);
+
+        DB::connection($this->getConnectionName())->statement("
+            SELECT mapuche.dh21.nro_legaj, c.cuil, ((SUM(impp_conce) * 100) / 2)::NUMERIC(10, 2) AS monto
+            INTO TEMP tcpto204
+            FROM mapuche.dh21, mapuche.vdh01 c
+            WHERE nro_liqui IN ({$liquidacionesStr})
+            AND mapuche.dh21.nro_legaj = c.nro_legaj
+            AND codn_conce = 790
+            AND mapuche.dh21.nro_legaj IN (
+                SELECT DISTINCT nro_legaj 
+                FROM mapuche.dh21
+                WHERE nro_liqui IN ({$liquidacionesStr}) 
+                AND codn_conce = '204'
+            )
+            GROUP BY mapuche.dh21.nro_legaj, c.cuil 
+            ORDER BY nro_legaj
+        ");
+    }
+
+    private function actualizarConcepto204(): void
+    {
+        DB::connection($this->getConnectionName())->statement("
+            UPDATE suc.afip_mapuche_sicoss
+            SET cpto_no_remun = cpto_no_remun - cpto_no_remun,
+                sueldo_adicc  = sueldo_adicc + cpto_no_remun,
+                rem_impo2     = rem_impo2 + cpto_no_remun
+            WHERE cuil IN (SELECT cuil FROM tcpto205sinaut) 
+            AND cuil NOT IN (
+                SELECT b.cuil 
+                FROM tcptouno a, mapuche.vdh01 b 
+                WHERE a.nro_legaj = b.nro_legaj
+            )
+        ");
+
+        DB::connection($this->getConnectionName())->statement('
+            UPDATE suc.afip_mapuche_sicoss
+            SET rem_impo2    = rem_impo6,
+                rem_impo3    = rem_impo6,
+                rem_dec_788  = rem_impo6,
+                rem_total    = rem_impo6 + cpto_no_remun,
+                sueldo_adicc = rem_impo6
+            FROM tcpto204 b
+            WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
+        ');
+    }
+
+    private function contarRegistrosConcepto204(): int
+    {
+        $resultado = DB::connection($this->getConnectionName())->selectOne("SELECT COUNT(*) as total FROM tcpto204");
+        return (int) $resultado->total;
     }
 }

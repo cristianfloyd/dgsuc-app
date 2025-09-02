@@ -305,11 +305,7 @@ class SicossUpdates extends Page
         }
     }
 
-    /**
-     * Summary of runConcepto205Update
-     * @return void
-     */
-    public function runConcepto205Update(): void
+    public function runConceptos204y205Update(): void
     {
         $this->isProcessing = true;
 
@@ -330,32 +326,52 @@ class SicossUpdates extends Page
                 return;
             }
 
-            // Ejecutar la actualización de concepto 205 con las liquidaciones del período
-            // Por defecto usará las liquidaciones [21, 24, 25, 26, 27] definidas en el servicio
-            $resultado = $this->sicossCpto205Service->actualizarCpto205(
-                [
-                    'liquidaciones' => $liquidaciones,
-                ],
-            );
-            $this->updateResults = $resultado;
+            $resultados = [];
 
-            // Mostrar notificación según el resultado
-            if ($resultado['status'] === 'success') {
+            // Ejecutar actualización de concepto 204
+            $resultado204 = $this->sicossCpto205Service->actualizarCpto204([
+                'liquidaciones' => $liquidaciones,
+            ]);
+            $resultados['concepto_204'] = $resultado204;
+
+            // Ejecutar actualización de concepto 205
+            $resultado205 = $this->sicossCpto205Service->actualizarCpto205([
+                'liquidaciones' => $liquidaciones,
+            ]);
+            $resultados['concepto_205'] = $resultado205;
+
+            $this->updateResults = $resultados;
+
+            // Determinar el estado general
+            $success204 = $resultado204['status'] === 'success';
+            $success205 = $resultado205['status'] === 'success';
+
+            if ($success204 && $success205) {
                 Notification::make()
-                    ->title('Actualización de concepto 205 completada')
+                    ->title('Actualización de conceptos 204/205 completada')
                     ->success()
-                    ->body($resultado['message'])
+                    ->body("Concepto 204: {$resultado204['data']['registros_procesados']} registros | Concepto 205: {$resultado205['data']['registros_procesados']} registros")
+                    ->send();
+            } elseif ($success204 || $success205) {
+                $mensaje = $success204 
+                    ? "Concepto 204 completado, error en 205: {$resultado205['message']}"
+                    : "Concepto 205 completado, error en 204: {$resultado204['message']}";
+                
+                Notification::make()
+                    ->title('Actualización parcial')
+                    ->warning()
+                    ->body($mensaje)
                     ->send();
             } else {
                 Notification::make()
-                    ->title('Error en la actualización')
+                    ->title('Error en ambas actualizaciones')
                     ->danger()
-                    ->body($resultado['message'])
+                    ->body("Error 204: {$resultado204['message']} | Error 205: {$resultado205['message']}")
                     ->send();
             }
         } catch (\Exception $e) {
             Log::error(
-                'Error en actualización de concepto 205',
+                'Error en actualización de conceptos 204/205',
                 [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -464,17 +480,15 @@ class SicossUpdates extends Page
                 ->modalHeading('Actualizar Código de Actividad')
                 ->modalDescription('¿Está seguro que desea actualizar los códigos de actividad? Este proceso es irreversible y puede afectar datos de AFIP.'),
 
-            Action::make('run_concepto205_update')
-                ->label('Actualizar Concepto 205')
+            Action::make('run_conceptos204y205_update')
+                ->label('Actualizar Conceptos 204/205')
                 ->color('success')
                 ->icon('heroicon-o-currency-dollar')
-                ->action('runConcepto205Update')
+                ->action('runConceptos204y205Update')
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
-                ->modalHeading('Actualizar Concepto 205')
-                ->modalDescription('Accion en modo de prueba. No se realizará la actualización.'),
-            // ->modalDescription('¿Está seguro que desea actualizar los datos
-            // del concepto 205 ? Este proceso creará una tabla temporal con los montos calculados para los agentes que tienen el concepto 789 y 205.')
+                ->modalHeading('Actualizar Conceptos 204 y 205')
+                ->modalDescription('¿Está seguro que desea actualizar los conceptos 204 (aportes mínimos) y 205? Este proceso ejecutará ambas actualizaciones secuencialmente y puede tomar varios minutos.')
         ];
     }
 }

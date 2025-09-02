@@ -70,4 +70,40 @@ class SicossCpto205Service
             ];
         }
     }
+
+    public function actualizarCpto204(array $params = []): array
+    {
+        $liquidaciones = $params['liquidaciones'] ?? [];
+        if (empty($liquidaciones)) {
+            return [
+                'status' => 'error',
+                'message' => 'No se encontraron liquidaciones para actualizar el concepto 204',
+                'data' => null,
+            ];
+        }
+
+        try {
+            $totalRegistros = $this->repository->procesarConcepto204($liquidaciones);
+
+            return [
+                'status' => 'success',
+                'message' => "Se procesaron $totalRegistros registros para el concepto 204",
+                'data' => [
+                    'registros_procesados' => $totalRegistros,
+                    'liquidaciones' => $liquidaciones,
+                ],
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error en actualización de concepto 204', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
 }
