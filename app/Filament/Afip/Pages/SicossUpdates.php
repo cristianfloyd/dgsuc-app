@@ -306,7 +306,8 @@ class SicossUpdates extends Page
     }
 
     /**
-     * Ejecuta la actualización de datos del concepto 205 en SICOSS.
+     * Summary of runConcepto205Update
+     * @return void
      */
     public function runConcepto205Update(): void
     {
@@ -316,7 +317,6 @@ class SicossUpdates extends Page
             // Obtener las liquidaciones para el período fiscal seleccionado
             $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
                 ->generaImpositivo()
-                ->definitiva()
                 ->pluck('nro_liqui')
                 ->toArray();
 

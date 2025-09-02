@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
@@ -28,16 +29,15 @@ class AfipMapucheArtExport implements
 
     protected $query;
 
-    public function __construct(string $periodo_fiscal, $query)
+    public function __construct(string $periodo_fiscal, Builder $query)
     {
         $this->periodo_fiscal = $periodo_fiscal;
         $this->query = $query;
     }
 
-    public function query()
+    public function query(): Builder
     {
-        $query = $this->query;
-        return $query;
+        return $this->query;
     }
 
     public function headings(): array
