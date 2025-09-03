@@ -59,7 +59,10 @@ class SicossUpdateService
             $results['update_5_create_tcodact'] = $this->createTcodact();
 
             // Update 6: Actualizar valores por defecto
-            $results['update_6_defaults'] = $this->updateDefaults();
+            // $results['update_6_defaults'] = $this->updateDefaults();
+
+            // Update 6a: Actualizar datos básicos SICOSS desde tcargosliq
+            $results['update_6a_basic_sicoss'] = $this->updateBasicSicossData();
 
             // Updates 7-10: Actualizar situaciones específicas
             $results['update_7_situacion'] = $this->updateSituacionCodsit();
@@ -580,6 +583,43 @@ class SicossUpdateService
                     AND mapuche.{$dh21Table}.codn_conce IN (717, 735, 737, 788)";
 
         $affected = $connection->update($query, $liquidaciones);
+
+        return [
+            'status' => 'success',
+            'rows_affected' => $affected,
+        ];
+    }
+
+    /**
+     * Actualiza los datos básicos de SICOSS con valores estándar desde tcargosliq.
+     *
+     * Este método actualiza la tabla mapuche.dha8 con los valores estándar establecidos
+     * desde la tabla temporal suc.tcargosliq para garantizar la consistencia de los datos
+     * SICOSS básicos antes de aplicar actualizaciones específicas.
+     * Este método establece los siguientes valores por defecto para todos los registros:
+     * 
+     * - codigosituacion = ACTIVO (1)
+     * - codigocondicion = SERVICIOS_COMUNES_MAYOR_18 (1)
+     * - codigoactividad = NULL
+     * - codigozona = 1
+     * - codigomodalcontrat = TIEMPO_COMPLETO_INDETERMINADO (8)
+     * 
+     * @return array{
+     *     status: string,
+     *     rows_affected: int
+     * } Array con el estado de la operación y el número de filas afectadas
+     */
+    public function updateBasicSicossData(): array
+    {
+        $affected = DB::connection($this->getConnectionName())
+            ->update('UPDATE mapuche.dha8 
+                    SET codigosituacion = ' . SicossCodigoSituacion::ACTIVO->value . ', 
+                        codigocondicion = ' . SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value . ', 
+                        codigoactividad = null, 
+                        codigozona = 1, 
+                        codigomodalcontrat = ' . SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value . '
+                    FROM suc.tcargosliq 
+                    WHERE suc.tcargosliq.nro_legaj = mapuche.dha8.nro_legajo');
 
         return [
             'status' => 'success',
