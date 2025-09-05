@@ -65,9 +65,7 @@
                                 {{__('Import')}}
                             </x-dropdown-link>
 
-                            <x-dropdown-link href="{{ route('mapuchemisim') }}" :active="request()->routeIs('mapuchemisim')">
-                                {{__('Mapuche mi Sim')}}
-                            </x-dropdown-link>
+                            
 
                             <x-dropdown-link href="{{ route('mapuche-sicoss-table') }}" :active="request()->routeIs('mapuche-sicoss-table')">
                                 {{__('Mapuche Sicoss Table')}}

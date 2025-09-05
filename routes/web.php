@@ -87,7 +87,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 
     Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
     Route::get('/afip/convertir', ConvertirTabla::class)->name('convertir');
-    Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('afip.mapuche.misimplificacion');
+    // Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('afip.mapuche.misimplificacion');
     Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
     Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
     Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
