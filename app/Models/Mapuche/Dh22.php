@@ -223,6 +223,13 @@ class Dh22 extends Model
         );
     }
 
+    public function descripcionCompleta(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): string => $this->nro_liqui . ' - ' . EncodingService::toUtf8($this->desc_liqui),
+        );
+    }
+
     // ########################## SCOPES ###############################################
     public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
     {
@@ -381,6 +388,7 @@ class Dh22 extends Model
         return static::getLiquidacionesForWidget()
             ->filterByPeriodoFiscal($periodoFiscal)
             ->formateadoParaSelect()
+            ->get()
             ->pluck('descripcion_completa', 'nro_liqui');
     }
 }
