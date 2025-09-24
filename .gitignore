@@ -27,3 +27,5 @@ phpcs-report.txt
 .cursorrules*
 .cursor/*
 cursor-*
+.claude
+.serena
