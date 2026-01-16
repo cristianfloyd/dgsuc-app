@@ -342,13 +342,13 @@ $conceptos_por_legajo = collect($todos_conceptos)->groupBy('nro_leg');
 
 ### Benchmarks Detallados
 
-| Optimización | Antes | Después | Mejora | Factor |
-|-------------|-------|---------|--------|---------|
-| **Consulta Principal** | 233.15s | 7.65s | 96.7% | 30.5x |
-| **Consulta Legajos** | 2.54s | 1.03s | 59.5% | 2.47x |
-| **SubPlan Loops** | 3,666,488 | 0 | 100% | ∞ |
-| **Accesos dh02** | 378,650 | 17 | 99.995% | 22,273x |
-| **Consultas Conceptos** | 189,325 | 1 | 99.999% | 189,325x |
+| Optimización            | Antes     | Después | Mejora    | Factor   |
+|-------------------------|-----------|---------|-----------|----------|
+| **Consulta Principal**  | 233.15s   | 7.65s   | 96.7%     | 30.5x    |
+| **Consulta Legajos**    | 2.54s     | 1.03s   | 59.5%     | 2.47x    |
+| **SubPlan Loops**       | 3,666,488 | 0       | 100%      | ∞        |
+| **Accesos dh02**        | 378,650   | 17      | 99.995%   | 22,273x  |
+| **Consultas Conceptos** | 189,325   | 1       | 99.999%   | 189,325x |
 
 ### Impacto en Memoria
 ```php
