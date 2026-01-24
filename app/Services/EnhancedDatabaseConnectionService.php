@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
+/**
+ * EnhancedDatabaseConnectionService
+ *
+ * Servicio mejorado para gestionar conexiones a bases de datos.
+ * Proporciona funcionalidades avanzadas para establecer, mantener y
+ * optimizar conexiones a diferentes tipos de bases de datos.
+ *
+ * @package App\Services
+ * @author cristainfloyd
+ * @version 1.0.0
+ */
 class EnhancedDatabaseConnectionService
 {
     public const SESSION_KEY = 'selected_db_connection';
@@ -16,7 +27,9 @@ class EnhancedDatabaseConnectionService
     public const DEFAULT_CONNECTION = 'pgsql-prod';
 
     /**
-     * Obtener todas las conexiones disponibles para el selector.
+     * Obtener la lista de conexiones disponibles que cumplen con ciertos criterios.
+     *
+     * @return array Lista de conexiones disponibles formateadas para mostrar en la UI.
      */
     public function getAvailableConnections(): array
     {
@@ -31,7 +44,9 @@ class EnhancedDatabaseConnectionService
     }
 
     /**
-     * Obtener la conexión actualmente seleccionada con múltiples capas de persistencia.
+     * Obtener la conexión secundaria actualmente seleccionada.
+     *
+     * @return string Nombre de la conexión secundaria seleccionada.
      */
     public function getCurrentConnection(): string
     {
@@ -75,7 +90,10 @@ class EnhancedDatabaseConnectionService
     }
 
     /**
-     * Establecer la conexión seleccionada en múltiples capas de persistencia.
+     * Establecer la conexión secundaria seleccionada
+     * en multiples capas: sesión, caché y cookie.
+     *
+     * @param string $connection Nombre de la conexión a establecer.
      */
     public function setConnection(string $connection): void
     {
@@ -107,6 +125,9 @@ class EnhancedDatabaseConnectionService
 
     /**
      * Formatear el nombre de la conexión para mostrar en la UI.
+     * 
+     * @param string $name
+     * @return string Nombre formateado.
      */
     private function formatConnectionName(string $name): string
     {
