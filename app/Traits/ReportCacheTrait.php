@@ -5,36 +5,22 @@ namespace App\Traits;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 
+/**
+ * ReportCacheTrait.
+ *
+ * Trait que proporciona funcionalidad de caché para reportes.
+ *
+ * Este trait encapsula la lógica común de almacenamiento y recuperación
+ * de datos en caché para optimizar el rendimiento de la generación de reportes.
+ *
+ * @package App\Traits
+ *
+ * @author cristianfloyd
+ *
+ * @since 1.0.0
+ */
 trait ReportCacheTrait
 {
-    /**
-     * Obtiene la clave de caché para un reporte.
-     *
-     * @param string $report Nombre del reporte
-     * @param string $type Tipo de datos (data|totals)
-     * @param array $params Parámetros adicionales
-     */
-    protected function getCacheKey(string $report, string $type, array $params = []): string
-    {
-        $prefix = Config::get("cache.reports.{$report}.prefix", "{$report}_report_");
-        $paramsKey = implode('_', $params);
-        return "{$prefix}{$type}_{$paramsKey}";
-    }
-
-    /**
-     * Obtiene el TTL para un tipo de caché de reporte.
-     *
-     * @param string $report Nombre del reporte
-     * @param string $type Tipo de datos (data|totals)
-     */
-    protected function getCacheTtl(string $report, string $type): int
-    {
-        return Config::get(
-            "cache.reports.{$report}.{$type}_ttl",
-            Config::get('cache.ttl', 3600),
-        );
-    }
-
     /**
      * Almacena datos en caché con el TTL configurado.
      *
@@ -46,12 +32,40 @@ trait ReportCacheTrait
      *
      * @return mixed
      */
-    protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback, ?int $customTtl = null)
+    protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback, ?int $customTtl = null): mixed
     {
         $key = $this->getCacheKey($report, $type, $params);
         $ttl = $customTtl ?? $this->getCacheTtl($report, $type);
 
         return Cache::remember($key, $ttl, $callback);
+    }
+
+    /**
+     * Obtiene la clave de caché para un reporte.
+     *
+     * @param string $report Nombre del reporte
+     * @param string $type Tipo de datos (data|totals)
+     * @param array $params Parámetros adicionales
+     */
+    protected function getCacheKey(string $report, string $type, array $params = []): string
+    {
+        $prefix = Config::get("cache.reports.$report.prefix", "{$report}_report_");
+        $paramsKey = implode('_', $params);
+        return "$prefix{$type}_$paramsKey";
+    }
+
+    /**
+     * Obtiene el TTL para un tipo de caché de reporte.
+     *
+     * @param string $report Nombre del reporte
+     * @param string $type Tipo de datos (data|totals)
+     */
+    protected function getCacheTtl(string $report, string $type): int
+    {
+        return Config::get(
+            "cache.reports.$report.{$type}_ttl",
+            Config::get('cache.ttl', 3600),
+        );
     }
 
     /**
@@ -73,7 +87,7 @@ trait ReportCacheTrait
      */
     protected function forgetAllReportCache(string $report): bool
     {
-        $prefix = Config::get("cache.reports.{$report}.prefix", "{$report}_report_");
+        $prefix = Config::get("cache.reports.$report.prefix", "{$report}_report_");
         return Cache::tags($prefix)->flush();
     }
 }

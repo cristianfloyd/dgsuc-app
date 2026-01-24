@@ -4,6 +4,20 @@ namespace App\Repositories\Interfaces;
 
 use Illuminate\Support\Collection;
 
+/**
+ * Interfaz SicossReporteRepositoryInterface.
+ *
+ * Provee la especificación de los métodos que debe implementar
+ * un repositorio encargado de generar y consultar el reporte SICOSS.
+ *
+ * Define operaciones para:
+ * - Obtener los datos del reporte para un período fiscal determinado.
+ * - Obtener los totales del reporte para un período fiscal.
+ * - Verificar la existencia de datos para un período fiscal.
+ * - Listar los períodos fiscales disponibles.
+ *
+ * @package App\Repositories\Interfaces
+ */
 interface SicossReporteRepositoryInterface
 {
     /**

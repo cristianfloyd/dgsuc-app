@@ -4,11 +4,21 @@ namespace App\Repositories\Decorators;
 
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Traits\ReportCacheTrait;
-use Illuminate\Support\Collection; // Para logging si es necesario
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-// Reutilizamos el trait para la lógica de caché
 
+/**
+ * Decorator class for caching Sicoss reports.
+ *
+ * This class implements the decorator pattern to add caching functionality
+ * to the SicossReporteRepository. It wraps the repository implementation
+ * and caches the results of report queries to improve performance and
+ * reduce database calls.
+ *
+ * @implements SicossReporteRepositoryInterface
+ *
+ */
 class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
 {
     use ReportCacheTrait;
@@ -16,16 +26,13 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
     protected const string REPORT_NAME = 'sicoss_repo'; // Nombre específico para el caché del repo
     protected const int CACHE_TTL = 3600; // 1 hora, podría ser configurable
 
-    protected SicossReporteRepositoryInterface $decoratedRepository;
-
     /**
      * Constructor del decorador de caché.
      *
      * @param SicossReporteRepositoryInterface $decoratedRepository El repositorio a decorar.
      */
-    public function __construct(SicossReporteRepositoryInterface $decoratedRepository)
+    public function __construct(protected SicossReporteRepositoryInterface $decoratedRepository)
     {
-        $this->decoratedRepository = $decoratedRepository;
     }
 
     /**
@@ -111,7 +118,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
     public function invalidateReporteCache(string $anio, string $mes): void
     {
         $this->forgetReportCache(self::REPORT_NAME, 'report_data', [$anio, $mes]);
-        Log::info("Caché invalidado para reporte SICOSS (datos): {$anio}-{$mes}");
+        Log::info("Caché invalidado para reporte SICOSS (datos): $anio-$mes");
     }
 
     /**
@@ -120,7 +127,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
     public function invalidateTotalesCache(string $anio, string $mes): void
     {
         $this->forgetReportCache(self::REPORT_NAME, 'report_totals', [$anio, $mes]);
-        Log::info("Caché invalidado para reporte SICOSS (totales): {$anio}-{$mes}");
+        Log::info("Caché invalidado para reporte SICOSS (totales): $anio-$mes");
     }
 
     /**
@@ -129,7 +136,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
     public function invalidatePeriodoExistsCache(string $anio, string $mes): void
     {
         $this->forgetReportCache(self::REPORT_NAME, 'period_exists', [$anio, $mes]);
-        Log::info("Caché invalidado para reporte SICOSS (existencia): {$anio}-{$mes}");
+        Log::info("Caché invalidado para reporte SICOSS (existencia): $anio-$mes");
     }
 
     /**
@@ -137,7 +144,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
      */
     public function invalidatePeriodosFiscalesDisponiblesCache(): void
     {
-        $this->forgetReportCache(self::REPORT_NAME, 'available_periods', []);
+        $this->forgetReportCache(self::REPORT_NAME, 'available_periods');
         Log::info('Caché invalidado para períodos fiscales disponibles SICOSS.');
     }
 
