@@ -3048,7 +3048,7 @@ class SicossOptimizado
         $factor_procesamiento = 1.4;       // 40% adicional para procesamiento
         $buffer_seguridad = 100;           // 100MB buffer mínimo
 
-        $memoria_total_estimada = ($memoria_base_estimada * $factor_overhead_php * $factor_agrupacion * $factor_procesamiento) + ($buffer_seguridad * 1024 * 1024);
+        $memoria_total_estimada = (int) ($memoria_base_estimada * $factor_overhead_php * $factor_agrupacion * $factor_procesamiento) + ($buffer_seguridad * 1024 * 1024);
 
         // PASO 8: Información del sistema
         $memoria_limite = self::obtener_limite_memoria_bytes();

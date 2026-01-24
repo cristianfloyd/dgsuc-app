@@ -443,8 +443,8 @@ class AfipMapucheSicoss extends Model
         $config = self::getConfiguracionSicoss();
         $where = $includeInactive ? 'true' : "dh01.tipo_estad = 'A'";
 
-        $mes = substr($periodoFiscal, -2);
-        $anio = substr($periodoFiscal, 0, 4);
+        $mes = (int) substr($periodoFiscal, -2);
+        $anio = (int) substr($periodoFiscal, 0, 4);
 
         $legajos = DB::connection(self::getMapucheConnection())->select(self::getSqlLegajos($where));
 
