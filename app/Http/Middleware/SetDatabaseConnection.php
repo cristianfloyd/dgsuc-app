@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware para establecer la conexión de base de datos
+ *
+ * Esta clase es responsable de determinar y establecer la conexión de base de datos
+ * apropiada para cada solicitud HTTP, permitiendo el uso de múltiples bases de datos
+ * en la aplicación.
+ *
+ * @package App\Http\Middleware
+ */
 class SetDatabaseConnection
 {
     public function __construct(

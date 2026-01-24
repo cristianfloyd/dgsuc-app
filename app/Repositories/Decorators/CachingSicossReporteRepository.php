@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Log;
  * and caches the results of report queries to improve performance and
  * reduce database calls.
  *
- * @implements SicossReporteRepositoryInterface
- *
  */
 class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
 {
