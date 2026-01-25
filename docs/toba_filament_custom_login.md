@@ -1,3 +1,4 @@
+
 # Implementación de Panel Toba con FilamentPHP
 
 Este documento detalla la implementación completa de un panel FilamentPHP dedicado para el sistema de autenticación Toba con página de login profesional y funcionalidades avanzadas.
