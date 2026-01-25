@@ -459,5 +459,3 @@ Post-login state {"toba_user":1,"default_user":1,"session_id_before_check":"..."
 ✅ **Sin duplicados**: Usuarios existentes se fusionan automáticamente  
 ✅ **Sessions compatibles**: user_id numérico en base de datos  
 ✅ **Funcionalidades Toba**: Todas las validaciones y características preservadas  
-
-Una vez completados todos estos pasos, tendrás una integración completa entre Laravel y Toba que permite autenticación dual sin conflictos y con total compatibilidad.
