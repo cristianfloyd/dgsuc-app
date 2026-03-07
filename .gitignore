@@ -34,3 +34,6 @@ claude.md
 /docs/sql/*
 CLAUDE.md
 .env.example
+.serena/
+.php-cs-fixer.cache
+CLAUDE.md
