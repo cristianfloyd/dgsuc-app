@@ -33,3 +33,4 @@ claude.md
 /docs/sql
 /docs/sql/*
 CLAUDE.md
+.env.example
