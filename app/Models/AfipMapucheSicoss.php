@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Reedware\LaravelCompositeRelations\HasCompositeRelations;
 use Throwable;
 
@@ -38,10 +35,6 @@ class AfipMapucheSicoss extends Model
     // Especificar la tabla
     protected $table = 'suc.afip_mapuche_sicoss';
     protected $primaryKey = 'id';
-
-    public $incrementing = true;
-    public $timestamps = false;
-
 
     // Agregar las columnas que pueden ser asignadas masivamente
     protected $fillable = [
@@ -173,36 +166,6 @@ class AfipMapucheSicoss extends Model
                 return null;
             },
         );
-                return null;
-            }
-        );
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            foreach ($model->encodedFields as $field) {
-                $model->setAttribute($field, EncodingService::toLatin1($model->getAttribute($field)));
-            }
-        });
-
-        static::updating(function ($model) {
-            foreach ($model->encodedFields as $field) {
-                $model->setAttribute($field, EncodingService::toLatin1($model->getAttribute($field)));
-            }
-        });
-    }
-
-    /**
-     * Obtener el nombre de la conexión de la base de datos estáticamente
-     *
-     * @return string
-     */
-    protected static function getMapucheConnection(): string
-    {
-        return (new static())->getConnectionName();
     }
 
     /**
