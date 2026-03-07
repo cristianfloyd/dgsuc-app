@@ -83,7 +83,7 @@ class ReportExport implements
                 case 'nro_liqui':
                 case 'nro_legaj':
                     // Asegurar que los números se muestren como texto
-                    $value = (string)$value;
+                    $value = (string) $value;
                     break;
             }
 

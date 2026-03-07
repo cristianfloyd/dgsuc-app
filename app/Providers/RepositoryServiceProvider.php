@@ -10,6 +10,7 @@ use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
+use App\Repositories\Contracts\ApexUsuarioRepositoryInterface;
 use App\Repositories\Decorators\CachingSicossReporteRepository;
 use App\Repositories\Dh01Repository;
 use App\Repositories\Dh11Repository;
@@ -20,6 +21,7 @@ use App\Repositories\Dh61Repository;
 use App\Repositories\Dh61RepositoryInterface;
 use App\Repositories\Dh90Repository;
 use App\Repositories\EloquentAfipMapucheSicossCalculoRepository;
+use App\Repositories\EloquentApexUsuarioRepository;
 use App\Repositories\EmbargoRepository;
 use App\Repositories\FallecidoRepository;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
@@ -46,8 +48,6 @@ use App\Repositories\Sicoss\SicossLegajoFilterRepository;
 use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
 use App\Repositories\Sicoss\SicossOrchestatorRepository;
 use App\Repositories\SicossReporteRepository;
-use App\Repositories\Contracts\ApexUsuarioRepositoryInterface;
-use App\Repositories\EloquentApexUsuarioRepository;
 use App\Services\CategoryUpdateService;
 use Illuminate\Support\ServiceProvider;
 
@@ -92,7 +92,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SicossLegajoFilterRepositoryInterface::class, SicossLegajoFilterRepository::class);
         $this->app->bind(SicossLegajoProcessorRepositoryInterface::class, SicossLegajoProcessorRepository::class);
         $this->app->bind(SicossOrchestatorRepositoryInterface::class, SicossOrchestatorRepository::class);
-        
+
         // Repository ApexUsuario para manejo de encoding
         $this->app->bind(ApexUsuarioRepositoryInterface::class, EloquentApexUsuarioRepository::class);
 

@@ -55,7 +55,7 @@ class ControlAportesDiferencia extends Model
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
-                    return (int)(substr($this->cuil, 2, 8));
+                    return (int) (substr($this->cuil, 2, 8));
                 }
                 return null;
             },

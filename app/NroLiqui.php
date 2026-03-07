@@ -18,7 +18,7 @@ class NroLiqui
     // Método para representación en string
     public function __toString(): string
     {
-        return (string)$this->value;
+        return (string) $this->value;
     }
 
     // Método getter para obtener el valor

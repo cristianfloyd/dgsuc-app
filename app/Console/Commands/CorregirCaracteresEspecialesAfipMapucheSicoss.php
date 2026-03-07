@@ -49,7 +49,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             $cuilFiltro = $this->option('cuil');
             $periodoFiltro = $this->option('periodo');
             $debug = $this->option('debug');
-            $batchSize = (int)$this->option('batch-size');
+            $batchSize = (int) $this->option('batch-size');
 
             $this->info('Iniciando corrección de caracteres especiales en AfipMapucheSicoss...');
 

@@ -11,7 +11,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -80,13 +79,13 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ->required()
                     ->searchable()
                     ->options(
-                        Dh22::getLiquidacionesByPeriodoFiscal(null)
+                        Dh22::getLiquidacionesByPeriodoFiscal(null),
                     ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')
                     ->multiple()
                     ->options(
-                        Dh22::getLiquidacionesByPeriodoFiscal(null)
+                        Dh22::getLiquidacionesByPeriodoFiscal(null),
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH20'),

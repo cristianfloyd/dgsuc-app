@@ -2,8 +2,6 @@
 
 namespace App\Enums;
 
-use function in_array;
-
 enum ConceptoGrupo: string
 {
     case DOSUBA = 'dosuba';
@@ -21,8 +19,6 @@ enum ConceptoGrupo: string
     case ART_AFIP = 'art_afip';
 
     case APORTES_AFIP = 'aportes_afip';
-
-
 
     /**
      * Obtiene los códigos de conceptos que pertenecen al grupo.
@@ -70,11 +66,12 @@ enum ConceptoGrupo: string
      */
     public function containsConcepto(int $codn_conce): bool
     {
-        return in_array($codn_conce, $this->getConceptos());
+        return \in_array($codn_conce, $this->getConceptos());
     }
 
     /**
      * Obtiene la descripción del grupo.
+     *
      * @return string
      */
     public function getDescripcion(): string

@@ -420,12 +420,12 @@ class SicossControlService
 
         return [
             'dh21' => [
-                'aportes' => (float)$totalesDH21->aportes,
-                'contribuciones' => (float)$totalesDH21->contribuciones,
+                'aportes' => (float) $totalesDH21->aportes,
+                'contribuciones' => (float) $totalesDH21->contribuciones,
             ],
             'sicoss' => [
-                'aportes' => (float)$totalesSicoss->aportes,
-                'contribuciones' => (float)$totalesSicoss->contribuciones,
+                'aportes' => (float) $totalesSicoss->aportes,
+                'contribuciones' => (float) $totalesSicoss->contribuciones,
             ],
         ];
     }
@@ -700,8 +700,8 @@ class SicossControlService
                 'registros_procesados' => $registrosInsertados,
                 'conceptos_aportes' => $resultados->whereIn('codn_conce', $conceptosAportes)->count(),
                 'conceptos_contribuciones' => $resultados->whereIn('codn_conce', $conceptosContribuciones)->count(),
-                'total_aportes' => (float)$totalAportes,
-                'total_contribuciones' => (float)$totalContribuciones,
+                'total_aportes' => (float) $totalAportes,
+                'total_contribuciones' => (float) $totalContribuciones,
                 'fecha_proceso' => now()->toDateTimeString(),
                 'periodo' => [
                     'anio' => $anio,

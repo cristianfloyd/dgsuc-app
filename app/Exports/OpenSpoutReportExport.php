@@ -172,7 +172,7 @@ class OpenSpoutReportExport
 
                     case 'nro_liqui':
                     case 'nro_legaj':
-                        $value = (string)$value;
+                        $value = (string) $value;
                         break;
                 }
 

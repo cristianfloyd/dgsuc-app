@@ -3,7 +3,6 @@
 namespace App\Data;
 
 use App\Models\AfipRelacionesActivas;
-use Carbon\Carbon;
 use Spatie\LaravelData\Data;
 
 class AfipRelacionesActivasData extends Data

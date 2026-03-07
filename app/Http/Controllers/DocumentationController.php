@@ -60,7 +60,7 @@ class DocumentationController extends Controller
 
         $tableOfContents = collect($matches)->map(function ($match) {
             return [
-                'level' => (int)$match[1],
+                'level' => (int) $match[1],
                 'id' => $match[2],
                 'title' => strip_tags($match[3]),
             ];

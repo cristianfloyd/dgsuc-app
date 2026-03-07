@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property string $cuit CUIT del beneficiario (PK)
  * @property string $nom_beneficiario Nombre del beneficiario
- *
  */
 class Beneficiario extends Model
 {

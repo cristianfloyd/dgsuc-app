@@ -52,7 +52,7 @@ class SicossTestCommand extends Command
                 return $this->limpiarTablasTemporales();
             }
 
-            $legajo = (int)$this->argument('legajo');
+            $legajo = (int) $this->argument('legajo');
 
             if ($legajo <= 0) {
                 $this->error('❌ El número de legajo debe ser un entero positivo');
@@ -141,8 +141,8 @@ class SicossTestCommand extends Command
             exit(1);
         }
 
-        $año = (int)$matches[1];
-        $mes = (int)$matches[2];
+        $año = (int) $matches[1];
+        $mes = (int) $matches[2];
 
         if ($mes < 1 || $mes > 12) {
             $this->error('❌ El mes debe estar entre 1 y 12');
@@ -236,7 +236,7 @@ class SicossTestCommand extends Command
             'TopeJubilatorioPatronal' => null,
             'TopeJubilatorioPersonal' => null,
             'TopeOtrosAportesPersonal' => null,
-            'nro_liqui' => $this->option('liqui') ? (int)$this->option('liqui') : null, // Filtrar por liquidación específica si se especifica
+            'nro_liqui' => $this->option('liqui') ? (int) $this->option('liqui') : null, // Filtrar por liquidación específica si se especifica
         ];
     }
 
@@ -419,7 +419,7 @@ class SicossTestCommand extends Command
                         $cuil_archivo = substr($linea, 0, 11);
 
                         // Buscar por patrón de legajo en la línea (aproximado)
-                        if (str_contains($linea, (string)$legajo)) {
+                        if (str_contains($linea, (string) $legajo)) {
                             $this->info("✅ Legajo encontrado en {$periodo} (línea " . ($numero_linea + 1) . ')');
 
                             if ($this->option('detailed')) {

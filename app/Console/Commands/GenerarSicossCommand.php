@@ -29,7 +29,7 @@ class GenerarSicossCommand extends Command
         $legajo = $this->argument('legajo');
 
         // Convertir a entero si se proporciona
-        $numeroLegajo = $legajo ? (int)$legajo : null;
+        $numeroLegajo = $legajo ? (int) $legajo : null;
 
         // Crear instancia del generador
         $generador = new GenerarSicossLegajo();

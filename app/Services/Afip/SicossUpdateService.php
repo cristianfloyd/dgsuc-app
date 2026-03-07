@@ -597,13 +597,13 @@ class SicossUpdateService
      * desde la tabla temporal suc.tcargosliq para garantizar la consistencia de los datos
      * SICOSS básicos antes de aplicar actualizaciones específicas.
      * Este método establece los siguientes valores por defecto para todos los registros:
-     * 
+     *
      * - codigosituacion = ACTIVO (1)
      * - codigocondicion = SERVICIOS_COMUNES_MAYOR_18 (1)
      * - codigoactividad = NULL
      * - codigozona = 1
      * - codigomodalcontrat = TIEMPO_COMPLETO_INDETERMINADO (8)
-     * 
+     *
      * @return array{
      *     status: string,
      *     rows_affected: int

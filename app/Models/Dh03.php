@@ -147,7 +147,7 @@ class Dh03 extends Model
         static::saving(function ($model): void {
             // Validar porcentajes
             if (
-                (float)$model->porcdedicdocente + (float)$model->porcdedicinvestig + (float)$model->porcdedicagestion + (float)$model->porcdedicaextens > 100
+                (float) $model->porcdedicdocente + (float) $model->porcdedicinvestig + (float) $model->porcdedicagestion + (float) $model->porcdedicaextens > 100
             ) {
                 throw new \Exception('La suma de porcentajes de dedicación no puede superar 100%');
             }
@@ -181,7 +181,7 @@ class Dh03 extends Model
         $cargo = static::validarLegajoCargo($nroLegaj, $nroCargo)->first();
 
         return [
-            'existe' => (bool)$cargo,
+            'existe' => (bool) $cargo,
             'detalles' => $cargo ? [
                 'legajo' => $cargo->nro_legaj,
                 'cargo' => $cargo->nro_cargo,
@@ -226,7 +226,6 @@ class Dh03 extends Model
             ->where('nro_cargo', $nro_cargo);
     }
 
-    
     public function scopeCargosActivos($query, int $nroLegajo)
     {
         $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
@@ -238,7 +237,7 @@ class Dh03 extends Model
                 THEN nro_cargo::TEXT
                 ELSE codc_categ
                 END AS codc_categ"),
-            ])
+        ])
             ->where(function ($query) use ($fecha): void {
                 $query->whereNull('fec_baja')
                     ->orWhere('fec_baja', '>=', $fecha);
@@ -289,8 +288,6 @@ class Dh03 extends Model
 
     /**
      * Obtiene la unidad académica asociada al cargo.
-     *
-     * 
      */
     public function dh30()
     {
@@ -336,12 +333,12 @@ class Dh03 extends Model
 
     protected function setCodigocontratoAttribute($value): void
     {
-        $this->attributes['codigocontrato'] = (int)$value;
+        $this->attributes['codigocontrato'] = (int) $value;
     }
 
     protected function setChkstopliqAttribute($value): void
     {
-        $this->attributes['chkstopliq'] = (int)$value;
+        $this->attributes['chkstopliq'] = (int) $value;
     }
 
     /* ##################### ATRIBUTOS ##################### */

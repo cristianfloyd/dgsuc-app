@@ -16,7 +16,6 @@ enum EstadoCierre: string
         };
     }
 
-    
     /**
      * Returns an array suitable for use in a select element.
      *

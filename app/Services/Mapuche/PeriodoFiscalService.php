@@ -55,8 +55,8 @@ class PeriodoFiscalService
             return false;
         }
 
-        return $liquidacion->per_liano === (int)$periodoActual['year']
-            && $liquidacion->per_limes === (int)$periodoActual['month'];
+        return $liquidacion->per_liano === (int) $periodoActual['year']
+            && $liquidacion->per_limes === (int) $periodoActual['month'];
     }
 
     /**
@@ -67,7 +67,7 @@ class PeriodoFiscalService
      */
     public function setPeriodoFiscal(int $year, int $month): void
     {
-        $formattedYear = (string)$year;
+        $formattedYear = (string) $year;
         $formattedMonth = \sprintf('%02d', $month);
         session(['year' => $formattedYear, 'month' => $formattedMonth]);
         Log::debug("Período fiscal establecido en la sesión: $formattedYear-$formattedMonth");
@@ -125,7 +125,7 @@ class PeriodoFiscalService
         $periodoFiscal = Dh99::first();
 
         // Formatea el año y el mes al formato deseado.
-        $formattedYear = (string)($periodoFiscal->per_anoct);
+        $formattedYear = (string) ($periodoFiscal->per_anoct);
         $formattedMonth = \sprintf('%02d', $periodoFiscal->per_mesct);
 
         return [

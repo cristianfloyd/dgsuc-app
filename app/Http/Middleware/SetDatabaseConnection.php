@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Middleware para establecer la conexión de base de datos
+ * Middleware para establecer la conexión de base de datos.
  *
  * Esta clase es responsable de determinar y establecer la conexión de base de datos
  * apropiada para cada solicitud HTTP, permitiendo el uso de múltiples bases de datos
@@ -31,7 +31,7 @@ class SetDatabaseConnection
     {
         try {
             // NO interferir con comandos Artisan (migrate, etc.)
-            if (app()->runningInConsole() || php_sapi_name() === 'cli') {
+            if (app()->runningInConsole() || \PHP_SAPI === 'cli') {
                 return $next($request);
             }
 

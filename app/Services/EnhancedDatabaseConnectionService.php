@@ -9,14 +9,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 /**
- * EnhancedDatabaseConnectionService
+ * EnhancedDatabaseConnectionService.
  *
  * Servicio mejorado para gestionar conexiones a bases de datos.
  * Proporciona funcionalidades avanzadas para establecer, mantener y
  * optimizar conexiones a diferentes tipos de bases de datos.
  *
  * @package App\Services
+ *
  * @author cristainfloyd
+ *
  * @version 1.0.0
  */
 class EnhancedDatabaseConnectionService
@@ -125,8 +127,9 @@ class EnhancedDatabaseConnectionService
 
     /**
      * Formatear el nombre de la conexión para mostrar en la UI.
-     * 
+     *
      * @param string $name
+     *
      * @return string Nombre formateado.
      */
     private function formatConnectionName(string $name): string

@@ -113,7 +113,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
 
         // Convertir objetos stdClass a arrays
         $legajos = array_map(function ($legajo) {
-            return (array)$legajo;
+            return (array) $legajo;
         }, $legajos);
 
         // Elimino legajos repetidos

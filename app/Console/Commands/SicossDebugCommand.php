@@ -20,10 +20,10 @@ class SicossDebugCommand extends Command
 
     public function handle()
     {
-        $legajo = (int)$this->argument('legajo');
+        $legajo = (int) $this->argument('legajo');
         $periodo = $this->option('periodo') ?? date('Y-m');
         $connection = $this->option('connection') ?? 'pgsql-prod';
-        $check_retro = (int)$this->option('retro');
+        $check_retro = (int) $this->option('retro');
         $codc_reparto = $this->option('codc_reparto');
 
         // Configurar conexión

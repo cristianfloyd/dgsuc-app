@@ -97,7 +97,7 @@ class LiquidacionControlService
                           end)::numeric::money < 0::money
             ', [$nroLiqui]);
 
-            return (object)[
+            return (object) [
                 'success' => \count($result) === 0,
                 'message' => \count($result) > 0 ? 'Se encontraron ' . \count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
                 'data' => $result,
@@ -108,7 +108,7 @@ class LiquidacionControlService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return (object)[
+            return (object) [
                 'success' => false,
                 'message' => 'Error al controlar negativos: ' . $e->getMessage(),
                 'data' => [],
@@ -138,7 +138,7 @@ class LiquidacionControlService
                          a.codc_agrup, a.codc_categ, a.codc_carac, c.desc_categ
             ', [$nroLiqui]);
 
-            return (object)[
+            return (object) [
                 'success' => \count($result) > 0,
                 'message' => 'Se encontraron ' . \count($result) . ' cargos liquidados',
                 'data' => $result,
@@ -149,7 +149,7 @@ class LiquidacionControlService
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return (object)[
+            return (object) [
                 'success' => false,
                 'message' => 'Error al controlar cargos liquidados: ' . $e->getMessage(),
                 'data' => [],

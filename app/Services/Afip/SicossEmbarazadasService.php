@@ -40,8 +40,8 @@ class SicossEmbarazadasService
         $month = $params['month'] ?? $periodoFiscal['month'];
 
         // Asegurar que month y year sean enteros
-        $year = (int)$year;
-        $month = (int)$month;
+        $year = (int) $year;
+        $month = (int) $month;
 
         // Calcular fechas de inicio y fin del mes
         $fechaDesde = $params['fecha_desde'] ?? date('Y-m-d', mktime(0, 0, 0, $month, 1, $year));

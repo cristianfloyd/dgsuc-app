@@ -2,22 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\EncodingService;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 
 class ApexUsuario extends Model
 {
-    protected $connection = 'toba';
-    protected $table = 'apex_usuario';
-    protected $primaryKey = 'usuario';
     public $incrementing = false;
-    protected $keyType = 'string';
+
     public $timestamps = false;
-    
+
+    protected $connection = 'toba';
+
+    protected $table = 'apex_usuario';
+
+    protected $primaryKey = 'usuario';
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         'usuario',
-        'clave', 
+        'clave',
         'nombre',
         'email',
         'autentificacion',
@@ -42,7 +47,7 @@ class ApexUsuario extends Model
         'forzar_cambio_pwd',
         'requiere_segundo_factor',
         'uid',
-        'p_uid'
+        'p_uid',
     ];
 
     protected $casts = [
@@ -53,7 +58,7 @@ class ApexUsuario extends Model
         'requiere_segundo_factor' => 'boolean',
         'vencimiento' => 'date',
         'hora_entrada' => 'datetime:H:i:s',
-        'hora_salida' => 'datetime:H:i:s'
+        'hora_salida' => 'datetime:H:i:s',
     ];
 
     public function nombre(): Attribute
@@ -112,7 +117,6 @@ class ApexUsuario extends Model
         );
     }
 
-
     public function scopeActivos($query)
     {
         return $query->where('bloqueado', 0);
@@ -146,21 +150,21 @@ class ApexUsuario extends Model
     public function getParametro($parametro)
     {
         $parametro = strtolower(trim($parametro));
-        if (!in_array($parametro, ['a', 'b', 'c'])) {
+        if (!\in_array($parametro, ['a', 'b', 'c'])) {
             throw new \InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
         }
-        
+
         $campo = 'parametro_' . $parametro;
         return $this->getAttribute($campo);
     }
 
     public function tieneVencimiento()
     {
-        return !is_null($this->vencimiento) && $this->vencimiento->isFuture();
+        return $this->vencimiento !== null && $this->vencimiento->isFuture();
     }
 
     public function estaVencido()
     {
-        return !is_null($this->vencimiento) && $this->vencimiento->isPast();
+        return $this->vencimiento !== null && $this->vencimiento->isPast();
     }
 }

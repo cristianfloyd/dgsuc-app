@@ -87,7 +87,7 @@ class IdLiquiSelector extends Widget implements HasForms
                     ->reactive()
                     ->afterStateUpdated(function ($state): void {
                         // Convertimos el valor a entero antes de enviarlo
-                        $liquidacionId = $state ? (int)$state : null;
+                        $liquidacionId = $state ? (int) $state : null;
 
                         $this->dispatch('idLiquiSelected', $liquidacionId);
                         Log::debug('idLiquiSelected', ['state' => $liquidacionId]);

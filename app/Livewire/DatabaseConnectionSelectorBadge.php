@@ -72,4 +72,4 @@ class DatabaseConnectionSelectorBadge extends Component implements HasForms
     {
         return view('livewire.database-connection-selector-badge');
     }
-} 
+}

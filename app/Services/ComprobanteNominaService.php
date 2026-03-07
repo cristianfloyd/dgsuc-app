@@ -145,7 +145,7 @@ class ComprobanteNominaService
         $fields = $this->extractFields($line);
 
         // Procesamos el importe eliminando caracteres no numéricos
-        $importe = (float)preg_replace('/[^0-9.-]/', '', $fields['importe']);
+        $importe = (float) preg_replace('/[^0-9.-]/', '', $fields['importe']);
         $esRetencion = preg_match('/^\d{2}\./', $line);
 
 
@@ -158,7 +158,7 @@ class ComprobanteNominaService
             'importe' => $importe,
             'area_administrativa' => $esRetencion ? '000' : '010',
             'subarea_administrativa' => '000',
-            'numero_retencion' => $esRetencion ? (int)str_replace('.', '', $fields['codigo']) : null,
+            'numero_retencion' => $esRetencion ? (int) str_replace('.', '', $fields['codigo']) : null,
             'descripcion_retencion' => trim($fields['descripcion']),
             'requiere_cheque' => $esRetencion && $fields['tipo'] === 'S',
             'codigo_grupo' => $esRetencion ? trim($fields['codigo_grupo']) : null,
@@ -173,7 +173,7 @@ class ComprobanteNominaService
 
         // Extraemos el número de liquidación después del punto y convertimos a entero
         $parts = explode(self::HEADER_FORMAT['SEPARATOR'], $line);
-        $nroLiqui = (int)substr($parts[1], 0, self::HEADER_FORMAT['LIQUI_LENGTH']);
+        $nroLiqui = (int) substr($parts[1], 0, self::HEADER_FORMAT['LIQUI_LENGTH']);
 
         // Extraemos descripción y tipo de pago
         $descStart = strpos($line, '.Liq:') + 7;
@@ -184,8 +184,8 @@ class ComprobanteNominaService
 
         // Extraemos los campos usando las posiciones correctas
         $this->currentHeader = [
-            'anio_periodo' => (int)$year,
-            'mes_periodo' => (int)$month,
+            'anio_periodo' => (int) $year,
+            'mes_periodo' => (int) $month,
             'nro_liqui' => $nroLiqui,
             'desc_liqui' => $descripcion,
             'tipo_pago' => $tipoPago,

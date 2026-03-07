@@ -133,7 +133,7 @@ class GenerateComprobanteNomina extends Page
             );
 
             // Correct way to access the first liquidation from the array
-            $nroLiqui = (int)$formData['liquidaciones'][0];
+            $nroLiqui = (int) $formData['liquidaciones'][0];
 
 
             $generator->setNroLiqui($nroLiqui);

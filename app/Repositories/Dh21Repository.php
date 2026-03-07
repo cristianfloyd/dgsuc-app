@@ -186,7 +186,7 @@ class Dh21Repository implements Dh21RepositoryInterface
 
         // Convertir los resultados a array
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultados);
     }
 

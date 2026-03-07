@@ -142,7 +142,7 @@ class ModernCargoSacService
         for ($i = 1; $i <= 12; $i++) {
             $campo = "imp_bruto_{$i}";
             if (isset($datos[$campo])) {
-                $datosValidados[$campo] = (float)$datos[$campo];
+                $datosValidados[$campo] = (float) $datos[$campo];
             }
         }
 

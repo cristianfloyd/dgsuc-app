@@ -13,7 +13,6 @@ class Dh15Data extends Data
     ) {
     }
 
-    
     public static function rules($contexte = null): array
     {
         return [

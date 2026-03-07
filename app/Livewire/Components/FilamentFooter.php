@@ -8,17 +8,17 @@ use Livewire\Component;
 class FilamentFooter extends Component
 {
     public string $currentTime;
-    
-    public function mount()
+
+    public function mount(): void
     {
         $this->updateTime();
     }
-    
-    public function updateTime()
+
+    public function updateTime(): void
     {
         $this->currentTime = now()->format('d/m/Y H:i:s');
     }
-    
+
     public function render()
     {
         return view('livewire.components.filament-footer', [
@@ -29,4 +29,4 @@ class FilamentFooter extends Component
             'appVersion' => config('app.version', '1.0.0'),
         ]);
     }
-} 
+}

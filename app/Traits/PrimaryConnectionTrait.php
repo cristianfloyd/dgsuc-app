@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -16,16 +15,16 @@ trait PrimaryConnectionTrait
 {
     /**
      * Obtiene el nombre de la conexión principal de la base de datos.
-     * Siempre retorna la conexión por defecto configurada en database.default
+     * Siempre retorna la conexión por defecto configurada en database.default.
      */
     public function getConnectionName(): string
     {
         $primaryConnection = config('database.default');
-        
+
         Log::debug('PrimaryConnectionTrait::getConnectionName', [
             'primary_connection' => $primaryConnection,
             'is_console' => app()->runningInConsole(),
-            'context' => 'Always using primary connection'
+            'context' => 'Always using primary connection',
         ]);
 
         return $primaryConnection;
@@ -50,7 +49,7 @@ trait PrimaryConnectionTrait
     public function getTable(): string
     {
         $tableName = parent::getTable();
-        
+
         // Si ya tiene el esquema definido, retornamos tal cual
         if (str_contains($tableName, '.')) {
             return $tableName;
@@ -58,7 +57,7 @@ trait PrimaryConnectionTrait
 
         // Para la conexión principal, usar el esquema por defecto o el configurado
         $schema = $this->schema ?? config('database.connections.pgsql.search_path', 'public');
-        
+
         // Si search_path tiene múltiples esquemas, usar el primero
         if (str_contains($schema, ',')) {
             $schema = explode(',', $schema)[0];
@@ -74,4 +73,4 @@ trait PrimaryConnectionTrait
     {
         return $this->getTable();
     }
-} 
+}

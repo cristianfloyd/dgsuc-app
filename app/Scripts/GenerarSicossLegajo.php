@@ -202,8 +202,8 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
         $legajosProcesados = [];
 
         foreach ($resultados as $legajo) {
-            $totalBruto += (float)($legajo['IMPORTE_BRUTO'] ?? 0);
-            $totalImponible += (float)($legajo['importeimponible_9'] ?? 0);
+            $totalBruto += (float) ($legajo['IMPORTE_BRUTO'] ?? 0);
+            $totalImponible += (float) ($legajo['importeimponible_9'] ?? 0);
 
             $legajosProcesados[] = [
                 'legajo' => $legajo['nro_legaj'] ?? 'N/A',
@@ -234,7 +234,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
      */
     private function formatearImporte($importe): string
     {
-        $valor = (float)$importe;
+        $valor = (float) $importe;
 
         if ($valor == 0) {
             return '0,00';

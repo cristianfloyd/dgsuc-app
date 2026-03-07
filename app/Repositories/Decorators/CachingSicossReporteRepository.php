@@ -7,7 +7,6 @@ use App\Traits\ReportCacheTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-
 /**
  * Decorator class for caching Sicoss reports.
  *
@@ -15,7 +14,6 @@ use Illuminate\Support\Facades\Log;
  * to the SicossReporteRepository. It wraps the repository implementation
  * and caches the results of report queries to improve performance and
  * reduce database calls.
- *
  */
 class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
 {

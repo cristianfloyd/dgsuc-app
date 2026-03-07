@@ -147,7 +147,7 @@ abstract class BaseSicossExport implements
         while ($columnNumber > 0) {
             $modulo = ($columnNumber - 1) % 26;
             $columnLetter = \chr(65 + $modulo) . $columnLetter;
-            $columnNumber = (int)(($columnNumber - $modulo) / 26);
+            $columnNumber = (int) (($columnNumber - $modulo) / 26);
         }
         return $columnLetter;
     }

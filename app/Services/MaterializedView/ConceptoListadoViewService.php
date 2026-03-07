@@ -13,7 +13,7 @@ class ConceptoListadoViewService
     public function exists(): bool
     {
         try {
-            return (bool)DB::connection($this->getConnectionName())
+            return (bool) DB::connection($this->getConnectionName())
                 ->selectOne("
                     SELECT EXISTS (
                         SELECT 1

@@ -43,7 +43,7 @@ class CombinacionesService
             $items = $conceptos->map(function ($item) {
                 return [
                     'codn_conce' => $item->codn_conce,
-                    'impp_conce' => (float)$item->impp_conce,
+                    'impp_conce' => (float) $item->impp_conce,
                     'tipo_conce' => $item->tipo_conce,
                 ];
             })->toArray();

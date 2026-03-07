@@ -135,7 +135,7 @@ class AfipMapucheExportService implements ExportServiceInterface
         // Formateo de números: remover comas y decimales
         if (\in_array($field, ['retribucion_pactada'])) {
             // Convertir a float, multiplicar por 100 para preservar 2 decimales y convertir a entero
-            $value = (int)((float)(str_replace(',', '', $value)) * 100);
+            $value = (int) ((float) (str_replace(',', '', $value)) * 100);
             return str_pad($value, $width, '0', \STR_PAD_LEFT);
         }
 

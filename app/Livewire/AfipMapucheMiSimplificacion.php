@@ -166,7 +166,7 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
 
                     // Formatear números si es necesario
                     if ($field === 'retribucion_pactada') {
-                        $value = number_format((float)$value, 2, '', ''); // Quitamos el punto decimal
+                        $value = number_format((float) $value, 2, '', ''); // Quitamos el punto decimal
                     }
 
                     // Formatear el campo nro_form_agro

@@ -39,11 +39,11 @@ Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerfo
 Route::get('/user/register', RegisterForm::class)->name('registerform');
 
 // Rutas de autenticación Toba con prefijo (para compatibilidad con código existente)
-Route::prefix('toba-legacy')->group(function () {
+Route::prefix('toba-legacy')->group(function (): void {
     Route::get('/login', [TobaLoginController::class, 'showLoginForm'])->name('toba.login.form');
     Route::post('/login', [TobaLoginController::class, 'login'])->name('toba.login');
     Route::post('/logout', [TobaLoginController::class, 'logout'])->name('toba.logout');
-    
+
     // Rutas adicionales Toba
     Route::get('/password/change', [TobaLoginController::class, 'showChangePasswordForm'])->name('toba.password.change');
     Route::get('/two-factor/verify', [TobaLoginController::class, 'showTwoFactorForm'])->name('toba.two-factor.verify');
@@ -63,14 +63,18 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddle
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', ])->group(function (): void {
     Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
     Route::get('/clicker', Clicker::class)->name('clicker');
-    Route::get('/suc', function () {return view('dashboard');})->name('dashboard');
+    Route::get('/suc', function () {
+        return view('dashboard');
+    })->name('dashboard');
     Route::get('/todos', TodoList::class)->name('todos');
     Route::post('/todos', [TodoList::class, 'create'])->name('todos.create');
     Route::get('/user/list', UserList::class)->name('userlist');
     Route::get('/contactus', ContactUs::class)->name('contact-us');
     Route::get('/modal', Modal::class)->name('modal');
     Route::get('/userstable', UsersTable::class)->name('datatable');
-    Route::get('/', function () {return view('index');})->name('index');
+    Route::get('/', function () {
+        return view('index');
+    })->name('index');
     Route::get('/imputacion', AsignacionForm::class)->name('imputacion');
     Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
     Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
@@ -82,7 +86,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
     })->name('reporte-orden-pago-pdf');
-    
+
 
 
     Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');

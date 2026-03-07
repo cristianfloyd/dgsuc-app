@@ -198,7 +198,7 @@ class ExcelRowValidationService
             ];
         }
 
-        $legajo = (int)$legajo;
+        $legajo = (int) $legajo;
 
         if ($legajo < 1) {
             return [
@@ -227,7 +227,7 @@ class ExcelRowValidationService
             ];
         }
 
-        $cargo = (int)$cargo;
+        $cargo = (int) $cargo;
 
         if ($cargo < 1) {
             return [

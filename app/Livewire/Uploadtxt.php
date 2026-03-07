@@ -98,7 +98,7 @@ class Uploadtxt extends Component implements HasForms
     {
         $this->importaciones = $this->fileUploadRepository->all();
         $this->origenes = OrigenesModel::all();
-        $this->processId = (string)Str::uuid(); // generar un ID de proceso único y convertirlo a string
+        $this->processId = (string) Str::uuid(); // generar un ID de proceso único y convertirlo a string
         Log::info("Process ID: {$this->processId}");
         Log::debug('Componente Uploadtxt montado');
     }

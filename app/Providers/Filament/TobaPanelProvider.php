@@ -26,11 +26,11 @@ class TobaPanelProvider extends PanelProvider
     public function register(): void
     {
         parent::register();
-        
+
         // Registrar respuesta personalizada de login para el panel Toba
         $this->app->bind(LoginResponse::class, TobaLoginResponse::class);
     }
-    
+
     public function panel(Panel $panel): Panel
     {
         return $panel

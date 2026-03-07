@@ -54,6 +54,7 @@ enum PuestoDesempenado: string
      * Retorna la instancia del enum correspondiente al código proporcionado.
      *
      * @param string $codigo
+     *
      * @return self|null
      */
     public static function fromCodigo(string $codigo): ?self
@@ -69,7 +70,6 @@ enum PuestoDesempenado: string
         };
     }
 
-   
     /**
      * Retorna un array asociativo con todos los casos del enum.
      *

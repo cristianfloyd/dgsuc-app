@@ -12,7 +12,7 @@ class ReportHeaderService
         return new ReportHeaderDTO(
             logoPath: asset(path: 'storage/uba40_sinfondo.png'),
             orderNumber: 'OP-' . uniqid(),
-            liquidationNumber: (string)$liquidationNumber,
+            liquidationNumber: (string) $liquidationNumber,
             liquidationDescription: 'Descripción de la liquidación',
             generationDate: now()->format('Y-m-d H:i:s'),
         );

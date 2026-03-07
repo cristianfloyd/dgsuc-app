@@ -10,7 +10,7 @@ use Spatie\LaravelData\Attributes\Validation\Size;
 use Spatie\LaravelData\Data;
 
 /**
- * Data Object para la tabla dh90. 
+ * Data Object para la tabla dh90.
  */
 class Dh90Data extends Data
 {
@@ -41,8 +41,6 @@ class Dh90Data extends Data
 
     /**
      * Actualiza un modelo existente con los datos del DTO.
-     *
-     *
      */
     public function updateModel(Dh90 $model): Dh90
     {

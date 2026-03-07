@@ -88,7 +88,7 @@ class DocumentationPage extends Page
                     'title' => $title,
                     'section' => $file,
                     'content' => $content,
-                    'rendered_content' => (string)$converter->convert($content),
+                    'rendered_content' => (string) $converter->convert($content),
                 ];
             }
         }

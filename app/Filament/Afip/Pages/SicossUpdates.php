@@ -353,10 +353,10 @@ class SicossUpdates extends Page
                     ->body("Concepto 204: {$resultado204['data']['registros_procesados']} registros | Concepto 205: {$resultado205['data']['registros_procesados']} registros")
                     ->send();
             } elseif ($success204 || $success205) {
-                $mensaje = $success204 
+                $mensaje = $success204
                     ? "Concepto 204 completado, error en 205: {$resultado205['message']}"
                     : "Concepto 205 completado, error en 204: {$resultado204['message']}";
-                
+
                 Notification::make()
                     ->title('Actualización parcial')
                     ->warning()
@@ -452,7 +452,7 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalDescription(
                     '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->year . '-' . str_pad((string)$this->month, 2, '0', \STR_PAD_LEFT) .
+                    $this->year . '-' . str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT) .
                     '? Este proceso puede tomar varios minutos.',
                 ),
 
@@ -466,7 +466,7 @@ class SicossUpdates extends Page
                 ->modalHeading('Actualizar Situación de Embarazadas')
                 ->modalDescription(
                     '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->year . '-' . str_pad((string)$this->month, 2, '0', \STR_PAD_LEFT) .
+                    $this->year . '-' . str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT) .
                     '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.',
                 ),
 
@@ -488,7 +488,7 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Conceptos 204 y 205')
-                ->modalDescription('¿Está seguro que desea actualizar los conceptos 204 (aportes mínimos) y 205? Este proceso ejecutará ambas actualizaciones secuencialmente y puede tomar varios minutos.')
+                ->modalDescription('¿Está seguro que desea actualizar los conceptos 204 (aportes mínimos) y 205? Este proceso ejecutará ambas actualizaciones secuencialmente y puede tomar varios minutos.'),
         ];
     }
 }

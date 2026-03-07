@@ -522,8 +522,8 @@ class BloqueosResource extends Resource
                     try {
                         $orchestrator = app(\App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface::class);
                         $periodoFiscalArray = [
-                            'year' => (int)substr($periodoFiscal, 0, 4),
-                            'month' => (int)substr($periodoFiscal, 5, 2),
+                            'year' => (int) substr($periodoFiscal, 0, 4),
+                            'month' => (int) substr($periodoFiscal, 5, 2),
                         ];
                         $resultado = $orchestrator->archivarPeriodoCompleto($periodoFiscalArray);
                         if ($resultado->success) {

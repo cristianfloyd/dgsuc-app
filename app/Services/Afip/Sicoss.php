@@ -273,7 +273,7 @@ class Sicoss
 
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -403,7 +403,7 @@ class Sicoss
 
         $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $licencias);
     }
 
@@ -442,7 +442,7 @@ class Sicoss
     			;";
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -503,7 +503,7 @@ class Sicoss
     			;";
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -533,7 +533,7 @@ class Sicoss
 
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -1136,7 +1136,7 @@ class Sicoss
                 $Imponible6_aux = $legajoActual['ImporteImponible_6'];
                 if ($Imponible6_aux != 0) {
                     if (
-                        (int)$Imponible6_aux != (int)$legajoActual['IMPORTE_IMPON']
+                        (int) $Imponible6_aux != (int) $legajoActual['IMPORTE_IMPON']
                         && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta + � - $5
                         && $legajoActual['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
                     ) {
@@ -1779,7 +1779,7 @@ class Sicoss
 					AND $where";
 
         $suma = DB::connection(self::getStaticConnectionName())->select($sql);
-        return (float)$suma[0]['suma'];
+        return (float) $suma[0]['suma'];
     }
 
     // Se obtienen los importes de otra actividad, cuando tiene varias tomo la del �ltimo periodo

@@ -191,17 +191,6 @@ class Dh01 extends Model
         ) = ?", [$cuil]);
     }
 
-    protected function cuilCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
-            // Aseguramos que cada parte tenga el largo correcto
-            $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
-            $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
-            $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
-            return $cuil1 . $cuil . $cuil2;
-        });
-    }
-
     /**
      * Verifica si un legajo específico está jubilado.
      *
@@ -216,27 +205,18 @@ class Dh01 extends Model
             ->where('tipo_estad', 'J')
             ->exists();
     }
-    protected function descNombr(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
-    }
 
     public function getCuil(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
+            get: fn (): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
         );
-    }
-
-    protected function descAppat(): Attribute
-    {
-        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)));
     }
 
     public function NombreCompleto(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
+            get: fn (): string => "{$this->desc_appat}, {$this->desc_nombr}",
         );
     }
 
@@ -274,6 +254,27 @@ class Dh01 extends Model
         $resultado = static::legajosActivosSinCargosVigentes($where_not_dh21)->first();
 
         return $resultado ? $resultado->toArray() : null;
+    }
+
+    protected function cuilCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
+            // Aseguramos que cada parte tenga el largo correcto
+            $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
+            $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
+            $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
+            return $cuil1 . $cuil . $cuil2;
+        });
+    }
+
+    protected function descNombr(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn ($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
+    }
+
+    protected function descAppat(): Attribute
+    {
+        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)));
     }
 
     protected function cuil(): Attribute

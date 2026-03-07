@@ -42,10 +42,10 @@ class TableSelectorService
             $periodoActual = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
 
             // Convertir a enteros para comparación
-            $yearLiquidacion = (int)$liquidacionModel->per_liano;
-            $mesLiquidacion = (int)$liquidacionModel->per_limes;
-            $yearActual = (int)$periodoActual['year'];
-            $mesActual = (int)$periodoActual['month'];
+            $yearLiquidacion = (int) $liquidacionModel->per_liano;
+            $mesLiquidacion = (int) $liquidacionModel->per_limes;
+            $yearActual = (int) $periodoActual['year'];
+            $mesActual = (int) $periodoActual['month'];
 
             // Comparar períodos fiscales
             if (

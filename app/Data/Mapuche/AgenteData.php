@@ -30,9 +30,9 @@ class AgenteData extends Data
      * @param ValidationContext|null $context Contexto de validación opcional.
      *
      * @return array<string, array<int, string>> Un array asociativo donde las claves son los nombres de los campos
-     *                                            y los valores son arrays de reglas de validación.
+     *                                           y los valores son arrays de reglas de validación.
      */
-    public static function rules(ValidationContext $context = null): array
+    public static function rules(?ValidationContext $context = null): array
     {
         return [
             'nombre' => ['required', 'string', 'max:255'],

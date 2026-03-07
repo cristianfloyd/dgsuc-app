@@ -85,16 +85,16 @@ class EmbargoResource extends Resource
 
             ])
             ->actions([
-                // 
+
             ])
             ->bulkActions([
-                //
+
             ]);
     }
 
     public static function actualizarDatos(array $data = []): void
     {
-        $instance = new self;
+        $instance = new self();
         $instance->setPropertyValues($data);
 
         // Actualizamos las propiedades del recurso
@@ -109,13 +109,13 @@ class EmbargoResource extends Resource
         if (isset($instance->periodoFiscal['year'], $instance->periodoFiscal['month'])) {
             $year = $instance->periodoFiscal['year'];
             $month = str_pad($instance->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
-            $periodoFiscal = (int)"{$year}{$month}";
+            $periodoFiscal = (int) "{$year}{$month}";
         } else {
             // Obtener el período fiscal del servicio como fallback
             $periodoFiscalData = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $year = $periodoFiscalData['year'] ?? date('Y');
             $month = $periodoFiscalData['month'] ?? date('m');
-            $periodoFiscal = (int)("{$year}" . str_pad($month, 2, '0', \STR_PAD_LEFT));
+            $periodoFiscal = (int) ("{$year}" . str_pad($month, 2, '0', \STR_PAD_LEFT));
             Log::warning('Se utilizará el período fiscal del servicio como valor predeterminado', ['periodoFiscal' => $periodoFiscal]);
         }
 
@@ -187,6 +187,16 @@ class EmbargoResource extends Resource
 
     }
 
+    /**
+     * getter para verificar si esta seteado el periodo fiscal.
+     *
+     * @return bool
+     */
+    public function getPeriodoFiscalAttribute(): bool
+    {
+        return isset($this->periodoFiscal['year'], $this->periodoFiscal['month']) ? true : false;
+    }
+
     protected function getListeners(): array
     {
         return [
@@ -214,15 +224,5 @@ class EmbargoResource extends Resource
             'insertIntoDh25' => $this->insertIntoDh25,
             'periodoFiscal' => $this->periodoFiscalService->getPeriodoFiscalFromDatabase(),
         ];
-    }
-
-    
-    /**
-     * getter para verificar si esta seteado el periodo fiscal
-     * @return bool
-     */
-    public function getPeriodoFiscalAttribute(): bool
-    {
-        return isset($this->periodoFiscal['year'], $this->periodoFiscal['month']) ? true : false;
     }
 }

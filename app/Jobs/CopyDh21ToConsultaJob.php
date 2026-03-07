@@ -56,7 +56,7 @@ class CopyDh21ToConsultaJob implements ShouldQueue
                 ->chunk($this->chunkSize, function ($rows) use (&$copyJob): void {
                     $insertData = [];
                     foreach ($rows as $row) {
-                        $insertData[] = (array)$row;
+                        $insertData[] = (array) $row;
                     }
                     if (!empty($insertData)) {
                         DB::connection('pgsql-consulta')->table('dh21')->insert($insertData);

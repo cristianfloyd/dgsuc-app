@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property int $id_tipo_remuneracion ID del tipo de remuneración (PK)
  * @property string $desc_tipo_remuneracion Descripción del tipo de remuneración
- *
  */
 class TipoRemuneracion extends Model
 {

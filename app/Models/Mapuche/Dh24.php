@@ -41,12 +41,14 @@ class Dh24 extends Model
 
     /**
      * Indica si el modelo debe tener timestamps.
+     *
      * @var bool
      */
     public $timestamps = false;
 
     /**
      * Indica si la clave primaria es auto-incrementable.
+     *
      * @var bool
      */
     public $incrementing = false;
@@ -58,7 +60,9 @@ class Dh24 extends Model
 
     /**
      * La clave primaria compuesta del modelo.
+     *
      * @var array
+     *
      * @phpstan-ignore property.phpDocType
      */
     protected $primaryKey = [

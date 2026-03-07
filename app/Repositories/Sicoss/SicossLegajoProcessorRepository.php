@@ -59,7 +59,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     ): array {
         // Convertir objetos stdClass a arrays si es necesario
         $legajos = array_map(function ($legajo) {
-            return \is_object($legajo) ? (array)$legajo : $legajo;
+            return \is_object($legajo) ? (array) $legajo : $legajo;
         }, $legajos);
 
         // Usar los valores del DTO directamente
@@ -115,7 +115,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Convertir objetos stdClass a arrays si es necesario
                 $limites = array_map(function ($limite) {
-                    return \is_object($limite) ? (array)$limite : $limite;
+                    return \is_object($limite) ? (array) $limite : $limite;
                 }, $limites);
 
                 //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
@@ -133,7 +133,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Convertir objetos stdClass a arrays si es necesario
                 $cargos_legajo = array_map(function ($cargo) {
-                    return \is_object($cargo) ? (array)$cargo : $cargo;
+                    return \is_object($cargo) ? (array) $cargo : $cargo;
                 }, $cargos_legajo);
                 // En el caso de las licencias de legajo, se mantiene el código de condición en esos días
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
@@ -297,7 +297,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $Imponible6_aux = $legajos[$i]['ImporteImponible_6'];
                 if ($Imponible6_aux != 0) {
                     if (
-                        (int)$Imponible6_aux != (int)$legajos[$i]['IMPORTE_IMPON']
+                        (int) $Imponible6_aux != (int) $legajos[$i]['IMPORTE_IMPON']
                         && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 //redondear hasta + o - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajos[$i]['IMPORTE_IMPON']
                     ) {
@@ -846,7 +846,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
         // Convertir objetos stdClass a arrays
         return array_map(function ($concepto) {
-            return (array)$concepto;
+            return (array) $concepto;
         }, $conceptos_filtrados);
     }
 

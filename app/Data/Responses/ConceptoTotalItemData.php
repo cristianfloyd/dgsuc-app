@@ -19,8 +19,6 @@ class ConceptoTotalItemData extends Data
 
     /**
      * Crea una instancia desde los datos de BD.
-     *
-     *
      */
     public static function fromRowData(object $rowData): self
     {

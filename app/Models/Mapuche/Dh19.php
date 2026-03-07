@@ -25,6 +25,7 @@ class Dh19 extends Model
      * The attributes that are mass assignable.
      *
      * @var array
+     *
      * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [

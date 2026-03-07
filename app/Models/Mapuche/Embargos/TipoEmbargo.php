@@ -6,7 +6,6 @@ namespace App\Models\Mapuche\Embargos;
 
 use App\Models\Dh12;
 use App\Models\Mapuche\Embargo;
-use App\Models\Mapuche\Embargos\TipoRemuneracion;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $codn_conce Código de concepto
  * @property int $mov_inicial_cta_cte Movimiento inicial cuenta corriente (0,1,2)
  * @property int $id_tipo_remuneracion ID del tipo de remuneración
- *
  */
 class TipoEmbargo extends Model
 {

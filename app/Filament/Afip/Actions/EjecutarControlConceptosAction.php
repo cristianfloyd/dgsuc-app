@@ -49,7 +49,7 @@ class EjecutarControlConceptosAction extends Action
                     ->label('Conceptos a controlar')
                     ->options(
                         collect(ConceptosSicossEnum::cases())
-                            ->mapWithKeys(fn ($case) => [$case->value => (string)$case->value])
+                            ->mapWithKeys(fn ($case) => [$case->value => (string) $case->value])
                             ->toArray(),
                     )
                     ->default(array_merge(

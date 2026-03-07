@@ -278,7 +278,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
      */
     private function round_up($number, $precision = 2)
     {
-        $fig = (int)str_pad('1', $precision, '0');
+        $fig = (int) str_pad('1', $precision, '0');
         return ceil($number * $fig) / $fig;
     }
 }

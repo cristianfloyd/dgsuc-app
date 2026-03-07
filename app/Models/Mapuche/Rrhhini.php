@@ -36,13 +36,16 @@ class Rrhhini extends Model
 
     /**
      * The primary key for the model.
+     *
      * @var array
      */
     protected $primaryKey = ['nombre_seccion', 'nombre_parametro']; // @phpstan-ignore property.phpDocType
 
     /**
      * The attributes that are mass assignable.
+     *
      * @var array<string>
+     *
      * @phpstan-ignore property.phpDocType
      */
     protected $fillable = [

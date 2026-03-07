@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Modelo para las relaciones activas de AFIP.
- * 
+ *
  * @property int $id
  * @property string $periodo_fiscal
  * @property string $codigo_movimiento
@@ -96,7 +96,7 @@ class AfipRelacionesActivas extends Model
 
         // Nombre de la conexión de base de datos a utilizar
         $conexion = self::getConexionNombre();
-        
+
         // Iniciar la transacion en la conexion especificada
         DB::connection($conexion)->beginTransaction();
 
@@ -216,7 +216,7 @@ class AfipRelacionesActivas extends Model
     protected function retribucionPactada(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => (float)(trim($value)),
+            get: fn (string $value) => (float) (trim($value)),
             set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', \STR_PAD_LEFT),
         );
     }
@@ -228,7 +228,7 @@ class AfipRelacionesActivas extends Model
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
-                    return (int)(substr($this->cuil, 2, 8));
+                    return (int) (substr($this->cuil, 2, 8));
                 }
                 return null;
             },

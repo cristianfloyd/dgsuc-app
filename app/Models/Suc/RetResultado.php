@@ -23,7 +23,6 @@ class RetResultado extends Model
      * @property int $nro_legaj Número de legajo del empleado
      * @property int $nro_cargo_nuevo Número de cargo nuevo
      * @property int $nro_cargo_ant Número de cargo anterior
-     * 
      * @property string $categ_n Categoría nueva
      * @property string|null $agrup_n Agrupamiento nuevo
      * @property string|null $dedid_n ID de dedicación nueva
@@ -35,7 +34,6 @@ class RetResultado extends Model
      * @property int $hs_cat_n Horas categoría nueva posición
      * @property string|null $codc_uacad_n Código unidad académica nueva posición
      * @property string|null $coddependesemp_n Código dependencia empleado nueva posición
-     * 
      * @property string $categ_v Categoría anterior
      * @property string|null $agrup_v Agrupamiento anterior
      * @property string|null $dedid_v ID de dedicación anterior
@@ -47,7 +45,6 @@ class RetResultado extends Model
      * @property int $hs_cat_v Horas categoría posición anterior
      * @property string|null $codc_uacad_v Código unidad académica posición anterior
      * @property string|null $coddependesemp_v Código dependencia empleado posición anterior
-     * 
      * @property bool $x11_n Bandera X11 nueva posición
      * @property bool $x11_v Bandera X11 posición anterior
      * @property bool $zona_n Bandera zona nueva posición
@@ -60,12 +57,10 @@ class RetResultado extends Model
      * @property bool $dede_v Bandera dedicación posición anterior
      * @property bool $adi_col_sec_n Bandera adicional colegio secundario nueva posición
      * @property bool $adi_col_sec_v Bandera adicional colegio secundario posición anterior
-     * 
      * @property string|null $sub_n Suplencia nueva posición
      * @property float $sub_basico_n Importe básico suplencia nueva posición
      * @property string|null $sub_v Suplencia posición anterior
      * @property float $sub_basico_v Importe básico suplencia posición anterior
-     * 
      * @property float $porcehaber Porcentaje de haberes
      * @property int|null $dias_mes_trab Días del mes trabajados
      * @property \Carbon\Carbon $fecha_ret_desde Fecha inicio retroactivo
@@ -76,7 +71,6 @@ class RetResultado extends Model
      * @property int $tipo_retro Tipo de retroactivo
      * @property int|null $porcentaje_dias_trab Porcentaje días trabajados
      * @property string|null $tipo_escal Tipo de escalafón
-     * 
      * @property float $c101_n Concepto 101 nueva posición
      * @property float $c101_sub_n Concepto 101 suplencia nueva posición
      * @property float $c102_n Concepto 102 nueva posición
@@ -113,7 +107,6 @@ class RetResultado extends Model
      * @property float $c165_n Concepto 165 nueva posición
      * @property float $c173_n Concepto 173 nueva posición
      * @property float $c174_n Concepto 174 nueva posición
-     * 
      * @property float $c101_v Concepto 101 posición anterior
      * @property float $c101_sub_v Concepto 101 suplencia posición anterior
      * @property float $c102_v Concepto 102 posición anterior
@@ -142,14 +135,12 @@ class RetResultado extends Model
      * @property float $c165_v Concepto 165 posición anterior
      * @property float $c173_v Concepto 173 posición anterior
      * @property float $c174_v Concepto 174 posición anterior
-     * 
      * @property float $monto_180 Monto 180
      * @property float $monto_123 Monto 123
      * @property float $monto_168 Monto 168
      * @property float $cat_basico_7 Categoría básica 7
      * @property float $cat_basico_n_perm Categoría básica nueva permanente
      * @property float $cat_basico_v_perm Categoría básica anterior permanente
-     * 
      * @property \App\ValueObjects\Periodo $periodo Período como ValueObject
      * @property \App\ValueObjects\TipoRetro $tipo_retro Tipo retroactivo como ValueObject
      *
@@ -162,7 +153,6 @@ class RetResultado extends Model
     // @phpstan-ignore property.defaultValue
     protected $primaryKey = ['nro_legaj', 'nro_cargo_ant', 'fecha_ret_desde', 'periodo'];
 
-    
     protected $fillable = [
         'nro_legaj', 'nro_cargo_nuevo', 'nro_cargo_ant',
         'categ_n', 'agrup_n', 'dedid_n', 'cat_basico_n', 'anios_n', 'titulo_n',

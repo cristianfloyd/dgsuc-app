@@ -132,7 +132,7 @@ class BloqueosImportService
         if (!is_numeric($legajo) || $legajo < 1) {
             throw new ImportValidationException("Legajo inválido: {$legajo}");
         }
-        return (int)$legajo;
+        return (int) $legajo;
     }
 
     /**
@@ -147,7 +147,7 @@ class BloqueosImportService
         if (!is_numeric($cargo) || $cargo < 1) {
             throw new ImportValidationException("Cargo inválido: {$cargo}");
         }
-        return (int)$cargo;
+        return (int) $cargo;
     }
 
     private function buildLogContext(string $filePath, int $nroLiqui, Carbon $startTime): array

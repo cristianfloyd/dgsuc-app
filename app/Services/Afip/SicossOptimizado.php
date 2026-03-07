@@ -284,7 +284,7 @@ class SicossOptimizado
         $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
 
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $licencias);
     }
 
@@ -415,7 +415,7 @@ class SicossOptimizado
         $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
 
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $licencias);
     }
 
@@ -455,7 +455,7 @@ class SicossOptimizado
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
 
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -517,7 +517,7 @@ class SicossOptimizado
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
 
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado);
     }
 
@@ -558,8 +558,8 @@ class SicossOptimizado
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
 
         return [
-            'minimo' => (int)$resultado[0]->minimo,
-            'maximo' => (int)$resultado[0]->maximo,
+            'minimo' => (int) $resultado[0]->minimo,
+            'maximo' => (int) $resultado[0]->maximo,
         ];
     }
 
@@ -723,7 +723,7 @@ class SicossOptimizado
             $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
 
             $legajos = array_map(function ($item) {
-                return (array)$item;
+                return (array) $item;
             }, $legajos);
         }
 
@@ -1319,7 +1319,7 @@ class SicossOptimizado
                 if ($Imponible6_aux != 0) {
                     Log::debug('✅ Importe Imponible 6 es distinto de 0');
                     if (
-                        (int)$Imponible6_aux != (int)$legajoActual['IMPORTE_IMPON']
+                        (int) $Imponible6_aux != (int) $legajoActual['IMPORTE_IMPON']
                         && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta +  - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
                     ) {
@@ -2097,7 +2097,7 @@ class SicossOptimizado
 
         // Convertir cada objeto stdClass a array
         return array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $conceptos_filtrados);
     }
 
@@ -2153,7 +2153,7 @@ class SicossOptimizado
         }
 
         // Convertir el objeto stdClass a array
-        return (array)$horas[0];
+        return (array) $horas[0];
     }
 
     /**
@@ -2184,7 +2184,7 @@ class SicossOptimizado
 
         $suma = DB::connection(self::getStaticConnectionName())->select($sql);
         // Manejo seguro del resultado
-        return !empty($suma) && isset($suma[0]->suma) ? (float)$suma[0]->suma : 0.0;
+        return !empty($suma) && isset($suma[0]->suma) ? (float) $suma[0]->suma : 0.0;
     }
 
     /**
@@ -2217,7 +2217,7 @@ class SicossOptimizado
             $resp[0] = ['importesacotraactividad' => 0, 'importebrutootraactividad' => 0];
         }
 
-        return (array)$resp[0];
+        return (array) $resp[0];
     }
 
     // Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss
@@ -2262,7 +2262,7 @@ class SicossOptimizado
 
         // Inicializar el objeto si está vacío
         if (empty($siglas)) {
-            $siglas = [(object)['codc_obsoc' => self::$codigo_obra_social_default]];
+            $siglas = [(object) ['codc_obsoc' => self::$codigo_obra_social_default]];
         } elseif (empty($siglas[0]->codc_obsoc)) {
             $siglas[0]->codc_obsoc = self::$codigo_obra_social_default;
         }
@@ -2489,7 +2489,7 @@ class SicossOptimizado
 
             // Convertir objetos stdClass a arrays para consistencia
             return array_map(function ($item) {
-                return (array)$item;
+                return (array) $item;
             }, $resultado);
         } catch (\Exception $e) {
             Log::error('precargar_conceptos_todos_legajos: Error en consulta SQL', [
@@ -2893,7 +2893,7 @@ class SicossOptimizado
             }
             // Para $where_condition === 'true' no hay filtros adicionales
 
-            $suma += (float)$concepto['impp_conce'];
+            $suma += (float) $concepto['impp_conce'];
         }
 
         return $suma;
@@ -2979,7 +2979,7 @@ class SicossOptimizado
         ]);
 
         // PASO 1: Muestra representativa (1-5% de legajos, mín 50, máx 500)
-        $muestra_size = max(50, min(30000, (int)($total_legajos * 0.03)));
+        $muestra_size = max(50, min(30000, (int) ($total_legajos * 0.03)));
         $legajos_muestra = \array_slice($legajos, 0, $muestra_size);
         $nros_legajos_muestra = implode(',', array_column($legajos_muestra, 'nro_legaj'));
 
@@ -3011,7 +3011,7 @@ class SicossOptimizado
 
         // PASO 4: Convertir a arrays y medir memoria
         $conceptos_muestra = array_map(function ($item) {
-            return (array)$item;
+            return (array) $item;
         }, $resultado_muestra);
 
         $memoria_despues = memory_get_usage(true);
@@ -3076,7 +3076,7 @@ class SicossOptimizado
                 'memoria_base_mb' => round($memoria_base_estimada / 1024 / 1024, 2),
                 'memoria_con_overhead_mb' => round($memoria_total_estimada / 1024 / 1024, 2),
                 'tiempo_estimado_ms' => round($tiempo_total_estimado, 2),
-                'conceptos_totales_estimados' => (int)($promedio_conceptos_por_legajo * $total_legajos),
+                'conceptos_totales_estimados' => (int) ($promedio_conceptos_por_legajo * $total_legajos),
             ],
 
             // Sistema
@@ -3322,27 +3322,27 @@ class SicossOptimizado
             switch ($tipo) {
                 case 'limites':
                     $datos_por_legajo[$nro_legaj]['limites'] = [
-                        'minimo' => (int)$dato->inicio,
-                        'maximo' => (int)$dato->final,
+                        'minimo' => (int) $dato->inicio,
+                        'maximo' => (int) $dato->final,
                     ];
                     break;
 
                 case 'cargo_sin_licencia':
                     $datos_por_legajo[$nro_legaj]['cargos_sin_licencia'][] = [
                         'nro_cargo' => $dato->nro_cargo,
-                        'inicio' => (int)$dato->inicio,
-                        'final' => (int)$dato->final,
+                        'inicio' => (int) $dato->inicio,
+                        'final' => (int) $dato->final,
                     ];
                     break;
 
                 case 'cargo_con_licencia':
                     $datos_por_legajo[$nro_legaj]['cargos_con_licencia'][] = [
                         'nro_cargo' => $dato->nro_cargo,
-                        'inicio' => (int)$dato->inicio,
-                        'final' => (int)$dato->final,
-                        'inicio_lic' => (int)$dato->inicio_lic,
-                        'final_lic' => (int)$dato->final_lic,
-                        'condicion' => (int)$dato->condicion,
+                        'inicio' => (int) $dato->inicio,
+                        'final' => (int) $dato->final,
+                        'inicio_lic' => (int) $dato->inicio_lic,
+                        'final_lic' => (int) $dato->final_lic,
+                        'condicion' => (int) $dato->condicion,
                     ];
                     break;
             }
@@ -3372,7 +3372,7 @@ class SicossOptimizado
             $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
             return [
                 'minimo' => 1,
-                'maximo' => (int)substr($fecha_fin, 9, 2),
+                'maximo' => (int) substr($fecha_fin, 9, 2),
             ];
         }
 
@@ -3509,8 +3509,8 @@ class SicossOptimizado
         foreach ($datos_otra_actividad as $dato) {
             $nro_legaj = $dato->nro_legaj;
             $datos_por_legajo[$nro_legaj] = [
-                'importebrutootraactividad' => (float)$dato->ImporteBrutoOtraActividad,
-                'importesacotraactividad' => (float)$dato->ImporteSACOtraActividad,
+                'importebrutootraactividad' => (float) $dato->ImporteBrutoOtraActividad,
+                'importesacotraactividad' => (float) $dato->ImporteSACOtraActividad,
                 'tiene_datos' => true,
                 'periodo' => $dato->vig_ano . '/' . str_pad($dato->vig_mes, 2, '0', \STR_PAD_LEFT),
             ];
@@ -4222,7 +4222,7 @@ class SicossOptimizado
         if ($where_periodo_retro !== 'true' && $where_periodo_retro !== ' true ') {
             // Analizar si el período es histórico
             if (preg_match('/ano_retro\s*=\s*(\d+)/', $where_periodo_retro, $matches)) {
-                $ano_retro = (int)($matches[1]);
+                $ano_retro = (int) ($matches[1]);
                 if ($ano_retro > 0) {
                     return 'dh21h'; // Tabla histórica
                 }
@@ -4244,7 +4244,7 @@ class SicossOptimizado
         }
 
         $unidad = strtolower(substr($limite, -1));
-        $numero = (int)(substr($limite, 0, -1));
+        $numero = (int) (substr($limite, 0, -1));
 
         switch ($unidad) {
             case 'g':
@@ -4254,7 +4254,7 @@ class SicossOptimizado
             case 'k':
                 return $numero * 1024;
             default:
-                return (int)$limite;
+                return (int) $limite;
         }
     }
 
@@ -4320,76 +4320,76 @@ class SicossOptimizado
 
             // Datos familiares
             'conyuge' => ($legajo['conyugue'] ?? false) ? true : false,
-            'cant_hijos' => (int)($legajo['hijos'] ?? 0),
+            'cant_hijos' => (int) ($legajo['hijos'] ?? 0),
 
             // Códigos situación laboral
-            'cod_situacion' => (int)($legajo['codigosituacion'] ?? 0),
-            'cod_cond' => (int)($legajo['codigocondicion'] ?? 0),
-            'cod_act' => (int)($legajo['TipoDeActividad'] ?? 0),
-            'cod_zona' => (int)($legajo['codigozona'] ?? 0),
+            'cod_situacion' => (int) ($legajo['codigosituacion'] ?? 0),
+            'cod_cond' => (int) ($legajo['codigocondicion'] ?? 0),
+            'cod_act' => (int) ($legajo['TipoDeActividad'] ?? 0),
+            'cod_zona' => (int) ($legajo['codigozona'] ?? 0),
 
             // Aportes y obra social
-            'porc_aporte' => (float)($legajo['aporteadicional'] ?? 0),
-            'cod_mod_cont' => (int)($legajo['codigocontratacion'] ?? 0),
+            'porc_aporte' => (float) ($legajo['aporteadicional'] ?? 0),
+            'cod_mod_cont' => (int) ($legajo['codigocontratacion'] ?? 0),
             'cod_os' => $legajo['codigo_os'] ?? '',
-            'cant_adh' => (int)($legajo['adherentes'] ?? 0),
+            'cant_adh' => (int) ($legajo['adherentes'] ?? 0),
 
             // Importes principales
-            'rem_total' => (float)($legajo['IMPORTE_BRUTO'] ?? 0),
-            'rem_impo1' => (float)($legajo['IMPORTE_IMPON'] ?? 0),
-            'asig_fam_pag' => (float)($legajo['AsignacionesFliaresPagadas'] ?? 0),
-            'aporte_vol' => (float)($legajo['IMPORTE_VOLUN'] ?? 0),
-            'imp_adic_os' => (float)($legajo['IMPORTE_ADICI'] ?? 0),
-            'exc_aport_ss' => (float)(abs($legajo['ImporteSICOSSDec56119'] ?? 0)),
+            'rem_total' => (float) ($legajo['IMPORTE_BRUTO'] ?? 0),
+            'rem_impo1' => (float) ($legajo['IMPORTE_IMPON'] ?? 0),
+            'asig_fam_pag' => (float) ($legajo['AsignacionesFliaresPagadas'] ?? 0),
+            'aporte_vol' => (float) ($legajo['IMPORTE_VOLUN'] ?? 0),
+            'imp_adic_os' => (float) ($legajo['IMPORTE_ADICI'] ?? 0),
+            'exc_aport_ss' => (float) (abs($legajo['ImporteSICOSSDec56119'] ?? 0)),
             'exc_aport_os' => 0.00,
             'prov' => \App\Services\EncodingService::toLatin1($legajo['provincialocalidad'] ?? ''),
 
             // Importes adicionales
-            'rem_impo2' => (float)($legajo['ImporteImponiblePatronal'] ?? 0),
-            'rem_impo3' => (float)($legajo['ImporteImponiblePatronal'] ?? 0),
-            'rem_impo4' => (float)($legajo['ImporteImponible_4'] ?? 0),
+            'rem_impo2' => (float) ($legajo['ImporteImponiblePatronal'] ?? 0),
+            'rem_impo3' => (float) ($legajo['ImporteImponiblePatronal'] ?? 0),
+            'rem_impo4' => (float) ($legajo['ImporteImponible_4'] ?? 0),
 
             // Datos siniestros y empresa
             'cod_siniestrado' => null,
             'marca_reduccion' => '0',
             'recomp_lrt' => 0.00,
             'tipo_empresa' => self::$tipoEmpresa ?? 'K',
-            'aporte_adic_os' => (float)($legajo['AporteAdicionalObraSocial'] ?? 0),
-            'regimen' => (string)($legajo['regimen'] ?? '0'),
+            'aporte_adic_os' => (float) ($legajo['AporteAdicionalObraSocial'] ?? 0),
+            'regimen' => (string) ($legajo['regimen'] ?? '0'),
 
             // Situaciones de revista
-            'sit_rev1' => (string)($legajo['codigorevista1'] ?? '0'),
-            'dia_ini_sit_rev1' => (int)($legajo['fecharevista1'] ?? 1),
-            'sit_rev2' => (string)($legajo['codigorevista2'] ?? '0'),
-            'dia_ini_sit_rev2' => (int)($legajo['fecharevista2'] ?? 0),
-            'sit_rev3' => (string)($legajo['codigorevista3'] ?? '0'),
-            'dia_ini_sit_rev3' => (int)($legajo['fecharevista3'] ?? 0),
+            'sit_rev1' => (string) ($legajo['codigorevista1'] ?? '0'),
+            'dia_ini_sit_rev1' => (int) ($legajo['fecharevista1'] ?? 1),
+            'sit_rev2' => (string) ($legajo['codigorevista2'] ?? '0'),
+            'dia_ini_sit_rev2' => (int) ($legajo['fecharevista2'] ?? 0),
+            'sit_rev3' => (string) ($legajo['codigorevista3'] ?? '0'),
+            'dia_ini_sit_rev3' => (int) ($legajo['fecharevista3'] ?? 0),
 
             // Conceptos salariales
-            'sueldo_adicc' => (float)($legajo['ImporteSueldoMasAdicionales'] ?? 0),
-            'sac' => (float)($legajo['ImporteSAC'] ?? 0),
-            'horas_extras' => (float)($legajo['ImporteHorasExtras'] ?? 0),
-            'zona_desfav' => (float)($legajo['ImporteZonaDesfavorable'] ?? 0),
-            'vacaciones' => (float)($legajo['ImporteVacaciones'] ?? 0),
-            'cant_dias_trab' => (int)($legajo['dias_trabajados'] ?? 0),
-            'rem_impo5' => (float)(($legajo['ImporteImponible_4'] ?? 0) - ($legajo['ImporteTipo91'] ?? 0)),
+            'sueldo_adicc' => (float) ($legajo['ImporteSueldoMasAdicionales'] ?? 0),
+            'sac' => (float) ($legajo['ImporteSAC'] ?? 0),
+            'horas_extras' => (float) ($legajo['ImporteHorasExtras'] ?? 0),
+            'zona_desfav' => (float) ($legajo['ImporteZonaDesfavorable'] ?? 0),
+            'vacaciones' => (float) ($legajo['ImporteVacaciones'] ?? 0),
+            'cant_dias_trab' => (int) ($legajo['dias_trabajados'] ?? 0),
+            'rem_impo5' => (float) (($legajo['ImporteImponible_4'] ?? 0) - ($legajo['ImporteTipo91'] ?? 0)),
             'convencionado' => ($legajo['trabajadorconvencionado'] ?? false) ? 1 : 0,
-            'rem_impo6' => (float)($legajo['ImporteImponible_6'] ?? 0),
-            'tipo_oper' => (string)($legajo['TipoDeOperacion'] ?? '0'),
-            'adicionales' => (float)($legajo['ImporteAdicionales'] ?? 0),
-            'premios' => (float)($legajo['ImportePremios'] ?? 0),
-            'rem_dec_788' => (float)($legajo['Remuner78805'] ?? 0),
-            'rem_imp7' => (float)($legajo['ImporteImponible_6'] ?? 0),
-            'nro_horas_ext' => (int)(ceil($legajo['CantidadHorasExtras'] ?? 0)),
-            'cpto_no_remun' => (float)($legajo['ImporteNoRemun'] ?? 0),
-            'maternidad' => (float)($legajo['ImporteMaternidad'] ?? 0),
-            'rectificacion_remun' => (float)($legajo['ImporteRectificacionRemun'] ?? 0),
-            'rem_imp9' => (float)($legajo['importeimponible_9'] ?? 0),
-            'contrib_dif' => (float)($legajo['ContribTareaDif'] ?? 0),
+            'rem_impo6' => (float) ($legajo['ImporteImponible_6'] ?? 0),
+            'tipo_oper' => (string) ($legajo['TipoDeOperacion'] ?? '0'),
+            'adicionales' => (float) ($legajo['ImporteAdicionales'] ?? 0),
+            'premios' => (float) ($legajo['ImportePremios'] ?? 0),
+            'rem_dec_788' => (float) ($legajo['Remuner78805'] ?? 0),
+            'rem_imp7' => (float) ($legajo['ImporteImponible_6'] ?? 0),
+            'nro_horas_ext' => (int) (ceil($legajo['CantidadHorasExtras'] ?? 0)),
+            'cpto_no_remun' => (float) ($legajo['ImporteNoRemun'] ?? 0),
+            'maternidad' => (float) ($legajo['ImporteMaternidad'] ?? 0),
+            'rectificacion_remun' => (float) ($legajo['ImporteRectificacionRemun'] ?? 0),
+            'rem_imp9' => (float) ($legajo['importeimponible_9'] ?? 0),
+            'contrib_dif' => (float) ($legajo['ContribTareaDif'] ?? 0),
             'hstrab' => 0,
             'seguro' => ($legajo['SeguroVidaObligatorio'] ?? false) ? 1 : 0,
-            'ley' => (float)($legajo['ImporteSICOSS27430'] ?? 0),
-            'incsalarial' => (float)($legajo['IncrementoSolidario'] ?? 0),
+            'ley' => (float) ($legajo['ImporteSICOSS27430'] ?? 0),
+            'incsalarial' => (float) ($legajo['IncrementoSolidario'] ?? 0),
             'remimp11' => 0.00,
         ];
     }

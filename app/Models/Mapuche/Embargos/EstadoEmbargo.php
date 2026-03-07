@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property int $id_estado_embargo ID del estado de embargo (PK)
  * @property string $desc_estado_embargo Descripción del estado
- *
  */
 class EstadoEmbargo extends Model
 {

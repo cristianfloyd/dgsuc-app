@@ -159,7 +159,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getCodigoObraSocialAporteAdicional(): int
     {
-        return (int)self::$codigo_os_aporte_adicional;
+        return (int) self::$codigo_os_aporte_adicional;
     }
 
     /**
@@ -167,7 +167,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getAportesVoluntarios(): int
     {
-        return (int)self::$aportes_voluntarios;
+        return (int) self::$aportes_voluntarios;
     }
 
     /**
@@ -175,7 +175,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getCodigoObraSocialFamiliarCargo(): int
     {
-        return (int)self::$codigo_obrasocial_fc;
+        return (int) self::$codigo_obrasocial_fc;
     }
 
     /**
@@ -208,10 +208,10 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
         ];
 
         return [
-            'TopeJubilatorioPatronal' => (float)($topeJubilatorioPatronal ?? $defaults['TopeJubilatorioPatronal']),
-            'TopeJubilatorioPersonal' => (float)($topeJubilatorioPersonal ?? $defaults['TopeJubilatorioPersonal']),
-            'TopeOtrosAportesPersonal' => (float)($topeOtrosAportesPersonal ?? $defaults['TopeOtrosAportesPersonal']),
-            'truncaTope' => (bool)($truncaTope ?? $defaults['truncaTope']),
+            'TopeJubilatorioPatronal' => (float) ($topeJubilatorioPatronal ?? $defaults['TopeJubilatorioPatronal']),
+            'TopeJubilatorioPersonal' => (float) ($topeJubilatorioPersonal ?? $defaults['TopeJubilatorioPersonal']),
+            'TopeOtrosAportesPersonal' => (float) ($topeOtrosAportesPersonal ?? $defaults['TopeOtrosAportesPersonal']),
+            'truncaTope' => (bool) ($truncaTope ?? $defaults['truncaTope']),
         ];
     }
 }

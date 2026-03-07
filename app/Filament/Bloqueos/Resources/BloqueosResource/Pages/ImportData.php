@@ -106,7 +106,7 @@ class ImportData extends Page
     public function import(): void
     {
         $filePath = collect($this->data['excel_file'])->first()->getRealPath();
-        $nroLiqui = (int)$this->data['nro_liqui'];
+        $nroLiqui = (int) $this->data['nro_liqui'];
         $connection = $this->getConnectionFromTrait();
 
         try {

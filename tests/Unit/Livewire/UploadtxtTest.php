@@ -30,7 +30,7 @@ class UploadtxtTest extends TestCase
     public function testDeleteFileSuccess(): void
     {
         $fileId = 1;
-        $file = (object)['id' => $fileId];
+        $file = (object) ['id' => $fileId];
 
         $this->fileUploadRepository->expects($this->once())
             ->method('findOrFail')
@@ -96,7 +96,7 @@ class UploadtxtTest extends TestCase
 
         $mockOrigenRepository->expects($this->once())
             ->method('findById')
-            ->willReturn((object)['name' => 'TestOrigen']);
+            ->willReturn((object) ['name' => 'TestOrigen']);
 
         $mockFileUploadRepository->expects($this->once())
             ->method('create')
@@ -157,7 +157,7 @@ class UploadtxtTest extends TestCase
 
         $mockOrigenRepository->expects($this->once())
             ->method('findById')
-            ->willReturn((object)['name' => 'TestOrigen']);
+            ->willReturn((object) ['name' => 'TestOrigen']);
 
         $mockFileUploadRepository->expects($this->once())
             ->method('create')

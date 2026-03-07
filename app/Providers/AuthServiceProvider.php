@@ -15,7 +15,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+
     }
 
     /**
@@ -35,7 +35,7 @@ class AuthServiceProvider extends ServiceProvider
             return new TobaGuard(
                 $name,
                 Auth::createUserProvider($config['provider']),
-                $app['session.store']
+                $app['session.store'],
             );
         });
     }

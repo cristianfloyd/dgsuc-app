@@ -93,47 +93,47 @@ class AfipMapucheSicossCalculoImportService
                 $this->columnMetadata->getStartPosition('cuil') - 1,
                 $this->columnMetadata->getColumnWidth(0),
             ),
-            'remtotal' => (float)str_replace(',', '.', substr(
+            'remtotal' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('remtotal') - 1,
                 $this->columnMetadata->getColumnWidth(1),
             )),
-            'rem1' => (float)str_replace(',', '.', substr(
+            'rem1' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('rem1') - 1,
                 $this->columnMetadata->getColumnWidth(2),
             )),
-            'rem2' => (float)str_replace(',', '.', substr(
+            'rem2' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('rem2') - 1,
                 $this->columnMetadata->getColumnWidth(3),
             )),
-            'aportesijp' => (float)str_replace(',', '.', substr(
+            'aportesijp' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('aportesijp') - 1,
                 $this->columnMetadata->getColumnWidth(4),
             )),
-            'aporteinssjp' => (float)str_replace(',', '.', substr(
+            'aporteinssjp' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('aporteinssjp') - 1,
                 $this->columnMetadata->getColumnWidth(5),
             )),
-            'contribucionsijp' => (float)str_replace(',', '.', substr(
+            'contribucionsijp' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('contribucionsijp') - 1,
                 $this->columnMetadata->getColumnWidth(6),
             )),
-            'contribucioninssjp' => (float)str_replace(',', '.', substr(
+            'contribucioninssjp' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('contribucioninssjp') - 1,
                 $this->columnMetadata->getColumnWidth(7),
             )),
-            'aportediferencialsijp' => (float)str_replace(',', '.', substr(
+            'aportediferencialsijp' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('aportediferencialsijp') - 1,
                 $this->columnMetadata->getColumnWidth(8),
             )),
-            'aportesres33_41re' => (float)str_replace(',', '.', substr(
+            'aportesres33_41re' => (float) str_replace(',', '.', substr(
                 $line,
                 $this->columnMetadata->getStartPosition('aportesres33_41re') - 1,
                 $this->columnMetadata->getColumnWidth(9),

@@ -84,7 +84,7 @@ class Dh22 extends Model
     protected $encodedFields = [
         'desc_liqui',
         'desc_lugap',
-        'desc_emisi'
+        'desc_emisi',
     ];
 
     /**

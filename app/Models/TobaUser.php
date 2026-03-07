@@ -2,33 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class TobaUser extends Authenticatable
 {
-    protected $connection = 'toba';
-    protected $table = 'apex_usuario';
-    protected $primaryKey = 'usuario';
     public $incrementing = false;
-    protected $keyType = 'string';
+
     public $timestamps = false; // Toba no maneja created_at/updated_at
-    
+
+    protected $connection = 'toba';
+
+    protected $table = 'apex_usuario';
+
+    protected $primaryKey = 'usuario';
+
+    protected $keyType = 'string';
+
     protected $fillable = [
-        'usuario', 
-        'nombre', 
+        'usuario',
+        'nombre',
         'email',
         'autentificacion',
         'bloqueado',
         'parametro_a',
-        'parametro_b', 
+        'parametro_b',
         'parametro_c',
         'forzar_cambio_pwd',
-        'requiere_segundo_factor'
+        'requiere_segundo_factor',
     ];
 
     protected $hidden = [
-        'clave'
+        'clave',
     ];
 
     protected $casts = [
@@ -37,7 +41,7 @@ class TobaUser extends Authenticatable
         'requiere_segundo_factor' => 'boolean',
         'vencimiento' => 'date',
         'hora_entrada' => 'datetime:H:i:s',
-        'hora_salida' => 'datetime:H:i:s'
+        'hora_salida' => 'datetime:H:i:s',
     ];
 
     // Campos que Laravel espera para autenticación
@@ -78,10 +82,10 @@ class TobaUser extends Authenticatable
     public function getParametro($parametro)
     {
         $parametro = strtolower(trim($parametro));
-        if (!in_array($parametro, ['a', 'b', 'c'])) {
+        if (!\in_array($parametro, ['a', 'b', 'c'])) {
             throw new \InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
         }
-        
+
         $campo = 'parametro_' . $parametro;
         return $this->getAttribute($campo);
     }

@@ -281,13 +281,13 @@ class Dh09 extends Model
         }
     }
 
-    
     /**
      * Obtiene un listado paginado de empleados por período.
      *
      * @param int $ano Año del período.
      * @param int $mes Mes del período.
      * @param int $limite Cantidad de registros por página.
+     *
      * @return LengthAwarePaginator
      */
     public static function obtenerPorPeriodo(int $ano, int $mes, int $limite = 100): LengthAwarePaginator
@@ -496,7 +496,6 @@ class Dh09 extends Model
     // MÉTODOS DE BÚSQUEDA AVANZADA
     // ========================================
 
-    
     /**
      * Realiza una búsqueda avanzada de registros DH09 basada en los criterios proporcionados.
      *
@@ -505,25 +504,25 @@ class Dh09 extends Model
      * obra social, dependencia, embargos y rango de fechas de ingreso.
      *
      * @param array $criterios Un array asociativo de criterios de búsqueda. Los criterios
-     *                           posibles incluyen:
-     *                           - 'legajo' (int): Número de legajo del empleado.
-     *                           - 'ano' (int): Año del período de vigencia.
-     *                           - 'mes' (int): Mes del período de vigencia.
-     *                           - 'jubilado' (bool): Indica si se deben buscar empleados jubilados (true)
-     *                             o no jubilados (false).
-     *                           - 'activo' (bool): Indica si se deben buscar empleados activos (true) o
-     *                             inactivos (false).
-     *                           - 'obra_social' (string): Código de la obra social.
-     *                           - 'dependencia' (string): Código de la dependencia.
-     *                           - 'con_embargo' (bool): Indica si se deben buscar empleados con embargo (true).
-     *                           - 'fecha_ingreso_desde' (string|Carbon): Fecha de inicio del rango de fechas de ingreso.
-     *                           - 'fecha_ingreso_hasta' (string|Carbon): Fecha de fin del rango de fechas de ingreso.
-     *
-     * @return Builder Una instancia de Illuminate\Database\Eloquent\Builder configurada con los
-     *               criterios de búsqueda especificados.
+     *                         posibles incluyen:
+     *                         - 'legajo' (int): Número de legajo del empleado.
+     *                         - 'ano' (int): Año del período de vigencia.
+     *                         - 'mes' (int): Mes del período de vigencia.
+     *                         - 'jubilado' (bool): Indica si se deben buscar empleados jubilados (true)
+     *                         o no jubilados (false).
+     *                         - 'activo' (bool): Indica si se deben buscar empleados activos (true) o
+     *                         inactivos (false).
+     *                         - 'obra_social' (string): Código de la obra social.
+     *                         - 'dependencia' (string): Código de la dependencia.
+     *                         - 'con_embargo' (bool): Indica si se deben buscar empleados con embargo (true).
+     *                         - 'fecha_ingreso_desde' (string|Carbon): Fecha de inicio del rango de fechas de ingreso.
+     *                         - 'fecha_ingreso_hasta' (string|Carbon): Fecha de fin del rango de fechas de ingreso.
      *
      * @throws \Exception Si ocurre algún error durante la ejecución de la búsqueda, se registrará
-     *                     un error en el log.
+     *                    un error en el log.
+     *
+     * @return Builder Una instancia de Illuminate\Database\Eloquent\Builder configurada con los
+     *                 criterios de búsqueda especificados.
      */
     public static function busquedaAvanzada(array $criterios): Builder
     {
@@ -627,7 +626,6 @@ class Dh09 extends Model
         }
     }
 
-    
     /**
      * Genera un reporte de salud de los datos en la tabla DH09.
      *
@@ -637,17 +635,17 @@ class Dh09 extends Model
      * diferentes estados (jubilados, fallecidos, con embargo).
      *
      * @return array Un array asociativo con las siguientes claves:
-     *   - 'total_registros' (int): Total de registros en la tabla.
-     *   - 'registros_con_periodo_valido' (int): Registros con año y mes de vigencia válidos (mes entre 1 y 12).
-     *   - 'registros_con_obra_social' (int): Registros con código de obra social y número de afiliado.
-     *   - 'empleados_jubilados' (int): Cantidad de empleados jubilados.
-     *   - 'empleados_fallecidos' (int): Cantidad de empleados fallecidos (con fecha de defunción).
-     *   - 'empleados_con_embargo' (int): Cantidad de empleados con embargo.
-     *   - 'registros_sin_fecha_ingreso' (int): Cantidad de registros sin fecha de ingreso.
-     *   - 'ultima_actualizacion' (string): Fecha y hora de la última actualización en la tabla,
-     *     o 'No disponible' si no hay registros.
-     *   - 'error' (string, opcional): Mensaje de error en caso de fallo durante la generación del reporte.
-     *   - 'mensaje' (string, opcional): Detalles del mensaje de error en caso de fallo.
+     *               - 'total_registros' (int): Total de registros en la tabla.
+     *               - 'registros_con_periodo_valido' (int): Registros con año y mes de vigencia válidos (mes entre 1 y 12).
+     *               - 'registros_con_obra_social' (int): Registros con código de obra social y número de afiliado.
+     *               - 'empleados_jubilados' (int): Cantidad de empleados jubilados.
+     *               - 'empleados_fallecidos' (int): Cantidad de empleados fallecidos (con fecha de defunción).
+     *               - 'empleados_con_embargo' (int): Cantidad de empleados con embargo.
+     *               - 'registros_sin_fecha_ingreso' (int): Cantidad de registros sin fecha de ingreso.
+     *               - 'ultima_actualizacion' (string): Fecha y hora de la última actualización en la tabla,
+     *               o 'No disponible' si no hay registros.
+     *               - 'error' (string, opcional): Mensaje de error en caso de fallo durante la generación del reporte.
+     *               - 'mensaje' (string, opcional): Detalles del mensaje de error en caso de fallo.
      */
     public static function generarReporteSalud(): array
     {
@@ -680,7 +678,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Summary of esJubilado
+     * Summary of esJubilado.
      */
     protected function esJubilado(): Attribute
     {
@@ -688,7 +686,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Summary of tieneSalarioFamiliarExterno
+     * Summary of tieneSalarioFamiliarExterno.
      */
     protected function tieneSalarioFamiliarExterno(): Attribute
     {
@@ -696,7 +694,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Summary of antiguedad
+     * Summary of antiguedad.
      */
     protected function antiguedad(): Attribute
     {
@@ -716,7 +714,7 @@ class Dh09 extends Model
     }
 
     /**
-     * Summary of estaFallecido
+     * Summary of estaFallecido.
      */
     protected function estaFallecido(): Attribute
     {
@@ -785,7 +783,6 @@ class Dh09 extends Model
         });
     }
 
-    
     /**
      * Configuración de casting de tipos de datos
      * Organizado por tipos para mejor mantenimiento.

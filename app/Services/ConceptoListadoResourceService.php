@@ -88,7 +88,7 @@ class ConceptoListadoResourceService
         $query = ConceptoListado::query()
             ->when(
                 $filters['codn_conce'] ?? null,
-                fn ($query, $concepto) => $query->whereIn('codn_conce', (array)$concepto),
+                fn ($query, $concepto) => $query->whereIn('codn_conce', (array) $concepto),
             )
             ->when(
                 $filters['nro_liqui'] ?? null,

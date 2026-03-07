@@ -61,8 +61,6 @@ class EmbargoProcesoResult extends Model
         'clas_noved' => 'string',
     ];
 
-
-
     /**
      * Obtiene una consulta vacía.
      *
@@ -249,7 +247,7 @@ class EmbargoProcesoResult extends Model
 
             foreach ($results as $index => $result) {
                 // Convertir a array
-                $registro = (array)$result;
+                $registro = (array) $result;
 
                 // Filtrar solo los campos válidos según $fillable
                 $registroFiltrado = array_intersect_key($registro, $fillableSet);
@@ -289,7 +287,7 @@ class EmbargoProcesoResult extends Model
 
             // Definir tamaño de bloque basado en la cantidad de registros
             // Para pocos registros, bloques más pequeños; para muchos, bloques más grandes
-            $tamañoBloque = min(max((int)($cantidadRegistros / 10), 50), 1000);
+            $tamañoBloque = min(max((int) ($cantidadRegistros / 10), 50), 1000);
 
             // Usar un contador para seguir los registros insertados correctamente
             $registrosInsertados = 0;

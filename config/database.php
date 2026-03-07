@@ -239,7 +239,7 @@ return [
             'search_path' => 'suc',
             'sslmode' => 'prefer',
         ],
-        
+
         'pgsql-liqui' => [
             'driver' => 'pgsql',
             'host' => env('DB_TEST_HOST', '127.0.0.1'),

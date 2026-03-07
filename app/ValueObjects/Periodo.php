@@ -1,27 +1,25 @@
-<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+<?php
+
+/** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace App\ValueObjects;
-
-use InvalidArgumentException;
-use Stringable;
 
 /**
  * Representa un periodo de tiempo en formato YYYYMM.
  *
  * Esta clase encapsula la validación y el acceso al valor del periodo.
  */
-class Periodo implements Stringable
+class Periodo implements \Stringable
 {
     private readonly string $value;
 
     public function __construct(string $periodo)
     {
         if (!preg_match('/^\d{6}$/', $periodo)) {
-            throw new InvalidArgumentException('El periodo debe ser una cadena de 6 dígitos.');
+            throw new \InvalidArgumentException('El periodo debe ser una cadena de 6 dígitos.');
         }
         $this->value = $periodo;
     }
-
 
     /**
      * Devuelve la representación en string del periodo.

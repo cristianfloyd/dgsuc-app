@@ -16,7 +16,7 @@ class SicossCpto205Repository
         return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
             // 0 Eliminar tabla temporal si existe
             $this->eliminarTablaTemporal();
-            
+
             // 1. Crear tabla temporal para cargos asociados
             $this->crearTablaCargosAsociados($liquidaciones);
 
@@ -50,6 +50,67 @@ class SicossCpto205Repository
         ');
     }
 
+    /**
+     * Cuenta los registros en la tabla temporal.
+     *
+     * @return int Número de registros
+     */
+    public function contarRegistros(): int
+    {
+        $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto205');
+        return (int) $resultado->total;
+    }
+
+    /**
+     * Inicia una transacción en la conexión Mapuche.
+     *
+     * Este método inicia una nueva transacción en la base de datos,
+     * permitiendo realizar múltiples operaciones que serán confirmadas
+     * o revertidas como una unidad atómica.
+     *
+     * @return void
+     */
+    public function iniciarTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->beginTransaction();
+    }
+
+    /**
+     * Confirma una transacción en la conexión Mapuche.
+     *
+     * Este método confirma todos los cambios realizados dentro de la transacción actual
+     * y los hace permanentes en la base de datos.
+     *
+     * @return void
+     */
+    public function confirmarTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->commit();
+    }
+
+    /**
+     * Revierte una transacción en la conexión Mapuche.
+     *
+     * Este método deshace todos los cambios realizados dentro de la transacción actual
+     * y restaura el estado de la base de datos al punto anterior al inicio de la transacción.
+     *
+     * @return void
+     */
+    public function revertirTransaccion(): void
+    {
+        DB::connection($this->getConnectionName())->rollBack();
+    }
+
+    public function procesarConcepto204(array $liquidaciones): int
+    {
+        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
+            $this->eliminarTablasTemporalesConcepto204();
+            $this->crearTablaDocentes($liquidaciones);
+            $this->crearTablaAllCargos($liquidaciones);
+            $this->actualizarConcepto204();
+            return $this->contarRegistrosConcepto204();
+        });
+    }
 
     private function crearTablaCargosAsociados(array $liquidaciones): void
     {
@@ -161,7 +222,7 @@ class SicossCpto205Repository
             GROUP BY mapuche.dh21.nro_legaj, c.cuil
             ORDER BY nro_legaj;
         ");
-        
+
 
         // Luego actualizamos la tabla final
         DB::connection($this->getConnectionName())->statement('
@@ -187,74 +248,6 @@ class SicossCpto205Repository
             FROM tcpto205sinaut b
             WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
         ');
-    }
-
-    
-
-    /**
-     * Cuenta los registros en la tabla temporal
-     *
-     * @return int Número de registros
-     */
-    public function contarRegistros(): int
-    {
-        $resultado = DB::connection($this->getConnectionName())->selectOne("SELECT COUNT(*) as total FROM tcpto205");
-        return (int) $resultado->total;
-    }
-
-
-
-    /**
-     * Inicia una transacción en la conexión Mapuche
-     *
-     * Este método inicia una nueva transacción en la base de datos,
-     * permitiendo realizar múltiples operaciones que serán confirmadas
-     * o revertidas como una unidad atómica.
-     *
-     * @return void
-     */
-    public function iniciarTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->beginTransaction();
-    }
-
-
-    /**
-     * Confirma una transacción en la conexión Mapuche
-     *
-     * Este método confirma todos los cambios realizados dentro de la transacción actual
-     * y los hace permanentes en la base de datos.
-     *
-     * @return void
-     */
-    public function confirmarTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->commit();
-    }
-
-
-    /**
-     * Revierte una transacción en la conexión Mapuche
-     *
-     * Este método deshace todos los cambios realizados dentro de la transacción actual
-     * y restaura el estado de la base de datos al punto anterior al inicio de la transacción.
-     *
-     * @return void
-     */
-    public function revertirTransaccion(): void
-    {
-        DB::connection($this->getConnectionName())->rollBack();
-    }
-
-    public function procesarConcepto204(array $liquidaciones): int
-    {
-        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
-            $this->eliminarTablasTemporalesConcepto204();
-            $this->crearTablaDocentes($liquidaciones);
-            $this->crearTablaAllCargos($liquidaciones);
-            $this->actualizarConcepto204();
-            return $this->contarRegistrosConcepto204();
-        });
     }
 
     private function eliminarTablasTemporalesConcepto204(): void
@@ -317,7 +310,7 @@ class SicossCpto205Repository
 
     private function actualizarConcepto204(): void
     {
-        DB::connection($this->getConnectionName())->statement("
+        DB::connection($this->getConnectionName())->statement('
             UPDATE suc.afip_mapuche_sicoss
             SET cpto_no_remun = cpto_no_remun - cpto_no_remun,
                 sueldo_adicc  = sueldo_adicc + cpto_no_remun,
@@ -328,7 +321,7 @@ class SicossCpto205Repository
                 FROM tcptouno a, mapuche.vdh01 b 
                 WHERE a.nro_legaj = b.nro_legaj
             )
-        ");
+        ');
 
         DB::connection($this->getConnectionName())->statement('
             UPDATE suc.afip_mapuche_sicoss
@@ -344,7 +337,7 @@ class SicossCpto205Repository
 
     private function contarRegistrosConcepto204(): int
     {
-        $resultado = DB::connection($this->getConnectionName())->selectOne("SELECT COUNT(*) as total FROM tcpto204");
+        $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto204');
         return (int) $resultado->total;
     }
 }

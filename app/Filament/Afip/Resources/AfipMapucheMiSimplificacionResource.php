@@ -142,8 +142,8 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService): void {
                         try {
                             $processedCount = $mapucheMiSimplificacionService->poblarMiSimplificacion(
-                                (int)$data['periodo_fiscal'],
-                                (int)$data['nro_liqui'],
+                                (int) $data['periodo_fiscal'],
+                                (int) $data['nro_liqui'],
                             );
 
                             if ($processedCount > 0) {

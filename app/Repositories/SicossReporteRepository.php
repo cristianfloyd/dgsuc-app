@@ -154,7 +154,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
         try {
             $periodoActual = $this->periodoFiscalService->getPeriodoFiscalFromDatabase();
 
-            return ((int)$periodoActual['year'] === (int)$anio && (int)$periodoActual['month'] === (int)$mes)
+            return ((int) $periodoActual['year'] === (int) $anio && (int) $periodoActual['month'] === (int) $mes)
                 ? 'mapuche.dh21'
                 : 'mapuche.dh21h';
         } catch (\Exception $e) {

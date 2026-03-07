@@ -82,7 +82,7 @@ class MapucheSicossTable extends Component
         try {
             $value = $model->getRawOriginal($attribute);
             if (\is_object($value)) {
-                return method_exists($value, '__toString') ? (string)$value : $value::class;
+                return method_exists($value, '__toString') ? (string) $value : $value::class;
             }
             return $value;
         } catch (\Exception $e) {

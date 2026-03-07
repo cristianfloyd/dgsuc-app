@@ -260,7 +260,7 @@ class SicossExportService
     private function formatearNumero($valor, int $longitud): string
     {
         // Convertir a string y asegurar que no sea null
-        $valorString = (string)($valor ?? '0');
+        $valorString = (string) ($valor ?? '0');
 
         // Si el valor es más largo que la longitud deseada, truncarlo
         if (\strlen($valorString) > $longitud) {

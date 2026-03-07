@@ -292,7 +292,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
 
         // Tomar el nro_liqui del primer registro y obtener el período fiscal real
         $primerBloqueo = $bloqueos->first();
-        $nroLiqui = (int)$primerBloqueo->nro_liqui;
+        $nroLiqui = (int) $primerBloqueo->nro_liqui;
         $periodo = $this->getPeriodoFiscalFromNroLiqui($nroLiqui);
         return $periodo ?? $periodoService->getPeriodoFiscal();
     }
@@ -326,8 +326,8 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
             return null;
         }
         return [
-            'year' => (int)$periodo['year'],
-            'month' => (int)$periodo['month'],
+            'year' => (int) $periodo['year'],
+            'month' => (int) $periodo['month'],
         ];
     }
 }

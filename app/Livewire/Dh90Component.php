@@ -104,8 +104,8 @@ class Dh90Component extends Component
 
         try {
             $data = Dh90Data::from([
-                'nroCargo' => (int)$this->form['nro_cargo'],
-                'nroCargoasociado' => $this->form['nro_cargoasociado'] ? (int)$this->form['nro_cargoasociado'] : null,
+                'nroCargo' => (int) $this->form['nro_cargo'],
+                'nroCargoasociado' => $this->form['nro_cargoasociado'] ? (int) $this->form['nro_cargoasociado'] : null,
                 'tipoasociacion' => $this->form['tipoasociacion'],
             ]);
 
@@ -294,8 +294,8 @@ class Dh90Component extends Component
 
         try {
             $this->repository->crearOActualizarRelacion(
-                (int)$this->form['nro_cargo'],
-                (int)$this->form['nro_cargoasociado'],
+                (int) $this->form['nro_cargo'],
+                (int) $this->form['nro_cargoasociado'],
                 $this->form['tipoasociacion'],
             );
 

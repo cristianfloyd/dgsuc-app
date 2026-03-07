@@ -47,8 +47,8 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
 
             // Convertimos a enteros para los selectores
-            $this->year = (int)$periodoFiscal['year'];
-            $this->month = (int)$periodoFiscal['month'];
+            $this->year = (int) $periodoFiscal['year'];
+            $this->month = (int) $periodoFiscal['month'];
 
             $this->form->fill();
 

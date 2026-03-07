@@ -254,7 +254,7 @@ class AfipMapucheSicossImportService
                     $parsedData[$field] = trim($value);
                 } else {
                     $parsedData[$field] = match ($config['type']) {
-                        'N' => (int)ltrim(trim($value), '0') ?: 0,
+                        'N' => (int) ltrim(trim($value), '0') ?: 0,
                         'D' => $this->parseAmount($value),
                         default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
                     };
@@ -894,7 +894,7 @@ class AfipMapucheSicossImportService
 
     private function calculateProgress(int $processed, int $total): int
     {
-        return (int)(($processed / $total) * 100);
+        return (int) (($processed / $total) * 100);
     }
 
     /**
@@ -930,7 +930,7 @@ class AfipMapucheSicossImportService
         $value = str_replace('.', ',', $value);
 
         // Convertir a float (asegurándose de que PHP use la coma como separador decimal)
-        return (float)str_replace(',', '.', $value);
+        return (float) str_replace(',', '.', $value);
     }
 
     private function validateParsedData(array $data): void
@@ -1160,7 +1160,7 @@ class AfipMapucheSicossImportService
 
                 // Procesar según el tipo de dato
                 $parsedData[$field] = match ($config['type']) {
-                    'N' => (int)ltrim(trim($value), '0') ?: 0,
+                    'N' => (int) ltrim(trim($value), '0') ?: 0,
                     'D' => $this->parseAmount($value),
                     'C' => trim($value),
                     default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")

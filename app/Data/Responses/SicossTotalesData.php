@@ -24,8 +24,10 @@ class SicossTotalesData extends Data
     }
 
     /**
-     * Summary of fromArray
+     * Summary of fromArray.
+     *
      * @param array $data
+     *
      * @return SicossTotalesData
      */
     public static function fromArray(array $data): self

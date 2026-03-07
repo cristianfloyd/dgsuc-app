@@ -228,7 +228,7 @@ class CompareCuils extends Component
     public function stepsCompleted(): bool
     {
         $step = $this->currentStep;
-        return (bool)($step === self::COMPLETED);
+        return (bool) ($step === self::COMPLETED);
     }
 
     /**
@@ -344,7 +344,7 @@ class CompareCuils extends Component
      */
     public function toggleValue(bool|string $value): bool
     {
-        return $value = (bool)$value === false;
+        return $value = (bool) $value === false;
     }
 
     /** Carga los CUILs que no se encuentran en AFIP.

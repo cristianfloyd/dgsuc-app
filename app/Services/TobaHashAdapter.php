@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use function strlen;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -54,7 +53,7 @@ class TobaHashAdapter
     {
         $hash = crypt($input, $this->getSalt());
 
-        if (strlen($hash) <= 13) {
+        if (\strlen($hash) <= 13) {
             throw new \Exception('Se produjo un error al crear el hash');
         }
 
@@ -128,7 +127,7 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'bcrypt',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : null,
-                'valido' => strlen($hash) === 60,
+                'valido' => \strlen($hash) === 60,
             ];
         }
 
@@ -137,7 +136,7 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'sha256',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
-                'valido' => strlen($hash) > 20,
+                'valido' => \strlen($hash) > 20,
             ];
         }
 
@@ -146,14 +145,14 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'sha512',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
-                'valido' => strlen($hash) > 20,
+                'valido' => \strlen($hash) > 20,
             ];
         }
 
         if (str_starts_with($hash, '$1$')) {
             return [
                 'algoritmo' => 'md5',
-                'valido' => strlen($hash) === 34,
+                'valido' => \strlen($hash) === 34,
             ];
         }
 
@@ -209,6 +208,7 @@ class TobaHashAdapter
      * Genera bytes aleatorios de manera segura usando características modernas de PHP.
      *
      * @param int $count
+     *
      * @return string
      */
     private function getSecureRandomBytes(int $count): string
@@ -238,7 +238,7 @@ class TobaHashAdapter
                 $bytes = fread($handle, $count);
                 fclose($handle);
 
-                if ($bytes !== false && strlen($bytes) === $count) {
+                if ($bytes !== false && \strlen($bytes) === $count) {
                     return $bytes;
                 }
             }
@@ -263,7 +263,7 @@ class TobaHashAdapter
     private function encodeBytes(string $input): string
     {
         $output = '';
-        $inputLength = strlen($input);
+        $inputLength = \strlen($input);
 
         for ($i = 0; $i < $inputLength; $i += 3) {
             $c1 = \ord($input[$i]);

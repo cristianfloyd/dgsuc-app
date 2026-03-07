@@ -590,9 +590,9 @@ class SicossOptimizadoTests
     {
         // Log cada 1000 legajos o al 25%, 50%, 75% del progreso
         $intervalos_log = [
-            (int)($total_legajos * 0.25),
-            (int)($total_legajos * 0.50),
-            (int)($total_legajos * 0.75),
+            (int) ($total_legajos * 0.25),
+            (int) ($total_legajos * 0.50),
+            (int) ($total_legajos * 0.75),
             $total_legajos,
         ];
 

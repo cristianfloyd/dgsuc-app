@@ -17,7 +17,7 @@ class DatabaseConnectionMiddleware
     public function handle(Request $request, \Closure $next): Response
     {
         // NO cambiar la conexión por defecto en comandos Artisan
-        if (app()->runningInConsole() || php_sapi_name() === 'cli') {
+        if (app()->runningInConsole() || \PHP_SAPI === 'cli') {
             return $next($request);
         }
 

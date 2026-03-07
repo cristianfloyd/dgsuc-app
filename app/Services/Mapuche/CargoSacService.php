@@ -19,8 +19,8 @@ class CargoSacService
 
     public static function getBrutosSacCargo(int $legajo, int $nro_cargo)
     {
-        $mes_periodo = (int)MapucheConfig::getMesFiscal();
-        $anio_periodo = (int)MapucheConfig::getAnioFiscal();
+        $mes_periodo = (int) MapucheConfig::getMesFiscal();
+        $anio_periodo = (int) MapucheConfig::getAnioFiscal();
         if ($mes_periodo <= 6) {
             $segundo_semestre = $anio_periodo - 1;
         } else {
@@ -127,8 +127,8 @@ class CargoSacService
     public static function get_brutos_para_sac($filtro, $orderby = '')
     {
 
-        $mes_periodo = (int)MapucheConfig::getMesFiscal();
-        $anio_periodo = (int)MapucheConfig::getAnioFiscal();
+        $mes_periodo = (int) MapucheConfig::getMesFiscal();
+        $anio_periodo = (int) MapucheConfig::getAnioFiscal();
 
         if ($orderby != '') {
             $order = ' ORDER BY nyapel ' . $orderby;

@@ -74,7 +74,7 @@ class Dh09Data extends Data
         public readonly ?string $ua_asigfamiliar,
         #[Date, Nullable]
         public readonly ?Carbon $fechadjur894,
-        #[StringType,Max(1), Nullable]
+        #[StringType, Max(1), Nullable]
         public readonly ?string $renunciadj894,
         #[Date, Nullable]
         public readonly ?Carbon $fechadechere,
@@ -101,7 +101,7 @@ class Dh09Data extends Data
     ) {
     }
 
-    public static function rules(\Spatie\LaravelData\Support\Validation\ValidationContext $context = null): array
+    public static function rules(?\Spatie\LaravelData\Support\Validation\ValidationContext $context = null): array
     {
         return [
             'nro_legaj' => ['required', 'integer'],

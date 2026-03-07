@@ -35,7 +35,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         ";
 
         $suma = DB::connection($this->getConnectionName())->select($sql);
-        return (float)($suma[0]->suma ?? 0);
+        return (float) ($suma[0]->suma ?? 0);
     }
 
     /**
@@ -77,7 +77,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
                         cargo,concepto";
 
         $horas = DB::connection($this->getConnectionName())->select($sql);
-        return !empty($horas) ? (array)$horas[0] : [];
+        return !empty($horas) ? (array) $horas[0] : [];
     }
 
     /**
@@ -111,7 +111,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
             ];
         }
 
-        return (array)$resp[0];
+        return (array) $resp[0];
     }
 
     /**
