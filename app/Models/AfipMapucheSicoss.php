@@ -529,8 +529,6 @@ class AfipMapucheSicoss extends Model
         );
     }
 
-    // === FIN DEL BLOQUE DE CAMPOS DE ANCHO FIJO DECIMAL ===
-
     // ################################ HELPER FUNCTIONS #########################################
 
     /**
@@ -882,68 +880,6 @@ class AfipMapucheSicoss extends Model
     protected static function getMapucheConnection(): string
     {
         return (new static())->getConnectionName();
-    }
-
-    // ###########################################################################################
-    // ################################ MUTADORES Y ACCESORES ####################################
-
-    /**
-     * Mutador y Accesor para el campo apnom.
-     */
-    protected function apnom(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
-        );
-    }
-
-    protected function remTotal(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
-        );
-    }
-
-    protected function remImpo6(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
-        );
-    }
-
-    protected function remImpo9(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
-        );
-    }
-
-    /**
-     * Mutador y Accesor para el campo prov.
-     */
-    protected function prov(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
-        );
-    }
-
-    protected function diferenciaRem(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                // Convertir a números y manejar valores nulos o vacíos
-                $remTotal = is_numeric($this->rem_total) ? (float)$this->rem_total : 0;
-                $remImpo6 = is_numeric($this->rem_impo6) ? (float)$this->rem_impo6 : 0;
-
-                return $remTotal - $remImpo6;
-            },
-        );
     }
 
     /**
