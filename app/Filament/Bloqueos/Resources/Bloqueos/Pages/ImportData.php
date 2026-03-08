@@ -5,7 +5,7 @@ namespace App\Filament\Bloqueos\Resources\Bloqueos\Pages;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Exception;
-use App\Filament\Bloqueos\Resources\Bloqueos\BloqueosResource;
+use App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos\BloqueosResource;
 use App\Imports\BloqueosImport;
 use App\Services\ImportDataTableService;
 use App\Services\Imports\BloqueosImportService;

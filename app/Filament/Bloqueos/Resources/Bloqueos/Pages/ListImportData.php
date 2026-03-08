@@ -8,7 +8,7 @@ use Throwable;
 use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Enums\BloqueosTipoEnum;
-use App\Filament\Bloqueos\Resources\Bloqueos\BloqueosResource;
+use App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos\BloqueosResource;
 use App\Services\ImportDataTableService;
 use App\Services\Reportes\BloqueosDataService;
 use App\Services\Reportes\BloqueosProcessService;

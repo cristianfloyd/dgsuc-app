@@ -2,7 +2,7 @@
 
 namespace App\Filament\Bloqueos\Resources\Bloqueos\Pages;
 
-use App\Filament\Bloqueos\Resources\Bloqueos\BloqueosResource;
+use App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos\BloqueosResource;
 use Filament\Resources\Pages\CreateRecord;
 use Livewire\WithFileUploads;
 

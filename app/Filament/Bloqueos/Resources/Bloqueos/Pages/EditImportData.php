@@ -2,8 +2,8 @@
 
 namespace App\Filament\Bloqueos\Resources\Bloqueos\Pages;
 
-use App\Filament\Bloqueos\Resources\Bloqueos\BloqueosResource;
-use App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorialResource;
+use App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorials\BloqueosHistorialResource;
 use App\Models\Dh01;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Mapuche\VerificacionMapucheService;

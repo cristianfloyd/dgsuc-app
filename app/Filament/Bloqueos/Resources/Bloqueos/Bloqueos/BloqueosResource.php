@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Bloqueos\Resources\Bloqueos;
+namespace App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
