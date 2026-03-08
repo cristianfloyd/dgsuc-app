@@ -3,7 +3,7 @@
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages;
 
 use Throwable;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImportResource;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports\NovedadesCargoImportResource;
 use App\Services\NovedadesCargoImportService;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Storage;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Mapuche\Resources\NovedadesCargoImports;
+namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\FileUpload;

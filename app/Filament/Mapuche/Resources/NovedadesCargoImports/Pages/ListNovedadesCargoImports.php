@@ -4,7 +4,7 @@ namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages;
 
 use Throwable;
 use Filament\Actions\CreateAction;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImportResource;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports\NovedadesCargoImportResource;
 use App\Services\NovedadesCargoImportTableService;
 use Filament\Actions;
 use Filament\Notifications\Notification;

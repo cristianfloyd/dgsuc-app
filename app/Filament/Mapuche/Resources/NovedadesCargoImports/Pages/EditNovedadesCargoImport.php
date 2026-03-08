@@ -3,7 +3,7 @@
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImportResource;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports\NovedadesCargoImportResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
