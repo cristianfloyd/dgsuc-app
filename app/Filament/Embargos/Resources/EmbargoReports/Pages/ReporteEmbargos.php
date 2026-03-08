@@ -5,7 +5,7 @@ namespace App\Filament\Embargos\Resources\EmbargoReports\Pages;
 use Exception;
 use Filament\Actions\ExportBulkAction;
 use App\Exports\EmbargoReportExport;
-use App\Filament\Embargos\Resources\EmbargoReports\EmbargoReportResource;
+use App\Filament\Embargos\Resources\EmbargoReports\EmbargoReports\EmbargoReportResource;
 use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 use App\Models\Mapuche\Dh22;
 use App\Models\Reportes\EmbargoReportModel;

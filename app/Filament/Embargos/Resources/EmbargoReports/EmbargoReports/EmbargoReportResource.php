@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\EmbargoReports;
+namespace App\Filament\Embargos\Resources\EmbargoReports\EmbargoReports;
 
 use App\Filament\Embargos\Resources\EmbargoReports\Pages\ListEmbargos;
 use App\Filament\Embargos\Resources\EmbargoReports\Pages\ReporteEmbargos;
