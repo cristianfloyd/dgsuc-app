@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Bloqueos\Resources\BloqueosHistorials;
+namespace App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorials;
 
 use App\Filament\Bloqueos\Resources\BloqueosHistorials\Pages\ListBloqueosHistorial;
 use App\Filament\Bloqueos\Resources\BloqueosHistorials\Pages\ViewBloqueoHistorial;
