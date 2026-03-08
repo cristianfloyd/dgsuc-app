@@ -3,7 +3,7 @@
 namespace App\Filament\Liquidaciones\Resources\Dh61s\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Liquidaciones\Resources\Dh61s\Dh61Resource;
+use App\Filament\Liquidaciones\Resources\Dh61s\Dh61s\Dh61Resource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

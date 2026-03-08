@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Liquidaciones\Resources\Dh61s;
+namespace App\Filament\Liquidaciones\Resources\Dh61s\Dh61s;
 
 use App\Filament\Liquidaciones\Resources\Dh61s\Pages\ListDh61s;
 use App\Filament\Liquidaciones\Resources\Dh61s\Pages\EditDh61;
