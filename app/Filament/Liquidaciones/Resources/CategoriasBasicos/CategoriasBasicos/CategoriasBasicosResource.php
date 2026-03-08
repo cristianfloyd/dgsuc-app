@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos;
+namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicos;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Set;

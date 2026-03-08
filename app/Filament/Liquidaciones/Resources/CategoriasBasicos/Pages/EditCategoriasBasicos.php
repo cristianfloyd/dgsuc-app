@@ -3,7 +3,7 @@
 namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicosResource;
+use App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicos\CategoriasBasicosResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

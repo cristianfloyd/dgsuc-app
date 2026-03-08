@@ -2,7 +2,7 @@
 
 namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages;
 
-use App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicosResource;
+use App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicos\CategoriasBasicosResource;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use Filament\Resources\Pages\ListRecords;
