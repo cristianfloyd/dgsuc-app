@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Documentations;
+namespace App\Filament\Admin\Resources\Documentations\Documentations;
 
 use Filament\Schemas\Schema;
 use Filament\Actions\Action;

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Documentations\Pages;
 
-use App\Filament\Admin\Resources\Documentations\DocumentationResource;
+use App\Filament\Admin\Resources\Documentations\Documentations\DocumentationResource;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\File;
 use League\CommonMark\CommonMarkConverter;
