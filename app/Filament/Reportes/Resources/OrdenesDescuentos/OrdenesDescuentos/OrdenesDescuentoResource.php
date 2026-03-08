@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\OrdenesDescuentos;
+namespace App\Filament\Reportes\Resources\OrdenesDescuentos\OrdenesDescuentos;
 
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;

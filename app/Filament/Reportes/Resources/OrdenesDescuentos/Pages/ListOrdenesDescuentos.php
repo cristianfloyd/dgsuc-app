@@ -2,7 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\OrdenesDescuentos\Pages;
 
-use App\Filament\Reportes\Resources\OrdenesDescuentos\OrdenesDescuentoResource;
+use App\Filament\Reportes\Resources\OrdenesDescuentos\OrdenesDescuentos\OrdenesDescuentoResource;
 use App\Services\OrdenesDescuentoTableService;
 use App\Traits\TableVerificationTrait;
 use Filament\Notifications\Notification;
