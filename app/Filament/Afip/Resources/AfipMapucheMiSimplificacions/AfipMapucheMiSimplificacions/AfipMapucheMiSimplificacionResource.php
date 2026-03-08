@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Afip\Resources\AfipMapucheMiSimplificacions;
+namespace App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacions;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Filters\SelectFilter;

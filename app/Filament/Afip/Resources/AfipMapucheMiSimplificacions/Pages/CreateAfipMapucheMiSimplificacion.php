@@ -2,7 +2,7 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages;
 
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacionResource;
+use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacionResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAfipMapucheMiSimplificacion extends CreateRecord
