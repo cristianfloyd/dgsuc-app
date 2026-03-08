@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\LicenciaVigentes;
+namespace App\Filament\Reportes\Resources\LicenciaVigentes\LicenciaVigentes;
 
 use App\Filament\Reportes\Resources\LicenciaVigentes\Pages\ListLicenciaVigentes;
 use App\Models\LicenciaVigente;

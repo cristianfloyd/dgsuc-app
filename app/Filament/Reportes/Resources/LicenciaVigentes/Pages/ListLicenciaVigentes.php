@@ -3,7 +3,7 @@
 namespace App\Filament\Reportes\Resources\LicenciaVigentes\Pages;
 
 use Filament\Schemas\Components\Tabs\Tab;
-use App\Filament\Reportes\Resources\LicenciaVigentes\LicenciaVigenteResource;
+use App\Filament\Reportes\Resources\LicenciaVigentes\LicenciaVigentes\LicenciaVigenteResource;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
