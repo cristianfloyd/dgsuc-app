@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use Exception;
+use RuntimeException;
 use App\Data\AfipMapucheSicossCalculoData;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
@@ -88,7 +90,7 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
                 'tabla' => $this->model->getTable(),
                 'conexión' => $connectionName,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Registrar el error detallado
             Log::error('Error al truncar la tabla: ' . $e->getMessage(), [
                 'conexión_obtenida' => $connectionName ?? 'desconocida',
@@ -110,7 +112,7 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
             }
 
             // Lanzar una excepción más informativa
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'Error al truncar la tabla: ' . $e->getMessage() .
                 '. Conexión utilizada: ' . ($connectionName ?? 'desconocida') .
                 '. Conexión en sesión: ' . ($sessionConnection ?? 'desconocida'),

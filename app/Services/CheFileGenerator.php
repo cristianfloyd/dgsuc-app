@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use App\Models\CheData;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -120,7 +122,7 @@ class CheFileGenerator
                 'error' => 'info',
                 'liquidacion' => $liquidaciones[$indice]['nro_liqui'],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error sending CHE to Pilaga: ' . $e->getMessage());
             return [
                 'mensaje' => '505',
@@ -237,7 +239,7 @@ class CheFileGenerator
     private function insertIntoDatabase(array $content): void
     {
         // Asumiendo que tienes un modelo llamado CheData
-        \App\Models\CheData::create([
+        CheData::create([
             'neto_liquidado' => $content['neto_liquidado'],
             'accion' => $content['accion'],
             // Aquí puedes agregar más campos según la estructura de tu tabla

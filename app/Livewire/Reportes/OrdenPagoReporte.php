@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Reportes;
 
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Application;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Services\ReportHeaderService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -155,7 +159,7 @@ class OrdenPagoReporte extends Component implements Htmlable
         }
     }
 
-    public function descargarReportePDF(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function descargarReportePDF(): StreamedResponse
     {
         $data = [
             'reportData' => $this->reportData,
@@ -181,7 +185,7 @@ class OrdenPagoReporte extends Component implements Htmlable
         }, 'users.pdf');
     }
 
-    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application
+    public function render(): View|Factory|Application
     {
         return view(view: 'livewire.reportes.orden-pago-reporte-exportable', data: [
             'reportData' => $this->reportData,

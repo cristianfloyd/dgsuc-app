@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
+use Exception;
+use App\Models\Mapuche\Dh22;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Mapuche\TableSelectorService;
 use App\Traits\MapucheConnectionTrait;
@@ -119,7 +121,7 @@ class SicossEmbarazadasService
                     'log_details' => $logDetails,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en actualización de embarazadas', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -145,11 +147,11 @@ class SicossEmbarazadasService
     {
         // Usar el modelo Dh22 para obtener liquidaciones que generan impositivo
         try {
-            return \App\Models\Mapuche\Dh22::FilterByYearMonth($year, $month)
+            return Dh22::FilterByYearMonth($year, $month)
                 ->generaImpositivo()
                 ->pluck('nro_liqui')
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener liquidaciones', [
                 'error' => $e->getMessage(),
                 'year' => $year,

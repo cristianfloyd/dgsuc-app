@@ -2,6 +2,8 @@
 
 namespace App\Services\Imports;
 
+use Exception;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Exceptions\Imports\ImportException;
 use App\Exceptions\ImportValidationException;
 use App\Imports\BloqueosImport;
@@ -45,7 +47,7 @@ class BloqueosImportService
             ]);
 
             return $processedRow;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error procesando fila', [
                 'row' => $row,
                 'error' => $e->getMessage(),
@@ -94,7 +96,7 @@ class BloqueosImportService
                 'd/m/y', 'Y/m/d',
                 // Formato Excel (número de días desde 1900)
                 function ($value) {
-                    return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+                    return Carbon::instance(Date::excelToDateTimeObject($value));
                 },
             ];
 
@@ -109,13 +111,13 @@ class BloqueosImportService
                     if ($parsed && $parsed->year > 1900 && $parsed->year < 2100) {
                         return $parsed->format('Y-m-d');
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     continue;
                 }
             }
 
-            throw new \Exception('Formato de fecha no válido');
-        } catch (\Exception $e) {
+            throw new Exception('Formato de fecha no válido');
+        } catch (Exception $e) {
             throw new ImportValidationException("Error al procesar fecha: {$date}");
         }
     }
@@ -173,7 +175,7 @@ class BloqueosImportService
         $this->notificationService->sendSuccessNotification();
     }
 
-    private function handleImportError(\Exception $e, array $context): void
+    private function handleImportError(Exception $e, array $context): void
     {
         Log::error('Error en importación', [
             ...$context,

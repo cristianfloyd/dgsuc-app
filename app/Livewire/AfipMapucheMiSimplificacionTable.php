@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\AfipMapucheMiSimplificacion;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -11,8 +13,9 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Livewire\Component;
 
-class AfipMapucheMiSimplificacionTable extends Component implements HasTable, HasForms
+class AfipMapucheMiSimplificacionTable extends Component implements HasTable, HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -26,10 +29,10 @@ class AfipMapucheMiSimplificacionTable extends Component implements HasTable, Ha
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 // ...
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ]);
     }

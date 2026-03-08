@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Exception;
+use App\Models\AfipMapucheSicoss;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
@@ -79,7 +81,7 @@ class GenerarSicossBDPrueba extends Command
             $this->mostrarResultados($resultado, $periodoFiscal, $tiempo);
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());
             $this->error('📍 En: ' . $e->getFile() . ':' . $e->getLine());
             if ($this->option('verbose')) {
@@ -156,12 +158,12 @@ class GenerarSicossBDPrueba extends Command
         }
 
         // Verificar registros efectivamente guardados en BD
-        $registros_bd = \App\Models\AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal->toString())->count();
+        $registros_bd = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal->toString())->count();
         $this->info("🗄️  Registros en BD: {$registros_bd}");
 
         // Mostrar ejemplo de registro si existe
         if ($registros_bd > 0) {
-            $ejemplo = \App\Models\AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal->toString())
+            $ejemplo = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal->toString())
                 ->orderBy('id')
                 ->first();
 

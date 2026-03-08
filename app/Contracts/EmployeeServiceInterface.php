@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\DTOs\EmployeeInfoDTO;
+
 interface EmployeeServiceInterface
 {
     /**
@@ -9,9 +11,9 @@ interface EmployeeServiceInterface
      *
      * @param string $dni El número de documento del empleado a buscar.
      *
-     * @return \App\DTOs\EmployeeInfoDTO|null El objeto DTO con la información del empleado, o null si no se encuentra.
+     * @return EmployeeInfoDTO|null El objeto DTO con la información del empleado, o null si no se encuentra.
      */
-    public function searchEmployee(string $dni): ?\App\DTOs\EmployeeInfoDTO;
+    public function searchEmployee(string $dni): ?EmployeeInfoDTO;
 
     /**
      * Obtiene los cargos asociados a un número de legajo específico.

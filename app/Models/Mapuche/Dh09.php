@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
+use Exception;
+use Override;
+use InvalidArgumentException;
 use App\Models\Dh01;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\Mapuche\Dh09Queries;
@@ -272,7 +275,7 @@ class Dh09 extends Model
     {
         try {
             return static::where('nro_legaj', $numeroLegajo)->first();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error buscando empleado por legajo', [
                 'legajo' => $numeroLegajo,
                 'error' => $e->getMessage(),
@@ -296,7 +299,7 @@ class Dh09 extends Model
             return static::porPeriodo($ano, $mes)
                 ->orderBy('nro_legaj')
                 ->paginate($limite);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error obteniendo empleados por período', [
                 'ano' => $ano,
                 'mes' => $mes,
@@ -324,7 +327,7 @@ class Dh09 extends Model
                 'empleados_fallecidos' => $query->whereNotNull('fec_defun')->count(),
                 'con_obra_social' => $query->whereNotNull('codc_obsoc')->count(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error obteniendo estadísticas por período', [
                 'ano' => $ano,
                 'mes' => $mes,
@@ -432,7 +435,7 @@ class Dh09 extends Model
             if (empty($this->nro_legaj)) {
                 $errores[] = 'El número de legajo es requerido';
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error validando consistencia de DH09', [
                 'legajo' => $this->nro_legaj ?? 'N/A',
                 'error' => $e->getMessage(),
@@ -495,7 +498,6 @@ class Dh09 extends Model
     // ========================================
     // MÉTODOS DE BÚSQUEDA AVANZADA
     // ========================================
-
     /**
      * Realiza una búsqueda avanzada de registros DH09 basada en los criterios proporcionados.
      *
@@ -518,7 +520,7 @@ class Dh09 extends Model
      *                         - 'fecha_ingreso_desde' (string|Carbon): Fecha de inicio del rango de fechas de ingreso.
      *                         - 'fecha_ingreso_hasta' (string|Carbon): Fecha de fin del rango de fechas de ingreso.
      *
-     * @throws \Exception Si ocurre algún error durante la ejecución de la búsqueda, se registrará
+     * @throws Exception Si ocurre algún error durante la ejecución de la búsqueda, se registrará
      *                    un error en el log.
      *
      * @return Builder Una instancia de Illuminate\Database\Eloquent\Builder configurada con los
@@ -580,7 +582,7 @@ class Dh09 extends Model
             if (!empty($criterios['fecha_ingreso_hasta'])) {
                 $query->where('fec_ingreso', '<=', $criterios['fecha_ingreso_hasta']);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en búsqueda avanzada de DH09', [
                 'criterios' => $criterios,
                 'error' => $e->getMessage(),
@@ -618,7 +620,7 @@ class Dh09 extends Model
             }
 
             return $registrosLimpiados;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error limpiando registros inconsistentes de DH09', [
                 'error' => $e->getMessage(),
             ]);
@@ -665,7 +667,7 @@ class Dh09 extends Model
                 'registros_sin_fecha_ingreso' => static::whereNull('fec_ingreso')->count(),
                 'ultima_actualizacion' => now()->format('Y-m-d H:i:s'),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error generando reporte de salud de DH09', [
                 'error' => $e->getMessage(),
             ]);
@@ -704,7 +706,7 @@ class Dh09 extends Model
             }
             try {
                 return (int) $this->fec_ingreso->diffInYears(now());
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::warning("Error calculando antigüedad para legajo: {$this->nro_legaj}", [
                     'error' => $e->getMessage(),
                 ]);
@@ -728,7 +730,7 @@ class Dh09 extends Model
     /**
      * Configuración de eventos del modelo.
      */
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -738,7 +740,7 @@ class Dh09 extends Model
             try {
                 // Validar que el legajo no esté vacío
                 if (empty($model->nro_legaj)) {
-                    throw new \InvalidArgumentException('El número de legajo es requerido');
+                    throw new InvalidArgumentException('El número de legajo es requerido');
                 }
 
                 // Establecer valores por defecto si no están definidos
@@ -747,7 +749,7 @@ class Dh09 extends Model
                 }
 
                 Log::info('Creando registro DH09 para legajo: ' . $model->nro_legaj);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Error en evento creating de DH09', [
                     'legajo' => $model->nro_legaj ?? 'null',
                     'error' => $e->getMessage(),
@@ -765,7 +767,7 @@ class Dh09 extends Model
                 if ($model->isDirty('fec_defun') && $model->fec_defun !== null) {
                     Log::warning('Se está registrando fecha de defunción para legajo: ' . $model->nro_legaj);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Error en evento updating de DH09', [
                     'legajo' => $model->nro_legaj,
                     'error' => $e->getMessage(),

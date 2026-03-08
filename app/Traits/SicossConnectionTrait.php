@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -22,7 +23,7 @@ trait SicossConnectionTrait
     /**
      * Obtiene la conexión desde el trait.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getConnectionFromTrait()
     {

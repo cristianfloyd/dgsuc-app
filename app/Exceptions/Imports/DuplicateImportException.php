@@ -2,6 +2,8 @@
 
 namespace App\Exceptions\Imports;
 
-class DuplicateImportException extends \Exception
+use Exception;
+
+class DuplicateImportException extends Exception
 {
 }

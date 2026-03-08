@@ -2,6 +2,8 @@
 
 namespace app\Services;
 
+use Exception;
+use PDO;
 use App\Contracts\DatabaseServiceInterface;
 use App\Models\AfipRelacionesActivas;
 use App\Traits\MapucheConnectionTrait;
@@ -47,7 +49,7 @@ class DatabaseService implements DatabaseServiceInterface
             // Registra un mensaje de éxito en el log
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revierte la transacción en caso de error
             DB::rollBack();
             // Registra un mensaje de error en el log
@@ -91,7 +93,7 @@ class DatabaseService implements DatabaseServiceInterface
 
             Log::info('Se importaron los datos correctamente');
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $connection->rollBack(); // Revierte la transacción en caso de error
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
             return false;
@@ -152,7 +154,7 @@ class DatabaseService implements DatabaseServiceInterface
                     'rowsInserted' => $rowInserted,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos en ' . $tableName . ': ' . $e->getMessage());
             return [
@@ -181,7 +183,7 @@ class DatabaseService implements DatabaseServiceInterface
         return AfipRelacionesActivas::mapearDatosAlModelo($linea);
     }
 
-    protected static function getMapucheConnection(): \PDO
+    protected static function getMapucheConnection(): PDO
     {
         if (self::$connectionInstance === null) {
             $model = new static();

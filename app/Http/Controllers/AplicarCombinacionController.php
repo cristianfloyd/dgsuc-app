@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\JsonResponse;
 use App\Models\ControlAportesDiferencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ class AplicarCombinacionController extends Controller
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function aplicar(Request $request)
     {
@@ -79,7 +81,7 @@ class AplicarCombinacionController extends Controller
                     'combinacion_aplicada' => $combinacionAplicada,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revertir la transacción en caso de error
             DB::rollBack();
 

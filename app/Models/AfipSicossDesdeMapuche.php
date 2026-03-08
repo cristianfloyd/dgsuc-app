@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use InvalidArgumentException;
+use Exception;
 use App\Services\DataMapperService;
 use App\Services\FileProcessorService;
 use App\Traits\MapucheConnectionTrait;
@@ -182,13 +184,12 @@ class AfipSicossDesdeMapuche extends Model
     // ##########################################################################
     // ############## METODOS  ##################################################
     // ##########################################################################
-
     /**
      * Procesa una tabla de líneas extraídas y devuelve una tabla procesada.
      *
      * @param array $lineasExtraidas Un array de líneas extraídas de una tabla de una sola columna y ancho fijo.
      *
-     * @throws \InvalidArgumentException Si los parámetros de entrada no son válidos.
+     * @throws InvalidArgumentException Si los parámetros de entrada no son válidos.
      *
      * @return array Un array de líneas procesadas.
      */
@@ -199,7 +200,7 @@ class AfipSicossDesdeMapuche extends Model
         }
         // Validación de entrada
         if (empty($lineasExtraidas)) {
-            throw new \InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
+            throw new InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
         }
 
         // Inicialización de la tabla procesada
@@ -220,7 +221,7 @@ class AfipSicossDesdeMapuche extends Model
      *
      * @param string $filePath La ruta del archivo.
      *
-     * @throws \Exception Si no se puede abrir el archivo.
+     * @throws Exception Si no se puede abrir el archivo.
      *
      * @return array Un array con los valores mínimo y máximo de caracteres por línea.
      */
@@ -231,7 +232,7 @@ class AfipSicossDesdeMapuche extends Model
 
         // Verificar que el archivo se abrió correctamente
         if (!$archivo) {
-            throw new \Exception('No se pudo abrir el archivo');
+            throw new Exception('No se pudo abrir el archivo');
         }
 
         $minCaracteres = \PHP_INT_MAX;
@@ -295,7 +296,7 @@ class AfipSicossDesdeMapuche extends Model
     {
         // Validacion de entrada.
         if ($line === null || $columnWidths === null || !\is_array($columnWidths)) {
-            throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+            throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
         $datosProcesados = $this->procesarlineainterna($line, $columnWidths);
@@ -348,7 +349,7 @@ class AfipSicossDesdeMapuche extends Model
     {
         //Validad la entrada
         if (empty($line) || empty($columnWidths)) {
-            throw new \InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
+            throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
         // Calcular el ancho total de la línea
@@ -359,7 +360,7 @@ class AfipSicossDesdeMapuche extends Model
 
         // Validar que el ancho de la línea coincida con la suma de los anchos de columna
         if ($anchoLinea !== $sumaAnchoColumnas) {
-            throw new \InvalidArgumentException('linea: ' . $this->contador . ' El ancho de línea ' . $anchoLinea . ' no coincide con la suma de los anchos de columna ' . $sumaAnchoColumnas);
+            throw new InvalidArgumentException('linea: ' . $this->contador . ' El ancho de línea ' . $anchoLinea . ' no coincide con la suma de los anchos de columna ' . $sumaAnchoColumnas);
         }
 
 
@@ -551,7 +552,7 @@ class AfipSicossDesdeMapuche extends Model
 
             try {
                 DB::connection($conexion)->table($this->getTable())->insert($chunk);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Registro de depuración en caso de error
                 Log::error('Error al insertar los datos: ' . $e->getMessage());
             }

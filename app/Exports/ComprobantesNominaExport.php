@@ -2,6 +2,8 @@
 
 namespace App\Exports;
 
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use NumberFormatter;
 use App\Models\ComprobanteNominaModel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -36,7 +38,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
 
     public function drawings()
     {
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing = new Drawing();
         $drawing->setName('Logo');
         $drawing->setDescription('Logo UBA');
         $drawing->setPath(public_path('images/uba.png'));
@@ -197,13 +199,13 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
 
     protected function formatMoneda(float $monto): string
     {
-        $formatter = new \NumberFormatter('es_AR', \NumberFormatter::CURRENCY);
+        $formatter = new NumberFormatter('es_AR', NumberFormatter::CURRENCY);
         return $formatter->format($monto);
     }
 
     protected function getImporteEnLetras(): string
     {
-        $formatter = new \NumberFormatter('es', \NumberFormatter::SPELLOUT);
+        $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
         return mb_strtoupper($formatter->format($this->totalImporte, 2));
     }
 }

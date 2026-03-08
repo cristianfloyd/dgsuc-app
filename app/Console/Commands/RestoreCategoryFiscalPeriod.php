@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Services\Dh11RestoreService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -68,7 +69,7 @@ class RestoreCategoryFiscalPeriod extends Command
             Log::info("Categorías restauradas para el período {$year}-{$month}");
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejar cualquier error que ocurra durante la restauración
             $this->error('Error durante la restauración: ' . $e->getMessage());
             Log::error("Error al restaurar categorías para el período {$year}-{$month}: " . $e->getMessage());

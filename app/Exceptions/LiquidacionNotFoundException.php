@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class LiquidacionNotFoundException extends \Exception
+use Exception;
+
+class LiquidacionNotFoundException extends Exception
 {
     public function __construct(string $message = 'Liquidación no encontrada')
     {

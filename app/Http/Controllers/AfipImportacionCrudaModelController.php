@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use App\Models\AfipImportacionCrudaModel;
 use App\Models\UploadedFile;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class AfipImportacionCrudaModelController extends Controller
         /**
          * Valida que el archivo subido sea de tipo txt.
          *
-         * @param \Illuminate\Http\Request $request
+         * @param Request $request
          *
          * @return void
          */
@@ -70,7 +71,7 @@ class AfipImportacionCrudaModelController extends Controller
              * Redirige al usuario a la página anterior con los errores de validación y los datos de entrada
              * para que el usuario pueda corregir los errores y volver a enviar la solicitud.
              *
-             * @return \Illuminate\Http\RedirectResponse
+             * @return RedirectResponse
              */
             return back()->withErrors($Validated)->withInput();
         }

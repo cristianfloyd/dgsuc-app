@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Override;
 use App\Data\Mapuche\GrupoData;
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
@@ -82,7 +83,7 @@ class MapucheGrupo extends Model
     /**
      * Boot the model.
      */
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossLegacy;
 use App\Services\EnhancedDatabaseConnectionService;
@@ -91,7 +92,7 @@ class SicossTestCommand extends Command
             $this->info('✅ Proceso completado exitosamente');
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->newLine();
             $this->error('❌ Error durante el proceso:');
             $this->error("Mensaje: {$e->getMessage()}");
@@ -204,7 +205,7 @@ class SicossTestCommand extends Command
                 DB::connection($currentConnection)->statement("DROP TABLE IF EXISTS {$tabla} CASCADE");
                 $this->line("   ✅ {$tabla} eliminada de {$currentConnection}");
                 $limpiezas_exitosas++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->line("   ⚠️  {$tabla}: {$e->getMessage()}");
             }
         }
@@ -530,7 +531,7 @@ class SicossTestCommand extends Command
             $this->newLine();
             $this->info("📁 Resultados exportados a: {$archivo}");
             $this->line('   Tamaño: ' . number_format(\strlen($json)) . ' bytes');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("❌ Error al exportar: {$e->getMessage()}");
         }
     }

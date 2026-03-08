@@ -2,16 +2,19 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
 use App\Services\EnhancedDatabaseConnectionService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-class DatabaseConnectionSelectorBadge extends Component implements HasForms
+class DatabaseConnectionSelectorBadge extends Component implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public ?string $connection = null;
@@ -28,12 +31,12 @@ class DatabaseConnectionSelectorBadge extends Component implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $service = app(EnhancedDatabaseConnectionService::class);
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('connection')
                     ->hiddenLabel()
                     ->options($service->getAvailableConnections())

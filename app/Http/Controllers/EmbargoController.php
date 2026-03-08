@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Http\Requests\EmbargoRequest;
 
@@ -27,7 +28,7 @@ class EmbargoController extends Controller
      *
      * @param EmbargoRequest $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function process(EmbargoRequest $request)
     {

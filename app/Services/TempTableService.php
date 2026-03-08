@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\TablaTempCuils;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class TempTableService extends DatabaseService
             DB::connection($this->getConnectionName())->commit();
             Log::info("Datos insertados correctamente en la tabla {$tableName}.");
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error("Error al insertar datos en la tabla {$this->model->getFullTableName()}: " . $e->getMessage());
             return false;
@@ -86,7 +87,7 @@ class TempTableService extends DatabaseService
 
             Log::info("Tabla {$tableName} limpiada correctamente.");
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejar la excepción aquí
             Log::error("Error al limpiar la tabla {$this->model->getFullTableName()}: " . $e->getMessage());
             return false;

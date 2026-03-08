@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Models\User;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -58,7 +59,7 @@ class RegisterForm extends Component
     {
         try {
             return $this->image->store('images', 'public');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->addError('image', 'Image is required and must be less than 10MB');
         }
     }

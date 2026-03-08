@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
 use App\Filament\Afip\Pages\SicossControles;
 use App\Filament\Afip\Pages\SicossReportePage;
 use App\Filament\Afip\Pages\SicossUpdates;
@@ -38,7 +40,7 @@ class AfipPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Afip/Resources'), for: 'App\\Filament\\Afip\\Resources')
             ->discoverPages(in: app_path('Filament/Afip/Pages'), for: 'App\\Filament\\Afip\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
                 SicossControles::class,
                 SicossReportePage::class,
@@ -53,7 +55,7 @@ class AfipPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Afip/Widgets'), for: 'App\\Filament\\Afip\\Widgets')
             ->widgets([
                 PeriodoFiscalSelectorWidget::class,
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
                 AfipRelacionesActivasStats::class,
             ])
             ->middleware([

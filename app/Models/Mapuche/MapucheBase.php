@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Override;
 use App\Services\EnhancedDatabaseConnectionService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ abstract class MapucheBase extends Model
     /**
      * Override del getConnectionName para permitir fallback a conexión dinámica.
      */
-    #[\Override]
+    #[Override]
     public function getConnectionName(): string
     {
         // Si estamos en el contexto del panel AFIP, usar conexión dinámica

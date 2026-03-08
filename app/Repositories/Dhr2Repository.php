@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use InvalidArgumentException;
 use App\Contracts\Repositories\Dhr2RepositoryInterface;
 use App\Data\DataObjects\Dhr2Data;
 use App\Models\Mapuche\Dhr1;
@@ -42,7 +43,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     public function create(Dhr2Data $data): Dhr2Data
     {
         if (!$this->validateLiquidacionExists($data->nro_liqui)) {
-            throw new \InvalidArgumentException('La liquidación principal no existe' . $data->nro_liqui);
+            throw new InvalidArgumentException('La liquidación principal no existe' . $data->nro_liqui);
         }
 
         $record = $this->model->create($data->toArray());

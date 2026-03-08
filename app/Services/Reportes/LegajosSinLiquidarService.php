@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Exceptions\LiquidacionNotFoundException;
 use App\Models\Mapuche\Dh21h;
 use App\Models\Mapuche\Dh22;
@@ -41,7 +42,7 @@ class LegajosSinLiquidarService
 
             // Construir query principal
             return $this->construirQueryLegajosSinLiquidar($liquidacionCuartoMes, $ultimasLiquidaciones);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener legajos sin liquidar: ' . $e->getMessage());
             throw $e;
         }

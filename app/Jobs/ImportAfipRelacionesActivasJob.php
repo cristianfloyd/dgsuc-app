@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TableManagementServiceInterface;
@@ -132,7 +133,7 @@ class ImportAfipRelacionesActivasJob implements ShouldQueue
                         'message' => 'Error al almacenar las líneas procesadas',
                         'data' => [],
                     ];
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Error durante la importación: ' . $e->getMessage());
                     return [
                         'success' => false,

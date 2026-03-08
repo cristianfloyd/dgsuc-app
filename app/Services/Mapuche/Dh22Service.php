@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use Exception;
 use App\Models\Mapuche\Dh22;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +40,7 @@ class Dh22Service
             return $query->orderBy('per_liano', 'desc')
                 ->orderBy('per_limes', 'desc')
                 ->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error getting definitive settlements: ' . $e->getMessage());
             return collect();
         }

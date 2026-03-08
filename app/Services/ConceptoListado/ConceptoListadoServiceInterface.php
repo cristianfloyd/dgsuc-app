@@ -2,6 +2,8 @@
 
 namespace App\Services\ConceptoListado;
 
+use Illuminate\Database\Connection;
+
 interface ConceptoListadoServiceInterface
 {
     /**
@@ -14,7 +16,7 @@ interface ConceptoListadoServiceInterface
     /**
      * Obtiene la instancia de conexión a la base de datos.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getConnection();
 }

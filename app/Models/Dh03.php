@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use App\Enums\LegajoCargo;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
@@ -149,7 +151,7 @@ class Dh03 extends Model
             if (
                 (float) $model->porcdedicdocente + (float) $model->porcdedicinvestig + (float) $model->porcdedicagestion + (float) $model->porcdedicaextens > 100
             ) {
-                throw new \Exception('La suma de porcentajes de dedicación no puede superar 100%');
+                throw new Exception('La suma de porcentajes de dedicación no puede superar 100%');
             }
 
             // Validar fechas coherentes
@@ -157,7 +159,7 @@ class Dh03 extends Model
                 $model->fec_baja && $model->fec_alta &&
                 $model->fec_baja < $model->fec_alta
             ) {
-                throw new \Exception('La fecha de baja no puede ser anterior a la fecha de alta');
+                throw new Exception('La fecha de baja no puede ser anterior a la fecha de alta');
             }
         });
     }
@@ -214,11 +216,11 @@ class Dh03 extends Model
     /**
      * Scope para validar la combinación legajo-cargo.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param int $nro_legaj
      * @param int $nro_cargo
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeValidarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
     {
@@ -323,7 +325,7 @@ class Dh03 extends Model
      * @param int $nroLegaj
      * @param int $nroCargo
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public static function buscarPorLegajoCargo(int $nroLegaj, int $nroCargo)
     {

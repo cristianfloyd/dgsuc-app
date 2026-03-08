@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Exception;
 use App\Models\EstadoLiquidacionModel;
 use App\Services\EncodingService;
 use App\Traits\Mapuche\EncodingTrait;
@@ -176,7 +177,7 @@ class Dh22 extends Model
 
             // Retorna el último nro_liqui o 0 si no se encuentra ninguno
             return $lastId ?? 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejo de excepciones
             // Puedes registrar el error o manejarlo según tus necesidades
             Log::error('Error al obtener el último nro_liqui: ' . $e->getMessage());
@@ -338,10 +339,10 @@ class Dh22 extends Model
     /**
      * Filtra las liquidaciones por un periodo fiscal específico en formato año/mes.
      *
-     * @param \Illuminate\Database\Eloquent\Builder<self> $query
+     * @param Builder<self> $query
      * @param array<string> $periodoFiscal
      *
-     * @return \Illuminate\Database\Eloquent\Builder<self>
+     * @return Builder<self>
      */
     public function scopeFilterByPeriodoFiscal($query, array|PeriodoFiscal|null $periodoFiscal = null): Builder
     {
@@ -367,9 +368,9 @@ class Dh22 extends Model
     /**
      * Obtiene las liquidaciones formateadas como "nro_liqui - desc_liqui" para mostrar en selects.
      *
-     * @param \Illuminate\Database\Eloquent\Builder<self> $query
+     * @param Builder<self> $query
      *
-     * @return \Illuminate\Database\Eloquent\Builder<self>
+     * @return Builder<self>
      */
     public function scopeFormateadoParaSelect($query)
     {

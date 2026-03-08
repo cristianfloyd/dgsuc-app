@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use DateTime;
 use App\Contracts\RetResultadoRepository;
 use App\DTOs\RetResultadoDTO;
 use App\Models\Suc\RetResultado;
@@ -22,12 +23,12 @@ class RetResultadoService
      *
      * @param int $nroLegaj
      * @param int $nroCargoAnt
-     * @param \DateTime $fechaRetDesde
+     * @param DateTime $fechaRetDesde
      * @param Periodo $periodo
      *
      * @return RetResultadoDTO|null
      */
-    public function calcularRetroactivo(int $nroLegaj, int $nroCargoAnt, \DateTime $fechaRetDesde, Periodo $periodo): ?RetResultadoDTO
+    public function calcularRetroactivo(int $nroLegaj, int $nroCargoAnt, DateTime $fechaRetDesde, Periodo $periodo): ?RetResultadoDTO
     {
         $retResultado = $this->repository->obtenerPorLlavePrimaria($nroLegaj, $nroCargoAnt, $fechaRetDesde, $periodo);
 

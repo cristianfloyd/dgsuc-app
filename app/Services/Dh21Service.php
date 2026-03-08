@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use Exception;
 use App\Data\Responses\ConceptoTotalData;
 use App\Models\Dh21;
 use App\Repositories\Dh21Repository;
@@ -31,7 +33,7 @@ class Dh21Service
 
         if ($nro_liqui !== null) {
             if ($nro_liqui <= 0) {
-                throw new \InvalidArgumentException('El número de liquidación debe ser positivo');
+                throw new InvalidArgumentException('El número de liquidación debe ser positivo');
             }
             $query->where('nro_liqui', $nro_liqui);
         }
@@ -45,7 +47,7 @@ class Dh21Service
      * @param int|null $nro_liqui Número de liquidación (opcional)
      * @param int|null $codn_fuent Código de fuente (opcional)
      *
-     * @throws \Exception Si ocurre un error durante la consulta
+     * @throws Exception Si ocurre un error durante la consulta
      *
      * @return Builder Query builder con los conceptos totales
      */
@@ -75,7 +77,7 @@ class Dh21Service
                 ->groupBy('codn_conce')
                 // Ordenación por codn_conce
                 ->orderBy('codn_conce');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejo de excepciones
             Log::error('Error en conceptosTotales: ' . $e->getMessage());
             throw $e;

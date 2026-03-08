@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Exception;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Services\Reports\SicossReporteService;
@@ -84,7 +85,7 @@ class SicossReporteExport implements WithMultipleSheets
                         }
 
                         return $this->sicossReporteService->getReporteData($this->anio, $this->mes);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Error al obtener datos para el reporte SICOSS', [
                             'error' => $e->getMessage(),
                             'anio' => $this->anio,
@@ -135,7 +136,7 @@ class SicossReporteExport implements WithMultipleSheets
                             $row->contribucionesSijp ?? 0,
                             $row->contribucionesInssjp ?? 0,
                         ];
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Error al mapear fila para el reporte SICOSS', [
                             'error' => $e->getMessage(),
                             'row' => json_encode($row),

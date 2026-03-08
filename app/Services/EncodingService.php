@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
@@ -194,7 +195,7 @@ class EncodingService
             }
 
             return $converted;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning("Error al convertir a UTF-8: {$e->getMessage()}", [
                 'valor_original' => bin2hex($value),
             ]);
@@ -225,7 +226,7 @@ class EncodingService
 
             // Convertir de UTF-8 a Latin1, manejando caracteres que no existen en Latin1
             return mb_convert_encoding($value, self::LATIN1, self::UTF8);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning("Error al convertir a Latin1: {$e->getMessage()}");
             return $value;
         }

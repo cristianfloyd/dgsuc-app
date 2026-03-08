@@ -2,6 +2,13 @@
 
 namespace App\Services\Reportes;
 
+use App\Data\Reportes\TransferResultData;
+use App\Data\Reportes\CleanupResultData;
+use Exception;
+use App\Models\Mapuche\Bloqueos\RepBloqueo;
+use Illuminate\Support\Collection;
+use App\Services\Mapuche\PeriodoFiscalService;
+use App\Enums\BloqueosEstadoEnum;
 use App\Data\Reportes\ArchiveProcessData;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
@@ -58,8 +65,8 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
                     return ArchiveProcessData::success(
                         $periodoFiscal,
-                        \App\Data\Reportes\TransferResultData::success(0, $periodoFiscal),
-                        \App\Data\Reportes\CleanupResultData::nothingToClean($periodoFiscal),
+                        TransferResultData::success(0, $periodoFiscal),
+                        CleanupResultData::nothingToClean($periodoFiscal),
                         microtime(true) - $startTime,
                     );
                 }
@@ -131,7 +138,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                     $duration,
                 );
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error general en proceso de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -208,7 +215,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             ]);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en validación de archivado', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -228,7 +235,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 ->where('esta_procesado', true)->count();
             $registrosPendientes = $totalRegistros - $registrosProcesados;
 
-            $registrosEnHistorial = \App\Models\Mapuche\Bloqueos\RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
+            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
             $yaArchivado = $this->periodoYaArchivado($periodoFiscal);
 
             $estadisticasHistorial = $this->historialService->getEstadisticasHistorial($periodoFiscal);
@@ -248,7 +255,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 'estadisticas_trabajo' => $estadisticasLimpieza,
                 'timestamp' => now()->toISOString(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener resumen de estado', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -272,13 +279,13 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             // 1. Existen registros en el historial
             // 2. No existen registros procesados en la tabla de trabajo
 
-            $registrosEnHistorial = \App\Models\Mapuche\Bloqueos\RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
+            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
             $registrosProcesadosEnTrabajo = BloqueosDataModel::where('nro_liqui', $periodoFiscal)
                 ->where('esta_procesado', true)
                 ->count();
 
             return $registrosEnHistorial > 0 && $registrosProcesadosEnTrabajo === 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar si período ya fue archivado', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -290,10 +297,10 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     /**
      * Obtiene los registros que están listos para ser procesados.
      */
-    private function obtenerRegistrosParaProcesar(array $periodoFiscal): \Illuminate\Support\Collection
+    private function obtenerRegistrosParaProcesar(array $periodoFiscal): Collection
     {
         // Usar el servicio para obtener la liquidación definitiva del período
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
 
         if (!$liquidacion) {
@@ -306,8 +313,8 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
         return BloqueosDataModel::where('nro_liqui', $nroLiqui)
             ->where('esta_procesado', true)
             ->whereIn('estado', [
-                \App\Enums\BloqueosEstadoEnum::PROCESADO,
-                \App\Enums\BloqueosEstadoEnum::VALIDADO,
+                BloqueosEstadoEnum::PROCESADO,
+                BloqueosEstadoEnum::VALIDADO,
             ])
             ->get();
     }

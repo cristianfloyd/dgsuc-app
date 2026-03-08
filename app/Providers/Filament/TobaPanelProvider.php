@@ -2,13 +2,16 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 use App\Filament\Toba\Auth\Login;
 use App\Http\Responses\Auth\TobaLoginResponse;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -47,12 +50,12 @@ class TobaPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Toba/Resources'), for: 'App\\Filament\\Toba\\Resources')
             ->discoverPages(in: app_path('Filament/Toba/Pages'), for: 'App\\Filament\\Toba\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Toba/Widgets'), for: 'App\\Filament\\Toba\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

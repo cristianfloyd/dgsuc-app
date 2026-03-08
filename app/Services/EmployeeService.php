@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\DTOs\EmployeeInfoDTO;
@@ -71,7 +72,7 @@ class EmployeeService implements EmployeeServiceInterface
             $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
             $this->handleResultado($resultado);
             return $resultado;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al almacenar las líneas procesadas: ' . $e->getMessage());
             return false;
         }

@@ -2,6 +2,7 @@
 
 namespace App\Contracts;
 
+use Exception;
 use App\Models\Reportes\RepOrdenPagoModel;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -56,7 +57,7 @@ interface RepOrdenPagoRepositoryInterface
     /**
      * Trunca la tabla rep_orden_pago.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return bool
      */
@@ -65,7 +66,7 @@ interface RepOrdenPagoRepositoryInterface
     /**
      * Crea la tabla rep_orden_pago si no existe.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return void
      */
@@ -74,7 +75,7 @@ interface RepOrdenPagoRepositoryInterface
     /**
      * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return void
      */
@@ -85,7 +86,7 @@ interface RepOrdenPagoRepositoryInterface
      *
      * @param array $liquidaciones Array de números de liquidación
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return void
      */

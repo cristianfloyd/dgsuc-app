@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -37,7 +38,7 @@ class DynamicPropertiesComponent extends Component
         $this->properties = $newProperties;
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('livewire.dynamic-properties-component', [
             'properties' => $this->properties,

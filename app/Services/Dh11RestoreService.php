@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use Illuminate\Support\Collection;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61Repository;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +29,7 @@ class Dh11RestoreService
      * @param int $year
      * @param int $month
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function restoreFiscalPeriod(int $year, int $month): void
     {
@@ -51,7 +53,7 @@ class Dh11RestoreService
             $historicalRecords = $this->dh61Repository->getRecordsByFiscalPeriod($year, $month);
 
             if ($historicalRecords->isEmpty()) {
-                throw new \Exception("No se encontraron registros históricos para el período {$year}-{$month}");
+                throw new Exception("No se encontraron registros históricos para el período {$year}-{$month}");
             }
 
             $updatedRecords = $this->restoreHistoricalRecords($historicalRecords);
@@ -60,7 +62,7 @@ class Dh11RestoreService
 
             DB::commit();
             Log::info("Restauración completada con éxito para el período {$year}-{$month}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error durante la restauración: ' . $e->getMessage());
             throw $e;
@@ -70,9 +72,9 @@ class Dh11RestoreService
     /**
      * Restaura los registros históricos de categorías en la tabla dh11.
      *
-     * @param \Illuminate\Support\Collection $historicalRecords Colección de registros históricos a restaurar.
+     * @param Collection $historicalRecords Colección de registros históricos a restaurar.
      *
-     * @throws \Exception Si ocurre un error durante la actualización de los registros.
+     * @throws Exception Si ocurre un error durante la actualización de los registros.
      *
      * @return array Arreglo de registros actualizados.
      */
@@ -99,7 +101,7 @@ class Dh11RestoreService
             DB::commit();
 
             return $updatedRecords;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error actualizando los registros: ' . $e->getMessage());
             throw $e; // Re-lanzar la excepción para que el llamador pueda manejarla

@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use Exception;
+use Throwable;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Traits\MapucheConnectionTrait;
@@ -22,7 +24,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAll(array|int|null $nroLiquis = null): Collection
     {
@@ -115,7 +117,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Trunca la tabla rep_orden_pago.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return bool
      */
@@ -130,7 +132,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             DB::connection($this->model->getConnectionName())->commit();
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->model->getConnectionName())->rollBack();
             throw $e;
         }
@@ -175,7 +177,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                 });
                 Log::info('Tabla suc.rep_orden_pago creada exitosamente');
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('Error al crear tabla suc.rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }
@@ -184,7 +186,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return void
      */
@@ -198,7 +200,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                 DB::connection($this->model->getConnectionName())->unprepared($this->getStoredProcedureDefinition());
                 Log::info('Función rep_orden_pago creada exitosamente');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar/crear función rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }
@@ -218,7 +220,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                 ->statement('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $liquidaciones) . '}']);
 
             Log::info('Reporte generado exitosamente para liquidaciones: ' . implode(',', $liquidaciones));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }

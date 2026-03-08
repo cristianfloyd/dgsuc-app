@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Connection;
 use App\Services\DatabaseConnectionService;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,7 @@ trait DynamicConnectionTrait
     /**
      * Obtiene la conexión desde el trait.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getConnectionFromTrait()
     {

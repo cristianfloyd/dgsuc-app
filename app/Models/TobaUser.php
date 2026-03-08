@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use InvalidArgumentException;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class TobaUser extends Authenticatable
@@ -83,7 +84,7 @@ class TobaUser extends Authenticatable
     {
         $parametro = strtolower(trim($parametro));
         if (!\in_array($parametro, ['a', 'b', 'c'])) {
-            throw new \InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
+            throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
         }
 
         $campo = 'parametro_' . $parametro;

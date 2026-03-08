@@ -40,7 +40,7 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
      * @param array|int|null $codn_conce Código(s) del concepto a buscar
      * @param int|null $nro_liqui Número de liquidación
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function getQueryForConcepto(array|int|null $codn_conce, ?int $nro_liqui = null): Builder
     {

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Data\Dh90Data;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
 use Illuminate\View\View;
@@ -87,7 +88,7 @@ class Dh90Component extends Component
             return view('livewire.dh90-component', [
                 'registros' => $registros,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al cargar datos: ' . $e->getMessage());
             return view('livewire.dh90-component', ['registros' => collect()]);
         }
@@ -119,7 +120,7 @@ class Dh90Component extends Component
 
             $this->resetForm();
             $this->dispatch('registro-guardado');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al guardar: ' . $e->getMessage());
         }
     }
@@ -147,7 +148,7 @@ class Dh90Component extends Component
                 'nro_cargoasociado' => $registro->nro_cargoasociado,
                 'tipoasociacion' => trim($registro->tipoasociacion),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al cargar registro: ' . $e->getMessage());
         }
     }
@@ -197,7 +198,7 @@ class Dh90Component extends Component
             } else {
                 session()->flash('error', 'No se pudo eliminar el registro.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al eliminar: ' . $e->getMessage());
         }
     }
@@ -252,7 +253,7 @@ class Dh90Component extends Component
                 'actualizar-listado',
                 registros: $this->repository->getCargosConAsociaciones()->toArray(),
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al cargar cargos asociados: ' . $e->getMessage());
         }
     }
@@ -274,7 +275,7 @@ class Dh90Component extends Component
                 relaciones: $relaciones->toArray(),
                 nroCargo: $nroCargo,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al buscar relaciones: ' . $e->getMessage());
         }
     }
@@ -302,7 +303,7 @@ class Dh90Component extends Component
             session()->flash('message', 'Relación creada correctamente.');
             $this->resetForm();
             $this->dispatch('relacion-creada');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', 'Error al crear relación: ' . $e->getMessage());
         }
     }

@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
-class ValidationException extends \Exception
+use Exception;
+use Throwable;
+
+class ValidationException extends Exception
 {
     private array $errors = [];
 
@@ -12,7 +15,7 @@ class ValidationException extends \Exception
         string $message,
         private readonly array $context = [],
         int $code = 0,
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }

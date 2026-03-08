@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use InvalidArgumentException;
 use App\Services\EncodingService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -151,7 +152,7 @@ class ApexUsuario extends Model
     {
         $parametro = strtolower(trim($parametro));
         if (!\in_array($parametro, ['a', 'b', 'c'])) {
-            throw new \InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
+            throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
         }
 
         $campo = 'parametro_' . $parametro;

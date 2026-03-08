@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Collection;
+
 /**
  * Trait que contiene consultas complejas relacionadas con cargos.
  */
@@ -12,7 +14,7 @@ trait CargoQueries
      *
      * @param int|null $tipoAsociacion
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public static function obtenerCargosRelacionados(?string $tipoAsociacion = null)
     {
@@ -29,7 +31,7 @@ trait CargoQueries
      * Encuentra relaciones entre cargos basadas en criterios específicos.
      *
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public static function encontrarRelacionesPorCargo(int $nroCargo)
     {

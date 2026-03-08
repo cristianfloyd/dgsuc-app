@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Services\ConceptosSindicatosService;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 trait ConceptoListadoTabs

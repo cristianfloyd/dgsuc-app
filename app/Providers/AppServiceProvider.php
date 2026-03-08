@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use InvalidArgumentException;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\ExportServiceInterface;
 use App\Contracts\RepEmbarazadaServiceInterface;
@@ -67,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
             return new BloqueosService(
                 $app->make(BloqueosImportService::class),
                 $app->make(BloqueosProcessService::class),
-                $parameters['nroLiqui'] ?? throw new \InvalidArgumentException('nroLiqui es requerido'),
+                $parameters['nroLiqui'] ?? throw new InvalidArgumentException('nroLiqui es requerido'),
             );
         });
 

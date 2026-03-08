@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-readonly class LegajoCargo implements \Stringable
+use Stringable;
+
+readonly class LegajoCargo implements Stringable
 {
     public function __construct(
         public ?int $legajo = null,

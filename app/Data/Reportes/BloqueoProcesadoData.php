@@ -2,6 +2,8 @@
 
 namespace App\Data\Reportes;
 
+use Spatie\LaravelData\Support\Transformation\TransformationContext;
+use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
 use App\Models\Dh03;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Rules\LegajoCargoExistsRule;
@@ -89,7 +91,7 @@ class BloqueoProcesadoData extends Data
         ];
     }
 
-    public function transform(\Spatie\LaravelData\Support\Transformation\TransformationContext|\Spatie\LaravelData\Support\Transformation\TransformationContextFactory|null $transformationContext = null): array
+    public function transform(TransformationContext|TransformationContextFactory|null $transformationContext = null): array
     {
         return [
             'success' => $this->success,

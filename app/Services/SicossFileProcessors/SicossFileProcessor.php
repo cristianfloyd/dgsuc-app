@@ -2,13 +2,15 @@
 
 namespace App\Services\SicossFileProcessors;
 
+use Generator;
+use RuntimeException;
 use Illuminate\Support\Facades\Log;
 
 class SicossFileProcessor
 {
     private const CHUNK_SIZE = 1000;
 
-    public function processFile(string $filePath, int $batchSize = 1000): \Generator
+    public function processFile(string $filePath, int $batchSize = 1000): Generator
     {
         // Validación del tamaño del lote
         $batchSize = max(1, $batchSize);
@@ -16,7 +18,7 @@ class SicossFileProcessor
         // Apertura del archivo con manejo de errores
         $handle = @fopen($filePath, 'r');
         if ($handle === false) {
-            throw new \RuntimeException("No se pudo abrir el archivo: {$filePath}");
+            throw new RuntimeException("No se pudo abrir el archivo: {$filePath}");
         }
 
         Log::info("Processing file: $filePath");

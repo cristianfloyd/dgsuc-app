@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -140,7 +141,7 @@ class DosubaSinLiquidarModel extends Model
             self::insert($dataToInsert);
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error al establecer datos del reporte DosubaSinLiquidar: ' . $e->getMessage());
             throw $e;

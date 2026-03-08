@@ -90,7 +90,7 @@ class LicenciaVigenteData extends Data
 
         return new DataCollection(
             LicenciaVigenteData::class,
-            $resultados->map(fn ($row): \App\Data\Responses\LicenciaVigenteData => self::fromRow($row)),
+            $resultados->map(fn ($row): LicenciaVigenteData => self::fromRow($row)),
         );
     }
 

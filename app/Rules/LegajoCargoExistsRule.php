@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use Closure;
 use App\Models\Dh03;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -17,7 +18,7 @@ class LegajoCargoExistsRule implements ValidationRule
         $this->nroCargo = $nroCargo;
     }
 
-    public function validate(string $attribute, mixed $value, \Closure $fail): void
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $exists = Dh03::validarLegajoCargo($this->nroLegaj, $this->nroCargo)->exists();
 

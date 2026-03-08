@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Exception;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Collection;
@@ -213,7 +214,7 @@ class EmbargoReportModel extends Model
 
             // Confirmamos la transacción
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revertimos la transacción en caso de error
             DB::rollBack();
             // Manejo de excepciones y registro de errores
@@ -225,7 +226,7 @@ class EmbargoReportModel extends Model
     /**
      * Obtiene los datos del reporte para la sesión actual.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public static function getReportData()
     {
@@ -246,7 +247,7 @@ class EmbargoReportModel extends Model
                 }
                 // Aquí puedes agregar más columnas según necesites
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al actualizar estructura de la tabla: ' . $e->getMessage());
             throw $e;
         }

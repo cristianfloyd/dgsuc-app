@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -63,9 +64,9 @@ class Dhr2 extends Model
     /**
      * Mutados para desc_apyno en mayusculas.
      */
-    protected function descApyno(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function descApyno(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value) => mb_strtoupper((string) $value));
+        return Attribute::make(get: fn ($value) => mb_strtoupper((string) $value));
     }
 
     /**

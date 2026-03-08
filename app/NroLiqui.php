@@ -2,6 +2,8 @@
 
 namespace App;
 
+use InvalidArgumentException;
+
 class NroLiqui
 {
     private $value;
@@ -10,7 +12,7 @@ class NroLiqui
     {
         // Validación del valor de entrada
         if ($value <= 0) {
-            throw new \InvalidArgumentException('El número de liquidación debe ser positivo');
+            throw new InvalidArgumentException('El número de liquidación debe ser positivo');
         }
         $this->value = $value;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Pages\DocumentationPage;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
@@ -59,7 +60,7 @@ class ReportesPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Reportes/Resources'), for: 'App\\Filament\\Reportes\\Resources')
             ->discoverPages(in: app_path('Filament/Reportes/Pages'), for: 'App\\Filament\\Reportes\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
                 DocumentationPage::class,
             ])

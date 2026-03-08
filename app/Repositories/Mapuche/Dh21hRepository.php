@@ -2,6 +2,9 @@
 
 namespace App\Repositories\Mapuche;
 
+use Illuminate\Database\Eloquent\Collection;
+use Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Data\Mapuche\Dh21hData;
 use App\Models\Mapuche\Dh21h;
@@ -35,7 +38,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function all(): \Illuminate\Database\Eloquent\Collection
+    public function all(): Collection
     {
         return $this->model->all();
     }
@@ -49,7 +52,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
             $deletedRows = $this->model->destroy($id);
 
             return $deletedRows > 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error deleting Dh21h with id {$id}: " . $e->getMessage());
             return false;
         }
@@ -66,7 +69,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function findByLegajo(int $legajo): \Illuminate\Database\Eloquent\Collection
+    public function findByLegajo(int $legajo): Collection
     {
         return $this->model->byLegajo($legajo)->get();
     }
@@ -74,7 +77,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function paginate(int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator
+    public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->model->paginate($perPage);
     }

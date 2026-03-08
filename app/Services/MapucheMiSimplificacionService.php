@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\CuilRepositoryInterface;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
@@ -74,7 +75,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * @param int $periodoFiscal El período fiscal en formato YYYYMM.
      * @param int $nroLiqui El número de liquidación.
      *
-     * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada.
+     * @throws Exception Si ocurre un error durante la ejecución de la función almacenada.
      *
      * @return int La cantidad de registros procesados.
      */
@@ -103,13 +104,13 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
             if (!$resultado) {
                 // Si la función almacenada devuelve false o un error.
-                throw new \Exception('Error al ejecutar la función almacenada `mapucheMiSimplificacion`.');
+                throw new Exception('Error al ejecutar la función almacenada `mapucheMiSimplificacion`.');
             }
 
             DB::connection($this->getConnectionName())->commit();
 
             return $cuilsCount;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             // Relanzamos la excepción para que el controlador (Resource) la maneje.
             // Esto permite que el controlador se encargue de la notificación al usuario y el log.
@@ -159,7 +160,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
             Log::info("La tabla {$fullTableName} está vacía.");
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
             return false;
         }
@@ -258,7 +259,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * @param int $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
      *
-     * @throws \Exception Si ocurre un error durante la ejecución de la función almacenada
+     * @throws Exception Si ocurre un error durante la ejecución de la función almacenada
      *
      * @return bool Verdadero si la ejecución de la función almacenada fue exitosa, falso en caso contrario
      */
@@ -272,7 +273,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             }
             Log::error('Error al ejecutar la función almacenada');
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
             return false;
         }

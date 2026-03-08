@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Dh21;
 use App\ValueObjects\NroLiqui;
 use Illuminate\Support\Collection;
@@ -61,7 +62,7 @@ class CombinacionesService
                     : 'No se encontraron combinaciones que se aproximen al valor objetivo',
                 'combinaciones' => $combinacionesLimitadas,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al buscar combinaciones: ' . $e->getMessage(), [
                 'legajo' => $nroLegaj,
                 'nro_liqui' => $nroLiqui->value(),

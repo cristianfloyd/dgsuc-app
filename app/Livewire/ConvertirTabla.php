@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Models\AfipImportacionCrudaModel;
 use App\Models\AfipSicossDesdeMapuche;
 use App\Models\UploadedFile;
@@ -118,7 +119,7 @@ class ConvertirTabla extends Component
     {
         try {
             $this->seleccionarArchivo();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }

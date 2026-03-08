@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AfipMapucheSicossRequest extends FormRequest
@@ -19,7 +20,7 @@ class AfipMapucheSicossRequest extends FormRequest
     /**
      * Obtiene las reglas de validación que se aplican a la solicitud.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array<string, Rule|array|string>
      */
     public function rules(): array
     {

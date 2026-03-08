@@ -2,6 +2,7 @@
 
 namespace App\Strategies;
 
+use Exception;
 use App\Contracts\CuilOperationStrategy;
 use App\Contracts\CuilRepositoryInterface;
 use Illuminate\Support\Facades\Cache;
@@ -33,7 +34,7 @@ class CompareCuilsStrategy implements CuilOperationStrategy
                     'message' => 'Comparación de CUILs completada',
                 ];
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en CompareCuils: ' . $e->getMessage());
             return [
                 'cuils' => [],

@@ -77,7 +77,7 @@ class Dh21Repository implements Dh21RepositoryInterface
      *
      * @param array $conditions Condiciones adicionales para filtrar
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getLiquidaciones(array $conditions = []): Collection
     {

@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Models\Reportes\BloqueosDataModel;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +29,7 @@ class ValidacionCargoAsociadoService
                 } else {
                     $sinCargo++;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error("Error al validar cargo asociado: {$e->getMessage()}", [
                     'legajo' => $registro->nro_legaj,
                     'cargo' => $registro->nro_cargo,

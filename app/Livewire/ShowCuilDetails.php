@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -70,7 +71,7 @@ class ShowCuilDetails extends Component
                 } else {
                     $results->push($result[0]);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->failedCuils[] = $cuil;
                 // Log the error if needed
             }

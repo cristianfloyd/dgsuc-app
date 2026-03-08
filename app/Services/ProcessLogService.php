@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use OutOfBoundsException;
+use Exception;
 use App\Models\ProcessLog;
 use Illuminate\Support\Facades\Log;
 
@@ -50,19 +53,19 @@ class ProcessLogService
     public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
         if (!\is_array($processLog->steps)) {
-            throw new \InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
+            throw new InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
         }
 
         $steps = $processLog->steps;
 
         if (!isset($steps[$step])) {
-            throw new \OutOfBoundsException("Paso no encontrado: $step");
+            throw new OutOfBoundsException("Paso no encontrado: $step");
         }
 
         $steps[$step] = $status;
 
         if (!$processLog->update(['steps' => $steps])) {
-            throw new \Exception('No se pudo actualizar el registro del proceso');
+            throw new Exception('No se pudo actualizar el registro del proceso');
         }
 
         Log::info("Paso actualizado: $step - $status", ['process_id' => $processLog->id]);

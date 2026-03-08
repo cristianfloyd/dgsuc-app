@@ -2,6 +2,7 @@
 
 namespace App\Services\ConceptoListado;
 
+use Exception;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
@@ -28,7 +29,7 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
      * @param string|null $periodoFiscal Período fiscal en formato 'YYYY-MM' (opcional)
      * @param int|null $nroLiqui Número de liquidación específico (opcional)
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return int Número de registros insertados
      */
@@ -68,7 +69,7 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
             ]);
 
             return $affectedRows;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error en sincronización de conceptos listado', [
                 'error' => $e->getMessage(),

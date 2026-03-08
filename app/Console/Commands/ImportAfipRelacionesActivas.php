@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TransactionServiceInterface;
@@ -93,7 +94,7 @@ class ImportAfipRelacionesActivas extends Command
             $this->workflowService->completeStep($processLog, 'import_archivo_afip');
 
             $this->info('Archivo importado correctamente.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // 7. Manejar errores, marcar el proceso como fallido
             $this->workflowService->failStep('import_archivo_afip', $e->getMessage());
 

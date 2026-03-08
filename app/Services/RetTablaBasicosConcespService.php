@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use DateTime;
 use App\Contracts\RetTablaBasicosConcespRepository;
 use App\Exceptions\RegistroNoEncontradoException;
 
@@ -17,7 +18,7 @@ class RetTablaBasicosConcespService
     /**
      * Obtiene el monto correspondiente a un registro específico de la tabla de básicos y conceptos.
      *
-     * @param \DateTime $fecha La fecha para la cual se desea obtener el monto.
+     * @param DateTime $fecha La fecha para la cual se desea obtener el monto.
      * @param string $catId El ID de la categoría del registro.
      * @param string $concLiqId El ID del concepto de liquidación del registro.
      * @param int $anios Los años de antigüedad del registro.
@@ -26,7 +27,7 @@ class RetTablaBasicosConcespService
      *
      * @return float El monto correspondiente al registro encontrado.
      */
-    public function obtenerMonto(\DateTime $fecha, string $catId, string $concLiqId, int $anios): float
+    public function obtenerMonto(DateTime $fecha, string $catId, string $concLiqId, int $anios): float
     {
         $registro = $this->repository->buscarRegistro($fecha, $catId, $concLiqId, $anios);
 

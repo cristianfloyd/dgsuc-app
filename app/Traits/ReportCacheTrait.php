@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Closure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 
@@ -27,12 +28,12 @@ trait ReportCacheTrait
      * @param string $report Nombre del reporte
      * @param string $type Tipo de datos (data|totals)
      * @param array $params Parámetros adicionales
-     * @param \Closure $callback Función que genera los datos
+     * @param Closure $callback Función que genera los datos
      * @param int|null $customTtl TTL personalizado en segundos (opcional)
      *
      * @return mixed
      */
-    protected function rememberReportCache(string $report, string $type, array $params, \Closure $callback, ?int $customTtl = null): mixed
+    protected function rememberReportCache(string $report, string $type, array $params, Closure $callback, ?int $customTtl = null): mixed
     {
         $key = $this->getCacheKey($report, $type, $params);
         $ttl = $customTtl ?? $this->getCacheTtl($report, $type);

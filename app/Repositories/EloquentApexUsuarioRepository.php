@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use Exception;
+use InvalidArgumentException;
 use App\Models\ApexUsuario;
 use App\Repositories\Contracts\ApexUsuarioRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +23,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->porUsuario($usuario)->first();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al buscar usuario por nombre', [
                 'usuario' => $usuario,
                 'error' => $e->getMessage(),
@@ -34,7 +36,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->where('email', $email)->first();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al buscar usuario por email', [
                 'email' => $email,
                 'error' => $e->getMessage(),
@@ -47,7 +49,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->where('uid', $uid)->first();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al buscar usuario por UID', [
                 'uid' => $uid,
                 'error' => $e->getMessage(),
@@ -60,7 +62,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->activos()->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios activos', [
                 'error' => $e->getMessage(),
             ]);
@@ -72,7 +74,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->where('bloqueado', 1)->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios bloqueados', [
                 'error' => $e->getMessage(),
             ]);
@@ -84,7 +86,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->whereNotNull('vencimiento')->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios con vencimiento', [
                 'error' => $e->getMessage(),
             ]);
@@ -98,7 +100,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
             return $this->model->whereNotNull('vencimiento')
                 ->where('vencimiento', '<', now())
                 ->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios vencidos', [
                 'error' => $e->getMessage(),
             ]);
@@ -110,7 +112,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->where('requiere_segundo_factor', 1)->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios que requieren segundo factor', [
                 'error' => $e->getMessage(),
             ]);
@@ -122,7 +124,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->where('forzar_cambio_pwd', 1)->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener usuarios con forzar cambio', [
                 'error' => $e->getMessage(),
             ]);
@@ -138,7 +140,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
             }
 
             return $this->model->create($datos);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear usuario', [
                 'datos' => array_diff_key($datos, ['clave' => '']),
                 'error' => $e->getMessage(),
@@ -160,7 +162,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
             }
 
             return $usuarioModel->update($datos);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al actualizar usuario', [
                 'usuario' => $usuario,
                 'datos' => array_diff_key($datos, ['clave' => '']),
@@ -199,7 +201,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             return $this->model->porUsuario($usuario)->exists();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar existencia de usuario', [
                 'usuario' => $usuario,
                 'error' => $e->getMessage(),
@@ -213,12 +215,12 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
         try {
             $parametro = strtolower(trim($parametro));
             if (!\in_array($parametro, ['a', 'b', 'c'])) {
-                throw new \InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
+                throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
             }
 
             $campo = 'parametro_' . $parametro;
             return $this->model->where($campo, $valor)->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al buscar por parámetro', [
                 'parametro' => $parametro,
                 'valor' => $valor,
@@ -241,7 +243,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
             }
 
             return Hash::check($clave, $usuarioModel->clave);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al validar credenciales', [
                 'usuario' => $usuario,
                 'error' => $e->getMessage(),

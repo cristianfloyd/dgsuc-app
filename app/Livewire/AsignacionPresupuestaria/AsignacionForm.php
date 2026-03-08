@@ -2,6 +2,7 @@
 
 namespace App\Livewire\AsignacionPresupuestaria;
 
+use Exception;
 use App\Data\Mapuche\Dh24Data;
 use App\Models\Mapuche\Dh24;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -122,7 +123,7 @@ class AsignacionForm extends Component
 
             $this->reset();
             $this->dispatch('allocation-saved');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->notification('Error al procesar la imputación' . $e, 'error');
         }
     }
@@ -135,7 +136,7 @@ class AsignacionForm extends Component
         try {
             $allocation->delete();
             $this->notification('Imputación eliminada correctamente');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->notification('Error al eliminar la imputación ' . $e, 'error');
         }
     }

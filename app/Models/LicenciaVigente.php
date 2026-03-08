@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Exception;
 use App\Services\EncodingService;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
@@ -127,9 +129,9 @@ class LicenciaVigente extends Model
      *
      * @param array $legajos
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public static function cargarLicenciasVigentes(array $legajos, string $sessionId): \Illuminate\Database\Eloquent\Builder
+    public static function cargarLicenciasVigentes(array $legajos, string $sessionId): Builder
     {
         try {
             // Limpiar registros anteriores de esta sesión
@@ -207,7 +209,7 @@ class LicenciaVigente extends Model
 
             // Devolver una consulta que filtra por la sesión actual
             return self::query()->where('session_id', $sessionId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al cargar licencias vigentes: ' . $e->getMessage(), [
                 'legajos' => $legajos,
                 'session_id' => $sessionId,

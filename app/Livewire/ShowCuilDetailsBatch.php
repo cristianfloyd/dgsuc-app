@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -72,7 +73,7 @@ class ShowCuilDetailsBatch extends Component
             }
 
             $this->emit('batchLoaded');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the error
             Log::error('Error loading batch: ' . $e->getMessage());
             $this->failedCuils = array_merge($this->failedCuils, $remainingCuils);

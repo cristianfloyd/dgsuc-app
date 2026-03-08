@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Exception;
+use Illuminate\Database\Schema\Builder;
+use Illuminate\Database\ConnectionInterface;
 use App\Contracts\TableManagementServiceInterface;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Connection;
@@ -66,7 +69,7 @@ class TableManagementService implements TableManagementServiceInterface
 
             Log::info($result['message'], $result['actions']);
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
             return [
                 'success' => false,
@@ -84,7 +87,7 @@ class TableManagementService implements TableManagementServiceInterface
     /**
      * Verifica si una tabla está vacía.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model Modelo Eloquent de la tabla a verificar.
+     * @param Model $model Modelo Eloquent de la tabla a verificar.
      * @param string $tableName Nombre de la tabla a verificar.
      *
      * @return bool Verdadero si la tabla está vacía, falso de lo contrario.
@@ -117,7 +120,7 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
      *
-     * @return \Illuminate\Database\Schema\Builder La instancia de la conexión de base de datos.
+     * @return Builder La instancia de la conexión de base de datos.
      */
     private static function getSchemaConnection(?string $connectionName = null)
     {
@@ -131,7 +134,7 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
      *
-     * @return \Illuminate\Database\Connection La instancia de la conexión de base de datos.
+     * @return Connection La instancia de la conexión de base de datos.
      */
     private static function getDbConnection(?string $connectionName = null)
     {
@@ -263,7 +266,7 @@ class TableManagementService implements TableManagementServiceInterface
      * Verifica si una tabla de la base de datos tiene datos.
      *
      * @param string $tableName Nombre de la tabla a verificar.
-     * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     * @param ConnectionInterface $db Conexión a la base de datos.
      *
      * @return bool Verdadero si la tabla tiene datos, falso de lo contrario.
      */
@@ -277,7 +280,7 @@ class TableManagementService implements TableManagementServiceInterface
      * Trunca una tabla de la base de datos.
      *
      * @param string $tableName Nombre de la tabla a truncar.
-     * @param \Illuminate\Database\ConnectionInterface $db Conexión a la base de datos.
+     * @param ConnectionInterface $db Conexión a la base de datos.
      *
      * @return void
      */

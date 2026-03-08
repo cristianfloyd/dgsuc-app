@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Enums\ConceptosEmbargoEnum;
 use App\Models\Mapuche\Embargo;
 use App\Models\Reportes\EmbargoReportModel;
@@ -120,7 +121,7 @@ class EmbargoReportService
 
             // convertir a eloquent collection
             return new Collection($embargos);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error generando reporte de embargos', [
                 'error' => $e->getMessage(),
                 'nro_liqui' => $nro_liqui,

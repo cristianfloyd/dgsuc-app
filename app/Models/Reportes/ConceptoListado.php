@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Exception;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -86,7 +87,7 @@ class ConceptoListado extends Model
                 Log::info('Tabla suc.rep_concepto_listado creada exitosamente');
                 return true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear tabla suc.rep_concepto_listado: ' . $e->getMessage());
             throw $e;
         }

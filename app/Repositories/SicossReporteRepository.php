@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Exception;
 use App\Models\Mapuche\MapucheSicossReporte;
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Services\Mapuche\PeriodoFiscalService;
@@ -36,7 +37,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
             return MapucheSicossReporte::query()
                 ->getReporte($anio, $mes)
                 ->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener reporte SICOSS en el repositorio', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -63,7 +64,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
 
             // Ya verificamos en el modelo que getTotales siempre retorna un array
             return $resultado;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS en el repositorio', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -105,7 +106,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
                         ->where('per_limes', $mes);
                 })
                 ->exists();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar existencia de datos para período', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -132,7 +133,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
                 ->orderBy('dh22.per_liano', 'desc')
                 ->orderBy('dh22.per_limes', 'desc')
                 ->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener períodos fiscales disponibles', [
                 'error' => $e->getMessage(),
             ]);
@@ -157,7 +158,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
             return ((int) $periodoActual['year'] === (int) $anio && (int) $periodoActual['month'] === (int) $mes)
                 ? 'mapuche.dh21'
                 : 'mapuche.dh21h';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al determinar tabla de período', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,

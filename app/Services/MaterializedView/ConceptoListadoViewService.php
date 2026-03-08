@@ -2,6 +2,8 @@
 
 namespace App\Services\MaterializedView;
 
+use Exception;
+use Throwable;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +24,7 @@ class ConceptoListadoViewService
                         AND matviewname = 'concepto_listado'
                     )
                 ")->exists;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error verificando existencia de vista', [
                 'error' => $e->getMessage(),
             ]);
@@ -65,7 +67,7 @@ class ConceptoListadoViewService
 
 
             Log::info('Vista materializada concepto_listado creada exitosamente');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('Error creando vista materializada', [
                 'error' => $e->getMessage(),
             ]);
@@ -86,7 +88,7 @@ class ConceptoListadoViewService
                 'REFRESH MATERIALIZED VIEW suc.concepto_listado',
             );
             Log::info('Vista materializada actualizada exitosamente');
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error('Error actualizando vista materializada', [
                 'error' => $th->getMessage(),
                 'trace' => $th->getTraceAsString(),
@@ -102,7 +104,7 @@ class ConceptoListadoViewService
                 'DROP MATERIALIZED VIEW IF EXISTS suc.concepto_listado CASCADE',
             );
             Log::info('Vista materializada concepto_listado eliminada exitosamente');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error eliminando vista materializada', [
                 'error' => $e->getMessage(),
             ]);

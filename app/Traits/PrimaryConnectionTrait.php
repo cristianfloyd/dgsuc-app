@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -33,13 +35,13 @@ trait PrimaryConnectionTrait
     /**
      * Obtiene la conexión principal desde el trait.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getConnectionFromTrait()
     {
         $connectionName = $this->getConnectionName();
         Log::debug('Obteniendo conexión principal desde trait:', ['nombre' => $connectionName]);
-        return \Illuminate\Support\Facades\DB::connection($connectionName);
+        return DB::connection($connectionName);
     }
 
     /**

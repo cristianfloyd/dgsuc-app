@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use RuntimeException;
 use App\Enums\ConceptosSicossEnum;
 use App\Models\ControlAportesDiferencia;
 use App\Models\ControlConceptosPeriodo;
@@ -349,7 +351,7 @@ class SicossControlService
                 'diferencias_encontradas' => $diferencias->count(),
                 'fecha_proceso' => now()->toDateTimeString(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener diferencias de contribuciones', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -604,7 +606,7 @@ class SicossControlService
                     'mes' => $mes,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en ejecutarControlCuils:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -709,7 +711,7 @@ class SicossControlService
                 ],
                 'resultados' => $resultados, // Para notificaciones detalladas
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en ejecutarControlConceptos:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -723,7 +725,7 @@ class SicossControlService
     protected function getConnection(): string
     {
         if ($this->connection === '' || $this->connection === '0') {
-            throw new \RuntimeException('Debe establecer una conexión antes de ejecutar los controles');
+            throw new RuntimeException('Debe establecer una conexión antes de ejecutar los controles');
         }
         return $this->connection;
     }

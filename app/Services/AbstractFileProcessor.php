@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use RuntimeException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,7 +20,7 @@ abstract class AbstractFileProcessor
     protected function validateFile(string $filePath): void
     {
         if (empty($filePath) || !Storage::exists($filePath)) {
-            throw new \InvalidArgumentException("File does not exist: $filePath");
+            throw new InvalidArgumentException("File does not exist: $filePath");
         }
     }
 
@@ -37,7 +39,7 @@ abstract class AbstractFileProcessor
             }
             fclose($fileHandle);
         } else {
-            throw new \RuntimeException("Unable to open file: $filePath");
+            throw new RuntimeException("Unable to open file: $filePath");
         }
 
         return $extractedLines;

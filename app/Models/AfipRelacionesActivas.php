@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Illuminate\Support\Carbon;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -37,9 +39,9 @@ use Illuminate\Support\Facades\Log;
  * @property string $categoria_profesional
  * @property string $ccct
  * @property string $no_hay_datos
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $nro_cuil
  */
 class AfipRelacionesActivas extends Model
@@ -114,7 +116,7 @@ class AfipRelacionesActivas extends Model
             // Confirmar la transaccion en la conexion especificada.
             DB::connection($conexion)->commit();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
             // Manejo del error, log, etc.
             log::error('Error al insertar los datos' . $e->getMessage(), ['exception' => $e]);
@@ -196,7 +198,7 @@ class AfipRelacionesActivas extends Model
             }
 
             return $connection;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener la conexión', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

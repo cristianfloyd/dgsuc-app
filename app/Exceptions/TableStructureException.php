@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class TableStructureException extends \Exception
+use Exception;
+
+class TableStructureException extends Exception
 {
     protected string $tableName;
 

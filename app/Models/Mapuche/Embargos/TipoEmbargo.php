@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
 
+use Override;
+use InvalidArgumentException;
 use App\Models\Dh12;
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
@@ -80,14 +82,14 @@ class TipoEmbargo extends Model
     /**
      * Reglas de validación para mov_inicial_cta_cte.
      */
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
 
         static::saving(function ($model): void {
             if (!\in_array($model->mov_inicial_cta_cte, [0, 1, 2])) {
-                throw new \InvalidArgumentException('mov_inicial_cta_cte debe ser 0, 1 o 2');
+                throw new InvalidArgumentException('mov_inicial_cta_cte debe ser 0, 1 o 2');
             }
         });
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\JsonResponse;
 use App\Services\Dh92Service;
 use Illuminate\Http\Request;
 
@@ -27,7 +29,7 @@ class Dh92Controller extends Controller
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -45,7 +47,7 @@ class Dh92Controller extends Controller
 
             $result = $this->service->createWithTransaction($data);
             return response()->json(['message' => 'Registro creado con éxito', 'data' => $result], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Error al crear el registro', 'error' => $e->getMessage()], 500);
         }
     }
@@ -56,7 +58,7 @@ class Dh92Controller extends Controller
      * @param Request $request
      * @param int $id
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -77,7 +79,7 @@ class Dh92Controller extends Controller
                 return response()->json(['message' => 'Registro actualizado con éxito']);
             }
             return response()->json(['message' => 'No se encontró el registro'], 404);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Error al actualizar el registro', 'error' => $e->getMessage()], 500);
         }
     }

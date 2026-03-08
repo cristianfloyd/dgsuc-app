@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\Dh92Repository;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class Dh92Service
      *
      * @param array $data
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return mixed
      */
@@ -38,7 +39,7 @@ class Dh92Service
             $result = $this->repository->create($data);
             DB::commit();
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -50,7 +51,7 @@ class Dh92Service
      * @param int $id
      * @param array $data
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return bool
      */
@@ -61,7 +62,7 @@ class Dh92Service
             $result = $this->repository->update($id, $data);
             DB::commit();
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -71,7 +72,7 @@ class LiquidacionControl extends Model
     {
         try {
             return Schema::hasTable('suc.controles_liquidacion');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }

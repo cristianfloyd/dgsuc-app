@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -83,7 +84,7 @@ class TablaTempCuils extends Model
             });
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Log the error or handle it as needed
             return false;
         }
@@ -111,7 +112,7 @@ class TablaTempCuils extends Model
             Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso. Desde tablaTemCuils model');
             // Devolver un valor que indique éxito
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejo del error: puedes registrar el error si es necesario
             Log::error($e->getMessage());
             return 0;

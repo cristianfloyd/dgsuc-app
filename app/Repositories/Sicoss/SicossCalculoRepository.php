@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Sicoss;
 
+use App\Models\Mapuche\MapucheConfig;
 use App\Models\Dh01;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
@@ -143,7 +144,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         $sigla = '';
         if (empty($siglas[0]->codc_obsoc)) {
             // Si campo dh09 está vacío asigno la obra social por defecto
-            $sigla = app(\App\Models\Mapuche\MapucheConfig::class)::getDefaultsObraSocial();
+            $sigla = app(MapucheConfig::class)::getDefaultsObraSocial();
         } else {
             $sigla = $siglas[0]->codc_obsoc;
         }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use Throwable;
 use App\Models\ComprobanteNominaModel;
 use App\Traits\MapucheConnectionTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -107,7 +109,7 @@ class ComprobanteNominaService
                         $stats['procesados']++;
                         continue;
                     }
-                    throw new \Exception('El archivo no comienza con un encabezado válido');
+                    throw new Exception('El archivo no comienza con un encabezado válido');
                 }
 
                 // Procesar el resto de las líneas como datos
@@ -122,7 +124,7 @@ class ComprobanteNominaService
 
             fclose($fileHandle);
             DB::connection($this->getConnectionName())->commit();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error de procesamiento: ' . $e->getMessage());
             throw $e;

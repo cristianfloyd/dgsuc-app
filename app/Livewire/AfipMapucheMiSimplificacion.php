@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
 use App\Models\AfipMapucheMiSimplificacion as ModelsAfipMapucheMiSimplificacion;
 use App\Services\ColumnMetadata;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -15,8 +17,9 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
-class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTable
+class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithForms;
 

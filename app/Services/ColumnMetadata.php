@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+
 class ColumnMetadata
 {
     /**
@@ -55,7 +57,7 @@ class ColumnMetadata
     public function setSystem(string $system): void
     {
         if (!\in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
-            throw new \InvalidArgumentException('Sistema no válido');
+            throw new InvalidArgumentException('Sistema no válido');
         }
         $this->currentSystem = $system;
     }
@@ -77,7 +79,7 @@ class ColumnMetadata
             case 'sicossCalculo':
                 return $this->widthsSicossCalculo;
             default:
-                throw new \InvalidArgumentException('Sistema no válido');
+                throw new InvalidArgumentException('Sistema no válido');
         }
     }
 

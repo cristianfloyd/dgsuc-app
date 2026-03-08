@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\Mapuche\Dh22;
 use App\Services\WorkflowService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -19,8 +21,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-class ParaMiSimplificacion extends Component implements HasTable, HasForms
+class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -112,7 +115,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms
                         ->toArray())
                     ->multiple(),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('exportar')
                     ->label('Exportar TXT')
                     ->icon('heroicon-o-document-arrow-down')

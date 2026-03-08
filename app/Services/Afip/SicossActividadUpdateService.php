@@ -2,6 +2,7 @@
 
 namespace App\Services\Afip;
 
+use Throwable;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +26,7 @@ class SicossActividadUpdateService
      * del CUIL del empleado. Solo se actualizan los registros donde el código de actividad difiere.
      *
      *
-     * @throws \Throwable Si ocurre algún error durante la transacción
+     * @throws Throwable Si ocurre algún error durante la transacción
      *
      * @return array Retorna un array con el estado de la operación:
      *               - ['status' => 'success', 'message' => string] en caso de éxito
@@ -53,7 +54,7 @@ class SicossActividadUpdateService
                 'status' => 'success',
                 'message' => "Se actualizaron $affected registros de cod_act.",
             ];
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en actualización de cod_act', [
                 'error' => $e->getMessage(),

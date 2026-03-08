@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $codn_grupo Código de grupo
  * @property int $codn_conce Código de concepto
  *
- * @method static \Database\Factories\Dh16Factory factory()
+ * @method static Dh16Factory factory()
  */
 class Dh16 extends Model
 {

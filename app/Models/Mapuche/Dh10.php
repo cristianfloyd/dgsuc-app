@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
+use InvalidArgumentException;
 use App\Models\Dh03;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
@@ -219,7 +220,7 @@ class Dh10 extends Model
     public function scopeConImportesMes(Builder $query, int $mes): Builder
     {
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         return $query->where("imp_bruto_{$mes}", '>', 0);
@@ -259,7 +260,7 @@ class Dh10 extends Model
     public function getImporteBrutoMes(int $mes): float
     {
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         return $this->{"imp_bruto_{$mes}"} ?? 0;
@@ -271,7 +272,7 @@ class Dh10 extends Model
     public function setImporteBrutoMes(int $mes, float $importe): self
     {
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         $this->{"imp_bruto_{$mes}"} = $importe;
@@ -284,7 +285,7 @@ class Dh10 extends Model
     public function getImporteRetroactivoMes(int $mes): float
     {
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         return $this->{"importes_retro_{$mes}"} ?? 0;

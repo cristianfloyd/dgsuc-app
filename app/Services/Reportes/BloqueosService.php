@@ -29,7 +29,7 @@ class BloqueosService implements BloqueosServiceInterface
      *
      * @param array $row Fila de datos de bloqueos importados desde Excel.
      *
-     * @return \Illuminate\Support\Collection<BloqueosData> Colección de datos de bloqueos procesados.
+     * @return Collection<BloqueosData> Colección de datos de bloqueos procesados.
      */
     public function processImport(array|BloqueosData $row): Collection
     {

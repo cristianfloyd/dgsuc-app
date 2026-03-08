@@ -19,7 +19,7 @@ interface TableManagementServiceInterface
     /**
      * Verifica si una tabla de base de datos está vacía.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model Modelo Eloquent asociado a la tabla.
+     * @param Model $model Modelo Eloquent asociado a la tabla.
      * @param string $tableName Nombre de la tabla a verificar.
      *
      * @return bool Verdadero si la tabla está vacía, falso en caso contrario.

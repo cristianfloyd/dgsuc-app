@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Exception;
+use RuntimeException;
+use InvalidArgumentException;
 use App\Contracts\DataMapperInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Models\UploadedFile;
@@ -60,7 +63,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
         try {
             $this->validateInput($filePath, $this->periodoFiscal);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al validar el archivo: ' . $e->getMessage());
             return new Collection();
         }
@@ -69,7 +72,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         // Validación de $filePatfh, que pueda abrirse y leerse
         if (!is_readable($this->absolutePath)) {
             Log::error('El archivo no se puede leer.');
-            throw new \RuntimeException('El archivo no se puede leer.');
+            throw new RuntimeException('El archivo no se puede leer.');
         }
         Log::info("Archivo válido para lectura.: $this->absolutePath");
 
@@ -83,7 +86,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
             Log::info('Datos mapeados handleFileImport:', [$mappedData->count()]);
             return  $mappedData;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejar el error, posiblemente registrándolo
             Log::error('Error al procesar el archivo (handleFileImport): ' . $e->getMessage());
             return new Collection();
@@ -126,7 +129,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
         if (empty($this->periodoFiscal)) {
             Log::error('El periodo fiscal no está inicializado.');
-            throw new \RuntimeException('El periodo fiscal no está inicializado.');
+            throw new RuntimeException('El periodo fiscal no está inicializado.');
         }
 
         Log::info("Procesando archivo: $filePath");
@@ -137,7 +140,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
             // Check if the file exists
             if (!Storage::exists($filePath)) {
-                throw new \RuntimeException("El archivo no existe: $filePath");
+                throw new RuntimeException("El archivo no existe: $filePath");
             }
 
             if ($fileContent = Storage::get($filePath)) {
@@ -152,7 +155,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $mappedData = $this->processLines($lines->toArray(), $columnWidths);
             Log::info('Datos mapeados:', [$mappedData->count()]);
             return $mappedData;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al procesar el archivo en FileProcessorService processFile(): ' . $e->getMessage());
             return new Collection();
         }
@@ -168,7 +171,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @param string $filePath La ruta del archivo a leer.
      *
-     * @throws \RuntimeException Si el archivo no se puede leer o abrir.
+     * @throws RuntimeException Si el archivo no se puede leer o abrir.
      *
      * @return array Las líneas extraídas del archivo.
      */
@@ -214,7 +217,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      * @param Collection $processedLines Las líneas procesadas del archivo.
      * @param string $system El sistema al que pertenece el archivo.
      *
-     * @throws \RuntimeException Si el sistema proporcionado no es válido.
+     * @throws RuntimeException Si el sistema proporcionado no es válido.
      *
      * @return Collection Una colección con los datos mapeados.
      */
@@ -226,7 +229,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         if ($system === 'afip') {
             return $this->mapearDatosRelacionesActivas($processedLines);
         }
-        throw new \RuntimeException('Sistema no válido: ' . $system);
+        throw new RuntimeException('Sistema no válido: ' . $system);
     }
 
     private function mapearDatosRelacionesActivas(Collection $processedLines): Collection
@@ -332,23 +335,23 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     {
         // Verifica que los parámetros no estén vacíos.
         if (empty($filePath) || empty($periodoFiscal)) {
-            throw new \InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
+            throw new InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
         }
 
         // Comprueba que el archivo exista en el almacenamiento.
         if (!Storage::exists($filePath)) {
-            throw new \InvalidArgumentException("El archivo no existe: $filePath");
+            throw new InvalidArgumentException("El archivo no existe: $filePath");
         }
 
         // Verifica que el archivo sea legible.
         $fullPath = Storage::path($filePath);
         if (!is_readable($fullPath)) {
-            throw new \InvalidArgumentException("El archivo no es legible: $fullPath");
+            throw new InvalidArgumentException("El archivo no es legible: $fullPath");
         }
 
         // Valida que el periodo fiscal sea un valor razonable (mayor que 0 y no superior al año actual más 12 meses).
         if ($periodoFiscal <= 0 || $periodoFiscal > date('Y') * 100 + 12) {
-            throw new \InvalidArgumentException('El periodo fiscal no es válido.');
+            throw new InvalidArgumentException('El periodo fiscal no es válido.');
         }
     }
 }

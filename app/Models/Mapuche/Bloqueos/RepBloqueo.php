@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
+use Override;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,7 +47,7 @@ class RepBloqueo extends Model
     /**
      * Get the route key for the model.
      */
-    #[\Override]
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'id';

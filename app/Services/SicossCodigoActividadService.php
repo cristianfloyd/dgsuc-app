@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -73,7 +74,7 @@ class SicossCodigoActividadService
             DB::connection($this->getConnectionName())->statement('CREATE INDEX ix_pre_conceptos_liquidados_1 ON pre_conceptos_liquidados(id_liquidacion)');
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al generar tabla de conceptos liquidados: ' . $e->getMessage());
             return false;
         }
@@ -105,7 +106,7 @@ class SicossCodigoActividadService
             DB::connection($this->getConnectionName())->statement('CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce)');
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al filtrar conceptos por período retro: ' . $e->getMessage());
             return false;
         }

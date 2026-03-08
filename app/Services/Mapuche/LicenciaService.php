@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use Exception;
 use App\Data\Responses\LicenciaVigenteData;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
@@ -124,7 +125,7 @@ class LicenciaService
             }
 
             return $licencias;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener licencias vigentes: ' . $e->getMessage(), [
                 'legajos' => $legajos,
                 'exception' => $e,
@@ -207,7 +208,7 @@ class LicenciaService
             }
 
             return $legajos;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener legajos con licencias vigentes: ' . $e->getMessage(), [
                 'exception' => $e,
             ]);
@@ -655,7 +656,7 @@ class LicenciaService
 
             // Convertir resultados a DTO
             return LicenciaVigenteData::fromResultados($resultados);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al ejecutar consulta SQL de licencias', [
                 'error' => $e->getMessage(),
                 'legajos' => $legajos,

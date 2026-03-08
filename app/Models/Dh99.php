@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use InvalidArgumentException;
+use Exception;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoFiscal;
@@ -81,13 +83,13 @@ class Dh99 extends Model
             }
 
             if (!($periodoFiscal instanceof PeriodoFiscal)) {
-                throw new \InvalidArgumentException('El periodo fiscal debe ser un string en formato YYYYMM o un objeto PeriodoFiscal');
+                throw new InvalidArgumentException('El periodo fiscal debe ser un string en formato YYYYMM o un objeto PeriodoFiscal');
             }
 
             $this->per_anoct = $periodoFiscal->year();
             $this->per_mesct = $periodoFiscal->month();
             return $this->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al establecer el periodo fiscal: ' . $e->getMessage());
             return false;
         }

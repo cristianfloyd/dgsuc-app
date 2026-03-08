@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use Override;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,13 +25,13 @@ class Dhe2 extends Model
         'cod_organismo',
     ];
 
-    #[\Override]
+    #[Override]
     public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
     }
 
-    #[\Override]
+    #[Override]
     public function getIncrementing(): false
     {
         return false;
@@ -53,7 +54,7 @@ class Dhe2 extends Model
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
     }
 
-    #[\Override]
+    #[Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))

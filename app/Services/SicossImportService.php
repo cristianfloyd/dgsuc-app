@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TableManagementServiceInterface;
@@ -95,7 +96,7 @@ class SicossImportService
                 'message' => 'Error al insertar los datos en la base de datos',
                 'data' => ['file' => $file->id, 'tableName' => $tableName, 'step' => $step],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error durante la importación: ' . $e->getMessage());
             return [
                 'success' => false,

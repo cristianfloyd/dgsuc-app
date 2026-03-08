@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -47,14 +48,14 @@ class TobaHashAdapter
     /**
      * Genera un hash para una contraseña.
      *
-     * @throws \Exception Si no se pudo crear el hash
+     * @throws Exception Si no se pudo crear el hash
      */
     public function hash(string $input): string
     {
         $hash = crypt($input, $this->getSalt());
 
         if (\strlen($hash) <= 13) {
-            throw new \Exception('Se produjo un error al crear el hash');
+            throw new Exception('Se produjo un error al crear el hash');
         }
 
         return $hash;
@@ -189,7 +190,7 @@ class TobaHashAdapter
             'SHA512' => \sprintf('$6$rounds=%d$', $this->calculateRounds()),
             'SHA256' => \sprintf('$5$rounds=%d$', $this->calculateRounds()),
             'MD5' => '$1$',
-            default => throw new \Exception("Algoritmo de hash no soportado: {$this->metodo}")
+            default => throw new Exception("Algoritmo de hash no soportado: {$this->metodo}")
         };
 
         $bytes = $this->getSecureRandomBytes(16);
@@ -217,7 +218,7 @@ class TobaHashAdapter
             // PHP 8.3 tiene random_bytes optimizado y siempre disponible
             $randomBytes = random_bytes($count);
             return $randomBytes;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fallback extremo (muy improbable en PHP 8.3)
             Log::warning('random_bytes() falló, usando fallback', ['error' => $e->getMessage()]);
             return $this->legacyRandomBytes($count);

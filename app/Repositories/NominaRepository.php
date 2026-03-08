@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use Exception;
+use RuntimeException;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +23,8 @@ class NominaRepository
         try {
             $this->connection = $this->getConnectionFromTrait();
             $this->schema = Schema::connection($this->connection->getName());
-        } catch (\Exception $e) {
-            throw new \RuntimeException('No se pudo establecer la conexión a la base de datos: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new RuntimeException('No se pudo establecer la conexión a la base de datos: ' . $e->getMessage());
         }
     }
 
@@ -30,7 +32,7 @@ class NominaRepository
     {
         try {
             $this->dropTemporaryTables();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al limpiar tablas temporales: ' . $e->getMessage());
         }
     }
@@ -58,13 +60,13 @@ class NominaRepository
                     );
                     Log::info('Tabla l creada exitosamente', [$query->toSql(), $query->getBindings()]);
                     DB::connection($this->connection->getName())->commit();
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     DB::connection($this->connection->getName())->rollBack();
                     throw $e;
                 }
                 break;
             default:
-                throw new \RuntimeException('No se encontraron parámetros de ajustes de contabilidad.');
+                throw new RuntimeException('No se encontraron parámetros de ajustes de contabilidad.');
         }
     }
 
@@ -116,7 +118,7 @@ class NominaRepository
                 );
 
             DB::connection($this->connection->getName())->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->connection->getName())->rollBack();
             throw $e;
         }

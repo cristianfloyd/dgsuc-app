@@ -2,6 +2,7 @@
 
 namespace App\Data\Mapuche;
 
+use DateTime;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
@@ -18,7 +19,7 @@ class GrupoData extends Data
         public readonly ?string $descripcion,
         #[MapName('fec_modificacion')]
         #[WithCast(DateTimeInterfaceCast::class)]
-        public readonly \DateTime $fechaModificacion,
+        public readonly DateTime $fechaModificacion,
     ) {
     }
 

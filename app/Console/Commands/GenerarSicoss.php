@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Console\Command;
 
@@ -83,7 +84,7 @@ class GenerarSicoss extends Command
                     }, $resultado['errores']),
                 );
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Error al generar SICOSS: ' . $e->getMessage());
             return 1;
         }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\RetUdaRepository;
 use App\DTOs\RetUdaDTO;
 use App\Models\Suc\RetUda;
@@ -23,7 +24,7 @@ class RetUdaService
     /**
      * Obtiene todos los registros de RetUda.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAllRetUdas()
     {

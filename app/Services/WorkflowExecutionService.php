@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use Exception;
 use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\WorkflowServiceInterface;
 use App\Enums\WorkflowStatus;
@@ -71,7 +73,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         // Inicializar nroLiqui con un valor por defecto
         try {
             $this->nroLiqui = new NroLiqui(1); // Valor por defecto que será reemplazado
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             Log::error('Error al inicializar NroLiqui: ' . $e->getMessage());
         }
     }
@@ -168,20 +170,20 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
      *
      * @param int|NroLiqui $nroLiqui
      *
-     * @throws \InvalidArgumentException Si el valor no es válido
+     * @throws InvalidArgumentException Si el valor no es válido
      */
     public function setNroLiqui($nroLiqui): self
     {
         try {
             $this->nroLiqui = ($nroLiqui instanceof NroLiqui) ? $nroLiqui : new NroLiqui($nroLiqui);
             return $this;
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             Log::error('Error al establecer NroLiqui: ' . $e->getMessage());
             throw $e;
         }
     }
 
-    private function executeStep(\App\Enums\WorkflowStatus $step): void
+    private function executeStep(WorkflowStatus $step): void
     {
         switch ($step) {
             case WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP:
@@ -217,7 +219,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
             return $this->cuilsNotInAfip;
         } catch (QueryException $e) {
             Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
-            throw new \Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.', $e->getCode(), $e);
+            throw new Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.', $e->getCode(), $e);
         }
     }
 
@@ -242,7 +244,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
             } else {
                 $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error al ejecutar la función almacenada']);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al ejecutar la función almacenada: ' . $e->getMessage());
             $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error: ' . $e->getMessage()]);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Models\UploadedFile;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,7 +14,7 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      *
      * @param int $id El ID del archivo cargado a buscar.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Si no se encuentra el archivo cargado.
+     * @throws ModelNotFoundException Si no se encuentra el archivo cargado.
      *
      * @return UploadedFile El modelo del archivo cargado.
      */

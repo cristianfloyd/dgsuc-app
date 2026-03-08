@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -23,7 +24,7 @@ class ClearConceptoListadoCache extends Command
             // Cache::flush();
 
             $this->info('Caché limpiada exitosamente!');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Error limpiando caché: ' . $e->getMessage());
         }
     }

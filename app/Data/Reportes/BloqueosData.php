@@ -2,6 +2,7 @@
 
 namespace App\Data\Reportes;
 
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Dh03;
 use Carbon\Carbon;
@@ -68,7 +69,7 @@ class BloqueosData extends Data
 
 
         return new self(
-            fecha_registro: Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
+            fecha_registro: Carbon::instance(Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
             email: strtolower(trim((string) $row['correo_electronico'])),
             nombre: ucwords(strtolower(trim((string) $row['nombre']))),
             usuario_mapuche: strtolower(trim((string) $row['usuario_mapuche_solicitante'])),
@@ -134,7 +135,7 @@ class BloqueosData extends Data
 
         // Procesamiento de la fecha según el formato
         $fecha = is_numeric($row['fecha_de_baja'])
-            ? Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['fecha_de_baja']))
+            ? Carbon::instance(Date::excelToDateTimeObject($row['fecha_de_baja']))
             : Carbon::parse($row['fecha_de_baja']);
 
         // Aplicamos la lógica de negocio para ajustar la fecha

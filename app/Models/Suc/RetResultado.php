@@ -2,6 +2,7 @@
 
 namespace App\Models\Suc;
 
+use Carbon\Carbon;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
@@ -63,8 +64,8 @@ class RetResultado extends Model
      * @property float $sub_basico_v Importe básico suplencia posición anterior
      * @property float $porcehaber Porcentaje de haberes
      * @property int|null $dias_mes_trab Días del mes trabajados
-     * @property \Carbon\Carbon $fecha_ret_desde Fecha inicio retroactivo
-     * @property \Carbon\Carbon $fecha_ret_hasta Fecha fin retroactivo
+     * @property Carbon $fecha_ret_desde Fecha inicio retroactivo
+     * @property Carbon $fecha_ret_hasta Fecha fin retroactivo
      * @property string $periodo Período (formato YYYYMM)
      * @property string $liquida Bandera de liquidación
      * @property string|null $periodo_mens Período mensual
@@ -141,8 +142,8 @@ class RetResultado extends Model
      * @property float $cat_basico_7 Categoría básica 7
      * @property float $cat_basico_n_perm Categoría básica nueva permanente
      * @property float $cat_basico_v_perm Categoría básica anterior permanente
-     * @property \App\ValueObjects\Periodo $periodo Período como ValueObject
-     * @property \App\ValueObjects\TipoRetro $tipo_retro Tipo retroactivo como ValueObject
+     * @property Periodo $periodo Período como ValueObject
+     * @property TipoRetro $tipo_retro Tipo retroactivo como ValueObject
      *
      * La tabla asociada con el modelo.
      *

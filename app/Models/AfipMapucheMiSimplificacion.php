@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use InvalidArgumentException;
 use App\Enums\PuestoDesempenado;
 use App\Traits\HasPuestoDesempenado;
 use App\Traits\HasUnidadAcademica;
@@ -257,7 +259,7 @@ class AfipMapucheMiSimplificacion extends Model
             Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return false;
         }
@@ -300,7 +302,7 @@ class AfipMapucheMiSimplificacion extends Model
 
                 try {
                     return PeriodoFiscal::fromString($periodoStr);
-                } catch (\InvalidArgumentException $e) {
+                } catch (InvalidArgumentException $e) {
                     Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
                     return null;
                 }
@@ -410,7 +412,7 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * Reemplaza los guiones (-) por barras (/) en el formato de fecha
      *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * @return Attribute
      */
     protected function inicioRelLaboral(): Attribute
     {
@@ -429,7 +431,7 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * Reemplaza los guiones (-) por barras (/) en el formato de fecha
      *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * @return Attribute
      */
     protected function finRelLaboral(): Attribute
     {

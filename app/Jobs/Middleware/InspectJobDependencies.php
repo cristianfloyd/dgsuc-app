@@ -2,13 +2,14 @@
 
 namespace App\Jobs\Middleware;
 
+use ReflectionClass;
 use Illuminate\Support\Facades\Log;
 
 class InspectJobDependencies
 {
     public function handle($job, $next)
     {
-        $reflection = new \ReflectionClass($job);
+        $reflection = new ReflectionClass($job);
         $properties = $reflection->getProperties();
 
         foreach ($properties as $property) {

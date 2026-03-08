@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
+use DateTime;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $per_liano Año del período
  * @property int|null $per_limes Mes del período
  * @property string|null $desc_liqui Descripción de liquidación
- * @property \DateTime|null $fec_emisi Fecha de emisión
- * @property \DateTime|null $fec_ultap Fecha último aporte
+ * @property DateTime|null $fec_emisi Fecha de emisión
+ * @property DateTime|null $fec_ultap Fecha último aporte
  * @property int|null $per_anoap Año del período de aporte
  * @property int|null $per_mesap Mes del período de aporte
  * @property string|null $desc_lugap Descripción lugar de aporte

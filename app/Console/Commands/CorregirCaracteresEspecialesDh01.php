@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\Dh01;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -118,7 +119,7 @@ class CorregirCaracteresEspecialesDh01 extends Command
                         DB::connection($registro->getConnectionName())->commit();
                         $cambiosRealizados++;
                         $this->info('✓ Registro actualizado correctamente.');
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         DB::connection($registro->getConnectionName())->rollBack();
                         $this->error("Error al actualizar registro: {$e->getMessage()}");
                         Log::error("Error al corregir caracteres en Dh01 #{$registro->nro_legaj}", [

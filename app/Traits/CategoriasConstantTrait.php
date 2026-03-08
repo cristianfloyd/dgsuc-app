@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use InvalidArgumentException;
+
 /**
  * Trait para manejar categorías de cargos.
  */
@@ -72,14 +74,14 @@ trait CategoriasConstantTrait
      *
      * @param string $group El grupo de categorías a obtener
      *
-     * @throws \InvalidArgumentException Si el grupo especificado no existe
+     * @throws InvalidArgumentException Si el grupo especificado no existe
      *
      * @return array<string> Lista de categorías pertenecientes al grupo
      */
     public function getCategoriesByGroup(string $group): array
     {
         if (!\array_key_exists($group, self::CATEGORIAS)) {
-            throw new \InvalidArgumentException("Grupo de categorías '$group' no existe");
+            throw new InvalidArgumentException("Grupo de categorías '$group' no existe");
         }
         return self::CATEGORIAS[$group];
     }

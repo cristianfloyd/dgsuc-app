@@ -2,6 +2,8 @@
 
 namespace App\Models\Suc;
 
+use DateTime;
+use Illuminate\Database\Eloquent\Builder;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,15 +56,15 @@ class RetTablaBasicosConcesp extends Model
     /**
      * Obtiene los registros que coinciden con los criterios de búsqueda.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \DateTime $fecha
+     * @param Builder $query
+     * @param DateTime $fecha
      * @param string $catId
      * @param string $concLiqId
      * @param int $anios
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeBuscarRegistros($query, \DateTime $fecha, string $catId, string $concLiqId, int $anios)
+    public function scopeBuscarRegistros($query, DateTime $fecha, string $catId, string $concLiqId, int $anios)
     {
         return $query->where('fecha_desde', '<=', $fecha)
             ->where('fecha_hasta', '>=', $fecha)

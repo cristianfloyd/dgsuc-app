@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -39,7 +40,7 @@ class FileUploadService
             }
 
             return $deleted;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error deleting file {$filePath}: " . $e->getMessage());
             return false;
         }
@@ -48,7 +49,7 @@ class FileUploadService
     /**
      * Sube un archivo al servidor.
      *
-     * @param \Illuminate\Http\UploadedFile $file El archivo que se va a subir
+     * @param UploadedFile $file El archivo que se va a subir
      * @param string $path La ruta donde se debe almacenar el archivo
      *
      * @return string|false La ruta del archivo subido si es exitoso, falso en caso contrario
@@ -71,7 +72,7 @@ class FileUploadService
             }
             Log::error('Failed to upload file');
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error uploading file: ' . $e->getMessage());
             return false;
         }

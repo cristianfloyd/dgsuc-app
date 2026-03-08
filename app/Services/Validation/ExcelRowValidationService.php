@@ -2,6 +2,7 @@
 
 namespace App\Services\Validation;
 
+use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Exceptions\ValidationException;
 use App\Services\DateParserService;
@@ -321,7 +322,7 @@ class ExcelRowValidationService
                 'value' => $fechaAjustada,
                 'estado' => BloqueosEstadoEnum::VALIDADO,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'value' => $fecha,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,

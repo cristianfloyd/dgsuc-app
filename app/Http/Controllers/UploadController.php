@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\UploadedFile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class UploadController extends Controller
         //Si falla, rechazar la solicitud y mostrar un mensaje de error
         try {
             $filepath = $file->storeAs('uploads', $filename, 'public');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return Redirect::back()->withErrors(['error' => $e->getMessage()]);
         }
 

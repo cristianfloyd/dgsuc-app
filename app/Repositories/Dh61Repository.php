@@ -28,7 +28,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      * @param int $year El año fiscal.
      * @param int $month El mes fiscal.
      *
-     * @return \Illuminate\Database\Eloquent\Collection La colección de registros históricos.
+     * @return Collection La colección de registros históricos.
      */
     public function getRecordsByFiscalPeriod(int $year, int $month): Collection
     {

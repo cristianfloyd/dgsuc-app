@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 trait TableVerificationTrait
@@ -18,7 +19,7 @@ trait TableVerificationTrait
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al inicializar tabla: ' . $e->getMessage());
             return false;
         }

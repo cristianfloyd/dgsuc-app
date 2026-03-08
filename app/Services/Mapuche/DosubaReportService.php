@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use Exception;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh21h;
 use App\Traits\MapucheConnectionTrait;
@@ -35,7 +36,7 @@ class DosubaReportService
      * @param string|null $year Año del período fiscal (formato: YYYY)
      * @param string|null $month Mes del período fiscal (formato: MM)
      *
-     * @throws \Exception Si ocurre un error durante la generación del reporte
+     * @throws Exception Si ocurre un error durante la generación del reporte
      *
      * @return Collection Colección con los datos del reporte
      */
@@ -54,13 +55,13 @@ class DosubaReportService
 
             // Realizamos el cruce de información entre los legajos combinados y los del tercer mes
             return $this->cruzarLegajos($legajosPorMes['tercerMes'], $legajosCombinados);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en DosubaReportService: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'year' => $year,
                 'month' => $month,
             ]);
-            throw new \Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage());
+            throw new Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage());
         }
     }
 

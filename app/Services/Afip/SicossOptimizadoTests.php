@@ -2,6 +2,8 @@
 
 namespace App\Services\Afip;
 
+use Exception;
+use Illuminate\Database\QueryException;
 use App\Models\Mapuche\MapucheConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -195,7 +197,7 @@ class SicossOptimizadoTests
                 'sistema' => $sistema_info,
                 'proyecciones' => $proyecciones,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('❌ ERROR EN DIAGNÓSTICO', [
                 'error' => $e->getMessage(),
                 'linea' => $e->getLine(),
@@ -230,8 +232,8 @@ class SicossOptimizadoTests
      * una muestra de legajos y calcula la memoria necesaria para su procesamiento.
      *
      *
-     * @throws \Exception Si falla la inicialización de variables estáticas
-     * @throws \Illuminate\Database\QueryException Si falla la consulta de legajos
+     * @throws Exception Si falla la inicialización de variables estáticas
+     * @throws QueryException Si falla la consulta de legajos
      *
      * @return array Análisis detallado de memoria que incluye:
      *               - memoria_actual: Memoria en uso antes del procesamiento
@@ -388,7 +390,7 @@ class SicossOptimizadoTests
                 'legajos_muestra' => \array_slice($resultado, 0, 3), // Primeros 3 para verificar
                 'recomendaciones' => self::generar_recomendaciones($estadisticas),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $fin_total = microtime(true);
 
             Log::error("❌ ERROR EN $nombre_test", [
@@ -645,7 +647,7 @@ class SicossOptimizadoTests
                     'registros' => $count_result[0]->total ?? 0,
                     'tamaño' => $size_result[0]->tamaño ?? 'No disponible',
                 ];
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $info_tablas[$tabla] = [
                     'registros' => 'Error: ' . $e->getMessage(),
                     'tamaño' => 'No disponible',
@@ -697,7 +699,7 @@ class SicossOptimizadoTests
                 'codc_reparto_utilizado' => $codc_reparto,
                 'periodo_consultado' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', \STR_PAD_LEFT),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'error' => 'Error al contar legajos: ' . $e->getMessage(),
                 'total_legajos' => 0,
@@ -722,7 +724,7 @@ class SicossOptimizadoTests
                 'nombre_mes' => date('F', mktime(0, 0, 0, $periodo['month'], 1)),
                 'timestamp_consulta' => now()->toDateTimeString(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'error' => 'Error al obtener período: ' . $e->getMessage(),
             ];

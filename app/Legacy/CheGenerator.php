@@ -2,6 +2,7 @@
 
 namespace App\Legacy;
 
+use App\Models\ComprobanteNominaModel;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
@@ -353,7 +354,7 @@ class CheGenerator
         $aportes = $this->getAportes(); // Obtener los aportes generados
 
         foreach ($aportes as $aporte) {
-            \App\Models\ComprobanteNominaModel::create([
+            ComprobanteNominaModel::create([
                 'anio_periodo' => date('Y'), // Asumiendo que el año es el actual
                 'mes_periodo' => date('m'), // Asumiendo que el mes es el actual
                 'nro_liqui' => $aporte['nro_liqui'], // Asegúrate de que este campo esté disponible en $aporte
@@ -373,7 +374,7 @@ class CheGenerator
         }
 
         // También puedes insertar los netos liquidados
-        \App\Models\ComprobanteNominaModel::create([
+        ComprobanteNominaModel::create([
             'anio_periodo' => date('Y'),
             'mes_periodo' => date('m'),
             'nro_liqui' => null, // O el número de liquidación correspondiente

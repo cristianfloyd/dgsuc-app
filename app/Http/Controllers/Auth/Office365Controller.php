@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Exception;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class Office365Controller extends Controller
             try {
                 // Obtener grupos del usuario y verificar permisos
                 $groups = $this->getUserGroups($microsoftUser->token);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->route('login')
                     ->with('error', $e->getMessage());
             }
@@ -54,7 +55,7 @@ class Office365Controller extends Controller
             Auth::login($user);
 
             return redirect('/selector-panel');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error Microsoft Login: ' . $e->getMessage());
             return redirect()->route('login')
                 ->with('error', 'Error al iniciar sesión con Microsoft: ' . $e->getMessage());
@@ -77,7 +78,7 @@ class Office365Controller extends Controller
                 })->toArray();
 
                 if (empty($allowedGroups)) {
-                    throw new \Exception('No tienes permiso para acceder. Debes pertenecer al grupo SUC');
+                    throw new Exception('No tienes permiso para acceder. Debes pertenecer al grupo SUC');
                 }
 
                 // Filtrar y formatear la información de los grupos
@@ -92,8 +93,8 @@ class Office365Controller extends Controller
                 })->toArray();
             }
 
-            throw new \Exception('No se pudieron obtener los grupos del usuario');
-        } catch (\Exception $e) {
+            throw new Exception('No se pudieron obtener los grupos del usuario');
+        } catch (Exception $e) {
             Log::error(__('Error getting Microsoft groups: ') . $e->getMessage());
             throw $e; // Re-lanzar la excepción para que sea capturada en handleMicrosoftCallback
         }

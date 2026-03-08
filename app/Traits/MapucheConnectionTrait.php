@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Connection;
 use App\Services\DatabaseConnectionService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
@@ -81,7 +82,7 @@ trait MapucheConnectionTrait
     /**
      * Obtiene la conexión desde el trait.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getConnectionFromTrait()
     {
@@ -120,7 +121,7 @@ trait MapucheConnectionTrait
     /**
      * Obtiene la conexión desde el trait.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public function getMapucheConnection()
     {

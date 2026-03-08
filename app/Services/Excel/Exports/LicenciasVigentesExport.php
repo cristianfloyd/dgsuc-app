@@ -2,6 +2,9 @@
 
 namespace App\Services\Excel\Exports;
 
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Illuminate\Support\Collection;
 use App\Data\Responses\LicenciaVigenteData;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -35,7 +38,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function collection()
     {
@@ -102,7 +105,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
                 'color' => ['argb' => 'FFFFFFFF'],
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['argb' => 'FF4F81BD'],
             ],
         ]);
@@ -111,7 +114,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
         $sheet->getStyle('A2:I' . ($this->collection()->count() + 1))->applyFromArray([
             'borders' => [
                 'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'borderStyle' => Border::BORDER_THIN,
                     'color' => ['argb' => 'FFD9D9D9'],
                 ],
             ],

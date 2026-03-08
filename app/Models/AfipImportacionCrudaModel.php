@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Illuminate\Support\Collection;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class AfipImportacionCrudaModel extends Model
      *
      * @param Request $request Solicitud HTTP que contiene la ruta del archivo a importar.
      *
-     * @throws \Exception Si no se puede abrir el archivo.
+     * @throws Exception Si no se puede abrir el archivo.
      *
      * @return int Número de líneas procesadas.
      */
@@ -41,7 +43,7 @@ class AfipImportacionCrudaModel extends Model
 
         // Verificar que el archivo se abrió correctamente
         if (!$archivo) {
-            throw new \Exception('No se pudo abrir el archivo');
+            throw new Exception('No se pudo abrir el archivo');
         }
 
         // Desactivar temporalmente las restricciones de la base de datos
@@ -77,7 +79,7 @@ class AfipImportacionCrudaModel extends Model
 
             // Confirmar la transacción
             DB::connection($this->connection)->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revertir la transacción en caso de error
             DB::connection($this->connection)->rollBack();
             throw $e;
@@ -97,7 +99,7 @@ class AfipImportacionCrudaModel extends Model
      * Obtiene los datos importados de la tabla 'afip_importacion_cruda'.
      * Retorna los datos de la tabla afip_importacion_cruda.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function getDatosImportados()
     {

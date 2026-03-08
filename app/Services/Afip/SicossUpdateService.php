@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
+use Exception;
 use App\Enums\SicossCodigoActividad;
 use App\Enums\SicossCodigoCondicion;
 use App\Enums\SicossCodigoModalContrat;
@@ -78,7 +79,7 @@ class SicossUpdateService
             DB::connection($this->getConnectionName())->commit();
             $results['status'] = 'success';
             $results['message'] = 'Todas las actualizaciones se completaron correctamente';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en actualización SICOSS: ' . $e->getMessage());
             $results['status'] = 'error';
@@ -400,7 +401,7 @@ class SicossUpdateService
      *
      * @param array $liquidaciones Array de IDs de liquidaciones a procesar. Por defecto [6]
      *
-     * @throws \Exception Si ocurre un error durante la creación de las tablas
+     * @throws Exception Si ocurre un error durante la creación de las tablas
      *
      * @return array{
      *     tables: array{
@@ -474,7 +475,7 @@ class SicossUpdateService
             $results['tables']['alterations'] = 3;
             $results['total_affected'] = $results['tables']['base'];
             $results['status'] = 'success';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error creando tablas temporales: ' . $e->getMessage());
             throw $e;
         }
@@ -490,7 +491,7 @@ class SicossUpdateService
      *
      * @param array $liquidaciones Array de números de liquidación a procesar. Por defecto [6].
      *
-     * @throws \Exception Si ocurre un error durante la actualización.
+     * @throws Exception Si ocurre un error durante la actualización.
      *
      * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
      */
@@ -523,7 +524,7 @@ class SicossUpdateService
      * Este método actualiza el campo r21 a 'S' para los registros que tienen un tipo adicional 18
      * en la tabla dhd2 y no tienen fecha de finalización (fechahasta ISNULL).
      *
-     * @throws \Exception Si ocurre un error durante la actualización.
+     * @throws Exception Si ocurre un error durante la actualización.
      *
      * @return array{status: string, rows_affected: int} Array con el estado de la operación y el número de filas afectadas.
      */
@@ -553,7 +554,7 @@ class SicossUpdateService
      *
      * @param array<int> $liquidaciones Array de números de liquidación a procesar. Por defecto [6]
      *
-     * @throws \Exception Si ocurre un error durante la actualización
+     * @throws Exception Si ocurre un error durante la actualización
      *
      * @return array{
      *     status: string,

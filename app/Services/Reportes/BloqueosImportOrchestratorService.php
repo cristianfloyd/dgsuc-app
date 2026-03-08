@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Throwable;
 use Illuminate\Support\Facades\Log;
 
 class BloqueosImportOrchestratorService
@@ -30,7 +31,7 @@ class BloqueosImportOrchestratorService
             }
 
             $resultados['success'] = true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('Error en la secuencia de importación de bloqueos', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

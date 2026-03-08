@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,10 +73,10 @@ class UploadedFile extends Model
     /**
      * Busca registros en la tabla de archivos cargados.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query El objeto de consulta.
+     * @param Builder $query El objeto de consulta.
      * @param string $search El término de búsqueda.
      *
-     * @return \Illuminate\Database\Eloquent\Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
+     * @return Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
      */
     public function scopeSearch($query, $search)
     {

@@ -2,9 +2,11 @@
 
 namespace App\Exceptions;
 
+use Exception;
+use Throwable;
 use Illuminate\Support\Collection;
 
-class ImportValidationException extends \Exception
+class ImportValidationException extends Exception
 {
     protected Collection $failures;
 
@@ -19,14 +21,14 @@ class ImportValidationException extends \Exception
      * @param array $rowData Datos de la fila que causó el error
      * @param int $rowNumber Número de fila en el archivo
      * @param int $code Código de error
-     * @param \Throwable|null $previous Excepción previa
+     * @param Throwable|null $previous Excepción previa
      */
     public function __construct(
         string $message,
         array $rowData = [],
         int $rowNumber = 0,
         int $code = 0,
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
 

@@ -153,9 +153,9 @@ class Dh21 extends Model
     /**
      * Obtiene una consulta de registros de Dh21 que tienen una liquidación definitiva asociada.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeConDefinitiva($query)
     {

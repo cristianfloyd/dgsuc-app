@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Reportes\BloqueosDataModel;
 use Illuminate\Support\Collection;
@@ -48,7 +49,7 @@ class BloqueosValidationService
                 'estado' => $record->estado,
                 'success' => $record->estado === BloqueosEstadoEnum::VALIDADO,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Capturamos cualquier excepción no manejada
             return [
                 'mensaje' => 'Error inesperado: ' . $e->getMessage(),
@@ -103,7 +104,7 @@ class BloqueosValidationService
                             'mensaje' => $record->mensaje_error ?? 'Error desconocido',
                         ];
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $estadisticas['conError']++;
                     $estadisticas['errores'][] = [
                         'id' => $record->id,
@@ -113,7 +114,7 @@ class BloqueosValidationService
             }
 
             return $estadisticas;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Capturamos cualquier excepción no manejada en el proceso global
             $estadisticas['error_general'] = $e->getMessage();
             return $estadisticas;

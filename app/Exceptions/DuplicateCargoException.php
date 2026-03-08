@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class DuplicateCargoException extends \Exception
+use Exception;
+
+class DuplicateCargoException extends Exception
 {
     protected $message = 'Se encontraron números de cargo duplicados';
 

@@ -250,14 +250,14 @@ class Embargo extends Model
         ];
     }
 
-    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function caratula(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8($value));
+        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8($value));
     }
 
-    protected function nomDemandado(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function nomDemandado(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): ?string => EncodingService::toUtf8($this->nom_demandado));
+        return Attribute::make(get: fn (): ?string => EncodingService::toUtf8($this->nom_demandado));
     }
 
     /**

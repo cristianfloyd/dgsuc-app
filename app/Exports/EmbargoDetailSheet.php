@@ -2,6 +2,10 @@
 
 namespace App\Exports;
 
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Conditional;
+use Illuminate\Support\Collection;
 use App\Exports\Sheets\BaseExcelSheet;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -63,7 +67,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
     /**
      * Obtiene la colección de datos para la hoja de Excel.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function collection()
     {
@@ -207,7 +211,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
                 'size' => 12,
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '4F81BD'],
             ],
         ]);
@@ -217,7 +221,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
         $sheet->getStyle("A6:M$lastRow")->applyFromArray([
             'borders' => [
                 'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => 'CCCCCC'],
                 ],
             ],
@@ -243,7 +247,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
             if (($row - 6) % 2 == 0) {
                 $sheet->getStyle('A' . $row . ':N' . $row)->applyFromArray([
                     'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F9F9F9'],
                     ],
                 ]);
@@ -252,9 +256,9 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
 
         // FORMATO CONDICIONAL: Resaltar embargos con montos altos (más de 50000)
         $conditionalStyles = [
-            new \PhpOffice\PhpSpreadsheet\Style\Conditional(),
-            new \PhpOffice\PhpSpreadsheet\Style\Conditional(),
-            new \PhpOffice\PhpSpreadsheet\Style\Conditional(),
+            new Conditional(),
+            new Conditional(),
+            new Conditional(),
         ];
 
 
@@ -280,12 +284,12 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => 'DCE6F1'],
             ],
             'borders' => [
                 'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                    'borderStyle' => Border::BORDER_MEDIUM,
                     'color' => ['rgb' => '4F81BD'],
                 ],
             ],
@@ -344,7 +348,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
             ],
             'borders' => [
                 'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'borderStyle' => Border::BORDER_THIN,
                     'color' => ['rgb' => '4F81BD'],
                 ],
             ],
@@ -354,7 +358,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements
         $sheet->getStyle('A5:M5')->applyFromArray([
             'borders' => [
                 'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                    'borderStyle' => Border::BORDER_MEDIUM,
                     'color' => ['rgb' => '4F81BD'],
                 ],
             ],

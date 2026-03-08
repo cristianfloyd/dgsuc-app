@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
+use Exception;
 use App\Repositories\Afip\SicossCpto205Repository;
 use Illuminate\Support\Facades\Log;
 
@@ -57,7 +58,7 @@ class SicossCpto205Service
                     'liquidaciones' => $liquidaciones,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en actualización de concepto 205', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -93,7 +94,7 @@ class SicossCpto205Service
                     'liquidaciones' => $liquidaciones,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en actualización de concepto 204', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

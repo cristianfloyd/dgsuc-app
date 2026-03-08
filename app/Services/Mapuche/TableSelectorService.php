@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use Exception;
 use App\Models\Mapuche\Dh22;
 use Illuminate\Support\Facades\Log;
 
@@ -58,7 +59,7 @@ class TableSelectorService
 
             Log::info("Usando tabla actual dh21 para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
             return 'dh21';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al determinar la tabla para la liquidación {$nroLiqui}: " . $e->getMessage());
             return 'dh21'; // Por defecto, usamos la tabla actual
         }

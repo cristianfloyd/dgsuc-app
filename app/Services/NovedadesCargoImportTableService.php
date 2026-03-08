@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Throwable;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -89,7 +90,7 @@ class NovedadesCargoImportTableService
             ";
 
             DB::connection($this->getConnectionName())->statement($sql);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             // Si la tabla ya existe o hay otro problema, lo registramos:
             Log::error('Error al crear la tabla temporal: ' . $th->getMessage());
             throw $th;
@@ -106,7 +107,7 @@ class NovedadesCargoImportTableService
             // pero en caso de querer forzar su eliminación antes, se usa DROP TABLE:
             $sql = "DROP TABLE IF EXISTS {$this->TableName};";
             DB::connection($this->getConnectionName())->statement($sql);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             // Registramos excepciones y volvemos a lanzar
             Log::error('Error al eliminar la tabla temporal: ' . $th->getMessage());
             throw $th;
@@ -121,7 +122,7 @@ class NovedadesCargoImportTableService
     {
         try {
             DB::connection($this->getConnectionName())->table($this->TableName)->insert($data);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error('Error al insertar datos en la tabla temporal: ' . $th->getMessage());
             throw $th;
         }
@@ -134,7 +135,7 @@ class NovedadesCargoImportTableService
     {
         try {
             return DB::connection($this->getConnectionName())->table($this->TableName)->get()->toArray();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error('Error al leer datos de la tabla temporal: ' . $th->getMessage());
             throw $th;
         }

@@ -3,6 +3,8 @@
 namespace App\Services\Reports;
 
 // use App\Traits\ReportCacheTrait;
+use Throwable;
+use Exception;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Repositories\Decorators\CachingSicossReporteRepository;
@@ -49,7 +51,7 @@ class SicossReporteService
         try {
             return $this->sicossReporteRepository->getReporte($anio, $mes)
                 ->map(fn ($item) => SicossReporteData::fromModel($item));
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error('Error al obtener datos del reporte SICOSS desde el servicio:', [
                 'error' => $th->getMessage(),
                 'anio' => $anio,
@@ -73,7 +75,7 @@ class SicossReporteService
         try {
             $totales = $this->sicossReporteRepository->getTotales($anio, $mes);
             return SicossTotalesData::fromArray($totales);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -107,7 +109,7 @@ class SicossReporteService
         try {
             // El parámetro $useCache ya no es necesario aquí
             return $this->sicossReporteRepository->existenDatosParaPeriodo($anio, $mes);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar existencia de datos para período desde el servicio', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -134,7 +136,7 @@ class SicossReporteService
                 $this->sicossReporteRepository->invalidateReporteCache($anio, $mes);
                 $this->sicossReporteRepository->invalidateTotalesCache($anio, $mes);
                 $this->sicossReporteRepository->invalidatePeriodoExistsCache($anio, $mes);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Error al invalidar caché del reporte SICOSS a través del servicio', [
                     'error' => $e->getMessage(),
                     'anio' => $anio,
@@ -156,7 +158,7 @@ class SicossReporteService
         if ($this->sicossReporteRepository instanceof CachingSicossReporteRepository) {
             try {
                 $this->sicossReporteRepository->invalidateAllSicossRepoCache();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Error al invalidar todo el caché del reporte SICOSS a través del servicio', [
                     'error' => $e->getMessage(),
                 ]);
@@ -200,7 +202,7 @@ class SicossReporteService
                     ];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener períodos fiscales desde PeriodoFiscalService', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -230,7 +232,7 @@ class SicossReporteService
                     ];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener períodos fiscales desde repositorio (vía servicio)', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

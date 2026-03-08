@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Illuminate\Support\Collection;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class PanelSwitcherModal extends Component
+class PanelSwitcherModal extends Component implements HasActions
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -34,7 +36,7 @@ class PanelSwitcherModal extends Component
     }
 
     // Método para obtener los paneles disponibles
-    private function getAvailablePanels(): \Illuminate\Support\Collection
+    private function getAvailablePanels(): Collection
     {
         return collect([
             [

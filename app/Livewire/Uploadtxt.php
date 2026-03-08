@@ -2,6 +2,9 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Exception;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\OrigenRepositoryInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -20,8 +23,9 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class Uploadtxt extends Component implements HasForms
+class Uploadtxt extends Component implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use WithFileUploads;
     use InteractsWithForms;
 
@@ -150,7 +154,7 @@ class Uploadtxt extends Component implements HasForms
 
             // Verifica el orden de subidaa de archivos
             if ($origen == 'mapuche' && !$this->fileUploadRepository->existsByOrigen('afip')) {
-                throw new \Exception('Primero debe cargar el archivo de AFIP');
+                throw new Exception('Primero debe cargar el archivo de AFIP');
             }
 
             // 1. Cargar el archivo en el servidor
@@ -160,7 +164,7 @@ class Uploadtxt extends Component implements HasForms
             );
 
             if (!$filePath) {
-                throw new \Exception('Error al cargar el archivo en el servidor.');
+                throw new Exception('Error al cargar el archivo en el servidor.');
             }
 
 
@@ -168,7 +172,7 @@ class Uploadtxt extends Component implements HasForms
 
             $origenModel = $this->origenRepository->findByName($origen);
             if (!$origenModel) {
-                throw new \Exception("No se encontró el origen '{$origen}'.");
+                throw new Exception("No se encontró el origen '{$origen}'.");
             }
 
             $uploadedFile = $this->fileUploadRepository->create([
@@ -184,7 +188,7 @@ class Uploadtxt extends Component implements HasForms
             ]);
 
             if (!$uploadedFile) {
-                throw new \Exception('Error al guardar la información del archivo en la base de datos.');
+                throw new Exception('Error al guardar la información del archivo en la base de datos.');
             }
 
             // 3. Actualizar el flujo de trabajo y redirigir
@@ -209,7 +213,7 @@ class Uploadtxt extends Component implements HasForms
                     $this->handleNextStep(); // Redirige solo si ambos archivos han sido cargados
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->handleException($e);
         }
     }
@@ -241,7 +245,7 @@ class Uploadtxt extends Component implements HasForms
                 $this->deleteFileAndRecord($file);
             });
             $this->handleSuccessfulDeletion();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->dispatch('error', 'Error: ' . $e->getMessage());
         }
     }
@@ -438,11 +442,11 @@ class Uploadtxt extends Component implements HasForms
      * Dependiendo del tipo de excepción, se envía un evento al frontend con el tipo de error y el mensaje de error correspondiente.
      * También se registra el error en el log de la aplicación.
      *
-     * @param \Exception $e La excepción que se produjo.
+     * @param Exception $e La excepción que se produjo.
      *
      * @return void
      */
-    private function handleException(\Exception $e): void
+    private function handleException(Exception $e): void
     {
         $errorType = $e instanceof ValidationException ? 'validationError' : 'fileUploadError';
         $errorMessage = $e instanceof ValidationException ? $e->errors() : $e->getMessage();
@@ -453,7 +457,7 @@ class Uploadtxt extends Component implements HasForms
     private function deleteFileAndRecord($file): void
     {
         if (!$this->fileUploadService->deleteFile($file->file_path)) {
-            throw new \Exception('Error al eliminar el archivo del servidor.');
+            throw new Exception('Error al eliminar el archivo del servidor.');
         }
         $this->fileUploadRepository->delete($file);
     }

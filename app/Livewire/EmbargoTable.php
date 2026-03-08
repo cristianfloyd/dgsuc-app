@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Filament\Resources\EmbargoResource;
 use Filament\Support\Contracts\TranslatableContentDriver;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -9,8 +11,9 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Livewire\Component;
 
-class EmbargoTable extends Component implements HasTable
+class EmbargoTable extends Component implements HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithTable;
 
     public function makeFilamentTranslatableContentDriver(): ?TranslatableContentDriver

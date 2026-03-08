@@ -2,6 +2,8 @@
 
 namespace App\Models\Mapuche;
 
+use Exception;
+use Closure;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,7 +57,7 @@ class MapucheSicossReporte extends Model
                 ->join('mapuche.dh22', "$tablaPeriodo.nro_liqui", '=', 'dh22.nro_liqui')
                 ->whereIn("$tablaPeriodo.nro_liqui", $subconsultaLiquidaciones)
                 ->groupBy("$tablaPeriodo.nro_liqui", 'dh22.desc_liqui');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en scopeGetReporte', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -112,7 +114,7 @@ class MapucheSicossReporte extends Model
                 'total_c305' => $result->total_c305,
                 'total_c306' => $result->total_c306,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en scopeGetTotales', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -147,7 +149,7 @@ class MapucheSicossReporte extends Model
             return ((int) $periodoActual['year'] === (int) $anio && (int) $periodoActual['month'] === (int) $mes)
                 ? 'mapuche.dh21'
                 : 'mapuche.dh21h';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al determinar tabla de período', [
                 'error' => $e->getMessage(),
                 'anio' => $anio,
@@ -164,9 +166,9 @@ class MapucheSicossReporte extends Model
      * @param string $anio Año del período fiscal
      * @param string $mes Mes del período fiscal
      *
-     * @return \Closure Función que genera la subconsulta
+     * @return Closure Función que genera la subconsulta
      */
-    private function generarSubconsultaLiquidaciones(string $anio, string $mes): \Closure
+    private function generarSubconsultaLiquidaciones(string $anio, string $mes): Closure
     {
         return function ($query) use ($anio, $mes): void {
             $query->select('nro_liqui')

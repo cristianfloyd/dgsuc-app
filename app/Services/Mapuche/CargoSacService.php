@@ -2,6 +2,10 @@
 
 namespace App\Services\Mapuche;
 
+use InvalidArgumentException;
+use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Dh03Repository;
 use Illuminate\Support\Facades\DB;
@@ -580,7 +584,7 @@ class CargoSacService
      * @param int $mes Mes (1-12)
      * @param int $anio Año (formato YYYY)
      *
-     * @throws \InvalidArgumentException Si el mes o año son inválidos
+     * @throws InvalidArgumentException Si el mes o año son inválidos
      *
      * @return int Número de días del mes
      */
@@ -588,18 +592,18 @@ class CargoSacService
     {
         // Validación de parámetros
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         if ($anio < 1900 || $anio > 2100) {
-            throw new \InvalidArgumentException("El año debe estar entre 1900 y 2100. Recibido: {$anio}");
+            throw new InvalidArgumentException("El año debe estar entre 1900 y 2100. Recibido: {$anio}");
         }
 
         try {
             // Usar Carbon que es más robusto y es el estándar en Laravel
-            return \Carbon\Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
-        } catch (\Carbon\Exceptions\InvalidFormatException $e) {
-            throw new \InvalidArgumentException("Fecha inválida: mes {$mes}, año {$anio}", 0, $e);
+            return Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
+        } catch (InvalidFormatException $e) {
+            throw new InvalidArgumentException("Fecha inválida: mes {$mes}, año {$anio}", 0, $e);
         }
     }
 
@@ -616,7 +620,7 @@ class CargoSacService
     {
         $cacheKey = "dias_mes_{$anio}_{$mes}";
 
-        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($mes, $anio) {
+        return Cache::remember($cacheKey, 3600, function () use ($mes, $anio) {
             return self::get_dias_mes($mes, $anio);
         });
     }
@@ -631,7 +635,7 @@ class CargoSacService
      */
     public static function get_info_mes(int $mes, int $anio): array
     {
-        $fecha = \Carbon\Carbon::createFromDate($anio, $mes, 1);
+        $fecha = Carbon::createFromDate($anio, $mes, 1);
 
         return [
             'dias' => $fecha->daysInMonth,

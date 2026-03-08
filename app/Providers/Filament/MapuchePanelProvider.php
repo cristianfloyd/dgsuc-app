@@ -2,7 +2,9 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Embargos\Resources\EmbargoResource;
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use App\Filament\Embargos\Resources\Embargos\EmbargoResource;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Pages\DatabaseSettings;
 use App\Http\Middleware\DatabaseConnectionMiddleware;
@@ -43,12 +45,12 @@ class MapuchePanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Mapuche/Resources'), for: 'App\\Filament\\Mapuche\\Resources')
             ->discoverPages(in: app_path('Filament/Mapuche/Pages'), for: 'App\\Filament\\Mapuche\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Mapuche/Widgets'), for: 'App\\Filament\\Mapuche\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

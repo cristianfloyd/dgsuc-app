@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
+use Exception;
 use App\Jobs\RefreshMaterializedViewJob;
 use App\Services\MaterializedView\ConceptoListadoViewService;
 use Filament\Notifications\Notification;
@@ -15,7 +17,7 @@ class CheckMaterializedView
     ) {
     }
 
-    public function handle(Request $request, \Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         try {
             if (!$this->viewService->exists()) {
@@ -32,7 +34,7 @@ class CheckMaterializedView
             }
 
             return $next($request);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             report($e);
             return $this->handleError($request);
         }

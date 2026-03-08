@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use DateTime;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +27,7 @@ class ConceptoListadoTableService
             });
 
             Log::info('Tabla concepto_listado creada y poblada exitosamente');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en createAndPopulate', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -34,7 +36,7 @@ class ConceptoListadoTableService
         }
     }
 
-    public function getLastSync(): ?\DateTime
+    public function getLastSync(): ?DateTime
     {
         $result = DB::connection($this->getConnectionName())
             ->table(self::TABLE_NAME)
@@ -42,7 +44,7 @@ class ConceptoListadoTableService
             ->orderBy('last_sync', 'desc')
             ->first();
 
-        return $result ? new \DateTime($result->last_sync) : null;
+        return $result ? new DateTime($result->last_sync) : null;
     }
 
     public function getCount(): int

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use DateTime;
+use Exception;
 use App\Exceptions\ValidationException;
 use Carbon\Carbon;
 
@@ -27,7 +29,7 @@ class DateParserService
             return $date;
         }
 
-        if ($date instanceof \DateTime) {
+        if ($date instanceof DateTime) {
             return Carbon::instance($date);
         }
 
@@ -37,7 +39,7 @@ class DateParserService
                 if ($parsed && $this->isValidYear($parsed->year)) {
                     return $parsed;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 continue;
             }
         }

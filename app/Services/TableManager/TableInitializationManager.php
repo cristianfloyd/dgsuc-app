@@ -2,6 +2,7 @@
 
 namespace App\Services\TableManager;
 
+use Exception;
 use App\Contracts\TableService\TableServiceInterface;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +34,7 @@ class TableInitializationManager
                 return true;
             }
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al inicializar tabla: ' . $e->getMessage());
             return false;
         }

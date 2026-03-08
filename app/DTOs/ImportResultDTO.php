@@ -2,6 +2,8 @@
 
 namespace App\DTOs;
 
+use Throwable;
+
 class ImportResultDTO
 {
     private int $processedCount = 0;
@@ -16,7 +18,7 @@ class ImportResultDTO
         public bool $success = false,
         public string $message = '',
         public array $processedData = [],
-        public ?\Throwable $error = null,
+        public ?Throwable $error = null,
     ) {
     }
 

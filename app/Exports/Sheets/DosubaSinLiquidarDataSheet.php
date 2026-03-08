@@ -2,6 +2,7 @@
 
 namespace App\Exports\Sheets;
 
+use Exception;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromQuery;
@@ -181,7 +182,7 @@ class DosubaSinLiquidarDataSheet implements
                     $event->sheet->getStyle("A1:{$lastColumn}$lastRow")->getProtection()
                         ->setLocked(false)
                         ->setHidden(false);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Error en configuración Excel: ' . $e->getMessage());
                 }
             },

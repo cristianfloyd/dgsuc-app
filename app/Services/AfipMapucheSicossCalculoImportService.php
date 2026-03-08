@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Traits\DynamicConnectionTrait;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class AfipMapucheSicossCalculoImportService
                     $imported += \count($batch);
                     $batch = [];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::connection($this->getConnectionName())->rollBack();
                 $errors[] = "Error en línea {$processed}: {$e->getMessage()}";
                 Log::error('Error importando SICOSS Calculo', [
@@ -70,7 +71,7 @@ class AfipMapucheSicossCalculoImportService
                 AfipMapucheSicossCalculo::insert($batch);
                 DB::commit();
                 $imported += \count($batch);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 $errors[] = "Error en último lote: {$e->getMessage()}";
             }

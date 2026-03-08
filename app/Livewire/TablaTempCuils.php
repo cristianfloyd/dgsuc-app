@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
 use App\Services\WorkflowService;
@@ -98,7 +99,7 @@ class TablaTempCuils extends Component
             } else {
                 $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
             $this->dispatch('error-mapuche-mi-simplificacion', 'Error al ejecutar la función almacenada');
         }
@@ -269,7 +270,7 @@ class TablaTempCuils extends Component
             $this->dispatch('error-tabla-temp-cuils', 'Fallo en la inserción en suc.afip_tabla_temp_cuils');
             Log::error('Fallo en la inserción en suc.afip_tabla_temp_cuils');
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al insertar datos en afip_tabla_temp_cuils: ' . $e->getMessage());
             $this->dispatch('error-tabla-temp-cuils', 'Error al insertar datos en afip_tabla_temp_cuils');
             return false;

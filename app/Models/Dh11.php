@@ -162,10 +162,10 @@ class Dh11 extends Model
     /**
      * Scope para filtrar por tipo de escalafón.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $type
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public static function scopeOfTipo(Builder $query, string $tipo): Builder
     {
@@ -179,9 +179,9 @@ class Dh11 extends Model
      * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
      * los registros donde las categorías están activas (es decir, no son nulas).
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -195,10 +195,10 @@ class Dh11 extends Model
      * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
      * los registros donde el campo `tipo_escal` coincide con el valor proporcionado.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $type El tipo de escalafón por el que se desea filtrar.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeByScalafon(Builder $query, string $type): Builder
     {

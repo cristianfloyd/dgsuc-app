@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
+use RuntimeException;
 use App\Models\UploadedFile;
 
 class ValidationService
@@ -13,28 +15,28 @@ class ValidationService
      *
      * @param UploadedFile $archivoSeleccionado El archivo seleccionado para importar.
      *
-     * @throws \InvalidArgumentException Si no se ha seleccionado ningún archivo o el tipo de archivo no es válido.
-     * @throws \RuntimeException Si el archivo seleccionado no existe o no se puede leer.
+     * @throws InvalidArgumentException Si no se ha seleccionado ningún archivo o el tipo de archivo no es válido.
+     * @throws RuntimeException Si el archivo seleccionado no existe o no se puede leer.
      */
     public function validateSelectedFile(UploadedFile $archivoSeleccionado): void
     {
         if (!$archivoSeleccionado) {
-            throw new \InvalidArgumentException('No se ha seleccionado ningún archivo para importar.');
+            throw new InvalidArgumentException('No se ha seleccionado ningún archivo para importar.');
         }
 
         $filePath = storage_path("app/{$archivoSeleccionado->file_path}");
         if (!file_exists($filePath)) {
-            throw new \RuntimeException('El archivo seleccionado no existe en el sistema.');
+            throw new RuntimeException('El archivo seleccionado no existe en el sistema.');
         }
 
         if (!is_readable($filePath)) {
-            throw new \RuntimeException('No se puede leer el archivo seleccionado.');
+            throw new RuntimeException('No se puede leer el archivo seleccionado.');
         }
 
         $allowedExtensions = ['txt', 'csv'];
         $fileExtension = pathinfo($filePath, \PATHINFO_EXTENSION);
         if (!\in_array($fileExtension, $allowedExtensions)) {
-            throw new \InvalidArgumentException('El tipo de archivo seleccionado no es válido. Se esperaba un archivo .txt o .csv.');
+            throw new InvalidArgumentException('El tipo de archivo seleccionado no es válido. Se esperaba un archivo .txt o .csv.');
         }
     }
 }

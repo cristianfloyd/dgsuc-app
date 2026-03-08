@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use Override;
 use App\Models\Dh03;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
@@ -20,8 +21,8 @@ use Illuminate\Support\Facades\DB;
  * @property string $cod_organismo Código del organismo.
  * @property string $cod_organismo_eval Código del organismo evaluador.
  * @property string $cod_ubic_geografica_sirhu Código de la ubicación geográfica en el sistema SIRHU.
- * @property \App\Models\Mapuche\Catalogo\Dhe4 $organismo Relación con el modelo Dhe4 (organismo).
- * @property \App\Models\Mapuche\Catalogo\Dhe4 $organismoEvaluador Relación con el modelo Dhe4 (organismo evaluador).
+ * @property Dhe4 $organismo Relación con el modelo Dhe4 (organismo).
+ * @property Dhe4 $organismoEvaluador Relación con el modelo Dhe4 (organismo evaluador).
  */
 class Dh36 extends Model
 {
@@ -50,7 +51,7 @@ class Dh36 extends Model
         'descdependesemp',
     ];
 
-    #[\Override]
+    #[Override]
     public static function boot(): void
     {
         parent::boot();

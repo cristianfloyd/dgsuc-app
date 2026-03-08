@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Throwable;
 use App\Models\CopyJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -68,7 +69,7 @@ class CopyDh21ToConsultaJob implements ShouldQueue
             $copyJob->status = 'completed';
             $copyJob->finished_at = now();
             $copyJob->save();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $copyJob->status = 'failed';
             $copyJob->error_message = $e->getMessage();
             $copyJob->finished_at = now();

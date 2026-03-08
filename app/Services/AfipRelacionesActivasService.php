@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\AfipRelacionesActivas;
 use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
 
             DB::connection($conexion)->commit();
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos masivos', [
                 'mensaje' => $e->getMessage(),

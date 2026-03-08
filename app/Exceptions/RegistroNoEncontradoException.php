@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
-class RegistroNoEncontradoException extends \Exception
+use Exception;
+
+class RegistroNoEncontradoException extends Exception
 {
     // agregar lógica adicional si es necesaria
 }

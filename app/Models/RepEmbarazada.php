@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\RepEmbarazadaFactory;
 use App\Data\RepEmbarazadaData;
 use App\Services\EncodingService;
 use App\Services\RepEmbarazadaService;
@@ -31,11 +33,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $cuil CUIL
  * @property string $codc_uacad Código de unidad académica (CHAR 4)
  *
- * @method static \Illuminate\Database\Eloquent\Builder|static query()
+ * @method static Builder|static query()
  */
 class RepEmbarazada extends Model
 {
-    /** @use HasFactory<\Database\Factories\RepEmbarazadaFactory> */
+    /** @use HasFactory<RepEmbarazadaFactory> */
     use HasFactory;
 
     use HasUacadScope;

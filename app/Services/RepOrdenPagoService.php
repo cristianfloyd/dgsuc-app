@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Data\RepOrdenPagoDtoData;
 use App\Models\Reportes\RepOrdenPagoModel;
@@ -62,7 +63,7 @@ class RepOrdenPagoService
     {
         try {
             return $this->repository->create($data->toArray());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear orden de pago: ' . $e->getMessage());
             throw $e;
         }
@@ -114,7 +115,7 @@ class RepOrdenPagoService
         try {
             $this->repository->executeStoredProcedure($liquidaciones);
             Log::info('Reporte generado exitosamente para liquidaciones: ' . implode(',', $liquidaciones));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al generar reporte: ' . $e->getMessage());
             throw $e;
         }
@@ -123,7 +124,7 @@ class RepOrdenPagoService
     /**
      * Trunca la tabla rep_orden_pago.
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return bool
      */
@@ -133,7 +134,7 @@ class RepOrdenPagoService
             $result = $this->repository->truncate();
             Log::info('Tabla suc.rep_orden_pago truncada exitosamente');
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al truncar tabla suc.rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use App\Enums\ConceptoGrupo;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
@@ -158,7 +159,7 @@ class Dh12 extends Model
                 $this->codn_conce,
                 EncodingService::toUtf8($this->desc_conce),
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return \sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
         }
     }

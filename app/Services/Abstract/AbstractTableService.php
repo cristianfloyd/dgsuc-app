@@ -2,6 +2,8 @@
 
 namespace App\Services\Abstract;
 
+use Exception;
+use InvalidArgumentException;
 use App\Contracts\TableService\TableServiceInterface;
 use App\Exceptions\TableStructureException;
 use App\Traits\MapucheConnectionTrait;
@@ -62,7 +64,7 @@ abstract class AbstractTableService implements TableServiceInterface
     /**
      * Crea y puebla la tabla dentro de una transacción.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function createAndPopulate(): void
     {
@@ -75,7 +77,7 @@ abstract class AbstractTableService implements TableServiceInterface
             });
 
             Log::info("Tabla {$this->getTableName()} creada y poblada exitosamente");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error en createAndPopulate para {$this->getTableName()}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -205,7 +207,7 @@ abstract class AbstractTableService implements TableServiceInterface
                 $columnDefinition = $table->jsonb($column);
                 break;
             default:
-                throw new \InvalidArgumentException("Tipo de columna no soportado: {$definition['type']}");
+                throw new InvalidArgumentException("Tipo de columna no soportado: {$definition['type']}");
         }
 
         // Aplicar modificadores si existen

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
+use Exception;
 use App\Services\EnhancedDatabaseConnectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -27,7 +29,7 @@ class SetDatabaseConnection
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, \Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         try {
             // NO interferir con comandos Artisan (migrate, etc.)
@@ -62,7 +64,7 @@ class SetDatabaseConnection
             $request->session()->put(EnhancedDatabaseConnectionService::SESSION_KEY, $secondaryConnection);
 
             return $next($request);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en middleware de conexión', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

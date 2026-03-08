@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Data\Reportes\BloqueoProcesadoData;
 use App\Data\Reportes\BloqueosData;
 use App\Enums\BloqueosEstadoEnum;
@@ -59,7 +60,7 @@ class BloqueosProcessService
      *
      * @param BloqueosData|null $bloqueosData Datos específicos a procesar. Si es null, procesa todos los registros pendientes.
      *
-     * @throws \Exception Si ocurre un error durante el procesamiento
+     * @throws Exception Si ocurre un error durante el procesamiento
      *
      * @return Collection<BloqueoProcesadoData> Colección con los resultados del procesamiento
      */
@@ -88,7 +89,7 @@ class BloqueosProcessService
                 });
 
                 if ($registrosInvalidos->isNotEmpty()) {
-                    throw new \Exception(
+                    throw new Exception(
                         'Existen registros no validados, con errores o ya procesados. ' .
                             'Por favor, valide todos los registros antes de procesar.',
                     );
@@ -99,7 +100,7 @@ class BloqueosProcessService
 
             // Verificar que existan registros para procesar
             if ($query->count() === 0) {
-                throw new \Exception('No hay registros válidos para procesar.');
+                throw new Exception('No hay registros válidos para procesar.');
             }
 
             // Procesar en lotes
@@ -150,7 +151,7 @@ class BloqueosProcessService
                             }
                         }
                         // ... existing code ...
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Error procesando registro individual', [
                             'id' => $bloqueo->id,
                             'error' => $e->getMessage(),
@@ -173,7 +174,7 @@ class BloqueosProcessService
             ]);
 
             return $resultados;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en procesamiento de bloqueos', [
                 'message' => $e->getMessage(),
@@ -212,7 +213,7 @@ class BloqueosProcessService
             $cambiosRealizados = match ($bloqueo->tipo) {
                 'licencia' => $this->procesarLicencia($cargo),
                 'fallecido', 'renuncia' => $this->procesarBaja($cargo, $bloqueo->fecha_baja),
-                default => throw new \Exception('Tipo de bloqueo no válido')
+                default => throw new Exception('Tipo de bloqueo no válido')
             };
 
             // Si llegamos aquí, el proceso fue exitoso
@@ -222,7 +223,7 @@ class BloqueosProcessService
 
             Log::info('Proceso exitoso:', array_merge($resultado->toArray(), ['cambios_realizados' => $cambiosRealizados]));
             return $resultado;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // En caso de error, el registro permanece en la tabla
             return BloqueoProcesadoData::fromError(
                 $e->getMessage(),
@@ -299,7 +300,7 @@ class BloqueosProcessService
             DB::connection($this->getConnectionName())->commit();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             throw $e;
         }
@@ -383,7 +384,7 @@ class BloqueosProcessService
             ]);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error procesando duplicados', [
                 'message' => $e->getMessage(),

@@ -2,6 +2,8 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -46,7 +48,7 @@ class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapp
         // Formatear la fecha correctamente si es una instancia de Carbon o DateTime
         $fechaBaja = '';
         if (!empty($record->fecha_baja)) {
-            if ($record->fecha_baja instanceof \Carbon\Carbon || $record->fecha_baja instanceof \DateTime) {
+            if ($record->fecha_baja instanceof Carbon || $record->fecha_baja instanceof DateTime) {
                 $fechaBaja = $record->fecha_baja->format('Y-m-d');
             } else {
                 $fechaBaja = $record->fecha_baja; // Ya es un string

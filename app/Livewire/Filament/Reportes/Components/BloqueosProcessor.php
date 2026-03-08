@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Filament\Reportes\Components;
 
+use Exception;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Reportes\BloqueosProcessService;
 use Filament\Notifications\Notification;
@@ -68,7 +69,7 @@ class BloqueosProcessor extends Component
 
             $this->guardarResultadosEnCache();
             $this->notificarResultados();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->manejarError($e);
         } finally {
             $this->isProcessing = false;
@@ -140,7 +141,7 @@ class BloqueosProcessor extends Component
             ->send();
     }
 
-    private function manejarError(\Exception $e): void
+    private function manejarError(Exception $e): void
     {
         Notification::make()
             ->title('Error en el procesamiento')

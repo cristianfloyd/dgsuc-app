@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Models\Todo;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -82,7 +83,7 @@ class TodoList extends Component
             $todo->delete();
             //send a message to the user
             session()->flash('success', 'Todo Deleted Successfully');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //send a message to the user
             session()->flash('error', 'Todo Deletion Failed');
         }

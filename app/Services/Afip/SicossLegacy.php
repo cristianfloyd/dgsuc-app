@@ -2,6 +2,7 @@
 
 namespace App\Services\Afip;
 
+use Exception;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
@@ -120,7 +121,7 @@ class SicossLegacy
             );
 
             return $resultado;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en generación de SICOSS', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -157,7 +158,7 @@ class SicossLegacy
             }
 
             Log::info('Conceptos liquidados procesados exitosamente');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al procesar conceptos liquidados', [
                 'error' => $e->getMessage(),
                 'periodo' => "{$per_mesct}/{$per_anoct}",
@@ -188,7 +189,7 @@ class SicossLegacy
             ]);
 
             return $licencias_agentes;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener licencias de agentes', [
                 'error' => $e->getMessage(),
             ]);
@@ -214,7 +215,7 @@ class SicossLegacy
                 try {
                     $resultado = $this->databaseOperation->dropTemporaryTable($tabla);
                     Log::debug("Tabla temporal eliminada: {$tabla}", ['resultado' => $resultado]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Ignorar errores si la tabla no existe
                     Log::debug("Tabla temporal no existía o no se pudo eliminar: {$tabla}", [
                         'error' => $e->getMessage(),
@@ -223,7 +224,7 @@ class SicossLegacy
             }
 
             Log::info('Limpieza de tablas temporales completada');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error general al limpiar tablas temporales', [
                 'error' => $e->getMessage(),
             ]);
@@ -256,14 +257,14 @@ class SicossLegacy
                     Log::error('Archivo de origen no encontrado', [
                         'origen' => $origen,
                     ]);
-                    throw new \Exception("Archivo de origen no encontrado: {$origen}");
+                    throw new Exception("Archivo de origen no encontrado: {$origen}");
                 }
 
                 if (!is_dir($testeo_directorio_salida)) {
                     Log::error('Directorio de destino no encontrado', [
                         'destino' => $testeo_directorio_salida,
                     ]);
-                    throw new \Exception("Directorio de destino no encontrado: {$testeo_directorio_salida}");
+                    throw new Exception("Directorio de destino no encontrado: {$testeo_directorio_salida}");
                 }
 
                 if (!copy($origen, $destino)) {
@@ -271,7 +272,7 @@ class SicossLegacy
                         'origen' => $origen,
                         'destino' => $destino,
                     ]);
-                    throw new \Exception("Error al copiar archivo de {$origen} a {$destino}");
+                    throw new Exception("Error al copiar archivo de {$origen} a {$destino}");
                 }
 
                 Log::info('Archivo copiado exitosamente para testing', [
@@ -287,7 +288,7 @@ class SicossLegacy
             ]);
 
             return $this->sicossFormateadorRepository->transformarARecordset($totales);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al procesar resultado final', [
                 'error' => $e->getMessage(),
             ]);

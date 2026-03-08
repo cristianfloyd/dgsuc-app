@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
 use App\Filament\Pages\DashboardSelector;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -46,12 +48,12 @@ class LiquidacionesPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Liquidaciones/Resources'), for: 'App\\Filament\\Liquidaciones\\Resources')
             ->discoverPages(in: app_path('Filament/Liquidaciones/Pages'), for: 'App\\Filament\\Liquidaciones\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Liquidaciones/Widgets'), for: 'App\\Filament\\Liquidaciones\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -53,10 +53,10 @@ class CuilRepository implements CuilRepositoryInterface
     /**
      * Pagina los resultados de una colección.
      *
-     * @param \Illuminate\Support\Collection $collection La colección a paginar.
+     * @param Collection $collection La colección a paginar.
      * @param int $perPage El número de resultados por página.
      *
-     * @return \Illuminate\Pagination\LengthAwarePaginator El paginador de los resultados.
+     * @return LengthAwarePaginator El paginador de los resultados.
      */
     private function paginateResults($collection, $perPage): LengthAwarePaginator
     {

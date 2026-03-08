@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Suc\RetUda;
 
 class RetUdaRepository
@@ -9,7 +10,7 @@ class RetUdaRepository
     /**
      * Obtiene todos los registros de RetUda.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getAll()
     {

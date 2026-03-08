@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Schema;
@@ -85,7 +86,7 @@ class MapucheSicossTable extends Component
                 return method_exists($value, '__toString') ? (string) $value : $value::class;
             }
             return $value;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 'Error: ' . $e->getMessage();
         }
     }

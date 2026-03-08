@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
 use App\Models\Reportes\BloqueosDataModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ class BloqueosDataService
     {
         try {
             return BloqueosDataModel::all();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener bloqueos: ' . $e->getMessage());
             throw $e;
         }
@@ -28,7 +29,7 @@ class BloqueosDataService
     {
         try {
             return BloqueosDataModel::findOrFail($id);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al obtener bloqueo ID {$id}: " . $e->getMessage());
             throw $e;
         }
@@ -41,7 +42,7 @@ class BloqueosDataService
     {
         try {
             return BloqueosDataModel::create($data);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear bloqueo: ' . $e->getMessage());
             throw $e;
         }
@@ -56,7 +57,7 @@ class BloqueosDataService
             $bloqueo = BloqueosDataModel::findOrFail($id);
             $bloqueo->update($data);
             return $bloqueo;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al actualizar bloqueo ID {$id}: " . $e->getMessage());
             throw $e;
         }
@@ -70,7 +71,7 @@ class BloqueosDataService
         try {
             $bloqueo = BloqueosDataModel::findOrFail($id);
             return $bloqueo->delete();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al eliminar bloqueo ID {$id}: " . $e->getMessage());
             throw $e;
         }
@@ -83,7 +84,7 @@ class BloqueosDataService
     {
         try {
             BloqueosDataModel::truncate();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al vaciar tabla de bloqueos: ' . $e->getMessage());
             throw $e;
         }
@@ -96,7 +97,7 @@ class BloqueosDataService
     {
         try {
             return BloqueosDataModel::where('nro_legaj', $nroLegajo)->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al obtener bloqueos para legajo {$nroLegajo}: " . $e->getMessage());
             throw $e;
         }

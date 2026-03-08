@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Abstract\AbstractTableService;
 use App\Traits\Mapuche\TableServiceTrait;
@@ -40,7 +41,7 @@ class OrdenesDescuentoTableService extends AbstractTableService
             });
 
             Log::info('Tabla rep_ordenes_descuento creada y poblada exitosamente');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en createAndPopulate', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

@@ -2,6 +2,7 @@
 
 namespace App\Models\Reportes;
 
+use Exception;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\OrdenesDescuentoTableService;
 use App\Traits\MapucheConnectionTrait;
@@ -132,7 +133,7 @@ class OrdenesDescuento extends Model implements HasLabel
                 Log::info('Tabla suc.rep_ordenes_descuento creada exitosamente');
                 return true;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear tabla suc.rep_ordenes_descuento: ' . $e->getMessage());
             throw $e;
         }
@@ -247,7 +248,7 @@ class OrdenesDescuento extends Model implements HasLabel
                     'default_charset' => \ini_get('default_charset'),
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en diagnóstico de codificación', [
                 'id' => $id,
                 'error' => $e->getMessage(),

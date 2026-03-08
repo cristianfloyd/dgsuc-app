@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -390,7 +391,7 @@ class CompareCuils extends Component
             }
 
             // Resto de la lógica...
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en loadCuilsNotInAfip: ' . $e->getMessage());
             $this->dispatch('notify', [
                 'type' => 'error',
@@ -431,7 +432,7 @@ class CompareCuils extends Component
             return $this->cuilsNotInAfip;
         } catch (QueryException $e) {
             Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
-            throw new \Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.');
+            throw new Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.');
         }
     }
 

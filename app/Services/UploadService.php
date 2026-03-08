@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use InvalidArgumentException;
 use Illuminate\Http\UploadedFile as HttpUploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -39,9 +41,9 @@ class UploadService
         try {
             Log::info('Subiendo archivo: ' . $fileNameLimpio);
             return $file->storeAs($folder, $fileNameLimpio, $disk);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al subir el archivo: ' . $e->getMessage());
-            throw new \Exception('Error al subir el archivo: ' . $e->getMessage());
+            throw new Exception('Error al subir el archivo: ' . $e->getMessage());
         }
     }
 
@@ -70,12 +72,12 @@ class UploadService
      *
      * @param string $folder El nombre de la carpeta a validar.
      *
-     * @throws \InvalidArgumentException Si el nombre de la carpeta contiene caracteres no permitidos.
+     * @throws InvalidArgumentException Si el nombre de la carpeta contiene caracteres no permitidos.
      */
     private static function validateFolders(string $folder): void
     {
         if (!preg_match('/^[a-zA-Z0-9\/\-_]+$/', $folder)) {
-            throw new \InvalidArgumentException('La carpeta contiene caracteres no permitidos.');
+            throw new InvalidArgumentException('La carpeta contiene caracteres no permitidos.');
         }
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Services\Abstract\AbstractTableService;
 use App\Tables\Definitions\AfipMapucheSicossTableDefinition;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class AfipMapucheSicossTableService extends AbstractTableService
                 'periodo' => $periodoFiscal,
                 'tabla' => $this->getTableName(),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->getConnectionName())->rollBack();
             Log::error('Error en sincronización SICOSS', [
                 'periodo' => $periodoFiscal,

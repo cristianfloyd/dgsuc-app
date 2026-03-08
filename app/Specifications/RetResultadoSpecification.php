@@ -2,6 +2,7 @@
 
 namespace App\Specifications;
 
+use DateTime;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,12 +39,12 @@ class RetResultadoSpecification
      * Aplica el criterio de búsqueda por rango de fechas.
      *
      * @param Builder $query
-     * @param \DateTime $desde
-     * @param \DateTime $hasta
+     * @param DateTime $desde
+     * @param DateTime $hasta
      *
      * @return Builder
      */
-    public function porRangoFechas(Builder $query, \DateTime $desde, \DateTime $hasta): Builder
+    public function porRangoFechas(Builder $query, DateTime $desde, DateTime $hasta): Builder
     {
         return $query->whereBetween('fecha_ret_desde', [$desde, $hasta]);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Connection;
+use Exception;
 use App\Models\LiquidacionControl;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\Log;
@@ -11,7 +13,7 @@ class LiquidacionControlService
 {
     use MapucheConnectionTrait;
 
-    protected \Illuminate\Database\Connection $connection;
+    protected Connection $connection;
 
     public function __construct()
     {
@@ -35,7 +37,7 @@ class LiquidacionControlService
             }
 
             return LiquidacionControl::where('estado', $estado)->count();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al obtener controles {$estado}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -102,7 +104,7 @@ class LiquidacionControlService
                 'message' => \count($result) > 0 ? 'Se encontraron ' . \count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
                 'data' => $result,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al controlar negativos para liquidación #{$nroLiqui}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -143,7 +145,7 @@ class LiquidacionControlService
                 'message' => 'Se encontraron ' . \count($result) . ' cargos liquidados',
                 'data' => $result,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error al controlar cargos liquidados para liquidación #{$nroLiqui}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -186,7 +188,7 @@ class LiquidacionControlService
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al crear la tabla suc.controles_liquidacion', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

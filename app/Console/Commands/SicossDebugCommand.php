@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
@@ -90,7 +91,7 @@ class SicossDebugCommand extends Command
             $this->mostrarResultados($resultado);
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("\n❌ Error al ejecutar genera_sicoss:");
             $this->error('Mensaje: ' . $e->getMessage());
             $this->error('Archivo: ' . $e->getFile() . ':' . $e->getLine());

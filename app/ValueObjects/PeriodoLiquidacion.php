@@ -2,6 +2,7 @@
 
 namespace App\ValueObjects;
 
+use InvalidArgumentException;
 use Carbon\Carbon;
 
 class PeriodoLiquidacion
@@ -12,7 +13,7 @@ class PeriodoLiquidacion
     {
         $fecha = Carbon::createFromFormat('Y-m', "$year-$month");
         if (!$fecha instanceof Carbon) {
-            throw new \InvalidArgumentException("Invalid date format: $year-$month");
+            throw new InvalidArgumentException("Invalid date format: $year-$month");
         }
         $this->fecha = $fecha->startOfMonth();
     }

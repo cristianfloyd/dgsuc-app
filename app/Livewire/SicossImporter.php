@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TableManagementServiceInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -141,7 +142,7 @@ class SicossImporter extends Component
             } else {
                 $this->dispatch('error', 'Hubo un problema durante la importación.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->dispatch('error', 'Error al procesar el archivo: ' . $e->getMessage());
         }
     }

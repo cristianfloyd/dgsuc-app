@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\QueryBuilder;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
@@ -153,7 +154,7 @@ class RepGerencialFinalService
             Log::info('Reporte gerencial generado exitosamente', [
                 'liquidaciones' => $liquidaciones,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($this->connection)->rollBack();
             Log::error('Error al generar reporte gerencial', [
                 'error' => $e->getMessage(),

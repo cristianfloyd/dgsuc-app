@@ -70,7 +70,7 @@ class AgenteData extends Data
      */
     public static function collection(Collection $employees): Collection
     {
-        return $employees->map(fn (Dh01 $employee): \App\Data\Mapuche\AgenteData => self::fromModel($employee));
+        return $employees->map(fn (Dh01 $employee): AgenteData => self::fromModel($employee));
     }
 
     /**

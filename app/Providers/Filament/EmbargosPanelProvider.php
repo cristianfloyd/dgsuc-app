@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
 use App\Filament\Pages\DashboardSelector;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -35,7 +37,7 @@ class EmbargosPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Embargos/Resources'), for: 'App\\Filament\\Embargos\\Resources')
             ->discoverPages(in: app_path('Filament/Embargos/Pages'), for: 'App\\Filament\\Embargos\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
             ])
             ->userMenuItems([
@@ -46,7 +48,7 @@ class EmbargosPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Embargos/Widgets'), for: 'App\\Filament\\Embargos\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([

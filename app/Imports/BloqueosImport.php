@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use Exception;
 use App\Data\Reportes\BloqueosData;
 use App\DTOs\ImportResultDTO;
 use App\Enums\BloqueosEstadoEnum;
@@ -69,7 +70,7 @@ class BloqueosImport implements ToCollection, WithHeadingRow, WithValidation, Wi
             // Actualización del resultado final
             $this->importResult->success = true;
             $this->importResult->message = 'Importación completada exitosamente';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->importResult->success = false;
             $this->importResult->error = $e;
             $this->importResult->message = 'Error en la importación: ' . $e->getMessage();

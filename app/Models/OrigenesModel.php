@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\DB;
 use App\Contracts\OrigenRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,7 +38,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
      */
     public static function verificarYCrearTabla(): void
     {
-        $schema = \Illuminate\Support\Facades\DB::connection(self::connectionName())->getSchemaBuilder();
+        $schema = DB::connection(self::connectionName())->getSchemaBuilder();
 
         if (!$schema->hasTable('suc.origenes_models')) {
             $schema->create('suc.origenes_models', function ($table): void {

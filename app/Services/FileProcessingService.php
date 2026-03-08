@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
@@ -135,7 +136,7 @@ class FileProcessingService
                 ->setNroLiqui($afipFile->nro_liqui)
                 ->executeWorkflowSteps();
             $result['data']['workflow'] = $workflowResult;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $result['success'] = false;
             $result['message'] = 'Error en la ejecución del workflow: ' . $e->getMessage();
             $result['data']['workflow'] = ['error' => $e->getMessage()];
@@ -257,7 +258,7 @@ class FileProcessingService
                     'fileId' => $mapucheFile->id,
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Excepción al procesar el archivo Mapuche: ' . $e->getMessage());
             return [
                 'success' => false,
@@ -290,7 +291,7 @@ class FileProcessingService
             $this->fileUploadRepository->delete($mapucheFile);
 
             Log::info('Archivos eliminados correctamente de la base de datos y del servidor.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al eliminar los archivos: ' . $e->getMessage());
         }
     }

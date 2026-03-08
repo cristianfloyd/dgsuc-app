@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use App\Traits\DynamicConnectionTrait;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +40,7 @@ class AfipMapucheSicossCalculoUpdateService
                 'affected' => $affected,
                 'message' => "Se actualizaron {$affected} registros correctamente",
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'affected' => 0,

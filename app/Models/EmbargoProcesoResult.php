@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Illuminate\Database\Connection;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -100,7 +102,7 @@ class EmbargoProcesoResult extends Model
      * @param bool $insertIntoDh25 Indica si se debe insertar en la tabla DH25
      * @param int $periodoFiscal Periodo fiscal en formato AAAAMM
      *
-     * @throws \Exception Si ocurre un error durante el proceso
+     * @throws Exception Si ocurre un error durante el proceso
      *
      * @return array Resultados del proceso de embargo
      */
@@ -134,7 +136,7 @@ class EmbargoProcesoResult extends Model
                     'schemas' => array_column($availableSchemas, 'schema_name'),
                 ]);
 
-                throw new \Exception("El esquema 'suc' no existe en la base de datos '{$connectionName}'.");
+                throw new Exception("El esquema 'suc' no existe en la base de datos '{$connectionName}'.");
             }
 
             // Convertir el array de complementarias en formato PostgreSQL
@@ -149,7 +151,7 @@ class EmbargoProcesoResult extends Model
             );
 
             if (empty($functionExists)) {
-                throw new \Exception("La función 'suc.emb_proceso' no existe en la base de datos.");
+                throw new Exception("La función 'suc.emb_proceso' no existe en la base de datos.");
             }
 
 
@@ -187,7 +189,7 @@ class EmbargoProcesoResult extends Model
             ]);
 
             return $results;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al ejecutar proceso de embargo', [
                 'mensaje' => $e->getMessage(),
                 'parametros' => [
@@ -209,7 +211,7 @@ class EmbargoProcesoResult extends Model
      * @param array $results Resultados obtenidos de la función almacenada
      * @param bool $limpiarTabla Si se debe limpiar la tabla antes de insertar nuevos registros
      *
-     * @throws \Exception Si ocurre un error durante el proceso de inserción
+     * @throws Exception Si ocurre un error durante el proceso de inserción
      *
      * @return int Número de registros insertados
      */
@@ -317,7 +319,7 @@ class EmbargoProcesoResult extends Model
             ]);
 
             return $registrosInsertados;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Revertir la transacción en caso de error
             $connection->rollBack();
 
@@ -328,7 +330,7 @@ class EmbargoProcesoResult extends Model
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            throw new \Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
+            throw new Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
         }
     }
 
@@ -353,9 +355,9 @@ class EmbargoProcesoResult extends Model
      * en el trait MapucheConnectionTrait, haciéndola accesible para métodos
      * estáticos que necesitan ejecutar consultas directas a la base de datos.
      *
-     * @throws \Exception Si no se puede determinar la conexión
+     * @throws Exception Si no se puede determinar la conexión
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     protected static function obtenerConexion()
     {

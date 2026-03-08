@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
 
+use Override;
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -68,7 +69,7 @@ class CuentaJudicial extends Model
     /**
      * Obtener la clave primaria compuesta.
      */
-    #[\Override]
+    #[Override]
     public function getKey()
     {
         $attributes = [];

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\AfipMapucheSicoss;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -105,7 +107,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             }
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Error general: ' . $e->getMessage());
             Log::error('Error en CorregirCaracteresEspecialesAfipMapucheSicoss', [
                 'error' => $e->getMessage(),
@@ -169,7 +171,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Aplica los filtros a la consulta según los parámetros especificados.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query Query builder
+     * @param Builder $query Query builder
      * @param string|null $cuilFiltro Filtro por CUIL
      * @param string|null $nombreFiltro Filtro por nombre
      * @param string|null $periodoFiltro Filtro por período
@@ -308,7 +310,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             DB::connection($registro->getConnectionName())->commit();
             $this->info('✓ Registro actualizado correctamente.');
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($registro->getConnectionName())->rollBack();
             $this->error("Error al actualizar registro: {$e->getMessage()}");
             Log::error("Error al corregir caracteres en AfipMapucheSicoss #{$registro->id}", [

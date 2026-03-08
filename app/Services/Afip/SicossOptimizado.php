@@ -2,6 +2,8 @@
 
 namespace App\Services\Afip;
 
+use Exception;
+use App\Services\EncodingService;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Mapuche\MapucheConfig;
@@ -2491,7 +2493,7 @@ class SicossOptimizado
             return array_map(function ($item) {
                 return (array) $item;
             }, $resultado);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('precargar_conceptos_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => \count($nros_legajos),
@@ -2937,7 +2939,7 @@ class SicossOptimizado
             DB::connection(self::getStaticConnectionName())->statement($sql2);
 
             Log::info('✅ Tablas temporales limpiadas');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('⚠️ Error limpiando tablas temporales: ' . $e->getMessage());
         }
     }
@@ -3290,7 +3292,7 @@ class SicossOptimizado
 
             // Agrupar por legajo y tipo para acceso O(1)
             return self::agrupar_datos_cargos_por_legajo($resultado);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('precargar_todos_datos_cargos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => \count($nros_legajos),
@@ -3478,7 +3480,7 @@ class SicossOptimizado
 
             // Agrupar por legajo para acceso O(1)
             return self::agrupar_otra_actividad_por_legajo($resultado, $nros_legajos);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('precargar_otra_actividad_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => \count($nros_legajos),
@@ -3663,7 +3665,7 @@ class SicossOptimizado
 
             // ✅ CONSULTA MASIVA 3: Verificar jubilados (usando datos ya cargados en legajos)
             return self::construir_mapa_codigos_dgi_final($legajos, $legajos_obra_social, $mapa_dgi);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('precargar_codigos_obra_social_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => \count($nros_legajos),
@@ -3782,7 +3784,7 @@ class SicossOptimizado
                         // Limpiar array para el siguiente chunk
                         $datos_para_insertar = [];
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $stats['errores']++;
                     Log::error('Error mapeando legajo SICOSS', [
                         'legajo' => $legajo['nro_legaj'] ?? 'N/A',
@@ -3799,7 +3801,7 @@ class SicossOptimizado
             Log::info('Guardado SICOSS en BD completado (BULK)', $stats);
 
             return $stats;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (isset($connection)) {
                 $connection->rollBack();
             }
@@ -3867,7 +3869,7 @@ class SicossOptimizado
                 $legajos,
                 $periodo_fiscal,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en generación SICOSS BD', [
                 'periodo' => $periodo_fiscal->toString(),
                 'error' => $e->getMessage(),
@@ -3988,7 +3990,7 @@ class SicossOptimizado
                 if (($index + 1) % 1000 === 0) {
                     Log::info('Procesamiento: ' . ($index + 1) . "/{$total_legajos} legajos");
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $errores++;
                 Log::error("Error procesando legajo {$nro_legajo}", [
                     'error' => $e->getMessage(),
@@ -4074,7 +4076,7 @@ class SicossOptimizado
             ];
 
             return $resultado;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en generación SICOSS BD - PRUEBA', [
                 'periodo' => $periodo_fiscal->toString(),
                 'error' => $e->getMessage(),
@@ -4133,7 +4135,7 @@ class SicossOptimizado
             }
 
             return $verificacion;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error verificando estructura', ['error' => $e->getMessage()]);
             throw $e;
         }
@@ -4316,7 +4318,7 @@ class SicossOptimizado
             // Identificación
             'periodo_fiscal' => $periodo_fiscal,
             'cuil' => $legajo['cuit'] ?? '',
-            'apnom' => \App\Services\EncodingService::toLatin1($legajo['apyno'] ?? ''),
+            'apnom' => EncodingService::toLatin1($legajo['apyno'] ?? ''),
 
             // Datos familiares
             'conyuge' => ($legajo['conyugue'] ?? false) ? true : false,
@@ -4342,7 +4344,7 @@ class SicossOptimizado
             'imp_adic_os' => (float) ($legajo['IMPORTE_ADICI'] ?? 0),
             'exc_aport_ss' => (float) (abs($legajo['ImporteSICOSSDec56119'] ?? 0)),
             'exc_aport_os' => 0.00,
-            'prov' => \App\Services\EncodingService::toLatin1($legajo['provincialocalidad'] ?? ''),
+            'prov' => EncodingService::toLatin1($legajo['provincialocalidad'] ?? ''),
 
             // Importes adicionales
             'rem_impo2' => (float) ($legajo['ImporteImponiblePatronal'] ?? 0),

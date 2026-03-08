@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Reportes;
 
+use InvalidArgumentException;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Services\RepOrdenPagoService;
 use App\Traits\MapucheConnectionTrait;
@@ -155,7 +156,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
 
             foreach ($camposMonetarios as $campo) {
                 if ($model->$campo < 0) {
-                    throw new \InvalidArgumentException("El campo {$campo} no puede ser negativo");
+                    throw new InvalidArgumentException("El campo {$campo} no puede ser negativo");
                 }
             }
         });

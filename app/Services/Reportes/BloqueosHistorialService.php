@@ -2,6 +2,8 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Data\Reportes\TransferResultData;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Mapuche\Bloqueos\RepBloqueo;
@@ -85,7 +87,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
                             'legajo' => $bloqueo->nro_legaj,
                             'cargo' => $bloqueo->nro_cargo,
                         ]);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Error al transferir bloqueo individual', [
                             'id' => $bloqueo->id,
                             'error' => $e->getMessage(),
@@ -127,7 +129,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
                 $idsTransferidos,
                 $idsFallidos,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error general en transferencia al historial', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -202,7 +204,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
                 'fecha_ultimo_registro' => $query->max('created_at'),
                 'periodo_fiscal' => $periodoFiscal,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener estadísticas del historial', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -226,7 +228,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
             return RepBloqueo::where('nro_liqui', $nroLiqui)
                 ->orderBy('created_at', 'desc')
                 ->get();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener bloqueos del historial', [
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
@@ -285,7 +287,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function extraerPeriodoFiscal(Collection $bloqueos): array
     {
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         if ($bloqueos->isEmpty()) {
             return $periodoService->getPeriodoFiscal();
         }
@@ -306,7 +308,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function getNroLiquiFromPeriodoFiscal(array $periodoFiscal): ?int
     {
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
         return $liquidacion?->nro_liqui;
     }
@@ -320,7 +322,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function getPeriodoFiscalFromNroLiqui(int $nroLiqui): ?array
     {
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         $periodo = $periodoService->getPeriodoFiscalFromLiqui($nroLiqui);
         if (!$periodo || !isset($periodo['year'], $periodo['month'])) {
             return null;

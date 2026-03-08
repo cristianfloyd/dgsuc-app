@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Data\Dh90Data;
 use App\Traits\CargoQueries;
 use App\Traits\DatabaseSchema;
@@ -17,8 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $tipoasociacion Tipo de asociación (char de 1 caracter)
  *
  * @method static \Database\Factories\Dh90Factory factory()
- * @method static \Illuminate\Database\Eloquent\Builder|Dh90 porTipoAsociacion(string $tipo)
- * @method static \Illuminate\Database\Eloquent\Builder|Dh90 conCargosAsociados()
+ * @method static Builder|Dh90 porTipoAsociacion(string $tipo)
+ * @method static Builder|Dh90 conCargosAsociados()
  */
 class Dh90 extends Model
 {
@@ -71,7 +72,7 @@ class Dh90 extends Model
     /**
      * Obtiene el Data Object a partir del modelo.
      *
-     * @return \App\Data\Dh90Data
+     * @return Dh90Data
      */
     public function toData(): Dh90Data
     {
@@ -81,10 +82,10 @@ class Dh90 extends Model
     /**
      * Scope para filtrar por tipo de asociación.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $tipo
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopePorTipoAsociacion($query, string $tipo)
     {
@@ -94,9 +95,9 @@ class Dh90 extends Model
     /**
      * Scope para obtener registros que tienen cargos asociados.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeConCargosAsociados($query)
     {

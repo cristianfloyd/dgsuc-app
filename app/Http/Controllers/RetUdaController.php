@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
 use App\DTOs\RetUdaDTO;
 use App\Services\RetUdaService;
 use Illuminate\Http\JsonResponse;
@@ -63,7 +64,7 @@ class RetUdaController extends Controller
             $dto = new RetUdaDTO($request->all());
             $retUda = $this->service->createRetUda($dto);
             return response()->json($retUda, 201);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => 'Error al crear RetUda', 'error' => $e->getMessage()], 400);
         }
     }
@@ -87,7 +88,7 @@ class RetUdaController extends Controller
                 return response()->json(['message' => 'RetUda no encontrado'], 404);
             }
             return response()->json(['message' => 'RetUda actualizado con éxito']);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json(['message' => 'Error al actualizar RetUda', 'error' => $e->getMessage()], 400);
         }
     }

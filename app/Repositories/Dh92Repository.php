@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Dh92;
 
 class Dh92Repository
@@ -24,7 +25,7 @@ class Dh92Repository
     /**
      * Obtiene todos los registros.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function all()
     {

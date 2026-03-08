@@ -21,7 +21,7 @@ trait HasUnidadAcademica
 
         $unidad = UnidadAcademicaData::fromCodigo($codigo);
 
-        if ($unidad instanceof \App\Data\UnidadAcademicaData) {
+        if ($unidad instanceof UnidadAcademicaData) {
             $this->attributes['domicilio'] = $unidad->sucursal;
             $this->attributes['actividad'] = $unidad->actividad->value;
         }

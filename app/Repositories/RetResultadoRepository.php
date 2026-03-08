@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use DateTime;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Suc\RetResultado;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
@@ -13,12 +15,12 @@ class RetResultadoRepository
      *
      * @param int $nroLegaj
      * @param int $nroCargoAnt
-     * @param \DateTime $fechaRetDesde
+     * @param DateTime $fechaRetDesde
      * @param Periodo $periodo
      *
      * @return RetResultado|null
      */
-    public function obtenerPorLlavePrimaria(int $nroLegaj, int $nroCargoAnt, \DateTime $fechaRetDesde, Periodo $periodo): ?RetResultado
+    public function obtenerPorLlavePrimaria(int $nroLegaj, int $nroCargoAnt, DateTime $fechaRetDesde, Periodo $periodo): ?RetResultado
     {
         return RetResultado::where('nro_legaj', $nroLegaj)
             ->where('nro_cargo_ant', $nroCargoAnt)
@@ -69,9 +71,9 @@ class RetResultadoRepository
      *
      * @param TipoRetro $tipoRetro
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
-    public function obtenerPorTipoRetro(TipoRetro $tipoRetro): \Illuminate\Database\Eloquent\Collection
+    public function obtenerPorTipoRetro(TipoRetro $tipoRetro): Collection
     {
         return RetResultado::where('tipo_retro', $tipoRetro->getValue())->get();
     }

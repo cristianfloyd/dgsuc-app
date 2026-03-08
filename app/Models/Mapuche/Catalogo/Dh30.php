@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use Override;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh19;
 use App\Services\EncodingService;
@@ -44,7 +45,7 @@ class Dh30 extends Model
         'desc_item',
     ];
 
-    #[\Override]
+    #[Override]
     public static function boot(): void
     {
         parent::boot();
@@ -93,13 +94,13 @@ class Dh30 extends Model
             ->filter(fn ($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
     }
 
-    #[\Override]
+    #[Override]
     public function getKeyName(): array
     {
         return ['nro_tabla', 'desc_abrev'];
     }
 
-    #[\Override]
+    #[Override]
     public function getIncrementing(): false
     {
         return false;
@@ -179,7 +180,7 @@ class Dh30 extends Model
         );
     }
 
-    #[\Override]
+    #[Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_tabla', $this->getAttribute('nro_tabla'))

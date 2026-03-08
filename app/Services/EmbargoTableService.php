@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,7 @@ class EmbargoTableService
                 Log::info('Tabla de embargos creada exitosamente');
             }
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar/crear tabla de embargos: ' . $e->getMessage());
             return false;
         }

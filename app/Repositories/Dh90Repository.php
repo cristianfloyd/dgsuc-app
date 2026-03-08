@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Exception;
 use App\Data\Dh90Data;
 use App\Models\Dh90;
 use App\Repositories\Interfaces\Dh90RepositoryInterface;
@@ -56,8 +57,8 @@ class Dh90Repository implements Dh90RepositoryInterface
             $model = $data->toModel();
             $model->save();
             return $model;
-        } catch (\Exception $e) {
-            throw new \Exception('Error al crear el registro: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Error al crear el registro: ' . $e->getMessage());
         }
     }
 
@@ -82,8 +83,8 @@ class Dh90Repository implements Dh90RepositoryInterface
             $model->save();
 
             return $model;
-        } catch (\Exception $e) {
-            throw new \Exception('Error al actualizar el registro: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Error al actualizar el registro: ' . $e->getMessage());
         }
     }
 
@@ -104,8 +105,8 @@ class Dh90Repository implements Dh90RepositoryInterface
             }
 
             return $model->delete();
-        } catch (\Exception $e) {
-            throw new \Exception('Error al eliminar el registro: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Error al eliminar el registro: ' . $e->getMessage());
         }
     }
 

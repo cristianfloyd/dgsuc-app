@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use Exception;
+use BackedEnum;
+use Carbon\Carbon;
 use App\Contracts\ExportServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +26,7 @@ class AfipMapucheExportService implements ExportServiceInterface
     {
         try {
             if (!AfipMapucheMiSimplificacion::exists()) {
-                throw new \Exception('No hay registros para exportar');
+                throw new Exception('No hay registros para exportar');
             }
 
             $fileName = 'mi_simplificacion_' . now()->format('Ymd_His') . '.txt';
@@ -44,7 +47,7 @@ class AfipMapucheExportService implements ExportServiceInterface
             fclose($handle);
 
             return response()->download($filePath)->deleteFileAfterSend(true);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en exportación TXT: ' . $e->getMessage());
             throw $e;
         }
@@ -119,7 +122,7 @@ class AfipMapucheExportService implements ExportServiceInterface
         $value = $record->{$field} ?? '';
 
         // Convertir Enum a string si es necesario
-        if ($value instanceof \BackedEnum) {
+        if ($value instanceof BackedEnum) {
             $value = $value->value;
         }
 
@@ -148,8 +151,8 @@ class AfipMapucheExportService implements ExportServiceInterface
             }
             try {
                 // Convertimos la fecha al formato deseado usando Carbon
-                $value = \Carbon\Carbon::parse($value)->format('Y/m/d');
-            } catch (\Exception $e) {
+                $value = Carbon::parse($value)->format('Y/m/d');
+            } catch (Exception $e) {
                 // Si hay un error en el parseo, retornamos espacios
                 return str_repeat(' ', $width);
             }
@@ -200,10 +203,10 @@ class AfipMapucheExportService implements ExportServiceInterface
 
         Log::info('Fecha original: ' . $date);
         try {
-            $date = \Carbon\Carbon::parse($date)->format('Y/m/d');
+            $date = Carbon::parse($date)->format('Y/m/d');
             Log::info("Fecha formateada: $date");
             return $date;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al formatear la fecha: ' . $e->getMessage());
             return ' ';
         }

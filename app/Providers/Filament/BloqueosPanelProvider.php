@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
 use App\Filament\Pages\DashboardSelector;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -34,7 +36,7 @@ class BloqueosPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Bloqueos/Resources'), for: 'App\\Filament\\Bloqueos\\Resources')
             ->discoverPages(in: app_path('Filament/Bloqueos/Pages'), for: 'App\\Filament\\Bloqueos\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
                 DashboardSelector::class,
             ])
             ->userMenuItems([
@@ -45,7 +47,7 @@ class BloqueosPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Bloqueos/Widgets'), for: 'App\\Filament\\Bloqueos\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

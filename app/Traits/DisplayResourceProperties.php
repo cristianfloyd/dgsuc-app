@@ -2,8 +2,9 @@
 
 namespace App\Traits;
 
+use Exception;
+use Filament\Schemas\Components\Section;
 use App\Filament\Actions\ViewResourcePropertiesAction;
-use Filament\Forms\Components\Section;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,7 @@ trait DisplayResourceProperties
             Log::debug('Propiedades restablecidas a los valores por defecto.', [
                 'defaultProperties' => $defaultProperties,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al restablecer las propiedades a los valores por defecto.', [
                 'error' => $e->getMessage(),
             ]);

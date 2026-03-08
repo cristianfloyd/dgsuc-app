@@ -256,9 +256,9 @@ class Dh01 extends Model
         return $resultado ? $resultado->toArray() : null;
     }
 
-    protected function cuilCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function cuilCompleto(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
+        return Attribute::make(get: function (): string {
             // Aseguramos que cada parte tenga el largo correcto
             $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
             $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
@@ -267,9 +267,9 @@ class Dh01 extends Model
         });
     }
 
-    protected function descNombr(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function descNombr(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn ($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
+        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn ($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
     }
 
     protected function descAppat(): Attribute

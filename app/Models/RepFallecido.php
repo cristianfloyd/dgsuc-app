@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Data\Reportes\FallecidoData;
 use App\Services\FallecidosTableService;
 use App\Traits\FilamentTableInitializationTrait;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $nombre Nombre del fallecido
  * @property string $cuil CUIL del fallecido
  * @property string $codc_uacad Código de unidad académica
- * @property \Carbon\Carbon|null $fec_defun Fecha de defunción
+ * @property Carbon|null $fec_defun Fecha de defunción
  */
 class RepFallecido extends Model
 {

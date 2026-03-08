@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
+use Override;
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -40,13 +41,13 @@ class Dh08 extends Model
         'nacio_principal',
     ];
 
-    #[\Override]
+    #[Override]
     public function getKeyName(): array
     {
         return ['nro_legaj', 'codc_nacio'];
     }
 
-    #[\Override]
+    #[Override]
     public function getIncrementing(): false
     {
         return false;
@@ -64,7 +65,7 @@ class Dh08 extends Model
             ->where('desc_abrev', $this->codc_nacio);
     }
 
-    #[\Override]
+    #[Override]
     protected function setKeysForSaveQuery($query)
     {
         return $query->where('nro_legaj', $this->getAttribute('nro_legaj'))

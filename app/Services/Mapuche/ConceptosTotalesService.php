@@ -2,6 +2,7 @@
 
 namespace App\Services\Mapuche;
 
+use Exception;
 use App\Contracts\Dh21RepositoryInterface;
 use App\NroLiqui;
 use Illuminate\Database\Eloquent\Builder;
@@ -39,7 +40,7 @@ class ConceptosTotalesService
 
             // Ejecutar la consulta y retornar los resultados
             return $query;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejo de excepciones
             Log::error('Error en conceptosTotales: ' . $e->getMessage());
             throw $e;

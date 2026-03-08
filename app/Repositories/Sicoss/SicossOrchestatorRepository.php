@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Sicoss;
 
+use Exception;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\Dh21RepositoryInterface;
 use App\Data\Sicoss\SicossProcessData;
@@ -38,7 +39,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param array $licencias_agentes Lista de agentes con licencias
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
      *
-     * @throws \Exception Si ocurre un error durante el proceso
+     * @throws Exception Si ocurre un error durante el proceso
      *
      * @return array Resultado del proceso según el flujo ejecutado
      */
@@ -79,7 +80,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $licencias_agentes,
                 $retornar_datos,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en orquestación de proceso SICOSS', [
                 'error' => $e->getMessage(),
                 'datos' => $datos,
@@ -101,7 +102,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
      *
-     * @throws \Exception Si ocurre un error durante el proceso
+     * @throws Exception Si ocurre un error durante el proceso
      *
      * @return array Resultado del proceso según el flujo ejecutado
      */
@@ -165,7 +166,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             ]);
 
             return $totales;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en procesamiento sin retro', [
                 'error' => $e->getMessage(),
                 'periodo' => "{$per_mesct}/{$per_anoct}",
@@ -186,7 +187,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Indica si se deben retornar los datos procesados
      *
-     * @throws \Exception Si ocurre un error durante el proceso
+     * @throws Exception Si ocurre un error durante el proceso
      *
      * @return array Resultado del proceso según el flujo ejecutado
      */
@@ -258,7 +259,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             ]);
 
             return $totales;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en procesamiento con retro', [
                 'error' => $e->getMessage(),
                 'periodo' => "{$per_mesct}/{$per_anoct}",
@@ -285,7 +286,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 'archivos' => $this->archivos,
                 'status' => 'completed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en procesamiento de resultado final', [
                 'error' => $e->getMessage(),
                 'totales' => \count($totales),
@@ -351,7 +352,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             );
 
             return [$item => $subtotal];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en procesamiento de período retro', [
                 'error' => $e->getMessage(),
                 'periodo_retro' => $periodo_data,
@@ -388,7 +389,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             );
 
             return [$periodo_display => $subtotal];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en procesamiento de período vigente', [
                 'error' => $e->getMessage(),
                 'periodo' => "{$per_mesct}/{$per_anoct}",
@@ -421,7 +422,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     ]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Error al mover archivos de testeo', [
                 'error' => $e->getMessage(),
                 'directorio' => $directorio_testeo,

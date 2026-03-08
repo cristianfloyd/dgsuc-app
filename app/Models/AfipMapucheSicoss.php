@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Exception;
+use Throwable;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\EncodingService;
 use App\Traits\HasFixedWithImportes;
@@ -217,7 +219,6 @@ class AfipMapucheSicoss extends Model
     }
 
     // ################################ HELPER FUNCTIONS #########################################
-
     /**
      * Poblar tabla SICOSS con datos del período.
      *
@@ -225,7 +226,7 @@ class AfipMapucheSicoss extends Model
      * @param bool $includeInactive Incluir empleados inactivos
      * @param callable|null $progressCallback Callback para progreso
      *
-     * @throws \Throwable
+     * @throws Throwable
      *
      * @return array
      */
@@ -369,12 +370,12 @@ class AfipMapucheSicoss extends Model
 
             $connection->commit();
             return ['status' => 'success', 'message' => 'Datos insertados correctamente.'];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('SICOSS: Error al poblar tabla: ' . $e->getMessage());
             if (isset($connection)) {
                 $connection->rollBack();
             }
-            throw new \Exception('Error al poblar tabla SICOSS: ' . $e->getMessage());
+            throw new Exception('Error al poblar tabla SICOSS: ' . $e->getMessage());
         }
     }
 

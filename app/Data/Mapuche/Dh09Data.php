@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Mapuche;
 
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\Date;
@@ -101,7 +102,7 @@ class Dh09Data extends Data
     ) {
     }
 
-    public static function rules(?\Spatie\LaravelData\Support\Validation\ValidationContext $context = null): array
+    public static function rules(?ValidationContext $context = null): array
     {
         return [
             'nro_legaj' => ['required', 'integer'],

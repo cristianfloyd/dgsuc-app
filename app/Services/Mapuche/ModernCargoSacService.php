@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Mapuche;
 
+use InvalidArgumentException;
 use App\Data\Mapuche\{SacCargoData, SacLegajoData};
 use App\Repositories\Mapuche\SacRepository;
 use Carbon\Carbon;
@@ -86,11 +87,11 @@ class ModernCargoSacService
     private function validarParametrosFecha(int $mes, int $anio): void
     {
         if ($mes < 1 || $mes > 12) {
-            throw new \InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
         }
 
         if ($anio < 1900 || $anio > 2100) {
-            throw new \InvalidArgumentException("El año debe estar entre 1900 y 2100. Recibido: {$anio}");
+            throw new InvalidArgumentException("El año debe estar entre 1900 y 2100. Recibido: {$anio}");
         }
     }
 

@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use Exception;
+use InvalidArgumentException;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
@@ -130,7 +132,7 @@ class AfipRelacionesActivas extends Component
 
             // Emitir un evento Livewire para actualizar la tabla
             $this->dispatch('show-success', ['message' => 'Se inició la importación en segundo plano.']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejar cualquier excepción que ocurra durante la ejecución del comando
             Log::error('Hubo un error durante la importación: ' . $e->getMessage());
         }
@@ -169,7 +171,7 @@ class AfipRelacionesActivas extends Component
     private function validateFileSelection(): void
     {
         if (!$this->archivoSeleccionado) {
-            throw new \InvalidArgumentException('No se ha seleccionado ningún archivo.');
+            throw new InvalidArgumentException('No se ha seleccionado ningún archivo.');
         }
 
         $this->validationService->validateSelectedFile($this->archivoSeleccionado);

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use App\Models\AfipMapucheArt;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,7 +44,7 @@ class ProcessPoblarAfipArt implements ShouldQueue
             DB::connection(AfipMapucheArt::getMapucheConnection()->getName())->commit();
 
             Log::info("Proceso completado exitosamente. Registros procesados: {$registrosProcesados}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection(AfipMapucheArt::getMapucheConnection()->getName())->rollBack();
             Log::error('Error en el proceso de poblado ART: ' . $e->getMessage());
             throw $e;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Connection;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
@@ -45,7 +46,7 @@ class AfipMapucheArt extends Model
     /**
      * Obtiene la conexión de Mapuche.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     public static function getMapucheConnection()
     {
@@ -96,7 +97,7 @@ class AfipMapucheArt extends Model
     /**
      * Obtiene la relación de pertenencia entre el modelo AfipMapucheArt y el modelo Dh22.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function dh22(): BelongsTo
     {

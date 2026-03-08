@@ -2,7 +2,10 @@
 
 namespace App\Exceptions\Imports;
 
-class ImportException extends \Exception
+use Exception;
+use Throwable;
+
+class ImportException extends Exception
 {
     /**
      * Constructor personalizado para mantener el contexto del error original.
@@ -10,7 +13,7 @@ class ImportException extends \Exception
     public function __construct(
         string $message = '',
         int $code = 0,
-        ?\Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
     }

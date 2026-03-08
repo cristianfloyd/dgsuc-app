@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh19RepositoryInterface;
@@ -104,7 +105,7 @@ class RepositoryServiceProvider extends ServiceProvider
                 // Por ejemplo, si necesitara PeriodoFiscalService directamente:
                 // return new SicossReporteRepository($app->make(PeriodoFiscalService::class));
                 return new SicossReporteRepository(
-                    $app->make(\App\Services\Mapuche\PeriodoFiscalService::class), // Asumiendo que SicossReporteRepository lo necesita
+                    $app->make(PeriodoFiscalService::class), // Asumiendo que SicossReporteRepository lo necesita
                 );
             },
         );

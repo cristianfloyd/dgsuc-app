@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche;
 
+use Override;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -72,7 +73,7 @@ class Rrhhini extends Model
     /**
      * Get the route key for the model.
      */
-    #[\Override]
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'nombre_seccion'; // Utilizamos uno de los campos de la clave compuesta como identificador principal
@@ -84,9 +85,9 @@ class Rrhhini extends Model
      * @param mixed $value
      * @param string|null $field
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
-    #[\Override]
+    #[Override]
     public function resolveRouteBinding($value, $field = null)
     {
         return $this->where('nombre_seccion', $value)
@@ -98,7 +99,7 @@ class Rrhhini extends Model
      * Get the value of the model's primary key.
      * This is required for Filament to work with composite keys.
      */
-    #[\Override]
+    #[Override]
     public function getKey(): string
     {
         return $this->nombre_seccion . '|' . $this->nombre_parametro;
@@ -107,7 +108,7 @@ class Rrhhini extends Model
     /**
      * Get the value of the model's route key.
      */
-    #[\Override]
+    #[Override]
     public function getRouteKey(): string
     {
         return $this->getKey();
@@ -126,7 +127,7 @@ class Rrhhini extends Model
      *
      * @param string|int $key
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
     public static function find($key)
     {

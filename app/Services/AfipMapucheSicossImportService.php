@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use RuntimeException;
+use Exception;
+use InvalidArgumentException;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Schema\Blueprint;
@@ -48,7 +51,7 @@ class AfipMapucheSicossImportService
             // Procesar archivo en chunks usando generator
             $handle = fopen($filePath, 'r');
             if ($handle === false) {
-                throw new \RuntimeException('No se pudo abrir el archivo');
+                throw new RuntimeException('No se pudo abrir el archivo');
             }
 
             DB::connection($this->getConnectionName())->beginTransaction();
@@ -106,7 +109,7 @@ class AfipMapucheSicossImportService
                             ]);
                         }
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $stats['errors'][] = "Error en línea {$lineNumber}: " . $e->getMessage();
                     Log::error('Error procesando línea SICOSS', [
                         'linea' => $lineNumber,
@@ -127,7 +130,7 @@ class AfipMapucheSicossImportService
             $this->logMetrics($stats);
 
             return $stats;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (isset($handle)) {
                 fclose($handle);
             }
@@ -147,7 +150,7 @@ class AfipMapucheSicossImportService
      * @param string $periodoFiscal Período fiscal en formato YYYYMM
      * @param array &$stats Array de estadísticas que se actualiza durante el proceso
      *
-     * @throws \Exception Si ocurre un error durante el procesamiento
+     * @throws Exception Si ocurre un error durante el procesamiento
      *
      * @return void
      */
@@ -173,7 +176,7 @@ class AfipMapucheSicossImportService
 
                 $this->createOrUpdateRecord($parsedData['data']);
                 $stats['imported']++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $stats['errors'][] = 'Error procesando línea: ' . $e->getMessage();
                 Log::error('Error en procesamiento de línea SICOSS', [
                     'error' => $e->getMessage(),
@@ -256,7 +259,7 @@ class AfipMapucheSicossImportService
                     $parsedData[$field] = match ($config['type']) {
                         'N' => (int) ltrim(trim($value), '0') ?: 0,
                         'D' => $this->parseAmount($value),
-                        default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
+                        default => throw new Exception("Tipo de dato no soportado: {$config['type']}")
                     };
                 }
             }
@@ -265,7 +268,7 @@ class AfipMapucheSicossImportService
                 'success' => true,
                 'data' => $parsedData,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'error' => "Error en línea {$lineNumber}: " . $e->getMessage(),
@@ -285,13 +288,13 @@ class AfipMapucheSicossImportService
         try {
             // Verificar que el archivo existe
             if (!file_exists($filePath)) {
-                throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
+                throw new InvalidArgumentException("El archivo no existe: {$filePath}");
             }
 
             // Abrir el archivo
             $handle = fopen($filePath, 'r');
             if ($handle === false) {
-                throw new \RuntimeException('No se pudo abrir el archivo');
+                throw new RuntimeException('No se pudo abrir el archivo');
             }
 
             // Leer las primeras 5 líneas para analizar
@@ -359,7 +362,7 @@ class AfipMapucheSicossImportService
             }
 
             fclose($handle);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             dd([
                 'error' => 'Error al verificar el encoding del archivo',
                 'mensaje' => $e->getMessage(),
@@ -381,13 +384,13 @@ class AfipMapucheSicossImportService
         try {
             // Verificar que el archivo existe
             if (!file_exists($filePath)) {
-                throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
+                throw new InvalidArgumentException("El archivo no existe: {$filePath}");
             }
 
             // Abrir el archivo
             $handle = fopen($filePath, 'r');
             if ($handle === false) {
-                throw new \RuntimeException('No se pudo abrir el archivo');
+                throw new RuntimeException('No se pudo abrir el archivo');
             }
 
             $sampleData = [];
@@ -427,7 +430,7 @@ class AfipMapucheSicossImportService
                 'resultados_procesamiento' => $processingResults,
                 'estructura_esperada' => $this->getFileStructure(),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             dd([
                 'error' => 'Error al analizar líneas de muestra',
                 'mensaje' => $e->getMessage(),
@@ -447,12 +450,12 @@ class AfipMapucheSicossImportService
     {
         try {
             if (!file_exists($filePath)) {
-                throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
+                throw new InvalidArgumentException("El archivo no existe: {$filePath}");
             }
 
             $handle = fopen($filePath, 'r');
             if ($handle === false) {
-                throw new \RuntimeException('No se pudo abrir el archivo');
+                throw new RuntimeException('No se pudo abrir el archivo');
             }
 
             $results = [];
@@ -513,7 +516,7 @@ class AfipMapucheSicossImportService
                 'resultados' => $results,
                 'recomendacion' => $this->determinarMejorEncoding($results),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             dd([
                 'error' => 'Error al diagnosticar archivo',
                 'mensaje' => $e->getMessage(),
@@ -730,7 +733,7 @@ class AfipMapucheSicossImportService
                 ->insert($batch);
 
             $stats['imported'] += \count($batch);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $stats['errors'][] = 'Error al procesar lote: ' . $e->getMessage();
             Log::error('Error al procesar lote SICOSS', [
                 'batch_size' => \count($batch),
@@ -773,7 +776,7 @@ class AfipMapucheSicossImportService
         $tableName = (new AfipMapucheSicoss())->getTable();
 
         if (!Schema::connection($this->getConnectionName())->hasTable($tableName)) {
-            throw new \RuntimeException("La tabla {$tableName} no existe en la base de datos.");
+            throw new RuntimeException("La tabla {$tableName} no existe en la base de datos.");
         }
 
         // Verificar índices necesarios
@@ -847,7 +850,7 @@ class AfipMapucheSicossImportService
         ]);
     }
 
-    private function logError(\Exception $e): void
+    private function logError(Exception $e): void
     {
         Log::error('Error fatal en importación SICOSS', [
             'error' => $e->getMessage(),
@@ -936,7 +939,7 @@ class AfipMapucheSicossImportService
     private function validateParsedData(array $data): void
     {
         if (empty($data['cuil']) || \strlen($data['cuil']) !== 11) {
-            throw new \Exception('CUIL inválido');
+            throw new Exception('CUIL inválido');
         }
 
 
@@ -1163,7 +1166,7 @@ class AfipMapucheSicossImportService
                     'N' => (int) ltrim(trim($value), '0') ?: 0,
                     'D' => $this->parseAmount($value),
                     'C' => trim($value),
-                    default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
+                    default => throw new Exception("Tipo de dato no soportado: {$config['type']}")
                 };
             }
 
@@ -1171,7 +1174,7 @@ class AfipMapucheSicossImportService
                 'success' => true,
                 'data' => $parsedData,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'error' => "Error en línea {$lineNumber}: " . $e->getMessage(),
@@ -1262,7 +1265,7 @@ class AfipMapucheSicossImportService
             if ($iconvResult && !str_contains($iconvResult, '?')) {
                 return $iconvResult;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Ignorar errores de iconv, seguir con otros métodos
         }
 
@@ -1348,15 +1351,15 @@ class AfipMapucheSicossImportService
     private function validateInitialConditions(string $filePath, string $periodoFiscal): void
     {
         if (!file_exists($filePath)) {
-            throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
+            throw new InvalidArgumentException("El archivo no existe: {$filePath}");
         }
 
         if (!is_readable($filePath)) {
-            throw new \InvalidArgumentException("El archivo no tiene permisos de lectura: {$filePath}");
+            throw new InvalidArgumentException("El archivo no tiene permisos de lectura: {$filePath}");
         }
 
         if (!preg_match('/^\d{6}$/', $periodoFiscal)) {
-            throw new \InvalidArgumentException('Periodo fiscal inválido. Formato requerido: YYYYMM');
+            throw new InvalidArgumentException('Periodo fiscal inválido. Formato requerido: YYYYMM');
         }
 
         // Validación mejorada de estructura del archivo
@@ -1370,7 +1373,7 @@ class AfipMapucheSicossImportService
         // Verificar longitud - ajustado a 500 caracteres según análisis
         if (\strlen($firstLine) !== 499) {
             Log::error('Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: ' . \strlen($firstLine));
-            throw new \InvalidArgumentException('Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: ' . \strlen($firstLine));
+            throw new InvalidArgumentException('Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: ' . \strlen($firstLine));
         }
     }
 

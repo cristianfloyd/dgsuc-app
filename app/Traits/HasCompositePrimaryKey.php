@@ -74,7 +74,7 @@ trait HasCompositePrimaryKey
              * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
              * @param string|null $relation El nombre de la relación (opcional).
              */
-            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $child, protected array $foreignKeys, protected array $localKeys, $relation)
+            public function __construct(Builder $query, Model $child, protected array $foreignKeys, protected array $localKeys, $relation)
             {
                 parent::__construct($query, $child, null, null, $relation);
             }
@@ -162,14 +162,14 @@ trait HasCompositePrimaryKey
      * @param array $foreignKeys Los nombres de los campos que componen la clave primaria del modelo relacionado.
      * @param array $localKeys Los nombres de los campos que componen la clave primaria del modelo actual.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany La relación HasMany con clave primaria compuesta.
+     * @return HasMany La relación HasMany con clave primaria compuesta.
      */
-    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function compositeHasMany(string $related, array $foreignKeys, array $localKeys): HasMany
     {
         $instance = $this->newRelatedInstance($related);
 
         return new class ($instance->newQuery(), $this, $foreignKeys, $localKeys) extends HasMany {
-            public function __construct(Builder $query, \Illuminate\Database\Eloquent\Model $parent, protected array $foreignKeys, protected $localKeys)
+            public function __construct(Builder $query, Model $parent, protected array $foreignKeys, protected $localKeys)
             {
                 parent::__construct($query, $parent, null, null);
             }

@@ -2,6 +2,8 @@
 
 namespace App\Services\Reportes;
 
+use Exception;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Data\Reportes\CleanupResultData;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Mapuche\Bloqueos\RepBloqueo;
@@ -93,7 +95,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                             'legajo' => $registro->nro_legaj,
                             'cargo' => $registro->nro_cargo,
                         ]);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::error('Error al eliminar registro individual', [
                             'id' => $registro->id,
                             'error' => $e->getMessage(),
@@ -139,7 +141,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 $idsEliminados,
                 $idsNoEliminados,
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error general en limpieza de tabla de trabajo', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -161,7 +163,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
         $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
         try {
             // Obtener nro_liqui definitivo
-            $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+            $periodoService = app(PeriodoFiscalService::class);
             $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
             if (!$liquidacion) {
                 Log::info('No existe liquidación definitiva para el período fiscal', [
@@ -201,7 +203,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al validar limpieza', [
                 'periodo_fiscal' => $periodoString,
                 'error' => $e->getMessage(),
@@ -218,7 +220,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
         $query = BloqueosDataModel::query();
         $nroLiqui = null;
         if ($periodoFiscal) {
-            $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+            $periodoService = app(PeriodoFiscalService::class);
             $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
             if ($liquidacion) {
                 $nroLiqui = $liquidacion->nro_liqui;
@@ -241,7 +243,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
      */
     public function getRegistrosListosParaEliminar(array $periodoFiscal): Collection
     {
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
         if (!$liquidacion) {
             return collect();
@@ -265,7 +267,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
      */
     public function contarRegistrosPorEstado(array $periodoFiscal): array
     {
-        $periodoService = app(\App\Services\Mapuche\PeriodoFiscalService::class);
+        $periodoService = app(PeriodoFiscalService::class);
         $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
         $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
         if (!$liquidacion) {
@@ -300,7 +302,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 'periodo_fiscal' => $periodoString,
                 'timestamp' => now()->toISOString(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al contar registros por estado', [
                 'periodo_fiscal' => $periodoString,
                 'error' => $e->getMessage(),

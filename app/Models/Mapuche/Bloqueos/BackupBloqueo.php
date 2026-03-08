@@ -2,6 +2,7 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
+use Override;
 use Illuminate\Database\Eloquent\Model;
 
 class BackupBloqueo extends Model
@@ -40,7 +41,7 @@ class BackupBloqueo extends Model
     /**
      * Get the route key for the model.
      */
-    #[\Override]
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'id';

@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use Exception;
+use Illuminate\Database\Connection;
 use App\Contracts\DatabaseOperationInterface;
 use App\Services\EnhancedDatabaseConnectionService;
 use App\Traits\MapucheConnectionTrait;
@@ -51,7 +53,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
 
             Log::info('Consulta SQL ejecutada exitosamente');
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Registrar el error para debugging
             Log::error('Error al ejecutar consulta SQL', [
                 'sql' => $sql,
@@ -97,7 +99,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             ]);
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al eliminar tabla temporal', [
                 'table_name' => $tableName,
                 'error' => $e->getMessage(),
@@ -132,7 +134,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             ]);
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al verificar existencia de tabla', [
                 'table_name' => $tableName,
                 'error' => $e->getMessage(),
@@ -162,7 +164,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
                     $bindings = $query['bindings'] ?? [];
 
                     if (empty(trim($sql))) {
-                        throw new \Exception('Consulta SQL vacía en transacción');
+                        throw new Exception('Consulta SQL vacía en transacción');
                     }
 
                     $this->getConnection()->statement($sql, $bindings);
@@ -173,7 +175,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
 
             Log::info('Transacción completada exitosamente');
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en transacción de base de datos', [
                 'error' => $e->getMessage(),
                 'query_count' => \count($queries),
@@ -186,7 +188,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
     /**
      * Obtiene la conexión a la base de datos.
      *
-     * @return \Illuminate\Database\Connection
+     * @return Connection
      */
     protected function getConnection()
     {
@@ -209,11 +211,11 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
 
             // Verificar que la conexión es válida
             if (!$connection) {
-                throw new \Exception("No se pudo obtener la conexión '{$connectionName}'");
+                throw new Exception("No se pudo obtener la conexión '{$connectionName}'");
             }
 
             return $connection;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('DatabaseOperationRepository: Error al obtener conexión', [
                 'error' => $e->getMessage(),
                 'connection_name' => $connectionName ?? 'null',
@@ -266,7 +268,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             }
 
             return $grammar->wrapTable($tableName);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('DatabaseOperationRepository: Error en escapeTableName', [
                 'table_name' => $tableName,
                 'error' => $e->getMessage(),

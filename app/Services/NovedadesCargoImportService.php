@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+use Throwable;
 use App\Models\NovedadesCargoImportModel;
 use Illuminate\Support\Facades\Log;
 
@@ -29,7 +31,7 @@ class NovedadesCargoImportService
             $handle = fopen($path, 'r');
 
             if (!$handle) {
-                throw new \Exception("No se puede abrir el archivo: {$path}");
+                throw new Exception("No se puede abrir el archivo: {$path}");
             }
 
             // -----------------------------------------------------------------
@@ -197,7 +199,7 @@ class NovedadesCargoImportService
             }
 
             fclose($handle);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             // Manejo de excepciones: se sugiere loguear y/o lanzar nuevamente
             // para notificar adecuadamente en la interfaz de usuario (Filament).
             Log::error('Error procesando archivo Cargos: ' . $th->getMessage());

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Sicoss;
 
+use Exception;
 use App\Data\Sicoss\SicossProcessData;
 use App\Models\Dh01;
 use App\Models\Dh03;
@@ -555,7 +556,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 'legajos_procesados' => $procesados,
                 'tamaño_archivo' => filesize($rutaCompleta) . ' bytes',
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al grabar archivo SICOSS TXT', [
                 'archivo' => $nombre_arch,
                 'error' => $e->getMessage(),
