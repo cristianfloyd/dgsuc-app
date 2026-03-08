@@ -9,7 +9,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                "resources/css/filament/reportes/theme.css",
+                'resources/css/filament/shared-panels/theme.css',
             ],
             refresh: true,
         }),
