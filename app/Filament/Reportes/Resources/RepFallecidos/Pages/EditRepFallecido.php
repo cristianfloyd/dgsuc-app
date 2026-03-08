@@ -3,7 +3,7 @@
 namespace App\Filament\Reportes\Resources\RepFallecidos\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Reportes\Resources\RepFallecidos\RepFallecidoResource;
+use App\Filament\Reportes\Resources\RepFallecidos\RepFallecidos\RepFallecidoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

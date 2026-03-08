@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepFallecidos;
+namespace App\Filament\Reportes\Resources\RepFallecidos\RepFallecidos;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
