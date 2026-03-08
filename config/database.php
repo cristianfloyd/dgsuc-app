@@ -345,7 +345,7 @@ return [
             'password' => env('TOBA_DB_PASSWORD'),
             'charset' => 'UTF8',
             'prefix' => '',
-            'schema' => 'toba_mapuche',
+            'schema' => env('TOBA_DB_SCHEMA', 'toba_mapuche'),
         ],
 
 

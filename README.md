@@ -1,6 +1,6 @@
 # Sistema DGSUC - Universidad de Buenos Aires
 
-Sistema integral de gestión de informes de recursos humanos y complementacion de nóminas desarrollado para la Universidad de Buenos Aires, construido con Laravel 11 y FilamentPHP.
+Sistema integral de gestión de informes de recursos humanos y complementacion de nóminas desarrollado para la Universidad de Buenos Aires, construido con Laravel 12 y FilamentPHP.
 
 ## 🚀 Características Principales
 
@@ -14,7 +14,7 @@ Sistema integral de gestión de informes de recursos humanos y complementacion d
 ## 🛠️ Stack Tecnológico
 
 ### Backend
-- **Framework**: Laravel 11 (PHP 8.3+)
+- **Framework**: Laravel 12 (PHP 8.4+)
 - **UI Admin**: FilamentPHP 3.x
 - **Autenticación**: Laravel Jetstream, Toba, Cuenta UBA
 - **Base de Datos**: PostgreSQL con esquemas múltiples
@@ -34,7 +34,7 @@ Sistema integral de gestión de informes de recursos humanos y complementacion d
 
 ## 📋 Requisitos del Sistema
 
-- PHP 8.3+
+- PHP 8.4+
 - PostgreSQL 12+
 - Node.js 18+
 - Composer 2+
@@ -81,6 +81,100 @@ Sistema integral de gestión de informes de recursos humanos y complementacion d
    ```bash
    php artisan serve
    ```
+
+## 🐳 Docker
+
+La aplicación puede ejecutarse con Docker usando PHP 8.4 (FPM), Nginx y PostgreSQL 17. Se sirve por **https://informes-app.test**. La **base de datos principal** corre en un contenedor; las **bases secundarias** (Mapuche, pgsql-2503, etc.) se conectan al PostgreSQL del **host** (una misma instancia para todas).
+
+### Requisitos
+
+- Docker y Docker Compose
+- PostgreSQL en el host (para conexiones secundarias), escuchando en el puerto que indiques (p. ej. 5432 o 5434)
+- Para HTTPS local: certificados en `docker/nginx/certs/` (ver más abajo) y entrada en `/etc/hosts` para `informes-app.test`
+
+### Uso rápido
+
+1. **Crear `.env`** (o copiar desde `.env.example`) y opcionalmente definir:
+
+   ```env
+   # UID/GID del usuario del host (para permisos con volumen montado)
+   UID=1000
+   GID=1000
+   # O ejecutar: echo "UID=$(id -u)" >> .env && echo "GID=$(id -g)" >> .env
+
+   DB_DATABASE=suc_app
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   # Conexión a la base del host (secundarias)
+   DB_HOST_SECONDARY_PORT=5432
+   DB_HOST_SECONDARY_DATABASE=desa
+   DB_HOST_SECONDARY_USERNAME=postgres
+   DB_HOST_SECONDARY_PASSWORD=postgres
+   ```
+
+   El contenedor `app` se ejecuta con el mismo UID/GID del host para evitar problemas con Git, Composer y permisos en `storage`/`vendor`.
+
+2. **Certificados HTTPS y dominio** (para https://informes-app.test):
+
+   - Añade en **/etc/hosts**: `127.0.0.1 informes-app.test`
+   - Genera certificados con [mkcert](https://github.com/FiloSottile/mkcert) (recomendado):
+     ```bash
+     mkcert -install
+     cd docker/nginx/certs && mkcert informes-app.test
+     ```
+   - Detalles y alternativa con OpenSSL en `docker/nginx/certs/README.md`.
+
+3. **Levantar servicios**
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. **Instalar dependencias y clave** (primera vez)
+
+   ```bash
+   docker compose exec app composer install
+   docker compose exec app php artisan key:generate
+   ```
+
+5. **Migraciones** (base principal en el contenedor)
+
+   ```bash
+   docker compose exec app php artisan migrate
+   ```
+
+6. **Acceder a la app**: **https://informes-app.test**
+
+### Servicios
+
+| Servicio | Puerto | Descripción |
+|----------|--------|-------------|
+| **nginx**| 80, 443 | Nginx (HTTP → HTTPS, Laravel vía PHP-FPM) |
+| **app**  | —      | Laravel (PHP 8.4-FPM) |
+| **db**   | 5440   | PostgreSQL (solo base principal) |
+| **redis**| 6379   | Redis (cache/colas) |
+
+### Bases secundarias (host)
+
+Todas las conexiones secundarias (`pgsql-mapuche`, `pgsql-2503`, `DB_TEST_*`, `DB_TEST_R2_*`, `DB_PROD_*`, etc.) usan por defecto **host.docker.internal** apuntando al PostgreSQL del host. Ajusta en `.env` o en `docker-compose.yml`:
+
+- `DB_HOST_SECONDARY_PORT`: puerto de PostgreSQL en el host (ej. 5432 o 5434).
+- `DB_HOST_SECONDARY_DATABASE`, `DB_HOST_SECONDARY_USERNAME`, `DB_HOST_SECONDARY_PASSWORD`: base y credenciales de esa instancia.
+
+En Linux, `host.docker.internal` se resuelve mediante `extra_hosts: host-gateway` en el compose; no hace falta configuración adicional.
+
+### Comandos útiles
+
+```bash
+# Colas
+docker compose exec app php artisan queue:work
+
+# Artisan
+docker compose exec app php artisan sicoss:generar
+
+# Shell
+docker compose exec app php artisan tinker
+```
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -514,4 +608,4 @@ Desarrollado para la **Universidad de Buenos Aires** como parte del sistema inte
 
 ---
 
-**Versión**: Laravel 11.x | **PHP**: 8.3+ | **Estado**: En Producción ✅
+**Versión**: Laravel 12.x | **PHP**: 8.4+ | **Estado**: En Producción ✅

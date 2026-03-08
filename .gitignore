@@ -35,5 +35,6 @@ claude.md
 CLAUDE.md
 .env.example
 .serena/
+docker/nginx/certs/*.pem
 .php-cs-fixer.cache
 CLAUDE.md
