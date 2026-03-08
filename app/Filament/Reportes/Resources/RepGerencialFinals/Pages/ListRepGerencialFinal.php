@@ -3,7 +3,7 @@
 namespace App\Filament\Reportes\Resources\RepGerencialFinals\Pages;
 
 use Exception;
-use App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinalResource;
+use App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinals\RepGerencialFinalResource;
 use App\Filament\Reportes\Resources\RepGerencialFinals\Widgets\RepGerencialFinalStats;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Dh22;

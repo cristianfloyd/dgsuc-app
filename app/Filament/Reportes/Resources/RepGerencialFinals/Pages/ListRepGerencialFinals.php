@@ -2,7 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\RepGerencialFinals\Pages;
 
-use App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinalResource;
+use App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinals\RepGerencialFinalResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListRepGerencialFinals extends ListRecords

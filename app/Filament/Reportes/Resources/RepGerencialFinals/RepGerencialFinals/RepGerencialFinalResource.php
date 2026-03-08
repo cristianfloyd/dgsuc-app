@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepGerencialFinals;
+namespace App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinals;
 
 use App\Filament\Reportes\Resources\RepGerencialFinals\Pages\ListRepGerencialFinals;
 use Filament\Actions\BulkActionGroup;
