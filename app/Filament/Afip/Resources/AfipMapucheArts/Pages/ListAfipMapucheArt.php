@@ -7,7 +7,7 @@ use Filament\Support\Enums\Size;
 use Exception;
 use App\Exports\AfipMapucheArtExport;
 use App\Filament\Actions\PoblarAfipArtAction;
-use App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArtResource;
+use App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArts\AfipMapucheArtResource;
 use App\Models\AfipMapucheArt;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;

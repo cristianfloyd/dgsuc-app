@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Afip\Resources\AfipMapucheArts;
+namespace App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArts;
 
 use Filament\Schemas\Schema;
 use Filament\Actions\BulkActionGroup;
