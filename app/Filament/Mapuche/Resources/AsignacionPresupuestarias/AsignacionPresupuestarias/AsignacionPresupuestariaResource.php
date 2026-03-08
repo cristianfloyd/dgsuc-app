@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Mapuche\Resources\AsignacionPresupuestarias;
+namespace App\Filament\Mapuche\Resources\AsignacionPresupuestarias\AsignacionPresupuestarias;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
