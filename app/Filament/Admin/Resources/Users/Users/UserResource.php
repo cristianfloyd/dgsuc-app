@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Users;
+namespace App\Filament\Admin\Resources\Users\Users;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
