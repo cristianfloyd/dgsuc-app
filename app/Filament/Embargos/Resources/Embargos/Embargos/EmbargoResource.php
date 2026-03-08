@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Embargos\Resources\Embargos;
+namespace App\Filament\Embargos\Resources\Embargos\Embargos;
 
 use Exception;
 use App\Filament\Embargos\Resources\Embargos\Pages\ListEmbargos;

@@ -3,7 +3,7 @@
 namespace App\Filament\Embargos\Resources\Embargos\Pages;
 
 use Filament\Support\Enums\Width;
-use App\Filament\Embargos\Resources\Embargos\EmbargoResource;
+use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use App\Filament\Embargos\Resources\Embargos\Widgets\DisplayPropertiesWidget;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Services\EmbargoTableService;

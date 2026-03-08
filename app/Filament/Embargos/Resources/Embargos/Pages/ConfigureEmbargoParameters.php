@@ -3,7 +3,7 @@
 namespace App\Filament\Embargos\Resources\Embargos\Pages;
 
 use Filament\Schemas\Schema;
-use App\Filament\Embargos\Resources\Embargos\EmbargoResource;
+use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Models\Mapuche\Dh22;
 use App\Services\Mapuche\PeriodoFiscalService;

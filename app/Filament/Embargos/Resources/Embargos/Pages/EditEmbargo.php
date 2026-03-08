@@ -3,7 +3,7 @@
 namespace App\Filament\Embargos\Resources\Embargos\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Embargos\Resources\Embargos\EmbargoResource;
+use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
