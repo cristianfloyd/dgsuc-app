@@ -2,7 +2,7 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages;
 
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAfipMapucheSicossCalculo extends CreateRecord

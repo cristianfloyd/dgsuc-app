@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos;
+namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos;
 
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;

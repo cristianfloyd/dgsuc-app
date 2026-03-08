@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ReporteConceptoListados;
+namespace App\Filament\Reportes\Resources\ReporteConceptoListados\ReporteConceptoListados;
 
 use App\Filament\Reportes\Resources\ReporteConceptoListados\Pages\ListReporteConceptoListados;
 use App\Models\Dh03;

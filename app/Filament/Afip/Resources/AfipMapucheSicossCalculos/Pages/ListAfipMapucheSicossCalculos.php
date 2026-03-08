@@ -3,7 +3,7 @@
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages;
 
 use Exception;
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Services\AfipMapucheSicossCalculoTableService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;

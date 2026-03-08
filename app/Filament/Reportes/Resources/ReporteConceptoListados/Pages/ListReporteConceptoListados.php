@@ -5,7 +5,7 @@ namespace App\Filament\Reportes\Resources\ReporteConceptoListados\Pages;
 use App\Filament\Reportes\Actions\DownloadExcelAction;
 use App\Filament\Reportes\Actions\DownloadOpenSpoutExcelAction;
 use App\Filament\Reportes\Actions\DownloadOptimizedExcelAction;
-use App\Filament\Reportes\Resources\ReporteConceptoListados\ReporteConceptoListadoResource;
+use App\Filament\Reportes\Resources\ReporteConceptoListados\ReporteConceptoListados\ReporteConceptoListadoResource;
 use App\Traits\ConceptoListadoTabs;
 use Filament\Resources\Pages\ListRecords;
 

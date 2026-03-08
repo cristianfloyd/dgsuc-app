@@ -5,7 +5,7 @@ namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages;
 use Exception;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Group;
-use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
+use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
 use App\Services\AfipMapucheSicossCalculoImportService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;
 use App\Services\Mapuche\PeriodoFiscalService;
