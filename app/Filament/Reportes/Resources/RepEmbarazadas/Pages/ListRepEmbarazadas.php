@@ -2,7 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\RepEmbarazadas\Pages;
 
-use App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadaResource;
+use App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadas\RepEmbarazadaResource;
 use App\Services\RepEmbarazadaService;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;

@@ -3,7 +3,7 @@
 namespace App\Filament\Reportes\Resources\RepEmbarazadas\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadaResource;
+use App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadas\RepEmbarazadaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

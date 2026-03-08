@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\RepEmbarazadas;
+namespace App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadas;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
