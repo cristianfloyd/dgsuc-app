@@ -4,7 +4,7 @@ namespace App\Providers\Filament;
 
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
-use App\Filament\Embargos\Resources\Embargos\EmbargoResource;
+use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Pages\DatabaseSettings;
 use App\Http\Middleware\DatabaseConnectionMiddleware;
