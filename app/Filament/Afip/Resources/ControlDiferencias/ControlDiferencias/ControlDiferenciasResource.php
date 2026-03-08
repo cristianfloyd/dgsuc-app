@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Afip\Resources\ControlDiferencias;
+namespace App\Filament\Afip\Resources\ControlDiferencias\ControlDiferencias;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
