@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Liquidaciones\Resources\DH21hs;
+namespace App\Filament\Liquidaciones\Resources\DH21hs\DH21hs;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\BulkActionGroup;

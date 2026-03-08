@@ -2,7 +2,7 @@
 
 namespace App\Filament\Liquidaciones\Resources\DH21hs\Pages;
 
-use App\Filament\Liquidaciones\Resources\DH21hs\DH21hResource;
+use App\Filament\Liquidaciones\Resources\DH21hs\DH21hs\DH21hResource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDH21h extends EditRecord
