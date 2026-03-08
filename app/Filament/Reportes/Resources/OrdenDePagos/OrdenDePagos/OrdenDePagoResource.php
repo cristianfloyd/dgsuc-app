@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\OrdenDePagos;
+namespace App\Filament\Reportes\Resources\OrdenDePagos\OrdenDePagos;
 
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
