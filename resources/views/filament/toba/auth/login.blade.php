@@ -5,14 +5,16 @@
 
     {{ \Filament\Support\Facades\FilamentView::renderHook('panels::auth.login.form.before') }}
 
-    <x-filament-panels::form wire:submit="authenticate">
+    <form wire:submit="authenticate" id="form" class="grid gap-y-6">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
+        <x-filament::actions
+            :actions="$this->getFormActions()"
             :full-width="$this->hasFullWidthFormActions()"
+            alignment="center"
+            class="mt-4"
         />
-    </x-filament-panels::form>
+    </form>
 
     {{ \Filament\Support\Facades\FilamentView::renderHook('panels::auth.login.form.after') }}
 

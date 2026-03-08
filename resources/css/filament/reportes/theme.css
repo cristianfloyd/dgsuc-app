@@ -1,6 +1,8 @@
-@import '/vendor/filament/filament/resources/css/theme.css';
-@import '/resources/css/filament-documentation.css';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../filament-documentation.css';
 
-@config 'tailwind.config.js';
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+@config '../../../../tailwind.config.js';
 
 

@@ -1,6 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../vendor/jetstream/**/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+@source "../../vendor/robsontenorio/mary/src/View/Components/**/*.php";
+@source "../../app/**/*.php";
+@source "../../vendor/filament/**/*.blade.php";
+
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+@config "../../tailwind.config.js";
 
 
 [x-cloak] {
