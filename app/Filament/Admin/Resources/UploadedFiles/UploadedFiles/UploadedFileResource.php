@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources\UploadedFiles;
+namespace App\Filament\Admin\Resources\UploadedFiles\UploadedFiles;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Textarea;

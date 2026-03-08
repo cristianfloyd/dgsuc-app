@@ -3,7 +3,7 @@
 namespace App\Filament\Admin\Resources\UploadedFiles\Pages;
 
 use Filament\Actions\CreateAction;
-use App\Filament\Admin\Resources\UploadedFiles\UploadedFileResource;
+use App\Filament\Admin\Resources\UploadedFiles\UploadedFiles\UploadedFileResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
