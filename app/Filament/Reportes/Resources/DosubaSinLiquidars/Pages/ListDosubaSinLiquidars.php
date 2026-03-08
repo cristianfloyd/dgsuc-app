@@ -2,7 +2,7 @@
 
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages;
 
-use App\Filament\Reportes\Resources\DosubaSinLiquidars\DosubaSinLiquidarResource;
+use App\Filament\Reportes\Resources\DosubaSinLiquidars\DosubaSinLiquidars\DosubaSinLiquidarResource;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;

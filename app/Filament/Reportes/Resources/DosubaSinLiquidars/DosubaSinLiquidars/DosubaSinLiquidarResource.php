@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\DosubaSinLiquidars;
+namespace App\Filament\Reportes\Resources\DosubaSinLiquidars\DosubaSinLiquidars;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
