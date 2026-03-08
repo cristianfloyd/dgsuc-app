@@ -2,7 +2,7 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Pages;
 
-use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivasResource;
+use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Actions\ImportAction;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Actions\TruncateAction;
 use Filament\Resources\Pages\ListRecords;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Afip\Resources\AfipRelacionesActivas;
+namespace App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;

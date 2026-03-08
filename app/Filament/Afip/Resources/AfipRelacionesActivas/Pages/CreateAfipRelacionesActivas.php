@@ -2,7 +2,7 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Pages;
 
-use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivasResource;
+use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAfipRelacionesActivas extends CreateRecord

@@ -3,7 +3,7 @@
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivasResource;
+use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
