@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use Filament\Actions\DeleteAction;
-use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
-use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use App\Models\Mapuche\Dh22;
 use App\Repositories\NominaRepository;
 use App\Services\CheFileGenerator;

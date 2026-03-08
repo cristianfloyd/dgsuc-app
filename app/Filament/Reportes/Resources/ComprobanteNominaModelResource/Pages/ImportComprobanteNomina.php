@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
-use Filament\Schemas\Schema;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Throwable;
-use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use App\Services\ComprobanteNominaService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;

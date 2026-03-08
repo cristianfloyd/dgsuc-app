@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModels;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels;
 
 use App\Exports\ComprobantesNominaExport;
 use App\Models\ComprobanteNominaModel;
@@ -20,6 +20,10 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
+
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\GenerateComprobanteNomina;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ImportComprobanteNomina;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ListComprobanteNominaModels;
 
 class ComprobanteNominaModelResource extends Resource
 {
@@ -181,9 +185,9 @@ class ComprobanteNominaModelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListComprobanteNominaModels::route('/'),
-            'import' => Pages\ImportComprobanteNomina::route('/import'),
-            'generate' => Pages\GenerateComprobanteNomina::route('/generate'),
+            'index' => ListComprobanteNominaModels::route('/'),
+            'import' => ImportComprobanteNomina::route('/import'),
+            'generate' => GenerateComprobanteNomina::route('/generate'),
         ];
     }
 }
