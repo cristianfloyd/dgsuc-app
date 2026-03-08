@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Liquidaciones\Resources\LiquidacionControls;
+namespace App\Filament\Liquidaciones\Resources\LiquidacionControls\LiquidacionControls;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;

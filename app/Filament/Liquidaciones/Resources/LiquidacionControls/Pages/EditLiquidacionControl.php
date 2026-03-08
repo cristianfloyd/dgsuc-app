@@ -3,7 +3,7 @@
 namespace App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\Liquidaciones\Resources\LiquidacionControls\LiquidacionControlResource;
+use App\Filament\Liquidaciones\Resources\LiquidacionControls\LiquidacionControls\LiquidacionControlResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
