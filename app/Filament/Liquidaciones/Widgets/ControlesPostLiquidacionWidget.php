@@ -2,6 +2,7 @@
 
 namespace App\Filament\Liquidaciones\Widgets;
 
+use Exception;
 use App\Models\LiquidacionControl;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -33,7 +34,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
                     ->descriptionIcon('heroicon-o-check-circle')
                     ->color('success'),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al generar estadísticas de controles post-liquidación', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -57,7 +58,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     {
         try {
             return LiquidacionControl::where('estado', 'pendiente')->count();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener controles pendientes', [
                 'error' => $e->getMessage(),
             ]);
@@ -74,7 +75,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     {
         try {
             return LiquidacionControl::where('estado', 'error')->count();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener controles con error', [
                 'error' => $e->getMessage(),
             ]);
@@ -91,7 +92,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     {
         try {
             return LiquidacionControl::where('estado', 'completado')->count();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al obtener controles completados', [
                 'error' => $e->getMessage(),
             ]);

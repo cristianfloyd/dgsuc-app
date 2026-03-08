@@ -2,6 +2,8 @@
 
 namespace App\Filament\Afip\Handlers;
 
+use Exception;
+use InvalidArgumentException;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use Filament\Notifications\Notification;
@@ -50,7 +52,7 @@ class SicossControlActionHandler
             $this->postProcesamiento($livewire, $tipoControl, $year, $month, $resultados);
 
             return $resultados;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->manejarError($e, $tipoControl);
             throw $e;
         } finally {
@@ -69,7 +71,7 @@ class SicossControlActionHandler
             'cuils' => $this->controlService->ejecutarControlCuils($year, $month),
             'conceptos' => ['status' => 'completed'], // Placeholder
             'conteos' => ['status' => 'completed'], // Placeholder
-            default => throw new \InvalidArgumentException("Tipo de control no válido: {$tipo}")
+            default => throw new InvalidArgumentException("Tipo de control no válido: {$tipo}")
         };
     }
 
@@ -120,12 +122,12 @@ class SicossControlActionHandler
      * - Notificación visual al usuario sobre el error ocurrido
      * - Persistencia de la notificación para asegurar visibilidad
      *
-     * @param \Exception $e Excepción capturada durante la ejecución del control
+     * @param Exception $e Excepción capturada durante la ejecución del control
      * @param string $tipoControl Tipo de control que falló (aportes, contribuciones, cuils, etc.)
      *
      * @return void
      */
-    protected function manejarError(\Exception $e, string $tipoControl): void
+    protected function manejarError(Exception $e, string $tipoControl): void
     {
         Log::error("Error en control de {$tipoControl}", [
             'error' => $e->getMessage(),

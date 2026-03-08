@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
 
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use Filament\Actions\DeleteAction;
+use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,7 @@ class EditComprobanteNominaModel extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

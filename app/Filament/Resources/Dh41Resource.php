@@ -2,9 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Dh41Resource\Pages\ListDh41s;
+use App\Filament\Resources\Dh41Resource\Pages\CreateDh41;
+use App\Filament\Resources\Dh41Resource\Pages\EditDh41;
 use App\Filament\Resources\Dh41Resource\Pages;
 use App\Models\Dh41;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -19,14 +25,14 @@ class Dh41Resource extends Resource
 
     protected static ?string $navigationLabel = 'Ganancias Iniciales';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Liquidaciones';
+    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
             ]);
     }
@@ -66,12 +72,12 @@ class Dh41Resource extends Resource
                             ->toArray(),
                     ),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -86,9 +92,9 @@ class Dh41Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh41s::route('/'),
-            'create' => Pages\CreateDh41::route('/create'),
-            'edit' => Pages\EditDh41::route('/{record}/edit'),
+            'index' => ListDh41s::route('/'),
+            'create' => CreateDh41::route('/create'),
+            'edit' => EditDh41::route('/{record}/edit'),
         ];
     }
 }

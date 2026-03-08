@@ -2,13 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use App\Models\Dh11;
 use App\Services\Mapuche\EscalafonService;
 use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class Dashboard extends \Filament\Pages\Dashboard
@@ -25,9 +25,9 @@ class Dashboard extends \Filament\Pages\Dashboard
         $this->escalafonService = $escalafonService;
     }
 
-    public function filtersForm(Form $form): Form
+    public function filtersForm(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Section::make('')->schema([
                 DatePicker::make('startDate')->label('Inicio'),
                 DatePicker::make('endDate')->label('Fin'),

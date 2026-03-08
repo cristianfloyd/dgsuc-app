@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Dh11Resource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\Dh11Resource;
 use App\Filament\Resources\Dh11Resource\Widgets\ActualizarImppBasicWidget;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
@@ -15,7 +16,7 @@ class ListDh11s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

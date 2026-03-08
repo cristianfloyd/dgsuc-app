@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Dh41Resource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\Dh41Resource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -13,7 +14,7 @@ class ListDh41s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

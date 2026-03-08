@@ -2,19 +2,22 @@
 
 namespace App\Filament\Afip\Pages;
 
+use Filament\Tables\Contracts\HasTable;
+use Exception;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Support\Enums\TextSize;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use App\Exports\SicossReporteExport;
 use App\Filament\Afip\Pages\Widgets\SicossTotalesWidget;
 use App\Models\Mapuche\MapucheSicossReporte;
 use App\Services\Reports\SicossReporteService;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Alignment;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Enums\FiltersLayout;
@@ -25,7 +28,7 @@ use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
 
-class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTable
+class SicossReportePage extends Page implements HasTable
 {
     use InteractsWithTable;
     use InteractsWithForms;
@@ -38,19 +41,19 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
 
     public bool $isLoading = false;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Reporte SICOSS';
 
     protected static ?string $title = 'Reporte SICOSS';
 
-    protected static ?string $navigationGroup = 'SICOSS';
+    protected static string | \UnitEnum | null $navigationGroup = 'SICOSS';
 
     protected static ?int $navigationSort = 2;
 
     protected $queryString = ['periodoFiscal'];
 
-    protected static string $view = 'filament.pages.sicoss-reporte';
+    protected string $view = 'filament.pages.sicoss-reporte';
 
     protected SicossReporteService $sicossReporteService;
 
@@ -80,7 +83,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         try {
             $totales = $this->getTotales();
             $this->dispatch('totales-actualizados', totales: $totales);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()->title('Error al actualizar totales')->danger()->send();
 
             logger()->error('Error actualizando totales:', [
@@ -101,9 +104,9 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         return 'xl';
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Section::make()
                 ->schema([
                     Select::make('periodoFiscal')
@@ -153,7 +156,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
             $this->updateWidgetData();
 
             Notification::make()->title('Datos actualizados')->success()->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()->title('Error al cargar los datos')->danger()->send();
 
             logger()->error('Error cargando datos:', [
@@ -199,16 +202,16 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
         return $table
             ->query(MapucheSicossReporte::query()->getReporte($this->anio, $this->mes))
             ->columns([
-                TextColumn::make('nro_liqui')->label('N° Liq')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('desc_liqui')->label('Descripción')->alignment(Alignment::Left)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('c305')->label('305')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('c306')->label('306')->sortable()->alignment(Alignment::Center)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('remunerativo')->label('Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('no_remunerativo')->label('No Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('aportesijpdh21')->label('Aportes SIJP')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('aporteinssjpdh21')->label('Aportes INSSJP')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('contribucionsijpdh21')->label('Contribución SIJP')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
-                TextColumn::make('contribucioninssjpdh21')->label('Contribución INSSJP')->money('ARS')->alignment(Alignment::End)->size(TextColumn\TextColumnSize::ExtraSmall),
+                TextColumn::make('nro_liqui')->label('N° Liq')->sortable()->alignment(Alignment::Center)->size(TextSize::ExtraSmall),
+                TextColumn::make('desc_liqui')->label('Descripción')->alignment(Alignment::Left)->size(TextSize::ExtraSmall),
+                TextColumn::make('c305')->label('305')->sortable()->alignment(Alignment::Center)->size(TextSize::ExtraSmall),
+                TextColumn::make('c306')->label('306')->sortable()->alignment(Alignment::Center)->size(TextSize::ExtraSmall),
+                TextColumn::make('remunerativo')->label('Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
+                TextColumn::make('no_remunerativo')->label('No Remunerativo')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
+                TextColumn::make('aportesijpdh21')->label('Aportes SIJP')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
+                TextColumn::make('aporteinssjpdh21')->label('Aportes INSSJP')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
+                TextColumn::make('contribucionsijpdh21')->label('Contribución SIJP')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
+                TextColumn::make('contribucioninssjpdh21')->label('Contribución INSSJP')->money('ARS')->alignment(Alignment::End)->size(TextSize::ExtraSmall),
             ])
             ->deferLoading()
             ->defaultSort('nro_liqui')
@@ -234,7 +237,7 @@ class SicossReportePage extends Page implements \Filament\Tables\Contracts\HasTa
                         return Excel::download(new SicossReporteExport($this->anio, $this->mes, null, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}.xlsx");
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkAction::make('export')
                     ->label('Exportar Seleccionados')
                     ->icon('heroicon-o-document-arrow-down')

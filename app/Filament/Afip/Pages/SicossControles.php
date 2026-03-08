@@ -2,6 +2,10 @@
 
 namespace App\Filament\Afip\Pages;
 
+use Exception;
+use Filament\Support\Enums\Width;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget;
 use App\Enums\ConceptosSicossEnum;
 use App\Exports\Sicoss\AportesDiferenciasExport;
 use App\Exports\Sicoss\ConceptosExport;
@@ -21,11 +25,8 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use App\Traits\MapucheConnectionTrait;
 use Filament\Actions\Action;
-use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -71,11 +72,11 @@ class SicossControles extends Page implements HasTable
 
     public $conceptosSeleccionados = [];
 
-    protected static ?string $navigationIcon = 'heroicon-o-check-circle';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check-circle';
 
-    protected static ?string $navigationGroup = 'SICOSS';
+    protected static string | \UnitEnum | null $navigationGroup = 'SICOSS';
 
-    protected static string $view = 'filament.afip.pages.sicoss-controles';
+    protected string $view = 'filament.afip.pages.sicoss-controles';
 
     protected static ?string $title = 'Controles SICOSS';
 
@@ -170,7 +171,7 @@ class SicossControles extends Page implements HasTable
                 ->title('Controles completados')
                 ->body($viewContent)
                 ->actions([
-                    NotificationAction::make('ver_resumen')
+                    Action::make('ver_resumen')
                         ->label('Ver Resumen')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
@@ -178,7 +179,7 @@ class SicossControles extends Page implements HasTable
                 ])
                 ->persistent()
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             logger()->error('Error en ejecución de controles SICOSS', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -282,7 +283,7 @@ class SicossControles extends Page implements HasTable
             ->defaultPaginationPageOption(5)
             ->paginated([5, 10, 25, 50, 100])
             ->searchable()
-            ->actions($this->getTableActions());
+            ->recordActions($this->getTableActions());
     }
 
     public function ejecutarControlAportes(): void
@@ -305,7 +306,7 @@ class SicossControles extends Page implements HasTable
                 ->title('Control de Aportes Ejecutado')
                 ->body('Se ha completado el control de aportes')
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->danger()
                 ->title('Error en el control de aportes')
@@ -341,7 +342,7 @@ class SicossControles extends Page implements HasTable
                 ->title('Control de Contribuciones Ejecutado')
                 ->body('Se ha completado el control de contribuciones')
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->danger()
                 ->title('Error en el control de contribuciones')
@@ -377,7 +378,7 @@ class SicossControles extends Page implements HasTable
                 ->title('Control de CUILs Ejecutado')
                 ->body('Se ha completado el control de CUILs')
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->danger()
                 ->title('Error en el control de CUILs')
@@ -432,7 +433,7 @@ class SicossControles extends Page implements HasTable
 
             // Guardar los resultados en la sesión para posible uso posterior
             session()->put('sicoss_conteos', $conteos);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             logger()->error('Error en ejecución de control de conteos', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -534,7 +535,7 @@ class SicossControles extends Page implements HasTable
                 ->title('Control de Conceptos Ejecutado')
                 ->body($viewContent)
                 ->actions([
-                    NotificationAction::make('ver_detalles')
+                    Action::make('ver_detalles')
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
@@ -542,7 +543,7 @@ class SicossControles extends Page implements HasTable
                 ])
                 ->persistent()
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             logger()->error('Error en ejecución de control de conceptos', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -670,7 +671,7 @@ class SicossControles extends Page implements HasTable
 
                 return $data;
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             logger()->error('Error obteniendo resumen stats:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -690,7 +691,7 @@ class SicossControles extends Page implements HasTable
     {
         return match ($this->activeTab) {
             'diferencias_aportes' => [
-                TableAction::make('view_aportes')
+                Action::make('view_aportes')
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
@@ -702,10 +703,10 @@ class SicossControles extends Page implements HasTable
                         ]);
                     })
                     ->modalHeading(fn ($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
+                    ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_contribuciones' => [
-                TableAction::make('view_contribuciones')
+                Action::make('view_contribuciones')
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
@@ -717,10 +718,10 @@ class SicossControles extends Page implements HasTable
                         ]);
                     })
                     ->modalHeading(fn ($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
+                    ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_cuils' => [
-                TableAction::make('view_cuils')
+                Action::make('view_cuils')
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
@@ -729,10 +730,10 @@ class SicossControles extends Page implements HasTable
                         ]);
                     })
                     ->modalHeading(fn ($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
+                    ->modalWidth(Width::SevenExtraLarge),
             ],
             'conceptos' => [
-                TableAction::make('view_conceptos')
+                Action::make('view_conceptos')
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
                     ->modalContent(function ($record): View {
@@ -741,7 +742,7 @@ class SicossControles extends Page implements HasTable
                         ]);
                     })
                     ->modalHeading(fn ($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
+                    ->modalWidth(Width::SevenExtraLarge),
             ],
             default => [],
         };
@@ -835,10 +836,10 @@ class SicossControles extends Page implements HasTable
     protected function getHeaderWidgets(): array
     {
         $widgets = [
-            \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
+            PeriodoFiscalSelectorWidget::class,
         ];
         if ($this->activeTab === 'conceptos') {
-            $widgets[] = \App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget::make([
+            $widgets[] = ConceptosSeleccionadosWidget::make([
                 'conceptosSeleccionados' => $this->conceptosSeleccionados ?? [],
             ]);
         }

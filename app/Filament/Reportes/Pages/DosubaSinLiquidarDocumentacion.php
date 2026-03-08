@@ -9,13 +9,13 @@ class DosubaSinLiquidarDocumentacion extends Page
 {
     protected static ?string $navigationLabel = 'Documentación';
 
-    protected static ?string $navigationGroup = 'Dosuba';
+    protected static string | \UnitEnum | null $navigationGroup = 'Dosuba';
 
     protected static ?int $navigationSort = 100;
 
     protected static ?string $title = 'Documentación del Reporte Dosuba Sin Liquidar';
 
-    protected static string $view = 'filament.pages.dosuba-sin-liquidar-documentacion';
+    protected string $view = 'filament.pages.dosuba-sin-liquidar-documentacion';
 
     public function getMarkdownContent(): string
     {

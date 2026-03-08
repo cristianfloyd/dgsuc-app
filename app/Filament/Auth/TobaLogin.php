@@ -2,21 +2,21 @@
 
 namespace App\Filament\Auth;
 
+use Filament\Auth\Pages\Login;
+use Filament\Schemas\Schema;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse;
-use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class TobaLogin extends BaseLogin
+class TobaLogin extends Login
 {
-    protected static string $view = 'filament.auth.toba-login';
+    protected string $view = 'filament.auth.toba-login';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('usuario')
                     ->label('Usuario')
                     ->required()

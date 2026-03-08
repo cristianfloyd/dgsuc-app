@@ -7,7 +7,7 @@ use Filament\Pages\Page;
 
 class DashboardSelector extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-2x2';
 
     protected static ?string $title = 'Seleccionar Panel';
 
@@ -15,7 +15,7 @@ class DashboardSelector extends Page
 
     protected static ?int $navigationSort = -2; // Asegura que aparezca primero en la navegación
 
-    protected static string $view = 'filament.pages.dashboard-selector';
+    protected string $view = 'filament.pages.dashboard-selector';
 
     public function mount(): void
     {

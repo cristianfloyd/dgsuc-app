@@ -9,5 +9,5 @@ class SortCustomers extends Page
 {
     protected static string $resource = CustomerResource::class;
 
-    protected static string $view = 'filament.resources.customer-resource.pages.sort-customers';
+    protected string $view = 'filament.resources.customer-resource.pages.sort-customers';
 }

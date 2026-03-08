@@ -10,7 +10,7 @@ class ActivityLogWidget extends Widget
 {
     use MapucheConnectionTrait;
 
-    protected static string $view = 'filament.widgets.activity-log-widget';
+    protected string $view = 'filament.widgets.activity-log-widget';
 
     protected static bool $isLazy = true;
 

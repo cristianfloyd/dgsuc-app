@@ -9,7 +9,7 @@ class CargoCountWidget extends Widget
 {
     protected static string $name = 'Cargo Count';
 
-    protected static string $view = 'filament.widgets.cargo-count-widget';
+    protected string $view = 'filament.widgets.cargo-count-widget';
 
     protected function getData(): array
     {

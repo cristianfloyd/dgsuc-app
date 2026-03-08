@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\PersonalResource\Pages\ListPersonals;
+use App\Filament\Resources\PersonalResource\Pages\CreatePersonal;
+use App\Filament\Resources\PersonalResource\Pages\EditPersonal;
 use App\Filament\Resources\PersonalResource\Pages;
 use App\Models\Dh01;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -19,14 +23,14 @@ class PersonalResource extends Resource
 
     protected static ?string $plurallabel = 'Personal';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Personal';
+    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
             ]);
     }
@@ -64,11 +68,11 @@ class PersonalResource extends Resource
 
 
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
@@ -88,9 +92,9 @@ class PersonalResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPersonals::route('/'),
-            'create' => Pages\CreatePersonal::route('/create'),
-            'edit' => Pages\EditPersonal::route('/{record}/edit'),
+            'index' => ListPersonals::route('/'),
+            'create' => CreatePersonal::route('/create'),
+            'edit' => EditPersonal::route('/{record}/edit'),
         ];
     }
 

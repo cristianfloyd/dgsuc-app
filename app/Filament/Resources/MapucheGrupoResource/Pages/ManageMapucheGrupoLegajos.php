@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\MapucheGrupoResource\Pages;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use App\Filament\Resources\MapucheGrupoResource;
 use App\Models\Dh01;
 use App\Models\Mapuche\MapucheGrupo;
@@ -26,24 +31,24 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
 
     protected static string $resource = MapucheGrupoResource::class;
 
-    protected static string $view = 'filament.resources.mapuche-grupo-resource.pages.manage-mapuche-grupo-legajos';
+    protected string $view = 'filament.resources.mapuche-grupo-resource.pages.manage-mapuche-grupo-legajos';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(Dh01::query())
             ->columns([
-                Tables\Columns\TextColumn::make('nro_legaj')
+                TextColumn::make('nro_legaj')
                     ->label('Legajo')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('nombre_completo')
+                TextColumn::make('nombre_completo')
                     ->label('Nombre')
                     ->sortable(),
 
                 // Estado en el grupo actual
-                Tables\Columns\IconColumn::make('en_grupo_actual')
+                IconColumn::make('en_grupo_actual')
                     ->label('En Grupo Actual')
                     ->boolean()
                     ->getStateUsing(function (Dh01 $record): bool {
@@ -53,7 +58,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     }),
 
                 // Lista de otros grupos
-                Tables\Columns\TextColumn::make('otros_grupos')
+                TextColumn::make('otros_grupos')
                     ->label('Otros Grupos')
                     ->getStateUsing(function (Dh01 $record): string {
                         return $record->grupos()
@@ -65,7 +70,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->searchable(false),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('grupo_actual')
+                SelectFilter::make('grupo_actual')
                     ->label('Estado en Grupo Actual')
                     ->options([
                         'en_grupo' => 'En este grupo',
@@ -87,8 +92,8 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                         };
                     }),
             ])
-            ->actions([
-                Tables\Actions\Action::make('toggle_grupo')
+            ->recordActions([
+                Action::make('toggle_grupo')
                     ->label(
                         fn (Dh01 $record): string =>
                         $record->grupos()
@@ -142,8 +147,8 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->requiresConfirmation(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('agregar_al_grupo')
+            ->toolbarActions([
+                BulkAction::make('agregar_al_grupo')
                     ->label('Agregar al Grupo')
                     ->icon('heroicon-o-plus')
                     ->color('success')
@@ -166,7 +171,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->requiresConfirmation()
                     ->visible(fn (): bool => !request()->boolean('tableFilters.en_grupo')),
 
-                Tables\Actions\BulkAction::make('quitar_del_grupo')
+                BulkAction::make('quitar_del_grupo')
                     ->label('Quitar del Grupo')
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
@@ -188,7 +193,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->visible(fn (): bool => request()->boolean('tableFilters.en_grupo')),
             ])
             ->headerActions([
-                Tables\Actions\Action::make('asignar_todos')
+                Action::make('asignar_todos')
                     ->label('Asignar Todos los Filtrados')
                     ->icon('heroicon-o-user-plus')
                     ->requiresConfirmation()

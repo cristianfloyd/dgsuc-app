@@ -16,7 +16,7 @@ class CargoCountWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $codigoescalafon = $this->filters['codigoescalafon'] ?? 'TODOS';
+        $codigoescalafon = $this->pageFilters['codigoescalafon'] ?? 'TODOS';
 
         switch ($codigoescalafon) {
             case 'TODOS':

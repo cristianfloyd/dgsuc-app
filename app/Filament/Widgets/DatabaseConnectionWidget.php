@@ -2,12 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\DB;
 
 class DatabaseConnectionWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.database-connection-widget';
+    protected string $view = 'filament.widgets.database-connection-widget';
 
     protected static ?int $sort = 1; // Orden de aparición
 
@@ -53,7 +54,7 @@ class DatabaseConnectionWidget extends Widget
         try {
             DB::connection($connection)->getPdo();
             return 'Conectado';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 'Desconectado';
         }
     }

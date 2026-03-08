@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\Dh03Resource\Widgets;
 
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Exception;
 use App\Contracts\CargoFilterServiceInterface;
 use App\Models\Dh03;
 use App\Models\Dh11;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class CargosOverTime extends ChartWidget
 
     protected static ?int  $sort = 1;
 
-    protected static ?string $heading = 'Cargos';
+    protected ?string $heading = 'Cargos';
 
     private CargoFilterServiceInterface $filterService;
 
@@ -60,9 +61,9 @@ class CargosOverTime extends ChartWidget
     // Obtener los datos para el gráfico
     protected function getData(): array
     {
-        $start = $this->filters['startDate'] ?? $this->startDate;
-        $end = $this->filters['endDate'] ?? $this->endDate;
-        $codigoescalafon = $this->filters['codigoescalafon'] ?? 'TODOS';
+        $start = $this->pageFilters['startDate'] ?? $this->startDate;
+        $end = $this->pageFilters['endDate'] ?? $this->endDate;
+        $codigoescalafon = $this->pageFilters['codigoescalafon'] ?? 'TODOS';
 
         try {
             if (empty($start) || empty($end)) {
@@ -93,7 +94,7 @@ class CargosOverTime extends ChartWidget
 
             // Verificar que las claves 'altas', 'bajas' y 'permanentes' existen en el array
             if (!isset($data['altas']) || !isset($data['bajas']) || !isset($data['permanentes'])) {
-                throw new \Exception('Datos de altas, bajas o permanentes no disponibles');
+                throw new Exception('Datos de altas, bajas o permanentes no disponibles');
             }
 
             // Formatear los datos para el gráfico
@@ -116,7 +117,7 @@ class CargosOverTime extends ChartWidget
 
                 ],
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejo de excepciones
             report($e);
             return [

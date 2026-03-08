@@ -2,6 +2,7 @@
 
 namespace App\Filament\Afip\Pages\Widgets;
 
+use Exception;
 use Filament\Widgets\Widget;
 use Livewire\Attributes\On;
 
@@ -14,7 +15,7 @@ class SicossTotalesWidget extends Widget
 
     public bool $isCollapsed = true;
 
-    protected static string $view = 'filament.afip.pages.widgets.sicoss-totales-widget';
+    protected string $view = 'filament.afip.pages.widgets.sicoss-totales-widget';
 
     protected int | string | array $columnSpan = 'full';
 
@@ -30,7 +31,7 @@ class SicossTotalesWidget extends Widget
     {
         try {
             return !empty($this->totales);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // En caso de error, registramos la excepción y evitamos bloquear la vista del widget.
             logger()->error('Error en shouldLoad de SicossTotalesWidget: ' . $e->getMessage());
             return false;

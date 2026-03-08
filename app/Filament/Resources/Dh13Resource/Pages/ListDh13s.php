@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Dh13Resource\Pages;
 
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\Dh13Resource;
 use Filament\Actions;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,7 +27,7 @@ class ListDh13s extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

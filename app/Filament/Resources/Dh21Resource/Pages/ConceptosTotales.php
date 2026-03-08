@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
+use Filament\Schemas\Components\Utilities\Get;
+use Throwable;
+use Filament\Support\Enums\Width;
 use App\Filament\Resources\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
 use App\Models\Dh21;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh21Service;
-use Filament\Forms\Get;
 use Filament\Resources\Pages\Page;
-use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -24,7 +25,7 @@ class ConceptosTotales extends Page implements HasTable
 
     protected static string $resource = Dh21Resource::class;
 
-    protected static string $view = 'filament.resources.dh21-resource.pages.conceptos-totales';
+    protected string $view = 'filament.resources.dh21-resource.pages.conceptos-totales';
 
     protected ?int $nro_liqui = null;
 
@@ -62,7 +63,7 @@ class ConceptosTotales extends Page implements HasTable
      *
      * @param int|null $nro_liqui El número de liquidación a filtrar, o null para obtener todos los conceptos.
      *
-     * @return \Illuminate\Database\Eloquent\Builder La consulta de Dh21 filtrada por el número de liquidación.
+     * @return Builder La consulta de Dh21 filtrada por el número de liquidación.
      */
     public function updateQuery($nro_liqui = null): Builder
     {
@@ -73,7 +74,7 @@ class ConceptosTotales extends Page implements HasTable
                 return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
             }
             return app(Dh21Service::class)->conceptosTotales($nro_liqui);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error($th->getMessage());
             return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
         }
@@ -105,12 +106,12 @@ class ConceptosTotales extends Page implements HasTable
         );
     }
 
-    public function getMaxContentWidth(): MaxWidth
+    public function getMaxContentWidth(): Width
     {
-        return MaxWidth::Full;
+        return Width::Full;
     }
 
-    public function getHeaderWidgetsColumns(): int | array
+    public function getHeaderWidgetsColumns(): int|array
     {
         return 3;
     }

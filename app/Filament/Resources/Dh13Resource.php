@@ -2,14 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Actions\EditAction;
+use App\Filament\Resources\Dh13Resource\Pages\ListDh13s;
+use App\Filament\Resources\Dh13Resource\Pages\CreateDh13;
+use App\Filament\Resources\Dh13Resource\Pages\EditDh13;
 use App\Filament\Resources\Dh13Resource\Pages;
 use App\Models\Dh13;
 use App\Services\EncodingService;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -23,18 +27,18 @@ class Dh13Resource extends Resource
 
     protected static ?string $modelLabel = 'Formulas';
 
-    protected static ?string $navigationGroup = 'Conceptos';
+    protected static string | \UnitEnum | null $navigationGroup = 'Conceptos';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Detalles del Concepto')
                     ->schema([
                         Grid::make(3)
@@ -88,10 +92,10 @@ class Dh13Resource extends Resource
             ->filters([
 
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
 
             ])
             ->defaultSort('codn_conce', 'asc')
@@ -108,9 +112,9 @@ class Dh13Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh13s::route('/'),
-            'create' => Pages\CreateDh13::route('/create'),
-            'edit' => Pages\EditDh13::route('/{record}/edit'),
+            'index' => ListDh13s::route('/'),
+            'create' => CreateDh13::route('/create'),
+            'edit' => EditDh13::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pages;
 
+use Exception;
 use App\Services\TableManager\TableInitializationManager;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +24,7 @@ abstract class BaseListRecords extends ListRecords
             if (!$manager->isTableInitialized($service)) {
                 $manager->initializeTable($service);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             report($e);
             // Opcional: Manejar el error de inicialización aquí
         }

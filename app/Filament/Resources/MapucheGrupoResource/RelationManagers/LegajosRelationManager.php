@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources\MapucheGrupoResource\RelationManagers;
 
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -27,9 +31,9 @@ class LegajosRelationManager extends RelationManager
         return "{$record->nro_legaj} - {$record->desc_appat}, {$record->desc_nombr}";
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     public function table(Table $table): Table
@@ -37,7 +41,7 @@ class LegajosRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('nro_legaj')
             ->columns([
-                Tables\Columns\TextColumn::make('nro_legaj')
+                TextColumn::make('nro_legaj')
                     ->label('Legajo')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy('dh01.nro_legaj', $direction);
@@ -46,7 +50,7 @@ class LegajosRelationManager extends RelationManager
                         return $query->where('dh01.nro_legaj', 'like', "%{$search}%");
                     }),
 
-                Tables\Columns\TextColumn::make('desc_appat')
+                TextColumn::make('desc_appat')
                     ->label('Apellido')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy('dh01.desc_appat', $direction);
@@ -55,7 +59,7 @@ class LegajosRelationManager extends RelationManager
                         return $query->where('dh01.desc_appat', 'ilike', "%{$search}%");
                     }),
 
-                Tables\Columns\TextColumn::make('desc_nombr')
+                TextColumn::make('desc_nombr')
                     ->label('Nombre')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy('dh01.desc_nombr', $direction);
@@ -64,7 +68,7 @@ class LegajosRelationManager extends RelationManager
                         return $query->where('dh01.desc_nombr', 'ilike', "%{$search}%");
                     }),
 
-                Tables\Columns\TextColumn::make('cuil')
+                TextColumn::make('cuil')
                     ->label('CUIL')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function ($query) use ($search) {
@@ -95,16 +99,16 @@ class LegajosRelationManager extends RelationManager
                         ]),
                     ),
             ])
-            ->actions([
-                Tables\Actions\DeleteAction::make()
+            ->recordActions([
+                DeleteAction::make()
                     ->label('Quitar del Grupo')
                     ->modalHeading('Quitar Legajo del Grupo')
                     ->modalDescription('¿Está seguro que desea quitar este legajo del grupo?')
                     ->successNotificationTitle('Legajo quitado del grupo'),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->label('Quitar Seleccionados')
                         ->modalDescription('¿Está seguro que desea quitar estos legajos del grupo?')
                         ->successNotificationTitle('Legajos quitados del grupo'),

@@ -2,13 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Exception;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Actions;
+use Filament\Actions\Action;
 use App\Services\Mapuche\PeriodoFiscalService;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -18,15 +21,16 @@ use Illuminate\Support\Facades\Log;
  *
  * @property mixed $form
  */
-class PeriodoFiscalSelectorWidget extends Widget implements HasForms
+class PeriodoFiscalSelectorWidget extends Widget implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public int $year;
 
     public int $month;
 
-    protected static string $view = 'filament.widgets.fiscal-period-selector';
+    protected string $view = 'filament.widgets.fiscal-period-selector';
 
     protected PeriodoFiscalService $periodoFiscalService;
 
@@ -53,7 +57,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
             $this->form->fill();
 
             Log::debug("Widget PeriodoFiscal montado con año: {$this->year}, mes: {$this->month}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al montar el widget PeriodoFiscal: ' . $e->getMessage());
 
             // Valores predeterminados en caso de error
@@ -74,10 +78,10 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms
         return true;
     }
 
-    protected function form(Form $form): Form
+    protected function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('year')
                     ->label('Año Fiscal')
                     ->default($this->year)

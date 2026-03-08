@@ -2,6 +2,8 @@
 
 namespace App\Filament\Liquidaciones\Pages;
 
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\CheckboxList;
 use App\Services\LiquidacionControlService;
 use Filament\Forms;
 use Filament\Pages\Page;
@@ -12,7 +14,7 @@ class EjecutarControlesPostLiquidacion extends Page
 
     public $resultados = [];
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
 
     protected static ?string $title = 'Ejecutar Controles Post-Liquidación';
 
@@ -32,14 +34,14 @@ class EjecutarControlesPostLiquidacion extends Page
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\Select::make('nroLiqui')
+            Select::make('nroLiqui')
                 ->label('Número de Liquidación')
                 ->required()
                 ->options(function () {
                     // Obtener liquidaciones disponibles
                     return [/* ... */];
                 }),
-            Forms\Components\CheckboxList::make('controles')
+            CheckboxList::make('controles')
                 ->label('Controles a Ejecutar')
                 ->options([
                     'cargos_liquidados' => 'Control de Cargos Liquidados',

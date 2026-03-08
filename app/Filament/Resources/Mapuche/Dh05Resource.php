@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources\Mapuche;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\Mapuche\Dh05Resource\Pages\ListDh05s;
+use App\Filament\Resources\Mapuche\Dh05Resource\Pages\CreateDh05;
+use App\Filament\Resources\Mapuche\Dh05Resource\Pages\EditDh05;
 use App\Filament\Resources\Mapuche\Dh05Resource\Pages;
 use App\Models\Mapuche\Dh05;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -22,12 +26,12 @@ class Dh05Resource extends Resource
 
     protected static ?string $navigationLabel = 'Licencias';
 
-    protected static ?string $navigationGroup = 'Personal';
+    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('nro_legaj')
                     ->numeric(),
                 TextInput::make('nro_cargo')
@@ -142,11 +146,11 @@ class Dh05Resource extends Resource
             ->filters([
 
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
@@ -166,9 +170,9 @@ class Dh05Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh05s::route('/'),
-            'create' => Pages\CreateDh05::route('/create'),
-            'edit' => Pages\EditDh05::route('/{record}/edit'),
+            'index' => ListDh05s::route('/'),
+            'create' => CreateDh05::route('/create'),
+            'edit' => EditDh05::route('/{record}/edit'),
         ];
     }
 }

@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\Dh03Resource\Pages\ListDh03s;
+use App\Filament\Resources\Dh03Resource\Pages\CreateDh03;
+use App\Filament\Resources\Dh03Resource\Pages\EditDh03;
 use App\Filament\Resources\Dh03Resource\Pages;
 use App\Models\Dh03;
 use App\Models\Dhc9;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -25,12 +29,12 @@ class Dh03Resource extends Resource
 
     protected static ?string $navigationLabel = 'Cargos';
 
-    protected static ?string $navigationGroup = 'Personal';
+    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
             ]);
     }
@@ -69,7 +73,7 @@ class Dh03Resource extends Resource
                     ->options(Dhc9::all()->pluck('descagrup', 'codc_agrup')->toArray()),
                 Filter::make('estado_cargo')
                     ->label('Estado del Cargo')
-                    ->form([
+                    ->schema([
                         Select::make('estado')
                             ->options([
                                 'activo' => 'Activo',
@@ -96,11 +100,11 @@ class Dh03Resource extends Resource
                     ->default(true), // Aplicar el filtro por defecto
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(5)
-            ->actions([
+            ->recordActions([
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
@@ -147,9 +151,9 @@ class Dh03Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh03s::route('/'),
-            'create' => Pages\CreateDh03::route('/create'),
-            'edit' => Pages\EditDh03::route('/{record}/edit'),
+            'index' => ListDh03s::route('/'),
+            'create' => CreateDh03::route('/create'),
+            'edit' => EditDh03::route('/{record}/edit'),
         ];
     }
 }

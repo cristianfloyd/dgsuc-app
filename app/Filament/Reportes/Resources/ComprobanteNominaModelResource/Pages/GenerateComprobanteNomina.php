@@ -1,50 +1,42 @@
 <?php
 
-namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
 
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use App\Models\Mapuche\Dh22;
 use App\Repositories\NominaRepository;
 use App\Services\CheFileGenerator;
 use App\Services\NominaProcessor;
 use App\Services\TemporaryTableManager;
 use App\Traits\MapucheConnectionTrait;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class GenerateComprobanteNomina extends Page
 {
     use MapucheConnectionTrait;
 
     public $descLiqui;
-
     public ?array $liquidaciones = [];
-
     public ?int $anio = null;
-
     public ?int $mes = null;
-
     public ?array $data = [];
-
     protected static string $resource = ComprobanteNominaModelResource::class;
-
-    protected static string $view = 'filament.resources.comprobante-nomina.pages.generate';
-
+    protected string $view = 'filament.resources.comprobante-nomina.pages.generate';
     protected static ?string $title = 'Generar Comprobantes';
-
     protected $connection;
 
     public function mount(): void
     {
         $this->form->fill();
         $this->connection = $this->getConnectionFromTrait();
-
     }
 
     /**
@@ -53,14 +45,14 @@ class GenerateComprobanteNomina extends Page
      * Este método configura el formulario para la generación de comprobantes de nomina, incluyendo campos para seleccionar liquidaciones, año y mes.
      * Cuando se selecciona una liquidación, se actualizan automáticamente los campos de año y mes, y se registra un log de la selección.
      *
-     * @param Form $form El formulario a configurar.
+     * @param \Filament\Schemas\Schema $schema El formulario a configurar.
      *
-     * @return Form El formulario configurado.
+     * @return \Filament\Schemas\Schema El formulario configurado.
      */
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Grid::make(2)
                     ->schema([
                         Select::make('liquidaciones')
@@ -76,7 +68,7 @@ class GenerateComprobanteNomina extends Page
                             )
                             ->live()
                             ->afterStateUpdated(function (Get $get, Set $set, $state): void {
-                                if (!empty($state)) {
+                                if (! empty($state)) {
                                     $liquidacion = Dh22::query()->where('nro_liqui', $state[0])->first();
                                     $set('anio', $liquidacion->per_liano);
                                     $set('mes', $liquidacion->per_limes);
@@ -91,9 +83,6 @@ class GenerateComprobanteNomina extends Page
                                     ]);
                                 }
                             }),
-
-
-
                         Select::make('anio')
                             ->label('Año')
                             ->required()
@@ -102,7 +91,6 @@ class GenerateComprobanteNomina extends Page
                                 range(date('Y') - 5, date('Y')),
                                 range(date('Y') - 5, date('Y')),
                             )),
-
                         Select::make('mes')
                             ->label('Mes')
                             ->required()
@@ -135,7 +123,6 @@ class GenerateComprobanteNomina extends Page
             // Correct way to access the first liquidation from the array
             $nroLiqui = (int) $formData['liquidaciones'][0];
 
-
             $generator->setNroLiqui($nroLiqui);
             $generator->setDescLiqui($this->descLiqui);
 
@@ -154,8 +141,7 @@ class GenerateComprobanteNomina extends Page
                 ->send();
 
             $this->redirect(ComprobanteNominaModelResource::getUrl('index'));
-
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->connection->rollBack();
             Log::error($e->getMessage());
             Notification::make()

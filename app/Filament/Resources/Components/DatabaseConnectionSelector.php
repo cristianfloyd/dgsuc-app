@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources\Components;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
 use App\Services\DatabaseConnectionService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
-class DatabaseConnectionSelector extends Component implements HasForms
+class DatabaseConnectionSelector extends Component implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public ?string $connection = null;
@@ -27,12 +30,12 @@ class DatabaseConnectionSelector extends Component implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $service = app(DatabaseConnectionService::class);
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('connection')
                     ->label('Base de Datos')
                     ->options($service->getAvailableConnections())

@@ -2,12 +2,12 @@
 
 namespace App\Filament\Afip\Actions;
 
+use Exception;
 use App\Enums\ConceptosSicossEnum;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View as ViewFacade;
@@ -44,7 +44,7 @@ class EjecutarControlConceptosAction extends Action
             ->action(function (): void {
                 $this->ejecutarControl();
             })
-            ->form([
+            ->schema([
                 CheckboxList::make('conceptos')
                     ->label('Conceptos a controlar')
                     ->options(
@@ -109,7 +109,7 @@ class EjecutarControlConceptosAction extends Action
      *
      * @param array $data Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
      *
-     * @throws \Exception Cuando ocurre un error durante la ejecución del control
+     * @throws Exception Cuando ocurre un error durante la ejecución del control
      *
      * @return void
      */
@@ -163,7 +163,7 @@ class EjecutarControlConceptosAction extends Action
                 ->title('Control de Conceptos Ejecutado')
                 ->body($viewContent)
                 ->actions([
-                    NotificationAction::make('ver_detalles')
+                    Action::make('ver_detalles')
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
@@ -171,7 +171,7 @@ class EjecutarControlConceptosAction extends Action
                 ])
                 ->persistent()
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en control de conceptos', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

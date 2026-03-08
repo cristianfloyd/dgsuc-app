@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Filament\Admin\Resources\Documentations\Pages;
+
+use Exception;
+use App\Filament\Admin\Resources\Documentations\DocumentationResource;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+
+class ListDocumentation extends ListRecords
+{
+    protected static string $resource = DocumentationResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('sync_docs')
+                ->label('Sincronizar Documentación')
+                ->icon('heroicon-o-arrow-path')
+                ->action(function (): void {
+                    try {
+                        DocumentationResource::syncMarkdownFiles();
+
+                        Notification::make()
+                            ->title('Documentación sincronizada correctamente')
+                            ->success()
+                            ->send();
+                    } catch (Exception $e) {
+                        Notification::make()
+                            ->title('Error al sincronizar documentación')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->requiresConfirmation()
+                ->modalHeading('¿Sincronizar documentación?')
+                ->modalDescription('Esta acción actualizará la documentación desde los archivos markdown. ¿Desea continuar?')
+                ->modalSubmitActionLabel('Sí, sincronizar'),
+        ];
+    }
+}

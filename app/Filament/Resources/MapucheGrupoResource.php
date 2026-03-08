@@ -2,6 +2,17 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\MapucheGrupoResource\Pages\CreateMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\Pages\EditMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\Pages\ListMapucheGrupos;
@@ -10,19 +21,17 @@ use App\Filament\Resources\MapucheGrupoResource\Pages\ViewMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\RelationManagers\LegajosRelationManager;
 use App\Models\Mapuche\MapucheGrupo;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 
 class MapucheGrupoResource extends Resource
 {
     protected static ?string $model = MapucheGrupo::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Liquidaciones';
+    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
 
     protected static ?string $modelLabel = 'Grupo';
 
@@ -30,21 +39,21 @@ class MapucheGrupoResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('nombre')
+        return $schema
+            ->components([
+                TextInput::make('nombre')
                     ->required()
                     ->maxLength(30)
                     ->label('Nombre del Grupo'),
 
-                Forms\Components\TextInput::make('tipo')
+                TextInput::make('tipo')
                     ->required()
                     ->maxLength(20)
                     ->label('Tipo'),
 
-                Forms\Components\Textarea::make('descripcion')
+                Textarea::make('descripcion')
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->label('Descripción'),
@@ -55,47 +64,47 @@ class MapucheGrupoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nombre')
+                TextColumn::make('nombre')
                     ->searchable()
                     ->sortable()
                     ->label('Nombre'),
 
-                Tables\Columns\TextColumn::make('tipo')
+                TextColumn::make('tipo')
                     ->searchable()
                     ->sortable()
                     ->label('Tipo'),
 
-                Tables\Columns\TextColumn::make('descripcion')
+                TextColumn::make('descripcion')
                     ->searchable()
                     ->limit(50)
                     ->label('Descripción'),
 
-                Tables\Columns\TextColumn::make('legajos_count')
+                TextColumn::make('legajos_count')
                     ->counts('legajos')
                     ->label('Cantidad de Legajos'),
 
-                Tables\Columns\TextColumn::make('fec_modificacion')
+                TextColumn::make('fec_modificacion')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->label('Última Modificación'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('tipo')
+                SelectFilter::make('tipo')
                     ->options(fn () => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
                     ->label('Filtrar por Tipo'),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
                 Action::make('administrar_legajos')
                     ->label('Administrar Legajos')
                     ->icon('heroicon-o-users')
                     ->url(fn (MapucheGrupo $record): string => static::getUrl('manage-legajos', ['record' => $record])),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

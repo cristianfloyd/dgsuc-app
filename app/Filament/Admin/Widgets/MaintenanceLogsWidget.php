@@ -10,7 +10,7 @@ class MaintenanceLogsWidget extends Widget
 {
     use MapucheConnectionTrait;
 
-    protected static string $view = 'filament.widgets.maintenance-logs-widget';
+    protected string $view = 'filament.widgets.maintenance-logs-widget';
 
     protected static bool $isLazy = true;
 

@@ -10,7 +10,7 @@ class SystemStatusWidget extends Widget
 {
     use MapucheConnectionTrait;
 
-    protected static string $view = 'filament.widgets.system-status-widget';
+    protected string $view = 'filament.widgets.system-status-widget';
 
     protected static bool $isLazy = true;
 

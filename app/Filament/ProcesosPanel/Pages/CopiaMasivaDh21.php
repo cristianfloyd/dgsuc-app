@@ -2,6 +2,8 @@
 
 namespace App\Filament\ProcesosPanel\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
 use App\Jobs\CopyDh21ToConsultaJob;
 use App\Models\CopyJob;
 use App\Models\Mapuche\Dh22;
@@ -11,7 +13,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Livewire\Attributes\On;
@@ -54,7 +55,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * @var string|null
      */
-    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
 
     /**
      * Título de la página.
@@ -68,7 +69,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * @var string
      */
-    protected static string $view = 'filament.procesos-panel.pages.copia-masiva-dh21';
+    protected string $view = 'filament.procesos-panel.pages.copia-masiva-dh21';
 
     /**
      * Inicializa el componente de página.
@@ -83,16 +84,16 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
     /**
      * Configura el esquema del formulario.
      *
-     * @param Form $form La instancia del formulario
+     * @param \Filament\Schemas\Schema $schema La instancia del formulario
      *
-     * @return Form $form Formulario Configurado
+     * @return \Filament\Schemas\Schema $form Formulario Configurado
      */
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema(
+        return $schema
+            ->components(
                 [
-                    Forms\Components\Select::make('nro_liqui')
+                    Select::make('nro_liqui')
                         ->label('Seleccionar Liquidación')
                         ->placeholder('-- Selecciona una liquidación --')
                         ->options(

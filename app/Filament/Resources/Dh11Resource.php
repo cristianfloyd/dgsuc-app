@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Set;
+use App\Filament\Resources\Dh11Resource\Pages\ListDh11s;
+use App\Filament\Resources\Dh11Resource\Pages\CreateDh11;
+use App\Filament\Resources\Dh11Resource\Pages\EditDh11;
 use App\Filament\Resources\Dh11Resource\Pages;
 use App\Models\Dh11;
 use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
@@ -28,14 +31,14 @@ class Dh11Resource extends Resource
 
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Personal';
+    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('impp_basic')
                     ->numeric()
                     ->live(onBlur: true)
@@ -126,10 +129,10 @@ class Dh11Resource extends Resource
                     ])
                     ->default('P'),
             ])
-            ->actions([
+            ->recordActions([
                 //Tables\Actions\EditAction::make()->modal(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // Tables\Actions\BulkActionGroup::make([
                 //     Tables\Actions\DeleteBulkAction::make(),
                 // ]),
@@ -147,9 +150,9 @@ class Dh11Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh11s::route('/'),
-            'create' => Pages\CreateDh11::route('/create'),
-            'edit' => Pages\EditDh11::route('/{record}/edit'),
+            'index' => ListDh11s::route('/'),
+            'create' => CreateDh11::route('/create'),
+            'edit' => EditDh11::route('/{record}/edit'),
         ];
     }
 

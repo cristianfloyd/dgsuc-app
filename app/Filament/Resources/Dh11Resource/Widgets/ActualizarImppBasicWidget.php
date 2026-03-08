@@ -2,6 +2,12 @@
 
 namespace App\Filament\Resources\Dh11Resource\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Actions;
+use Exception;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Models\Dh11;
 use App\Services\Dh11RestoreService;
@@ -9,21 +15,19 @@ use App\Services\Dh11Service;
 use App\Services\Mapuche\EscalafonService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\CategoriasConstantTrait;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 
-class ActualizarImppBasicWidget extends Widget implements HasForms
+class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use CategoriasConstantTrait;
 
@@ -35,7 +39,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
     public ?string $codigoescalafon = null;
 
-    protected static string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
+    protected string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
 
     private $categoryUpdateService;
 
@@ -70,10 +74,10 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
         $this->previewData = collect();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('codigoescalafon')->label('Escalafon')
                     ->options(function () {
                         $codc_categs = collect(['TODO' => 'Todos'])
@@ -191,7 +195,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
             $this->addNotification('Cambios aplicados correctamente');
             $this->resetForm();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al confirmar cambios: ' . $e->getMessage());
             $this->addError('general', 'Ocurrió un error al aplicar los cambios. Por favor, inténtelo de nuevo.');
         }
@@ -222,7 +226,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms
 
             $this->addNotification('Categorías restauradas correctamente.');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error al restaurar datos: ' . $e->getMessage());
             $this->addError('general', 'Ocurrió un error al restaurar los datos. Por favor, inténtelo de nuevo.');
         }

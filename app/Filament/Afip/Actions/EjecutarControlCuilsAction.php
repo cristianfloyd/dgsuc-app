@@ -2,6 +2,7 @@
 
 namespace App\Filament\Afip\Actions;
 
+use Exception;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use Filament\Actions\Action;
@@ -81,7 +82,7 @@ class EjecutarControlCuilsAction extends Action
                 ->title('Control de CUILs Ejecutado')
                 ->body("Se completó el control de CUILs para el período {$year}-" . str_pad($month, 2, '0', \STR_PAD_LEFT))
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en control de CUILs', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

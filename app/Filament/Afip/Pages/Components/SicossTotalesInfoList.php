@@ -2,36 +2,37 @@
 
 namespace App\Filament\Afip\Pages\Components;
 
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\TextSize;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Support\Colors\Color;
 
-class SicossTotalesInfoList extends Infolist
+class SicossTotalesInfoList extends Schema
 {
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 TextEntry::make('total_aportes')
                     ->label('Total Aportes')
                     ->money('ARS')
                     ->color(Color::Blue)
-                    ->size(TextEntry\TextEntrySize::Large),
+                    ->size(TextSize::Large),
                 TextEntry::make('total_contribuciones')
                     ->label('Total Contribuciones')
                     ->money('ARS')
                     ->color(Color::Blue)
-                    ->size(TextEntry\TextEntrySize::Large),
+                    ->size(TextSize::Large),
                 TextEntry::make('total_remunerativo')
                     ->label('Total Remunerativo Imponible')
                     ->money('ARS')
                     ->color(Color::Emerald)
-                    ->size(TextEntry\TextEntrySize::Large),
+                    ->size(TextSize::Large),
                 TextEntry::make('total_no_remunerativo')
                     ->label('Total No Remunerativo Imponible')
                     ->money('ARS')
                     ->color(Color::Emerald)
-                    ->size(TextEntry\TextEntrySize::Large),
+                    ->size(TextSize::Large),
             ])
             ->columns(4);
     }

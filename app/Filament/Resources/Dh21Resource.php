@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\Dh21Resource\Pages\ListDh21s;
+use App\Filament\Resources\Dh21Resource\Pages\EditDh21;
+use App\Filament\Resources\Dh21Resource\Pages\ConceptosTotales;
 use App\Filament\Resources\Dh21Resource\Pages;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
@@ -11,7 +16,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Livewire\Livewire;
@@ -24,9 +28,9 @@ class Dh21Resource extends Resource
 
     protected static ?string $navigationLabel = 'Liquidaciones';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Liquidaciones';
+    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {
@@ -114,7 +118,7 @@ class Dh21Resource extends Resource
             ->filters([
 
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
                 Action::make(name: 'gerearReporte')
                     ->label('Generar Reporte')
@@ -124,8 +128,8 @@ class Dh21Resource extends Resource
                         static::generarReporte($record);
                     }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
@@ -144,9 +148,9 @@ class Dh21Resource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDh21s::route('/'),
-            'edit' => Pages\EditDh21::route('/{record}/edit'),
-            'conceptos-totales' => Pages\ConceptosTotales::route('/conceptos-totales'),
+            'index' => ListDh21s::route('/'),
+            'edit' => EditDh21::route('/{record}/edit'),
+            'conceptos-totales' => ConceptosTotales::route('/conceptos-totales'),
         ];
     }
 

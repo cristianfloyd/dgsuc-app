@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Filament\Admin\Resources\Documentations\Pages;
+
+use App\Filament\Admin\Resources\Documentations\DocumentationResource;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\File;
+use League\CommonMark\CommonMarkConverter;
+
+class ViewDocumentation extends Page
+{
+    protected static string $resource = DocumentationResource::class;
+
+    protected string $view = 'filament.resources.documentation.view';
+
+    public function getViewData(): array
+    {
+        $converter = new CommonMarkConverter();
+
+        // Lee el archivo markdown
+        $markdown = File::get(resource_path('docs/index.md'));
+
+        // Convierte a HTML
+        $html = $converter->convert($markdown);
+
+        return [
+            'documentation' => $html,
+        ];
+    }
+}

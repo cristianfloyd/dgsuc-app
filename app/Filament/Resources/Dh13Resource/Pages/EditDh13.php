@@ -33,7 +33,7 @@ class EditDh13 extends EditRecord
      *
      * @param int|string $key La clave compuesta del registro a resolver.
      *
-     * @return \Illuminate\Database\Eloquent\Model El registro Dh13 encontrado.
+     * @return Model El registro Dh13 encontrado.
      */
     protected function resolveRecord(int|string $key): Model
     {
@@ -59,10 +59,10 @@ class EditDh13 extends EditRecord
     /**
      * Actualiza un registro existente en el modelo Dh13 con los datos proporcionados.
      *
-     * @param \Illuminate\Database\Eloquent\Model $record El registro a actualizar.
+     * @param Model $record El registro a actualizar.
      * @param array $data Los datos a actualizar en el registro.
      *
-     * @return \Illuminate\Database\Eloquent\Model El registro actualizado.
+     * @return Model El registro actualizado.
      */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {

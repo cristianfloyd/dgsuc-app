@@ -2,11 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
 use App\Models\Mapuche\Dh22;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
@@ -15,15 +17,16 @@ use Livewire\Attributes\On;
 /**
  * @property mixed $form
  */
-class MultipleIdLiquiSelector extends Widget implements HasForms
+class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public ?array $selectedIdLiqui = null;
 
     protected static ?int $sort = 2;
 
-    protected static string $view = 'filament.widgets.id-liqui-selector';
+    protected string $view = 'filament.widgets.id-liqui-selector';
 
     protected array $casts = [
         'form' => 'array',
@@ -35,10 +38,10 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
     }
 
     /**
-     * @return Form
+     * @return \Filament\Schemas\Schema
      */
     #[Computed]
-    public function form(): Form
+    public function form(): Schema
     {
         return $this->makeForm();
     }
@@ -68,10 +71,10 @@ class MultipleIdLiquiSelector extends Widget implements HasForms
         Log::debug('PeriodoFiscalSelected en MultipleIdLiquiSelector', ['periodoFiscal' => $periodoFiscal]);
     }
 
-    protected function makeForm(): Form
+    protected function makeForm(): Schema
     {
-        return Form::make($this)
-            ->schema([
+        return Schema::make($this)
+            ->components([
                 Select::make('selectedIdLiqui')
                     ->label('Seleccionar Liquidaciones')
                     ->multiple()

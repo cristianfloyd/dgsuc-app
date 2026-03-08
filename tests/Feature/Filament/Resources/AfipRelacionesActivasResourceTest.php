@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Filament\Resources;
 
-use App\Filament\Afip\Resources\AfipRelacionesActivasResource;
+use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

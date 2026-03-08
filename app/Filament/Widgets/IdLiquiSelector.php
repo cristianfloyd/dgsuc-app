@@ -2,11 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Schemas\Schema;
 use App\Models\Mapuche\Dh22;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
@@ -19,15 +21,16 @@ use Livewire\Attributes\On;
  *
  * @property mixed $form
  */
-class IdLiquiSelector extends Widget implements HasForms
+class IdLiquiSelector extends Widget implements HasForms, HasActions, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public ?string $selectedIdLiqui = null;
 
     protected static ?int $sort = 2;
 
-    protected static string $view = 'filament.widgets.id-liqui-selector';
+    protected string $view = 'filament.widgets.id-liqui-selector';
 
     protected static ?string $heading = 'Selector de Liquidación';
 
@@ -43,7 +46,7 @@ class IdLiquiSelector extends Widget implements HasForms
     }
 
     #[Computed]
-    public function form(): Form
+    public function form(): Schema
     {
         return $this->makeForm();
     }
@@ -64,15 +67,15 @@ class IdLiquiSelector extends Widget implements HasForms
         $this->form->fill();
     }
 
-    protected function makeForm(): Form
+    protected function makeForm(): Schema
     {
-        return Form::make($this)
+        return Schema::make($this)
             /**
              * Renders a Filament form component that allows the user to select a liquidation from a list of available liquidations.
              * The list of liquidations is filtered by the current fiscal period, if set.
              * When a liquidation is selected, an 'idLiquiSelected' event is dispatched with the selected liquidation ID.
              */
-            ->schema([
+            ->components([
                 Select::make('selectedIdLiqui')
                     ->label('Seleccionar Liquidaciones')
                     ->options(

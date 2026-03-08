@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Afip\Pages;
 
+use Exception;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
+use Throwable;
 use App\Data\PeriodoFiscalData;
 use App\Models\Mapuche\Dh22;
 use App\Services\Afip\SicossActividadUpdateService;
@@ -42,15 +45,15 @@ class SicossUpdates extends Page
 
     public PeriodoFiscalData $periodoFiscal;
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
 
-    protected static ?string $navigationGroup = 'AFIP';
+    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Actualización SICOSS';
 
     protected static ?string $title = 'Actualización de Datos SICOSS';
 
-    protected static string $view = 'filament.afip.pages.sicoss-updates';
+    protected string $view = 'filament.afip.pages.sicoss-updates';
 
     protected PeriodoFiscalService $periodoFiscalService;
 
@@ -176,7 +179,7 @@ class SicossUpdates extends Page
                     ->body($this->updateResults['message'])
                     ->send();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(
                 'Error en actualización SICOSS',
                 [
@@ -254,7 +257,7 @@ class SicossUpdates extends Page
                     ->body($resultado['message'])
                     ->send();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(
                 'Error en actualización de embarazadas',
                 [
@@ -294,7 +297,7 @@ class SicossUpdates extends Page
                     ->body($resultado['message'])
                     ->send();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Error')
                 ->danger()
@@ -369,7 +372,7 @@ class SicossUpdates extends Page
                     ->body("Error 204: {$resultado204['message']} | Error 205: {$resultado205['message']}")
                     ->send();
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(
                 'Error en actualización de conceptos 204/205',
                 [
@@ -391,7 +394,7 @@ class SicossUpdates extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Widgets\PeriodoFiscalSelectorWidget::class,
+            PeriodoFiscalSelectorWidget::class,
         ];
     }
 
@@ -414,7 +417,7 @@ class SicossUpdates extends Page
                     ->body($this->updateResults['message'])
                     ->send();
             }
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error(
                 'Error en actualización SICOSS',
                 [

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Widgets;
 
+use Exception;
 use App\Traits\MapucheConnectionTrait;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Cache;
@@ -14,7 +15,7 @@ class DatabaseHealthWidget extends Widget
     // Actualizamos cada 5 minutos
     public $poolingInterval = 300;
 
-    protected static string $view = 'filament.widgets.database-health-widget';
+    protected string $view = 'filament.widgets.database-health-widget';
 
     protected static ?int $sort = 2;
 
@@ -83,7 +84,7 @@ class DatabaseHealthWidget extends Widget
                 'latencia' => $time,
                 'mensaje' => 'Conexión establecida',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'status' => 'error',
                 'latencia' => 0,

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use Exception;
 use App\Models\AfipMapucheArt;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -16,7 +17,7 @@ class PoblarAfipArtAction extends Action
         parent::setUp();
 
         $this->label('Poblar ART')
-            ->form([
+            ->schema([
                 TextInput::make('periodo_fiscal')
                     ->label('Período Fiscal')
                     ->required()
@@ -101,7 +102,7 @@ class PoblarAfipArtAction extends Action
                 ->body("Se han procesado {$count} registros correctamente.")
                 ->success()
                 ->send();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::connection($connection)->rollBack();
 
             Notification::make()

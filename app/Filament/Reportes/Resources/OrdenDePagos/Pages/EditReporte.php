@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Filament\Reportes\Resources\OrdenDePagos\Pages;
+
+use Filament\Actions\DeleteAction;
+use App\Filament\Reportes\Resources\OrdenDePagos\OrdenDePagoResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditReporte extends EditRecord
+{
+    protected static string $resource = OrdenDePagoResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
+}

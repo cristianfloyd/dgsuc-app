@@ -6,7 +6,7 @@ use Filament\Pages\Page;
 
 class DatabaseSettings extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Configuración BD';
 
@@ -16,5 +16,5 @@ class DatabaseSettings extends Page
 
     protected static ?int $navigationSort = 100;
 
-    protected static string $view = 'filament.pages.database-settings';
+    protected string $view = 'filament.pages.database-settings';
 }

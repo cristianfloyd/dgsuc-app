@@ -2,11 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Schema;
 use App\Services\DatabaseConnectionService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -16,7 +16,7 @@ class SelectDatabaseConnection extends Page implements HasForms
 
     public ?string $selectedConnection = null;
 
-    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-circle-stack';
 
     protected static ?string $navigationLabel = 'Cambiar Base de Datos';
 
@@ -33,12 +33,12 @@ class SelectDatabaseConnection extends Page implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $service = app(DatabaseConnectionService::class);
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('connection')
                     ->label('Conexión a Base de Datos')
                     ->options($service->getAvailableConnections())

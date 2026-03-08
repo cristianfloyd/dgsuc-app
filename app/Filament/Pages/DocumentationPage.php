@@ -16,9 +16,9 @@ class DocumentationPage extends Page
 
     protected static ?string $title = 'Documentación del Sistema';
 
-    protected static string $view = 'filament.pages.documentation';
+    protected string $view = 'filament.pages.documentation';
 
-    protected static ?string $navigationGroup = 'Ayuda';
+    protected static string | \UnitEnum | null $navigationGroup = 'Ayuda';
 
     protected static ?int $navigationSort = 100;
 

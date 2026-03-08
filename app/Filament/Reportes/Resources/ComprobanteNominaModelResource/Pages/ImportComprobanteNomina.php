@@ -1,14 +1,15 @@
 <?php
 
-namespace app\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
+namespace App\Filament\Reportes\Resources\ComprobanteNominaModels\Pages;
 
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Throwable;
+use App\Filament\Reportes\Resources\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use App\Services\ComprobanteNominaService;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,7 @@ class ImportComprobanteNomina extends Page
 
     protected static string $resource = ComprobanteNominaModelResource::class;
 
-    protected static string $view = 'filament.resources.comprobante-nomina.pages.import';
+    protected string $view = 'filament.resources.comprobante-nomina.pages.import';
 
     protected static ?string $title = 'Importación Avanzada';
 
@@ -28,10 +29,10 @@ class ImportComprobanteNomina extends Page
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Configuración de Importación')
                     ->description('Configure las opciones de importación del archivo')
                     ->schema([
@@ -90,7 +91,7 @@ class ImportComprobanteNomina extends Page
                 ->send();
 
             $this->redirect(ComprobanteNominaModelResource::getUrl('index'));
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error($e->getMessage());
             Notification::make()
                 ->title('Error en la importación')

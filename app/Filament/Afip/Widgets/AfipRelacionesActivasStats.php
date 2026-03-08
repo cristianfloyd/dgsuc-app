@@ -2,6 +2,8 @@
 
 namespace App\Filament\Afip\Widgets;
 
+use Exception;
+use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -40,8 +42,8 @@ class AfipRelacionesActivasStats extends BaseWidget
                     ->descriptionIcon('heroicon-m-arrow-trending-down')
                     ->color('danger'),
             ];
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error al obtener estadísticas de relaciones activas', [
+        } catch (Exception $e) {
+            Log::error('Error al obtener estadísticas de relaciones activas', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
