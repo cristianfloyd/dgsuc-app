@@ -6,7 +6,7 @@ use Filament\Actions\Action;
 use Exception;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Group;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicossResource;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossExportService;
 use Carbon\Carbon;

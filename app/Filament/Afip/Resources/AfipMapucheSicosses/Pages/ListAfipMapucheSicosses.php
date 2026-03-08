@@ -4,7 +4,7 @@ namespace App\Filament\Afip\Resources\AfipMapucheSicosses\Pages;
 
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Actions\Action;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicossResource;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use App\Filament\Resources\Pages\BaseListRecords;
 use App\Repositories\AfipMapucheSicossRepository;
 use App\Services\AfipMapucheSicossTableService;

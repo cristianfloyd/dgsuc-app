@@ -2,7 +2,7 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicosses\Pages;
 
-use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicossResource;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAfipMapucheSicoss extends CreateRecord

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Afip\Resources\AfipMapucheSicosses;
+namespace App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses;
 
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ActionGroup;
