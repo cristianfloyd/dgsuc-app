@@ -2,7 +2,7 @@
 
 namespace App\Filament\Liquidaciones\Resources\Dh21s\Pages;
 
-use App\Filament\Liquidaciones\Resources\Dh21s\Dh21Resource;
+use App\Filament\Liquidaciones\Resources\Dh21s\Dh21s\Dh21Resource;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 use App\Filament\Widgets\IdLiquiSelector;
 use App\Livewire\Reportes\OrdenPagoReporte;

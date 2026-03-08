@@ -6,7 +6,7 @@ namespace App\Filament\Liquidaciones\Resources\Dh21s\Pages;
 
 use Throwable;
 use Filament\Support\Enums\Width;
-use App\Filament\Liquidaciones\Resources\Dh21s\Dh21Resource;
+use App\Filament\Liquidaciones\Resources\Dh21s\Dh21s\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh21Service;

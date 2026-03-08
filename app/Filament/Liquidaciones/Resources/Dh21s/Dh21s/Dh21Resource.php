@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Liquidaciones\Resources\Dh21s;
+namespace App\Filament\Liquidaciones\Resources\Dh21s\Dh21s;
 
 use Filament\Actions\BulkActionGroup;
 use App\Filament\Liquidaciones\Resources\Dh21s\Pages\ListDh21s;
