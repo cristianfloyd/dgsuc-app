@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages\Dashboard;
-use Filament\Widgets\AccountWidget;
 use App\Filament\Afip\Pages\SicossControles;
 use App\Filament\Afip\Pages\SicossReportePage;
 use App\Filament\Afip\Pages\SicossUpdates;
@@ -15,11 +13,11 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
-use Filament\Pages;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
+use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -34,6 +32,7 @@ class AfipPanelProvider extends PanelProvider
         return $panel
             ->id('afip')
             ->path('afip-panel')
+            ->viteTheme('resources/css/filament/shared-panels/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
             ])

@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/shared-panels/theme.css')
             ->colors([
                 'primary' => '#6366f1',
             ])

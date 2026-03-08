@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages\Dashboard;
 use App\Filament\Pages\DashboardSelector;
 use App\Filament\Pages\DocumentationPage;
 use App\Livewire\Filament\Reportes\Components\BloqueosProcessor;
@@ -11,7 +10,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -34,7 +33,7 @@ class ReportesPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->viteTheme('resources/css/filament/reportes/theme.css')
+            ->viteTheme('resources/css/filament/shared-panels/theme.css')
             ->databaseNotifications()
             ->navigationGroups([
                 NavigationGroup::make()

@@ -29,6 +29,7 @@ class SucPanelProvider extends PanelProvider
             ->default()
             ->id('dashboard')
             ->path('dashboard')
+            ->viteTheme('resources/css/filament/shared-panels/theme.css')
             ->login()
             ->profile()
             ->userMenuItems([
