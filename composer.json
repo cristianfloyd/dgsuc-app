@@ -34,7 +34,6 @@
     "require-dev": {
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
-        "filament/upgrade": "^4.0",
         "friendsofphp/php-cs-fixer": "^3.84",
         "larastan/larastan": "^3.6",
         "laravel-lang/common": "^6.2",
@@ -67,8 +66,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

@@ -4,7 +4,7 @@
         <x-filament::button wire:click="actualizarDatos">Actualizar Datos</x-filament::button>
     </div>
     <!-- Aquí agregar más contenido o widgets relevantes -->
-    <x-filament::grid class="grid auto-cols-fr gap-y-2">
+    <div class="grid auto-cols-fr gap-y-2">
         <x-filament::section title="Parámetros">
             <x-filament::card>
                     <div class="grid grid-cols-3 gap-4">
@@ -25,5 +25,5 @@
                 <x-filament::button type="submit" class="mt-4">Ejecutar Proceso</x-filament::button>
             </form>
         </x-filament::section>
-    </x-filament::grid>
+    </div>
 </x-filament::page>

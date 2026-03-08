@@ -175,40 +175,37 @@
                 </x-filament::section>
             @endif
 
-            <x-filament::grid
-                style="--cols-lg: repeat(4, minmax(0, 1fr));"
-                class="lg:grid-cols-[--cols-lg] py-4"
-            >
+            <div class="grid grid-cols-1 gap-4 py-4 lg:grid-cols-4">
                 {{-- Sección Totales --}}
                 <x-filament::section>
-                    <x-filament::grid columns="3">
-                        <x-filament::grid.column>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div>
                             <h3 class="text-lg font-medium">CUILs Procesados</h3>
                             <p class="mt-2 text-2xl font-semibold">
                                 {{ number_format($stats['totales']['cuils_procesados'] ?? 0, 0, ',', '.') }}
                             </p>
-                        </x-filament::grid.column>
+                        </div>
 
-                        <x-filament::grid.column>
+                        <div>
                             <h3 class="text-lg font-medium">CUILs con Diferencias en Aportes</h3>
                             <p class="mt-2 text-2xl font-semibold text-danger-600">
                                 {{ number_format($stats['totales']['cuils_con_diferencias_aportes'] ?? 0, 0, ',', '.') }}
                             </p>
-                        </x-filament::grid.column>
+                        </div>
 
-                        <x-filament::grid.column>
+                        <div>
                             <h3 class="text-lg font-medium">CUILs con Diferencias en Contribuciones</h3>
                             <p class="mt-2 text-2xl font-semibold text-danger-600">
                                 {{ number_format($stats['totales']['cuils_con_diferencias_contribuciones'] ?? 0, 0, ',', '.') }}
                             </p>
-                        </x-filament::grid.column>
-                    </x-filament::grid>
+                        </div>
+                    </div>
                 </x-filament::section>
 
                 {{-- Diferencias Monetarias Totales --}}
                 <x-filament::section>
-                    <x-filament::grid columns="2">
-                        <x-filament::grid.column>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
                             <h3 class="text-lg font-medium">Diferencia Total en Aportes</h3>
                             <p @class([
                                 'mt-2 text-2xl font-semibold',
@@ -217,9 +214,9 @@
                             ])>
                                 $ {{ number_format($stats['totales_monetarios']['diferencia_aportes'] ?? 0, 2, ',', '.') }}
                             </p>
-                        </x-filament::grid.column>
+                        </div>
 
-                        <x-filament::grid.column>
+                        <div>
                             <h3 class="text-lg font-medium">Diferencia Total en Contribuciones</h3>
                             <p @class([
                                 'mt-2 text-2xl font-semibold',
@@ -228,15 +225,15 @@
                             ])>
                                 $ {{ number_format($stats['totales_monetarios']['diferencia_contribuciones'] ?? 0, 2, ',', '.') }}
                             </p>
-                        </x-filament::grid.column>
-                    </x-filament::grid>
+                        </div>
+                    </div>
                 </x-filament::section>
 
                 {{-- Comparación con F.931 --}}
                 <x-filament::section>
                     <h3 class="text-lg font-medium mb-4">Comparación con F.931</h3>
-                    <x-filament::grid columns="2">
-                        <x-filament::grid.column>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
                             <h4 class="font-medium mb-2">Aportes</h4>
                             <dl class="space-y-2">
                                 <div class="flex justify-between">
@@ -258,8 +255,8 @@
                                     </dd>
                                 </div>
                             </dl>
-                        </x-filament::grid.column>
-                        <x-filament::grid.column>
+                        </div>
+                        <div>
                             <h4 class="font-medium mb-2">Contribuciones</h4>
                             <dl class="space-y-2">
                                 <div class="flex justify-between">
@@ -281,25 +278,25 @@
                                     </dd>
                                 </div>
                             </dl>
-                        </x-filament::grid.column>
-                    </x-filament::grid>
+                        </div>
+                    </div>
                 </x-filament::section>
 
                 {{-- CUILs No Encontrados --}}
                 <x-filament::section>
                     <h3 class="text-lg font-medium mb-4">CUILs No Encontrados</h3>
-                    <x-filament::grid columns="2">
-                        <x-filament::grid.column>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
                             <h4 class="font-medium text-danger-600">En DH21 pero no en SICOSS</h4>
                             <p class="text-2xl font-semibold mt-2">{{ $stats['cuils_no_encontrados']['en_dh21'] ?? 0 }}</p>
-                        </x-filament::grid.column>
-                        <x-filament::grid.column>
+                        </div>
+                        <div>
                             <h4 class="font-medium text-danger-600">En SICOSS pero no en DH21</h4>
                             <p class="text-2xl font-semibold mt-2">{{ $stats['cuils_no_encontrados']['en_sicoss'] ?? 0 }}</p>
-                        </x-filament::grid.column>
-                    </x-filament::grid>
+                        </div>
+                    </div>
                 </x-filament::section>
-            </x-filament::grid>
+            </div>
             {{-- Diferencias por Dependencia --}}
             <x-filament::section class="col-span-1">
                 <h3 class="text-lg font-medium mb-4">Diferencias por Dependencia</h3>

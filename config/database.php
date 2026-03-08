@@ -42,7 +42,7 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => env('DB_SEARCH_PATH', 'suc_app,informes_app'),
+            'search_path' => env('DB_SCHEMA', 'suc_app,informes_app'),
             'sslmode' => 'prefer',
         ],
 
@@ -348,7 +348,6 @@ return [
             'schema' => env('TOBA_DB_SCHEMA', 'toba_mapuche'),
         ],
 
-
     ],
 
     /*
@@ -384,7 +383,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
         'default' => [

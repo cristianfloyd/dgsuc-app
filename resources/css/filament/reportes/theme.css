@@ -3,6 +3,8 @@
 
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
-@config '../../../../tailwind.config.js';
+
+@source '../../../../app/Filament/Reportes/**/*';
+@source '../../../../resources/views/filament/reportes/**/*';
 
 

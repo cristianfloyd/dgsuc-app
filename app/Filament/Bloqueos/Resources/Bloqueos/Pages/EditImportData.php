@@ -2,13 +2,8 @@
 
 namespace App\Filament\Bloqueos\Resources\Bloqueos\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\Utilities\Get;
-use App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorialResource;
 use App\Filament\Bloqueos\Resources\Bloqueos\BloqueosResource;
+use App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorialResource;
 use App\Models\Dh01;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Services\Mapuche\VerificacionMapucheService;
@@ -20,6 +15,11 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 
 class EditImportData extends EditRecord
@@ -130,7 +130,7 @@ class EditImportData extends EditRecord
                 ->icon('heroicon-o-check')
                 ->requiresConfirmation()
                 ->action(fn () => $this->record->marcarProcesado())
-                ->visible(fn () => !$this->record->chkstopliq),
+                ->visible(fn () => ! $this->record->chkstopliq),
             Action::make('verificar_mapuche')
                 ->label('Verificar en Mapuche')
                 ->icon('heroicon-o-check-circle')
@@ -145,14 +145,14 @@ class EditImportData extends EditRecord
                         $this->record->nro_cargo,
                     );
 
-                    if (!$resultado['existe']) {
+                    if (! $resultado['existe']) {
                         Notification::make()
                             ->danger()
                             ->title('Error de verificación')
                             ->body($resultado['mensaje'])
                             ->send();
 
-                        throw new Halt();
+                        throw new Halt;
                     }
 
                     $datos = $resultado['datos'];
@@ -169,9 +169,8 @@ class EditImportData extends EditRecord
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
                 ->url(
-                    fn ($record) =>
-                    BloqueosHistorialResource::getUrl('index') .
-                    '?tableFilters[nro_legaj][value]=' . $record->nro_legaj,
+                    fn ($record) => BloqueosHistorialResource::getUrl('index').
+                    '?filters[nro_legaj][value]='.$record->nro_legaj,
                 ),
         ];
     }

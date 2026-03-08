@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use InvalidArgumentException;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\ExportServiceInterface;
 use App\Contracts\RepEmbarazadaServiceInterface;
@@ -36,11 +35,16 @@ use App\Services\Reportes\Interfaces\BloqueosHistorialServiceInterface;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 use App\Services\SicossExportService;
 use App\Services\WorkflowService;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Table;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,7 +56,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WorkflowServiceInterface::class, WorkflowService::class);
         if ($this->app->environment('local')) {
         }
-
 
         Event::listen(
             JobFailed::class,
@@ -73,14 +76,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SicossExportService::class, function ($app) {
-            return new SicossExportService();
+            return new SicossExportService;
         });
 
         $this->app->bind(Dh16RepositoryInterface::class, Dh16Repository::class);
 
         $this->app->bind(OrdenesDescuentoTableService::class, function ($app) {
             return new OrdenesDescuentoTableService(
-                new OrdenesDescuentoTableDefinition(),
+                new OrdenesDescuentoTableDefinition,
             );
         });
 
@@ -103,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
             ->needs(DatabaseOperationInterface::class)
             ->give(function ($app) {
                 // Usar conexión dinámica que respeta el EnhancedDatabaseConnectionService
-                return new DatabaseOperationRepository();
+                return new DatabaseOperationRepository;
             });
     }
 
@@ -113,10 +116,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Queue::before(function ($job) {
-            return (new InspectJobDependencies())->handle($job, function ($job) {
+            return (new InspectJobDependencies)->handle($job, function ($job) {
                 return $job;
             });
         });
+
+        // Comportamiento tipo Filament v3 tras actualización a v4 (guía upgrade)
+        Table::configureUsing(fn (Table $table) => $table->deferFilters(false));
+        Section::configureUsing(fn (Section $section) => $section->liberatedFromContainerGrid());
+        Grid::configureUsing(fn (Grid $grid) => $grid->liberatedFromContainerGrid());
+        Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset->liberatedFromContainerGrid());
 
         // Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
         //     $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
