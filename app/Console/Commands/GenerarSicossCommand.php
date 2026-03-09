@@ -32,7 +32,7 @@ class GenerarSicossCommand extends Command
         $numeroLegajo = $legajo ? (int) $legajo : null;
 
         // Crear instancia del generador
-        $generador = new GenerarSicossLegajo();
+        $generador = new GenerarSicossLegajo;
 
         // Mostrar mensaje inicial
         if ($numeroLegajo) {
@@ -54,8 +54,6 @@ class GenerarSicossCommand extends Command
 
     /**
      * Muestra el resultado exitoso con formato mejorado.
-     *
-     * @param array $resultado
      */
     private function mostrarResultadoExitoso(array $resultado): void
     {
@@ -88,8 +86,6 @@ class GenerarSicossCommand extends Command
 
     /**
      * Muestra los datos de un legajo individual.
-     *
-     * @param array $datos
      */
     private function mostrarDatosLegajoIndividual(array $datos): void
     {
@@ -129,8 +125,6 @@ class GenerarSicossCommand extends Command
 
     /**
      * Muestra el resumen de múltiples legajos.
-     *
-     * @param array $datos
      */
     private function mostrarResumenMultiplesLegajos(array $datos): void
     {

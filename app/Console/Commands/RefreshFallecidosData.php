@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Services\Reportes\FallecidoService;
+use Exception;
 use Illuminate\Console\Command;
 
 class RefreshFallecidosData extends Command
@@ -21,9 +21,11 @@ class RefreshFallecidosData extends Command
         try {
             $service->refreshData();
             $this->info('Datos actualizados exitosamente.');
+
             return Command::SUCCESS;
         } catch (Exception $e) {
             $this->error("Error al actualizar datos: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
     }

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Console\Command;
 
 class GenerarSicossBD extends Command
@@ -37,8 +37,9 @@ class GenerarSicossBD extends Command
         $incluirInactivos = $this->option('incluir-inactivos');
 
         // Validar formato del período
-        if (!preg_match('/^\d{6}$/', $periodo)) {
+        if (! preg_match('/^\d{6}$/', $periodo)) {
             $this->error('El período debe tener formato YYYYMM');
+
             return 1;
         }
 
@@ -63,13 +64,14 @@ class GenerarSicossBD extends Command
                     ['Insertados', $resultado['insertados']],
                     ['Chunks procesados', $resultado['chunks_procesados']],
                     ['Errores', $resultado['errores']],
-                    ['Tiempo total', $resultado['tiempo_total'] . 's'],
+                    ['Tiempo total', $resultado['tiempo_total'].'s'],
                 ],
             );
 
             return 0;
         } catch (Exception $e) {
-            $this->error('❌ Error: ' . $e->getMessage());
+            $this->error('❌ Error: '.$e->getMessage());
+
             return 1;
         }
     }

@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\Afip\SicossOptimizado;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Console\Command;
 
 class SicossDebugCommand extends Command
@@ -85,7 +85,7 @@ class SicossDebugCommand extends Command
             $tiempo_total = microtime(true) - $inicio;
 
             $this->info('✅ Método ejecutado exitosamente');
-            $this->info('⏱️ Tiempo de ejecución: ' . number_format($tiempo_total, 2) . ' segundos');
+            $this->info('⏱️ Tiempo de ejecución: '.number_format($tiempo_total, 2).' segundos');
 
             // Mostrar resultados
             $this->mostrarResultados($resultado);
@@ -93,8 +93,8 @@ class SicossDebugCommand extends Command
             return 0;
         } catch (Exception $e) {
             $this->error("\n❌ Error al ejecutar genera_sicoss:");
-            $this->error('Mensaje: ' . $e->getMessage());
-            $this->error('Archivo: ' . $e->getFile() . ':' . $e->getLine());
+            $this->error('Mensaje: '.$e->getMessage());
+            $this->error('Archivo: '.$e->getFile().':'.$e->getLine());
             $this->error("\nStack trace:");
             $this->line($e->getTraceAsString());
 
@@ -112,9 +112,9 @@ class SicossDebugCommand extends Command
 
             if (isset($resultado['legajos_procesados'])) {
                 $legajos = $resultado['legajos_procesados'];
-                $this->info('   - Legajos procesados: ' . \count($legajos));
+                $this->info('   - Legajos procesados: '.\count($legajos));
 
-                if (!empty($legajos)) {
+                if (! empty($legajos)) {
                     $legajo = $legajos[0];
                     $this->info("\n📋 Primer legajo procesado:");
                     $this->table(
@@ -132,18 +132,18 @@ class SicossDebugCommand extends Command
                 }
             } else {
                 // Si no tiene la estructura esperada, mostrar las claves principales
-                $this->info('   - Claves encontradas: ' . implode(', ', array_keys($resultado)));
+                $this->info('   - Claves encontradas: '.implode(', ', array_keys($resultado)));
 
                 // Mostrar primeros elementos si es un array de legajos directo
                 if (isset($resultado[0]) && \is_array($resultado[0])) {
-                    $this->info('   - Total elementos: ' . \count($resultado));
+                    $this->info('   - Total elementos: '.\count($resultado));
                     $primer_elemento = $resultado[0];
-                    $this->info('   - Claves del primer elemento: ' . implode(', ', array_keys($primer_elemento)));
+                    $this->info('   - Claves del primer elemento: '.implode(', ', array_keys($primer_elemento)));
                 }
             }
         } else {
-            $this->info('✅ Tipo: ' . \gettype($resultado));
-            $this->info('📋 Valor: ' . print_r($resultado, true));
+            $this->info('✅ Tipo: '.\gettype($resultado));
+            $this->info('📋 Valor: '.print_r($resultado, true));
         }
     }
 }

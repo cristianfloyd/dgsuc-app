@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Models\Dh01;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,7 +69,6 @@ class CorregirCaracteresEspecialesDh01 extends Command
             $query->limit($limit);
         }
 
-
         // Obtener registros
         $registros = $query->get();
         $this->info("Se encontraron {$registros->count()} registros para revisar.");
@@ -84,7 +83,7 @@ class CorregirCaracteresEspecialesDh01 extends Command
             foreach ($camposACorregir as $campo) {
                 $valorOriginal = $registro->getRawOriginal($campo);
 
-                if (!$valorOriginal) {
+                if (! $valorOriginal) {
                     continue;
                 }
 
@@ -101,10 +100,10 @@ class CorregirCaracteresEspecialesDh01 extends Command
                 }
             }
 
-            if (!empty($cambios)) {
-                $this->info("Registro #{$registro->nro_legaj}: " . json_encode($cambios, \JSON_UNESCAPED_UNICODE));
+            if (! empty($cambios)) {
+                $this->info("Registro #{$registro->nro_legaj}: ".json_encode($cambios, \JSON_UNESCAPED_UNICODE));
 
-                if (!$dryRun) {
+                if (! $dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();
 
                     try {
@@ -143,8 +142,7 @@ class CorregirCaracteresEspecialesDh01 extends Command
     /**
      * Función especializada para corregir caracteres en registros de Dh01.
      *
-     * @param string $texto Texto a corregir
-     *
+     * @param  string  $texto  Texto a corregir
      * @return string Texto corregido
      */
     private function corregirCaracteresDh01(string $texto): string
@@ -216,8 +214,9 @@ class CorregirCaracteresEspecialesDh01 extends Command
     {
         $hex = '';
         for ($i = 0; $i < \strlen($text); $i++) {
-            $hex .= bin2hex($text[$i]) . ' ';
+            $hex .= bin2hex($text[$i]).' ';
         }
+
         return trim($hex);
     }
 }

@@ -25,7 +25,7 @@ class ClearConceptoListadoCache extends Command
 
             $this->info('Caché limpiada exitosamente!');
         } catch (Exception $e) {
-            $this->error('Error limpiando caché: ' . $e->getMessage());
+            $this->error('Error limpiando caché: '.$e->getMessage());
         }
     }
 }

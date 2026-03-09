@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TransactionServiceInterface;
@@ -10,6 +9,7 @@ use App\Contracts\WorkflowServiceInterface;
 use app\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\ValidationService;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -65,7 +65,7 @@ class ImportAfipRelacionesActivas extends Command
     public function handle(): void
     {
         $uploadedFileId = $this->argument('uploadedFileId'); // Obtener el ID del archivo
-        Log::info('Importando archivo con ID: ' . $uploadedFileId);
+        Log::info('Importando archivo con ID: '.$uploadedFileId);
         try {
             // 1. Obtener el archivo a procesar desde la base de datos
             $uploadedFile = UploadedFile::query()->findOrFail($uploadedFileId)->first();
@@ -86,7 +86,7 @@ class ImportAfipRelacionesActivas extends Command
                 );
 
                 // 5. Guardar las líneas procesadas
-                Log::info('Guardando líneas procesadas (' . $processedLines->count() . ') AfipRelacionesActivas');
+                Log::info('Guardando líneas procesadas ('.$processedLines->count().') AfipRelacionesActivas');
                 $this->employeeService->storeProcessedLines($processedLines->toArray());
             });
 
@@ -98,7 +98,7 @@ class ImportAfipRelacionesActivas extends Command
             // 7. Manejar errores, marcar el proceso como fallido
             $this->workflowService->failStep('import_archivo_afip', $e->getMessage());
 
-            $this->error('Error al importar el archivo: ' . $e->getMessage());
+            $this->error('Error al importar el archivo: '.$e->getMessage());
         }
     }
 }

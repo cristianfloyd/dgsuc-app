@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Services\Dh11RestoreService;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -32,8 +32,6 @@ class RestoreCategoryFiscalPeriod extends Command
 
     /**
      * Constructor del comando.
-     *
-     * @param Dh11RestoreService $restoreService
      */
     public function __construct(Dh11RestoreService $restoreService)
     {
@@ -53,7 +51,7 @@ class RestoreCategoryFiscalPeriod extends Command
         $month = $this->argument('month');
 
         // Validar los argumentos
-        if (!$this->validateArguments($year, $month)) {
+        if (! $this->validateArguments($year, $month)) {
             return 1;
         }
 
@@ -71,8 +69,8 @@ class RestoreCategoryFiscalPeriod extends Command
             return 0;
         } catch (Exception $e) {
             // Manejar cualquier error que ocurra durante la restauración
-            $this->error('Error durante la restauración: ' . $e->getMessage());
-            Log::error("Error al restaurar categorías para el período {$year}-{$month}: " . $e->getMessage());
+            $this->error('Error durante la restauración: '.$e->getMessage());
+            Log::error("Error al restaurar categorías para el período {$year}-{$month}: ".$e->getMessage());
 
             return 1;
         }
@@ -81,20 +79,20 @@ class RestoreCategoryFiscalPeriod extends Command
     /**
      * Valida los argumentos del comando.
      *
-     * @param string $year
-     * @param string $month
-     *
-     * @return bool
+     * @param  string  $year
+     * @param  string  $month
      */
     private function validateArguments($year, $month): bool
     {
-        if (!is_numeric($year) || \strlen($year) !== 4) {
+        if (! is_numeric($year) || \strlen($year) !== 4) {
             $this->error('El año debe ser un número de 4 dígitos.');
+
             return false;
         }
 
-        if (!is_numeric($month) || $month < 1 || $month > 12) {
+        if (! is_numeric($month) || $month < 1 || $month > 12) {
             $this->error('El mes debe ser un número entre 1 y 12.');
+
             return false;
         }
 

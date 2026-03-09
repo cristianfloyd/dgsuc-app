@@ -18,6 +18,7 @@ class DiagnosticarCodificacion extends Command
 
         if (isset($diagnostico['error'])) {
             $this->error($diagnostico['error']);
+
             return 1;
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Exception;
 use App\Services\ConceptoListado\ConceptoListadoSyncService;
+use Exception;
 use Illuminate\Console\Command;
 
 class SyncConceptoListado extends Command
@@ -18,7 +18,7 @@ class SyncConceptoListado extends Command
             $registros = $syncService->sync();
             $this->info("Sincronización completada: {$registros} registros procesados");
         } catch (Exception $e) {
-            $this->error('Error en la sincronización: ' . $e->getMessage());
+            $this->error('Error en la sincronización: '.$e->getMessage());
         }
     }
 }
