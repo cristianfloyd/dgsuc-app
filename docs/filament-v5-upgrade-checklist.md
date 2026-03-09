@@ -93,18 +93,17 @@ Algunos plugins pueden no estar listos para v5. Revisa y actúa:
 
 ### 4.1 Instalar el paquete de upgrade
 
-- [ ] Ejecutar:
+- [x] Ejecutar:
   ```bash
   docker compose exec app composer require filament/upgrade:"^5.0" -W --dev
   ```
   En Windows PowerShell, si `^` da problemas, usar: `filament/upgrade:"~5.0"`.
-  _(Se hizo la actualización por vía directa: composer update + filament:upgrade.)_
 
 ### 4.2 Ejecutar el script
 
-- [x] Ejecutar: `docker compose exec app vendor/bin/filament-v5` _(alternativa usada: `docker compose exec app php artisan filament:upgrade`)_
+- [x] Ejecutar: `docker compose exec app vendor/bin/filament-v5`
 - [x] **Leer la salida completa:** el script indica comandos adicionales y cambios aplicados.
-- [ ] Revisar los cambios que el script haya hecho en el código (git diff).
+- [ ] Revisar los cambios que el script haya hecho en el código (`git diff`).
 
 ### 4.3 Comandos indicados por el script
 
@@ -124,7 +123,7 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 
 ### 4.5 Quitar el paquete de upgrade
 
-- [x] Ejecutar: `docker compose exec app composer remove filament/upgrade --dev` _(N/A: no se instaló el paquete filament/upgrade)_
+- [x] Ejecutar: `docker compose exec app composer remove filament/upgrade --dev`
 
 ---
 
@@ -154,10 +153,10 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 | Prioridad | Tarea |
 |-----------|--------|
 | Alta | Actualizar Livewire a v4 y actualizar `config/livewire.php`. ✅ |
-| Alta | Ejecutar `filament-v5` y los comandos que indique. ✅ _(hecho con `php artisan filament:upgrade`)_ |
+| Alta | Ejecutar `filament-v5` y los comandos que indique. ✅ |
 | Alta | Actualizar `filament/filament` y `filament/spatie-laravel-media-library-plugin` a ^5.0. ✅ |
 | Media | Revisar cambios del script y ajustar código a mano si hace falta. |
-| Media | Quitar `filament/upgrade` y verificar que no queden referencias. ✅ _(N/A)_ |
+| Media | Quitar `filament/upgrade` y verificar que no queden referencias. ✅ |
 | Baja | Revisar opciones nuevas de Livewire v4 y Filament v5 (opcional). |
 
 ---
