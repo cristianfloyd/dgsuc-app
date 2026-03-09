@@ -2,21 +2,18 @@
 
 namespace App\Filament\Admin\Pages;
 
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
 class Profile extends Page
 {
     public ?array $data = [];
-
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
-
-    protected string $view = 'filament.pages.profile';
-
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
+    protected string $view = 'filament.admin.pages.profile';
     protected static ?string $title = 'Mi Perfil';
 
     public function mount(): void
@@ -35,27 +32,22 @@ class Profile extends Page
                 TextInput::make('name')
                     ->label('Nombre')
                     ->required(),
-
                 TextInput::make('email')
                     ->label('Email')
                     ->email()
                     ->required(),
-
                 TextInput::make('current_password')
                     ->label('Contraseña actual')
                     ->password()
                     ->dehydrated(false),
-
                 TextInput::make('new_password')
                     ->label('Nueva contraseña')
                     ->password()
                     ->dehydrated(false),
-
                 TextInput::make('new_password_confirmation')
                     ->label('Confirmar nueva contraseña')
                     ->password()
                     ->dehydrated(false),
-
                 FileUpload::make('profile_photo_path')
                     ->label('Foto de perfil')
                     ->image()
@@ -72,11 +64,12 @@ class Profile extends Page
 
         // Validar contraseña actual si se intenta cambiar
         if ($validated['new_password']) {
-            if (!Hash::check($validated['current_password'], $user->password)) {
+            if (! Hash::check($validated['current_password'], $user->password)) {
                 Notification::make()
                     ->title('La contraseña actual es incorrecta')
                     ->danger()
                     ->send();
+
                 return;
             }
 
