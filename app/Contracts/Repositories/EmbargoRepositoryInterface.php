@@ -9,13 +9,6 @@ interface EmbargoRepositoryInterface
 {
     /**
      * Ejecuta el proceso de embargo.
-     *
-     * @param array $nroComplementarias
-     * @param int $nroLiquiDefinitiva
-     * @param int $nroLiquiProxima
-     * @param bool $insertIntoDh25
-     *
-     * @return Builder
      */
     public function executeEmbargoProcess(
         array $nroComplementarias,
@@ -26,17 +19,11 @@ interface EmbargoRepositoryInterface
 
     /**
      * Obtiene todos los registros de embargo.
-     *
-     * @return Collection
      */
     public function getAllEmbargos(): Collection;
 
     /**
      * Obtiene embargos por tipo.
-     *
-     * @param int $tipoEmbargo
-     *
-     * @return Collection
      */
     public function getEmbargosByType(int $tipoEmbargo): Collection;
 }

@@ -19,45 +19,33 @@ interface Dh21hRepositoryInterface
     /**
      * Obtiene un registro DH21H por su ID.
      *
-     * @param int $id
-     *
-     * @return Dh21h
+     * @param  int  $id
      */
     public function find($id): Dh21h;
 
     /**
      * Crea un nuevo registro DH21H.
-     *
-     * @param Dh21hData $data
-     *
-     * @return Dh21h
      */
     public function create(Dh21hData $data): Dh21h;
 
     /**
      * Actualiza un registro DH21H existente.
      *
-     * @param int $id
-     * @param Dh21hData $data
-     *
-     * @return bool
+     * @param  int  $id
      */
     public function update($id, Dh21hData $data): bool;
 
     /**
      * Elimina un registro DH21H.
      *
-     * @param int $id
-     *
-     * @return bool
+     * @param  int  $id
      */
     public function delete($id): bool;
 
     /**
      * Busca registros DH21H por criterios específicos.
      *
-     * @param array $criteria
-     *
+     * @param  array  $criteria
      * @return mixed
      */
     public function findByLegajo(int $legajo): Collection;

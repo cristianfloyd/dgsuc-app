@@ -32,8 +32,6 @@ use App\Models\ProcessLog;
  *
  * @category Contracts
  *
- * @access public
- *
  * @see ProcessLog
  * @see WorkflowService
  * @see ProcessLogService
@@ -42,49 +40,32 @@ interface WorkflowServiceInterface
 {
     /**
      * Inicia un nuevo flujo de trabajo.
-     *
-     * @return ProcessLog
      */
     public function startWorkflow(): ProcessLog;
 
     /**
      * Reinicia un flujo de trabajo existente.
-     *
-     * @param ProcessLog $processLog
-     *
-     * @return void
      */
     public function resetWorkflow(ProcessLog $processLog): void;
 
     /**
      * Obtiene el flujo de trabajo más reciente.
-     *
-     * @return ProcessLog|null
      */
     public function getLatestWorkflow(): ?ProcessLog;
 
     /**
      * Obtiene todos los pasos del flujo de trabajo.
-     *
-     * @return array
      */
     public function getSteps(): array;
 
     /**
      * Obtiene el paso actual del flujo de trabajo.
-     *
-     * @param ProcessLog $processLog
-     *
-     * @return string|null
      */
-    public function getCurrentStep(ProcessLog $processLog): string|null;
+    public function getCurrentStep(ProcessLog $processLog): ?string;
 
     /**
      * Actualiza el estado de un paso en el flujo de trabajo.
      *
-     * @param ProcessLog $processLog
-     * @param string $step
-     * @param string $status
      *
      * @return mixed
      */
@@ -92,58 +73,34 @@ interface WorkflowServiceInterface
 
     /**
      * Marca un paso como completado en el flujo de trabajo.
-     *
-     * @param ProcessLog $processLog
-     * @param string $step
-     *
-     * @return void
      */
     public function completeStep(ProcessLog $processLog, string $step): void;
 
     /**
      * Obtiene el siguiente paso en el flujo de trabajo.
-     *
-     * @param string $currentStep
-     *
-     * @return string|null
      */
     public function getNextStep(string $currentStep): ?string;
 
     /**
      * Verifica si un paso está completado en el flujo de trabajo.
-     *
-     * @param ProcessLog $processLog
-     * @param string $step
-     *
-     * @return bool
      */
     public function isStepCompleted(ProcessLog $processLog, string $step): bool;
 
     /**
      * Obtiene la URL asociada a un paso del flujo de trabajo.
-     *
-     * @param string $step
-     *
-     * @return string
      */
     public function getStepUrl(?string $step): ?string;
 
     /**
      * Marca un paso como fallido en el flujo de trabajo.
      *
-     * @param string $step El paso que se ha marcado como fallido.
-     * @param string|null $message Un mensaje opcional que describe el motivo del fallo.
-     *
-     * @return void
+     * @param  string  $step  El paso que se ha marcado como fallido.
+     * @param  string|null  $message  Un mensaje opcional que describe el motivo del fallo.
      */
     public function failStep(string $step, ?string $message = null): void;
 
     /**
      * Verifica si el proceso completo está finalizado.
-     *
-     * @param ProcessLog $processLog
-     *
-     * @return bool
      */
     public function isProcessCompleted(ProcessLog $processLog): bool;
 }

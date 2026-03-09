@@ -15,22 +15,11 @@ interface Dh21RepositoryInterface
 
     /**
      * Obtiene conceptos liquidados para procesamiento SICOSS.
-     *
-     * @param int $per_anoct
-     * @param int $per_mesct
-     * @param string $where
-     *
-     * @return array
      */
     public function obtenerConceptosLiquidadosSicoss(int $per_anoct, int $per_mesct, string $where): array;
 
     /**
      * Obtiene períodos retro disponibles de la tabla temporal pre_conceptos_liquidados.
-     *
-     * @param bool $check_lic
-     * @param bool $check_retr
-     *
-     * @return array
      */
     public function obtenerPeriodosRetro(bool $check_lic = false, bool $check_retr = false): array;
 }

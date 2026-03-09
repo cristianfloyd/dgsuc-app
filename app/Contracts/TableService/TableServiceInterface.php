@@ -6,15 +6,11 @@ namespace App\Contracts\TableService;
  * Interface TableServiceInterface.
  *
  * Define el contrato base para los servicios de gestión de tablas
- *
- * @package App\Contracts\TableService
  */
 interface TableServiceInterface
 {
     /**
      * Verifica si la tabla existe en la base de datos.
-     *
-     * @return bool
      */
     public function exists(): bool;
 
@@ -30,8 +26,6 @@ interface TableServiceInterface
 
     /**
      * Obtiene el nombre de la tabla.
-     *
-     * @return string
      */
     public function getTableName(): string;
 }

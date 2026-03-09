@@ -9,9 +9,8 @@ interface TableManagementServiceInterface
     /**
      * Verifica y prepara una tabla de base de datos.
      *
-     * @param string $tableName Nombre de la tabla a verificar y preparar.
-     * @param string|null $connection Nombre de la conexión de base de datos a utilizar (opcional).
-     *
+     * @param  string  $tableName  Nombre de la tabla a verificar y preparar.
+     * @param  string|null  $connection  Nombre de la conexión de base de datos a utilizar (opcional).
      * @return array Devuelve un array con información sobre la tabla, como si está vacía o no.
      */
     public static function verifyAndPrepareTable(string $tableName, ?string $connection = null): array;
@@ -19,9 +18,8 @@ interface TableManagementServiceInterface
     /**
      * Verifica si una tabla de base de datos está vacía.
      *
-     * @param Model $model Modelo Eloquent asociado a la tabla.
-     * @param string $tableName Nombre de la tabla a verificar.
-     *
+     * @param  Model  $model  Modelo Eloquent asociado a la tabla.
+     * @param  string  $tableName  Nombre de la tabla a verificar.
      * @return bool Verdadero si la tabla está vacía, falso en caso contrario.
      */
     public static function verifyTableIsEmpty(Model $model, string $tableName): bool;
