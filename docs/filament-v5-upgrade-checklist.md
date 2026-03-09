@@ -140,7 +140,8 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 ## 6. Verificación final
 
 - [ ] `docker compose exec app composer run quality:check` (o equivalente del proyecto).
-- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).
+- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).  
+  _En tests: conexión por defecto = SQLite en memoria (no escribe en la BD real). Conexiones secundarias (pgsql-mapuche, pgsql-2503, …) no deben escribirse; si hace falta escribir datos tipo Mapuche, usar la conexión `test-pgsql` (BD demo; configurar TEST_PGSQL_* en .env)._
 - [ ] `docker compose exec app php artisan filament:optimize`
 - [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend; si corres npm en el contenedor: `docker compose exec app npm run build`.
 - [ ] Probar en navegador los paneles que uses: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
