@@ -1,0 +1,53 @@
+/* Header/topbar global: más compacto y ordenado */
+
+.fi-topbar-ctn {
+    @apply sticky top-0 z-30 overflow-x-clip;
+}
+
+.fi-topbar {
+    @apply flex min-h-[3.25rem] items-center gap-0 bg-white px-3 shadow-sm ring-1 ring-gray-200/80 dark:bg-gray-900 dark:ring-white/10;
+}
+
+.fi-topbar-start {
+    @apply me-4 hidden items-center gap-2 lg:flex;
+}
+
+.fi-topbar-start .fi-logo {
+    @apply ms-1;
+}
+
+.fi-topbar-open-sidebar-btn,
+.fi-topbar-close-sidebar-btn,
+.fi-topbar-open-collapse-sidebar-btn,
+.fi-topbar-close-collapse-sidebar-btn {
+    @apply mx-0 size-9 shrink-0;
+}
+
+.fi-topbar-nav-groups {
+    @apply ms-2 me-2 hidden items-center gap-x-0.5 lg:my-1.5 lg:flex lg:flex-wrap lg:gap-y-0.5;
+}
+
+.fi-topbar-item-btn {
+    @apply flex items-center justify-center gap-x-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium outline-hidden transition duration-75 hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5;
+}
+
+.fi-topbar-item-btn .fi-icon {
+    @apply size-4 text-gray-500 dark:text-gray-400;
+}
+
+.fi-topbar-item-label {
+    @apply text-[13px] font-medium text-gray-700 dark:text-gray-200;
+}
+
+.fi-topbar-item.fi-active .fi-topbar-item-btn {
+    @apply bg-gray-100 dark:bg-white/5;
+}
+
+.fi-topbar-item.fi-active .fi-topbar-item-btn .fi-icon,
+.fi-topbar-item.fi-active .fi-topbar-item-label {
+    @apply text-primary-600 dark:text-primary-400;
+}
+
+.fi-topbar-end {
+    @apply ms-auto flex items-center gap-x-2;
+}

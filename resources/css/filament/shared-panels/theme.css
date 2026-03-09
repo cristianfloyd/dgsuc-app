@@ -1,4 +1,5 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import './topbar.css';
 
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
@@ -6,3 +7,4 @@
 @source '../../../../app/Filament/**/*.php';
 @source '../../../../resources/views/filament/**/*.blade.php';
 @source '../../../../resources/views/livewire/components/filament-footer.blade.php';
+@source '../../../../resources/views/livewire/database-connection-selector-badge.blade.php';
