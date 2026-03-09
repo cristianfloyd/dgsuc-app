@@ -20,7 +20,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithStyles, WithTitle, WithEvents, WithColumnFormatting
+class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected string $periodo;
 
@@ -48,7 +48,7 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
     public function headings(): array
     {
         return [
-            ['Período: ' . $this->formatPeriodo()],
+            ['Período: '.$this->formatPeriodo()],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -172,6 +172,6 @@ class RepEmbarazadasSheet implements FromQuery, WithMapping, WithHeadings, Shoul
      */
     protected function formatPeriodo(): string
     {
-        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
+        return substr($this->periodo, 0, 4).'/'.substr($this->periodo, 4, 2);
     }
 }

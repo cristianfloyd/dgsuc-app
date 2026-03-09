@@ -6,6 +6,8 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid as ComponentsGrid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
@@ -28,30 +30,50 @@ class Profile extends Page
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
-                TextInput::make('name')
-                    ->label('Nombre')
-                    ->required(),
-                TextInput::make('email')
-                    ->label('Email')
-                    ->email()
-                    ->required(),
-                TextInput::make('current_password')
-                    ->label('Contraseña actual')
-                    ->password()
-                    ->dehydrated(false),
-                TextInput::make('new_password')
-                    ->label('Nueva contraseña')
-                    ->password()
-                    ->dehydrated(false),
-                TextInput::make('new_password_confirmation')
-                    ->label('Confirmar nueva contraseña')
-                    ->password()
-                    ->dehydrated(false),
-                FileUpload::make('profile_photo_path')
-                    ->label('Foto de perfil')
-                    ->image()
-                    ->directory('profile-photos'),
+                ComponentsGrid::make(2)
+                    ->schema([
+                        // Columna izquierda: datos del usuario
+                        Section::make('Datos del usuario')
+                            ->columns(1)
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nombre')
+                                    ->required(),
+                                TextInput::make('email')
+                                    ->label('Email')
+                                    ->email()
+                                    ->required(),
+                                TextInput::make('current_password')
+                                    ->label('Contraseña actual')
+                                    ->password()
+                                    ->revealable(true)
+                                    ->dehydrated(false),
+                                TextInput::make('new_password')
+                                    ->label('Nueva contraseña')
+                                    ->password()
+                                    ->revealable(true)
+                                    ->dehydrated(false),
+                                TextInput::make('new_password_confirmation')
+                                    ->label('Confirmar nueva contraseña')
+                                    ->password()
+                                    ->revealable(true)
+                                    ->dehydrated(false),
+                            ]),
+                        // Columna derecha: foto de perfil
+                        Section::make('Foto de perfil')
+                            ->columns(1)
+                            ->schema([
+                                FileUpload::make('profile_photo_path')
+                                    ->label('Foto de perfil')
+                                    ->image()
+                                    ->avatar()
+                                    ->imageEditor()
+                                    ->directory('profile-photos')
+                                    ->maxSize(1024),
+                            ]),
+                    ])
             ])
             ->statePath('data');
     }

@@ -32,8 +32,7 @@ class TransferResultData extends Data
         public readonly array $idsTransferidos = [],
         /** @var array IDs de registros que fallaron con sus errores */
         public readonly array $idsFallidos = [],
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia exitosa.
@@ -107,6 +106,7 @@ class TransferResultData extends Data
     public function getPorcentajeExito(): float
     {
         $total = $this->getTotalProcesados();
+
         return $total > 0 ? ($this->transferidos / $total) * 100 : 0;
     }
 
@@ -115,6 +115,6 @@ class TransferResultData extends Data
      */
     public function getPeriodoFiscalString(): string
     {
-        return $this->periodoFiscal['year'] . '-' . str_pad((string) $this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        return $this->periodoFiscal['year'].'-'.str_pad((string) $this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
     }
 }

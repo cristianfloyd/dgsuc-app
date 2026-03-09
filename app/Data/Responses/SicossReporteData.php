@@ -30,14 +30,12 @@ class SicossReporteData extends Data
         public readonly float $c305,
         #[MapName('c306')]
         public readonly float $c306,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia de SicossReporteData a partir de un modelo.
      *
-     * @param mixed $model El modelo desde el cual crear la instancia
-     *
+     * @param  mixed  $model  El modelo desde el cual crear la instancia
      * @return self Nueva instancia de SicossReporteData
      */
     public static function fromModel($model): self

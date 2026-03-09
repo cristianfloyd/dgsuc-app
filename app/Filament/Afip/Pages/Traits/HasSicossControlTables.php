@@ -2,9 +2,9 @@
 
 namespace App\Filament\Afip\Pages\Traits;
 
-use Filament\Support\Enums\TextSize;
 use Carbon\Carbon;
 use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;

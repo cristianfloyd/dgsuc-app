@@ -2,19 +2,19 @@
 
 namespace App\Filament\Admin\Resources\Documentations\Documentations;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\Action;
 use App\Filament\Admin\Resources\Documentations\Pages\CreateDocumentation;
 use App\Filament\Admin\Resources\Documentations\Pages\EditDocumentation;
 use App\Filament\Admin\Resources\Documentations\Pages\ListDocumentation;
 use App\Filament\Admin\Resources\Documentations\Pages\ViewDocumentation;
 use App\Models\Documentation;
+use Filament\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -23,9 +23,9 @@ class DocumentationResource extends Resource
 {
     protected static ?string $model = Documentation::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Sistema';
+    protected static string|\UnitEnum|null $navigationGroup = 'Sistema';
 
     protected static ?string $label = 'Documentacion';
 

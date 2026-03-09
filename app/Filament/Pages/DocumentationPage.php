@@ -18,7 +18,7 @@ class DocumentationPage extends Page
 
     protected string $view = 'filament.pages.documentation';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Ayuda';
+    protected static string|\UnitEnum|null $navigationGroup = 'Ayuda';
 
     protected static ?int $navigationSort = 100;
 
@@ -59,11 +59,12 @@ class DocumentationPage extends Page
         $currentDoc = collect($this->documentationData)
             ->firstWhere('section', $this->activeSection);
 
-        if (!$currentDoc) {
+        if (! $currentDoc) {
             return [];
         }
 
         preg_match_all('/#+ (.*)/', $currentDoc['content'], $matches);
+
         return $matches[1] ?? [];
     }
 

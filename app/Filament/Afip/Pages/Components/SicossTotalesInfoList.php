@@ -2,10 +2,10 @@
 
 namespace App\Filament\Afip\Pages\Components;
 
-use Filament\Schemas\Schema;
-use Filament\Support\Enums\TextSize;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\TextSize;
 
 class SicossTotalesInfoList extends Schema
 {

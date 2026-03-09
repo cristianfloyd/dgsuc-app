@@ -2,19 +2,19 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicosses\Pages;
 
-use Filament\Actions\Action;
-use Exception;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
 use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossExportService;
 use Carbon\Carbon;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Log;
 
@@ -70,14 +70,14 @@ class ExportAfipMapucheSicoss extends Page
         $periodoFiscal = null;
         try {
             $data = $this->form->getState();
-            $periodoFiscal = $data['year'] . \sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
 
             // Obtener registros según el período fiscal
             $query = static::getResource()::getModel()::query()
                 ->where('periodo_fiscal', $periodoFiscal);
 
             // Aplicar filtro de activos/inactivos si es necesario
-            if (!$data['includeInactive']) {
+            if (! $data['includeInactive']) {
                 $query->where('cod_situacion', '!=', '2'); // Asumiendo que '2' es el código para inactivos
             }
 
@@ -85,6 +85,7 @@ class ExportAfipMapucheSicoss extends Page
 
             if ($registros->isEmpty()) {
                 $this->showErrorNotification('No se encontraron registros para el período fiscal seleccionado');
+
                 return;
             }
 
@@ -115,7 +116,7 @@ class ExportAfipMapucheSicoss extends Page
                 'periodo' => $periodoFiscal,
             ]);
 
-            $this->showErrorNotification('Error durante la exportación: ' . $e->getMessage());
+            $this->showErrorNotification('Error durante la exportación: '.$e->getMessage());
         }
     }
 
@@ -181,6 +182,7 @@ class ExportAfipMapucheSicoss extends Page
     private function getYearOptions(): array
     {
         $currentYear = Carbon::now()->year;
+
         return array_combine(
             range($currentYear - 5, $currentYear + 1),
             range($currentYear - 5, $currentYear + 1),

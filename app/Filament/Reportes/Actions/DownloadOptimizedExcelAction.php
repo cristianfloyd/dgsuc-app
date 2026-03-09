@@ -50,6 +50,7 @@ class DownloadOptimizedExcelAction extends Action
     public static function make(?string $name = null): static
     {
         $name ??= 'downloadOptimized';
+
         return parent::make($name);
     }
 }

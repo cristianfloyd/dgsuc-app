@@ -3,8 +3,8 @@
 namespace App\Exceptions;
 
 use Exception;
-use Throwable;
 use Illuminate\Support\Collection;
+use Throwable;
 
 class ImportValidationException extends Exception
 {
@@ -17,11 +17,11 @@ class ImportValidationException extends Exception
     /**
      * Constructor de la excepción de validación.
      *
-     * @param string $message Mensaje de error
-     * @param array $rowData Datos de la fila que causó el error
-     * @param int $rowNumber Número de fila en el archivo
-     * @param int $code Código de error
-     * @param Throwable|null $previous Excepción previa
+     * @param  string  $message  Mensaje de error
+     * @param  array  $rowData  Datos de la fila que causó el error
+     * @param  int  $rowNumber  Número de fila en el archivo
+     * @param  int  $code  Código de error
+     * @param  Throwable|null  $previous  Excepción previa
      */
     public function __construct(
         string $message,
@@ -34,13 +34,11 @@ class ImportValidationException extends Exception
 
         $this->rowData = $rowData;
         $this->rowNumber = $rowNumber;
-        $this->failures = new Collection();
+        $this->failures = new Collection;
     }
 
     /**
      * Obtiene los datos de la fila que causó el error.
-     *
-     * @return array
      */
     public function getRowData(): array
     {
@@ -49,8 +47,6 @@ class ImportValidationException extends Exception
 
     /**
      * Obtiene el número de fila donde ocurrió el error.
-     *
-     * @return int
      */
     public function getRowNumber(): int
     {
@@ -59,11 +55,6 @@ class ImportValidationException extends Exception
 
     /**
      * Agrega un error de validación.
-     *
-     * @param string $attribute
-     * @param string $error
-     *
-     * @return void
      */
     public function addFailure(string $attribute, string $error): void
     {
@@ -77,8 +68,6 @@ class ImportValidationException extends Exception
 
     /**
      * Obtiene todos los errores de validación.
-     *
-     * @return Collection
      */
     public function getFailures(): Collection
     {
@@ -87,8 +76,6 @@ class ImportValidationException extends Exception
 
     /**
      * Formatea el error para logging.
-     *
-     * @return array
      */
     public function toArray(): array
     {

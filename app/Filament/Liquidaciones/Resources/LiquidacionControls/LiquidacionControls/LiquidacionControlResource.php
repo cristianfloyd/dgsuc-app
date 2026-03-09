@@ -2,24 +2,21 @@
 
 namespace App\Filament\Liquidaciones\Resources\LiquidacionControls\LiquidacionControls;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use App\Services\LiquidacionControlService;
-use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\ListLiquidacionControls;
 use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\CreateLiquidacionControl;
 use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\EditLiquidacionControl;
-use App\Filament\Liquidaciones\Resources\LiquidacionControlResource\Pages;
+use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\ListLiquidacionControls;
 use App\Models\LiquidacionControl;
-use Filament\Forms;
+use App\Services\LiquidacionControlService;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -27,9 +24,9 @@ class LiquidacionControlResource extends Resource
 {
     protected static ?string $model = LiquidacionControl::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check-badge';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
     protected static ?string $modelLabel = 'Control Post-Liquidación';
 
@@ -126,8 +123,8 @@ class LiquidacionControlResource extends Resource
         // usando LiquidacionControlService
 
         // Ejemplo:
-        $service = new LiquidacionControlService();
-        $result = match($record->nombre_control) {
+        $service = new LiquidacionControlService;
+        $result = match ($record->nombre_control) {
             'controlar_negativos' => $service->controlarNegativos($record->nro_liqui),
             'controlar_cargos_liquidados' => $service->controlarCargosLiquidados($record->nro_liqui),
             // Agrega más casos según los controles que tengas

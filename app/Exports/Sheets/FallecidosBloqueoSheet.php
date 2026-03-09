@@ -19,15 +19,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class FallecidosBloqueoSheet implements
-    FromCollection,
-    WithTitle,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    ShouldAutoSize,
-    WithEvents,
-    WithColumnFormatting
+class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $records;
 
@@ -43,6 +35,7 @@ class FallecidosBloqueoSheet implements
     {
         $collection = $this->records;
         $collection = $collection->filter(fn ($row) => $row !== null);
+
         return $collection;
     }
 
@@ -54,7 +47,7 @@ class FallecidosBloqueoSheet implements
     public function headings(): array
     {
         return [
-            ['Período: ' . $this->periodo],
+            ['Período: '.$this->periodo],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -79,9 +72,9 @@ class FallecidosBloqueoSheet implements
             $fechaBaja = Carbon::parse($fechaBaja);
         }
 
-        $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
+        $cuil = $row->dh01->nro_cuil1.$row->dh01->nro_cuil.$row->dh01->nro_cuil2;
 
-        if (!$row) {
+        if (! $row) {
             return [
                 '',
                 '',
@@ -93,6 +86,7 @@ class FallecidosBloqueoSheet implements
                 '',
             ];
         }
+
         return [
             $row->nro_legaj,
             $row?->dh01?->nro_cuil1 ?? 'N/A',

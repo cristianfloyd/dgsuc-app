@@ -9,20 +9,19 @@ readonly class LegajoCargo implements Stringable
     public function __construct(
         public ?int $legajo = null,
         public ?int $cargo = null,
-    ) {
-    }
+    ) {}
 
     public function __toString(): string
     {
         return $this->toString();
     }
 
-    public function getLegajo(): int|null
+    public function getLegajo(): ?int
     {
         return $this->legajo;
     }
 
-    public function getCargo(): int|null
+    public function getCargo(): ?int
     {
         return $this->cargo;
     }
@@ -39,11 +38,12 @@ readonly class LegajoCargo implements Stringable
 
     public static function fromString(?string $value): self
     {
-        if (!$value) {
-            return new self();
+        if (! $value) {
+            return new self;
         }
 
         [$legajo, $cargo] = explode('-', $value);
+
         return new self((int) $legajo, (int) $cargo);
     }
 

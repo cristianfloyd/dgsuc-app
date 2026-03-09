@@ -2,7 +2,6 @@
 
 namespace App\Filament\Embargos\Resources\Embargos\Pages;
 
-use Filament\Schemas\Schema;
 use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Models\Mapuche\Dh22;
@@ -12,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
@@ -46,7 +46,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
 
     public function mount(): void
     {
-        $embargoResource = new EmbargoResource();
+        $embargoResource = new EmbargoResource;
 
         $this->data = $embargoResource->getPropertiesToDisplay();
         foreach ($this->data as $key => $value) {
@@ -123,7 +123,6 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         // Lógica para guardar los parámetros y actualizar los datos
         EmbargoResource::actualizarDatos($data);
 
-
         // Redirigir a la página de listado
         return redirect()->to(EmbargoResource::getUrl())->with('success', 'Configuración guardada exitosamente');
     }
@@ -131,7 +130,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal(array $periodoFiscal): void
     {
-        $instance = new EmbargoResource();
+        $instance = new EmbargoResource;
         $currentProperties = $instance->getPropertiesToDisplay();
         $this->periodoFiscal = [
             'periodoFiscal' => $periodoFiscal,

@@ -41,7 +41,7 @@ class ListDh21s extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            //Dh21LegajoCounter::class,
+            // Dh21LegajoCounter::class,
             Dh21Concepto101Total::class,
             IdLiquiSelector::class,
         ];
@@ -50,6 +50,7 @@ class ListDh21s extends ListRecords
     protected static function descargarReportePDF($liquidacionId)
     {
         $component = Livewire::test(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
+
         return $component->call('descargarPDF');
     }
 }

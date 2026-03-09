@@ -2,9 +2,8 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoReports\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Embargos\Resources\EmbargoReports\EmbargoReports\EmbargoReportResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditEmbargo extends EditRecord

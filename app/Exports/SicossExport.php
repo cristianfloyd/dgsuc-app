@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -10,9 +9,10 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize, WithStyles
+class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected Collection $registros;
 
@@ -21,8 +21,8 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
     /**
      * Constructor.
      *
-     * @param Collection $registros Registros a exportar
-     * @param string|null $periodoFiscal Periodo fiscal (formato YYYYMM)
+     * @param  Collection  $registros  Registros a exportar
+     * @param  string|null  $periodoFiscal  Periodo fiscal (formato YYYYMM)
      */
     public function __construct(Collection $registros, ?string $periodoFiscal = null)
     {
@@ -30,17 +30,11 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
         $this->periodoFiscal = $periodoFiscal ?? date('Ym');
     }
 
-    /**
-     * @return Collection
-     */
     public function collection(): Collection
     {
         return $this->registros;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         return [
@@ -109,9 +103,7 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
     }
 
     /**
-     * @param mixed $row
-     *
-     * @return array
+     * @param  mixed  $row
      */
     public function map($row): array
     {
@@ -180,19 +172,11 @@ class SicossExport implements FromCollection, WithHeadings, WithMapping, WithTit
         ];
     }
 
-    /**
-     * @return string
-     */
     public function title(): string
     {
-        return 'SICOSS ' . $this->periodoFiscal;
+        return 'SICOSS '.$this->periodoFiscal;
     }
 
-    /**
-     * @param Worksheet $sheet
-     *
-     * @return array
-     */
     public function styles(Worksheet $sheet): array
     {
         return [

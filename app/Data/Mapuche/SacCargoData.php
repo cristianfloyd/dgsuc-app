@@ -21,8 +21,7 @@ class SacCargoData extends Data
         public ?string $categoria = null,
         public ?Carbon $fecha_alta = null,
         public ?Carbon $fecha_baja = null,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(Dh10 $model): self
     {

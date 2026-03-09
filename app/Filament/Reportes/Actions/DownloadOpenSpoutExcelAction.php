@@ -50,6 +50,7 @@ class DownloadOpenSpoutExcelAction extends Action
     public static function make(?string $name = null): static
     {
         $name ??= 'downloadOpenSpout';
+
         return parent::make($name);
     }
 }

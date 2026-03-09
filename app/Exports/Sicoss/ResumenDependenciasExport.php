@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class ResumenDependenciasExport implements FromCollection, WithHeadings, WithMapping, WithTitle, ShouldAutoSize
+class ResumenDependenciasExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithTitle
 {
     protected Collection $data;
 

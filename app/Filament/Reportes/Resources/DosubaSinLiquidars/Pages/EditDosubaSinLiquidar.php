@@ -2,9 +2,8 @@
 
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Reportes\Resources\DosubaSinLiquidars\DosubaSinLiquidars\DosubaSinLiquidarResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDosubaSinLiquidar extends EditRecord

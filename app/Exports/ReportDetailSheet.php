@@ -15,14 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReportDetailSheet implements
-    FromQuery,
-    WithHeadings,
-    WithStrictNullComparison,
-    WithStyles,
-    ShouldAutoSize,
-    WithMapping,
-    WithTitle
+class ReportDetailSheet implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStrictNullComparison, WithStyles, WithTitle
 {
     protected $query;
 
@@ -67,6 +60,7 @@ class ReportDetailSheet implements
                 $mappedRow[] = $row->{$column} ?? '';
             }
         }
+
         return $mappedRow;
     }
 
@@ -78,7 +72,7 @@ class ReportDetailSheet implements
     public function styles(Worksheet $sheet)
     {
         // Estilo para el encabezado
-        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
+        $sheet->getStyle('A1:'.$sheet->getHighestColumn().'1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -103,7 +97,7 @@ class ReportDetailSheet implements
         // Estilo para el cuerpo del reporte
         $lastRow = $sheet->getHighestRow();
         if ($lastRow > 1) {
-            $sheet->getStyle('A2:' . $sheet->getHighestColumn() . $lastRow)->applyFromArray([
+            $sheet->getStyle('A2:'.$sheet->getHighestColumn().$lastRow)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -116,7 +110,7 @@ class ReportDetailSheet implements
             ]);
 
             // Estilo para columnas numéricas (importe) - columna I (9)
-            $sheet->getStyle('I2:I' . $lastRow)->applyFromArray([
+            $sheet->getStyle('I2:I'.$lastRow)->applyFromArray([
                 'numberFormat' => [
                     'formatCode' => '#,##0.00',
                 ],
@@ -129,7 +123,7 @@ class ReportDetailSheet implements
         // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
             if ($row % 2 == 0) {
-                $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
+                $sheet->getStyle('A'.$row.':'.$sheet->getHighestColumn().$row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F2F2F2'],

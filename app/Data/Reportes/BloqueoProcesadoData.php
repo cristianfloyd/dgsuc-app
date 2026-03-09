@@ -2,8 +2,6 @@
 
 namespace App\Data\Reportes;
 
-use Spatie\LaravelData\Support\Transformation\TransformationContext;
-use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
 use App\Models\Dh03;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Rules\LegajoCargoExistsRule;
@@ -14,6 +12,8 @@ use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Transformation\TransformationContext;
+use Spatie\LaravelData\Support\Transformation\TransformationContextFactory;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class BloqueoProcesadoData extends Data
@@ -30,8 +30,7 @@ class BloqueoProcesadoData extends Data
         public readonly ?array $metadata = [],
         public bool $cambiosRealizados = false,
         public array $datosOriginales = [],
-    ) {
-    }
+    ) {}
 
     public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {
@@ -51,7 +50,7 @@ class BloqueoProcesadoData extends Data
 
     public static function fromSuccess(BloqueosDataModel $bloqueo): self
     {
-        if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+        if (! Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
             throw ValidationException::withMessages([
                 'legajo_cargo' => 'Combinación legajo-cargo inválida',
             ]);

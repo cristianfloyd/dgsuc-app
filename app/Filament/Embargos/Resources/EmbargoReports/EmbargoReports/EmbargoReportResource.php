@@ -6,7 +6,6 @@ use App\Filament\Embargos\Resources\EmbargoReports\Pages\ListEmbargos;
 use App\Filament\Embargos\Resources\EmbargoReports\Pages\ReporteEmbargos;
 use App\Models\Mapuche\Embargo;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -18,7 +17,7 @@ class EmbargoReportResource extends Resource
 
     protected static ?string $label = 'Reporte Embargos';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Informes';
+    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
 
     public static function table(Table $table): Table
     {
@@ -33,6 +32,7 @@ class EmbargoReportResource extends Resource
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         $searchTerm = strtoupper($search);
+
                         return $query->whereHas('datosPersonales', function ($query) use ($searchTerm): void {
                             $query->where('desc_appat', 'like', "%{$searchTerm}%")
                                 ->orWhere('desc_apmat', 'like', "%{$searchTerm}%")
@@ -50,12 +50,14 @@ class EmbargoReportResource extends Resource
                     ->label('Importe Descontado')
                     ->state(function (Embargo $record): float {
                         $importes = $record->getImporteDescontado(3);
+
                         return $importes->sum('impp_conce');
                     })
                     ->tooltip(function (Embargo $record): string {
                         $importes = $record->getImporteDescontado(3);
+
                         return $importes->map(function ($importe) {
-                            return "Cargo {$importe->nro_cargo}: $ " . number_format($importe->impp_conce, 2);
+                            return "Cargo {$importe->nro_cargo}: $ ".number_format($importe->impp_conce, 2);
                         })->join("\n");
                     })
                     ->sortable(),
@@ -65,6 +67,7 @@ class EmbargoReportResource extends Resource
                     ->label('Saldo Pendiente')
                     ->state(function (Embargo $record): float {
                         $importes = $record->getImporteDescontado(3);
+
                         return $record->imp_embargo - $importes->sum('impp_conce');
                     }),
                 TextColumn::make('estado.desc_estado_embargo')->label('estado')->sortable(),

@@ -23,12 +23,14 @@ class ValidationException extends Exception
     public function setField(string $field): self
     {
         $this->field = $field;
+
         return $this;
     }
 
     public function setContext(array $context): self
     {
         $this->context = $context;
+
         return $this;
     }
 
@@ -40,12 +42,14 @@ class ValidationException extends Exception
     public function addError(string $field, string $message): self
     {
         $this->errors[$field] = $message;
+
         return $this;
     }
 
     public function setErrors(array $errors): self
     {
         $this->errors = $errors;
+
         return $this;
     }
 

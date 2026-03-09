@@ -9,7 +9,7 @@ class DosubaSinLiquidarDocumentacion extends Page
 {
     protected static ?string $navigationLabel = 'Documentación';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string|\UnitEnum|null $navigationGroup = 'Dosuba';
 
     protected static ?int $navigationSort = 100;
 

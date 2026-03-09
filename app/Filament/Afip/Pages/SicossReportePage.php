@@ -2,24 +2,24 @@
 
 namespace App\Filament\Afip\Pages;
 
-use Filament\Tables\Contracts\HasTable;
-use Exception;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Support\Enums\TextSize;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
 use App\Exports\SicossReporteExport;
 use App\Filament\Afip\Pages\Widgets\SicossTotalesWidget;
 use App\Models\Mapuche\MapucheSicossReporte;
 use App\Services\Reports\SicossReporteService;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
@@ -30,8 +30,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SicossReportePage extends Page implements HasTable
 {
-    use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithTable;
 
     public $periodoFiscal;
 
@@ -41,13 +41,13 @@ class SicossReportePage extends Page implements HasTable
 
     public bool $isLoading = false;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Reporte SICOSS';
 
     protected static ?string $title = 'Reporte SICOSS';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'SICOSS';
+    protected static string|\UnitEnum|null $navigationGroup = 'SICOSS';
 
     protected static ?int $navigationSort = 2;
 
@@ -125,7 +125,7 @@ class SicossReportePage extends Page implements HasTable
                             ),
                         )
                         ->afterStateUpdated(function ($state): void {
-                            if (!$state) {
+                            if (! $state) {
                                 return;
                             }
 
@@ -180,8 +180,9 @@ class SicossReportePage extends Page implements HasTable
      */
     public function getTotales(): array
     {
-        if (!$this->anio || !$this->mes) {
+        if (! $this->anio || ! $this->mes) {
             Log::info('SicossReportePage:: No se pudo obtener los totales', ['anio' => $this->anio, 'mes' => $this->mes]);
+
             return [];
         }
 

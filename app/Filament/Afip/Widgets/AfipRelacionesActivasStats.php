@@ -2,11 +2,11 @@
 
 namespace App\Filament\Afip\Widgets;
 
-use Exception;
-use Illuminate\Support\Facades\Log;
 use App\Models\AfipRelacionesActivas;
+use Exception;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Log;
 
 class AfipRelacionesActivasStats extends BaseWidget
 {

@@ -175,6 +175,7 @@ enum ConceptosSicossEnum: int
     public static function getSqlConditionAportesSijp(): string
     {
         $codes = implode(', ', self::getAportesSijpCodes());
+
         return "codn_conce IN ({$codes})";
     }
 
@@ -186,6 +187,7 @@ enum ConceptosSicossEnum: int
     public static function getSqlConditionAportesInssjp(): string
     {
         $codes = implode(', ', self::getAportesInssjpCodes());
+
         return "codn_conce IN ({$codes})";
     }
 
@@ -197,6 +199,7 @@ enum ConceptosSicossEnum: int
     public static function getSqlConditionContribucionesSijp(): string
     {
         $codes = implode(', ', self::getContribucionesSijpCodes());
+
         return "codn_conce IN ({$codes})";
     }
 
@@ -208,6 +211,7 @@ enum ConceptosSicossEnum: int
     public static function getSqlConditionContribucionesInssjp(): string
     {
         $codes = implode(', ', self::getContribucionesInssjpCodes());
+
         return "codn_conce IN ({$codes})";
     }
 }

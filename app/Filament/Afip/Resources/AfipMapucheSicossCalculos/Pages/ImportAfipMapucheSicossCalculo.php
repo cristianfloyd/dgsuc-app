@@ -2,19 +2,19 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages;
 
-use Exception;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
 use App\Services\AfipMapucheSicossCalculoImportService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Carbon\Carbon;
+use Exception;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -66,7 +66,7 @@ class ImportAfipMapucheSicossCalculo extends Page
             $filePath = Storage::disk('public')->path($data['file']);
 
             $service = app(AfipMapucheSicossCalculoImportService::class);
-            $periodoFiscal = $data['year'] . \sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
 
             $result = $service->streamImport(
                 $filePath,
@@ -176,6 +176,7 @@ class ImportAfipMapucheSicossCalculo extends Page
     private function getYearOptions(): array
     {
         $currentYear = Carbon::now()->year;
+
         return array_combine(
             range($currentYear - 5, $currentYear + 1),
             range($currentYear - 5, $currentYear + 1),

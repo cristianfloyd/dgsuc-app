@@ -2,18 +2,16 @@
 
 namespace App\Filament\Liquidaciones\Resources\Dh21s\Dh21s;
 
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Liquidaciones\Resources\Dh21s\Pages\ListDh21s;
-use App\Filament\Liquidaciones\Resources\Dh21s\Pages\EditDh21;
-use Filament\Actions\Action;
-use App\Filament\Liquidaciones\Resources\Dh21Resource\Pages;
 use App\Filament\Liquidaciones\Resources\Dh21s\Pages\ConceptosTotales;
+use App\Filament\Liquidaciones\Resources\Dh21s\Pages\EditDh21;
+use App\Filament\Liquidaciones\Resources\Dh21s\Pages\ListDh21s;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Models\Dh21;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Livewire\Livewire;
@@ -28,9 +26,9 @@ class Dh21Resource extends Resource
 
     protected static ?string $slug = 'dh21';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {
@@ -127,7 +125,7 @@ class Dh21Resource extends Resource
                 ]),
             ])
             ->defaultSort('nro_legaj', 'desc')
-            ->paginated(5) //configurar la paginacion
+            ->paginated(5) // configurar la paginacion
             ->paginationPageOptions([5, 10, 25, 50, 100])
             ->defaultPaginationPageOption(5)
             ->deferLoading();
@@ -145,12 +143,13 @@ class Dh21Resource extends Resource
     public static function generarReporte($record)
     {
         // Verificamos que el registro tenga un ID válido
-        if (!$record->nro_liqui) {
+        if (! $record->nro_liqui) {
             Notification::make()
                 ->title('Error')
                 ->body('No se pudo generar el reporte. Liquidación inválida.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -172,10 +171,11 @@ class Dh21Resource extends Resource
     protected static function descargarReportePDF($liquidacionId)
     {
         $reporteHtml = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
-        $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
+        $nombreArchivo = 'orden_pago_'.$liquidacionId.'_'.now()->format('YmdHis').'.pdf';
         $pdf = Pdf::loadHTML($reporteHtml);
+
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn () => print ($pdf->output()),
             $nombreArchivo,
             ['Content-Type' => 'application/pdf'],
         );

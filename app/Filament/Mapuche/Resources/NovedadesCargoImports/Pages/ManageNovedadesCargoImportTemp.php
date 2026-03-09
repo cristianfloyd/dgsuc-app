@@ -2,12 +2,12 @@
 
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages;
 
-use Throwable;
 use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports\NovedadesCargoImportResource;
 use App\Services\NovedadesCargoImportTableService;
 use App\Services\NovedadesCargoImportTempService;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ManageNovedadesCargoImportTemp extends ManageRecords
 {
@@ -22,10 +22,10 @@ class ManageNovedadesCargoImportTemp extends ManageRecords
 
         // Crea la tabla temporal al entrar en la página, si no existe:
         try {
-            $tempService = new NovedadesCargoImportTableService();
+            $tempService = new NovedadesCargoImportTableService;
             $tempService->createTempTable();
         } catch (Throwable $e) {
-            $this->notify('danger', 'Error al crear tabla temporal: ' . $e->getMessage());
+            $this->notify('danger', 'Error al crear tabla temporal: '.$e->getMessage());
         }
     }
 
@@ -35,8 +35,9 @@ class ManageNovedadesCargoImportTemp extends ManageRecords
     public function importFile(): void
     {
         try {
-            if (!$this->txtFile) {
+            if (! $this->txtFile) {
                 $this->notify('danger', 'Por favor, selecciona un archivo antes de importar.');
+
                 return;
             }
 
@@ -44,7 +45,7 @@ class ManageNovedadesCargoImportTemp extends ManageRecords
             $path = Storage::disk('local')->path($this->txtFile);
 
             // Instanciamos el servicio que parsea e inserta en la tabla temporal
-            $tempService = new NovedadesCargoImportTempService();
+            $tempService = new NovedadesCargoImportTempService;
 
             // Aquí parseas tu archivo (con substr, etc.) y en cada línea
             // vas llamando a $tempService->insertTempData($data).
@@ -64,7 +65,7 @@ class ManageNovedadesCargoImportTemp extends ManageRecords
             $this->notify('success', 'Archivo importado exitosamente.');
             // Limpias si deseas: $this->txtFile = null;
         } catch (Throwable $e) {
-            $this->notify('danger', 'Error al importar: ' . $e->getMessage());
+            $this->notify('danger', 'Error al importar: '.$e->getMessage());
         }
     }
 }

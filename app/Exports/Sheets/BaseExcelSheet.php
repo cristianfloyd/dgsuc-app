@@ -4,10 +4,13 @@ namespace App\Exports\Sheets;
 
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\{Alignment, Border, Color, Fill};
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
+abstract class BaseExcelSheet implements WithCustomStartCell, WithStyles
 {
     public function startCell(): string
     {
@@ -31,7 +34,7 @@ abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
         $sheet->setCellValue('A2', 'REPORTE DE EMBARGOS');
 
         $sheet->mergeCells('A3:E3');
-        $sheet->setCellValue('A3', 'Fecha: ' . now()->format('d/m/Y'));
+        $sheet->setCellValue('A3', 'Fecha: '.now()->format('d/m/Y'));
 
         // Aplicar estilos al encabezado
         $sheet->getStyle('A1:E3')->applyFromArray([
@@ -90,7 +93,7 @@ abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
         ]);
 
         // Estilo para el contenido
-        $sheet->getStyle('A7:Z' . $sheet->getHighestRow())->applyFromArray([
+        $sheet->getStyle('A7:Z'.$sheet->getHighestRow())->applyFromArray([
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
@@ -106,7 +109,7 @@ abstract class BaseExcelSheet implements WithStyles, WithCustomStartCell
         for ($row = 7; $row <= $sheet->getHighestRow(); $row++) {
             if ($row % 2 == 0) {
                 $color = new Color('F8F9FA');
-                $sheet->getStyle('A' . $row . ':Z' . $row)->getFill()
+                $sheet->getStyle('A'.$row.':Z'.$row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->setStartColor($color);
             }

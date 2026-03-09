@@ -20,15 +20,10 @@ class SicossTotalesData extends Data
         public readonly float $totalC305,
         #[MapName('total_c306')]
         public readonly float $totalC306,
-    ) {
-    }
+    ) {}
 
     /**
      * Summary of fromArray.
-     *
-     * @param array $data
-     *
-     * @return SicossTotalesData
      */
     public static function fromArray(array $data): self
     {

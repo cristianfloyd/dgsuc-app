@@ -2,10 +2,10 @@
 
 namespace App\Filament\Afip\Actions;
 
-use Exception;
 use App\Enums\ConceptosSicossEnum;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Notifications\Notification;
@@ -26,8 +26,6 @@ class EjecutarControlConceptosAction extends Action
      * La acción requiere confirmación del usuario antes de ejecutar el control
      * de conceptos para el período fiscal actual, proporcionando una interfaz
      * clara y segura para esta operación crítica.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -89,6 +87,7 @@ class EjecutarControlConceptosAction extends Action
     {
         return $this->badge(function () {
             $livewire = $this->getLivewire();
+
             return \sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
@@ -107,11 +106,9 @@ class EjecutarControlConceptosAction extends Action
      * para el período fiscal especificado, utilizando la conexión de base de datos
      * configurada en el componente Livewire padre.
      *
-     * @param array $data Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
+     * @param  array  $data  Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
      *
      * @throws Exception Cuando ocurre un error durante la ejecución del control
-     *
-     * @return void
      */
     protected function ejecutarControl(array $data = []): void
     {

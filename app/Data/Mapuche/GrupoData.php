@@ -20,8 +20,7 @@ class GrupoData extends Data
         #[MapName('fec_modificacion')]
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly DateTime $fechaModificacion,
-    ) {
-    }
+    ) {}
 
     public static function rules(?ValidationContext $context = null): array
     {

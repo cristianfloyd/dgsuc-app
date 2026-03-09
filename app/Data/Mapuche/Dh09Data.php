@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data\Mapuche;
 
-use Spatie\LaravelData\Support\Validation\ValidationContext;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\Validation\BooleanType;
 use Spatie\LaravelData\Attributes\Validation\Date;
@@ -13,6 +12,7 @@ use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 class Dh09Data extends Data
 {
@@ -99,8 +99,7 @@ class Dh09Data extends Data
         public readonly ?Carbon $fec_norma,
         #[BooleanType]
         public readonly bool $fuerza_reparto = false,
-    ) {
-    }
+    ) {}
 
     public static function rules(?ValidationContext $context = null): array
     {

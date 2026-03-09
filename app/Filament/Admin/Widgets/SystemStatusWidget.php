@@ -55,6 +55,7 @@ class SystemStatusWidget extends Widget
                 FROM pg_stat_database
                 WHERE datname = current_database()
             ');
+
         // dd($data);
         return [
             'cache_hit_ratio' => $data[0]->cache_hit_ratio,

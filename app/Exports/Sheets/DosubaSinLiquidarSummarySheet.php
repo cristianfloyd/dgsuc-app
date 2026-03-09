@@ -16,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithStyles, ShouldAutoSize, WithColumnFormatting, WithEvents
+class DosubaSinLiquidarSummarySheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithStyles, WithTitle
 {
     protected $records;
 
@@ -112,7 +112,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
             ],
 
             // Estilo para pie de página
-            'A' . ($lastRow - 2) . ':A' . $lastRow => [
+            'A'.($lastRow - 2).':A'.$lastRow => [
                 'font' => ['bold' => true],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
@@ -185,7 +185,7 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
                 // Agregar bordes al pie de página
                 $lastRow = $event->sheet->getHighestRow();
-                $event->sheet->getStyle('A' . ($lastRow - 2) . ':B' . $lastRow)->getBorders()
+                $event->sheet->getStyle('A'.($lastRow - 2).':B'.$lastRow)->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
 
@@ -199,6 +199,6 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, WithTitle, WithSt
 
     protected function formatPeriodo(): string
     {
-        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
+        return substr($this->periodo, 0, 4).'/'.substr($this->periodo, 4, 2);
     }
 }

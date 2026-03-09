@@ -24,8 +24,7 @@ class Dh90Data extends Data
         public ?int $nroCargoasociado = null,
         #[Size(1)]
         public ?string $tipoasociacion = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Convierte el DTO a un modelo Eloquent.

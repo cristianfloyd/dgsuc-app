@@ -2,17 +2,16 @@
 
 namespace App\Filament\Embargos\Resources\Embargos\Embargos;
 
-use Exception;
-use App\Filament\Embargos\Resources\Embargos\Pages\ListEmbargos;
-use App\Filament\Embargos\Resources\Embargos\Pages\DashboardEmbargo;
 use App\Filament\Embargos\Resources\Embargos\Pages\ConfigureEmbargoParameters;
-use Filament\Actions\Action;
-use App\Filament\Embargos\Resources\EmbargoResource\Pages;
+use App\Filament\Embargos\Resources\Embargos\Pages\DashboardEmbargo;
+use App\Filament\Embargos\Resources\Embargos\Pages\ListEmbargos;
 use App\Models\EmbargoProcesoResult;
 use App\Services\EmbargoTableService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Tables\EmbargoTable;
 use App\Traits\DisplayResourceProperties;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
@@ -37,13 +36,13 @@ class EmbargoResource extends Resource
 
     protected static ?string $model = EmbargoProcesoResult::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     protected static ?string $modelLabel = 'Embargo';
 
     protected static ?string $slug = 'embargos';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected EmbargoTable $embargoTable;
 
@@ -98,7 +97,7 @@ class EmbargoResource extends Resource
 
     public static function actualizarDatos(array $data = []): void
     {
-        $instance = new self();
+        $instance = new self;
         $instance->setPropertyValues($data);
 
         // Actualizamos las propiedades del recurso
@@ -119,7 +118,7 @@ class EmbargoResource extends Resource
             $periodoFiscalData = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $year = $periodoFiscalData['year'] ?? date('Y');
             $month = $periodoFiscalData['month'] ?? date('m');
-            $periodoFiscal = (int) ("{$year}" . str_pad($month, 2, '0', \STR_PAD_LEFT));
+            $periodoFiscal = (int) ("{$year}".str_pad($month, 2, '0', \STR_PAD_LEFT));
             Log::warning('Se utilizará el período fiscal del servicio como valor predeterminado', ['periodoFiscal' => $periodoFiscal]);
         }
 
@@ -137,7 +136,7 @@ class EmbargoResource extends Resource
             Notification::make()
                 ->title('Proceso de embargos completado')
                 ->success()
-                ->body('Se procesaron ' . \count($results) . ' registros de embargos')
+                ->body('Se procesaron '.\count($results).' registros de embargos')
                 ->send();
 
             // Remover el dd para producción
@@ -174,8 +173,6 @@ class EmbargoResource extends Resource
     /**
      * Obtiene las propiedades a mostrar y sus valores actuales.
      * Este método utiliza la implementación del trait, que maneja el caché.
-     *
-     * @return array
      */
     public function getPropertiesToDisplay(): array
     {
@@ -193,8 +190,6 @@ class EmbargoResource extends Resource
 
     /**
      * getter para verificar si esta seteado el periodo fiscal.
-     *
-     * @return bool
      */
     public function getPeriodoFiscalAttribute(): bool
     {
@@ -211,8 +206,6 @@ class EmbargoResource extends Resource
     /**
      * Define las propiedades por defecto del recurso.
      * Este método es requerido por el trait DisplayResourceProperties.
-     *
-     * @return array
      */
     protected function getDefaultProperties(): array
     {

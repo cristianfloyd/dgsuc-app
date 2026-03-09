@@ -2,22 +2,21 @@
 
 namespace App\Filament\Reportes\Resources\DosubaSinLiquidars\DosubaSinLiquidars;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Actions\BulkAction;
-use Exception;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\Action;
-use App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages\ListDosubaSinLiquidars;
-use App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages\CreateDosubaSinLiquidar;
 use App\Exports\DosubaSinLiquidarExport;
-use App\Filament\Reportes\Resources\DosubaSinLiquidarResource\Pages;
+use App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages\CreateDosubaSinLiquidar;
+use App\Filament\Reportes\Resources\DosubaSinLiquidars\Pages\ListDosubaSinLiquidars;
 use App\Models\Mapuche\Dh22;
 use App\Models\Reportes\DosubaSinLiquidarModel;
 use Carbon\Carbon;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -33,7 +32,7 @@ class DosubaSinLiquidarResource extends Resource
 
     protected static ?string $slug = 'reportes/dosuba-sin-liquidar';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string|\UnitEnum|null $navigationGroup = 'Dosuba';
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -111,9 +110,10 @@ class DosubaSinLiquidarResource extends Resource
                     ->action(function ($records) {
                         try {
                             $filteredRecords = $records->filter(fn ($record) => $record !== null);
+
                             return Excel::download(
                                 new DosubaSinLiquidarExport($filteredRecords, $filteredRecords->first()?->periodo_fiscal ?? ''),
-                                'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx',
+                                'dosuba-sin-liquidar-'.now()->format('Y-m-d').'.xlsx',
                             );
                         } catch (Exception $e) {
                             Notification::make()
@@ -149,12 +149,13 @@ class DosubaSinLiquidarResource extends Resource
                         ])
                         ->action(function (array $data) {
                             $records = DosubaSinLiquidarModel::all()->filter(fn ($record) => $record !== null);
+
                             return Excel::download(
                                 new DosubaSinLiquidarExport(
                                     records: $records,
                                     periodo: $data['periodo'],
                                 ),
-                                'dosuba-sin-liquidar-' . $data['periodo'] . '.xlsx',
+                                'dosuba-sin-liquidar-'.$data['periodo'].'.xlsx',
                             );
                         }),
                 ])->label('Acciones de Tabla')

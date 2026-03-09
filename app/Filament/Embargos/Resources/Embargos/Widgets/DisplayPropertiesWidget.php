@@ -2,8 +2,8 @@
 
 namespace App\Filament\Embargos\Resources\Embargos\Widgets;
 
-use Illuminate\Contracts\View\View;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 

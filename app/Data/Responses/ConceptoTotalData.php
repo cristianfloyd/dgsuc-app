@@ -14,15 +14,10 @@ class ConceptoTotalData extends Data
         public readonly int $codigoConcepto,
         #[MapName('total_impp')]
         public readonly float $importeTotal,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia de ConceptoTotalData desde un array de datos.
-     *
-     * @param array $data
-     *
-     * @return self
      */
     public static function fromArray(array $data): self
     {

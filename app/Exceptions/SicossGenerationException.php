@@ -13,9 +13,9 @@ class SicossGenerationException extends Exception
     /**
      * Constructor de la excepción.
      *
-     * @param string $message Mensaje de error
-     * @param int $code Código de error
-     * @param Exception|null $previous Excepción anterior
+     * @param  string  $message  Mensaje de error
+     * @param  int  $code  Código de error
+     * @param  Exception|null  $previous  Excepción anterior
      */
     public function __construct(string $message = '', int $code = 0, ?Exception $previous = null)
     {
@@ -24,11 +24,9 @@ class SicossGenerationException extends Exception
 
     /**
      * Representación en string de la excepción.
-     *
-     * @return string
      */
     public function __toString(): string
     {
-        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+        return __CLASS__.": [{$this->code}]: {$this->message}\n";
     }
 }

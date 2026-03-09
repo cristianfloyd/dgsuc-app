@@ -2,16 +2,16 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheArts\Pages;
 
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Support\Enums\Size;
-use Exception;
 use App\Exports\AfipMapucheArtExport;
 use App\Filament\Actions\PoblarAfipArtAction;
 use App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArts\AfipMapucheArtResource;
 use App\Models\AfipMapucheArt;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\Size;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -46,7 +46,7 @@ class ListAfipMapucheArt extends ListRecords
                             session('periodo_fiscal', date('Ym')),
                             $livewire->getFilteredTableQuery(),
                         ),
-                        'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx',
+                        'reporte-afip-art-'.session('periodo_fiscal', date('Ym')).'.xlsx',
                     );
                 }),
             PoblarAfipArtAction::make()

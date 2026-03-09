@@ -16,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles, WithCustomStartCell, WithBackgroundColor, WithTitle
+class OrdenesDescuentoExport implements FromQuery, ShouldAutoSize, WithBackgroundColor, WithColumnFormatting, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     use Exportable;
 
@@ -96,7 +96,7 @@ class OrdenesDescuentoExport implements FromQuery, WithHeadings, WithMapping, Sh
     public function styles(Worksheet $sheet)
     {
         $sheet->mergeCells('A1:O1');
-        $sheet->setCellValue('A1', 'REPORTE DE ÓRDENES DE DESCUENTO - ' . now()->format('d/m/Y'));
+        $sheet->setCellValue('A1', 'REPORTE DE ÓRDENES DE DESCUENTO - '.now()->format('d/m/Y'));
 
         // Aplicar filtros a los encabezados
         $lastColumn = 'O';

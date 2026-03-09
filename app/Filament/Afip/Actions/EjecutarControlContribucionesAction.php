@@ -36,6 +36,7 @@ class EjecutarControlContribucionesAction extends Action
     {
         return $this->badge(function () {
             $livewire = $this->getLivewire();
+
             return \sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }

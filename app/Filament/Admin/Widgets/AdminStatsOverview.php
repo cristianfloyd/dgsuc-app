@@ -13,7 +13,7 @@ class AdminStatsOverview extends BaseWidget
 {
     protected static ?int $sort = 0;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected function getStats(): array
     {
@@ -28,7 +28,6 @@ class AdminStatsOverview extends BaseWidget
                 ->chart([15, 4, 10, 2, 12, 4, 12])
                 ->color('warning'),
 
-
             // Estadísticas de Cargos
             Stat::make('Total Cargos', Dh03::count())
                 ->description('Total de cargos en el sistema')
@@ -38,7 +37,7 @@ class AdminStatsOverview extends BaseWidget
 
             // Estadísticas de Cargos Activos
             Stat::make('Cargos Activos', $this->getActiveCargos())
-                ->description($this->getActivePercentage() . '% del total')
+                ->description($this->getActivePercentage().'% del total')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->chart($this->getActivosTrend())
                 ->color('info'),
@@ -63,6 +62,7 @@ class AdminStatsOverview extends BaseWidget
     {
         $total = Dh03::count();
         $activos = $this->getActiveCargos();
+
         return $total > 0 ? round(($activos / $total) * 100, 2) : 0;
     }
 

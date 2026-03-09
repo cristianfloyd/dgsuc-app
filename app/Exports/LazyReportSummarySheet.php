@@ -12,11 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class LazyReportSummarySheet implements
-    FromCollection,
-    WithStyles,
-    WithTitle,
-    ShouldAutoSize
+class LazyReportSummarySheet implements FromCollection, ShouldAutoSize, WithStyles, WithTitle
 {
     protected $summaryData;
 
@@ -27,7 +23,7 @@ class LazyReportSummarySheet implements
 
     public function collection()
     {
-        $collection = new Collection();
+        $collection = new Collection;
 
         // Agregar título
         $collection->push(['RESUMEN DEL REPORTE']);
@@ -106,7 +102,7 @@ class LazyReportSummarySheet implements
             ]);
 
             // Alineación para columnas numéricas
-            $sheet->getStyle('B' . ($tableStart + 1) . ":C{$lastRow}")->applyFromArray([
+            $sheet->getStyle('B'.($tableStart + 1).":C{$lastRow}")->applyFromArray([
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_RIGHT,
                 ],

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Embargos\Resources\Embargos\Pages;
 
-use Filament\Support\Enums\Width;
 use App\Filament\Embargos\Resources\Embargos\Embargos\EmbargoResource;
 use App\Filament\Embargos\Resources\Embargos\Widgets\DisplayPropertiesWidget;
 use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
@@ -10,6 +9,7 @@ use App\Services\EmbargoTableService;
 use App\Traits\DisplayResourceProperties;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Livewire\Attributes\On;
 
 class ListEmbargos extends ListRecords
@@ -32,7 +32,7 @@ class ListEmbargos extends ListRecords
 
     public function mount(): void
     {
-        $this->embargoResource = new EmbargoResource();
+        $this->embargoResource = new EmbargoResource;
     }
 
     public function getHeaderWidgetsColumns(): int|array
@@ -48,7 +48,7 @@ class ListEmbargos extends ListRecords
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal($periodoFiscal): void
     {
-        $instance = new EmbargoResource();
+        $instance = new EmbargoResource;
         $currentProperties = $instance->getPropertiesToDisplay();
         $this->periodoFiscal = [
             'periodoFiscal' => $periodoFiscal,
@@ -60,7 +60,7 @@ class ListEmbargos extends ListRecords
 
     protected function getHeaderWidgets(): array
     {
-        $embargoResource = new EmbargoResource();
+        $embargoResource = new EmbargoResource;
         $data = $embargoResource->getPropertiesToDisplay();
 
         return [
@@ -79,7 +79,7 @@ class ListEmbargos extends ListRecords
             Action::make('reset')
                 ->label('Reset')
                 ->action(function (): void {
-                    $instance = new EmbargoResource();
+                    $instance = new EmbargoResource;
                     $instance->resetPropertiesToDefault();
                     $this->dispatch('propertiesUpdated', $instance->getPropertiesToDisplay());
                 }),

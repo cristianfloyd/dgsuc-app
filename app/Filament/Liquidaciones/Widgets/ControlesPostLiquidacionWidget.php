@@ -2,8 +2,8 @@
 
 namespace App\Filament\Liquidaciones\Widgets;
 
-use Exception;
 use App\Models\LiquidacionControl;
+use Exception;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Log;
@@ -62,6 +62,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             Log::error('Error al obtener controles pendientes', [
                 'error' => $e->getMessage(),
             ]);
+
             return 0;
         }
     }
@@ -79,6 +80,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             Log::error('Error al obtener controles con error', [
                 'error' => $e->getMessage(),
             ]);
+
             return 0;
         }
     }
@@ -96,6 +98,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
             Log::error('Error al obtener controles completados', [
                 'error' => $e->getMessage(),
             ]);
+
             return 0;
         }
     }

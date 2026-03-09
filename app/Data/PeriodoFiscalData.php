@@ -14,8 +14,7 @@ class PeriodoFiscalData extends Data
         public readonly int $year,
         #[IntegerType, Min(1), Max(12)]
         public readonly int $month,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene el período fiscal formateado como YYYY-MM.
@@ -31,6 +30,7 @@ class PeriodoFiscalData extends Data
     public static function current(): self
     {
         $now = now();
+
         return new self($now->year, $now->month);
     }
 

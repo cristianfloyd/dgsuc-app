@@ -2,18 +2,16 @@
 
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports;
 
-use Filament\Schemas\Schema;
+use App\Filament\Mapuche\Resources\NovedadesCargoImportResource\Pages;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ListNovedadesCargoImports;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ManageNovedadesCargoImportTemp;
+use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\NovedadesCargoImport;
+use App\Models\NovedadesCargoImportModel;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ListNovedadesCargoImports;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\NovedadesCargoImport;
-use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ManageNovedadesCargoImportTemp;
-use App\Filament\Mapuche\Resources\NovedadesCargoImportResource\Pages;
-use App\Models\NovedadesCargoImportModel;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class NovedadesCargoImportResource extends Resource
@@ -26,7 +24,7 @@ class NovedadesCargoImportResource extends Resource
     // -------------------------------------------------------------------------
     // Configuración del icono y del label
     // -------------------------------------------------------------------------
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Importar Cargos';
 

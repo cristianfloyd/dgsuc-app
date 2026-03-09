@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use App\Models\UploadedFile;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -18,9 +18,7 @@ class JobProcessed
     /**
      * Create a new event instance.
      */
-    public function __construct(UploadedFile $uploadedFile)
-    {
-    }
+    public function __construct(UploadedFile $uploadedFile) {}
 
     /**
      * Get the channels the event should broadcast on.

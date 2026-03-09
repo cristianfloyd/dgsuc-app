@@ -4,7 +4,6 @@ namespace App\Filament\Liquidaciones\Resources\LiquidacionControls\Components;
 
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables;
 
 class ResultadoControlModal extends ModalComponent
 {

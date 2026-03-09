@@ -2,8 +2,8 @@
 
 namespace App\Exports\Sheets;
 
-use Exception;
 use App\Models\Reportes\DosubaSinLiquidarModel;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -21,16 +21,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DosubaSinLiquidarDataSheet implements
-    FromQuery,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    ShouldAutoSize,
-    WithColumnFormatting,
-    WithProperties,
-    WithEvents,
-    WithTitle
+class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithProperties, WithStyles, WithTitle
 {
     protected $records;
 
@@ -183,7 +174,7 @@ class DosubaSinLiquidarDataSheet implements
                         ->setLocked(false)
                         ->setHidden(false);
                 } catch (Exception $e) {
-                    Log::error('Error en configuración Excel: ' . $e->getMessage());
+                    Log::error('Error en configuración Excel: '.$e->getMessage());
                 }
             },
         ];

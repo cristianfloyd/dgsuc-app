@@ -2,12 +2,12 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages;
 
-use Exception;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos\AfipMapucheSicossCalculoResource;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Services\AfipMapucheSicossCalculoTableService;
 use App\Services\AfipMapucheSicossCalculoUpdateService;
 use App\Services\TableManager\TableInitializationManager;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -22,7 +22,7 @@ class ListAfipMapucheSicossCalculos extends ListRecords
         $service = app(AfipMapucheSicossCalculoTableService::class);
 
         try {
-            if (!$manager->isTableInitialized($service)) {
+            if (! $manager->isTableInitialized($service)) {
                 $manager->initializeTable($service);
             }
         } catch (Exception $e) {

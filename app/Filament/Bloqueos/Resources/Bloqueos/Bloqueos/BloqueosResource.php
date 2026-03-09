@@ -2,18 +2,6 @@
 
 namespace App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Exception;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use Filament\Support\Enums\Width;
-use Filament\Forms\Components\Select;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Models\RepFallecido;
-use Filament\Forms\Components\Checkbox;
-use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
-use Throwable;
 use App\Enums\BloqueosEstadoEnum;
 use App\Exports\BloqueosResultadosExport;
 use App\Exports\FallecidosExport;
@@ -22,14 +10,24 @@ use App\Filament\Bloqueos\Resources\Bloqueos\Pages\ImportData;
 use App\Filament\Bloqueos\Resources\Bloqueos\Pages\ListImportData;
 use App\Filament\Bloqueos\Resources\Bloqueos\Pages\ViewBloqueo;
 use App\Filament\Bloqueos\Resources\Bloqueos\RelationManagers\CargosRelationManager;
+use App\Models\RepFallecido;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Repositories\BloqueosRepositoryInterface;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
-use Filament\Forms;
+use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -39,6 +37,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class BloqueosResource extends Resource
 {
@@ -50,7 +49,7 @@ class BloqueosResource extends Resource
 
     protected static ?string $pluralLabel = 'Bloqueos';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Informes';
+    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?Collection $resultadosProcesamiento = null;
@@ -116,7 +115,7 @@ class BloqueosResource extends Resource
 
     protected static function getResultados(): Collection
     {
-        $cacheKey = 'bloqueos_resultados_' . auth()->guard('web')->id();
+        $cacheKey = 'bloqueos_resultados_'.auth()->guard('web')->id();
 
         // Invalidar caché cuando sea necesario
         if (session()->has('invalidate_bloqueos_cache')) {
@@ -126,6 +125,7 @@ class BloqueosResource extends Resource
 
         return Cache::remember($cacheKey, 3600, function () {
             $service = app(BloqueosProcessService::class);
+
             return $service->procesarBloqueos();
         });
     }
@@ -150,7 +150,7 @@ class BloqueosResource extends Resource
                 'total_procesados' => $repository->getTotalProcesados(),
             ]);
         } catch (Exception $e) {
-            Log::error('Error al procesar bloqueos: ' . $e->getMessage(), [
+            Log::error('Error al procesar bloqueos: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -169,13 +169,12 @@ class BloqueosResource extends Resource
     /**
      * Genera un resumen estadístico del procesamiento.
      *
-     * @param Collection $resultados
-     *
-     * @return array
+     * @param  Collection  $resultados
      */
     protected static function generarResumenProcesamiento($resultados): array
     {
         $repository = app(BloqueosRepositoryInterface::class);
+
         return [
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
@@ -190,7 +189,7 @@ class BloqueosResource extends Resource
     {
         return Excel::download(
             new BloqueosResultadosExport($resultados),
-            'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx',
+            'resultados_bloqueos_'.now()->format('Y-m-d_His').'.xlsx',
         );
     }
 
@@ -254,8 +253,7 @@ class BloqueosResource extends Resource
             TextColumn::make('cargoAsociado.nro_cargoasociado')
                 ->label('Info Cargo Asociado')
                 ->formatStateUsing(
-                    fn ($record) =>
-                    $record->cargoAsociado
+                    fn ($record) => $record->cargoAsociado
                         ? "Cargo: {$record->cargoAsociado->nro_cargoasociado}
                            (Tipo: {$record->cargoAsociado->tipoasociacion})"
                         : 'Sin cargo asociado',
@@ -304,8 +302,7 @@ class BloqueosResource extends Resource
     private static function getRecordClasses(): callable
     {
 
-        $clase = fn (BloqueosDataModel $record): string =>
-        match (true) {
+        $clase = fn (BloqueosDataModel $record): string => match (true) {
             $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
             $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
             $record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'bg-orange-50 dark:bg-orange-900/50 !border-l-4 !border-l-orange-900 !dark:border-l-orange-900',
@@ -313,6 +310,7 @@ class BloqueosResource extends Resource
             $record->esta_procesado => 'bg-gray-50 dark:bg-gray-900/50 !border-l-4 !border-l-gray-900 !dark:border-l-gray-900',
             default => ''
         };
+
         return $clase;
     }
 
@@ -322,8 +320,7 @@ class BloqueosResource extends Resource
             Action::make('edit')
                 ->label('Editar')
                 ->icon('heroicon-o-pencil-square')
-                ->url(fn (BloqueosDataModel $record): string =>
-                static::getUrl('edit', ['record' => $record]))
+                ->url(fn (BloqueosDataModel $record): string => static::getUrl('edit', ['record' => $record]))
                 ->color('warning'),
             Action::make('validar')
                 ->label('Validar')
@@ -401,7 +398,7 @@ class BloqueosResource extends Resource
 
                     return Excel::download(
                         new BloqueosResultadosExport($records),
-                        'resultados_bloqueos_seleccionados_' . now()->format('Y-m-d_His') . '.xlsx',
+                        'resultados_bloqueos_seleccionados_'.now()->format('Y-m-d_His').'.xlsx',
                     );
                 }),
 
@@ -431,7 +428,7 @@ class BloqueosResource extends Resource
                         if (isset($estadisticas['error_general'])) {
                             Notification::make()
                                 ->title('Advertencia')
-                                ->body('Ocurrieron algunos errores durante el proceso: ' . $estadisticas['error_general'])
+                                ->body('Ocurrieron algunos errores durante el proceso: '.$estadisticas['error_general'])
                                 ->warning()
                                 ->send();
                         }
@@ -473,12 +470,11 @@ class BloqueosResource extends Resource
                         ->with(['dh01', 'cargo'])
                         ->get();
 
-
                     // Obtener registros de fallecidos del sistema
                     $registrosRep = RepFallecido::query()
                         ->get();
 
-                    if (!$registrosBloqueos && !$registrosRep) {
+                    if (! $registrosBloqueos && ! $registrosRep) {
                         Notification::make()
                             ->title('No hay registros de fallecidos para exportar')
                             ->warning()
@@ -498,7 +494,7 @@ class BloqueosResource extends Resource
                             $registrosBloqueos,
                             $periodoFiscal,
                         ),
-                        'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx',
+                        'fallecidos_consolidado_'.now()->format('Y-m-d_His').'.xlsx',
                     );
                 }),
 
@@ -520,11 +516,12 @@ class BloqueosResource extends Resource
                 ->action(function (array $data): void {
                     $periodoFiscal = $data['periodo_fiscal'];
                     $confirmado = $data['confirmar_archivado'] ?? false;
-                    if (!$confirmado) {
+                    if (! $confirmado) {
                         Notification::make()
                             ->title('Debes confirmar el archivado')
                             ->warning()
                             ->send();
+
                         return;
                     }
                     try {

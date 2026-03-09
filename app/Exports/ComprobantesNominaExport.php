@@ -2,8 +2,6 @@
 
 namespace App\Exports;
 
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use NumberFormatter;
 use App\Models\ComprobanteNominaModel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -15,13 +13,15 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\BeforeSheet;
+use NumberFormatter;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitle, WithStyles, WithEvents, WithCustomStartCell, ShouldAutoSize, WithDrawings, WithColumnFormatting
+class ComprobantesNominaExport implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithDrawings, WithEvents, WithHeadings, WithStyles, WithTitle
 {
     protected $nroLiqui;
 
@@ -38,7 +38,7 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
 
     public function drawings()
     {
-        $drawing = new Drawing();
+        $drawing = new Drawing;
         $drawing->setName('Logo');
         $drawing->setDescription('Logo UBA');
         $drawing->setPath(public_path('images/uba.png'));
@@ -75,8 +75,6 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
                     ->setLeft(2)
                     ->setBottom(2);
 
-
-
                 // Espacio para logo y márgenes
                 $event->sheet->mergeCells('A1:B6');
                 $event->sheet->getRowDimension(1)->setRowHeight(100);
@@ -94,10 +92,10 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
                 $event->sheet->mergeCells('A8:B8');
                 $event->sheet->setCellValue(
                     'A8',
-                    'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, ' .
-                        'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe ' .
-                        'gerencial que se adjuntan a la presente, totalizando un importe de descuentos de PESOS ' .
-                        $this->getImporteEnLetras() . ' ($' . number_format($this->totalImporte, 2, ',', '.') . ')',
+                    'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, '.
+                        'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe '.
+                        'gerencial que se adjuntan a la presente, totalizando un importe de descuentos de PESOS '.
+                        $this->getImporteEnLetras().' ($'.number_format($this->totalImporte, 2, ',', '.').')',
                 );
 
                 // Texto final
@@ -155,13 +153,11 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
             ->setFitToWidth(1)
             ->setFitToHeight(0);
 
-
         // Ajustamos la altura de las filas del logo
         $sheet->getRowDimension(1)->setRowHeight(20);
         $sheet->getRowDimension(2)->setRowHeight(20);
         $sheet->getRowDimension(3)->setRowHeight(20);
         $sheet->getRowDimension(4)->setRowHeight(20);
-
 
         return [
             7 => [
@@ -200,12 +196,14 @@ class ComprobantesNominaExport implements FromCollection, WithHeadings, WithTitl
     protected function formatMoneda(float $monto): string
     {
         $formatter = new NumberFormatter('es_AR', NumberFormatter::CURRENCY);
+
         return $formatter->format($monto);
     }
 
     protected function getImporteEnLetras(): string
     {
         $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
+
         return mb_strtoupper($formatter->format($this->totalImporte, 2));
     }
 }

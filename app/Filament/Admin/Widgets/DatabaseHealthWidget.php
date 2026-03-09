@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Widgets;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -88,7 +88,7 @@ class DatabaseHealthWidget extends Widget
             return [
                 'status' => 'error',
                 'latencia' => 0,
-                'mensaje' => 'Error de conexión: ' . $e->getMessage(),
+                'mensaje' => 'Error de conexión: '.$e->getMessage(),
             ];
         }
     }
@@ -124,6 +124,7 @@ class DatabaseHealthWidget extends Widget
         if ($size < 5000) {
             return 'warning';
         }
+
         return 'danger';
     }
 }

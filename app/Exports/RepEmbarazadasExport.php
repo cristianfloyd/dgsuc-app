@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Exports;
 
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use App\Models\RepEmbarazada;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class RepEmbarazadasExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithStyles
+class RepEmbarazadasExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
     /**
      * Retorna la query para la exportación.
@@ -27,7 +27,7 @@ class RepEmbarazadasExport implements FromQuery, WithMapping, WithHeadings, Shou
     /**
      * Define el mapeo de cada fila.
      *
-     * @param RepEmbarazada $embarazada
+     * @param  RepEmbarazada  $embarazada
      */
     public function map($embarazada): array
     {

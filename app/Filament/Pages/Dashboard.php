@@ -2,19 +2,19 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
 use App\Models\Dh11;
 use App\Services\Mapuche\EscalafonService;
 use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    use HasFiltersForm;
     use CategoriasConstantTrait;
+    use HasFiltersForm;
 
     protected ?string $heading = '';
 
@@ -52,8 +52,8 @@ class Dashboard extends \Filament\Pages\Dashboard
                          * Obtiene los códigos de categoría de la tabla 'dh11' que coinciden con el código de escalafón seleccionado,
                          * y los almacena en la sesión con la clave 'selected_codc_categs'.
                          *
-                         * @param string $state El código de escalafón seleccionado.
-                         * @param callable $set Función para establecer el estado del campo de selección.
+                         * @param  string  $state  El código de escalafón seleccionado.
+                         * @param  callable  $set  Función para establecer el estado del campo de selección.
                          */
                         $codc_categs = Dh11::where('codigoescalafon', $state)
                             ->pluck('codc_categ')

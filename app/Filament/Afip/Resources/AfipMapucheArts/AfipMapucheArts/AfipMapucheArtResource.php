@@ -2,17 +2,15 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArts;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Afip\Resources\AfipMapucheArts\Pages\ListAfipMapucheArt;
+use App\Filament\Actions\PoblarAfipArtAction;
 use App\Filament\Afip\Resources\AfipMapucheArts\Pages\CreateAfipMapucheArt;
 use App\Filament\Afip\Resources\AfipMapucheArts\Pages\EditAfipMapucheArt;
-use App\Filament\Actions\PoblarAfipArtAction;
-use App\Filament\Afip\Resources\AfipMapucheArtResource\Pages;
+use App\Filament\Afip\Resources\AfipMapucheArts\Pages\ListAfipMapucheArt;
 use App\Models\AfipMapucheArt;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -27,7 +25,7 @@ class AfipMapucheArtResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Afip Art';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?int $navigationSort = 4;
 
@@ -53,8 +51,8 @@ class AfipMapucheArtResource extends Resource
                     ->label('Apellido y Nombre')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function ($query) use ($search): void {
-                            $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
-                                ->orWhere('cuil', 'ilike', '%' . $search . '%');
+                            $query->where('apellido_y_nombre', 'ilike', '%'.strtoupper($search).'%')
+                                ->orWhere('cuil', 'ilike', '%'.$search.'%');
                         });
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),

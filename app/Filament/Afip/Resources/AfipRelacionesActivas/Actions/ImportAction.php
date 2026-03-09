@@ -2,12 +2,12 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Actions;
 
-use Exception;
 use app\Models\Mapuche\Dh22;
 use app\Models\UploadedFile;
 use app\Services\ColumnMetadata;
 use app\Services\DatabaseService;
 use app\Services\FileProcessorService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -71,17 +71,14 @@ class ImportAction extends Action
                     $filename = basename($filePath);
                     $extension = pathinfo($filename, \PATHINFO_EXTENSION);
                     $timenow = time();
-                    $newFilename = pathinfo($filename, \PATHINFO_FILENAME) . "-{$timenow}.{$extension}";
+                    $newFilename = pathinfo($filename, \PATHINFO_FILENAME)."-{$timenow}.{$extension}";
 
                     // Filament ya movió el archivo a almacenamiento, solo necesitamos la ruta
                     $filePath = Storage::disk('public')->path($file);
 
-
                     // periodo fiscal y nro_liqui
                     $periodoFiscal = $data['periodo_fiscal'];
                     $nro_liqui = $data['nro_liqui'];
-
-
 
                     $uploadedFile = UploadedFile::create([
                         'periodo_fiscal' => $data['periodo_fiscal'],
@@ -89,28 +86,25 @@ class ImportAction extends Action
                         'filename' => $newFilename,
                         'original_name' => $filename,
                         'file_path' => $file,
-                        'user_name' => 'arca', //auth()->user()->name,
-                        'user_id' => 1, //auth()->user()->id,
+                        'user_name' => 'arca', // auth()->user()->name,
+                        'user_id' => 1, // auth()->user()->id,
                         'nro_liqui' => $nro_liqui,
                     ]);
 
                     // Instanciamos los servicios necesarios
                     $fileProcessor = new FileProcessorService(
-                        new DatabaseService(),
-                        new ColumnMetadata(),
+                        new DatabaseService,
+                        new ColumnMetadata,
                         app()->make('App\Contracts\DataMapperInterface'),
                         $periodoFiscal,
                     );
-
 
                     // Procesar el archivo usando el servicio FileProcessor
                     $fileProcessor = app(FileProcessorService::class);
                     $processedData = $fileProcessor->handleFileImport($uploadedFile, 'afip');
 
-
                     $databaseService = app(DatabaseService::class);
                     $result = $databaseService->insertBulkData($processedData, 'afip_relaciones_activas');
-
 
                     if ($result['success']) {
                         Notification::make()
@@ -122,7 +116,7 @@ class ImportAction extends Action
                         throw new Exception($result['message']);
                     }
                 } catch (Exception $e) {
-                    Log::error('Error en importación: ' . $e->getMessage());
+                    Log::error('Error en importación: '.$e->getMessage());
 
                     Notification::make()
                         ->title('Error al importar archivo')

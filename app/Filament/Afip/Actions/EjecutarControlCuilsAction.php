@@ -2,9 +2,9 @@
 
 namespace App\Filament\Afip\Actions;
 
-use Exception;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
@@ -40,6 +40,7 @@ class EjecutarControlCuilsAction extends Action
     {
         return $this->badge(function () {
             $livewire = $this->getLivewire();
+
             return \sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
@@ -80,7 +81,7 @@ class EjecutarControlCuilsAction extends Action
             Notification::make()
                 ->success()
                 ->title('Control de CUILs Ejecutado')
-                ->body("Se completó el control de CUILs para el período {$year}-" . str_pad($month, 2, '0', \STR_PAD_LEFT))
+                ->body("Se completó el control de CUILs para el período {$year}-".str_pad($month, 2, '0', \STR_PAD_LEFT))
                 ->send();
         } catch (Exception $e) {
             Log::error('Error en control de CUILs', [

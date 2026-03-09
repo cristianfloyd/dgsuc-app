@@ -4,28 +4,26 @@ declare(strict_types=1);
 
 namespace App\Filament\Afip\Pages;
 
-use Exception;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use Throwable;
 use App\Data\PeriodoFiscalData;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Models\Mapuche\Dh22;
 use App\Services\Afip\SicossActividadUpdateService;
 use App\Services\Afip\SicossCpto205Service;
 use App\Services\Afip\SicossEmbarazadasService;
 use App\Services\Afip\SicossUpdateService;
 use App\Services\Mapuche\PeriodoFiscalService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Throwable;
 
 /**
  * Class SicossUpdates.
  *
  * Página de Filament para gestionar y mostrar actualizaciones relacionadas con SICOSS de AFIP.
- *
- * @package App\Filament\Afip\Pages
  */
 class SicossUpdates extends Page
 {
@@ -45,9 +43,9 @@ class SicossUpdates extends Page
 
     public PeriodoFiscalData $periodoFiscal;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Actualización SICOSS';
 
@@ -65,11 +63,6 @@ class SicossUpdates extends Page
 
     /**
      * Inyecta los servicios necesarios en el componente.
-     *
-     * @param PeriodoFiscalService $periodoFiscalService
-     * @param SicossEmbarazadasService $sicossEmbarazadasService
-     * @param SicossActividadUpdateService $sicossActividadUpdateService
-     * @param SicossCpto205Service $sicossCpto205Service
      */
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
@@ -159,6 +152,7 @@ class SicossUpdates extends Page
                     ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
                     ->send();
                 $this->isProcessing = false;
+
                 return;
             }
 
@@ -170,7 +164,7 @@ class SicossUpdates extends Page
                 Notification::make()
                     ->title('Actualización completada')
                     ->success()
-                    ->body('Se procesaron ' . \count($liquidaciones) . " liquidaciones para el período {$this->year}-{$this->month}")
+                    ->body('Se procesaron '.\count($liquidaciones)." liquidaciones para el período {$this->year}-{$this->month}")
                     ->send();
             } else {
                 Notification::make()
@@ -220,9 +214,9 @@ class SicossUpdates extends Page
                     ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
                     ->send();
                 $this->isProcessing = false;
+
                 return;
             }
-
 
             // Ejecutar la actualización de embarazadas
             $resultado = $this->sicossEmbarazadasService->actualizarEmbarazadas(
@@ -326,6 +320,7 @@ class SicossUpdates extends Page
                     ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$this->year}-{$this->month}")
                     ->send();
                 $this->isProcessing = false;
+
                 return;
             }
 
@@ -444,7 +439,7 @@ class SicossUpdates extends Page
                 ->icon(fn () => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                 ->action(
                     function (): void {
-                        $this->isHelpVisible = !$this->isHelpVisible;
+                        $this->isHelpVisible = ! $this->isHelpVisible;
                     },
                 ),
 
@@ -454,8 +449,8 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalDescription(
-                    '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT) .
+                    '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período '.
+                    $this->year.'-'.str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT).
                     '? Este proceso puede tomar varios minutos.',
                 ),
 
@@ -468,8 +463,8 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Situación de Embarazadas')
                 ->modalDescription(
-                    '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT) .
+                    '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período '.
+                    $this->year.'-'.str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT).
                     '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.',
                 ),
 

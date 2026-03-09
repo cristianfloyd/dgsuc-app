@@ -2,20 +2,17 @@
 
 namespace App\Filament\Admin\Resources\UploadedFiles\UploadedFiles;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Admin\Resources\UploadedFiles\Pages\ListUploadedFiles;
 use App\Filament\Admin\Resources\UploadedFiles\Pages\CreateUploadedFile;
 use App\Filament\Admin\Resources\UploadedFiles\Pages\EditUploadedFile;
-use App\Filament\Admin\Resources\UploadedFileResource\Pages;
+use App\Filament\Admin\Resources\UploadedFiles\Pages\ListUploadedFiles;
 use App\Models\UploadedFile;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class UploadedFileResource extends Resource
@@ -24,7 +21,7 @@ class UploadedFileResource extends Resource
 
     protected static ?string $label = 'Archivos';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
     {

@@ -48,6 +48,7 @@ class DownloadExcelAction extends Action
     public static function make(?string $name = null): static
     {
         $name ??= 'download';
+
         return parent::make($name);
     }
 }

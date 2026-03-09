@@ -2,15 +2,14 @@
 
 namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicos;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Utilities\Set;
-use App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages\ListCategoriasBasicos;
 use App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages\EditCategoriasBasicos;
-use App\Filament\Liquidaciones\Resources\CategoriasBasicosResource\Pages;
+use App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages\ListCategoriasBasicos;
 use App\Models\Dh11;
 use App\Traits\CategoriasConstantTrait;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -30,9 +29,9 @@ class CategoriasBasicosResource extends Resource
 
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|\UnitEnum|null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {
@@ -43,7 +42,7 @@ class CategoriasBasicosResource extends Resource
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (Set $set, ?float $state): void {
                         $set('impp_asign', $state);
-                        //fn (Set $set, ?int $state) => $set('impp_asign', $state)
+                        // fn (Set $set, ?int $state) => $set('impp_asign', $state)
                     }),
                 TextInput::make('impp_asign')
                     ->numeric(),
@@ -84,19 +83,19 @@ class CategoriasBasicosResource extends Resource
                     ]),
                 TextColumn::make('impp_asign')->label('Importe Asignación')
                     ->numeric(
-                        decimalPlaces:2,
+                        decimalPlaces: 2,
                         decimalSeparator: ',',
                         thousandsSeparator: '.',
                     )->disabled(),
-                TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault:true),
+                TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('vig_caano')->label('Vigencia Año')->toggleable(),
                 TextColumn::make('vig_cames')->label('Vigencia Mes')->toggleable(),
-                ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(isToggledHiddenByDefault:true),
-                TextColumn::make('nivel')->label('Nivel')->toggleable(isToggledHiddenByDefault:true),
+                ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nivel')->label('Nivel')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('escalafon')
@@ -107,7 +106,7 @@ class CategoriasBasicosResource extends Resource
                         'NODO' => 'Nodocente',
                     ])
                     ->query(function (Builder $query, array $data) {
-                        if (!$data['value']) {
+                        if (! $data['value']) {
                             return $query;
                         }
 

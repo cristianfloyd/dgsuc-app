@@ -2,24 +2,22 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\ListAfipRelacionesActivas;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\CreateAfipRelacionesActivas;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\EditAfipRelacionesActivas;
-use App\Filament\Afip\Resources\AfipRelacionesActivasResource\Pages;
+use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\ListAfipRelacionesActivas;
 use App\Models\AfipRelacionesActivas;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -27,9 +25,9 @@ class AfipRelacionesActivasResource extends Resource
 {
     protected static ?string $model = AfipRelacionesActivas::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?int $navigationSort = 1;
 
@@ -85,7 +83,6 @@ class AfipRelacionesActivasResource extends Resource
                                     ->maxValue(999999999.99)
                                     ->minValue(0),
 
-
                                 Select::make('modalidad_liquidacion')
                                     ->required()
                                     ->options([
@@ -129,16 +126,14 @@ class AfipRelacionesActivasResource extends Resource
                 TextColumn::make('cuil')
                     ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string =>
-                    substr($state, 0, 2) . '-' .
-                        substr($state, 2, 8) . '-' .
+                    ->formatStateUsing(fn (string $state): string => substr($state, 0, 2).'-'.
+                        substr($state, 2, 8).'-'.
                         substr($state, -1)),
 
                 TextColumn::make('codigo_movimiento')
                     ->sortable()
                     ->badge()
-                    ->color(fn (string $state): string =>
-                    match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         '00' => 'success',
                         '01' => 'danger',
                         '02' => 'warning',

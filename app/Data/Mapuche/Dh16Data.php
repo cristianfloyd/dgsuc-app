@@ -17,8 +17,7 @@ class Dh16Data extends Data
         #[Required]
         #[IntegerType]
         public readonly int $codn_conce,
-    ) {
-    }
+    ) {}
 
     public static function rules($context = null): array
     {

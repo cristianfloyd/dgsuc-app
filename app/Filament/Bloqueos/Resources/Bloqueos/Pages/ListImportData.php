@@ -2,10 +2,6 @@
 
 namespace App\Filament\Bloqueos\Resources\Bloqueos\Pages;
 
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions\CreateAction;
-use Throwable;
-use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Enums\BloqueosTipoEnum;
 use App\Filament\Bloqueos\Resources\Bloqueos\Bloqueos\BloqueosResource;
@@ -14,16 +10,19 @@ use App\Services\Reportes\BloqueosDataService;
 use App\Services\Reportes\BloqueosProcessService;
 use App\Services\Reportes\BloqueosValidationService;
 use App\Services\Reportes\ValidacionCargoAsociadoService;
-use Filament\Actions;
+use Exception;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\MarkdownConverter;
+use Throwable;
 
 class ListImportData extends ListRecords
 {
@@ -117,7 +116,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error en la validación')
-                            ->body('Error: ' . $th->getMessage())
+                            ->body('Error: '.$th->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -142,13 +141,13 @@ class ListImportData extends ListRecords
                         Notification::make()
                             ->title('Procesamiento completo')
                             ->body(
-                                'Bloqueos procesados:<br>' .
-                                'Total procesados: ' . ($resBloqueos['procesados'] ?? '-') . '<br>' .
-                                'Errores: ' . ($resBloqueos['errores'] ?? '0') . '<br>' .
-                                '<br>' .
-                                'Duplicados procesados:<br>' .
-                                'Grupos detectados: ' . ($resDuplicados['grupos'] ?? '-') . '<br>' .
-                                'Registros eliminados: ' . ($resDuplicados['eliminados'] ?? '-'),
+                                'Bloqueos procesados:<br>'.
+                                'Total procesados: '.($resBloqueos['procesados'] ?? '-').'<br>'.
+                                'Errores: '.($resBloqueos['errores'] ?? '0').'<br>'.
+                                '<br>'.
+                                'Duplicados procesados:<br>'.
+                                'Grupos detectados: '.($resDuplicados['grupos'] ?? '-').'<br>'.
+                                'Registros eliminados: '.($resDuplicados['eliminados'] ?? '-'),
                             )
                             ->success()
                             ->send();
@@ -160,7 +159,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error en el procesamiento')
-                            ->body('Error: ' . $e->getMessage())
+                            ->body('Error: '.$e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -189,7 +188,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error al restaurar cambios')
-                            ->body('Error: ' . $e->getMessage())
+                            ->body('Error: '.$e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -218,7 +217,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error al vaciar la tabla')
-                            ->body('Error: ' . $e->getMessage())
+                            ->body('Error: '.$e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -232,9 +231,9 @@ class ListImportData extends ListRecords
                 ->modalContent(function () {
                     $markdown = file_get_contents(resource_path('docs/documentacion_bloqueos_resource.md'));
 
-                    $environment = new Environment();
-                    $environment->addExtension(new CommonMarkCoreExtension());
-                    $environment->addExtension(new GithubFlavoredMarkdownExtension());
+                    $environment = new Environment;
+                    $environment->addExtension(new CommonMarkCoreExtension);
+                    $environment->addExtension(new GithubFlavoredMarkdownExtension);
 
                     $converter = new MarkdownConverter($environment);
                     $html = $converter->convert($markdown)->getContent();

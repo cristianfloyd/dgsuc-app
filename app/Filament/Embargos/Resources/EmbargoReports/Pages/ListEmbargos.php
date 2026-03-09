@@ -2,9 +2,8 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoReports\Pages;
 
-use Filament\Actions\Action;
 use App\Filament\Embargos\Resources\EmbargoReports\EmbargoReports\EmbargoReportResource;
-use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListEmbargos extends ListRecords

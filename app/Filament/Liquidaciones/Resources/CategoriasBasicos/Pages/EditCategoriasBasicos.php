@@ -2,9 +2,8 @@
 
 namespace App\Filament\Liquidaciones\Resources\CategoriasBasicos\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Liquidaciones\Resources\CategoriasBasicos\CategoriasBasicos\CategoriasBasicosResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCategoriasBasicos extends EditRecord

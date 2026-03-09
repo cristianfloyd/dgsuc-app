@@ -2,15 +2,14 @@
 
 namespace App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages;
 
-use Throwable;
-use Filament\Actions\CreateAction;
 use App\Filament\Mapuche\Resources\NovedadesCargoImports\NovedadesCargoImports\NovedadesCargoImportResource;
 use App\Services\NovedadesCargoImportTableService;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Throwable;
 
 class ListNovedadesCargoImports extends ListRecords
 {
@@ -23,8 +22,6 @@ class ListNovedadesCargoImports extends ListRecords
     public function mount(): void
     {
         parent::mount();
-
-
 
         // inicializamos la colección de datos vacia
         $this->importData = collect();

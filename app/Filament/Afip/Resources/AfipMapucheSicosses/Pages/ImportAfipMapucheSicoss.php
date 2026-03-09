@@ -2,19 +2,19 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicosses\Pages;
 
-use Exception;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
 use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use App\Services\AfipMapucheSicossImportService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Carbon\Carbon;
+use Exception;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -70,13 +70,14 @@ class ImportAfipMapucheSicoss extends Page
             $data = $this->form->getState();
             $filePath = Storage::disk('public')->path($data['file']);
 
-            if (!$this->validateFile($filePath)) {
+            if (! $this->validateFile($filePath)) {
                 $this->showErrorNotification('El archivo no cumple con el formato esperado');
+
                 return;
             }
 
             $service = app(AfipMapucheSicossImportService::class);
-            $periodoFiscal = $data['year'] . \sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
 
             // Usar streams para procesar el archivo
             $result = $service->streamImport(
@@ -93,7 +94,7 @@ class ImportAfipMapucheSicoss extends Page
                 'file' => $data['file'] ?? 'No file specified',
             ]);
 
-            $this->showErrorNotification('Error durante la importación: ' . $e->getMessage());
+            $this->showErrorNotification('Error durante la importación: '.$e->getMessage());
         }
     }
 
@@ -171,6 +172,7 @@ class ImportAfipMapucheSicoss extends Page
         $line = fgets($handle);
         fclose($handle);
         Log::info('ImportAfipMapucheSicoss::validateFile', [$line]);
+
         return $line !== false;
     }
 
@@ -213,7 +215,7 @@ class ImportAfipMapucheSicoss extends Page
                 ->send();
         } else {
             $this->showErrorNotification(
-                'Importación con errores: ' . implode("\n", $result['errors']),
+                'Importación con errores: '.implode("\n", $result['errors']),
             );
         }
     }
@@ -259,6 +261,7 @@ class ImportAfipMapucheSicoss extends Page
     private function getYearOptions(): array
     {
         $currentYear = Carbon::now()->year;
+
         return array_combine(
             range($currentYear - 5, $currentYear + 1),
             range($currentYear - 5, $currentYear + 1),

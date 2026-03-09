@@ -45,12 +45,12 @@ class TableStructureException extends Exception
     {
         $parts = ["Estructura inválida en tabla {$this->tableName}"];
 
-        if (!empty($this->missingColumns)) {
-            $parts[] = 'Columnas faltantes: ' . implode(', ', $this->missingColumns);
+        if (! empty($this->missingColumns)) {
+            $parts[] = 'Columnas faltantes: '.implode(', ', $this->missingColumns);
         }
 
-        if (!empty($this->extraColumns)) {
-            $parts[] = 'Columnas extra: ' . implode(', ', $this->extraColumns);
+        if (! empty($this->extraColumns)) {
+            $parts[] = 'Columnas extra: '.implode(', ', $this->extraColumns);
         }
 
         return implode('. ', $parts);

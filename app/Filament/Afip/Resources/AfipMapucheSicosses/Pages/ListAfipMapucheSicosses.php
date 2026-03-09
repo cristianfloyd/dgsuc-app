@@ -2,14 +2,13 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicosses\Pages;
 
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions\Action;
 use App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses\AfipMapucheSicossResource;
 use App\Filament\Resources\Pages\BaseListRecords;
 use App\Repositories\AfipMapucheSicossRepository;
 use App\Services\AfipMapucheSicossTableService;
-use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListAfipMapucheSicosses extends BaseListRecords
@@ -43,7 +42,7 @@ class ListAfipMapucheSicosses extends BaseListRecords
             Action::make('truncate')
                 ->label('Borrar Tabla')
                 ->action(function (): void {
-                    $repository = new AfipMapucheSicossRepository();
+                    $repository = new AfipMapucheSicossRepository;
                     $repository->truncate();
                     Notification::make()
                         ->title('Datos Eliminados')

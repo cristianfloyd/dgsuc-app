@@ -2,8 +2,8 @@
 
 namespace App\Filament\Actions;
 
-use Exception;
 use App\Models\AfipMapucheArt;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -107,7 +107,7 @@ class PoblarAfipArtAction extends Action
 
             Notification::make()
                 ->title('Error')
-                ->body('Ocurrió un error al procesar los datos: ' . $e->getMessage())
+                ->body('Ocurrió un error al procesar los datos: '.$e->getMessage())
                 ->danger()
                 ->send();
 

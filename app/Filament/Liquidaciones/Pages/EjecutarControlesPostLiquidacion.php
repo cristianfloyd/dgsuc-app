@@ -2,10 +2,9 @@
 
 namespace App\Filament\Liquidaciones\Pages;
 
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\CheckboxList;
 use App\Services\LiquidacionControlService;
-use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 
 class EjecutarControlesPostLiquidacion extends Page
@@ -14,13 +13,13 @@ class EjecutarControlesPostLiquidacion extends Page
 
     public $resultados = [];
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-check';
 
     protected static ?string $title = 'Ejecutar Controles Post-Liquidación';
 
     public function ejecutarControles(): void
     {
-        $service = new LiquidacionControlService();
+        $service = new LiquidacionControlService;
 
         foreach ($this->controles as $control) {
             $this->resultados[$control] = match ($control) {

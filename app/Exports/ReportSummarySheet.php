@@ -14,13 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReportSummarySheet implements
-    FromCollection,
-    WithTitle,
-    WithStyles,
-    ShouldAutoSize,
-    WithStrictNullComparison,
-    WithCustomStartCell
+class ReportSummarySheet implements FromCollection, ShouldAutoSize, WithCustomStartCell, WithStrictNullComparison, WithStyles, WithTitle
 {
     protected $summaryData;
 
@@ -31,7 +25,7 @@ class ReportSummarySheet implements
 
     public function collection()
     {
-        $collection = new Collection();
+        $collection = new Collection;
 
         // Agregar encabezado para el resumen general
         $collection->push(['RESUMEN GENERAL']);
@@ -117,12 +111,12 @@ class ReportSummarySheet implements
 
         // Formato para los valores monetarios
         $sheet->getStyle('B3')->getNumberFormat()->setFormatCode('#,##0.00');
-        $sheet->getStyle('C7:C' . ($sheet->getHighestRow()))->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle('C7:C'.($sheet->getHighestRow()))->getNumberFormat()->setFormatCode('#,##0.00');
 
         // Estilo para los datos de la tabla de dependencias
         $lastRow = $sheet->getHighestRow();
         if ($lastRow > 6) {
-            $sheet->getStyle('A7:C' . $lastRow)->applyFromArray([
+            $sheet->getStyle('A7:C'.$lastRow)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -137,7 +131,7 @@ class ReportSummarySheet implements
             // Filas alternadas para mejor legibilidad
             for ($row = 7; $row <= $lastRow; $row++) {
                 if ($row % 2 == 0) {
-                    $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
+                    $sheet->getStyle('A'.$row.':C'.$row)->applyFromArray([
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,
                             'startColor' => ['rgb' => 'F2F2F2'],
@@ -154,7 +148,7 @@ class ReportSummarySheet implements
             ],
         ]);
 
-        $sheet->getStyle('B7:C' . $lastRow)->applyFromArray([
+        $sheet->getStyle('B7:C'.$lastRow)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],

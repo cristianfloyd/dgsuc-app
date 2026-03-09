@@ -4,33 +4,29 @@ declare(strict_types=1);
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicossCalculos\AfipMapucheSicossCalculos;
 
-use Filament\Tables\Table;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages\EditAfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages\ImportAfipMapucheSicossCalculo;
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages\ListAfipMapucheSicossCalculos;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Actions\Action as ActionsTable;
-use Filament\Tables\Actions\ActionGroup;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class AfipMapucheSicossCalculoResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicossCalculo::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'SICOSS Calculo';
 

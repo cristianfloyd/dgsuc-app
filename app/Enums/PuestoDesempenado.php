@@ -18,8 +18,6 @@ enum PuestoDesempenado: string
 
     /**
      * Retorna la descripción del puesto desempeñado.
-     *
-     * @return string
      */
     public function descripcion(): string
     {
@@ -35,8 +33,6 @@ enum PuestoDesempenado: string
 
     /**
      * Retorna el escalafón correspondiente al puesto desempeñado.
-     *
-     * @return string
      */
     public function escalafon(): string
     {
@@ -52,10 +48,6 @@ enum PuestoDesempenado: string
 
     /**
      * Retorna la instancia del enum correspondiente al código proporcionado.
-     *
-     * @param string $codigo
-     *
-     * @return self|null
      */
     public static function fromCodigo(string $codigo): ?self
     {
@@ -86,6 +78,7 @@ enum PuestoDesempenado: string
                 'descripcion' => $enum->descripcion(),
                 'escalafon' => $enum->escalafon(),
             ];
+
             return $carry;
         }, []);
     }

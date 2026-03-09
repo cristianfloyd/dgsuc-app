@@ -47,7 +47,7 @@ class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapp
     {
         // Formatear la fecha correctamente si es una instancia de Carbon o DateTime
         $fechaBaja = '';
-        if (!empty($record->fecha_baja)) {
+        if (! empty($record->fecha_baja)) {
             if ($record->fecha_baja instanceof Carbon || $record->fecha_baja instanceof DateTime) {
                 $fechaBaja = $record->fecha_baja->format('Y-m-d');
             } else {

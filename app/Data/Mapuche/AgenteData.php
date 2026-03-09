@@ -21,14 +21,12 @@ class AgenteData extends Data
         public string $dni,
         #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public ?Carbon $fechaInicio,
-    ) {
-    }
+    ) {}
 
     /**
      * Define las reglas de validación para los datos del agente.
      *
-     * @param ValidationContext|null $context Contexto de validación opcional.
-     *
+     * @param  ValidationContext|null  $context  Contexto de validación opcional.
      * @return array<string, array<int, string>> Un array asociativo donde las claves son los nombres de los campos
      *                                           y los valores son arrays de reglas de validación.
      */
@@ -46,15 +44,14 @@ class AgenteData extends Data
     /**
      * Crea una instancia de AgenteData a partir de un modelo Dh01.
      *
-     * @param Dh01 $employee El modelo Dh01 del empleado.
-     *
+     * @param  Dh01  $employee  El modelo Dh01 del empleado.
      * @return self Una nueva instancia de AgenteData.
      */
     public static function fromModel(Dh01 $employee): self
     {
         return new self(
             nombre: $employee->desc_nombr,
-            apellido: trim((string) $employee->desc_appat . ' ' . $employee->desc_apmat),
+            apellido: trim((string) $employee->desc_appat.' '.$employee->desc_apmat),
             nroLegaj: $employee->nro_legaj,
             dni: $employee->nro_docum,
             fechaInicio: Carbon::parse($employee->dh03()->orderBy('fec_alta', 'asc')->value('fec_alta')),
@@ -64,8 +61,7 @@ class AgenteData extends Data
     /**
      * Crea una colección de AgenteData a partir de una colección de modelos Dh01.
      *
-     * @param Collection<int, Dh01> $employees Colección de modelos Dh01.
-     *
+     * @param  Collection<int, Dh01>  $employees  Colección de modelos Dh01.
      * @return Collection<int, AgenteData> Colección de instancias AgenteData.
      */
     public static function collection(Collection $employees): Collection

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Liquidaciones\Resources\Dh61s\Dh61s;
 
-use App\Filament\Liquidaciones\Resources\Dh61s\Pages\ListDh61s;
 use App\Filament\Liquidaciones\Resources\Dh61s\Pages\EditDh61;
-use App\Filament\Liquidaciones\Resources\Dh61Resource\Pages;
+use App\Filament\Liquidaciones\Resources\Dh61s\Pages\ListDh61s;
 use App\Models\Dh61;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
@@ -17,9 +16,9 @@ class Dh61Resource extends Resource
 
     protected static ?string $modelLabel = 'Basicos Historico';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|\UnitEnum|null $navigationGroup = 'Personal';
 
     public static function table(Table $table): Table
     {

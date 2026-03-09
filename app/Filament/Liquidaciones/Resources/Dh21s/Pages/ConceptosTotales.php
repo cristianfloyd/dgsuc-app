@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Liquidaciones\Resources\Dh21s\Pages;
 
-use Throwable;
-use Filament\Support\Enums\Width;
 use App\Filament\Liquidaciones\Resources\Dh21s\Dh21s\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh21Service;
-use Filament\Forms\Get;
 use Filament\Resources\Pages\Page;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -20,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Throwable;
 
 class ConceptosTotales extends Page implements HasTable
 {
@@ -63,8 +61,7 @@ class ConceptosTotales extends Page implements HasTable
     /**
      * Obtiene una consulta de Dh21 que filtra los conceptos totales por el número de liquidación proporcionado.
      *
-     * @param int|null $nro_liqui El número de liquidación a filtrar, o null para obtener todos los conceptos.
-     *
+     * @param  int|null  $nro_liqui  El número de liquidación a filtrar, o null para obtener todos los conceptos.
      * @return Builder La consulta de Dh21 filtrada por el número de liquidación.
      */
     public function updateQuery($nro_liqui = null): Builder
@@ -73,11 +70,14 @@ class ConceptosTotales extends Page implements HasTable
             if ($this->lastNroLiqui == null) {
                 $this->lastNroLiqui = Dh22::getLastIdLiquidacion();
                 $this->nro_liqui = $this->lastNroLiqui;
+
                 return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
             }
+
             return app(Dh21Service::class)->conceptosTotales($nro_liqui);
         } catch (Throwable $th) {
             Log::error($th->getMessage());
+
             return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
         }
     }
@@ -95,9 +95,7 @@ class ConceptosTotales extends Page implements HasTable
     /**
      * Filtra los conceptos totales de la tabla por el código de escalafón proporcionado.
      *
-     * @param string|null $codigoEscalafon El código de escalafón a filtrar, o null para obtener todos los conceptos.
-     *
-     * @return void
+     * @param  string|null  $codigoEscalafon  El código de escalafón a filtrar, o null para obtener todos los conceptos.
      */
     public function filterByCodigoEscalafon(?string $codigoEscalafon = null): void
     {

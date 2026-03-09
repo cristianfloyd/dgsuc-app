@@ -17,7 +17,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHeadings, WithStyles, ShouldAutoSize, WithCustomStartCell, WithDrawings, WithBackgroundColor
+class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithCustomStartCell, WithDrawings, WithHeadings, WithStyles, WithTitle
 {
     protected $query;
 
@@ -56,7 +56,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
 
     public function drawings()
     {
-        $drawing = new Drawing();
+        $drawing = new Drawing;
         $drawing->setName('Logo');
         $drawing->setDescription('Logo UBA');
         $drawing->setPath(public_path('images/encabezado.png'));
@@ -110,7 +110,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
         $totalAfip = $totalContribucionesAfip + $totalSeguroAfip + $totalArtAfip + $totalAportesAfip;
         $totalGeneral = $totalDosuba + $totalAfip;
 
-        $numberToWords = new NumberToWords();
+        $numberToWords = new NumberToWords;
         $currencyTransformer = $numberToWords->getCurrencyTransformer('es');
         $totalGeneralTexto = strtoupper($currencyTransformer->toWords($totalGeneral, 'ARS'));
 
@@ -129,7 +129,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
             [''], // libre
             [''], // Línea libre
             [
-                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de ' . $totalGeneralTexto . ' ($ ' . number_format($totalGeneral, 2, ',', '.') . '.-)',
+                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de '.$totalGeneralTexto.' ($ '.number_format($totalGeneral, 2, ',', '.').'.-)',
             ],
             [''],
             ['Los mismo corresponden a los siguientes beneficiarios,'],
@@ -193,7 +193,6 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
             ->setFitToWidth(1)
             ->setFitToHeight(0);
 
-
         // Ajustamos la altura de las filas del logo
         $sheet->getRowDimension(1)->setRowHeight(15);
         $sheet->getRowDimension(2)->setRowHeight(15);
@@ -216,7 +215,6 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
         $inicioTabla = 19;
         $lastRow = $sheet->getHighestRow();
 
-
         $sheet->getStyle('A14')->getAlignment()->setWrapText(true);
         $sheet->getStyle('A14:E14')->getAlignment()->setVertical('top');
 
@@ -227,7 +225,7 @@ class AportesyContribucionesSummary implements FromCollection, WithTitle, WithHe
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => 'solid', 'color' => ['rgb' => 'FFEB9C']],
             ],
-            'B1:G' . $lastRow => [
+            'B1:G'.$lastRow => [
                 'numberFormat' => ['formatCode' => '#,##0.00'],
             ],
         ];

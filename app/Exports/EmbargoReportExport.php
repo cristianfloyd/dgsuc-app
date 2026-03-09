@@ -25,8 +25,8 @@ class EmbargoReportExport implements WithMultipleSheets, WithProperties
     /**
      * Constructor.
      *
-     * @param Builder $query Consulta para obtener los datos
-     * @param string $periodoLiquidacion Período de liquidación (opcional)
+     * @param  Builder  $query  Consulta para obtener los datos
+     * @param  string  $periodoLiquidacion  Período de liquidación (opcional)
      */
     public function __construct(Builder $query, string $periodoLiquidacion = '')
     {
@@ -36,8 +36,6 @@ class EmbargoReportExport implements WithMultipleSheets, WithProperties
 
     /**
      * Define las hojas que componen el archivo Excel.
-     *
-     * @return array
      */
     public function sheets(): array
     {
@@ -50,8 +48,6 @@ class EmbargoReportExport implements WithMultipleSheets, WithProperties
 
     /**
      * Define las propiedades del documento Excel.
-     *
-     * @return array
      */
     public function properties(): array
     {

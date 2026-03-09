@@ -2,17 +2,11 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheSicosses\AfipMapucheSicosses;
 
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ActionGroup;
-use Filament\Notifications\Notification;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\BulkAction;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ListAfipMapucheSicosses;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\CreateAfipMapucheSicoss;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ImportAfipMapucheSicoss;
-use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ExportAfipMapucheSicoss;
 use App\Filament\Actions\PoblarAfipArtAction;
-use App\Filament\Afip\Resources\AfipMapucheSicossResource\Pages;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\CreateAfipMapucheSicoss;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ExportAfipMapucheSicoss;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ImportAfipMapucheSicoss;
+use App\Filament\Afip\Resources\AfipMapucheSicosses\Pages\ListAfipMapucheSicosses;
 use App\Models\AfipMapucheSicoss;
 use App\Models\Mapuche\Dh22;
 use App\Services\Afip\SicossEmbarazadasService;
@@ -21,10 +15,15 @@ use App\Services\Mapuche\TableSelectorService;
 use App\Services\SicossExportService;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,9 +37,9 @@ class AfipMapucheSicossResource extends Resource
 
     protected static ?string $model = AfipMapucheSicoss::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Mapuche SICOSS';
 
@@ -148,6 +147,7 @@ class AfipMapucheSicossResource extends Resource
                                     ->warning()
                                     ->body("No se encontraron liquidaciones que generen datos impositivos para el período {$year}-{$month}")
                                     ->send();
+
                                 return;
                             }
 
@@ -184,6 +184,7 @@ class AfipMapucheSicossResource extends Resource
                         ->action(function () {
                             $exportService = Container::getInstance()->make(SicossExportService::class);
                             $path = $exportService->generarArchivoExcel(static::getModel()::all());
+
                             return response()->download($path)->deleteFileAfterSend();
                         })
                         ->color('success'),
@@ -291,9 +292,8 @@ class AfipMapucheSicossResource extends Resource
      * requerido por el sistema SICOSS. El archivo se guarda en el directorio temporal y se
      * devuelve la ruta completa del archivo generado.
      *
-     * @param ?Collection $registros Una colección de registros a incluir en el archivo SICOSS.
-     *                               Si no se proporciona, se utilizarán todos los registros.
-     *
+     * @param  ?Collection  $registros  Una colección de registros a incluir en el archivo SICOSS.
+     *                                  Si no se proporciona, se utilizarán todos los registros.
      * @return string La ruta completa del archivo SICOSS generado.
      */
     public static function generarArchivoSicoss(?Collection $registros = null): string
@@ -306,6 +306,7 @@ class AfipMapucheSicossResource extends Resource
             $valor ??= 0;
             // Formatea el número con 2 decimales y punto como separador
             $numeroFormateado = number_format($valor, 2, '.', '');
+
             // Rellena con ceros a la izquierda hasta alcanzar la longitud deseada
             return str_pad($numeroFormateado, $longitud, '0', \STR_PAD_LEFT);
         };
@@ -317,6 +318,7 @@ class AfipMapucheSicossResource extends Resource
             $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
             // Limitar la longitud considerando caracteres especiales
             $valor = substr($valor, 0, $longitud);
+
             // Rellenar con espacios hasta alcanzar la longitud exacta
             return str_pad($valor, $longitud, ' ', \STR_PAD_RIGHT);
         };
@@ -418,12 +420,13 @@ class AfipMapucheSicossResource extends Resource
                 $linea = str_pad($linea, 500, ' ', \STR_PAD_RIGHT);
             }
 
-            $contenido .= $linea . \PHP_EOL;
+            $contenido .= $linea.\PHP_EOL;
         }
 
-        $nombreArchivo = 'SICOSS_' . date('Ym') . '.txt';
-        Storage::disk('local')->put('tmp/' . $nombreArchivo, $contenido);
-        return storage_path('app/tmp/' . $nombreArchivo);
+        $nombreArchivo = 'SICOSS_'.date('Ym').'.txt';
+        Storage::disk('local')->put('tmp/'.$nombreArchivo, $contenido);
+
+        return storage_path('app/tmp/'.$nombreArchivo);
     }
 
     /**
@@ -432,23 +435,22 @@ class AfipMapucheSicossResource extends Resource
      * Esta función utiliza el query builder de Livewire para obtener los registros filtrados
      * y luego llama a la función exportarRegistros para generar el archivo de exportación.
      *
-     * @param $livewire El objeto Livewire que contiene el query builder filtrado.
-     * @param string $formato El formato de exportación ('txt' o 'excel').
-     *
+     * @param  $livewire  El objeto Livewire que contiene el query builder filtrado.
+     * @param  string  $formato  El formato de exportación ('txt' o 'excel').
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistrosFiltrados($livewire, string $formato = 'txt'): Response
     {
         $registrosFiltrados = $livewire->getFilteredTableQuery()->get();
+
         return static::exportarRegistros($registrosFiltrados, $formato);
     }
 
     /**
      * Exporta los registros proporcionados a un archivo.
      *
-     * @param Collection $registros Los registros a exportar.
-     * @param string $formato El formato de exportación ('txt' o 'excel').
-     *
+     * @param  Collection  $registros  Los registros a exportar.
+     * @param  string  $formato  El formato de exportación ('txt' o 'excel').
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistros(Collection $registros, string $formato = 'txt'): Response

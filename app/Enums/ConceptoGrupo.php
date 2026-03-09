@@ -71,8 +71,6 @@ enum ConceptoGrupo: string
 
     /**
      * Obtiene la descripción del grupo.
-     *
-     * @return string
      */
     public function getDescripcion(): string
     {

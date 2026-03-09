@@ -2,16 +2,16 @@
 
 namespace App\Filament\Embargos\Resources\EmbargoReports\Pages;
 
-use Exception;
-use Filament\Actions\ExportBulkAction;
 use App\Exports\EmbargoReportExport;
 use App\Filament\Embargos\Resources\EmbargoReports\EmbargoReports\EmbargoReportResource;
 use App\Filament\Exports\Reportes\EmbargoReportModelExporter;
 use App\Models\Mapuche\Dh22;
 use App\Models\Reportes\EmbargoReportModel;
 use App\Services\Reportes\EmbargoReportService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -28,10 +28,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ReporteEmbargos extends Page implements HasTable, HasForms
+class ReporteEmbargos extends Page implements HasForms, HasTable
 {
-    use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithTable;
 
     public $nro_liqui;
 
@@ -97,7 +97,7 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
 
                     return Excel::download(
                         new EmbargoReportExport($query),
-                        'embargos-' . now()->format('Y-m-d') . '.xlsx',
+                        'embargos-'.now()->format('Y-m-d').'.xlsx',
                     );
                 }),
             ExportAction::make('export')
@@ -112,12 +112,11 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
     {
         Log::info('nro_lqui actualizado: ', [$this->nro_liqui]);
 
-
         // Guardamos el nro_liqui en la sesión
         session()->put('selected_nro_liqui', $this->nro_liqui);
 
         // Verificamos si ya existen datos para esta liquidación
-        if (!$this->hasReportData()) {
+        if (! $this->hasReportData()) {
             // Solo generamos el reporte si no existe
             $this->generateReport();
         }
@@ -131,8 +130,7 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
     public function generateReport(): void
     {
 
-
-        if (!$this->nro_liqui) {
+        if (! $this->nro_liqui) {
             return;
         }
 
@@ -143,6 +141,7 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
                 ->title('Ya hay datos para esta sesión.')
                 ->persistent()
                 ->send();
+
             return;
         }
 
@@ -235,6 +234,7 @@ class ReporteEmbargos extends Page implements HasTable, HasForms
     protected function hasReportData(): bool
     {
         $sessionId = session()->getId();
+
         return EmbargoReportModel::where('session_id', $sessionId)
             ->where('nro_liqui', $this->nro_liqui)
             ->exists();

@@ -2,31 +2,30 @@
 
 namespace App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacions;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\Action;
-use Exception;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\ListAfipMapucheMiSimplificacions;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\CreateAfipMapucheMiSimplificacion;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\EditAfipMapucheMiSimplificacion;
 use App\Enums\EstadoCierre;
 use App\Enums\PuestoDesempenado;
-use App\Filament\Afip\Resources\AfipMapucheMiSimplificacionResource\Pages;
+use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\CreateAfipMapucheMiSimplificacion;
+use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\EditAfipMapucheMiSimplificacion;
+use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages\ListAfipMapucheMiSimplificacions;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Services\AfipMapucheExportService;
 use App\Services\AfipMapucheSicossService;
 use App\Services\Mapuche\LiquidacionService;
 use App\Services\MapucheMiSimplificacionService;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +33,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 {
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'AFIP';
+    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Mi Simplificación';
 
@@ -44,7 +43,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
     protected static ?string $pluralLabel = 'Mi Simplificación';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-right-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-right-circle';
 
     protected static ?int $navigationSort = 3;
 
@@ -52,7 +51,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
     {
         return $schema
             ->components([
-                //// TextInput::make('periodo_fiscal')
+                // // TextInput::make('periodo_fiscal')
             ]);
     }
 
@@ -132,7 +131,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->label('Número de Liquidación')
                             ->options(function (callable $get, LiquidacionService $liquidacionService): array {
                                 $periodoFiscal = $get('periodo_fiscal');
-                                if (!$periodoFiscal) {
+                                if (! $periodoFiscal) {
                                     return [];
                                 }
                                 $year = substr($periodoFiscal, 0, 4);
@@ -191,7 +190,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    //Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('periodo_fiscal', 'desc');

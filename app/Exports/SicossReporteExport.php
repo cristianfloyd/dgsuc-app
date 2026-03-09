@@ -2,10 +2,10 @@
 
 namespace App\Exports;
 
-use Exception;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Services\Reports\SicossReporteService;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -49,7 +49,8 @@ class SicossReporteExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            'Detalle' => new class ($this->anio, $this->mes, $this->records, $this->sicossReporteService) implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles, WithCustomStartCell, WithBackgroundColor, WithTitle {
+            'Detalle' => new class($this->anio, $this->mes, $this->records, $this->sicossReporteService) implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithColumnFormatting, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
+            {
                 use Exportable;
 
                 protected string $anio;
@@ -81,6 +82,7 @@ class SicossReporteExport implements WithMultipleSheets
                     try {
                         if ($this->records) {
                             $records = $this->records->map(fn ($item) => SicossReporteData::fromModel($item));
+
                             return $records;
                         }
 
@@ -91,7 +93,8 @@ class SicossReporteExport implements WithMultipleSheets
                             'anio' => $this->anio,
                             'mes' => $this->mes,
                         ]);
-                        return new Collection(); // Devolver colección vacía en caso de error
+
+                        return new Collection; // Devolver colección vacía en caso de error
                     }
                 }
 
@@ -117,8 +120,7 @@ class SicossReporteExport implements WithMultipleSheets
                  * Este método convierte cada registro en un array con los campos necesarios para el reporte,
                  * proporcionando valores predeterminados en caso de que algún campo sea nulo.
                  *
-                 * @param mixed $row Fila de datos a mapear
-                 *
+                 * @param  mixed  $row  Fila de datos a mapear
                  * @return array Array con los valores mapeados de la fila
                  */
                 public function map($row): array
@@ -141,6 +143,7 @@ class SicossReporteExport implements WithMultipleSheets
                             'error' => $e->getMessage(),
                             'row' => json_encode($row),
                         ]);
+
                         // Devolver valores por defecto en caso de error
                         return ['', '', 0, 0, 0, 0, 0, 0, 0];
                     }
@@ -165,7 +168,7 @@ class SicossReporteExport implements WithMultipleSheets
                 public function styles(Worksheet $sheet)
                 {
                     $sheet->mergeCells('A1:H1');
-                    $sheet->setCellValue('A1', 'REPORTE SICOSS - PERÍODO ' . $this->anio . '/' . $this->mes);
+                    $sheet->setCellValue('A1', 'REPORTE SICOSS - PERÍODO '.$this->anio.'/'.$this->mes);
 
                     // Aplicar filtros a los encabezados
                     $lastColumn = 'H';
@@ -196,7 +199,8 @@ class SicossReporteExport implements WithMultipleSheets
                     return 'Detalle';
                 }
             },
-            'Totales' => new class ($this->totales) implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithBackgroundColor, WithTitle {
+            'Totales' => new class($this->totales) implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithColumnFormatting, WithCustomStartCell, WithHeadings, WithStyles, WithTitle
+            {
                 use Exportable;
 
                 protected SicossTotalesData $totales;

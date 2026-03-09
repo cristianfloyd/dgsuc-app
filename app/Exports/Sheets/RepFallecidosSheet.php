@@ -17,15 +17,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class RepFallecidosSheet implements
-    FromCollection,
-    WithTitle,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    ShouldAutoSize,
-    WithEvents,
-    WithColumnFormatting
+class RepFallecidosSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected string $periodo;
 
@@ -50,7 +42,7 @@ class RepFallecidosSheet implements
     public function headings(): array
     {
         return [
-            ['Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
+            ['Período: '.substr($this->periodo, 0, 4).'/'.substr($this->periodo, 4, 2)],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -66,6 +58,7 @@ class RepFallecidosSheet implements
     public function map($row): array
     {
         dump($row);
+
         return [
             $row->nro_legaj,
             trim($row->apellido),

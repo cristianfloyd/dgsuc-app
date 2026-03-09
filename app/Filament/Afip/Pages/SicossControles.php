@@ -2,10 +2,6 @@
 
 namespace App\Filament\Afip\Pages;
 
-use Exception;
-use Filament\Support\Enums\Width;
-use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
-use App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget;
 use App\Enums\ConceptosSicossEnum;
 use App\Exports\Sicoss\AportesDiferenciasExport;
 use App\Exports\Sicoss\ConceptosExport;
@@ -17,6 +13,8 @@ use App\Filament\Afip\Actions\EjecutarControlConceptosAction;
 use App\Filament\Afip\Actions\EjecutarControlContribucionesAction;
 use App\Filament\Afip\Actions\EjecutarControlCuilsAction;
 use App\Filament\Afip\Pages\Traits\HasSicossControlTables;
+use App\Filament\Afip\Widgets\ConceptosSeleccionadosWidget;
+use App\Filament\Widgets\PeriodoFiscalSelectorWidget;
 use App\Models\ControlAportesDiferencia;
 use App\Models\ControlConceptosPeriodo;
 use App\Models\ControlContribucionesDiferencia;
@@ -24,9 +22,11 @@ use App\Models\ControlCuilsDiferencia;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -40,12 +40,12 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SicossControles extends Page implements HasTable
 {
+    // use SicossConnectionTrait;
+    use HasSicossControlTables;
+
     use InteractsWithTable {
         InteractsWithTable::getTable insteadof MapucheConnectionTrait;
     }
-
-    // use SicossConnectionTrait;
-    use HasSicossControlTables;
     use MapucheConnectionTrait {
         MapucheConnectionTrait::getTable as getMapucheTable;
     }
@@ -72,9 +72,9 @@ class SicossControles extends Page implements HasTable
 
     public $conceptosSeleccionados = [];
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'SICOSS';
+    protected static string|\UnitEnum|null $navigationGroup = 'SICOSS';
 
     protected string $view = 'filament.afip.pages.sicoss-controles';
 
@@ -218,7 +218,7 @@ class SicossControles extends Page implements HasTable
     public function getDiferenciaConteos(): int
     {
         $conteos = $this->getConteosData();
-        if (!$conteos) {
+        if (! $conteos) {
             return 0;
         }
 
@@ -227,7 +227,7 @@ class SicossControles extends Page implements HasTable
 
     public function formatMoney($value): string
     {
-        return '$ ' . number_format($value, 2, ',', '.');
+        return '$ '.number_format($value, 2, ',', '.');
     }
 
     public function getDiferenciasCount(): int
@@ -237,9 +237,10 @@ class SicossControles extends Page implements HasTable
 
     public function getDependenciasCount(): int
     {
-        if (!$this->hasResults()) {
+        if (! $this->hasResults()) {
             return 0;
         }
+
         return \count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
     }
 
@@ -272,8 +273,7 @@ class SicossControles extends Page implements HasTable
             ->columns($this->getColumnsForActiveTab())
             ->when(
                 $this->activeTab !== 'diferencias_cuils' && $this->activeTab !== 'conceptos',
-                fn (Table $table) =>
-                $table->defaultSort('diferencia', 'desc'),
+                fn (Table $table) => $table->defaultSort('diferencia', 'desc'),
             )
             ->when(
                 $this->activeTab === 'conceptos',
@@ -843,6 +843,7 @@ class SicossControles extends Page implements HasTable
                 'conceptosSeleccionados' => $this->conceptosSeleccionados ?? [],
             ]);
         }
+
         return $widgets;
     }
 
@@ -915,12 +916,13 @@ class SicossControles extends Page implements HasTable
             default => null
         };
 
-        if (!$data) {
+        if (! $data) {
             Notification::make()
                 ->warning()
                 ->title('No se puede exportar')
                 ->body('No hay datos para exportar en esta pestaña.')
                 ->send();
+
             return;
         }
 
