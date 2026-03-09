@@ -3,11 +3,13 @@
 namespace App\Livewire\Components;
 
 use App\Services\DatabaseConnectionService;
+use Composer\InstalledVersions;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class FilamentFooter extends Component
 {
-    public string $currentTime;
+    public string $currentTime = '';
 
     public function mount(): void
     {
@@ -19,14 +21,14 @@ class FilamentFooter extends Component
         $this->currentTime = now()->format('d/m/Y H:i:s');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.components.filament-footer', [
             'connectionName' => app(DatabaseConnectionService::class)->getCurrentConnectionName(),
             'laravelVersion' => app()->version(),
-            'filamentVersion' => '3.3.33',
+            'filamentVersion' => InstalledVersions::getPrettyVersion('filament/filament') ?? '—',
             'appName' => config('app.name'),
-            'appVersion' => config('app.version', '1.0.0'),
+            'appVersion' => config('app.version', '1.0'),
         ]);
     }
 }
