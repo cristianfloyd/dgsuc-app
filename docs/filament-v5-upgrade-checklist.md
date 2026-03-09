@@ -4,7 +4,7 @@ Guía paso a paso según la [guía oficial de Filament v5](https://filamentphp.c
 
 **Estado:** Pendiente. Marca cada ítem al completarlo.
 
-> **Nota:** Si la aplicación corre en Docker, usa: `docker compose exec app php artisan <comando>` o `docker compose exec app composer <comando>`.
+> **Nota:** La aplicación corre en Docker. Todos los comandos siguientes usan el prefijo `docker compose exec app`.
 
 ---
 
@@ -25,7 +25,7 @@ Antes de empezar, confirma que cumples:
 | Requisito | Tu proyecto | Completado |
 |-----------|------------|------------|
 | Tailwind CSS v4.0+ | ✅ tailwindcss 4.2.1 | [ ] |
-| Livewire v4.0+ | ⚠️ Actualmente 3.7.x — **hay que actualizar** | [ ] |
+| Livewire v4.0+ | ✅ livewire 4.2.1 | [x] |
 | Laravel v11.28+ | ✅ Laravel 12.x | [ ] |
 | PHP 8.2+ | ✅ PHP ^8.4 | [ ] |
 
@@ -39,8 +39,8 @@ Sigue la [guía de Livewire v4](https://livewire.laravel.com/docs/4.x/upgrading)
 
 ### 2.1 Instalar Livewire v4
 
-- [ ] Ejecutar: `composer require livewire/livewire:^4.0`
-- [ ] Ejecutar: `php artisan optimize:clear`
+- [ ] Ejecutar: `docker compose exec app composer require livewire/livewire:^4.0`
+- [ ] Ejecutar: `docker compose exec app php artisan optimize:clear`
 
 ### 2.2 Actualizar `config/livewire.php`
 
@@ -71,7 +71,7 @@ Cambios principales (v3 → v4):
 
 ### 2.7 Verificación Livewire v4
 
-- [ ] `composer show livewire/livewire` muestra versión ^4.x.
+- [ ] `docker compose exec app composer show livewire/livewire` muestra versión ^4.x.
 - [ ] Probar en navegador que los componentes Livewire y paneles Filament responden bien antes de seguir.
 
 ---
@@ -95,13 +95,13 @@ Algunos plugins pueden no estar listos para v5. Revisa y actúa:
 
 - [ ] Ejecutar:
   ```bash
-  composer require filament/upgrade:"^5.0" -W --dev
+  docker compose exec app composer require filament/upgrade:"^5.0" -W --dev
   ```
   En Windows PowerShell, si `^` da problemas, usar: `filament/upgrade:"~5.0"`.
 
 ### 4.2 Ejecutar el script
 
-- [ ] Ejecutar: `vendor/bin/filament-v5`
+- [ ] Ejecutar: `docker compose exec app vendor/bin/filament-v5`
 - [ ] **Leer la salida completa:** el script indica comandos adicionales y cambios aplicados.
 - [ ] Revisar los cambios que el script haya hecho en el código (git diff).
 
@@ -111,19 +111,19 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 
 - [ ] Ejecutar los comandos que imprima el script (por ejemplo):
   ```bash
-  composer require filament/filament:"^5.0" -W --no-update
-  composer update
+  docker compose exec app composer require filament/filament:"^5.0" -W --no-update
+  docker compose exec app composer update
   ```
   (En PowerShell, si hace falta: `filament/filament:"~5.0"`.)
 
 ### 4.4 Actualizar plugin Spatie Media Library (si lo usas)
 
-- [ ] Ejecutar: `composer require filament/spatie-laravel-media-library-plugin:"^5.0" -W`
+- [ ] Ejecutar: `docker compose exec app composer require filament/spatie-laravel-media-library-plugin:"^5.0" -W`
 - [ ] Resolver conflictos de dependencias si aparecen.
 
 ### 4.5 Quitar el paquete de upgrade
 
-- [ ] Ejecutar: `composer remove filament/upgrade --dev`
+- [ ] Ejecutar: `docker compose exec app composer remove filament/upgrade --dev`
 
 ---
 
@@ -138,10 +138,10 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 
 ## 6. Verificación final
 
-- [ ] `composer run quality:check` (o equivalente del proyecto).
-- [ ] `php artisan test --compact` (o los tests que uses).
-- [ ] `php artisan filament:optimize`
-- [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend.
+- [ ] `docker compose exec app composer run quality:check` (o equivalente del proyecto).
+- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).
+- [ ] `docker compose exec app php artisan filament:optimize`
+- [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend; si corres npm en el contenedor: `docker compose exec app npm run build`.
 - [ ] Probar en navegador los paneles que uses: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
 - [ ] Probar recursos que usen `SpatieMediaLibraryFileUpload` o columnas/entries de media (si aplica).
 

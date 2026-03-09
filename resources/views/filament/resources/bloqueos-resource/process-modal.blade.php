@@ -1,5 +1,3 @@
 <div>
-    <livewire:bloqueos-data-processor
-        :registro="$registro ?? null"
-    />
+    <livewire:bloqueos-data-processor :registro="$registro ?? null" />
 </div>

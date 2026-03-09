@@ -36,7 +36,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/user/register', [RegisterForm::class, 'create'])->name('registerform.create');
-Route::get('/user/register', RegisterForm::class)->name('registerform');
+Route::livewire('/user/register', RegisterForm::class)->name('registerform');
 
 // Rutas de autenticación Toba con prefijo (para compatibilidad con código existente)
 Route::prefix('toba-legacy')->group(function (): void {
@@ -61,50 +61,50 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\DatabaseConnectionMiddle
 
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', ])->group(function (): void {
-    Route::get('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
-    Route::get('/clicker', Clicker::class)->name('clicker');
+    Route::livewire('/selector-panel', PanelSelector::class)->middleware('auth')->name('panel-selector');
+    Route::livewire('/clicker', Clicker::class)->name('clicker');
     Route::get('/suc', function () {
         return view('dashboard');
     })->name('dashboard');
-    Route::get('/todos', TodoList::class)->name('todos');
+    Route::livewire('/todos', TodoList::class)->name('todos');
     Route::post('/todos', [TodoList::class, 'create'])->name('todos.create');
-    Route::get('/user/list', UserList::class)->name('userlist');
-    Route::get('/contactus', ContactUs::class)->name('contact-us');
-    Route::get('/modal', Modal::class)->name('modal');
-    Route::get('/userstable', UsersTable::class)->name('datatable');
+    Route::livewire('/user/list', UserList::class)->name('userlist');
+    Route::livewire('/contactus', ContactUs::class)->name('contact-us');
+    Route::livewire('/modal', Modal::class)->name('modal');
+    Route::livewire('/userstable', UsersTable::class)->name('datatable');
     Route::get('/', function () {
         return view('index');
     })->name('index');
-    Route::get('/imputacion', AsignacionForm::class)->name('imputacion');
-    Route::get('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
-    Route::get('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
-    Route::get('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas'); // 2.- paso relaciones activas
+    Route::livewire('/imputacion', AsignacionForm::class)->name('imputacion');
+    Route::livewire('/afip', AfipMiSimplificacion::class)->name('MiSimplificacion');  // Raiz para la app de mapuche-afip mi simplificacion
+    Route::livewire('/afip/subir-archivo', Uploadtxt::class)->name('importar'); // 1.- paso subir archivos
+    Route::livewire('/afip/relaciones-activas', AfipRelacionesActivas::class)->name('afiprelacionesactivas'); // 2.- paso relaciones activas
     Route::match(['get', 'post'], '/afip/sicossimporter', SicossImporter::class)->name('mapuche-sicoss'); // 3.- paso mapuche sicoss
     Route::match(['get', 'post'], '/afip/compare-cuils', CompareCuils::class)->name('compare-cuils'); //  4.- paso comparar cuils
 
-    Route::get('/reporte/orden-pago', OrdenPagoReporte::class)->name('reporte-orden-pago');
+    Route::livewire('/reporte/orden-pago', OrdenPagoReporte::class)->name('reporte-orden-pago');
     Route::get('/reporte/orden-pago-pdf', function () {
         return view('reporte');
     })->name('reporte-orden-pago-pdf');
 
 
 
-    Route::get('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
-    Route::get('/afip/convertir', ConvertirTabla::class)->name('convertir');
-    // Route::get('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('afip.mapuche.misimplificacion');
-    Route::get('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
-    Route::get('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
-    Route::get('/afip/testcuils', TestCuils::class)->name('testcuils');
-    Route::get('/importar-crudo', AfipImportCrudo::class)->name('upload');
-    Route::get('buscar-columna', BuscarColumna::class)->name('buscar-columna');
-    Route::get('buscar-comentario', BuscarComentario::class)->name('buscar-comentario');
-    Route::get('dh21', Dh21::class)->name('dh21');
+    Route::livewire('/misimplificaciontable', ParaMiSimplificacion::class)->name('misimplificaciontable');
+    Route::livewire('/afip/convertir', ConvertirTabla::class)->name('convertir');
+    // Route::livewire('/afip/mapuchemisim', AfipMapucheMiSimplificacion::class)->name('afip.mapuche.misimplificacion');
+    Route::livewire('/afip/mapuche-sicoss-table', MapucheSicossTable::class)->name('mapuche-sicoss-table');
+    Route::livewire('/afip/altas-mi-simplificacion', ShowCuilDetails::class)->name('altas');
+    Route::livewire('/afip/testcuils', TestCuils::class)->name('testcuils');
+    Route::livewire('/importar-crudo', AfipImportCrudo::class)->name('upload');
+    Route::livewire('buscar-columna', BuscarColumna::class)->name('buscar-columna');
+    Route::livewire('buscar-comentario', BuscarComentario::class)->name('buscar-comentario');
+    Route::livewire('dh21', Dh21::class)->name('dh21');
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
-    Route::get('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
-    Route::get('/encoding', FileEncoding::class)->name('encoding');
-    Route::get('/prueba', ParaMiSimplificacion::class)->name('prueba');
+    Route::livewire('reporteLiquidacion', ReporteLiquidacion::class)->name('reporteLiquidacion');
+    Route::livewire('/encoding', FileEncoding::class)->name('encoding');
+    Route::livewire('/prueba', ParaMiSimplificacion::class)->name('prueba');
 
-    Route::get('/afip/misim', AfipMapucheMiSimplificacionTable::class)->name('afip.misimplificacion.table');
+    Route::livewire('/afip/misim', AfipMapucheMiSimplificacionTable::class)->name('afip.misimplificacion.table');
 });
 
 Route::get('documentation/download', [DocumentationController::class, 'download'])

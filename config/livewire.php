@@ -30,19 +30,32 @@ return [
 
     /*
     |---------------------------------------------------------------------------
-    | Layout
+    | Component Namespaces
     |---------------------------------------------------------------------------
-    | The view that will be used as the layout when rendering a single component
-    | as an entire page via `Route::get('/post/create', CreatePost::class);`.
-    | In this case, the view returned by CreatePost will render into $slot.
+    | Custom namespaces for view-based components (e.g. layouts::app, pages::dashboard).
     |
     */
 
-    'layout' => 'layouts.app',
+    'component_namespaces' => [
+        'layouts' => resource_path('views/layouts'),
+        'pages' => resource_path('views/pages'),
+    ],
 
     /*
     |---------------------------------------------------------------------------
-    | Lazy Loading Placeholder
+    | Page Layout (v4: component_layout)
+    |---------------------------------------------------------------------------
+    | The view that will be used as the layout when rendering a single component
+    | as an entire page via Route::livewire('/post/create', CreatePost::class).
+    | Uses layouts:: namespace → resources/views/layouts/app.blade.php.
+    |
+    */
+
+    'component_layout' => 'layouts::app',
+
+    /*
+    |---------------------------------------------------------------------------
+    | Lazy Loading Placeholder (v4: component_placeholder)
     |---------------------------------------------------------------------------
     | Livewire allows you to lazy load components that would otherwise slow down
     | the initial page load. Every component can have a custom placeholder or
@@ -50,7 +63,31 @@ return [
     |
     */
 
-    'lazy_placeholder' => null,
+    'component_placeholder' => null,
+
+    /*
+    |---------------------------------------------------------------------------
+    | Make Command
+    |---------------------------------------------------------------------------
+    | Default type (sfc, mfc, class) and emoji prefix for make:livewire.
+    |
+    */
+
+    'make_command' => [
+        'type' => 'class',
+        'emoji' => false,
+    ],
+
+    /*
+    |---------------------------------------------------------------------------
+    | Class Path
+    |---------------------------------------------------------------------------
+    |
+    | Path where Livewire component class files are created.
+    |
+    */
+
+    'class_path' => app_path('Livewire'),
 
     /*
     |---------------------------------------------------------------------------
@@ -147,6 +184,16 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Smart Wire Keys
+    |---------------------------------------------------------------------------
+    | Apply smart keys to nested components in loops for more reliable updates.
+    |
+    */
+
+    'smart_wire_keys' => true,
+
+    /*
+    |---------------------------------------------------------------------------
     | Pagination Theme
     |---------------------------------------------------------------------------
     |
@@ -157,5 +204,14 @@ return [
     */
 
     'pagination_theme' => 'tailwind',
-    'middleware_group' => ['web'],
+
+    /*
+    |---------------------------------------------------------------------------
+    | CSP Safe
+    |---------------------------------------------------------------------------
+    | Use CSP-safe Alpine build when using strict Content Security Policy.
+    |
+    */
+
+    'csp_safe' => false,
 ];
