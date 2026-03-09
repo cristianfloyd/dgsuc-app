@@ -1,0 +1,108 @@
+/* Sidebar global: compacto y alineado con el header (3.25rem) */
+
+/* Posición cuando hay topbar: mismo alto que el header */
+.fi-body-has-topbar .fi-sidebar {
+    @apply lg:top-[3.25rem] lg:h-[calc(100dvh-3.25rem)];
+}
+
+.fi-sidebar-header {
+    @apply flex h-[3.25rem] min-h-[3.25rem] items-center justify-center;
+}
+
+.fi-body-has-topbar .fi-sidebar-header {
+    @apply bg-white px-4 ring-1 ring-gray-200/80 lg:hidden dark:bg-gray-900 dark:ring-white/10;
+}
+
+:not(.fi-body-has-topbar) .fi-sidebar-header .fi-logo {
+    @apply ms-2;
+}
+
+.fi-sidebar-nav {
+    @apply flex grow flex-col gap-y-4 overflow-x-hidden overflow-y-auto px-4 py-4;
+    scrollbar-gutter: stable;
+}
+
+.fi-sidebar-nav-groups {
+    @apply -mx-1 flex flex-col gap-y-4;
+}
+
+.fi-sidebar-group {
+    @apply flex flex-col gap-y-0.5;
+}
+
+.fi-sidebar-group-btn {
+    @apply flex items-center gap-x-2 p-1.5;
+}
+
+.fi-sidebar-group-btn .fi-icon {
+    @apply size-4 text-gray-400 dark:text-gray-500;
+}
+
+.fi-sidebar-group-label {
+    @apply flex-1 text-[13px] font-medium leading-tight text-gray-500 dark:text-gray-400;
+}
+
+.fi-sidebar-group-dropdown-trigger-btn {
+    @apply relative flex flex-1 items-center justify-center gap-x-2 rounded-md p-1.5 outline-hidden transition duration-75 hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5;
+}
+
+.fi-sidebar-group-dropdown-trigger-btn .fi-icon {
+    @apply size-4 text-gray-400 dark:text-gray-500;
+}
+
+.fi-sidebar-group-items {
+    @apply flex flex-col gap-y-0.5;
+}
+
+.fi-sidebar-item-btn {
+    @apply relative flex items-center justify-center gap-x-2 rounded-md p-1.5 outline-hidden transition duration-75;
+}
+
+.fi-sidebar-item-btn > .fi-icon {
+    @apply size-4 text-gray-400 dark:text-gray-500;
+}
+
+.fi-sidebar-item-label {
+    @apply flex-1 truncate text-[13px] font-medium text-gray-700 dark:text-gray-200;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    @apply bg-gray-100 dark:bg-white/5;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+.fi-sidebar-item.fi-active > .fi-sidebar-item-label {
+    @apply text-primary-600 dark:text-primary-400;
+}
+
+.fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn {
+    @apply hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5;
+}
+
+.fi-sidebar-item-grouped-border {
+    @apply relative flex size-5 items-center justify-center;
+}
+
+.fi-sidebar-item-grouped-border-part {
+    @apply relative h-1 w-1 rounded-full bg-gray-400 dark:bg-gray-500;
+}
+
+.fi-sidebar-footer {
+    @apply mx-3 my-2 grid gap-y-2;
+}
+
+.fi-sidebar-database-notifications-btn {
+    @apply relative flex w-full items-center justify-center gap-x-2 rounded-md p-1.5 text-start outline-hidden transition duration-75 hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5;
+}
+
+.fi-sidebar-database-notifications-btn .fi-icon {
+    @apply size-4 text-gray-400 dark:text-gray-500;
+}
+
+.fi-sidebar-database-notifications-btn > .fi-sidebar-database-notifications-btn-label {
+    @apply flex-1 truncate text-[13px] font-medium text-gray-700 dark:text-gray-200;
+}
+
+.fi-sidebar-sub-group-items {
+    @apply flex flex-col gap-y-0.5;
+}

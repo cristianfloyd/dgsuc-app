@@ -1,5 +1,6 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 @import './topbar.css';
+@import './sidebar.css';
 
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
