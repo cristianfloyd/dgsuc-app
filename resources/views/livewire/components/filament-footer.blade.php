@@ -2,7 +2,7 @@
     role="contentinfo"
     class="fi-footer border-t border-gray-200/80 dark:border-white/5 bg-gray-50/80 dark:bg-white/[0.02]"
 >
-    <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-1.5 text-[11px] leading-tight text-gray-500 dark:text-gray-400">
+    <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span title="Conexión BD">{{ $connectionName ?: 'Default' }}</span>
             <span class="select-none text-gray-300 dark:text-gray-600" aria-hidden="true">·</span>
