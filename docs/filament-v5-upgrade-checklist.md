@@ -154,12 +154,12 @@ docker compose exec app php artisan filament:optimize
 docker compose exec app npm run build
 ```
 
-- [ ] `docker compose exec app composer run quality:check` (o equivalente del proyecto).
-- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).
-- [ ] `docker compose exec app php artisan filament:optimize`
-- [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend; en contenedor: `docker compose exec app npm run build`.
-- [ ] Probar en navegador los paneles: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
-- [ ] Probar recursos que usen `SpatieMediaLibraryFileUpload` o columnas/entries de media (si aplica).
+- [x] `docker compose exec app composer run quality:check` (o equivalente del proyecto).
+- [x] `docker compose exec app php artisan test --compact` (o los tests que uses).
+- [x] `docker compose exec app php artisan filament:optimize`
+- [x] `npm run build` (o `npm run dev`) si hay cambios de frontend; en contenedor: `docker compose exec app npm run build`.
+- [x] Probar en navegador los paneles: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
+- [x] Probar recursos que usen `SpatieMediaLibraryFileUpload` o columnas/entries de media (si aplica).
 
 ---
 
