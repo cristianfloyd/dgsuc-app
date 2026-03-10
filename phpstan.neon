@@ -2,7 +2,7 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 5
+    level: 7
     paths:
         - app/
         - routes/
@@ -12,6 +12,9 @@ parameters:
         - database/seeders/
         - database/factories/
     
+    # Versión de PHP objetivo (8.4)
+    phpVersion: 80400
+
     # Excluir archivos/directorios
     excludePaths:
         - vendor/
