@@ -30,7 +30,8 @@ class SicossReporteData extends Data
         public readonly float $c305,
         #[MapName('c306')]
         public readonly float $c306,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia de SicossReporteData a partir de un modelo.

@@ -9,7 +9,9 @@ class LiquidacionService
     /**
      * Create a new class instance.
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /**
      * Obtiene las liquidaciones disponibles para un período fiscal específico,

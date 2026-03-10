@@ -19,7 +19,9 @@ class UserList extends Component
     public $selectedUser;
 
     #[On('user-created')]
-    public function updateList(): void {}
+    public function updateList(): void
+    {
+    }
 
     public function viewUser(User $user): void
     {

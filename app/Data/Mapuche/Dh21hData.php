@@ -38,7 +38,8 @@ class Dh21hData extends Data
         public ?int $codn_grupo_presup = null,
         public ?string $tipo_ejercicio = null,
         public ?int $codn_subsubar = null,
-    ) {}
+    ) {
+    }
 
     public static function rules($context = null): array
     {

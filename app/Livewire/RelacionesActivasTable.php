@@ -41,7 +41,9 @@ class RelacionesActivasTable extends Component
         }
     }
 
-    public function mount(): void {}
+    public function mount(): void
+    {
+    }
 
     public function updatedSearch(): void
     {

@@ -16,7 +16,9 @@ class TableSelectorService
     /**
      * Constructor del servicio.
      */
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService) {}
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService)
+    {
+    }
 
     /**
      * Determina qué tabla usar (dh21 o dh21h) según el período fiscal de la liquidación.

@@ -18,7 +18,9 @@ class Dh90Repository implements Dh90RepositoryInterface
      *
      * @param Dh90 $model
      */
-    public function __construct(protected Dh90 $model) {}
+    public function __construct(protected Dh90 $model)
+    {
+    }
 
     /**
      * Obtener todos los registros.

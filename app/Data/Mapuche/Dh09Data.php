@@ -99,7 +99,8 @@ class Dh09Data extends Data
         public readonly ?Carbon $fec_norma,
         #[BooleanType]
         public readonly bool $fuerza_reparto = false,
-    ) {}
+    ) {
+    }
 
     public static function rules(?ValidationContext $context = null): array
     {

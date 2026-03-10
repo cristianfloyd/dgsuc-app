@@ -89,7 +89,7 @@ class BloqueosProcessService
                 });
 
                 if ($registrosInvalidos->isNotEmpty()) {
-                    throw new Exception('Existen registros no validados, con errores o ya procesados. ' . 'Por favor, valide todos los registros antes de procesar.', );
+                    throw new Exception('Existen registros no validados, con errores o ya procesados. ' . 'Por favor, valide todos los registros antes de procesar.',);
                 }
 
                 $query->whereIn('id', collect($bloqueosData)->pluck('id'));

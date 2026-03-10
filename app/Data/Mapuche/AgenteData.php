@@ -21,7 +21,8 @@ class AgenteData extends Data
         public string $dni,
         #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public ?Carbon $fechaInicio,
-    ) {}
+    ) {
+    }
 
     /**
      * Define las reglas de validación para los datos del agente.

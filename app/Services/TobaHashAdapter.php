@@ -39,7 +39,8 @@ class TobaHashAdapter
     public function __construct(
         private readonly string $metodo = 'bcrypt',
         private int $rounds = self::MIN_ROUNDS,
-    ) {}
+    ) {
+    }
 
     /**
      * Establece el número de rondas para el hash.

@@ -15,7 +15,9 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     /**
      * Create a new class instance.
      */
-    public function __construct(private readonly Dh21h $model) {}
+    public function __construct(private readonly Dh21h $model)
+    {
+    }
 
     /**
      * Obtener liquidación por ID.

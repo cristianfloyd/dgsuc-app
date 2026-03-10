@@ -12,7 +12,8 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
 {
     public function __construct(
         protected AfipRelacionesActivas $model,
-    ) {}
+    ) {
+    }
 
     /**
      * Inserta datos masivamente en la tabla.

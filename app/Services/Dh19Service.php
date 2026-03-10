@@ -13,7 +13,9 @@ class Dh19Service
      *
      * @param Dh19RepositoryInterface $repository
      */
-    public function __construct(protected Dh19RepositoryInterface $repository) {}
+    public function __construct(protected Dh19RepositoryInterface $repository)
+    {
+    }
 
     /**
      * Obtiene todos los registros de Dh19.

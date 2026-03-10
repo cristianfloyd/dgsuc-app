@@ -14,7 +14,8 @@ class ConceptoTotalItemData extends Data
         public readonly string $descripcionConcepto,
         #[MapName('importe')]
         public readonly float $importe,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia desde los datos de BD.

@@ -33,7 +33,8 @@ class BloqueosData extends Data
         public readonly int $nro_liqui,
         public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE,
         public readonly ?string $mensaje_error = null,
-    ) {}
+    ) {
+    }
 
     public static function rules(?ValidationContext $context = null): array
     {

@@ -13,7 +13,8 @@ class SacRepository
 {
     public function __construct(
         private PeriodoFiscalService $periodoService,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.

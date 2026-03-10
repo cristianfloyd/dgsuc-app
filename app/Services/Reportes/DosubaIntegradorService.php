@@ -13,7 +13,8 @@ class DosubaIntegradorService
     public function __construct(
         private readonly LegajosSinLiquidarService $legajosSinLiquidarService,
         private readonly DosubaReportService $dosubaReportService,
-    ) {}
+    ) {
+    }
 
     public function getLegajosSinLiquidarConDosuba(): Builder
     {

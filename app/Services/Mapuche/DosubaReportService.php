@@ -26,7 +26,8 @@ class DosubaReportService
      */
     public function __construct(
         private readonly PeriodoFiscalService $periodoFiscalService,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene el reporte DOSUBA para un período específico.

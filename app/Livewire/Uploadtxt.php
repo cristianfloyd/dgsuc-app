@@ -252,7 +252,9 @@ class Uploadtxt extends Component implements HasForms, HasActions
         }
     }
 
-    public function updatedImportaciones(): void {}
+    public function updatedImportaciones(): void
+    {
+    }
 
     public function render()
     {

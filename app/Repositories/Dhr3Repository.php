@@ -10,7 +10,8 @@ class Dhr3Repository
 {
     public function __construct(
         private readonly Dhr3 $model,
-    ) {}
+    ) {
+    }
 
     public function find(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo): ?Dhr3
     {

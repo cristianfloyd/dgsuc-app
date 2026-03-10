@@ -21,7 +21,9 @@ class CargoSacService
     /**
      * Create a new class instance.
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public static function getBrutosSacCargo(int $legajo, int $nro_cargo)
     {

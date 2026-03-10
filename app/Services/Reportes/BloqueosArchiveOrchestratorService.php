@@ -30,7 +30,8 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     public function __construct(
         private readonly BloqueosHistorialServiceInterface $historialService,
         private readonly BloqueosCleanupServiceInterface $cleanupService,
-    ) {}
+    ) {
+    }
 
     /**
      * Archiva un período fiscal completo (transferencia + limpieza).

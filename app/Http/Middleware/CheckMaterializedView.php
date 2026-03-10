@@ -14,7 +14,8 @@ class CheckMaterializedView
 {
     public function __construct(
         private readonly ConceptoListadoViewService $viewService,
-    ) {}
+    ) {
+    }
 
     public function handle(Request $request, Closure $next): Response
     {

@@ -17,7 +17,8 @@ class ModernCargoSacService
         private SacRepository $sacRepository,
         private PeriodoFiscalService $periodoService,
         private VinculoCargoService $vinculoService,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.

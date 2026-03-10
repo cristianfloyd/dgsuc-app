@@ -26,7 +26,9 @@ class AfipSicossDesdeMapucheController extends Controller
         return view('afip-sicoss-desde-mapuche.create');
     }
 
-    public function transformar(): void {}
+    public function transformar(): void
+    {
+    }
 
     public function store(Request $request): void
     {

@@ -26,7 +26,9 @@ class RepOrdenPagoService
     /**
      * Crear una nueva instancia.
      */
-    public function __construct(protected RepOrdenPagoRepositoryInterface $repository) {}
+    public function __construct(protected RepOrdenPagoRepositoryInterface $repository)
+    {
+    }
 
     /**
      * Obtiene todos los registros de RepOrdenPago.

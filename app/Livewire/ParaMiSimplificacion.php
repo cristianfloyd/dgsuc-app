@@ -55,7 +55,9 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
         $this->resetPage();
     }
 
-    public function mount(): void {}
+    public function mount(): void
+    {
+    }
 
     #[Computed()]
     public function headers(): array
@@ -178,7 +180,9 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
-    public function toggleFinished(): void {}
+    public function toggleFinished(): void
+    {
+    }
 
     public function render()
     {

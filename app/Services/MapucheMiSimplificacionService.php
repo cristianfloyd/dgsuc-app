@@ -30,7 +30,8 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         private AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion,
         private TablaTempCuils $tablaTempCuils,
         private CuilRepositoryInterface $cuilRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * Ejecuta el proceso principal de MapucheMiSimplificacion.

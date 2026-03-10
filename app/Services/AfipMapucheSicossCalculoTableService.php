@@ -11,7 +11,8 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
 {
     public function __construct(
         private readonly AfipMapucheSicossCalculoTableDefinition $definition,
-    ) {}
+    ) {
+    }
 
     public function getTableDefinition(): array
     {

@@ -15,7 +15,9 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     /**
      * Create a new class instance.
      */
-    public function __construct(protected Dhr2 $model) {}
+    public function __construct(protected Dhr2 $model)
+    {
+    }
 
     public function findByPrimaryKey(int $nro_liqui, int $nro_legaj, int $nro_cargo): ?Dhr2Data
     {

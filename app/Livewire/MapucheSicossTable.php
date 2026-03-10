@@ -25,7 +25,9 @@ class MapucheSicossTable extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function mount(): void {}
+    public function mount(): void
+    {
+    }
 
     public function updatingSearch(): void
     {

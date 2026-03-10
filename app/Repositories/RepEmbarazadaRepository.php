@@ -15,7 +15,8 @@ class RepEmbarazadaRepository
      */
     public function __construct(
         private readonly RepEmbarazada $model,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtener todos los registros.

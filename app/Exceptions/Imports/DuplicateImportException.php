@@ -4,4 +4,6 @@ namespace App\Exceptions\Imports;
 
 use Exception;
 
-class DuplicateImportException extends Exception {}
+class DuplicateImportException extends Exception
+{
+}

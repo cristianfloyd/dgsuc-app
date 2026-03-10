@@ -12,7 +12,8 @@ class Dh16Repository implements Dh16RepositoryInterface
 {
     public function __construct(
         private readonly Dh16 $model,
-    ) {}
+    ) {
+    }
 
     public function getConceptosByGrupo(int $codn_grupo): Collection
     {

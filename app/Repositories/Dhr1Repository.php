@@ -13,7 +13,9 @@ class Dhr1Repository implements Dhr1RepositoryInterface
 {
     protected $property;
 
-    public function __construct($property) {}
+    public function __construct($property)
+    {
+    }
 
     public function find(int $nro_liqui): ?Dhr1
     {

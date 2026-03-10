@@ -21,7 +21,8 @@ class LegajosSinLiquidarService
         private readonly Dh22 $dh22,
         private readonly Dh21h $dh21h,
         private readonly PeriodoFiscalService $periodoFiscalService,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene los legajos sin liquidar en los últimos meses.

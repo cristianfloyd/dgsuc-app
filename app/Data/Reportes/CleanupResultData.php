@@ -38,7 +38,8 @@ class CleanupResultData extends Data
         public readonly array $estadisticasAntes = [],
         /** @var array Estadísticas después de la limpieza */
         public readonly array $estadisticasDespues = [],
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia exitosa.

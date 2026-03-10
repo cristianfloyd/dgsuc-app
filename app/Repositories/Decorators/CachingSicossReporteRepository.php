@@ -27,7 +27,9 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
      *
      * @param SicossReporteRepositoryInterface $decoratedRepository El repositorio a decorar.
      */
-    public function __construct(protected SicossReporteRepositoryInterface $decoratedRepository) {}
+    public function __construct(protected SicossReporteRepositoryInterface $decoratedRepository)
+    {
+    }
 
     /**
      * {@inheritdoc}

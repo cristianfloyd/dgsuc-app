@@ -55,7 +55,7 @@ class BloqueosImportService
                 'error' => $e->getMessage(),
             ]);
 
-            throw new ImportException('Error procesando fila: ' . $e->getMessage(), previous: $e, );
+            throw new ImportException('Error procesando fila: ' . $e->getMessage(), previous: $e,);
         }
     }
 
@@ -185,7 +185,7 @@ class BloqueosImportService
 
         $this->notificationService->sendErrorNotification($e->getMessage());
 
-        throw new ImportException('Error al procesar la importación: ' . $e->getMessage(), previous: $e, );
+        throw new ImportException('Error al procesar la importación: ' . $e->getMessage(), previous: $e,);
     }
 
     private function getMemoryUsage(): string

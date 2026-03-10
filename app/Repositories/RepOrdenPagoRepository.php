@@ -20,7 +20,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
     use MapucheConnectionTrait;
 
-    public function __construct(protected RepOrdenPagoModel $model) {}
+    public function __construct(protected RepOrdenPagoModel $model)
+    {
+    }
 
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.

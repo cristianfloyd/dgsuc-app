@@ -14,7 +14,8 @@ class FallecidoRepository implements FallecidoRepositoryInterface
 {
     public function __construct(
         private readonly RepFallecido $model,
-    ) {}
+    ) {
+    }
 
     public function all(): Collection
     {

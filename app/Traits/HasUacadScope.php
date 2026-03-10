@@ -14,7 +14,9 @@ trait HasUacadScope
     /**
      * Create a new class instance.
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /**
      * Scope para filtrar por unidad académica.

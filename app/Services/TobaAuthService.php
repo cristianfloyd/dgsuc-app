@@ -103,7 +103,6 @@ class TobaAuthService
             if (strlen($resultado) > 13) {
                 return $resultado;
             }
-
         }
 
         // Fallback para métodos antiguos

@@ -37,7 +37,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         protected SicossEstadoRepositoryInterface $sicossEstadoRepository,
         protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository,
         protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * Procesa los legajos para el cálculo de SICOSS.

@@ -11,5 +11,6 @@ class Dh21hService
      */
     public function __construct(
         private readonly Dh21hRepository $repository,
-    ) {}
+    ) {
+    }
 }

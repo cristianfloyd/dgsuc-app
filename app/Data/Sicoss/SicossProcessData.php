@@ -31,7 +31,8 @@ class SicossProcessData extends Data
         public readonly ?float $TopeOtrosAportesPersonal = null,
         public readonly bool $truncaTope = false,
         public readonly ?int $nro_liqui = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia desde un array de datos.

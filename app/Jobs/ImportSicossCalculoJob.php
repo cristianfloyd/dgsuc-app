@@ -19,7 +19,10 @@ class ImportSicossCalculoJob implements ShouldQueue
     public function __construct(
         private readonly string $filePath,
         private readonly string $periodoFiscal,
-    ) {}
+    ) {
+    }
 
-    public function handle(AfipMapucheSicossCalculoImportService $service): void {}
+    public function handle(AfipMapucheSicossCalculoImportService $service): void
+    {
+    }
 }

@@ -12,7 +12,8 @@ class Dh17Repository
 {
     public function __construct(
         private readonly Dh17 $model,
-    ) {}
+    ) {
+    }
 
     public function find(int $id): ?Dh17
     {

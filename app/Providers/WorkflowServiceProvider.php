@@ -37,7 +37,9 @@ class WorkflowServiceProvider extends ServiceProvider implements DeferrableProvi
     /**
      * Bootstrap services.
      */
-    public function boot(): void {}
+    public function boot(): void
+    {
+    }
 
     /**
      * Get the services provided by the provider.

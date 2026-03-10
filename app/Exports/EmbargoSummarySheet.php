@@ -16,7 +16,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmbargoSummarySheet extends BaseExcelSheet implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
-    public function __construct(protected Builder $query) {}
+    public function __construct(protected Builder $query)
+    {
+    }
 
     /**
      * @return Collection

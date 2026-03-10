@@ -9,7 +9,8 @@ readonly class LegajoCargo implements Stringable
     public function __construct(
         public ?int $legajo = null,
         public ?int $cargo = null,
-    ) {}
+    ) {
+    }
 
     public function __toString(): string
     {

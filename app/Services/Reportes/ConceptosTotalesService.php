@@ -14,7 +14,8 @@ class ConceptosTotalesService
      */
     public function __construct(
         private readonly ConceptosTotalesRepositoryInterface $repository,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene los totales por concepto para un período específico.

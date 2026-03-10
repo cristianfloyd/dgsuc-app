@@ -27,7 +27,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected Dh21RepositoryInterface $dh21Repository,
         protected DatabaseOperationInterface $databaseOperation,
-    ) {}
+    ) {
+    }
 
     /**
      * Ejecuta el proceso completo de generación SICOSS

@@ -2,4 +2,6 @@
 
 namespace App\Http\Controllers;
 
-class AfipArtController extends Controller {}
+class AfipArtController extends Controller
+{
+}
