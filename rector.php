@@ -40,11 +40,11 @@ return RectorConfig::configure()
     ])
     ->withSets([
         // === MODERNIZACIÓN PHP ===
-        LevelSetList::UP_TO_PHP_83,
+        LevelSetList::UP_TO_PHP_84,
 
         // === LARAVEL VERSION UPGRADE ===
         // Usa el set de nivel que corresponda a tu versión target
-        LaravelLevelSetList::UP_TO_LARAVEL_110, // o la versión que necesites
+        LaravelLevelSetList::UP_TO_LARAVEL_120, // o la versión que necesites
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
 
         // === CALIDAD DE CÓDIGO LARAVEL ===
