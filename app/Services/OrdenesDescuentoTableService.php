@@ -16,13 +16,10 @@ class OrdenesDescuentoTableService extends AbstractTableService
     use MapucheConnectionTrait;
     use TableServiceTrait;
 
-    private const TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
+    private const string TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
 
-    private OrdenesDescuentoTableDefinition $definition;
-
-    public function __construct(OrdenesDescuentoTableDefinition $definition)
+    public function __construct(private OrdenesDescuentoTableDefinition $definition)
     {
-        $this->definition = $definition;
     }
 
     public function getTableName(): string
@@ -30,6 +27,7 @@ class OrdenesDescuentoTableService extends AbstractTableService
         return $this->definition->getTableName();
     }
 
+    #[\Override]
     public function createAndPopulate(): void
     {
         try {
@@ -50,11 +48,13 @@ class OrdenesDescuentoTableService extends AbstractTableService
         }
     }
 
+    #[\Override]
     public function populateTable(): void
     {
         DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
     }
 
+    #[\Override]
     public function exists(): bool
     {
         return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
@@ -157,6 +157,7 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         ";
     }
 
+    #[\Override]
     protected function createIndexes(): void
     {
         $connection = $this->getConnectionName();
@@ -176,6 +177,7 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         }
     }
 
+    #[\Override]
     protected function addColumn($table, $column, $definition): void
     {
         switch ($definition['type']) {

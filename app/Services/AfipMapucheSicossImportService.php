@@ -22,7 +22,7 @@ class AfipMapucheSicossImportService
 {
     use MapucheConnectionTrait;
 
-    private const BATCH_SIZE = 1000;
+    private const int BATCH_SIZE = 1000;
     private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 
     private $connection;
@@ -125,7 +125,7 @@ class AfipMapucheSicossImportService
             }
 
             // Procesar el último batch si existe
-            if (!empty($batch)) {
+            if ($batch !== []) {
                 $this->processBatch($batch, $stats);
             }
 
@@ -137,9 +137,7 @@ class AfipMapucheSicossImportService
 
             return $stats;
         } catch (Exception $e) {
-            if (isset($handle)) {
-                fclose($handle);
-            }
+            fclose($handle);
             DB::connection($this->getConnectionName())->rollBack();
             $this->logError($e);
             throw $e;
@@ -157,15 +155,13 @@ class AfipMapucheSicossImportService
      * @param array &$stats Array de estadísticas que se actualiza durante el proceso
      *
      * @throws Exception Si ocurre un error durante el procesamiento
-     *
-     * @return void
      */
     public function processBatchWithValidation(array $chunk, string $periodoFiscal, array &$stats): void
     {
         foreach ($chunk as $line) {
             try {
                 if (!$this->isValidLine($line)) {
-                    $stats['errors'][] = 'Línea inválida: ' . substr($line, 0, 50) . '...';
+                    $stats['errors'][] = 'Línea inválida: ' . substr((string) $line, 0, 50) . '...';
                     continue;
                 }
 
@@ -186,7 +182,7 @@ class AfipMapucheSicossImportService
                 $stats['errors'][] = 'Error procesando línea: ' . $e->getMessage();
                 Log::error('Error en procesamiento de línea SICOSS', [
                     'error' => $e->getMessage(),
-                    'linea' => substr($line, 0, 50),
+                    'linea' => substr((string) $line, 0, 50),
                 ]);
             }
         }
@@ -286,8 +282,6 @@ class AfipMapucheSicossImportService
      * Verifica el encoding del archivo SICOSS.
      *
      * @param string $filePath Ruta del archivo a verificar
-     *
-     * @return void
      */
     public function checkFileEncoding(string $filePath): void
     {
@@ -382,8 +376,6 @@ class AfipMapucheSicossImportService
      *
      * @param string $filePath Ruta del archivo a verificar
      * @param int $lineCount Número de líneas a analizar
-     *
-     * @return void
      */
     public function analyzeSampleLines(string $filePath, int $lineCount = 3): void
     {
@@ -449,8 +441,6 @@ class AfipMapucheSicossImportService
      * Método de diagnóstico para analizar problemas de encoding.
      *
      * @param string $filePath Ruta del archivo a verificar
-     *
-     * @return void
      */
     public function diagnosticarArchivo(string $filePath): void
     {
@@ -600,8 +590,6 @@ class AfipMapucheSicossImportService
      * Método para verificar específicamente la longitud de las líneas del archivo.
      *
      * @param string $filePath Ruta del archivo
-     *
-     * @return void
      */
     public function verificarLongitudLineas(string $filePath): void
     {
@@ -735,7 +723,7 @@ class AfipMapucheSicossImportService
         try {
             // Usar insert en lugar de updateOrCreate para mejor rendimiento
             DB::connection($this->getConnectionName())
-                ->table((new AfipMapucheSicoss())->getTable())
+                ->table(new AfipMapucheSicoss()->getTable())
                 ->insert($batch);
 
             $stats['imported'] += count($batch);
@@ -743,76 +731,6 @@ class AfipMapucheSicossImportService
             $stats['errors'][] = 'Error al procesar lote: ' . $e->getMessage();
             Log::error('Error al procesar lote SICOSS', [
                 'batch_size' => count($batch),
-            ]);
-        }
-    }
-
-    private function logProgress(array $chunk, array $stats): void
-    {
-        Log::info('Progreso de importación SICOSS', [
-            'registros_procesados' => count($chunk),
-            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
-        ]);
-    }
-
-    // private function validateInitialConditions(string $filePath, string $periodoFiscal): void
-    // {
-    //     if (!file_exists($filePath)) {
-    //         throw new \InvalidArgumentException("El archivo no existe: {$filePath}");
-    //     }
-
-    //     if (!is_readable($filePath)) {
-    //         throw new \InvalidArgumentException("El archivo no tiene permisos de lectura: {$filePath}");
-    //     }
-
-    //     if (!preg_match('/^\d{6}$/', $periodoFiscal)) {
-    //         throw new \InvalidArgumentException("Periodo fiscal inválido. Formato requerido: YYYYMM");
-    //     }
-
-    //     // Validación básica de estructura del archivo
-    //     $firstLine = fgets(fopen($filePath, 'r'));
-    //     if (strlen($firstLine) < 500) {
-    //         Log::error("Formato de archivo inválido. Se esperan registros de 499 caracteres. Pero se recibió: " . strlen($firstLine));
-    //         throw new \InvalidArgumentException("Formato de archivo inválido. Se esperan registros de 499 caracteres.");
-    //     }
-    // }
-
-    private function prepareTable(): void
-    {
-        $tableName = (new AfipMapucheSicoss())->getTable();
-
-        if (!Schema::connection($this->getConnectionName())->hasTable($tableName)) {
-            throw new RuntimeException("La tabla {$tableName} no existe en la base de datos.");
-        }
-
-        // Verificar índices necesarios
-        $this->ensureTableIndexes($tableName);
-    }
-
-    private function ensureTableIndexes(string $tableName): void
-    {
-        $schemaBuilder = Schema::connection($this->getConnectionName());
-
-        if (!$schemaBuilder->hasIndex($tableName, 'afip_mapuche_sicoss_cuil_periodo_idx')) {
-            $schemaBuilder->table($tableName, function (Blueprint $table): void {
-                $table->index(['cuil', 'periodo_fiscal'], 'afip_mapuche_sicoss_cuil_periodo_idx');
-            });
-        }
-    }
-
-    private function isDuplicate(array $data): bool
-    {
-        return AfipMapucheSicoss::where('cuil', $data['cuil'])
-            ->where('periodo_fiscal', $data['periodo_fiscal'])
-            ->exists();
-    }
-
-    private function updateProgress(array $chunk, ?callable $progressCallback): void
-    {
-        if ($progressCallback) {
-            $progressCallback([
-                'processed' => count($chunk),
-                'memory' => $this->formatMemoryUsage(memory_get_usage(true)),
             ]);
         }
     }
@@ -841,19 +759,6 @@ class AfipMapucheSicossImportService
             'duplicates' => 0,
             'start_time' => microtime(true),
         ];
-    }
-
-    private function logSuccess(array $stats): void
-    {
-        $executionTime = microtime(true) - $stats['start_time'];
-
-        Log::info('Importación SICOSS completada', [
-            'registros_importados' => $stats['imported'],
-            'duplicados' => $stats['duplicates'],
-            'errores' => count($stats['errors']),
-            'tiempo_ejecucion' => round($executionTime, 2) . 's',
-            'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
-        ]);
     }
 
     private function logError(Exception $e): void
@@ -901,28 +806,18 @@ class AfipMapucheSicossImportService
         return sprintf('%d minutos %d segundos', floor($seconds / 60), $seconds % 60);
     }
 
-    private function calculateProgress(int $processed, int $total): int
-    {
-        return (int) (($processed / $total) * 100);
-    }
-
     /**
      * Crea o actualiza un registro en la base de datos.
      */
     private function createOrUpdateRecord(array $data): void
     {
         // Aplicar EncodingService a todos los campos string
-        $sanitizedData = array_map(function ($value) {
-            return is_string($value) ? EncodingService::toUtf8($value) : $value;
-        }, $data);
+        $sanitizedData = array_map(fn($value) => is_string($value) ? EncodingService::toUtf8($value) : $value, $data);
 
-        AfipMapucheSicoss::updateOrCreate(
-            [
-                'periodo_fiscal' => $sanitizedData['periodo_fiscal'],
-                'cuil' => $sanitizedData['cuil'],
-            ],
-            $data,
-        );
+        AfipMapucheSicoss::query()->updateOrCreate([
+            'periodo_fiscal' => $sanitizedData['periodo_fiscal'],
+            'cuil' => $sanitizedData['cuil'],
+        ], $data);
     }
 
     private function parseAmount(string $value): float
@@ -931,7 +826,7 @@ class AfipMapucheSicossImportService
         $value = ltrim($value, ' 0');
 
         // Si quedó vacío después de eliminar espacios y ceros, retornar 0
-        if (empty($value)) {
+        if ($value === '' || $value === '0') {
             return 0.0;
         }
 
@@ -942,32 +837,9 @@ class AfipMapucheSicossImportService
         return (float) str_replace(',', '.', $value);
     }
 
-    private function validateParsedData(array $data): void
-    {
-        if (empty($data['cuil']) || strlen($data['cuil']) !== 11) {
-            throw new Exception('CUIL inválido');
-        }
-
-
-        // Validaciones adicionales según reglas de negocio
-    }
-
-    /**
-     * Valida los datos antes de la importación.
-     */
-    private function validateData(array $data): bool
-    {
-        return !empty($data['cuil'])
-            && !empty($data['periodo_fiscal'])
-            && strlen($data['cuil']) === 11
-            && strlen($data['periodo_fiscal']) === 6;
-    }
-
     /**
      * Define la estructura completa del archivo SICOSS para parseo
      * Basado en documentación SIU Mapuche - AFIP SICOSS.
-     *
-     * @return array
      */
     private function getFileStructure(): array
     {
@@ -1114,10 +986,10 @@ class AfipMapucheSicossImportService
             // Verificar si las conversiones resuelven caracteres especiales
             if (isset($lineInfo['nombre'])) {
                 foreach ($lineInfo['nombre'] as $encoding => $value) {
-                    if (str_contains($encoding, 'utf8_desde_iso') && !str_contains($value, '?')) {
+                    if (str_contains((string) $encoding, 'utf8_desde_iso') && !str_contains((string) $value, '?')) {
                         $encodingScores['ISO-8859-1']++;
                     }
-                    if (str_contains($encoding, 'utf8_desde_win1252') && !str_contains($value, '?')) {
+                    if (str_contains((string) $encoding, 'utf8_desde_win1252') && !str_contains((string) $value, '?')) {
                         $encodingScores['Windows-1252']++;
                     }
                 }
@@ -1151,7 +1023,7 @@ class AfipMapucheSicossImportService
             $line = rtrim($line, "\r\n");
 
             // 2. Verificar longitud (debe ser 500 caracteres exactamente)
-            if (strlen($line) != 499) {
+            if (strlen($line) !== 499) {
                 Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
                 // Ajustar longitud si es necesario
                 $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
@@ -1186,122 +1058,6 @@ class AfipMapucheSicossImportService
                 'error' => "Error en línea {$lineNumber}: " . $e->getMessage(),
             ];
         }
-    }
-
-
-    /**
-     * Parsea una línea del archivo según especificación SICOSS
-     * con manejo mejorado de caracteres especiales.
-     *
-     * @param string $line Línea a parsear
-     * @param int $lineNumber Número de línea (para logging)
-     *
-     * @return array Resultado del parseo
-     */
-    // public function parseLine(string $line, int $lineNumber = 0): array
-    // {
-    //     try {
-    //         // Normalizar eliminando saltos de línea
-    //         $line = rtrim($line, "\r\n");
-
-    //         // Verificar longitud correcta
-    //         if (strlen($line) !== 499) {
-    //             Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
-    //             $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
-    //         }
-
-    //         $structure = $this->getFileStructure();
-    //         $parsedData = [];
-
-    //         foreach ($structure as $field => $config) {
-    //             $value = substr($line, $config['start'], $config['length']);
-
-    //             // Tratamiento especial para el campo nombre
-    //             if ($field === 'apnom') {
-    //                 $value = $this->corregirCaracteresEspeciales($value);
-    //                 // $value = mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
-    //                 $parsedData[$field] = trim($value);
-    //             } else {
-    //                 $parsedData[$field] = match ($config['type']) {
-    //                     'N' => (int)ltrim(trim($value), '0') ?: 0,
-    //                     'D' => $this->parseAmount($value),
-    //                     'C' => trim($value),
-    //                     default => throw new \Exception("Tipo de dato no soportado: {$config['type']}")
-    //                 };
-    //             }
-    //         }
-
-    //         return [
-    //             'success' => true,
-    //             'data' => $parsedData
-    //         ];
-    //     } catch (\Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'error' => "Error en línea {$lineNumber}: " . $e->getMessage()
-    //         ];
-    //     }
-    // }
-
-    /**
-     * Corrige problemas de encoding para caracteres especiales
-     * Utiliza múltiples estrategias para garantizar conversión correcta.
-     *
-     * @param string $texto Texto a corregir
-     * @param string $campo Nombre del campo (para lógica específica)
-     *
-     * @return string Texto corregido
-     */
-    private function corregirEncoding(string $texto, string $campo = ''): string
-    {
-        // 1. Intentar con diferentes encodings fuente
-        $encodings = ['Windows-1252', 'ISO-8859-1', 'CP850', 'Latin1'];
-
-        foreach ($encodings as $encoding) {
-            $convertido = mb_convert_encoding($texto, 'UTF-8', $encoding);
-            // Si la conversión eliminó los signos de interrogación, es probable que sea correcta
-            if (!str_contains($convertido, '?') && $convertido !== $texto) {
-                return $convertido;
-            }
-        }
-
-        // 2. Usar iconv como alternativa a mb_convert_encoding
-        try {
-            $iconvResult = iconv('Windows-1252', 'UTF-8//TRANSLIT', $texto);
-            if ($iconvResult && !str_contains($iconvResult, '?')) {
-                return $iconvResult;
-            }
-        } catch (Exception $e) {
-            // Ignorar errores de iconv, seguir con otros métodos
-        }
-
-        // 3. Aplicar reemplazos manuales para caracteres específicos
-        // Especialmente útil para campos como nombres donde aparecen tildes y eñes
-        if ($campo === 'apnom') {
-            // Reemplazos específicos para caracteres problemáticos
-            $mapa = [
-                // Códigos hexadecimales para caracteres latinos comunes
-                "\xF1" => 'ñ',
-                "\xD1" => 'Ñ', // eñe
-                "\xE1" => 'á',
-                "\xC1" => 'Á', // a con tilde
-                "\xE9" => 'é',
-                "\xC9" => 'É', // e con tilde
-                "\xED" => 'í',
-                "\xCD" => 'Í', // i con tilde
-                "\xF3" => 'ó',
-                "\xD3" => 'Ó', // o con tilde
-                "\xFA" => 'ú',
-                "\xDA" => 'Ú', // u con tilde
-                // Casos específicos que podamos encontrar
-                '?' => 'Ñ',
-            ];
-
-            return strtr($texto, $mapa);
-        }
-
-        // 4. Si todo lo anterior falla, al menos garantizar UTF-8 válido
-        return mb_convert_encoding($texto, 'UTF-8', 'Windows-1252');
     }
 
     /**
@@ -1380,147 +1136,6 @@ class AfipMapucheSicossImportService
         if (strlen($firstLine) !== 499) {
             Log::error('Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: ' . strlen($firstLine));
             throw new InvalidArgumentException('Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: ' . strlen($firstLine));
-        }
-    }
-
-    /**
-     * Servicio de limpieza de encoding.
-     *
-     * @param string $text Texto a limpiar
-     *
-     * @return string Texto limpio en UTF-8
-     */
-    private function limpiarEncoding(string $text): string
-    {
-        // Detectar encoding actual
-        $encoding = mb_detect_encoding($text, ['Windows-1252', 'ISO-8859-1', 'UTF-8'], true);
-
-        // Convertir a UTF-8
-        if ($encoding && $encoding !== 'UTF-8') {
-            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
-        } else {
-            // Si no se detecta encoding, asumir Windows-1252 (mejor para caracteres latinos)
-            $text = mb_convert_encoding($text, 'UTF-8', 'Windows-1252');
-        }
-
-        // Reemplazar caracteres problemáticos específicos
-        $replacements = [
-            '?' => 'Ñ', // Posible reemplazo directo si sabemos que ? siempre es Ñ
-            // Añadir otros reemplazos específicos según sea necesario
-        ];
-
-        return str_replace(array_keys($replacements), array_values($replacements), $text);
-    }
-
-    /**
-     * Maneja específicamente caracteres problemáticos en archivos AFIP.
-     *
-     * @param string $text Texto a procesar
-     *
-     * @return string Texto con caracteres corregidos
-     */
-    // public function corregirCaracteresEspeciales(string $text): string
-    // {
-    //     // Análisis de bytes para identificar patrones específicos
-    //     $bytes = [];
-    //     $problematicos = [];
-
-    //     // Recopilar información sobre bytes problemáticos
-    //     for ($i = 0; $i < strlen($text); $i++) {
-    //         $char = $text[$i];
-    //         $ord = ord($char);
-
-    //         // Identificar bytes no ASCII que podrían ser parte de caracteres especiales
-    //         if ($ord > 127) {
-    //             $bytes[] = [
-    //                 'pos' => $i,
-    //                 'byte' => $ord,
-    //                 'hex' => bin2hex($char),
-    //                 'contexto' => substr($text, max(0, $i - 2), 5)
-    //             ];
-    //             $problematicos[] = $i;
-    //         }
-    //     }
-
-    //     // Si no hay caracteres problemáticos, devolver el texto original
-    //     if (empty($problematicos)) {
-    //         return $text;
-    //     }
-
-    //     // Estrategia 1: Reemplazar secuencias específicas de bytes
-    //     // Mapeo basado en patrones identificados en el archivo dgi202502.txt
-    //     $result = $text;
-
-    //     // Buscar patrones específicos que representan la Ñ
-    //     // (estos patrones pueden variar según el archivo)
-    //     $patronesÑ = [
-    //         "\xC3\xAF\xC2\xBF\xC2\xBD" => "Ñ", // Patrón Ã¯Â¿Â½
-    //         "\xC3\xB1" => "ñ",                // ñ en UTF-8
-    //         "\xC3\x91" => "Ñ",                // Ñ en UTF-8
-    //         "\xF1" => "ñ",                    // ñ en Latin1/Windows-1252
-    //         "\xD1" => "Ñ",                    // Ñ en Latin1/Windows-1252
-    //         "?" => "Ñ"                        // Signo de interrogación que reemplaza a Ñ
-    //     ];
-
-    //     // Reemplazar patrones conocidos
-    //     foreach ($patronesÑ as $patron => $reemplazo) {
-    //         $result = str_replace($patron, $reemplazo, $result);
-    //     }
-
-    //     // Estrategia 2: Reemplazo contextual
-    //     // Si sabemos que en la posición específica debería haber una Ñ
-    //     if (strpos($text, "PI") !== false && strpos($text, "EIRO") !== false) {
-    //         // Reemplazar cualquier carácter entre "PI" y "EIRO" por "Ñ"
-    //         $result = preg_replace('/PI(.)EIRO/u', 'PIÑEIRO', $result);
-    //     }
-
-    //     // Estrategia 3: Detección por posición conocida
-    //     // Si sabemos por el formato que ciertos apellidos contienen Ñ
-    //     $apellidosConÑ = [
-    //         "PI?EIRO" => "PIÑEIRO",
-    //         "MU?OZ" => "MUÑOZ",
-    //         "CASTA?ARES" => "CASTAÑARES",
-    //         "PE?A" => "PEÑA",
-    //         "ARDI?O" => "ARDIÑO",
-    //         "MARI?O" => "MARIÑO",
-    //         "ORDO?EZ" => "ORDOÑEZ",
-    //         "ESPA?A" => "ESPAÑA"
-    //     ];
-
-    //     foreach ($apellidosConÑ as $mal => $bien) {
-    //         $result = str_replace($mal, $bien, $result);
-    //     }
-
-    //     return $result;
-    // }
-
-    /**
-     * Registra información sobre bytes potencialmente problemáticos para diagnóstico.
-     *
-     * @param string $texto Texto a analizar
-     *
-     * @return void
-     */
-    private function registrarBytesProblematicos(string $texto): void
-    {
-        $bytes = [];
-        for ($i = 0; $i < strlen($texto); $i++) {
-            $byte = ord($texto[$i]);
-            if ($byte > 127) { // Solo registrar bytes no ASCII
-                $bytes[] = [
-                    'posición' => $i,
-                    'byte' => $byte,
-                    'hex' => sprintf('0x%02X', $byte),
-                    'contexto' => substr($texto, max(0, $i - 5), 10),
-                ];
-            }
-        }
-
-        if (!empty($bytes)) {
-            Log::info('Bytes no ASCII detectados en texto', [
-                'texto_completo' => $texto,
-                'bytes_especiales' => $bytes,
-            ]);
         }
     }
 }

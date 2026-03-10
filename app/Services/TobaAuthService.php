@@ -15,7 +15,7 @@ class TobaAuthService
     /**
      * Replica la lógica de autenticación de Toba.
      */
-    public function autenticar($id_usuario, $clave)
+    public function autenticar($id_usuario, $clave): bool
     {
         try {
             // Obtener datos del usuario desde la BD de Toba
@@ -80,7 +80,7 @@ class TobaAuthService
         }
 
         if ($algoritmo === 'md5') {
-            return hash('md5', $clave);
+            return hash('md5', (string) $clave);
         }
 
         // Para otros algoritmos, necesitas implementar encriptar_con_sal
@@ -90,7 +90,7 @@ class TobaAuthService
     /**
      * Implementación exacta de la función encriptar_con_sal de Toba.
      */
-    private function encriptarConSal($clave, $metodo, $sal = null)
+    private function encriptarConSal(string $clave, $metodo, $sal = null): string
     {
         if (version_compare(PHP_VERSION, '5.3.2') >= 0 || $metodo == 'bcrypt') {
             $hasher = new TobaHashAdapter($metodo);
@@ -106,22 +106,18 @@ class TobaAuthService
         }
 
         // Fallback para métodos antiguos
-        if ($sal === null) {
-            $sal = $this->getSalt();
-        } else {
-            $sal = substr($sal, 0, 10);
-        }
+        $sal = $sal === null ? $this->getSalt() : substr($sal, 0, 10);
 
         // Si el mecanismo es bcrypt no debería llegar hasta aquí
         return ($metodo != 'bcrypt')
-            ? $sal . hash($metodo, $sal . $clave)
+            ? $sal . hash((string) $metodo, $sal . $clave)
             : hash('sha256', $this->getSalt() . ($resultado ?? ''));
     }
 
     /**
      * Genera un salt aleatorio (método simple para fallback).
      */
-    private function getSalt()
+    private function getSalt(): string
     {
         return substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 10);
     }

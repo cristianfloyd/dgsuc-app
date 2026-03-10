@@ -9,16 +9,8 @@ use App\Repositories\Dh61RepositoryInterface;
 
 class CategoryUpdateService implements CategoryUpdateServiceInterface
 {
-    private $dh11Repository;
-
-    private $dh61Repository;
-
-    public function __construct(
-        Dh11RepositoryInterface $dh11Repository,
-        Dh61RepositoryInterface $dh61Repository,
-    ) {
-        $this->dh11Repository = $dh11Repository;
-        $this->dh61Repository = $dh61Repository;
+    public function __construct(private readonly Dh11RepositoryInterface $dh11Repository, private readonly Dh61RepositoryInterface $dh61Repository)
+    {
     }
 
     /**

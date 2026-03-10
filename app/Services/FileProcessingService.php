@@ -19,71 +19,18 @@ use Illuminate\Support\Facades\Log;
 
 class FileProcessingService
 {
-    private $afipRelacionesActivas;
-
-    private $sicossImporter;
-
-    private $compareCuils;
-
-    private $fileUploadRepository;
-
-    private $fileProcessor;
-
-    private $employeeService;
-
-    private $validationService;
-
-    private $transactionService;
-
-    private $workflowService;
-
-    private $columnMetadata;
-
-    private $sicossImporterService;
-
-    private $workflowExecutionService;
-
-    private $databaseService;
-
-    private $tableManagementService;
-
-    public function __construct(
-        AfipRelacionesActivas $afipRelacionesActivas,
-        SicossImporter $sicossImporter,
-        CompareCuils $compareCuils,
-        FileUploadRepositoryInterface $fileUploadRepository,
-        FileProcessorInterface $fileProcessor,
-        EmployeeServiceInterface $employeeService,
-        ValidationService $validationService,
-        TransactionServiceInterface $transactionService,
-        WorkflowServiceInterface $workflowService,
-        ColumnMetadata $columnMetadata,
-        SicossImportService $sicossImporterService,
-        WorkflowExecutionInterface $workflowExecutionService,
-        DatabaseServiceInterface $databaseService,
-        TableManagementServiceInterface $tableManagementService,
-    ) {
-        $this->afipRelacionesActivas = $afipRelacionesActivas;
-        $this->sicossImporter = $sicossImporter;
-        $this->compareCuils = $compareCuils;
-        $this->fileUploadRepository = $fileUploadRepository;
-        $this->fileProcessor = $fileProcessor;
-        $this->employeeService = $employeeService;
-        $this->validationService = $validationService;
-        $this->transactionService = $transactionService;
-        $this->workflowService = $workflowService;
-        $this->columnMetadata = $columnMetadata;
-        $this->sicossImporterService = $sicossImporterService;
-        $this->workflowExecutionService = $workflowExecutionService;
-        $this->databaseService = $databaseService;
-        $this->tableManagementService = $tableManagementService;
+    public function __construct(AfipRelacionesActivas $afipRelacionesActivas, SicossImporter $sicossImporter, CompareCuils $compareCuils, private readonly FileProcessorInterface $fileProcessor, private readonly WorkflowServiceInterface $workflowService, private readonly SicossImportService $sicossImporterService, private readonly WorkflowExecutionInterface $workflowExecutionService, private readonly DatabaseServiceInterface $databaseService, private readonly TableManagementServiceInterface $tableManagementService)
+    {
     }
 
-    public function processFiles()
+    /**
+     * @return array<'afip', mixed>[]|bool[]|non-falsy-string[]
+     */
+    public function processFiles(): array
     {
         // Verificar si ambos archivos han sido subidos
-        $afipFile = UploadedFile::where('origen', 'afip')->latest()->first();
-        $mapucheFile = UploadedFile::where('origen', 'mapuche')->latest()->first();
+        $afipFile = UploadedFile::query()->where('origen', 'afip')->latest()->first();
+        $mapucheFile = UploadedFile::query()->where('origen', 'mapuche')->latest()->first();
 
 
         // Verificar que ambos archivos tienen el mismo UUID
@@ -170,7 +117,7 @@ class FileProcessingService
         $uploadedFileId = $afipFile->id;
         $processLog = $this->workflowService->getLatestWorkflow();
         $step = $this->workflowService->getCurrentStep($processLog);
-        $uploadedFile = (new UploadedFile())->findOrFail($uploadedFileId);
+        $uploadedFile = new UploadedFile()->findOrFail($uploadedFileId);
         $system = $uploadedFile->origen;
         $tableName = 'afip_relaciones_activas';
 
@@ -227,7 +174,7 @@ class FileProcessingService
         ];
     }
 
-    private function processFileMapuche($mapucheFile)
+    private function processFileMapuche(\App\Models\UploadedFile $mapucheFile): array
     {
         // aca se va a procesar el archivo mapuche
         $tableName = 'suc.afip_mapuche_sicoss';
@@ -270,29 +217,6 @@ class FileProcessingService
                     'error' => $e->getMessage(),
                 ],
             ];
-        }
-    }
-
-    private function executeCompareCuilsStep(): void
-    {
-        // try {
-        //     $this->compareCuils->excecuteWorkfloSteps();
-        //     Log::info('Paso de comparación de CUILs ejecutado correctamente.');
-        // } catch (\Exception $e) {
-        //     Log::error('Error al ejecutar el paso de comparación de CUILs: ' . $e->getMessage());
-        // }
-    }
-
-    private function deleteFiles($afipFile, $mapucheFile): void
-    {
-        try {
-            // Utilizar el repositorio para eliminar los archivos
-            $this->fileUploadRepository->delete($afipFile);
-            $this->fileUploadRepository->delete($mapucheFile);
-
-            Log::info('Archivos eliminados correctamente de la base de datos y del servidor.');
-        } catch (Exception $e) {
-            Log::error('Error al eliminar los archivos: ' . $e->getMessage());
         }
     }
 }

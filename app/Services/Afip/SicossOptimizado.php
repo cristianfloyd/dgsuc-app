@@ -131,7 +131,7 @@ class SicossOptimizado
 
 
                 $periodo = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-                if ($retornar_datos === true) {
+                if ($retornar_datos) {
                     return self::procesa_sicoss(
                         $datos,
                         $per_anoct,
@@ -164,10 +164,11 @@ class SicossOptimizado
             default:
                 $periodos_retro = self::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
                 $total = [];
+                $counter = count($periodos_retro);
 
-                for ($i = 0; $i < count($periodos_retro); $i++) {
+                for ($i = 0; $i < $counter; $i++) {
                     $p = $periodos_retro[$i];
-                    $mes = str_pad($p['mes_retro'], 2, '0', STR_PAD_LEFT);
+                    $mes = str_pad((string) $p['mes_retro'], 2, '0', STR_PAD_LEFT);
                     //agrego cero adelante a meses
                     $where_periodo = 't.ano_retro=' . $p['ano_retro'] . ' AND t.mes_retro=' . $mes;
                     $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
@@ -176,7 +177,7 @@ class SicossOptimizado
                         $nombre_arch = 'sicoss_retro_periodo_vigente';
                         $periodo = $per_mesct . '/' . $per_anoct;
                         $item = $per_mesct . '/' . $per_anoct . ' (Vigente)';
-                        if ($retornar_datos === true) {
+                        if ($retornar_datos) {
                             return self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
                         }
                         $subtotal = self::procesa_sicoss($datos, $per_anoct, $per_mesct, $legajos, $nombre_arch, $licencias_agentes, $datos['check_retro'], $datos['check_sin_activo'], $retornar_datos);
@@ -199,7 +200,7 @@ class SicossOptimizado
         $sql = 'DROP TABLE IF EXISTS pre_conceptos_liquidados CASCADE';
         DB::connection(self::getStaticConnectionName())->statement($sql);
 
-        if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
+        if ($testeo_directorio_salida !== '' && $testeo_prefijo_archivos !== '') {
             // copy(storage_path("comunicacion/sicoss/$nombre_arch.txt"), "$testeo_directorio_salida/$testeo_prefijo_archivos");
         } else {
             // self::armar_zip();
@@ -207,7 +208,7 @@ class SicossOptimizado
         }
     }
 
-    public static function get_licencias_protecintegral_vacaciones($where_legajos): array
+    public static function get_licencias_protecintegral_vacaciones(string $where_legajos): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
@@ -215,22 +216,20 @@ class SicossOptimizado
         $variantes_vacaciones = MapucheConfig::getVarLicenciaVacaciones();
         $variantes_protecintegral = MapucheConfig::getVarLicenciaProtecIntegral();
 
-        if ($variantes_vacaciones == '' && $variantes_protecintegral == '') {
+        if ($variantes_vacaciones === '' && $variantes_protecintegral === '') {
             return [];
         }
-        if ($variantes_vacaciones != '' && $variantes_protecintegral != '') {
+        if ($variantes_vacaciones !== '' && $variantes_protecintegral !== '') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
             $variantes = $variantes_vacaciones . ',' . $variantes_protecintegral;
             $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes)";
-        } else {
-            if ($variantes_vacaciones != '') {
-                $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
-                $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_vacaciones)";
-            } elseif ($variantes_protecintegral != '') {
-                $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
-                $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_protecintegral)";
-            }
+        } elseif ($variantes_vacaciones !== '') {
+            $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
+            $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_vacaciones)";
+        } elseif ($variantes_protecintegral !== '') {
+            $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
+            $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_protecintegral)";
         }
 
         $sql = "SELECT
@@ -296,12 +295,10 @@ class SicossOptimizado
 
         $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
 
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $licencias);
+        return array_map(fn($item) => (array) $item, $licencias);
     }
 
-    public static function get_licencias_vigentes($where_legajos)
+    public static function get_licencias_vigentes($where_legajos): array
     {
         $fecha_inicio = self::quote(MapucheConfig::getFechaInicioPeriodoCorriente());
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
@@ -317,7 +314,7 @@ class SicossOptimizado
 
         $variantes_protecintegral = MapucheConfig::getVarLicenciaProtecIntegral();
 
-        if (isset($variantes_ilt_primer_tramo) && !empty($variantes_ilt_primer_tramo)) {
+        if ($variantes_ilt_primer_tramo !== '' && $variantes_ilt_primer_tramo !== '0') {
             $sql_ilt = " OR ( dh05.nrovarlicencia IN ($variantes_ilt_primer_tramo)) ";
             $where_ilt = " WHEN dh05.nrovarlicencia IN ($variantes_ilt_primer_tramo) THEN '18'::integer ";
         } else {
@@ -330,24 +327,24 @@ class SicossOptimizado
         $where_vacaciones = '';
         $where_protecintegral = '';
 
-        if (isset($variantes_ilt_segundo_tramo) && !empty($variantes_ilt_segundo_tramo)) {
+        if ($variantes_ilt_segundo_tramo !== '' && $variantes_ilt_segundo_tramo !== '0') {
             $sql_ilt .= " OR ( dh05.nrovarlicencia IN ($variantes_ilt_segundo_tramo)) ";
             $where_ilt .= " WHEN dh05.nrovarlicencia IN ($variantes_ilt_segundo_tramo) THEN '19'::integer ";
         }
 
-        if (isset($variantes_down) && !empty($variantes_down)) {
+        if ($variantes_down !== '' && $variantes_down !== '0') {
             $where_down = " WHEN dh05.nrovarlicencia IN ($variantes_down) THEN '11'::integer ";
         }
 
-        if (isset($variantes_excedencia) && !empty($variantes_excedencia)) {
+        if ($variantes_excedencia !== '' && $variantes_excedencia !== '0') {
             $where_excedencia = " WHEN dh05.nrovarlicencia IN ($variantes_excedencia) THEN '10'::integer ";
         }
 
-        if (isset($variantes_vacaciones) && !empty($variantes_vacaciones)) {
+        if ($variantes_vacaciones !== '' && $variantes_vacaciones !== '0') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
         }
 
-        if (isset($variantes_protecintegral) && !empty($variantes_protecintegral)) {
+        if ($variantes_protecintegral !== '' && $variantes_protecintegral !== '0') {
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
         }
 
@@ -427,9 +424,7 @@ class SicossOptimizado
 
         $licencias = DB::connection(self::getStaticConnectionName())->select($sql);
 
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $licencias);
+        return array_map(fn($item) => (array) $item, $licencias);
     }
 
     public static function get_cargos_activos_sin_licencia($legajo): array
@@ -467,9 +462,7 @@ class SicossOptimizado
     			;";
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
 
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $resultado);
+        return array_map(fn($item) => (array) $item, $resultado);
     }
 
     public static function get_cargos_activos_con_licencia_vigente($legajo): array
@@ -529,9 +522,7 @@ class SicossOptimizado
     			;";
         $resultado = DB::connection(self::getStaticConnectionName())->select($sql);
 
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $resultado);
+        return array_map(fn($item) => (array) $item, $resultado);
     }
 
     /**
@@ -576,7 +567,7 @@ class SicossOptimizado
         ];
     }
 
-    public static function obtener_conceptos_liquidados($per_anoct, $per_mesct, $where): void
+    public static function obtener_conceptos_liquidados(string $per_anoct, string $per_mesct, $where): void
     {
         // Crear la tabla temporal optimizada UNA sola vez
         $sql_conceptos_liq = 'CREATE TEMP TABLE pre_conceptos_liquidados AS
@@ -639,7 +630,7 @@ class SicossOptimizado
             $rs_periodos_retro = DB::connection(self::getStaticConnectionName())->select($sql_periodos_retro);
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
-            array_push($rs_periodos_retro, $temp);
+            $rs_periodos_retro[] = $temp;
         } elseif (!$check_lic) {
             $sql_periodos_retro = '
                                     SELECT
@@ -650,12 +641,10 @@ class SicossOptimizado
                                             ano_retro desc, mes_retro desc
                                     ';
             $rs_periodos_retro = DB::connection(self::getStaticConnectionName())->select($sql_periodos_retro);
-        }
-        // si tiene check de licencias solo debo tener en cuenta el periodo retro 0-0
-        else {
+        } else {
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
-            array_push($rs_periodos_retro, $temp);
+            $rs_periodos_retro[] = $temp;
         }
         return $rs_periodos_retro;
     }
@@ -675,7 +664,7 @@ class SicossOptimizado
      *
      * @return array Arreglo de legajos filtrados con sus respectivos datos
      */
-    public static function obtener_legajos($codc_reparto, $where_periodo_retro, $where_legajo = ' true ', $check_lic = false, $check_sin_activo = false)
+    public static function obtener_legajos($codc_reparto, $where_periodo_retro, string $where_legajo = ' true ', $check_lic = false, $check_sin_activo = false)
     {
         Log::debug('Obtener legajos:', [
             'where_periodo_retro' => $where_periodo_retro,
@@ -711,7 +700,7 @@ class SicossOptimizado
             // Agrego a la consulta anterior la union, para reutilizar el sql y como necesito los mismos datos parametrizo el string
             $tabla = 'dh01';
             $where = ' true ';
-            if (isset($legajos_lic) && !empty($legajos_lic)) {
+            if ($legajos_lic !== '' && $legajos_lic !== '0') {
                 $where = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
 
                 if (!$check_lic) {
@@ -735,9 +724,7 @@ class SicossOptimizado
             // Si no tengo el check licencias se consulta solo contra conceptos liquidados
             $legajos = DB::connection(self::getStaticConnectionName())->select($sql_datos_legajo);
 
-            $legajos = array_map(function ($item) {
-                return (array) $item;
-            }, $legajos);
+            $legajos = array_map(fn($item) => (array) $item, $legajos);
         }
 
         //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidación para Reserva de Puesto"
@@ -849,9 +836,12 @@ class SicossOptimizado
         WHERE $where";
     }
 
-    public static function inicializar_estado_situacion($codigo, $min, $max)
+    /**
+     * @return mixed[]
+     */
+    public static function inicializar_estado_situacion($codigo, $min, $max): array
     {
-        $periodo = MapucheConfig::getPeriodoCorriente();
+        MapucheConfig::getPeriodoCorriente();
         $estado_situacion = [];
         for ($i = $min; $i <= $max; $i++) {
             $estado_situacion[$i] = $codigo;
@@ -940,7 +930,7 @@ class SicossOptimizado
         foreach ($estado_situacion as $codigo) {
             // Se suman solo los dias trabajados, codigo 1
             // Los dias de Licencia por Maternidad tmb cuentan como trabajados
-            if ($codigo === 1 || $codigo === 5 || $codigo === 12 || $codigo === 51) {
+            if (in_array($codigo, [1, 5, 12, 51], true)) {
                 $dias_trabajados += 1;
             }
         }
@@ -958,7 +948,7 @@ class SicossOptimizado
      *
      * @return array Array con los últimos tres cambios de estado, cada uno con su código y día correspondiente
      */
-    public static function calcular_revista_legajo($cambios_estado): array
+    public static function calcular_revista_legajo(array $cambios_estado): array
     {
         $controlar_maternidad = false;
         $revista_legajo = [];
@@ -996,6 +986,9 @@ class SicossOptimizado
         return $revista_legajo;
     }
 
+    /**
+     * @return mixed[]
+     */
     public static function procesa_sicoss(
         array $datos,
         int $per_anoct,
@@ -1008,7 +1001,7 @@ class SicossOptimizado
         bool $retornar_datos = false,
         bool $guardar_en_bd = false,
         ?PeriodoFiscal $periodo_fiscal = null,
-    ) {
+    ): array {
 
         // Valores obtenidos del form (que se obtienen de rrhhini)
         // Topes
@@ -1100,10 +1093,8 @@ class SicossOptimizado
 				";
                 $legajo_sin_liquidar = Dh01::getLegajosActivosSinCargosVigentes($where_not_dh21);
 
-                if (isset($legajo_sin_liquidar[0])) {
-                    if ($legajo_sin_liquidar[0]['nro_legaj'] == $legajo) {
-                        $legajoActual['codigosituacion'] = 14;
-                    }
+                if (isset($legajo_sin_liquidar[0]) && $legajo_sin_liquidar[0]['nro_legaj'] == $legajo) {
+                    $legajoActual['codigosituacion'] = 14;
                 }
             }
 
@@ -1127,7 +1118,7 @@ class SicossOptimizado
                 if (!isset($limites['maximo'])) {
                     $cargos_activos_agente = Dh03::getCargosActivos($legajo);
 
-                    if (empty($cargos_activos_agente)) {
+                    if ($cargos_activos_agente === []) {
                         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
                         $limites['maximo'] = substr($fecha_fin, 9, 2);
                     }
@@ -1166,11 +1157,11 @@ class SicossOptimizado
                 Log::debug('Licencias Cargos: ', $licencias_cargos);
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
-                    for ($dia = 1; $dia <= count($cargo); $dia++) {
-                        if (!in_array($dia, $dias_lic_legajo)) {
-                            if ((isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
-                                $estado_situacion[$dia] = $cargo[$dia]; // Si estaba trabajando en algn cargo se prioriza el cdigo en dha8
-                            }
+                    $counter = count($cargo);
+                    for ($dia = 1; $dia <= $counter; $dia++) {
+                        if (!in_array($dia, $dias_lic_legajo) && (isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
+                            $estado_situacion[$dia] = $cargo[$dia];
+                            // Si estaba trabajando en algn cargo se prioriza el cdigo en dha8
                         }
                     }
                 }
@@ -1252,7 +1243,7 @@ class SicossOptimizado
             Log::debug('Importe Imponible Patronal: ', [$legajoActual['ImporteImponiblePatronal']]);
 
             // Log de progreso cada 1000 legajos o al final
-            if (($i + 1) % 1000 == 0 || ($i + 1) == $total_legajos) {
+            if (($i + 1) % 1000 === 0 || $i + 1 === $total_legajos) {
                 Log::info('✅ Procesados legajos optimizados: ' . ($i + 1) . "/$total_legajos", [
                     'porcentaje' => round((($i + 1) / $total_legajos) * 100, 1),
                     'memoria_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
@@ -1332,7 +1323,7 @@ class SicossOptimizado
                 if ($Imponible6_aux != 0) {
                     Log::debug('✅ Importe Imponible 6 es distinto de 0');
                     if (
-                        (int) $Imponible6_aux != (int) $legajoActual['IMPORTE_IMPON']
+                        (int) $Imponible6_aux !== (int) $legajoActual['IMPORTE_IMPON']
                         && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta +  - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
                     ) {
@@ -1397,39 +1388,32 @@ class SicossOptimizado
                             'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
                         ]);
                     }
-                } else {
-                    if ($trunca_tope == 1) {
-                        $bruto_nodo_sin_sac = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'] - $legajoActual['ImporteSACNoDocente'];
-                        Log::debug('✅ Calculo bruto nodo sin sac', [
-                            'IMPORTE_BRUTO' => $legajoActual['IMPORTE_BRUTO'],
-                            'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
-                            'ImporteImponible_6' => $legajoActual['ImporteImponible_6'],
-                        ]);
-
-                        $sac = $legajoActual['ImporteSACNoDocente'];
-
-                        $tope = min($bruto_nodo_sin_sac, $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
-                        $imp_1 = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'];
-
-                        $tope_sueldo = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal);
-                        $tope_sac = min($sac, $TopeSACJubilatorioPers);
-
-
-                        $legajoActual['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
-                        Log::debug('✅ ACA TOPEA:', [
-                            'sac' => $sac,
-                            'tope_jubil_personal' => $tope_jubil_personal,
-                            'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
-                            'ImporteNoRemun' => $legajoActual['ImporteNoRemun'],
-                            'tope_sueldo' => $tope_sueldo,
-                            'tope_sac' => $tope_sac,
-                        ]);
-                        Log::debug('en el else', [
-                            'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
-                            'sac' => $sac,
-                            'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
-                        ]);
-                    }
+                } elseif ($trunca_tope == 1) {
+                    $bruto_nodo_sin_sac = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'] - $legajoActual['ImporteSACNoDocente'];
+                    Log::debug('✅ Calculo bruto nodo sin sac', [
+                        'IMPORTE_BRUTO' => $legajoActual['IMPORTE_BRUTO'],
+                        'ImporteSACNoDocente' => $legajoActual['ImporteSACNoDocente'],
+                        'ImporteImponible_6' => $legajoActual['ImporteImponible_6'],
+                    ]);
+                    $sac = $legajoActual['ImporteSACNoDocente'];
+                    $tope = min($bruto_nodo_sin_sac, $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
+                    $imp_1 = $legajoActual['IMPORTE_BRUTO'] - $legajoActual['ImporteImponible_6'];
+                    $tope_sueldo = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal);
+                    $tope_sac = min($sac, $TopeSACJubilatorioPers);
+                    $legajoActual['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajoActual['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
+                    Log::debug('✅ ACA TOPEA:', [
+                        'sac' => $sac,
+                        'tope_jubil_personal' => $tope_jubil_personal,
+                        'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
+                        'ImporteNoRemun' => $legajoActual['ImporteNoRemun'],
+                        'tope_sueldo' => $tope_sueldo,
+                        'tope_sac' => $tope_sac,
+                    ]);
+                    Log::debug('en el else', [
+                        'bruto_nodo_sin_sac' => $bruto_nodo_sin_sac,
+                        'sac' => $sac,
+                        'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
+                    ]);
                 }
 
                 $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
@@ -1449,23 +1433,19 @@ class SicossOptimizado
                     'ImporteImponibleSinSAC' => $legajoActual['ImporteImponibleSinSAC'],
                 ]);
 
-                $tope_jubil_personal = $TopeJubilatorioPersonal;
-
                 $tope_jubil_personal = ($legajoActual['ImporteSAC'] > 0) ? $TopeJubilatorioPersonal + $TopeSACJubilatorioPers : $TopeJubilatorioPersonal;
                 Log::debug('Tope Jubilatorio personal', ['tope_jubil_personal' => $tope_jubil_personal]);
 
 
-                if ($legajoActual['ImporteImponibleSinSAC'] > $tope_jubil_personal) {
-                    if ($trunca_tope == 1) {
-                        $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
-                        $legajoActual['IMPORTE_IMPON'] -= $legajoActual['DiferenciaImponibleConTope'];
-                        Log::debug('✅ ImporteImponibleSinSAC es mayor al tope', [
-                            'tope_jubil_personal' => $tope_jubil_personal,
-                            'DiferenciaImponibleConTope' => $legajoActual['DiferenciaImponibleConTope'],
-                            'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
-                            'ImporteImponibleSinSAC' => $legajoActual['ImporteImponibleSinSAC'],
-                        ]);
-                    }
+                if ($legajoActual['ImporteImponibleSinSAC'] > $tope_jubil_personal && $trunca_tope == 1) {
+                    $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
+                    $legajoActual['IMPORTE_IMPON'] -= $legajoActual['DiferenciaImponibleConTope'];
+                    Log::debug('✅ ImporteImponibleSinSAC es mayor al tope', [
+                        'tope_jubil_personal' => $tope_jubil_personal,
+                        'DiferenciaImponibleConTope' => $legajoActual['DiferenciaImponibleConTope'],
+                        'IMPORTE_IMPON' => $legajoActual['IMPORTE_IMPON'],
+                        'ImporteImponibleSinSAC' => $legajoActual['ImporteImponibleSinSAC'],
+                    ]);
                 }
 
 
@@ -1516,32 +1496,28 @@ class SicossOptimizado
 
                 $legajoActual['DifSACImponibleConOtroTope'] = 0;
                 $legajoActual['DifImponibleConOtroTope'] = 0;
-                if ($legajoActual['ImporteSACOtroAporte'] > $TopeSACJubilatorioOtroAp) {
-                    if ($trunca_tope == 1) {
-                        $legajoActual['DifSACImponibleConOtroTope'] = $legajoActual['ImporteSACOtroAporte'] - $TopeSACJubilatorioOtroAp;
-                        $legajoActual['ImporteImponible_4'] -= $legajoActual['DifSACImponibleConOtroTope'];
-                        $legajoActual['ImporteSACOtroAporte'] = $TopeSACJubilatorioOtroAp;
-                        Log::debug('✅ ImporteSACOtroAporte es mayor al tope', [
-                            'TopeSACJubilatorioOtroAp' => $TopeSACJubilatorioOtroAp,
-                            'DifSACImponibleConOtroTope' => $legajoActual['DifSACImponibleConOtroTope'],
-                            'ImporteImponible_4' => $legajoActual['ImporteImponible_4'],
-                            'ImporteSACOtroAporte' => $legajoActual['ImporteSACOtroAporte'],
-                        ]);
-                    }
+                if ($legajoActual['ImporteSACOtroAporte'] > $TopeSACJubilatorioOtroAp && $trunca_tope == 1) {
+                    $legajoActual['DifSACImponibleConOtroTope'] = $legajoActual['ImporteSACOtroAporte'] - $TopeSACJubilatorioOtroAp;
+                    $legajoActual['ImporteImponible_4'] -= $legajoActual['DifSACImponibleConOtroTope'];
+                    $legajoActual['ImporteSACOtroAporte'] = $TopeSACJubilatorioOtroAp;
+                    Log::debug('✅ ImporteSACOtroAporte es mayor al tope', [
+                        'TopeSACJubilatorioOtroAp' => $TopeSACJubilatorioOtroAp,
+                        'DifSACImponibleConOtroTope' => $legajoActual['DifSACImponibleConOtroTope'],
+                        'ImporteImponible_4' => $legajoActual['ImporteImponible_4'],
+                        'ImporteSACOtroAporte' => $legajoActual['ImporteSACOtroAporte'],
+                    ]);
                 }
 
                 $legajoActual['OtroImporteImponibleSinSAC'] = $legajoActual['ImporteImponible_4'] - $legajoActual['ImporteSACOtroAporte'];
-                if ($legajoActual['OtroImporteImponibleSinSAC'] > $TopeOtrosAportesPersonales) {
-                    if ($trunca_tope == 1) {
-                        $legajoActual['DifImponibleConOtroTope'] = $legajoActual['OtroImporteImponibleSinSAC'] - $TopeOtrosAportesPersonales;
-                        $legajoActual['ImporteImponible_4'] -= $legajoActual['DifImponibleConOtroTope'];
-                        Log::debug('✅ OtroImporteImponibleSinSAC es mayor al tope', [
-                            'TopeOtrosAportesPersonales' => $TopeOtrosAportesPersonales,
-                            'DifImponibleConOtroTope' => $legajoActual['DifImponibleConOtroTope'],
-                            'ImporteImponible_4' => $legajoActual['ImporteImponible_4'],
-                            'OtroImporteImponibleSinSAC' => $legajoActual['OtroImporteImponibleSinSAC'],
-                        ]);
-                    }
+                if ($legajoActual['OtroImporteImponibleSinSAC'] > $TopeOtrosAportesPersonales && $trunca_tope == 1) {
+                    $legajoActual['DifImponibleConOtroTope'] = $legajoActual['OtroImporteImponibleSinSAC'] - $TopeOtrosAportesPersonales;
+                    $legajoActual['ImporteImponible_4'] -= $legajoActual['DifImponibleConOtroTope'];
+                    Log::debug('✅ OtroImporteImponibleSinSAC es mayor al tope', [
+                        'TopeOtrosAportesPersonales' => $TopeOtrosAportesPersonales,
+                        'DifImponibleConOtroTope' => $legajoActual['DifImponibleConOtroTope'],
+                        'ImporteImponible_4' => $legajoActual['ImporteImponible_4'],
+                        'OtroImporteImponibleSinSAC' => $legajoActual['OtroImporteImponibleSinSAC'],
+                    ]);
                 }
 
                 if ($legajoActual['ImporteImponible_6'] != 0 && $legajoActual['TipoDeOperacion'] == 1) {
@@ -1650,7 +1626,7 @@ class SicossOptimizado
         }
 
         // ✅ LOG FINAL DE OPTIMIZACIÓN
-        $fin_total = microtime(true);
+        microtime(true);
 
         Log::info('=== ✅ OPTIMIZACIÓN COMPLETADA ===', [
             'total_legajos_procesados' => $total_legajos,
@@ -1659,14 +1635,14 @@ class SicossOptimizado
             'mejora_estimada' => 'Eliminadas ' . $total_legajos . ' consultas N+1 individuales',
         ]);
 
-        if (!empty($legajos_validos)) {
-            if ($retornar_datos === true) {
+        if ($legajos_validos !== []) {
+            if ($retornar_datos) {
                 dd($legajos_validos);
                 return $legajos_validos;
             }
 
             // NUEVA FUNCIONALIDAD: Guardar en BD en lugar de TXT
-            if ($guardar_en_bd === true && $periodo_fiscal !== null) {
+            if ($guardar_en_bd && $periodo_fiscal instanceof \App\ValueObjects\PeriodoFiscal) {
                 Log::info('Guardando en BD');
                 self::guardar_en_bd($legajos_validos, $periodo_fiscal);
             }
@@ -1679,7 +1655,7 @@ class SicossOptimizado
     }
 
     // Dado un arreglo, doy formato y agrego a archivo
-    public static function grabar_en_txt($legajos, $nombre_arch): void
+    public static function grabar_en_txt($legajos, string $nombre_arch): void
     {
         //Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
         $directorio = storage_path('comunicacion/sicoss');
@@ -1695,8 +1671,9 @@ class SicossOptimizado
             $error = error_get_last();
             Log::error('No se pudo abrir el archivo: ' . $archivo . ' - Error: ' . $error['message']);
         }
+        $counter = count($legajos);
         // Proceso la tabla, le agrego las longitudes correpondientes
-        for ($i = 0; $i < count($legajos); $i++) {
+        for ($i = 0; $i < $counter; $i++) {
             fwrite(
                 $fh,
                 $legajos[$i]['cuit']                                                                // Campo 1
@@ -1774,10 +1751,9 @@ class SicossOptimizado
      *
      * Este método fue reemplazado por sumarizar_conceptos_optimizado()
      * Se mantiene solo para referencia y posible rollback.
-     *
-     * @deprecated Usar sumarizar_conceptos_optimizado() en su lugar
      */
-    public static function sumarizar_conceptos_por_tipos_grupos($nro_leg, &$leg): void
+    #[\Deprecated(message: 'Usar sumarizar_conceptos_optimizado() en su lugar')]
+    public static function sumarizar_conceptos_por_tipos_grupos($nro_leg, array &$leg): void
     {
         Log::warning('⚠️ USANDO MÉTODO DEPRECADO: sumarizar_conceptos_por_tipos_grupos', [
             'legajo' => $nro_leg,
@@ -1788,7 +1764,7 @@ class SicossOptimizado
         static $contador_consultas = 0;
         $contador_consultas++;
 
-        if ($contador_consultas <= 5 || $contador_consultas % 1000 == 0) {
+        if ($contador_consultas <= 5 || $contador_consultas % 1000 === 0) {
             Log::info("sumarizar_conceptos_por_tipos_grupos: Consulta N+1 #{$contador_consultas}", [
                 'legajo' => $nro_leg,
                 'memoria_actual' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
@@ -1842,8 +1818,8 @@ class SicossOptimizado
         // Sumarizo donde corresponda para cada concepto liquidado
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
         $conce_hs_extr = [];
-        $cont = 0;
-        for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
+        $counter = count($conceptos_liq_por_leg);
+        for ($i = 0; $i < $counter; $i++) {
             $importe = $conceptos_liq_por_leg[$i]['impp_conce'];
             $importe_novedad = $conceptos_liq_por_leg[$i]['nov1_conce'];
             $grupos_concepto = $conceptos_liq_por_leg[$i]['tipos_grupos'];
@@ -1852,7 +1828,7 @@ class SicossOptimizado
             $codigo_obra_social = $leg['codigo_os'];
 
 
-            if (preg_match('/[^\d]+6[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+6[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
                 if (self::$hs_extras_por_novedad == 1) {
@@ -1865,15 +1841,15 @@ class SicossOptimizado
                 }
             }
 
-            if (preg_match('/[^\d]+7[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+7[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteZonaDesfavorable'] += $importe;
             }
 
-            if (preg_match('/[^\d]+8[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+8[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteVacaciones'] += $importe;
             }
 
-            if (preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+9[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSAC'] += $importe;
 
                 if ($conceptos_liq_por_leg[$i]['codigoescalafon'] == 'NODO') {
@@ -1887,7 +1863,7 @@ class SicossOptimizado
                 }
             }
 
-            if (preg_match('/[^\d]+11[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+11[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 38) {
                     $leg['PrioridadTipoDeActividad'] = 38;
@@ -1895,26 +1871,26 @@ class SicossOptimizado
                 if (($leg['PrioridadTipoDeActividad'] == 87) || ($leg['PrioridadTipoDeActividad'] == 88)) {
                     $leg['PrioridadTipoDeActividad'] = 38;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+12[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+12[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 34) {
                     $leg['PrioridadTipoDeActividad'] = 34;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+13[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+13[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 35) {
                     $leg['PrioridadTipoDeActividad'] = 35;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+14[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+14[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 36;
@@ -1922,10 +1898,10 @@ class SicossOptimizado
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 36;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+15[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+15[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 37) {
                     $leg['PrioridadTipoDeActividad'] = 37;
@@ -1933,50 +1909,50 @@ class SicossOptimizado
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 37;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+16[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+16[^\d]+/', (string) $grupos_concepto)) {
                 $leg['AporteAdicionalObraSocial'] += $importe;
             }
 
-            if (preg_match('/[^\d]+21[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+21[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteAdicionales'] += $importe;
             }
 
-            if (preg_match('/[^\d]+22[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+22[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImportePremios'] += $importe;
             }
 
             // conceptos no remunerativos
-            if (preg_match('/[^\d]+45[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+45[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+46[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+46[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteRectificacionRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+47[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+47[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteMaternidad'] += $importe;
             }
 
-            if (preg_match('/[^\d]+48[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+48[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 87;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+49[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+49[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 88;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
-            if (preg_match('/[^\d]+58[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+58[^\d]+/', (string) $grupos_concepto)) {
                 $leg['SeguroVidaObligatorio'] = 1;
             }
 
@@ -1992,22 +1968,22 @@ class SicossOptimizado
                 $leg['adherentes'] = 1;
             }
 
-            if (preg_match('/[^\d]+24[^\d]+/', $grupos_concepto) && self::$hs_extras_por_novedad == 0) {
+            if (preg_match('/[^\d]+24[^\d]+/', (string) $grupos_concepto) && self::$hs_extras_por_novedad == 0) {
                 $leg['CantidadHorasExtras'] += $importe;
             }
 
-            if (preg_match('/[^\d]+67[^\d]+/', $grupos_concepto) && $informar_becarios == 1) {
+            if (preg_match('/[^\d]+67[^\d]+/', (string) $grupos_concepto) && $informar_becarios == 1) {
                 $leg['ImporteImponibleBecario'] += $importe;
             }
 
-            if (preg_match('/[^\d]+81[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+81[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSS27430'] += $importe;
             }
-            if (preg_match('/[^\d]+83[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+83[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSSDec56119'] += $importe;
             }
 
-            if (preg_match('/[^\d]+84[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+84[^\d]+/', (string) $grupos_concepto)) {
                 $leg['NoRemun4y8'] += $importe;
             }
 
@@ -2018,17 +1994,17 @@ class SicossOptimizado
             }*/
 
             // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneracin 11"
-            if (preg_match('/[^\d]+86[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+86[^\d]+/', (string) $grupos_concepto)) {
                 $leg['IncrementoSolidario'] += $importe;
             }
 
             // Tipo 91- AFIP Base de Clculo Diferencial Aportes OS y FSR
-            if (preg_match('/[^\d]+91[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+91[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteTipo91'] += $importe;
             }
 
             // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneracin bruta total
-            if (preg_match('/[^\d]+96[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+96[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun96'] += $importe;
             }
         }
@@ -2058,7 +2034,7 @@ class SicossOptimizado
      *
      * @return int El total del SAC Investigador calculado.
      */
-    public static function calcularSACInvestigador($nro_leg, $cargos)
+    public static function calcularSACInvestigador($nro_leg, $cargos): int|float
     {
         $sacInvestigador = 0;
         $cargos = array_unique($cargos); // limpio cargos duplicados
@@ -2067,7 +2043,8 @@ class SicossOptimizado
                        --filtro solo los que tienen tipo de concepto = 9 como es una lista uso exp. reg.
                        AND array_to_string(tipos_grupos,',') ~ '(:?^|,)+9(:?$|,)'";
             $conceptos_liq_por_leg = self::consultar_conceptos_liquidados($nro_leg, $where);
-            for ($j = 0; $j < count($conceptos_liq_por_leg); $j++) {
+            $counter = count($conceptos_liq_por_leg);
+            for ($j = 0; $j < $counter; $j++) {
                 $sacInvestigador += $conceptos_liq_por_leg[$j]['impp_conce'];
             }
         }
@@ -2087,7 +2064,7 @@ class SicossOptimizado
      *
      * @return array Un arreglo de conceptos liquidados, cada uno representado como un arreglo asociativo.
      */
-    public static function consultar_conceptos_liquidados($nro_leg, $where)
+    public static function consultar_conceptos_liquidados($nro_leg, $where): array
     {
         $sql_conceptos_fltrados
             = "
@@ -2109,9 +2086,7 @@ class SicossOptimizado
         $conceptos_filtrados = DB::connection(self::getStaticConnectionName())->select($sql_conceptos_fltrados);
 
         // Convertir cada objeto stdClass a array
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $conceptos_filtrados);
+        return array_map(fn($item) => (array) $item, $conceptos_filtrados);
     }
 
     /**
@@ -2126,7 +2101,7 @@ class SicossOptimizado
      *
      * @return array Un arreglo asociativo con el cargo, el concepto y la suma de horas extras.
      */
-    public static function calculo_horas_extras($concepto, $cargo)
+    public static function calculo_horas_extras($concepto, $cargo): array
     {
         $sql = "	SELECT
 						cargo,concepto,sum(nov1) as sum_nov1
@@ -2182,7 +2157,7 @@ class SicossOptimizado
      *
      * @return float La remuneración total del grupo.
      */
-    public static function calcular_remuner_grupo($nro_legajo, $tipo, $where)
+    public static function calcular_remuner_grupo($nro_legajo, $tipo, $where): float
     {
         $sql
             = "
@@ -2211,7 +2186,7 @@ class SicossOptimizado
      *
      * @return array Un arreglo asociativo con los importes bruto y SAC de otra actividad.
      */
-    public static function otra_actividad($nro_legajo)
+    public static function otra_actividad($nro_legajo): array
     {
         $sql = "
 				SELECT
@@ -2234,13 +2209,12 @@ class SicossOptimizado
     }
 
     // Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss
-    public static function VerificarAgenteImportesCERO($leg)
+    public static function VerificarAgenteImportesCERO(array $leg): int
     {
-        $VerificarAgenteImportesCERO = 1;
         if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0) {
-            $VerificarAgenteImportesCERO = 0;
+            return 0;
         }
-        return $VerificarAgenteImportesCERO;
+        return 1;
     }
 
     /**
@@ -2300,7 +2274,7 @@ class SicossOptimizado
 
     // --- Funciones auxiliares para dar formato a campos ---
 
-    public static function llena_importes($valor, $longitud)
+    public static function llena_importes($valor, $longitud): string
     {
         if ($valor === null) {
             $valor = '';
@@ -2311,32 +2285,35 @@ class SicossOptimizado
         return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
-    public static function llena_blancos_izq($texto, $longitud)
+    public static function llena_blancos_izq($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, -($longitud));
+        if (strlen(trim((string) $texto)) > $longitud) {
+            return substr((string) $texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
+        return str_pad((string) $texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
-    public static function llena_blancos_mod($texto, $longitud)
+    public static function llena_blancos_mod($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, 0, ($longitud));
+        if (strlen(trim((string) $texto)) > $longitud) {
+            return substr((string) $texto, 0, ($longitud));
         }
-        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
+        return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
-    public static function llena_blancos($texto, $longitud)
+    public static function llena_blancos($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, -($longitud));
+        if (strlen(trim((string) $texto)) > $longitud) {
+            return substr((string) $texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
+        return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
-    public static function transformar_a_recordset($totales_periodo)
+    /**
+     * @return array{variable: ('BRUTO' | 'IMPONIBLE 1' | 'IMPONIBLE 2' | 'IMPONIBLE 3' | 'IMPONIBLE 4' | 'IMPONIBLE 5' | 'IMPONIBLE 6' | 'IMPONIBLE 7' | 'IMPONIBLE 8' | 'IMPONIBLE 9'), valor: mixed, periodo: mixed}[]
+     */
+    public static function transformar_a_recordset($totales_periodo): array
     {
         // Devuelvo importes totales con formato adecuado para un cuadro toba
         $totales = [];
@@ -2394,7 +2371,7 @@ class SicossOptimizado
             }
         }
 
-        if ($archivos_adjuntados == 0 && file_exists($archivo)) {
+        if ($archivos_adjuntados === 0 && file_exists($archivo)) {
             unlink($archivo);
         }
     }
@@ -2403,8 +2380,6 @@ class SicossOptimizado
      * Escapa un valor o array de valores para uso en consultas SQL.
      *
      * @param mixed $dato Valor o array a escapar
-     *
-     * @return string|array
      */
     public static function quote(mixed $dato): string|array
     {
@@ -2431,7 +2406,7 @@ class SicossOptimizado
      *
      * @return string El nombre de la conexión estática.
      */
-    public static function getStaticConnectionName()
+    public static function getStaticConnectionName(): string
     {
         $instance = new static();
         return $instance->getConnectionName();
@@ -2453,7 +2428,7 @@ class SicossOptimizado
         $nros_legajos = array_column($legajos, 'nro_legaj');
 
         // Validar que tengamos legajos para procesar
-        if (empty($nros_legajos)) {
+        if ($nros_legajos === []) {
             Log::warning('precargar_conceptos_todos_legajos: No hay legajos para procesar');
             return [];
         }
@@ -2501,9 +2476,7 @@ class SicossOptimizado
             ]);
 
             // Convertir objetos stdClass a arrays para consistencia
-            return array_map(function ($item) {
-                return (array) $item;
-            }, $resultado);
+            return array_map(fn($item) => (array) $item, $resultado);
         } catch (Exception $e) {
             Log::error('precargar_conceptos_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
@@ -2557,7 +2530,7 @@ class SicossOptimizado
         }
 
         // Estadísticas adicionales
-        if (!empty($stats['conceptos_por_legajo'])) {
+        if (isset($stats['conceptos_por_legajo']) && $stats['conceptos_por_legajo'] !== []) {
             $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / count($stats['conceptos_por_legajo']);
             $stats['max_conceptos_por_legajo'] = max($stats['conceptos_por_legajo']);
             $stats['min_conceptos_por_legajo'] = min($stats['conceptos_por_legajo']);
@@ -2607,7 +2580,7 @@ class SicossOptimizado
      * @param array $conceptos_legajo Conceptos pre-cargados para este legajo
      * @param array $leg Referencia al array del legajo para modificar
      */
-    public static function sumarizar_conceptos_optimizado($conceptos_legajo, &$leg): void
+    public static function sumarizar_conceptos_optimizado($conceptos_legajo, array &$leg): void
     {
         // Inicializar todas las variables igual que antes
         $leg['ImporteSAC'] = 0;
@@ -2662,7 +2635,7 @@ class SicossOptimizado
 
             // *** MISMA LÓGICA QUE ANTES - Solo sin consultas SQL ***
 
-            if (preg_match('/[^\d]+6[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+6[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
                 if (self::$hs_extras_por_novedad == 1) {
@@ -2675,15 +2648,15 @@ class SicossOptimizado
                 }
             }
 
-            if (preg_match('/[^\d]+7[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+7[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteZonaDesfavorable'] += $importe;
             }
 
-            if (preg_match('/[^\d]+8[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+8[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteVacaciones'] += $importe;
             }
 
-            if (preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+9[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSAC'] += $importe;
 
                 if ($concepto['codigoescalafon'] == 'NODO') {
@@ -2697,7 +2670,7 @@ class SicossOptimizado
                 }
             }
 
-            if (preg_match('/[^\d]+11[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+11[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 38) {
                     $leg['PrioridadTipoDeActividad'] = 38;
@@ -2705,26 +2678,26 @@ class SicossOptimizado
                 if (($leg['PrioridadTipoDeActividad'] == 87) || ($leg['PrioridadTipoDeActividad'] == 88)) {
                     $leg['PrioridadTipoDeActividad'] = 38;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+12[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+12[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 34) {
                     $leg['PrioridadTipoDeActividad'] = 34;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+13[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+13[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 35) {
                     $leg['PrioridadTipoDeActividad'] = 35;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+14[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+14[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 36;
@@ -2732,10 +2705,10 @@ class SicossOptimizado
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 36;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+15[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+15[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 37) {
                     $leg['PrioridadTipoDeActividad'] = 37;
@@ -2743,50 +2716,50 @@ class SicossOptimizado
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 37;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+16[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+16[^\d]+/', (string) $grupos_concepto)) {
                 $leg['AporteAdicionalObraSocial'] += $importe;
             }
 
-            if (preg_match('/[^\d]+21[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+21[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteAdicionales'] += $importe;
             }
 
-            if (preg_match('/[^\d]+22[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+22[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImportePremios'] += $importe;
             }
 
             // conceptos no remunerativos
-            if (preg_match('/[^\d]+45[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+45[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+46[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+46[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteRectificacionRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+47[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+47[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteMaternidad'] += $importe;
             }
 
-            if (preg_match('/[^\d]+48[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+48[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 87;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+49[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+49[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 88;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
-            if (preg_match('/[^\d]+58[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+58[^\d]+/', (string) $grupos_concepto)) {
                 $leg['SeguroVidaObligatorio'] = 1;
             }
 
@@ -2802,37 +2775,37 @@ class SicossOptimizado
                 $leg['adherentes'] = 1;
             }
 
-            if (preg_match('/[^\d]+24[^\d]+/', $grupos_concepto) && self::$hs_extras_por_novedad == 0) {
+            if (preg_match('/[^\d]+24[^\d]+/', (string) $grupos_concepto) && self::$hs_extras_por_novedad == 0) {
                 $leg['CantidadHorasExtras'] += $importe;
             }
 
-            if (preg_match('/[^\d]+67[^\d]+/', $grupos_concepto) && $informar_becarios == 1) {
+            if (preg_match('/[^\d]+67[^\d]+/', (string) $grupos_concepto) && $informar_becarios == 1) {
                 $leg['ImporteImponibleBecario'] += $importe;
             }
 
-            if (preg_match('/[^\d]+81[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+81[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSS27430'] += $importe;
             }
-            if (preg_match('/[^\d]+83[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+83[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSSDec56119'] += $importe;
             }
 
-            if (preg_match('/[^\d]+84[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+84[^\d]+/', (string) $grupos_concepto)) {
                 $leg['NoRemun4y8'] += $importe;
             }
 
             // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneracin 11"
-            if (preg_match('/[^\d]+86[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+86[^\d]+/', (string) $grupos_concepto)) {
                 $leg['IncrementoSolidario'] += $importe;
             }
 
             // Tipo 91- AFIP Base de Clculo Diferencial Aportes OS y FSR
-            if (preg_match('/[^\d]+91[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+91[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteTipo91'] += $importe;
             }
 
             // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneracin bruta total
-            if (preg_match('/[^\d]+96[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+96[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun96'] += $importe;
             }
         }
@@ -2866,7 +2839,7 @@ class SicossOptimizado
             // Verificar si el cargo está en la lista Y tiene tipo de grupo 9
             if (
                 in_array($nro_cargo, $cargos)
-                && preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)
+                && preg_match('/[^\d]+9[^\d]+/', (string) $grupos_concepto)
             ) {
                 $sacInvestigador += $concepto['impp_conce'];
             }
@@ -2890,19 +2863,16 @@ class SicossOptimizado
 
         foreach ($conceptos_legajo as $concepto) {
             // Verificar que el concepto sea del tipo solicitado
-            if (!isset($concepto['tipo_conce']) || $concepto['tipo_conce'] !== $tipo) {
+            if (!isset($concepto['tipo_conce'])) {
                 continue;
             }
-
+            if ($concepto['tipo_conce'] !== $tipo) {
+                continue;
+            }
             // Aplicar filtros según la condición
-            if ($where_condition === 'nro_orimp >0 AND codn_conce > 0') {
-                // Verificar que nro_orimp > 0 y codn_conce > 0
-                if (
-                    !isset($concepto['nro_orimp']) || $concepto['nro_orimp'] <= 0
-                    || !isset($concepto['codn_conce']) || $concepto['codn_conce'] <= 0
-                ) {
-                    continue;
-                }
+            // Verificar que nro_orimp > 0 y codn_conce > 0
+            if ($where_condition === 'nro_orimp >0 AND codn_conce > 0' && (!isset($concepto['nro_orimp']) || $concepto['nro_orimp'] <= 0 || !isset($concepto['codn_conce']) || $concepto['codn_conce'] <= 0)) {
+                continue;
             }
             // Para $where_condition === 'true' no hay filtros adicionales
 
@@ -2958,7 +2928,7 @@ class SicossOptimizado
     /**
      * Verifica el estado de las variables estáticas - Para debugging.
      */
-    public static function verificarEstadoVariablesEstaticas()
+    public static function verificarEstadoVariablesEstaticas(): array
     {
         return [
             'codc_reparto' => self::$codc_reparto,
@@ -3023,9 +2993,7 @@ class SicossOptimizado
         $tiempo_consulta = (microtime(true) - $inicio) * 1000;
 
         // PASO 4: Convertir a arrays y medir memoria
-        $conceptos_muestra = array_map(function ($item) {
-            return (array) $item;
-        }, $resultado_muestra);
+        $conceptos_muestra = array_map(fn($item) => (array) $item, $resultado_muestra);
 
         $memoria_despues = memory_get_usage(true);
         $memoria_muestra = $memoria_despues - $memoria_antes;
@@ -3067,7 +3035,6 @@ class SicossOptimizado
             $memoria_total_estimada,
             $memoria_disponible,
             $total_legajos,
-            $promedio_conceptos_por_legajo,
         );
 
         // Limpiar datos de muestra
@@ -3120,7 +3087,7 @@ class SicossOptimizado
     {
         $nros_legajos = array_column($legajos, 'nro_legaj');
 
-        if (empty($nros_legajos)) {
+        if ($nros_legajos === []) {
             Log::warning('precargar_todos_datos_cargos: No hay legajos para procesar');
             return [];
         }
@@ -3376,7 +3343,7 @@ class SicossOptimizado
     /**
      * Versión optimizada de get_limites_cargos que NO hace consultas SQL.
      */
-    public static function get_limites_cargos_optimizado($legajo, $datos_cargos_por_legajo): array
+    public static function get_limites_cargos_optimizado($legajo, array $datos_cargos_por_legajo): array
     {
         $datos_legajo = $datos_cargos_por_legajo[$legajo] ?? null;
 
@@ -3395,7 +3362,7 @@ class SicossOptimizado
     /**
      * Versión optimizada de get_cargos_activos_sin_licencia que NO hace consultas SQL.
      */
-    public static function get_cargos_activos_sin_licencia_optimizado($legajo, $datos_cargos_por_legajo): array
+    public static function get_cargos_activos_sin_licencia_optimizado($legajo, array $datos_cargos_por_legajo): array
     {
         $datos_legajo = $datos_cargos_por_legajo[$legajo] ?? null;
 
@@ -3409,7 +3376,7 @@ class SicossOptimizado
     /**
      * Versión optimizada de get_cargos_activos_con_licencia_vigente que NO hace consultas SQL.
      */
-    public static function get_cargos_activos_con_licencia_vigente_optimizado($legajo, $datos_cargos_por_legajo): array
+    public static function get_cargos_activos_con_licencia_vigente_optimizado($legajo, array $datos_cargos_por_legajo): array
     {
         $datos_legajo = $datos_cargos_por_legajo[$legajo] ?? null;
 
@@ -3434,7 +3401,7 @@ class SicossOptimizado
     {
         $nros_legajos = array_column($legajos, 'nro_legaj');
 
-        if (empty($nros_legajos)) {
+        if ($nros_legajos === []) {
             Log::warning('precargar_otra_actividad_todos_legajos: No hay legajos para procesar');
             return [];
         }
@@ -3525,14 +3492,14 @@ class SicossOptimizado
                 'importebrutootraactividad' => (float) $dato->ImporteBrutoOtraActividad,
                 'importesacotraactividad' => (float) $dato->ImporteSACOtraActividad,
                 'tiene_datos' => true,
-                'periodo' => $dato->vig_ano . '/' . str_pad($dato->vig_mes, 2, '0', STR_PAD_LEFT),
+                'periodo' => $dato->vig_ano . '/' . str_pad((string) $dato->vig_mes, 2, '0', STR_PAD_LEFT),
             ];
         }
 
         $fin = microtime(true);
         $tiempo_agrupacion = ($fin - $inicio) * 1000;
 
-        $legajos_con_datos = array_filter($datos_por_legajo, fn($d) => $d['tiene_datos']);
+        $legajos_con_datos = array_filter($datos_por_legajo, fn(array $d) => $d['tiene_datos']);
 
         Log::info('agrupar_otra_actividad_por_legajo: Agrupación completada', [
             'datos_procesados' => count($datos_otra_actividad),
@@ -3553,7 +3520,7 @@ class SicossOptimizado
      *
      * @return array Array con importes de otra actividad
      */
-    public static function otra_actividad_optimizado($nro_legajo, $datos_otra_actividad_por_legajo): array
+    public static function otra_actividad_optimizado($nro_legajo, array $datos_otra_actividad_por_legajo): array
     {
         // Buscar datos pre-cargados
         $datos = $datos_otra_actividad_por_legajo[$nro_legajo] ?? null;
@@ -3586,7 +3553,7 @@ class SicossOptimizado
     {
         $nros_legajos = array_column($legajos, 'nro_legaj');
 
-        if (empty($nros_legajos)) {
+        if ($nros_legajos === []) {
             Log::warning('precargar_codigos_obra_social_todos_legajos: No hay legajos para procesar');
             return [];
         }
@@ -3633,7 +3600,7 @@ class SicossOptimizado
 
             // ✅ CONSULTA MASIVA 2: Obtener todos los códigos DGI de dh37
             $codigos_unicos = array_keys($codigos_obra_social_unicos);
-            $codigos_quoted = array_map([self::class, 'quote'], $codigos_unicos);
+            $codigos_quoted = array_map(self::quote(...), $codigos_unicos);
             $codigos_in = implode(',', $codigos_quoted);
 
             $sql_codigos_dgi = "
@@ -3688,7 +3655,7 @@ class SicossOptimizado
     /**
      * Construye el mapa final de códigos DGI por legajo, aplicando regla de jubilados.
      */
-    public static function construir_mapa_codigos_dgi_final($legajos_originales, $legajos_obra_social, $mapa_dgi): array
+    public static function construir_mapa_codigos_dgi_final($legajos_originales, array $legajos_obra_social, array $mapa_dgi): array
     {
         $inicio = microtime(true);
         $codigos_dgi_por_legajo = [];
@@ -3711,7 +3678,7 @@ class SicossOptimizado
         $fin = microtime(true);
         $tiempo_construccion = ($fin - $inicio) * 1000;
 
-        $jubilados = array_filter($codigos_dgi_por_legajo, fn($codigo) => $codigo === '000000');
+        $jubilados = array_filter($codigos_dgi_por_legajo, fn($codigo): bool => $codigo === '000000');
 
         Log::info('construir_mapa_codigos_dgi_final: Construcción completada', [
             'total_legajos' => count($codigos_dgi_por_legajo),
@@ -3731,7 +3698,7 @@ class SicossOptimizado
      *
      * @return string Código DGI de la obra social
      */
-    public static function codigo_os_optimizado($nro_legajo, $codigos_dgi_por_legajo): string
+    public static function codigo_os_optimizado($nro_legajo, array $codigos_dgi_por_legajo): string
     {
         // Buscar código pre-cargado
         $codigo_dgi = $codigos_dgi_por_legajo[$nro_legajo] ?? '000000';
@@ -3903,7 +3870,7 @@ class SicossOptimizado
      */
     public static function procesa_sicoss_bd(array $datos, int $per_anoct, int $per_mesct, array $legajos, PeriodoFiscal $periodo_fiscal): array
     {
-        $inicio_total = microtime(true);
+        microtime(true);
         $total_legajos = count($legajos);
 
         Log::info('Iniciando procesamiento SICOSS optimizado para BD', [
@@ -4129,7 +4096,7 @@ class SicossOptimizado
             ];
 
             // Procesar uno para ver la estructura final
-            if (!empty($muestra_legajos)) {
+            if ($muestra_legajos !== []) {
                 $legajo_test = $muestra_legajos[0];
                 $conceptos_por_legajo = self::precargar_conceptos_todos_legajos([$legajo_test]);
                 $conceptos_legajo = $conceptos_por_legajo[$legajo_test['nro_legaj']] ?? [];
@@ -4171,80 +4138,6 @@ class SicossOptimizado
         );
     }
 
-    private static function getConsultaConceptosOptimizada($where_periodo_retro, $where_legajo)
-    {
-        $periodo = self::$periodo_actual;
-        $per_anoct = $periodo['ano'];
-        $per_mesct = $periodo['mes'];
-        $where_original = $periodo['where'];
-
-        // Determinar tabla según período (dh21 actual o dh21h histórico)
-        $tabla_liquidaciones = self::determinarTablaLiquidaciones($where_periodo_retro);
-
-        return "
-        WITH tipos_grupos_conceptos AS (
-            SELECT
-                dh16.codn_conce,
-                array_agg(DISTINCT dh15.codn_tipogrupo) AS tipos_grupos
-            FROM mapuche.dh16
-            INNER JOIN mapuche.dh15 ON dh15.codn_grupo = dh16.codn_grupo
-            GROUP BY dh16.codn_conce
-        )
-        SELECT DISTINCT
-            dh21.id_liquidacion,
-            dh21.impp_conce,
-            dh21.ano_retro,
-            dh21.mes_retro,
-            dh21.nro_legaj,
-            dh21.codn_conce,
-            dh21.tipo_conce,
-            dh21.nro_cargo,
-            dh21.nov1_conce,
-            dh12.nro_orimp,
-            COALESCE(tgc.tipos_grupos, ARRAY[]::integer[]) AS tipos_grupos,
-            dh21.codigoescalafon
-        FROM mapuche.{$tabla_liquidaciones} dh21
-        INNER JOIN mapuche.dh22 ON dh22.nro_liqui = dh21.nro_liqui
-        LEFT JOIN mapuche.dh01 ON dh01.nro_legaj = dh21.nro_legaj
-        LEFT JOIN mapuche.dh12 ON dh12.codn_conce = dh21.codn_conce
-        LEFT JOIN tipos_grupos_conceptos tgc ON tgc.codn_conce = dh21.codn_conce
-        WHERE dh22.per_liano = {$per_anoct}
-          AND dh22.per_limes = {$per_mesct}
-          AND dh22.sino_genimp = true
-          AND dh21.codn_conce > 0
-          AND ({$where_original})
-          AND ({$where_periodo_retro})
-    ";
-    }
-
-    /**
-     * Determina qué tabla de liquidaciones utilizar según el período retroactivo.
-     *
-     * Analiza el filtro de período retroactivo para determinar si se debe usar
-     * la tabla de liquidaciones actual (dh21) o la tabla histórica (dh21h).
-     * Si el período incluye años retroactivos específicos (ano_retro > 0),
-     * se utiliza la tabla histórica.
-     *
-     * @param string $where_periodo_retro Condición WHERE para filtrar el período retroactivo
-     *
-     * @return string Nombre de la tabla a utilizar ('dh21' para actual, 'dh21h' para histórica)
-     */
-    private static function determinarTablaLiquidaciones($where_periodo_retro)
-    {
-        // Si el filtro de período incluye años/meses específicos, usar tabla histórica
-        if ($where_periodo_retro !== 'true' && $where_periodo_retro !== ' true ') {
-            // Analizar si el período es histórico
-            if (preg_match('/ano_retro\s*=\s*(\d+)/', $where_periodo_retro, $matches)) {
-                $ano_retro = (int) ($matches[1]);
-                if ($ano_retro > 0) {
-                    return 'dh21h'; // Tabla histórica
-                }
-            }
-        }
-
-        return 'dh21'; // Tabla actual
-    }
-
     /**
      * Obtiene el límite de memoria en bytes.
      */
@@ -4259,16 +4152,12 @@ class SicossOptimizado
         $unidad = strtolower(substr($limite, -1));
         $numero = (int) (substr($limite, 0, -1));
 
-        switch ($unidad) {
-            case 'g':
-                return $numero * 1024 * 1024 * 1024;
-            case 'm':
-                return $numero * 1024 * 1024;
-            case 'k':
-                return $numero * 1024;
-            default:
-                return (int) $limite;
-        }
+        return match ($unidad) {
+            'g' => $numero * 1024 * 1024 * 1024,
+            'm' => $numero * 1024 * 1024,
+            'k' => $numero * 1024,
+            default => (int) $limite,
+        };
     }
 
     /**
@@ -4279,7 +4168,6 @@ class SicossOptimizado
         int $memoria_estimada,
         int $memoria_disponible,
         int $total_legajos,
-        float $promedio_conceptos,
     ): string {
         if (!$factible) {
             if ($total_legajos > 50000) {
@@ -4332,7 +4220,7 @@ class SicossOptimizado
             'apnom' => EncodingService::toLatin1($legajo['apyno'] ?? ''),
 
             // Datos familiares
-            'conyuge' => ($legajo['conyugue'] ?? false) ? true : false,
+            'conyuge' => $legajo['conyugue'] ?? false,
             'cant_hijos' => (int) ($legajo['hijos'] ?? 0),
 
             // Códigos situación laboral

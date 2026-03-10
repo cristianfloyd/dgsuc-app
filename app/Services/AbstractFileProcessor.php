@@ -13,13 +13,13 @@ abstract class AbstractFileProcessor
     public function processFile(string $filePath, array $columnWidths): Collection
     {
         return collect($this->readFileLines($filePath))
-            ->map(fn($line) => $this->processLine($line, $columnWidths));
+            ->map(fn(string $line): \Illuminate\Database\Eloquent\Collection => $this->processLine($line, $columnWidths));
     }
 
     // Método para validar el archivo
     protected function validateFile(string $filePath): void
     {
-        if (empty($filePath) || !Storage::exists($filePath)) {
+        if ($filePath === '' || $filePath === '0' || !Storage::exists($filePath)) {
             throw new InvalidArgumentException("File does not exist: $filePath");
         }
     }

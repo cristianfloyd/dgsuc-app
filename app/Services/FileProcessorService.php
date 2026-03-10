@@ -24,21 +24,12 @@ use function sprintf;
  */
 class FileProcessorService extends AbstractFileProcessor implements FileProcessorInterface
 {
-    private const UTF8_ENCODING = 'UTF-8';
-
-    private int $periodoFiscal;
+    private const string UTF8_ENCODING = 'UTF-8';
 
     private string $absolutePath;
 
-    private string $tableName;
-
-    public function __construct(
-        private DatabaseService $databaseService,
-        private ColumnMetadata $columnMetadata,
-        private DataMapperInterface $dataMapper,
-        int $periodoFiscal = 0,
-    ) {
-        $this->periodoFiscal = $periodoFiscal;
+    public function __construct(private readonly ColumnMetadata $columnMetadata, private readonly DataMapperInterface $dataMapper, private int $periodoFiscal = 0)
+    {
     }
 
     public function setPeriodoFiscal(int $periodoFiscal): void
@@ -123,13 +114,14 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @return Collection Una Coleccion con las líneas del archivo procesadas.
      */
+    #[\Override]
     public function processFile(string $filePath, array $columnWidths, ?UploadedFile $uploadedFile = null): Collection
     {
-        if ($uploadedFile) {
+        if ($uploadedFile instanceof \App\Models\UploadedFile) {
             $this->assignValues($uploadedFile);
         }
 
-        if (empty($this->periodoFiscal)) {
+        if ($this->periodoFiscal === 0) {
             Log::error('El periodo fiscal no está inicializado.');
             throw new RuntimeException('El periodo fiscal no está inicializado.');
         }
@@ -151,7 +143,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $encoding = $this->detectEncoding($fileContent);
             Log::info("Encoding detected: $encoding");
 
-            $lines = $this->convertToUtf8($fileContent, $encoding);
+            $lines = $this->convertToUtf8($fileContent);
             Log::info('Líneas del archivo: ' . $lines->count());
 
             $mappedData = $this->processLines($lines->toArray(), $columnWidths);
@@ -196,7 +188,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         $posicion = 0;
         // Creamos una colección a partir de los anchos de columna
         $data = collect($columnWidths)
-            ->map(function ($width, $key) use ($line, &$posicion) {
+            ->map(function (int $width, $key) use ($line, &$posicion): int|string {
                 if ($key === 0) {
                     return $campo = $this->periodoFiscal;
                 }
@@ -223,7 +215,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @return Collection Una colección con los datos mapeados.
      */
-    private function mapearDatos(Collection $processedLines, $system = 'mapuche'): Collection
+    private function mapearDatos(Collection $processedLines, string $system = 'mapuche'): Collection
     {
         if ($system === 'mapuche') {
             return $this->mapearDatosMapucheSicoss($processedLines);
@@ -237,51 +229,35 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     private function mapearDatosRelacionesActivas(Collection $processedLines): Collection
     {
         $mappedData = $processedLines
-            ->map(fn($linea) => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
+            ->map(fn($linea): array => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
         return new Collection($mappedData);
     }
 
     private function mapearDatosMapucheSicoss(Collection $processedLines): Collection
     {
         $mappedData = $processedLines
-            ->map(fn($linea) => $this->dataMapper->mapDataToModel($linea->toArray()));
+            ->map(fn($linea): array => $this->dataMapper->mapDataToModel($linea->toArray()));
         return new Collection($mappedData);
-    }
-
-    /**
-     * Lee el contenido del archivo.
-     *
-     * @param string $filePath
-     *
-     * @return string
-     */
-    private function readFileContent(string $filePath): string
-    {
-        return file_get_contents(Storage::path($filePath));
     }
 
     /**
      * Detecta la codificación del contenido del archivo.
      *
-     * @param string $content
      *
-     * @return string
      */
     private function detectEncoding(string $content): string
     {
-        $encoding = mb_detect_encoding($content, mb_list_encodings(), true) ?: self::UTF8_ENCODING;
-        return $encoding;
+        return mb_detect_encoding($content, mb_list_encodings(), true) ?: self::UTF8_ENCODING;
     }
 
     /**
      * Convierte el contenido del archivo a un array de líneas en formato UTF-8.
      *
      * @param string $content El contenido del archivo a convertir.
-     * @param string|null $fromEncoding La codificación de origen del contenido, si se conoce. Si se omite, se intentará detectar automáticamente.
      *
      * @return Collection Una colección de líneas en formato UTF-8.
      */
-    private function convertToUtf8(string $content, ?string $fromEncoding = null): Collection
+    private function convertToUtf8(string $content): Collection
     {
         $utf8Content = mb_convert_encoding($content, self::UTF8_ENCODING, 'auto');
 
@@ -293,16 +269,13 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     /**
      * Procesa las líneas del archivo.
      *
-     * @param array $lines
-     * @param array $columnWidths
      *
-     * @return Collection
      */
     private function processLines(array $lines, array $columnWidths): Collection
     {
         $data = collect($lines)
             ->filter()
-            ->map(fn($line) => $this->processLine($line, $columnWidths));
+            ->map(fn(string $line): \Illuminate\Database\Eloquent\Collection => $this->processLine($line, $columnWidths));
         Log::info('Datos procesados en ProcessLines : ' . $data->count());
         return new Collection($data->all());
     }
@@ -336,7 +309,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     private function validateInput(string $filePath, int $periodoFiscal): void
     {
         // Verifica que los parámetros no estén vacíos.
-        if (empty($filePath) || empty($periodoFiscal)) {
+        if ($filePath === '' || $filePath === '0' || $periodoFiscal === 0) {
             throw new InvalidArgumentException('Los parámetros de entrada no pueden estar vacíos.');
         }
 

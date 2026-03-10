@@ -10,16 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class SicossCpto205Service
 {
-    protected SicossCpto205Repository $repository;
-
     /**
      * Constructor.
      *
      * @param SicossCpto205Repository $repository Repositorio para operaciones de datos
      */
-    public function __construct(SicossCpto205Repository $repository)
+    public function __construct(protected SicossCpto205Repository $repository)
     {
-        $this->repository = $repository;
     }
 
     /**

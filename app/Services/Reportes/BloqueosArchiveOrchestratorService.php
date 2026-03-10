@@ -53,7 +53,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 );
             }
 
-            return DB::connection($this->getConnectionName())->transaction(function () use ($periodoFiscal, $startTime) {
+            return DB::connection($this->getConnectionName())->transaction(function () use ($periodoFiscal, $startTime): \App\Data\Reportes\ArchiveProcessData {
 
                 // Paso 1: Obtener registros a procesar
                 $registrosParaProcesar = $this->obtenerRegistrosParaProcesar($periodoFiscal);
@@ -78,47 +78,47 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
                 // Paso 2: Transferir al historial
                 Log::info('Iniciando transferencia al historial');
-                $transferResult = $this->historialService->transferirAlHistorial($registrosParaProcesar);
+                $transferResultData = $this->historialService->transferirAlHistorial($registrosParaProcesar);
 
-                if (!$transferResult->success) {
+                if (!$transferResultData->success) {
                     Log::error('Error en la transferencia al historial', [
                         'periodo_fiscal' => $periodoFiscal,
-                        'mensaje' => $transferResult->mensaje,
+                        'mensaje' => $transferResultData->mensaje,
                     ]);
 
                     return ArchiveProcessData::error(
                         $periodoFiscal,
-                        "Error en transferencia: {$transferResult->mensaje}",
-                        $transferResult,
+                        "Error en transferencia: {$transferResultData->mensaje}",
+                        $transferResultData,
                     );
                 }
 
                 Log::info('Transferencia al historial completada', [
-                    'transferidos' => $transferResult->transferidos,
-                    'fallidos' => $transferResult->fallidos,
+                    'transferidos' => $transferResultData->transferidos,
+                    'fallidos' => $transferResultData->fallidos,
                 ]);
 
                 // Paso 3: Limpiar tabla de trabajo
                 Log::info('Iniciando limpieza de tabla de trabajo');
-                $cleanupResult = $this->cleanupService->limpiarTablaWork($periodoFiscal);
+                $cleanupResultData = $this->cleanupService->limpiarTablaWork($periodoFiscal);
 
-                if (!$cleanupResult->success) {
+                if (!$cleanupResultData->success) {
                     Log::warning('Error en la limpieza, pero transferencia fue exitosa', [
                         'periodo_fiscal' => $periodoFiscal,
-                        'mensaje_limpieza' => $cleanupResult->mensaje,
+                        'mensaje_limpieza' => $cleanupResultData->mensaje,
                     ]);
 
                     return ArchiveProcessData::partial(
                         $periodoFiscal,
-                        $transferResult,
-                        $cleanupResult,
+                        $transferResultData,
+                        $cleanupResultData,
                         'Transferencia exitosa pero limpieza falló parcialmente',
                     );
                 }
 
                 Log::info('Limpieza de tabla de trabajo completada', [
-                    'eliminados' => $cleanupResult->eliminados,
-                    'no_eliminados' => $cleanupResult->noEliminados,
+                    'eliminados' => $cleanupResultData->eliminados,
+                    'no_eliminados' => $cleanupResultData->noEliminados,
                 ]);
 
                 $endTime = microtime(true);
@@ -126,15 +126,15 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
                 Log::info('Proceso completo de archivado finalizado exitosamente', [
                     'periodo_fiscal' => $periodoFiscal,
-                    'transferidos' => $transferResult->transferidos,
-                    'eliminados' => $cleanupResult->eliminados,
+                    'transferidos' => $transferResultData->transferidos,
+                    'eliminados' => $cleanupResultData->eliminados,
                     'duracion_segundos' => $duration,
                 ]);
 
                 return ArchiveProcessData::success(
                     $periodoFiscal,
-                    $transferResult,
-                    $cleanupResult,
+                    $transferResultData,
+                    $cleanupResultData,
                     $duration,
                 );
             });
@@ -163,7 +163,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             ]);
 
             // Verificar que existan registros para el período
-            $totalRegistros = BloqueosDataModel::where('nro_liqui', $periodoFiscal)->count();
+            $totalRegistros = BloqueosDataModel::query()->where('nro_liqui', $periodoFiscal)->count();
             if ($totalRegistros === 0) {
                 Log::info('No existen registros para archivar', [
                     'periodo_fiscal' => $periodoFiscal,
@@ -180,7 +180,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             }
 
             // Verificar que haya registros procesados
-            $registrosProcesados = BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+            $registrosProcesados = BloqueosDataModel::query()->where('nro_liqui', $periodoFiscal)
                 ->where('esta_procesado', true)
                 ->count();
 
@@ -230,12 +230,12 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     public function getResumenEstadoArchivado(array $periodoFiscal): array
     {
         try {
-            $totalRegistros = BloqueosDataModel::where('nro_liqui', $periodoFiscal)->count();
-            $registrosProcesados = BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+            $totalRegistros = BloqueosDataModel::query()->where('nro_liqui', $periodoFiscal)->count();
+            $registrosProcesados = BloqueosDataModel::query()->where('nro_liqui', $periodoFiscal)
                 ->where('esta_procesado', true)->count();
             $registrosPendientes = $totalRegistros - $registrosProcesados;
 
-            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
+            $registrosEnHistorial = RepBloqueo::query()->where('nro_liqui', $periodoFiscal)->count();
             $yaArchivado = $this->periodoYaArchivado($periodoFiscal);
 
             $estadisticasHistorial = $this->historialService->getEstadisticasHistorial($periodoFiscal);
@@ -279,8 +279,8 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
             // 1. Existen registros en el historial
             // 2. No existen registros procesados en la tabla de trabajo
 
-            $registrosEnHistorial = RepBloqueo::where('nro_liqui', $periodoFiscal)->count();
-            $registrosProcesadosEnTrabajo = BloqueosDataModel::where('nro_liqui', $periodoFiscal)
+            $registrosEnHistorial = RepBloqueo::query()->where('nro_liqui', $periodoFiscal)->count();
+            $registrosProcesadosEnTrabajo = BloqueosDataModel::query()->where('nro_liqui', $periodoFiscal)
                 ->where('esta_procesado', true)
                 ->count();
 
@@ -300,8 +300,8 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     private function obtenerRegistrosParaProcesar(array $periodoFiscal): Collection
     {
         // Usar el servicio para obtener la liquidación definitiva del período
-        $periodoService = app(PeriodoFiscalService::class);
-        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
+        $liquidacion = $periodoFiscalService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
 
         if (!$liquidacion) {
             // No hay liquidación definitiva para ese período
@@ -310,7 +310,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
 
         $nroLiqui = $liquidacion->nro_liqui;
 
-        return BloqueosDataModel::where('nro_liqui', $nroLiqui)
+        return BloqueosDataModel::query()->where('nro_liqui', $nroLiqui)
             ->where('esta_procesado', true)
             ->whereIn('estado', [
                 BloqueosEstadoEnum::PROCESADO,

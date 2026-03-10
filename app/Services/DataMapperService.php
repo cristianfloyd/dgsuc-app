@@ -15,7 +15,7 @@ class DataMapperService implements DataMapperInterface
      */
     public function mapDataToModel(array $datosProcesados): array
     {
-        $datosMapeados = [
+        return [
             'periodo_fiscal' => $datosProcesados[0],
             'cuil' => $datosProcesados[1],
             'apnom' => $datosProcesados[2],
@@ -78,7 +78,6 @@ class DataMapperService implements DataMapperInterface
             'incsalarial' => $datosProcesados[59],
             'remimp11' => $datosProcesados[60],
         ];
-        return $datosMapeados;
     }
 
     /**
@@ -102,7 +101,7 @@ class DataMapperService implements DataMapperInterface
      */
     public function mapearDatosAlModelo(array $datosProcesados): array
     {
-        $datosMapeados = [
+        return [
             'periodo_fiscal' => $datosProcesados[0],
             'cuil' => $datosProcesados[1],
             'apnom' => $datosProcesados[2],
@@ -165,7 +164,6 @@ class DataMapperService implements DataMapperInterface
             'incsalarial' => $datosProcesados[59],
             'remimp11' => $datosProcesados[60],
         ];
-        return $datosMapeados;
     }
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
@@ -175,7 +173,7 @@ class DataMapperService implements DataMapperInterface
      */
     public function mapDataToModelAfipRelacionesActivas(array $datosProcesados): array
     {
-        $datosMapeados = [
+        return [
 
             'periodo_fiscal' => $datosProcesados[0], //periodo fiscal,6
             'codigo_movimiento' => $datosProcesados[1], //codigo movimiento,2
@@ -200,6 +198,5 @@ class DataMapperService implements DataMapperInterface
             'ccct' => $datosProcesados[20], //Código de Convenio Colectivo de Trabajo,7
             'no_hay_datos' => $datosProcesados[21], // campo vacio,5
         ];
-        return $datosMapeados;
     }
 }

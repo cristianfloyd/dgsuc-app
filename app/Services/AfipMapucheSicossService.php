@@ -9,25 +9,20 @@ use App\Models\AfipMapucheSicoss;
 
 class AfipMapucheSicossService
 {
-    private AfipMapucheSicossRepositoryInterface $repository;
-
-    public function __construct(AfipMapucheSicossRepositoryInterface $repository)
+    public function __construct(private readonly AfipMapucheSicossRepositoryInterface $repository)
     {
-        $this->repository = $repository;
     }
 
     /**
      * Crea o actualiza un registro de AfipMapucheSicoss.
      *
-     * @param AfipMapucheSicossDTO $dto
      *
-     * @return AfipMapucheSicoss
      */
-    public function createOrUpdate(AfipMapucheSicossDTO $dto)
+    public function createOrUpdate(AfipMapucheSicossDTO $dto): \App\Models\AfipMapucheSicoss
     {
         $existingRecord = $this->repository->findByPeriodoAndCuil($dto->periodoFiscal, $dto->cuil);
 
-        if ($existingRecord) {
+        if ($existingRecord instanceof \App\Models\AfipMapucheSicoss) {
             return $this->repository->update($existingRecord, $dto);
         }
 
@@ -37,8 +32,6 @@ class AfipMapucheSicossService
     /**
      * Obtiene un registro por período fiscal y CUIL.
      *
-     * @param string $periodoFiscal
-     * @param string $cuil
      *
      * @throws AfipMapucheSicossNotFoundException
      *
@@ -48,7 +41,7 @@ class AfipMapucheSicossService
     {
         $record = $this->repository->findByPeriodoAndCuil($periodoFiscal, $cuil);
 
-        if (!$record) {
+        if (!$record instanceof \App\Models\AfipMapucheSicoss) {
             throw new AfipMapucheSicossNotFoundException("No se encontró el registro para el período fiscal $periodoFiscal y CUIL $cuil");
         }
 
@@ -57,8 +50,6 @@ class AfipMapucheSicossService
 
     /**
      * Obtiene una lista de períodos fiscales para usar en componentes select.
-     *
-     * @return array
      */
     public function getPeriodosFiscalesForSelect(): array
     {

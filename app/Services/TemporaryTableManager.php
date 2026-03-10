@@ -6,13 +6,10 @@ use App\Repositories\NominaRepository;
 
 class TemporaryTableManager
 {
-    private $nominaRepository;
+    private bool $tableCreated = false;
 
-    private $tableCreated = false;
-
-    public function __construct(NominaRepository $nominaRepository)
+    public function __construct(private readonly NominaRepository $nominaRepository)
     {
-        $this->nominaRepository = $nominaRepository;
     }
 
     public function createTemporaryTables(int $nroLiqui): void

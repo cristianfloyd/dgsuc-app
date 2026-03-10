@@ -9,7 +9,7 @@ use function count;
 
 class Dh61Service
 {
-    private Dh61RepositoryInterface $dh61Repository;
+    private readonly Dh61RepositoryInterface $dh61Repository;
 
     public function __construct(Dh61RepositoryInterface $dh61Repository)
     {
@@ -66,7 +66,7 @@ class Dh61Service
         $restoredCount = 0;
         $failedCategories = [];
         foreach ($groupedRecords[$year][$month] as $historicalRecord) {
-            $category = Dh11::find($historicalRecord->codc_categ);
+            $category = Dh11::query()->find($historicalRecord->codc_categ);
 
             // Validar si la categoría existe.
             if (!$category) {
@@ -83,7 +83,7 @@ class Dh61Service
         }
 
         // Construir el mensaje de respuesta.
-        if (empty($failedCategories)) {
+        if ($failedCategories === []) {
             $message = "Se restauraron {$restoredCount} categorías con éxito.";
         } else {
             $message = "Se restauraron {$restoredCount} categorías. ";

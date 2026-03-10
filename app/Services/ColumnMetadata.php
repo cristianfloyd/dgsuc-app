@@ -45,7 +45,7 @@ class ColumnMetadata
 
     private array $widthsMiSimplificacion;
 
-    private string $currentSystem;
+    private string $currentSystem = 'afip';
 
     private array $widthsSicossCalculo;
 
@@ -53,8 +53,7 @@ class ColumnMetadata
 
     public function __construct()
     {
-        $this->initializeWidths();
-        $this->currentSystem = 'afip'; // Por defecto
+        $this->initializeWidths(); // Por defecto
     }
 
     public function setSystem(string $system): void
@@ -72,18 +71,13 @@ class ColumnMetadata
      */
     public function getWidths(): array
     {
-        switch ($this->currentSystem) {
-            case 'afip':
-                return $this->widthsAfip;
-            case 'mapuche':
-                return $this->widthsMapuche;
-            case 'miSimplificacion':
-                return $this->widthsMiSimplificacion;
-            case 'sicossCalculo':
-                return $this->widthsSicossCalculo;
-            default:
-                throw new InvalidArgumentException('Sistema no válido');
-        }
+        return match ($this->currentSystem) {
+            'afip' => $this->widthsAfip,
+            'mapuche' => $this->widthsMapuche,
+            'miSimplificacion' => $this->widthsMiSimplificacion,
+            'sicossCalculo' => $this->widthsSicossCalculo,
+            default => throw new InvalidArgumentException('Sistema no válido'),
+        };
     }
 
     /**

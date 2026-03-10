@@ -8,11 +8,8 @@ use Illuminate\Support\Facades\Validator;
 
 class Dhe7Service
 {
-    protected $dhe7Repository;
-
-    public function __construct(Dhe7Repository $dhe7Repository)
+    public function __construct(protected \App\Contracts\Dhe7Repository $dhe7Repository)
     {
-        $this->dhe7Repository = $dhe7Repository;
     }
 
     // Obtiene todos los registros

@@ -38,7 +38,7 @@ abstract class AbstractTableService implements TableServiceInterface
         $missingColumns = array_diff($expectedColumns, $currentColumns);
         $extraColumns = array_diff($currentColumns, $expectedColumns);
 
-        if (!empty($missingColumns) || !empty($extraColumns)) {
+        if ($missingColumns !== [] || $extraColumns !== []) {
             throw new TableStructureException($this->getTableName(), $missingColumns, $extraColumns,);
         }
 
@@ -102,7 +102,7 @@ abstract class AbstractTableService implements TableServiceInterface
     {
         $query = $this->getTablePopulationQuery();
 
-        if (!empty($query)) {
+        if ($query !== '' && $query !== '0') {
             $this->getConnectionFromTrait()->statement($query);
         }
     }
@@ -165,42 +165,19 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     protected function addColumn($table, string $column, array $definition): void
     {
-        $columnDefinition = null;
-        switch ($definition['type']) {
-            case 'bigIncrements':
-                $columnDefinition = $table->bigIncrements($column);
-                break;
-            case 'string':
-                $columnDefinition = $table->string($column, $definition['length'] ?? 255);
-                break;
-            case 'integer':
-                $columnDefinition = $table->integer($column);
-                break;
-            case 'decimal':
-                $columnDefinition = $table->decimal($column, $definition['precision'] ?? 8, $definition['scale'] ?? 2);
-                break;
-            case 'boolean':
-                $columnDefinition = $table->boolean($column);
-                break;
-            case 'date':
-                $columnDefinition = $table->date($column);
-                break;
-            case 'datetime':
-                $columnDefinition = $table->datetime($column);
-                break;
-            case 'timestamp':
-                $columnDefinition = $table->timestamp($column);
-                break;
-            case 'json':
-                $columnDefinition = $table->json($column);
-                break;
-            case 'jsonb':
-                $columnDefinition = $table->jsonb($column);
-                break;
-            default:
-                throw new InvalidArgumentException("Tipo de columna no soportado: {$definition['type']}");
-        }
-
+        $columnDefinition = match ($definition['type']) {
+            'bigIncrements' => $table->bigIncrements($column),
+            'string' => $table->string($column, $definition['length'] ?? 255),
+            'integer' => $table->integer($column),
+            'decimal' => $table->decimal($column, $definition['precision'] ?? 8, $definition['scale'] ?? 2),
+            'boolean' => $table->boolean($column),
+            'date' => $table->date($column),
+            'datetime' => $table->datetime($column),
+            'timestamp' => $table->timestamp($column),
+            'json' => $table->json($column),
+            'jsonb' => $table->jsonb($column),
+            default => throw new InvalidArgumentException("Tipo de columna no soportado: {$definition['type']}"),
+        };
         // Aplicar modificadores si existen
         if (!empty($definition['nullable'])) {
             $columnDefinition->nullable();

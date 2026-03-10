@@ -8,8 +8,6 @@ interface ConceptoListadoServiceInterface
 {
     /**
      * Obtiene el nombre de la conexión a la base de datos Mapuche.
-     *
-     * @return string
      */
     public function getConnectionName(): string;
 

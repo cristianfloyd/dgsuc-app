@@ -9,16 +9,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RetUdaService
 {
-    protected $repository;
-
     /**
      * Constructor del servicio RetUda.
-     *
-     * @param RetUdaRepository $repository
      */
-    public function __construct(RetUdaRepository $repository)
+    public function __construct(protected \App\Contracts\RetUdaRepository $repository)
     {
-        $this->repository = $repository;
     }
 
     /**
@@ -34,9 +29,6 @@ class RetUdaService
     /**
      * Obtiene un registro de RetUda por su clave primaria compuesta.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
-     * @param string $periodo
      *
      * @return RetUda|null
      */
@@ -62,12 +54,8 @@ class RetUdaService
     /**
      * Actualiza un registro de RetUda.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
-     * @param string $periodo
      * @param array $data
      *
-     * @return bool
      */
     public function updateRetUda(int $nroLegaj, int $nroCargo, string $periodo, RetUdaDTO $dto): bool
     {
@@ -81,11 +69,7 @@ class RetUdaService
     /**
      * Elimina un registro de RetUda.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
-     * @param string $periodo
      *
-     * @return bool
      */
     public function deleteRetUda(int $nroLegaj, int $nroCargo, string $periodo): bool
     {

@@ -213,9 +213,7 @@ class TobaHashAdapter
     /**
      * Genera bytes aleatorios de manera segura usando características modernas de PHP.
      *
-     * @param int $count
      *
-     * @return string
      */
     private function getSecureRandomBytes(int $count): string
     {

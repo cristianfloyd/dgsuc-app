@@ -109,7 +109,7 @@ class RepGerencialFinalService
         Log::info('Procesando datos de rep_ger_final', ['liquidaciones' => $liquidaciones]);
 
         // Chequear que $liquidaciones no esté vacío
-        if (empty($liquidaciones)) {
+        if ($liquidaciones === null || $liquidaciones === []) {
             Log::warning('No se encontraron liquidaciones para procesar.');
             return;
         }
@@ -228,7 +228,7 @@ class RepGerencialFinalService
 
         if (!empty($filters['conceptos'])) {
             $conceptosConditions = array_map(
-                fn($concepto) => "dh21.codn_conce = :concepto_{$concepto}",
+                fn($concepto): string => "dh21.codn_conce = :concepto_{$concepto}",
                 $filters['conceptos'],
             );
             $conditions[] = '(' . implode(' OR ', $conceptosConditions) . ')';
@@ -240,13 +240,13 @@ class RepGerencialFinalService
             $conditions[] = 'dh21.nro_orimp > 0';
         }
 
-        return empty($conditions) ? 'TRUE' : implode(' AND ', $conditions);
+        return $conditions === [] ? 'TRUE' : implode(' AND ', $conditions);
     }
 
     protected function addFilters(string $sql, ?string $whereClause): string
     {
         if ($whereClause) {
-            $sql = str_replace(
+            return str_replace(
                 'WHERE TRUE',
                 "WHERE TRUE AND $whereClause",
                 $sql,
@@ -649,8 +649,6 @@ class RepGerencialFinalService
      * 'rep_ger_importes_netos_d' del esquema definido en la propiedad '$this->schema'.
      *
      * @param array $liquidaciones Array de números de liquidación a procesar
-     *
-     * @return void
      */
     protected function processNetAmountsTypeD(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
@@ -719,8 +717,6 @@ class RepGerencialFinalService
      * necesaria.
      *
      * @param array $liquidaciones Array de números de liquidación a procesar.
-     *
-     * @return void
      */
     protected function processNetAmountsTypeA(?int $liquidaciones, ?string $whereClause, array $filters): void
     {

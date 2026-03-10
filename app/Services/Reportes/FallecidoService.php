@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\Schema;
 
 class FallecidoService
 {
-    public function __construct(
-        private readonly FallecidoRepositoryInterface $repository,
-    ) {
-    }
-
     /**
      * Crea la tabla rep_fallecidos si no existe.
      */

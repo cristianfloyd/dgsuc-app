@@ -20,14 +20,8 @@ class SicossUpdateService
 {
     use MapucheConnectionTrait;
 
-    private const string CODIGO_DOCENTE = 'DOCE';
-    private const string CODIGO_EXCLUSIVA = 'EXCL';
-
-    protected TableSelectorService $tableSelectorService;
-
-    public function __construct(TableSelectorService $tableSelectorService)
+    public function __construct(protected TableSelectorService $tableSelectorService)
     {
-        $this->tableSelectorService = $tableSelectorService;
     }
 
     public function executeUpdates(?array $liquidaciones = null): array

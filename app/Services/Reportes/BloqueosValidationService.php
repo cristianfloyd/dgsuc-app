@@ -18,7 +18,6 @@ class BloqueosValidationService
     /**
      * Valida un registro de bloqueo individual.
      *
-     * @param BloqueosDataModel $record
      *
      * @return array Resultado de la validación con estado y mensaje
      */
@@ -63,7 +62,6 @@ class BloqueosValidationService
     /**
      * Valida múltiples registros de bloqueo.
      *
-     * @param Collection $records
      *
      * @return array Estadísticas del proceso de validación
      */
@@ -124,9 +122,7 @@ class BloqueosValidationService
     /**
      * Genera un mensaje de resumen para mostrar al usuario.
      *
-     * @param array $estadisticas
      *
-     * @return string
      */
     public function generarMensajeResumen(array $estadisticas): string
     {

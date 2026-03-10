@@ -14,22 +14,15 @@ use Illuminate\Support\Facades\Validator;
  */
 class Dhe8Service
 {
-    protected $dhe8Repository;
-
     /**
      * Dhe8Service constructor.
-     *
-     * @param Dhe8Repository $dhe8Repository
      */
-    public function __construct(Dhe8Repository $dhe8Repository)
+    public function __construct(protected \App\Contracts\Dhe8Repository $dhe8Repository)
     {
-        $this->dhe8Repository = $dhe8Repository;
     }
 
     /**
      * Obtiene todos los registros.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -39,9 +32,7 @@ class Dhe8Service
     /**
      * Busca un registro por su código.
      *
-     * @param string $codigo
      *
-     * @return Dhe8|null
      **/
     public function findByCodigo(string $codigo): ?Dhe8
     {
@@ -51,9 +42,7 @@ class Dhe8Service
     /**
      * Crea un nuevo registro.
      *
-     * @param array $data
      *
-     * @return Dhe8
      */
     public function create(array $data): Dhe8
     {
@@ -66,10 +55,7 @@ class Dhe8Service
     /**
      * Actualiza un registro existente.
      *
-     * @param string $codigo
-     * @param array $data
      *
-     * @return bool
      */
     public function update(string $codigo, array $data): bool
     {
@@ -82,9 +68,7 @@ class Dhe8Service
     /**
      * Elimina un registro.
      *
-     * @param string $codigo
      *
-     * @return bool
      */
     public function delete(string $codigo): bool
     {
@@ -95,8 +79,6 @@ class Dhe8Service
      * Valida los datos proporcionados para crear o actualizar un registro Dhe8.
      *
      * @param array $data Los datos a validar.
-     *
-     * @return void
      */
     protected function validate(array $data): void
     {

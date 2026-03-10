@@ -81,7 +81,7 @@ class SicossControlService
     {
         // Si no se proporciona año y mes, obtenerlos del servicio
         if (!$year || !$month) {
-            $periodoFiscalService = app(PeriodoFiscalService::class);
+            $periodoFiscalService = resolve(PeriodoFiscalService::class);
             $periodoFiscal = $periodoFiscalService->getPeriodoFiscalFromDatabase();
             $year = $periodoFiscal['year'];
             $month = $periodoFiscal['month'];
@@ -153,7 +153,7 @@ class SicossControlService
     {
         // Si no se proporcionan parámetros, usar el periodo fiscal actual
         if ($anio === null || $mes === null) {
-            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $periodoFiscal = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $anio ??= $periodoFiscal['year'];
             $mes ??= $periodoFiscal['month'];
         }
@@ -167,7 +167,7 @@ class SicossControlService
 
 
         // Determinar qué tabla usar basado en el período
-        $periodoActual = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+        $periodoActual = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
         $tablaNovedad = ($anio == $periodoActual['year'] && $mes == $periodoActual['month'])
             ? 'mapuche.dh21'
             : 'mapuche.dh21h';
@@ -224,14 +224,14 @@ class SicossControlService
     {
         // Si no se proporcionan parámetros, usar el periodo fiscal actual
         if ($anio === null || $mes === null) {
-            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $periodoFiscal = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $anio ??= $periodoFiscal['year'];
             $mes ??= $periodoFiscal['month'];
         }
 
 
         // Primero limpiamos los registros anteriores
-        ControlAportesDiferencia::truncate();
+        ControlAportesDiferencia::query()->truncate();
 
         $diferencias = DB::connection($this->connection)
             ->table('dh21aporte as a')
@@ -275,7 +275,7 @@ class SicossControlService
             'connection' => $this->connection,
         ])
             ->chunk(1000)->each(function ($chunk): void {
-                ControlAportesDiferencia::insert($chunk->toArray());
+                ControlAportesDiferencia::query()->insert($chunk->all());
             });
 
         // Retornamos solo el resumen del proceso
@@ -298,13 +298,13 @@ class SicossControlService
     {
         // Si no se proporcionan parámetros, usar el periodo fiscal actual
         if ($anio === null || $mes === null) {
-            $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $periodoFiscal = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $anio ??= $periodoFiscal['year'];
             $mes ??= $periodoFiscal['month'];
         }
 
         // Primero limpiamos los registros anteriores
-        ControlContribucionesDiferencia::truncate();
+        ControlContribucionesDiferencia::query()->truncate();
 
         try {
             // Consulta mejorada siguiendo el patrón que funciona correctamente
@@ -345,7 +345,7 @@ class SicossControlService
                 'fecha_control' => now(),
                 'connection' => $this->connection,
             ])->chunk(1000)->each(function ($chunk): void {
-                ControlContribucionesDiferencia::insert($chunk->toArray());
+                ControlContribucionesDiferencia::query()->insert($chunk->all());
             });
 
             return [
@@ -542,7 +542,7 @@ class SicossControlService
         try {
             // Si no se proporcionan parámetros, usar el periodo fiscal actual
             if ($anio === null || $mes === null) {
-                $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+                $periodoFiscal = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
                 $anio ??= $periodoFiscal['year'];
                 $mes ??= $periodoFiscal['month'];
             }
@@ -551,7 +551,7 @@ class SicossControlService
             $this->crearTablaDH21Aportes($anio, $mes);
 
             // Primero limpiamos los registros anteriores
-            ControlCuilsDiferencia::truncate();
+            ControlCuilsDiferencia::query()->truncate();
 
             // Obtener CUILs que están en DH21 pero no en SICOSS
             $cuilsSoloDh21 = DB::connection($this->connection)
@@ -594,8 +594,8 @@ class SicossControlService
 
             // Obtener conteos para el resumen
             $conteos = [
-                'cuils_solo_dh21' => ControlCuilsDiferencia::where('origen', 'DH21')->count(),
-                'cuils_solo_sicoss' => ControlCuilsDiferencia::where('origen', 'SICOSS')->count(),
+                'cuils_solo_dh21' => ControlCuilsDiferencia::query()->where('origen', 'DH21')->count(),
+                'cuils_solo_sicoss' => ControlCuilsDiferencia::query()->where('origen', 'SICOSS')->count(),
             ];
 
             return [
@@ -639,7 +639,7 @@ class SicossControlService
         try {
             // Si no se proporcionan parámetros, usar el periodo fiscal actual
             if ($anio === null || $mes === null) {
-                $periodoFiscal = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+                $periodoFiscal = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
                 $anio ??= $periodoFiscal['year'];
                 $mes ??= $periodoFiscal['month'];
             }
@@ -677,7 +677,7 @@ class SicossControlService
                 ->get();
 
             // Eliminar registros anteriores para este período
-            ControlConceptosPeriodo::where('year', $anio)
+            ControlConceptosPeriodo::query()->where('year', $anio)
                 ->where('month', $mes)
                 ->where('connection_name', $this->connection)
                 ->delete();
@@ -685,7 +685,7 @@ class SicossControlService
             // Guardar los nuevos resultados
             $registrosInsertados = 0;
             foreach ($resultados as $resultado) {
-                ControlConceptosPeriodo::create([
+                ControlConceptosPeriodo::query()->create([
                     'year' => $anio,
                     'month' => $mes,
                     'codn_conce' => $resultado->codn_conce,

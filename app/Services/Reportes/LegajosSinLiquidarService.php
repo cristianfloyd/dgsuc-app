@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class LegajosSinLiquidarService
 {
-    private const MESES_ANALISIS = 3;
+    private const int MESES_ANALISIS = 3;
 
     public function __construct(
         private readonly Dh22 $dh22,
@@ -29,14 +29,14 @@ class LegajosSinLiquidarService
      *
      * @throws LiquidacionNotFoundException
      */
-    public function getLegajosSinLiquidar()
+    public function getLegajosSinLiquidar(): \Illuminate\Database\Eloquent\Builder
     {
         try {
             // Obtener liquidaciones de referencia
             $ultimasLiquidaciones = $this->getLiquidacionesDefinitivasPorMes(self::MESES_ANALISIS);
             $liquidacionCuartoMes = $this->getLiquidacionDefinitivaCuartoMes();
 
-            if (!$liquidacionCuartoMes) {
+            if (!$liquidacionCuartoMes instanceof \App\Models\Mapuche\Dh22) {
                 throw new LiquidacionNotFoundException('No se encontró liquidación para el cuarto mes');
             }
 
@@ -84,7 +84,7 @@ class LegajosSinLiquidarService
      */
     public function getLiquidacionDefinitivaCuartoMes(): ?Dh22
     {
-        $cuartoMesAtras = Carbon::now()->subMonths(4);
+        $cuartoMesAtras = \Illuminate\Support\Facades\Date::now()->subMonths(4);
 
         return $this->dh22
             ->definitiva()

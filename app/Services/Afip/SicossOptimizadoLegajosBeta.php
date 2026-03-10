@@ -7,11 +7,6 @@ use function count;
 class SicossOptimizadoLegajosBeta
 {
     /**
-     * Create a new class instance.
-     */
-    public function __construct() {}
-
-    /**
      * Método auxiliar para obtener estadísticas de la pre-carga.
      *
      * @param array $todos_conceptos Array resultado de precargar_conceptos_todos_legajos
@@ -53,7 +48,7 @@ class SicossOptimizadoLegajosBeta
         }
 
         // Estadísticas adicionales
-        if (!empty($stats['conceptos_por_legajo'])) {
+        if (isset($stats['conceptos_por_legajo']) && $stats['conceptos_por_legajo'] !== []) {
             $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / count($stats['conceptos_por_legajo']);
             $stats['max_conceptos_por_legajo'] = max($stats['conceptos_por_legajo']);
             $stats['min_conceptos_por_legajo'] = min($stats['conceptos_por_legajo']);

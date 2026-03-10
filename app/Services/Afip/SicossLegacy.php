@@ -47,7 +47,7 @@ class SicossLegacy
         protected DatabaseOperationInterface $databaseOperation,
     ) {}
 
-    public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = false)
+    public function genera_sicoss(array $datos, string $testeo_directorio_salida = '', string $testeo_prefijo_archivos = '', bool $retornar_datos = false)
     {
         try {
             Log::info('Iniciando generación de SICOSS', [
@@ -143,8 +143,6 @@ class SicossLegacy
      * @param int $per_anoct Año del período
      * @param int $per_mesct Mes del período
      * @param string $where Condición WHERE base
-     *
-     * @return void
      */
     protected function procesarConceptosLiquidados(SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where): void
     {
@@ -200,8 +198,6 @@ class SicossLegacy
 
     /**
      * Limpia todas las tablas temporales utilizadas en el proceso.
-     *
-     * @return void
      */
     protected function limpiarTablasTemporales(): void
     {
@@ -239,17 +235,15 @@ class SicossLegacy
      * @param array $totales Totales calculados
      * @param string $testeo_directorio_salida Directorio de salida para testing
      * @param string $testeo_prefijo_archivos Prefijo de archivos para testing
-     *
-     * @return mixed
      */
     protected function procesarResultadoFinal(
         array $totales,
         string $testeo_directorio_salida = '',
         string $testeo_prefijo_archivos = '',
-    ) {
+    ): true|array {
         try {
             // Si estamos en modo de testeo, copiar el archivo al directorio especificado
-            if ($testeo_directorio_salida != '' && $testeo_prefijo_archivos != '') {
+            if ($testeo_directorio_salida !== '' && $testeo_prefijo_archivos !== '') {
                 $nombre_arch = array_key_last($this->archivos);
                 $origen = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
                 $destino = $testeo_directorio_salida . '/' . $testeo_prefijo_archivos;

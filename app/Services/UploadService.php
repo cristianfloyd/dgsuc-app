@@ -12,7 +12,7 @@ use const PATHINFO_FILENAME;
 
 class UploadService
 {
-    private const DEFAULT_DISK = 'public';
+    private const string DEFAULT_DISK = 'public';
 
     /**
      * Almacena un archivo subido en la carpeta y el disco especificado.
@@ -25,7 +25,7 @@ class UploadService
      */
     public static function uploadFile(HttpUploadedFile $file, string $folder, $disk = self::DEFAULT_DISK): string
     {
-        static::validateFolders($folder);
+        self::validateFolders($folder);
 
 
         //filename without extension
@@ -37,7 +37,7 @@ class UploadService
         //filename to store
         $fileNameToStore = $filename . '_' . time() . '.' . $extension;
         // limpiar fileName
-        $fileNameLimpio = static::sanitizeFileName($fileNameToStore);
+        $fileNameLimpio = self::sanitizeFileName($fileNameToStore);
         //upload the file
 
         try {
@@ -45,7 +45,7 @@ class UploadService
             return $file->storeAs($folder, $fileNameLimpio, $disk);
         } catch (Exception $e) {
             Log::error('Error al subir el archivo: ' . $e->getMessage());
-            throw new Exception('Error al subir el archivo: ' . $e->getMessage());
+            throw new Exception('Error al subir el archivo: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 

@@ -8,14 +8,8 @@ use App\Services\WorkflowService;
 
 class ProcessInitializationService
 {
-    protected $workflowService;
-
-    protected $processLogService;
-
-    public function __construct(WorkflowService $workflowService, ProcessLogService $processLogService)
+    public function __construct(protected \App\Services\WorkflowService $workflowService, protected \App\Services\ProcessLogService $processLogService)
     {
-        $this->workflowService = $workflowService;
-        $this->processLogService = $processLogService;
     }
 
     /** Inicia un nuevo proceso de registro.

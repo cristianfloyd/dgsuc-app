@@ -62,15 +62,11 @@ class Dh21Service
                     DB::raw('SUM(impp_conce) as total_impp'),
                 )
                 // Filtro opcional por nro_liqui
-                ->when($nro_liqui !== null, function ($query) use ($nro_liqui) {
-                    return $query->where('nro_liqui', '=', $nro_liqui);
-                })
+                ->when($nro_liqui !== null, fn($query) => $query->where('nro_liqui', '=', $nro_liqui))
                 // Filtro por codn_conce mayor a 100
                 ->where('codn_conce', '>', '100')
                 // Filtro opcional por codn_fuent
-                ->when($codn_fuent !== null, function ($query) use ($codn_fuent) {
-                    return $query->where('codn_fuent', '=', $codn_fuent);
-                })
+                ->when($codn_fuent !== null, fn($query) => $query->where('codn_fuent', '=', $codn_fuent))
                 // Filtro adicional por codn_conce
                 ->whereRaw('codn_conce/100 IN (1,3)')
                 // Agrupación por codn_conce
@@ -99,7 +95,7 @@ class Dh21Service
             ConceptoTotalData::class,
             $this->conceptosTotales($nro_liqui, $codn_fuent)
                 ->get()
-                ->map(fn($item) => ConceptoTotalData::fromArray($item->toArray())),
+                ->map(fn($item): \App\Data\Responses\ConceptoTotalData => ConceptoTotalData::fromArray($item->toArray())),
         );
     }
 
@@ -119,9 +115,7 @@ class Dh21Service
     /**
      * Obtiene las liquidaciones aplicando filtros opcionales.
      *
-     * @param array $conditions
      *
-     * @return Collection
      */
     public function obtenerLiquidaciones(array $conditions = []): Collection
     {

@@ -17,11 +17,8 @@ use Illuminate\Support\Facades\Log;
  */
 class WorkflowService implements WorkflowServiceInterface
 {
-    protected $processLogService;
-
-    public function __construct(ProcessLogService $processLogService)
+    public function __construct(protected \App\Services\ProcessLogService $processLogService)
     {
-        $this->processLogService = $processLogService;
     }
 
     /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
@@ -44,8 +41,6 @@ class WorkflowService implements WorkflowServiceInterface
      * También se registra el evento de reinicio del flujo de trabajo en el log.
      *
      * @param ProcessLog $processLog La instancia de registro de proceso que se reiniciará.
-     *
-     * @return void
      */
     public function resetWorkflow(ProcessLog $processLog): void
     {
@@ -223,7 +218,7 @@ class WorkflowService implements WorkflowServiceInterface
     public function failStep(string $step, ?string $errorMessage = null): void
     {
         $processLog = $this->getLatestWorkflow(); // Obtiene el proceso actual
-        if ($processLog) {
+        if ($processLog instanceof \App\Models\ProcessLog) {
             $this->updateStep($processLog, $step, 'failed'); // Marca el paso como 'failed'
 
             // Registra el error en el log del proceso (opcional)
@@ -252,9 +247,7 @@ class WorkflowService implements WorkflowServiceInterface
     {
         $allCompleted = array_reduce(
             $processLog->steps,
-            function ($carry, $step) {
-                return $carry && $step === 'completed';
-            },
+            fn(true $carry, $step) => $carry && $step === 'completed',
             true,
         );
 

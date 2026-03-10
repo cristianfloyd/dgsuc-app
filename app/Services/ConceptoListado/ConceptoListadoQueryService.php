@@ -41,8 +41,6 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
      *
      * @param array|int|null $codn_conce Código(s) del concepto a buscar
      * @param int|null $nro_liqui Número de liquidación
-     *
-     * @return Builder
      */
     public function getQueryForConcepto(array|int|null $codn_conce, ?int $nro_liqui = null): Builder
     {
@@ -51,7 +49,7 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
         $defaultNroLiqui = 2;
 
         // Subconsulta para obtener un único cargo por legajo
-        $legajoCargo = DB::connection($connection)
+        $builder = DB::connection($connection)
             ->table('mapuche.dh21')
             ->select([
                 DB::raw('DISTINCT ON (dh21.nro_legaj) dh21.nro_legaj'),
@@ -69,7 +67,7 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
         // Consulta principal
         $query = ConceptoListado::on($connection)
             ->from('mapuche.dh21')
-            ->joinSub($legajoCargo, 'lc', function ($join): void {
+            ->joinSub($builder, 'lc', function ($join): void {
                 $join->on('dh21.nro_legaj', '=', 'lc.nro_legaj');
             })
             ->join('mapuche.dh01', 'dh21.nro_legaj', '=', 'dh01.nro_legaj')
@@ -88,11 +86,9 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
                 'dh21.codn_conce',
                 'dh21.impp_conce',
             ])
-            ->when($codn_conce !== null, function ($query) use ($codn_conce) {
-                return is_array($codn_conce)
-                    ? $query->whereIn('dh21.codn_conce', $codn_conce)
-                    : $query->where('dh21.codn_conce', $codn_conce);
-            })
+            ->when($codn_conce !== null, fn($query) => is_array($codn_conce)
+                ? $query->whereIn('dh21.codn_conce', $codn_conce)
+                : $query->where('dh21.codn_conce', $codn_conce))
             ->where('dh21.nro_liqui', operator: $nro_liqui ?? $defaultNroLiqui);
 
 

@@ -10,7 +10,7 @@ use App\Repositories\Sicoss\Dh03Repository;
 class VinculoCargoService
 {
     public function __construct(
-        private Dh03Repository $dh03Repository,
+        private readonly Dh03Repository $dh03Repository,
     ) {
     }
 
@@ -34,8 +34,8 @@ class VinculoCargoService
             }
 
             // Obtener siguiente cargo en la cadena
-            $cargoActual = $this->obtenerSiguienteCargo($cargoActual->vcl_cargo);
-            if (!$cargoActual) {
+            $cargoActual = $this->obtenerSiguienteCargo();
+            if (!$cargoActual instanceof \App\Data\Mapuche\SacCargoData) {
                 break;
             }
 
@@ -89,7 +89,7 @@ class VinculoCargoService
         }
     }
 
-    private function obtenerSiguienteCargo(int $nroCargo): ?SacCargoData
+    private function obtenerSiguienteCargo(): ?SacCargoData
     {
         // Implementar lógica para obtener el siguiente cargo en la cadena
         // Esto requeriría acceso al repository o al modelo

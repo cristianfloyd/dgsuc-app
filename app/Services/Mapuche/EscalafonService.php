@@ -11,17 +11,10 @@ class EscalafonService
 {
     use MapucheConnectionTrait;
 
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-    }
-
     public function getEscalafones()
     {
         try {
-            return Dh89::select('descesc', 'dh11.codigoescalafon')
+            return Dh89::query()->select('descesc', 'dh11.codigoescalafon')
                 ->distinct()
                 ->join('mapuche.dh11', 'dh89.codigoescalafon', '=', 'dh11.codigoescalafon')
                 ->pluck('descesc', 'codigoescalafon');

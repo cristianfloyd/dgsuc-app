@@ -85,19 +85,15 @@ class PeriodoFiscalService
      */
     public function getPeriodoFiscal(): array
     {
-        $periodoFiscal = [];
-
         if (session()->has(['year', 'month'])) {
             log::debug('Período fiscal obtenido de la sesión: ' . session('year') . '-' . session('month'));
-            $periodoFiscal = [
+            return [
                 'year' => session('year'),
                 'month' => session('month'),
             ];
-        } else {
-            // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
-            $periodoFiscal = $this->getPeriodoFiscalFromDatabase();
         }
-        return $periodoFiscal;
+        // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
+        return $this->getPeriodoFiscalFromDatabase();
     }
 
     /**
@@ -124,7 +120,7 @@ class PeriodoFiscalService
     public function getPeriodoFiscalFromDatabase(): array
     {
         // Obtiene el primer registro de la tabla Dh99. Asumimos que siempre existe un periodo fiscal definido.
-        $periodoFiscal = Dh99::first();
+        $periodoFiscal = Dh99::query()->first();
 
         // Formatea el año y el mes al formato deseado.
         $formattedYear = (string) ($periodoFiscal->per_anoct);
@@ -169,7 +165,7 @@ class PeriodoFiscalService
             Log::warning('No se proporcionó un ID para obtener el período fiscal');
             return $this->getPeriodoFiscalFromDatabase();
         }
-        $periodoFiscal = Dh22::find($id);
+        $periodoFiscal = Dh22::query()->find($id);
         return [
             'year' => $periodoFiscal->per_liano,
             'month' => $periodoFiscal->per_limes,
@@ -184,7 +180,7 @@ class PeriodoFiscalService
     public function getPeriodosFiscalesForSelect(): array
     {
         return $this->getPeriodosFiscales()['periodosFiscales']
-            ->mapWithKeys(function ($periodo) {
+            ->mapWithKeys(function ($periodo): array {
                 $year = $periodo->per_liano;
                 $month = sprintf('%02d', $periodo->per_limes);
                 $label = "$year-$month";

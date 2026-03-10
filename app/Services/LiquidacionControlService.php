@@ -38,7 +38,7 @@ class LiquidacionControlService
                 return 0;
             }
 
-            return LiquidacionControl::where('estado', $estado)->count();
+            return LiquidacionControl::query()->where('estado', $estado)->count();
         } catch (Exception $e) {
             Log::error("Error al obtener controles {$estado}", [
                 'error' => $e->getMessage(),

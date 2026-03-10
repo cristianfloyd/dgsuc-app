@@ -31,16 +31,18 @@ class AfipMapucheSicossCalculoImportService
         $batchSize = 1000; // Procesar 1000 registros por lote
 
         while (($line = fgets($handle)) !== false) {
-            if (empty($line)) {
+            if ($line === '') {
                 continue;
             }
-
+            if ($line === '0') {
+                continue;
+            }
             try {
                 $batch[] = $this->parseLine($line, $periodoFiscal);
 
                 if (count($batch) >= $batchSize) {
                     DB::connection($this->getConnectionName())->beginTransaction();
-                    AfipMapucheSicossCalculo::insert($batch);
+                    AfipMapucheSicossCalculo::query()->insert($batch);
                     DB::connection($this->getConnectionName())->commit();
 
                     $imported += count($batch);
@@ -67,10 +69,10 @@ class AfipMapucheSicossCalculoImportService
         }
 
         // Procesar el último lote si existe
-        if (!empty($batch)) {
+        if ($batch !== []) {
             try {
                 DB::beginTransaction();
-                AfipMapucheSicossCalculo::insert($batch);
+                AfipMapucheSicossCalculo::query()->insert($batch);
                 DB::commit();
                 $imported += count($batch);
             } catch (Exception $e) {

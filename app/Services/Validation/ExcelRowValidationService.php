@@ -16,8 +16,6 @@ use const FILTER_VALIDATE_EMAIL;
 
 class ExcelRowValidationService
 {
-    private array $errors = [];
-
     public function __construct(
         private readonly DateParserService $dateParserService,
     ) {
@@ -28,7 +26,6 @@ class ExcelRowValidationService
      */
     public function validateRow(array $row): array
     {
-        $this->errors = [];
         Log::debug('Iniciando validación de fila', ['row' => $row]);
 
         // Parseamos la fecha de la misma manera que en validateFechaBaja
@@ -97,24 +94,19 @@ class ExcelRowValidationService
         return $validatedData;
     }
 
-    private function addError(string $field, string $message): void
-    {
-        $this->errors[] = "{$field}: {$message}";
-    }
-
     /**
      * Valida y normaliza el email.
      */
     private function validateEmail(?string $email): string
     {
-        if (empty($email)) {
-            throw (new ValidationException('El email es requerido'))->setField('email')->addError('email', 'Campo requerido');
+        if (in_array($email, [null, '', '0'], true)) {
+            throw new ValidationException('El email es requerido')->setField('email')->addError('email', 'Campo requerido');
         }
 
         $email = strtolower(trim($email));
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw (new ValidationException("Email inválido: {$email}"))->setField('email')->setContext(['input' => $email]);
+            throw new ValidationException("Email inválido: {$email}")->setField('email')->setContext(['input' => $email]);
         }
 
         return $email;
@@ -125,7 +117,7 @@ class ExcelRowValidationService
      */
     private function validateNombre(?string $nombre): string
     {
-        if (empty($nombre)) {
+        if (in_array($nombre, [null, '', '0'], true)) {
             throw new ValidationException('El nombre es requerido');
         }
 
@@ -143,7 +135,7 @@ class ExcelRowValidationService
      */
     private function validateUsuarioMapuche(?string $usuario): array
     {
-        if (empty($usuario)) {
+        if (in_array($usuario, [null, '', '0'], true)) {
             return [
                 'value' => null,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,
@@ -172,7 +164,7 @@ class ExcelRowValidationService
      */
     private function validateDependencia(?string $dependencia): string
     {
-        if (empty($dependencia)) {
+        if (in_array($dependencia, [null, '', '0'], true)) {
             throw new ValidationException('La dependencia es requerida');
         }
 
@@ -250,7 +242,7 @@ class ExcelRowValidationService
      */
     private function validateTipoMovimiento(?string $tipo): array
     {
-        if (empty($tipo)) {
+        if (in_array($tipo, [null, '', '0'], true)) {
             return [
                 'value' => null,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,

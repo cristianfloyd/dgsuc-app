@@ -56,7 +56,7 @@ class FileUploadService
      *
      * @return string|false La ruta del archivo subido si es exitoso, falso en caso contrario
      */
-    public function uploadFile(UploadedFile $file, string $path)
+    public function uploadFile(UploadedFile $file, string $path): false
     {
 
 

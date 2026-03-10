@@ -17,23 +17,10 @@ use Spatie\LaravelData\DataCollection;
 
 class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize
 {
-    /**
-     * @var DataCollection
-     */
-    protected DataCollection $licencias;
-
-    /**
-     * @var string
-     */
     protected string $periodo;
 
-    /**
-     * @param DataCollection $licencias
-     * @param string|null $periodo
-     */
-    public function __construct(DataCollection $licencias, ?string $periodo = null)
+    public function __construct(protected DataCollection $licencias, ?string $periodo = null)
     {
-        $this->licencias = $licencias;
         $this->periodo = $periodo ?? now()->format('Y-m');
     }
 
@@ -45,9 +32,6 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
         return collect($this->licencias->all());
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         return [
@@ -65,8 +49,6 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
 
     /**
      * @param mixed $row
-     *
-     * @return array
      */
     public function map($row): array
     {
@@ -92,9 +74,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
     /**
      * Aplica estilos a la hoja de Excel.
      *
-     * @param Worksheet $sheet
      *
-     * @return void
      */
     public function styles(Worksheet $sheet): void
     {
@@ -123,8 +103,6 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
 
     /**
      * Devuelve el título de la hoja.
-     *
-     * @return string
      */
     public function title(): string
     {
@@ -134,9 +112,7 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
     /**
      * Obtiene la descripción legible de la condición.
      *
-     * @param int $condicion
      *
-     * @return string
      */
     protected function getDescripcionCondicion(int $condicion): string
     {

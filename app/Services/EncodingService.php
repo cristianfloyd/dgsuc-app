@@ -9,10 +9,8 @@ use InvalidArgumentException;
 class EncodingService
 {
     // Constantes para las codificaciones soportadas
-    private const UTF8 = 'UTF-8';
-    private const LATIN1 = 'ISO-8859-1';
-    private const WINDOWS1252 = 'WINDOWS-1252';
-    private const ASCII = 'ASCII';
+    private const string UTF8 = 'UTF-8';
+    private const string LATIN1 = 'ISO-8859-1';
 
     /**
      * Convierte el valor proporcionado a codificación UTF-8.
@@ -191,7 +189,7 @@ class EncodingService
 
             // Si aún hay caracteres problemáticos, intentar conversión general
             if (mb_detect_encoding($converted, [self::UTF8], true) === false) {
-                $converted = mb_convert_encoding($converted, self::UTF8, self::LATIN1);
+                return mb_convert_encoding($converted, self::UTF8, self::LATIN1);
             }
 
             return $converted;

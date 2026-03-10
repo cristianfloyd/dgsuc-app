@@ -13,7 +13,7 @@ class ConceptoListadoTableService
 {
     use MapucheConnectionTrait;
 
-    private const TABLE_NAME = 'suc.rep_concepto_listado';
+    private const string TABLE_NAME = 'suc.rep_concepto_listado';
 
     public function createAndPopulate(): void
     {

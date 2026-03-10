@@ -14,8 +14,6 @@ class EmbargoTableService
 
     /**
      * Verifica y crea la tabla si no existe.
-     *
-     * @return bool
      */
     public function ensureTableExists(): bool
     {
@@ -33,8 +31,6 @@ class EmbargoTableService
 
     /**
      * Verifica si la tabla existe.
-     *
-     * @return bool
      */
     private function tableExists(): bool
     {
@@ -44,8 +40,6 @@ class EmbargoTableService
 
     /**
      * Crea la tabla con su estructura.
-     *
-     * @return void
      */
     private function createTable(): void
     {

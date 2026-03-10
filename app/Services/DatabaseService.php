@@ -18,7 +18,7 @@ class DatabaseService implements DatabaseServiceInterface
 {
     use MapucheConnectionTrait;
 
-    private const DEFAULT_CHUNK_SIZE = 1000;
+    private const int DEFAULT_CHUNK_SIZE = 1000;
 
     private static $connectionInstance;
 
@@ -42,7 +42,7 @@ class DatabaseService implements DatabaseServiceInterface
                 ->chunk($tamanoLote)
                 // Inserta cada lote en la base de datos
                 ->each(function ($lote): void {
-                    AfipRelacionesActivas::insert($lote->toArray());
+                    AfipRelacionesActivas::query()->insert($lote->toArray());
                 });
 
             // Confirma la transacción
@@ -69,10 +69,10 @@ class DatabaseService implements DatabaseServiceInterface
     public function insertarDatosMasivos2(array $datosMapeados): bool
     {
         $tamanoLote = 1000; // Ajusta este valor según tus necesidades
-        $connection = self::getMapucheConnection(); // Conexión a la base de datos específica
+        $pdo = self::getMapucheConnection(); // Conexión a la base de datos específica
 
         try {
-            $connection->beginTransaction(); // Inicia la transacción
+            $pdo->beginTransaction(); // Inicia la transacción
 
             // Divide los datos en lotes y los inserta
             foreach (array_chunk($datosMapeados, $tamanoLote) as $lote) {
@@ -83,7 +83,7 @@ class DatabaseService implements DatabaseServiceInterface
                 $query = 'INSERT INTO afip_relaciones_activas (' . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";
 
                 // Prepara la consulta
-                $statement = $connection->prepare($query);
+                $statement = $pdo->prepare($query);
 
                 // Ejecuta la consulta para cada fila en el lote
                 foreach ($lote as $row) {
@@ -91,12 +91,12 @@ class DatabaseService implements DatabaseServiceInterface
                 }
             }
 
-            $connection->commit(); // Confirma la transacción
+            $pdo->commit(); // Confirma la transacción
 
             Log::info('Se importaron los datos correctamente');
             return true;
         } catch (Exception $e) {
-            $connection->rollBack(); // Revierte la transacción en caso de error
+            $pdo->rollBack(); // Revierte la transacción en caso de error
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
             return false;
         }
@@ -136,11 +136,9 @@ class DatabaseService implements DatabaseServiceInterface
             DB::connection($conexion)->beginTransaction();
 
             $mappedData->chunk($chunkSize)->each(function ($chunk) use ($conexion, $tableName, &$rowInserted): void {
-                $processedChunk = $chunk->map(function ($data) {
-                    return collect($data)->except('id')->toArray();
-                });
+                $processedChunk = $chunk->map(fn($data) => collect($data)->except('id')->toArray());
 
-                $inserted = DB::connection($conexion)->table($tableName)->insert($processedChunk->toArray());
+                $inserted = DB::connection($conexion)->table($tableName)->insert($processedChunk->all());
                 $rowInserted += $inserted;
             });
 
@@ -192,12 +190,5 @@ class DatabaseService implements DatabaseServiceInterface
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
         return self::$connectionInstance;
-    }
-
-    private function sanitizeData($data)
-    {
-        return array_map(function ($item) {
-            return preg_replace('/[\x00-\x1F\x7F-\xFF]/', '?', $item);
-        }, $data);
     }
 }

@@ -60,10 +60,10 @@ class TableManagementService implements TableManagementServiceInterface
 
             // Verificar existencia de la tabla en el schema correcto
             if (!$schemaBuilder->hasTable("{$schema}.{$tableNameWithoutSchema}")) {
-                static::createTable($tableNameWithoutSchema, $schemaBuilder);
+                self::createTable($tableNameWithoutSchema, $schemaBuilder);
                 $result['actions'][] = 'created';
-            } elseif (static::tableHasData("{$schema}.{$tableNameWithoutSchema}", $db)) {
-                static::truncateTable("{$schema}.{$tableNameWithoutSchema}", $db);
+            } elseif (self::tableHasData("{$schema}.{$tableNameWithoutSchema}", $db)) {
+                self::truncateTable("{$schema}.{$tableNameWithoutSchema}", $db);
                 $result['actions'][] = 'truncated';
             } else {
                 $result['actions'][] = 'verified';
@@ -112,7 +112,7 @@ class TableManagementService implements TableManagementServiceInterface
 
     protected static function getMapucheConnectionName(): string
     {
-        return (new static())->getConnectionFromTrait()->getName();
+        return new static()->getConnectionFromTrait()->getName();
     }
 
     /**
@@ -146,9 +146,9 @@ class TableManagementService implements TableManagementServiceInterface
     private static function createTable(string $tableName, $schema): void
     {
         if ($tableName === 'afip_mapuche_sicoss') {
-            static::createTableMapucheSicoss($tableName, $schema);
+            self::createTableMapucheSicoss($tableName, $schema);
         } elseif ($tableName === 'afip_relaciones_activas') {
-            static::createTableRelacionesActivas($tableName, $schema);
+            self::createTableRelacionesActivas($tableName, $schema);
         }
     }
 
@@ -283,8 +283,6 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * @param string $tableName Nombre de la tabla a truncar.
      * @param ConnectionInterface $db Conexión a la base de datos.
-     *
-     * @return void
      */
     private static function truncateTable(string $tableName, $db): void
     {

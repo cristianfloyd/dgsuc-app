@@ -19,22 +19,16 @@ class LicenciaService
 
     /**
      * Nombre del esquema de la base de datos Mapuche.
-     *
-     * @var string
      */
-    protected string $esquema;
+    protected string $esquema = 'mapuche';
 
     /**
      * Tiempo de expiración del caché en segundos (por defecto 1 hora).
-     *
-     * @var int
      */
     protected int $cacheExpirationTime;
 
     /**
      * Prefijo para las claves de caché.
-     *
-     * @var string
      */
     protected string $cachePrefix;
 
@@ -43,7 +37,6 @@ class LicenciaService
      */
     public function __construct()
     {
-        $this->esquema = 'mapuche';
         // Tiempo de caché configurable (1 hora por defecto)
         $this->cacheExpirationTime = config('cache.licencias_expiration', 3600);
         // Prefijo para las claves de caché
@@ -56,14 +49,12 @@ class LicenciaService
      *
      * @param array $legajos Array de números de legajo
      * @param bool $useCache Indica si se debe usar caché o forzar consulta fresca
-     *
-     * @return DataCollection
      */
     public function getLicenciasVigentes(array $legajos, bool $useCache = true): DataCollection
     {
         try {
             // Validar que existan legajos para consultar
-            if (empty($legajos)) {
+            if ($legajos === []) {
                 Log::warning('Se intentó consultar licencias sin proporcionar legajos');
                 return new DataCollection(LicenciaVigenteData::class, []);
             }
@@ -144,8 +135,6 @@ class LicenciaService
      *
      * @param int $legajo Número de legajo
      * @param bool $useCache Indica si se debe usar caché o forzar consulta fresca
-     *
-     * @return DataCollection
      */
     public function getLicenciasVigentesPorLegajo(int $legajo, bool $useCache = true): DataCollection
     {
@@ -165,15 +154,15 @@ class LicenciaService
 
         // Si no está en caché, obtener de la base de datos
         Log::info('Cargando licencias para legajo individual desde la base de datos', ['legajo' => $legajo]);
-        $licencias = $this->getLicenciasVigentes([$legajo], false);
+        $dataCollection = $this->getLicenciasVigentes([$legajo], false);
 
         // Guardar en caché si hay resultados
-        if ($licencias->count() > 0) {
-            $licenciasArray = $licencias->toArray();
+        if ($dataCollection->count() > 0) {
+            $licenciasArray = $dataCollection->toArray();
             Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($licenciasArray));
         }
 
-        return $licencias;
+        return $dataCollection;
     }
 
     /**
@@ -205,7 +194,7 @@ class LicenciaService
             $legajos = $this->fetchLegajosConLicenciasFromDatabase();
 
             // Guardar en caché
-            if (!empty($legajos)) {
+            if ($legajos !== []) {
                 Redis::setex($cacheKey, $this->cacheExpirationTime, json_encode($legajos));
             }
 
@@ -225,8 +214,6 @@ class LicenciaService
      * Utiliza patrones de Redis para una invalidación más eficiente.
      *
      * @param array|null $legajos Legajos específicos o null para invalidar todo
-     *
-     * @return void
      */
     public function invalidateCache(?array $legajos = null): void
     {
@@ -286,7 +273,7 @@ class LicenciaService
             $restultado = true;
         }
         if (self::tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)) {
-            $restultado = true;
+            return true;
         }
         return $restultado;
     }
@@ -313,8 +300,6 @@ class LicenciaService
      * Método original para obtener legajos con licencias sin goce.
      *
      * @param string $whereLegajo Condición adicional para filtrar legajos
-     *
-     * @return array
      */
     public static function getLegajosLicenciasSinGoceOriginal(string $whereLegajo): array
     {
@@ -465,21 +450,21 @@ class LicenciaService
         }
 
         // Preparar condiciones para otras variantes
-        $whereDown = !empty($variantes['down'])
-            ? " WHEN dh05.nrovarlicencia IN ({$variantes['down']}) THEN '11'::integer "
-            : '';
+        $whereDown = empty($variantes['down'])
+            ? ''
+            : " WHEN dh05.nrovarlicencia IN ({$variantes['down']}) THEN '11'::integer ";
 
-        $whereExcedencia = !empty($variantes['excedencia'])
-            ? " WHEN dh05.nrovarlicencia IN ({$variantes['excedencia']}) THEN '10'::integer "
-            : '';
+        $whereExcedencia = empty($variantes['excedencia'])
+            ? ''
+            : " WHEN dh05.nrovarlicencia IN ({$variantes['excedencia']}) THEN '10'::integer ";
 
-        $whereVacaciones = !empty($variantes['vacaciones'])
-            ? " WHEN dh05.nrovarlicencia IN ({$variantes['vacaciones']}) THEN '12'::integer "
-            : '';
+        $whereVacaciones = empty($variantes['vacaciones'])
+            ? ''
+            : " WHEN dh05.nrovarlicencia IN ({$variantes['vacaciones']}) THEN '12'::integer ";
 
-        $whereProtecIntegral = !empty($variantes['protecIntegral'])
-            ? " WHEN dh05.nrovarlicencia IN ({$variantes['protecIntegral']}) THEN '51'::integer "
-            : '';
+        $whereProtecIntegral = empty($variantes['protecIntegral'])
+            ? ''
+            : " WHEN dh05.nrovarlicencia IN ({$variantes['protecIntegral']}) THEN '51'::integer ";
 
         return [
             'sqlIlt' => $sqlIlt,
@@ -624,8 +609,6 @@ class LicenciaService
      * Método interno utilizado por el sistema de caché.
      *
      * @param array $legajos Array de números de legajo
-     *
-     * @return DataCollection
      */
     private function fetchLicenciasFromDatabase(array $legajos): DataCollection
     {
@@ -671,14 +654,12 @@ class LicenciaService
     /**
      * Ejecuta la consulta a la base de datos para obtener legajos con licencias.
      * Método interno utilizado por el sistema de caché.
-     *
-     * @return array
      */
     private function fetchLegajosConLicenciasFromDatabase(): array
     {
         // Obtener parámetros de fecha desde la configuración
         $fechaInicio = MapucheConfig::getFechaInicioPeriodoCorriente();
-        $fechaFin = MapucheConfig::getFechaFinPeriodoCorriente();
+        MapucheConfig::getFechaFinPeriodoCorriente();
 
         // Preparar condiciones para tipos de licencias
         $variantesConfig = $this->getVariantesLicencias();
@@ -723,8 +704,6 @@ class LicenciaService
      * Útil para invalidación de caché por patrones.
      *
      * @param string $pattern Patrón de claves a eliminar
-     *
-     * @return void
      */
     private function deleteKeysByPattern(string $pattern): void
     {
@@ -738,7 +717,7 @@ class LicenciaService
         }
     }
 
-    private static function tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)
+    private static function tieneLicenciaMaternidadEnLegajo($nro_legajo, string $fecha_inicio, string $fecha_final): bool
     {
 
         $sql = "SELECT
@@ -759,7 +738,7 @@ class LicenciaService
         return $rs['cantidad'] > 0;
     }
 
-    private static function tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)
+    private static function tieneLicenciaMaternidadEnCargo($nro_legajo, string $fecha_inicio, string $fecha_final): bool
     {
 
 
@@ -784,7 +763,7 @@ class LicenciaService
         return $rs['cantidad'] > 0;
     }
 
-    private static function getStaticConnectionName()
+    private static function getStaticConnectionName(): string
     {
         $instance = new static();
         return $instance->getConnectionName();
@@ -793,9 +772,7 @@ class LicenciaService
     /**
      * Obtiene la subconsulta para licencias por legajo.
      *
-     * @param string $whereLegajo
      *
-     * @return string
      */
     private static function getSubqueryLicenciasPorLegajo(string $whereLegajo): string
     {
@@ -813,9 +790,7 @@ class LicenciaService
     /**
      * Obtiene la subconsulta para licencias por cargo.
      *
-     * @param string $whereLegajo
      *
-     * @return string
      */
     private static function getSubqueryLicenciasPorCargo(string $whereLegajo): string
     {

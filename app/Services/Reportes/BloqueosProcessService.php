@@ -27,8 +27,6 @@ class BloqueosProcessService
      * Si no existe, la crea con una estructura predefinida para almacenar información de respaldo
      * de bloqueos, incluyendo campos como número de liquidación, número de cargo, fecha de baja,
      * tipo de bloqueo, entre otros.
-     *
-     * @return void
      */
     public function crearTablaBackupSiNoExiste(): void
     {
@@ -80,13 +78,11 @@ class BloqueosProcessService
                 ->whereNull('mensaje_error')
                 ->where('esta_procesado', false); // Solo procesamos los que no están procesados
 
-            if ($bloqueosData !== null) {
+            if ($bloqueosData instanceof \App\Data\Reportes\BloqueosData) {
                 // Validar que todos los registros estén en estado correcto
-                $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
-                    return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO
-                        || $bloqueo->mensaje_error !== null
-                        || $bloqueo->esta_procesado === true;
-                });
+                $registrosInvalidos = collect($bloqueosData)->filter(fn($bloqueo) => $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO
+                    || $bloqueo->mensaje_error !== null
+                    || $bloqueo->esta_procesado === true);
 
                 if ($registrosInvalidos->isNotEmpty()) {
                     throw new Exception('Existen registros no validados, con errores o ya procesados. ' . 'Por favor, valide todos los registros antes de procesar.',);
@@ -195,7 +191,7 @@ class BloqueosProcessService
                 );
             }
 
-            if (!$cargo) {
+            if (!$cargo instanceof \App\Models\Dh03) {
                 $cargo = Dh03::buscarPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
             }
 
@@ -277,7 +273,7 @@ class BloqueosProcessService
             // Restaurar cada registro y almacenar los IDs procesados
             $idsRestaurados = [];
             foreach ($backup as $registro) {
-                Dh03::where('nro_cargo', $registro->nro_cargo)
+                Dh03::query()->where('nro_cargo', $registro->nro_cargo)
                     ->update([
                         'fec_baja' => $registro->fec_baja,
                         'chkstopliq' => $registro->chkstopliq,
@@ -287,7 +283,7 @@ class BloqueosProcessService
             }
 
             // Eliminar los registros de backup que fueron restaurados
-            if (!empty($idsRestaurados)) {
+            if ($idsRestaurados !== []) {
                 DB::connection($this->getConnectionName())
                     ->table('suc.dh03_backup_bloqueos')
                     ->whereIn('id', $idsRestaurados)
@@ -312,7 +308,7 @@ class BloqueosProcessService
             $this->crearTablaBackupSiNoExiste();
 
             // Identificar grupos de registros con el mismo nro_legaj y nro_cargo
-            $duplicados = BloqueosDataModel::select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
+            $duplicados = BloqueosDataModel::query()->select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
                 ->where('esta_procesado', false) // Solo procesamos los que no están procesados
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->havingRaw('COUNT(*) > 1')
@@ -322,10 +318,9 @@ class BloqueosProcessService
 
             foreach ($duplicados as $grupo) {
                 // Obtener todos los registros duplicados para este par legajo-cargo
-                $registrosDuplicados = BloqueosDataModel::where('nro_legaj', $grupo->nro_legaj)
+                $registrosDuplicados = BloqueosDataModel::query()->where('nro_legaj', $grupo->nro_legaj)
                     ->where('nro_cargo', $grupo->nro_cargo)
-                    ->where('esta_procesado', false) // Solo procesamos los que no están procesados
-                    ->orderBy('created_at', 'asc') // Procesamos primero los más antiguos
+                    ->where('esta_procesado', false)->oldest() // Procesamos primero los más antiguos
                     ->get();
 
                 // Verificar si el cargo existe en Mapuche
@@ -405,8 +400,8 @@ class BloqueosProcessService
 
     private function procesarBaja(Dh03 $cargo, string $fechaBaja): bool
     {
-        $fechaBajaImportada = Carbon::parse($fechaBaja);
-        $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;
+        $fechaBajaImportada = \Illuminate\Support\Facades\Date::parse($fechaBaja);
+        $fechaBajaDh03 = $cargo->fec_baja ? \Illuminate\Support\Facades\Date::parse($cargo->fec_baja) : null;
 
         if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
             $cargo->update(['fec_baja' => $fechaBajaImportada]);
@@ -420,8 +415,6 @@ class BloqueosProcessService
      * Marca un registro como procesado.
      *
      * @param BloqueosDataModel $registro El registro a marcar como procesado
-     *
-     * @return void
      */
     private function marcarComoProcesado(BloqueosDataModel $registro): void
     {
@@ -437,40 +430,5 @@ class BloqueosProcessService
             'legajo' => $registro->nro_legaj,
             'cargo' => $registro->nro_cargo,
         ]);
-    }
-
-    private function procesarLicencias(): void
-    {
-        BloqueosDataModel::where('tipo', 'Licencia')
-            ->whereHas('cargo')
-            ->chunk(100, function ($licencias): void {
-                foreach ($licencias as $licencia) {
-                    $cargo = $licencia->cargo;
-                    if ($cargo) {
-                        $cargo->update(['chkstopliq' => true]);
-                    }
-                }
-            });
-    }
-
-    private function procesarBajas(): void
-    {
-        BloqueosDataModel::whereIn('tipo', ['Fallecido', 'Renuncia'])
-            ->whereHas('cargo')
-            ->chunk(100, function ($bajas): void {
-                foreach ($bajas as $baja) {
-                    $cargo = $baja->cargo;
-                    if (!$cargo) {
-                        continue;
-                    }
-
-                    $fechaBajaImportada = Carbon::parse($baja->fecha_baja);
-                    $fechaBajaDh03 = $cargo->fec_baja ? Carbon::parse($cargo->fec_baja) : null;
-
-                    if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
-                        $cargo->update(['fec_baja' => $fechaBajaImportada]);
-                    }
-                }
-            });
     }
 }

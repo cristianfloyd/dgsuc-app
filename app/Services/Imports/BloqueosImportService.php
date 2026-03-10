@@ -18,18 +18,12 @@ class BloqueosImportService
 {
     use MapucheConnectionTrait;
 
-    private ImportValidationService $validationService;
-
-    private ImportNotificationService $notificationService;
-
     private $connection;
 
     public function __construct(
-        ImportValidationService $validationService,
-        ImportNotificationService $notificationService,
+        private ImportValidationService $validationService,
+        private ImportNotificationService $notificationService,
     ) {
-        $this->validationService = $validationService;
-        $this->notificationService = $notificationService;
         $this->connection = $this->getConnectionFromTrait();
     }
 
@@ -55,7 +49,7 @@ class BloqueosImportService
                 'error' => $e->getMessage(),
             ]);
 
-            throw new ImportException('Error procesando fila: ' . $e->getMessage(), previous: $e,);
+            throw new ImportException('Error procesando fila: ' . $e->getMessage(), $e->getCode(), previous: $e);
         }
     }
 
@@ -63,8 +57,6 @@ class BloqueosImportService
      * Procesa y valida los datos del archivo Excel.
      *
      * @param array $row Fila del Excel
-     *
-     * @return array
      */
     public function processRow(array $row): array
     {
@@ -79,8 +71,6 @@ class BloqueosImportService
      * Parsea y valida fechas en múltiples formatos.
      *
      * @param mixed $date
-     *
-     * @return string|null
      */
     private function parseDate($date): ?string
     {
@@ -94,29 +84,23 @@ class BloqueosImportService
                 'd/m/Y', 'Y-m-d', 'd-m-Y',
                 'd/m/y', 'Y/m/d',
                 // Formato Excel (número de días desde 1900)
-                function ($value) {
-                    return Carbon::instance(Date::excelToDateTimeObject($value));
-                },
+                fn($value) => \Illuminate\Support\Facades\Date::instance(Date::excelToDateTimeObject($value)),
             ];
 
             foreach ($formats as $format) {
                 try {
-                    if (is_callable($format)) {
-                        $parsed = $format($date);
-                    } else {
-                        $parsed = Carbon::createFromFormat($format, $date);
-                    }
+                    $parsed = is_callable($format) ? $format($date) : \Illuminate\Support\Facades\Date::createFromFormat($format, $date);
 
                     if ($parsed && $parsed->year > 1900 && $parsed->year < 2100) {
                         return $parsed->format('Y-m-d');
                     }
-                } catch (Exception $e) {
+                } catch (Exception) {
                     continue;
                 }
             }
 
             throw new Exception('Formato de fecha no válido');
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw new ImportValidationException("Error al procesar fecha: {$date}");
         }
     }
@@ -125,8 +109,6 @@ class BloqueosImportService
      * Valida el formato del legajo.
      *
      * @param mixed $legajo
-     *
-     * @return int
      */
     private function validateLegajo($legajo): int
     {
@@ -140,8 +122,6 @@ class BloqueosImportService
      * Valida el formato del cargo.
      *
      * @param mixed $cargo
-     *
-     * @return int
      */
     private function validateCargo($cargo): int
     {
@@ -149,47 +129,5 @@ class BloqueosImportService
             throw new ImportValidationException("Cargo inválido: {$cargo}");
         }
         return (int) $cargo;
-    }
-
-    private function buildLogContext(string $filePath, int $nroLiqui, Carbon $startTime): array
-    {
-        return [
-            'file' => $filePath,
-            'liquidacion' => $nroLiqui,
-            'start_time' => $startTime->toDateTimeString(),
-        ];
-    }
-
-    private function handleSuccessfulImport(BloqueosImport $importer, array $context): void
-    {
-        $processedCount = $importer->getProcessedRowsCount();
-
-        Log::info('Importación completada exitosamente', [
-            ...$context,
-            'processed_rows' => $processedCount,
-            'duration_seconds' => now()->diffInSeconds($context['start_time']),
-            'memory_usage' => $this->getMemoryUsage(),
-        ]);
-
-        $this->notificationService->sendSuccessNotification();
-    }
-
-    private function handleImportError(Exception $e, array $context): void
-    {
-        Log::error('Error en importación', [
-            ...$context,
-            'error_type' => $e::class,
-            'error_message' => $e->getMessage(),
-            'error_trace' => $e->getTraceAsString(),
-        ]);
-
-        $this->notificationService->sendErrorNotification($e->getMessage());
-
-        throw new ImportException('Error al procesar la importación: ' . $e->getMessage(), previous: $e,);
-    }
-
-    private function getMemoryUsage(): string
-    {
-        return memory_get_peak_usage(true) / 1024 / 1024 . 'MB';
     }
 }

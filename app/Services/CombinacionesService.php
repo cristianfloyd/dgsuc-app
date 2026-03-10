@@ -44,13 +44,11 @@ class CombinacionesService
             }
 
             // Convertir a array para el algoritmo
-            $items = $conceptos->map(function ($item) {
-                return [
-                    'codn_conce' => $item->codn_conce,
-                    'impp_conce' => (float) $item->impp_conce,
-                    'tipo_conce' => $item->tipo_conce,
-                ];
-            })->toArray();
+            $items = $conceptos->map(fn($item) => [
+                'codn_conce' => $item->codn_conce,
+                'impp_conce' => (float) $item->impp_conce,
+                'tipo_conce' => $item->tipo_conce,
+            ])->all();
 
             // Buscar combinaciones
             $combinaciones = $this->encontrarCombinaciones($items, $valorObjetivo, $tolerancia);
@@ -90,7 +88,7 @@ class CombinacionesService
      */
     private function obtenerConceptos(int $nroLegaj, NroLiqui $nroLiqui): Collection
     {
-        return Dh21::where('nro_legaj', $nroLegaj)
+        return Dh21::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_liqui', $nroLiqui->value())
             ->select('codn_conce', 'impp_conce', 'tipo_conce')
             ->get();
@@ -109,12 +107,12 @@ class CombinacionesService
     {
         // Optimización: para 50 registros, podemos usar un enfoque más eficiente
         // Separamos los conceptos positivos y negativos para optimizar la búsqueda
-        $positivos = array_filter($items, fn($item) => $item['impp_conce'] > 0);
-        $negativos = array_filter($items, fn($item) => $item['impp_conce'] < 0);
+        $positivos = array_filter($items, fn(array $item): bool => $item['impp_conce'] > 0);
+        $negativos = array_filter($items, fn(array $item): bool => $item['impp_conce'] < 0);
 
         // Ordenamos de mayor a menor valor absoluto para mejorar la eficiencia
-        usort($positivos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
-        usort($negativos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($positivos, fn(array $a, array $b): int => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($negativos, fn(array $a, array $b): int => abs($b['impp_conce']) <=> abs($a['impp_conce']));
 
         $resultados = [];
 
@@ -132,7 +130,7 @@ class CombinacionesService
         );
 
         // Ordenamos por cercanía al valor objetivo
-        usort($resultados, function ($a, $b) use ($valorObjetivo) {
+        usort($resultados, function (array $a, array $b) use ($valorObjetivo): int {
             $diffA = abs($a['total'] - $valorObjetivo);
             $diffB = abs($b['total'] - $valorObjetivo);
             return $diffA <=> $diffB;

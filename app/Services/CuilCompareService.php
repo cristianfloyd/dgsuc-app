@@ -7,11 +7,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 class CuilCompareService
 {
-    protected $cuilRepository;
-
-    public function __construct(CuilRepositoryInterface $cuilRepository)
+    public function __construct(protected \App\Contracts\CuilRepositoryInterface $cuilRepository)
     {
-        $this->cuilRepository = $cuilRepository;
     }
 
     /**

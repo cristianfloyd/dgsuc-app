@@ -12,24 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class SicossImportService
 {
-    private $fileProcessor;
-
-    private $workflowService;
-
-    private $tableManagementService;
-
-    private $databaseService;
-
-    public function __construct(
-        FileProcessorInterface $fileProcessor,
-        WorkflowServiceInterface $workflowService,
-        TableManagementServiceInterface $tableManagementService,
-        DatabaseServiceInterface $databaseService,
-    ) {
-        $this->fileProcessor = $fileProcessor;
-        $this->workflowService = $workflowService;
-        $this->tableManagementService = $tableManagementService;
-        $this->databaseService = $databaseService;
+    public function __construct(private readonly FileProcessorInterface $fileProcessor, private readonly WorkflowServiceInterface $workflowService, private readonly TableManagementServiceInterface $tableManagementService, private readonly DatabaseServiceInterface $databaseService)
+    {
     }
 
     /**

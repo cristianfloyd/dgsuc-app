@@ -14,13 +14,8 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
 {
     use MapucheConnectionTrait;
 
-    private PeriodoFiscalService $periodoFiscalService;
-
-    public function __construct(
-        private ConceptoListado $conceptoListado,
-        PeriodoFiscalService $periodoFiscalService,
-    ) {
-        $this->periodoFiscalService = $periodoFiscalService;
+    public function __construct(private ConceptoListado $conceptoListado, private PeriodoFiscalService $periodoFiscalService)
+    {
     }
 
     /**

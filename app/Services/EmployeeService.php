@@ -10,14 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 class EmployeeService implements EmployeeServiceInterface
 {
-    private $employeeRepository;
-
-    private $databaseService;
-
-    public function __construct(EmployeeRepositoryInterface $employeeRepository, DatabaseService $databaseService)
+    public function __construct(private readonly EmployeeRepositoryInterface $employeeRepository, private readonly DatabaseService $databaseService)
     {
-        $this->employeeRepository = $employeeRepository;
-        $this->databaseService = $databaseService;
     }
 
     /**
@@ -82,7 +76,7 @@ class EmployeeService implements EmployeeServiceInterface
     {
 
         return collect($processedLines)
-            ->map(fn($linea) => $this->databaseService->mapearDatosAlModelo($linea))
+            ->map(fn(array $linea) => $this->databaseService->mapearDatosAlModelo($linea))
             ->all();
     }
 
@@ -92,8 +86,6 @@ class EmployeeService implements EmployeeServiceInterface
      * Este método registra un mensaje de log indicando si la importación fue exitosa o no.
      *
      * @param bool $resultado Indica si la importación fue exitosa o no.
-     *
-     * @return void
      */
     private function handleResultado(bool $resultado): void
     {

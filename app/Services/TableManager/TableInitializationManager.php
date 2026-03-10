@@ -21,9 +21,7 @@ class TableInitializationManager
     /**
      * Inicializa una tabla si no existe.
      *
-     * @param TableServiceInterface $tableService
      *
-     * @return bool
      */
     public function initializeTable(TableServiceInterface $tableService): bool
     {

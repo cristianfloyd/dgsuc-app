@@ -14,20 +14,20 @@ class BloqueosImportOrchestratorService
         try {
             if ($validarTodos) {
                 // 1. Validar todos los registros
-                $resultados['validar_todos'] = app(BloqueosValidationService::class)->validarTodosLosRegistros();
+                $resultados['validar_todos'] = resolve(BloqueosValidationService::class)->validarTodosLosRegistros();
             }
 
             if ($validarCargosAsociados) {
                 // 2. Validar cargos asociados
-                $resultados['validar_cargos_asociados'] = app(ValidacionCargoAsociadoService::class)->validarCargosAsociados();
+                $resultados['validar_cargos_asociados'] = resolve(ValidacionCargoAsociadoService::class)->validarCargosAsociados();
             }
 
             if ($procesarTodo) {
                 // 3. Procesar bloqueos
-                $resultados['procesar'] = app(BloqueosProcessService::class)->procesarBloqueos();
+                $resultados['procesar'] = resolve(BloqueosProcessService::class)->procesarBloqueos();
 
                 // 4. Procesar duplicados
-                $resultados['procesar_duplicados'] = app(BloqueosProcessService::class)->procesarBloqueosDuplicados();
+                $resultados['procesar_duplicados'] = resolve(BloqueosProcessService::class)->procesarBloqueosDuplicados();
             }
 
             $resultados['success'] = true;

@@ -13,10 +13,7 @@ class Dh22Service
     /**
      * Obtener liquidaciones definitivas con período fiscal formateado y filtros opcionales.     *.
      *
-     * @param int|null $year
-     * @param int|null $month
      *
-     * @return Collection
      */
     public function getLiquidacionesDefinitivas(?int $year = null, ?int $month = null): Collection
     {
@@ -51,11 +48,9 @@ class Dh22Service
         return Dh22::query()
             ->definitiva()
             ->get()
-            ->mapWithKeys(function ($liquidacion) {
-                return [
-                    $liquidacion->nro_liqui => $liquidacion->desc_liqui,
-                ];
-            })
+            ->mapWithKeys(fn($liquidacion) => [
+                $liquidacion->nro_liqui => $liquidacion->desc_liqui,
+            ])
             ->toArray();
     }
 }

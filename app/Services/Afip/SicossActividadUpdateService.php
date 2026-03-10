@@ -12,11 +12,6 @@ class SicossActividadUpdateService
     use MapucheConnectionTrait;
 
     /**
-     * Create a new class instance.
-     */
-    public function __construct() {}
-
-    /**
      * Actualiza el código de actividad (cod_act) en la tabla afip_mapuche_sicoss.
      *
      * Este método actualiza el campo cod_act en la tabla afip_mapuche_sicoss tomando los valores

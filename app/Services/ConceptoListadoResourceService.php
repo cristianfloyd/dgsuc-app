@@ -37,7 +37,7 @@ class ConceptoListadoResourceService
         //         ->orderBy('nro_legaj');
         // }
 
-        $cacheKey = $this->getCacheKey($filters);
+        $this->getCacheKey($filters);
 
 
         // Solo construimos la query si hay filtros
@@ -96,15 +96,5 @@ class ConceptoListadoResourceService
             );
 
         return $query;
-    }
-
-    // Método separado para obtener resultados cacheados
-    private function getCachedResults(Builder $query, string $cacheKey)
-    {
-        return Cache::store('file')->remember(
-            $cacheKey,
-            now()->addHours(2),
-            fn() => $query->get(),
-        );
     }
 }

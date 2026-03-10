@@ -18,15 +18,13 @@ class SubsetSumFinder
     public function findCombinations(array $items, float $targetSum, float $tolerance = 0.01): array
     {
         // Ordenamos los elementos por valor para optimizar la búsqueda
-        usort($items, function ($a, $b) {
-            return $b['importe'] <=> $a['importe'];
-        });
+        usort($items, fn(array $a, array $b) => $b['importe'] <=> $a['importe']);
 
         $results = [];
         $this->findSubsets($items, $targetSum, [], 0, 0, $results, $tolerance);
 
         // Ordenamos los resultados por cercanía al valor objetivo
-        usort($results, function ($a, $b) use ($targetSum) {
+        usort($results, function (array $a, array $b) use ($targetSum): int {
             $diffA = abs($a['total'] - $targetSum);
             $diffB = abs($b['total'] - $targetSum);
             return $diffA <=> $diffB;
@@ -70,7 +68,8 @@ class SubsetSumFinder
 
         // Optimización: si con todos los elementos restantes no llegamos al objetivo, terminamos
         $remainingSum = 0;
-        for ($i = $index; $i < count($items); $i++) {
+        $counter = count($items);
+        for ($i = $index; $i < $counter; $i++) {
             $remainingSum += $items[$i]['importe'];
         }
 

@@ -32,8 +32,6 @@ class RepOrdenPagoService
 
     /**
      * Obtiene todos los registros de RepOrdenPago.
-     *
-     * @return Collection
      */
     public function getAllRepOrdenPago(): Collection
     {
@@ -43,9 +41,7 @@ class RepOrdenPagoService
     /**
      * Obtiene RepOrdenPago por nro_liqui.
      *
-     * @param int $nroLiqui
      *
-     * @return RepOrdenPagoModel|null
      */
     public function getRepOrdenPagoByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
     {
@@ -56,8 +52,6 @@ class RepOrdenPagoService
      * Crea un nuevo registro de RepOrdenPago.
      *
      * @param RepOrdenPagoDtoData $data DTO con los datos para crear la orden de pago
-     *
-     * @return RepOrdenPagoModel
      */
     public function createRepOrdenPago(RepOrdenPagoDtoData $data): RepOrdenPagoModel
     {
@@ -72,10 +66,7 @@ class RepOrdenPagoService
     /**
      * Actualiza un registro existente de RepOrdenPago.
      *
-     * @param RepOrdenPagoModel $repOrdenPago
-     * @param RepOrdenPagoDtoData $data
      *
-     * @return bool
      */
     public function updateRepOrdenPago(RepOrdenPagoModel $repOrdenPago, RepOrdenPagoDtoData $data): bool
     {
@@ -85,9 +76,7 @@ class RepOrdenPagoService
     /**
      * Elimina un registro de RepOrdenPago.
      *
-     * @param RepOrdenPagoModel $repOrdenPago
      *
-     * @return bool
      */
     public function deleteRepOrdenPago(RepOrdenPagoModel $repOrdenPago): bool
     {
@@ -106,9 +95,7 @@ class RepOrdenPagoService
     /**
      * Genera un reporte para las liquidaciones proporcionadas.
      *
-     * @param array $liquidaciones
      *
-     * @return void
      */
     public function generateReport(array $liquidaciones): void
     {
@@ -125,8 +112,6 @@ class RepOrdenPagoService
      * Trunca la tabla rep_orden_pago.
      *
      * @throws Exception
-     *
-     * @return bool
      */
     public function truncateTable(): bool
     {

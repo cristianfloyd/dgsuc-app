@@ -14,9 +14,8 @@ use InvalidArgumentException;
 class ModernCargoSacService
 {
     public function __construct(
-        private SacRepository $sacRepository,
-        private PeriodoFiscalService $periodoService,
-        private VinculoCargoService $vinculoService,
+        private readonly SacRepository $sacRepository,
+        private readonly VinculoCargoService $vinculoService,
     ) {
     }
 
@@ -27,7 +26,7 @@ class ModernCargoSacService
     {
         $datos = $this->sacRepository->getBrutosSacCargo($legajo, $nroCargo);
 
-        if (!$datos) {
+        if (!$datos instanceof \App\Data\Mapuche\SacCargoData) {
             return null;
         }
 
@@ -42,7 +41,7 @@ class ModernCargoSacService
         $datosRaw = $this->sacRepository->getBrutosParaSac($filtros, $orderBy);
 
         return $this->agruparPorLegajo($datosRaw)
-            ->map(fn($grupo) => $this->procesarLegajo($grupo))
+            ->map(fn(\Illuminate\Support\Collection $grupo): \App\Data\Mapuche\SacLegajoData => $this->procesarLegajo($grupo))
             ->values();
     }
 
@@ -64,10 +63,10 @@ class ModernCargoSacService
     {
         $cacheKey = "info_mes_{$anio}_{$mes}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($mes, $anio) {
+        return Cache::remember($cacheKey, 3600, function () use ($mes, $anio): array {
             $this->validarParametrosFecha($mes, $anio);
 
-            $fecha = Carbon::createFromDate($anio, $mes, 1);
+            $fecha = \Illuminate\Support\Facades\Date::createFromDate($anio, $mes, 1);
 
             return [
                 'dias' => $fecha->daysInMonth,

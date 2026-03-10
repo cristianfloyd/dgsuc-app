@@ -10,11 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 class AfipMapucheSicossTableService extends AbstractTableService
 {
-    private AfipMapucheSicossTableDefinition $definition;
-
-    public function __construct(AfipMapucheSicossTableDefinition $definition)
+    public function __construct(private readonly AfipMapucheSicossTableDefinition $definition)
     {
-        $this->definition = $definition;
     }
 
     /**

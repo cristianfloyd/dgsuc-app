@@ -25,25 +25,16 @@ class CheFileGenerator
 
     protected $connection;
 
-    private $temporaryTableManager;
+    private int $netos = 0;
 
-    private $procesadorNomina;
-
-    private $pilagaClient;
-
-    private $netos = 0;
-
-    private $tableCreated = false;
+    private bool $tableCreated = false;
 
     public function __construct(
-        TemporaryTableManager $temporaryTableManager,
-        NominaProcessor $procesadorNomina,
-        $pilagaApiClient = null,
+        private TemporaryTableManager $temporaryTableManager,
+        private NominaProcessor $procesadorNomina,
+        private $pilagaClient = null,
     ) {
-        $this->temporaryTableManager = $temporaryTableManager;
-        $this->procesadorNomina = $procesadorNomina;
         $this->connection = $this->getConnectionFromTrait();
-        $this->pilagaClient = $pilagaApiClient;
     }
 
     public function __destruct()
@@ -151,26 +142,26 @@ class CheFileGenerator
 
     public function fillWithZeros($valor, $longitud): string
     {
-        if (strlen(trim($valor)) > $longitud) {
-            return substr($valor, -$longitud);
+        if (strlen(trim((string) $valor)) > $longitud) {
+            return substr((string) $valor, -$longitud);
         }
-        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
+        return str_pad((string) $valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     public function fillWithSpaces($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, -$longitud);
+        if (strlen(trim((string) $texto)) > $longitud) {
+            return substr((string) $texto, -$longitud);
         }
-        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
+        return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public function fillWithLeftSpaces($texto, $longitud): string
     {
-        if (strlen(trim($texto)) > $longitud) {
-            return substr($texto, -$longitud);
+        if (strlen(trim((string) $texto)) > $longitud) {
+            return substr((string) $texto, -$longitud);
         }
-        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
+        return str_pad((string) $texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     public function set_progreso($porcentaje): void
@@ -185,10 +176,8 @@ class CheFileGenerator
 
     /**
      * Set the value of descLiqui.
-     *
-     * @return self
      */
-    public function setDescLiqui($descLiqui)
+    public function setDescLiqui(?string $descLiqui): static
     {
         $this->descLiqui = $descLiqui;
         return $this;
@@ -204,7 +193,7 @@ class CheFileGenerator
             $this->processAndStore($liquidaciones, $anio, $mes);
 
             // Insertar los datos en la tabla de la base de datos
-            foreach ($liquidaciones as $indice => $liquidacion) {
+            foreach (array_keys($liquidaciones) as $indice) {
                 $content = $this->generateCheContent($liquidaciones, $anio, $mes, $indice);
 
                 // Aquí se asume que tienes un modelo para la tabla donde deseas insertar los datos
@@ -221,16 +210,14 @@ class CheFileGenerator
      */
     private function formatAportes(array $aportes): array
     {
-        return collect($aportes)->map(function ($aporte) {
-            return [
-                'codigo' => $this->fillWithZeros($aporte['grupo'], 3),
-                'descripcion' => $this->fillWithSpaces($aporte['desc_grupo'], 50),
-                'importe' => $this->fillWithLeftSpaces(
-                    number_format($aporte['total'], 2, '.', ''),
-                    16,
-                ),
-            ];
-        })->toArray();
+        return collect($aportes)->map(fn($aporte) => [
+            'codigo' => $this->fillWithZeros($aporte['grupo'], 3),
+            'descripcion' => $this->fillWithSpaces($aporte['desc_grupo'], 50),
+            'importe' => $this->fillWithLeftSpaces(
+                number_format($aporte['total'], 2, '.', ''),
+                16,
+            ),
+        ])->all();
     }
 
     private function dropTemporaryTable(): void

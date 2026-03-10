@@ -17,34 +17,19 @@ use function sprintf;
 
 class SicossReporteService
 {
-    //use ReportCacheTrait;
-
-    // protected const REPORT_NAME = 'sicoss';
-    // protected const CACHE_TTL = 3600; // 1 hora en segundos
-
-    protected PeriodoFiscalService $periodoFiscalService;
-
-    protected SicossReporteRepositoryInterface $sicossReporteRepository;
-
     /**
      * Constructor del servicio.
      *
      * @param PeriodoFiscalService $periodoFiscalService Servicio de períodos fiscales.
      * @param SicossReporteRepositoryInterface $repository Repositorio de reportes SICOSS (posiblemente decorado).
      */
-    public function __construct(
-        PeriodoFiscalService $periodoFiscalService,
-        SicossReporteRepositoryInterface $sicossReporteRepository,
-    ) {
-        $this->periodoFiscalService = $periodoFiscalService;
-        $this->sicossReporteRepository = $sicossReporteRepository;
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected SicossReporteRepositoryInterface $sicossReporteRepository)
+    {
     }
 
     /**
      * Obtiene los datos del reporte SICOSS.
      *
-     * @param string $anio
-     * @param string $mes
      *
      * @return Collection<SicossReporteData>
      */
@@ -52,7 +37,7 @@ class SicossReporteService
     {
         try {
             return $this->sicossReporteRepository->getReporte($anio, $mes)
-                ->map(fn($item) => SicossReporteData::fromModel($item));
+                ->map(fn($item): \App\Data\Responses\SicossReporteData => SicossReporteData::fromModel($item));
         } catch (Throwable $th) {
             Log::error('Error al obtener datos del reporte SICOSS desde el servicio:', [
                 'error' => $th->getMessage(),
@@ -67,10 +52,7 @@ class SicossReporteService
     /**
      * Obtiene los totales del reporte SICOSS.
      *
-     * @param string $anio
-     * @param string $mes
      *
-     * @return SicossTotalesData
      */
     public function getTotales(string $anio, string $mes): SicossTotalesData
     {
@@ -101,10 +83,7 @@ class SicossReporteService
      * Verifica si existen datos para un período fiscal específico.
      * El caché es manejado por el repositorio decorado.
      *
-     * @param string $anio
-     * @param string $mes
      *
-     * @return bool
      */
     public function existenDatosParaPeriodo(string $anio, string $mes): bool
     {
@@ -126,10 +105,7 @@ class SicossReporteService
      * Invalida el caché del reporte para un período específico.
      * Delega al repositorio si este tiene métodos de invalidación.
      *
-     * @param string $anio
-     * @param string $mes
      *
-     * @return void
      */
     public function invalidateCache(string $anio, string $mes): void
     {
@@ -152,8 +128,6 @@ class SicossReporteService
 
     /**
      * Invalida todo el caché del reporte SICOSS.
-     *
-     * @return void
      */
     public function invalidateAllCache(): void
     {
@@ -194,7 +168,7 @@ class SicossReporteService
             }
 
             return $periodosFiscalesRespuesta['periodosFiscales']
-                ->mapWithKeys(function ($periodo) {
+                ->mapWithKeys(function ($periodo): array {
                     $anio = $periodo->per_liano;
                     $mes = sprintf('%02d', $periodo->per_limes);
                     $periodoFiscal = $anio . $mes;
@@ -203,7 +177,7 @@ class SicossReporteService
                         $periodoFiscal => 'Período ' . $anio . ' ' . $this->getNombreMes($periodo->per_limes),
                     ];
                 })
-                ->toArray();
+                ->all();
         } catch (Exception $e) {
             Log::error('Error al obtener períodos fiscales desde PeriodoFiscalService', [
                 'error' => $e->getMessage(),
@@ -216,15 +190,13 @@ class SicossReporteService
     /**
      * Obtiene los períodos fiscales disponibles.
      * El caché es manejado por el repositorio decorado.
-     *
-     * @return array
      */
     public function getPeriodosFiscalesFromRepo(): array
     {
         try {
             // El parámetro $useCache ya no es necesario aquí
             return $this->sicossReporteRepository->getPeriodosFiscalesDisponibles()
-                ->mapWithKeys(function ($periodo) {
+                ->mapWithKeys(function ($periodo): array {
                     $anio = $periodo->per_liano;
                     $mes = sprintf('%02d', $periodo->per_limes);
                     $periodoFiscal = $anio . $mes;
@@ -233,7 +205,7 @@ class SicossReporteService
                         $periodoFiscal => 'Período ' . $anio . ' ' . $this->getNombreMes($periodo->per_limes),
                     ];
                 })
-                ->toArray();
+                ->all();
         } catch (Exception $e) {
             Log::error('Error al obtener períodos fiscales desde repositorio (vía servicio)', [
                 'error' => $e->getMessage(),

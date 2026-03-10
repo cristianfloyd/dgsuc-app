@@ -15,13 +15,12 @@ class ProcessLogService
     /**
      * Inicia un nuevo proceso y crea un registro en la base de datos.
      *
-     * @param string $processName
      *
      * @return ProcessLog
      */
     public function startProcess(string $processName)
     {
-        $processLog = ProcessLog::create([
+        $processLog = ProcessLog::query()->create([
             'process_name' => $processName,
             'status' => 'in_progress',
             'steps' => [
@@ -46,11 +45,7 @@ class ProcessLogService
     /**
      * Actualiza el estado de un paso específico del proceso.
      *
-     * @param ProcessLog $processLog
-     * @param string $step
-     * @param string $status
      *
-     * @return void
      */
     public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
@@ -99,34 +94,6 @@ class ProcessLogService
     public function getLatestProcess(): ?ProcessLog
     {
         Log::info('Buscando el último registro de ProcessLog en ProcessLogService');
-        return ProcessLog::latest()->first();
-    }
-
-    /**
-     * Verificar si todos los pasos del proceso han sido completados.
-     *
-     * @param array $steps
-     *
-     * @return bool
-     */
-    private function allStepsCompleted(array $steps): bool
-    {
-        return collect($steps)->every(function ($status) {
-            return $status === 'completed';
-        });
-    }
-
-    /*
-    * Marca el proceso como completado
-    *
-    * @param ProcessLog $processLog
-    * @return void
-    */
-    private function completeProcess(ProcessLog $processLog): void
-    {
-        $processLog->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
+        return ProcessLog::query()->latest()->first();
     }
 }

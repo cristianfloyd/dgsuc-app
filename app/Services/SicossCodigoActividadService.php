@@ -137,16 +137,14 @@ class SicossCodigoActividadService
 
 
         // Convertir explícitamente cada objeto stdClass a un array asociativo
-        return array_map(function ($item) {
-            return [
-                'impp_conce' => $item->impp_conce,
-                'nov1_conce' => $item->nov1_conce,
-                'codn_conce' => $item->codn_conce,
-                'tipos_grupos' => $item->tipos_grupos,
-                'nro_cargo' => $item->nro_cargo,
-                'codigoescalafon' => $item->codigoescalafon,
-            ];
-        }, $resultados->all());
+        return array_map(fn(\stdClass $item) => [
+            'impp_conce' => $item->impp_conce,
+            'nov1_conce' => $item->nov1_conce,
+            'codn_conce' => $item->codn_conce,
+            'tipos_grupos' => $item->tipos_grupos,
+            'nro_cargo' => $item->nro_cargo,
+            'codigoescalafon' => $item->codigoescalafon,
+        ], $resultados->all());
 
         // Alternativa con SQL directo si es necesario:
         /*
@@ -190,77 +188,61 @@ class SicossCodigoActividadService
             // Verificar a qué grupos pertenece el concepto
 
             // Grupo 11
-            if (preg_match('/[^\d]+11[^\d]+/', $gruposConcepto)) {
+            if (preg_match('/[^\d]+11[^\d]+/', (string) $gruposConcepto)) {
                 if ($prioridadTipoActividad < 38) {
                     $prioridadTipoActividad = 38;
                 }
-                if (($prioridadTipoActividad == 87) || ($prioridadTipoActividad == 88)) {
+                if (($prioridadTipoActividad === 87) || ($prioridadTipoActividad === 88)) {
                     $prioridadTipoActividad = 38;
                 }
             }
 
             // Grupo 12
-            if (preg_match('/[^\d]+12[^\d]+/', $gruposConcepto)) {
-                if ($prioridadTipoActividad < 34) {
-                    $prioridadTipoActividad = 34;
-                }
+            if (preg_match('/[^\d]+12[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 34) {
+                $prioridadTipoActividad = 34;
             }
 
             // Grupo 13
-            if (preg_match('/[^\d]+13[^\d]+/', $gruposConcepto)) {
-                if ($prioridadTipoActividad < 35) {
-                    $prioridadTipoActividad = 35;
-                }
+            if (preg_match('/[^\d]+13[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 35) {
+                $prioridadTipoActividad = 35;
             }
 
             // Grupo 14
-            if (preg_match('/[^\d]+14[^\d]+/', $gruposConcepto)) {
+            if (preg_match('/[^\d]+14[^\d]+/', (string) $gruposConcepto)) {
                 if ($prioridadTipoActividad < 36) {
                     $prioridadTipoActividad = 36;
                 }
-                if ($prioridadTipoActividad == 87 || $prioridadTipoActividad == 88) {
+                if ($prioridadTipoActividad === 87 || $prioridadTipoActividad === 88) {
                     $prioridadTipoActividad = 36;
                 }
             }
 
             // Grupo 15
-            if (preg_match('/[^\d]+15[^\d]+/', $gruposConcepto)) {
+            if (preg_match('/[^\d]+15[^\d]+/', (string) $gruposConcepto)) {
                 if ($prioridadTipoActividad < 37) {
                     $prioridadTipoActividad = 37;
                 }
-                if ($prioridadTipoActividad == 87 || $prioridadTipoActividad == 88) {
+                if ($prioridadTipoActividad === 87 || $prioridadTipoActividad === 88) {
                     $prioridadTipoActividad = 37;
                 }
             }
 
             // Grupo 48
-            if (preg_match('/[^\d]+48[^\d]+/', $gruposConcepto)) {
-                if ($prioridadTipoActividad < 36 || $prioridadTipoActividad == 88) {
-                    $prioridadTipoActividad = 87;
-                }
+            if (preg_match('/[^\d]+48[^\d]+/', $gruposConcepto) && ($prioridadTipoActividad < 36 || $prioridadTipoActividad === 88)) {
+                $prioridadTipoActividad = 87;
             }
 
             // Grupo 49
-            if (preg_match('/[^\d]+49[^\d]+/', $gruposConcepto)) {
-                if ($prioridadTipoActividad < 36) {
-                    $prioridadTipoActividad = 88;
-                }
+            if (preg_match('/[^\d]+49[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 36) {
+                $prioridadTipoActividad = 88;
             }
         }
 
         // Determinar el tipo de actividad final según la prioridad calculada
-        if ($prioridadTipoActividad == 38 || $prioridadTipoActividad == 0) {
+        if ($prioridadTipoActividad === 38 || $prioridadTipoActividad === 0) {
             return $codigoActividadDefault ?? 0;
         }
-        if (
-            ($prioridadTipoActividad >= 34 && $prioridadTipoActividad <= 37)
-            || $prioridadTipoActividad == 87 || $prioridadTipoActividad == 88
-        ) {
-            return $prioridadTipoActividad;
-        }
-
-        // Valor por defecto si no se cumple ninguna condición
-        return 0;
+        return $prioridadTipoActividad;
     }
 
     /**

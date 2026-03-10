@@ -42,10 +42,10 @@ class EnhancedDatabaseConnectionService
 
         // Filtrar solo las conexiones que comienzan con pgsql-
         return collect($connections)
-            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->filter(fn($config, $name): bool => str_starts_with((string) $name, 'pgsql-'))
             ->keys()
-            ->mapWithKeys(fn($name) => [$name => $this->formatConnectionName($name)])
-            ->toArray();
+            ->mapWithKeys(fn(string $name): array => [$name => $this->formatConnectionName($name)])
+            ->all();
     }
 
     /**
@@ -131,7 +131,6 @@ class EnhancedDatabaseConnectionService
     /**
      * Formatear el nombre de la conexión para mostrar en la UI.
      *
-     * @param string $name
      *
      * @return string Nombre formateado.
      */

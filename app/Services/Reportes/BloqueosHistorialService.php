@@ -37,7 +37,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         $idsTransferidos = [];
         $idsFallidos = [];
         $periodoFiscal = $this->extraerPeriodoFiscal($bloqueos);
-        $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
+        $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
 
         Log::info('Iniciando transferencia al historial', [
             'total_registros' => $bloqueos->count(),
@@ -79,7 +79,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
 
                         // Crear registro en RepBloqueo
                         $historialData = $this->prepararDatosHistorial($bloqueo);
-                        RepBloqueo::create($historialData);
+                        RepBloqueo::query()->create($historialData);
 
                         $idsTransferidos[] = $bloqueo->id;
                         $transferidos++;
@@ -156,7 +156,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         }
 
         // Verificar que todos estén procesados
-        $noProceados = $bloqueos->filter(fn($bloqueo) => !$bloqueo->esta_procesado);
+        $noProceados = $bloqueos->reject(fn($bloqueo): bool => (bool) $bloqueo->esta_procesado);
         if ($noProceados->isNotEmpty()) {
             Log::error('Existen bloqueos no procesados', [
                 'ids_no_procesados' => $noProceados->pluck('id')->toArray(),
@@ -170,16 +170,16 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
             BloqueosEstadoEnum::VALIDADO,
         ];
 
-        $estadosInvalidos = $bloqueos->filter(
-            fn($bloqueo) => !in_array($bloqueo->estado, $estadosValidos),
+        $estadosInvalidos = $bloqueos->reject(
+            fn($bloqueo): bool => in_array($bloqueo->estado, $estadosValidos),
         );
 
         if ($estadosInvalidos->isNotEmpty()) {
             Log::error('Existen bloqueos con estados inválidos para transferir', [
-                'ids_estados_invalidos' => $estadosInvalidos->map(fn($b) => [
+                'ids_estados_invalidos' => $estadosInvalidos->map(fn($b): array => [
                     'id' => $b->id,
                     'estado' => $b->estado->value,
-                ])->toArray(),
+                ])->all(),
             ]);
             return false;
         }
@@ -194,7 +194,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
     {
         $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
         try {
-            $query = RepBloqueo::where('nro_liqui', $nroLiqui);
+            $query = RepBloqueo::query()->where('nro_liqui', $nroLiqui);
 
             return [
                 'total_registros' => $query->count(),
@@ -227,8 +227,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
     {
         $nroLiqui = $this->getNroLiquiFromPeriodoFiscal($periodoFiscal);
         try {
-            return RepBloqueo::where('nro_liqui', $nroLiqui)
-                ->orderBy('created_at', 'desc')
+            return RepBloqueo::query()->where('nro_liqui', $nroLiqui)->latest()
                 ->get();
         } catch (Exception $e) {
             Log::error('Error al obtener bloqueos del historial', [
@@ -245,7 +244,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function existeEnHistorial(BloqueosDataModel $bloqueo): bool
     {
-        return RepBloqueo::where('nro_liqui', $bloqueo->nro_liqui)
+        return RepBloqueo::query()->where('nro_liqui', $bloqueo->nro_liqui)
             ->where('nro_legaj', $bloqueo->nro_legaj)
             ->where('nro_cargo', $bloqueo->nro_cargo)
             ->exists();
@@ -289,16 +288,16 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function extraerPeriodoFiscal(Collection $bloqueos): array
     {
-        $periodoService = app(PeriodoFiscalService::class);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
         if ($bloqueos->isEmpty()) {
-            return $periodoService->getPeriodoFiscal();
+            return $periodoFiscalService->getPeriodoFiscal();
         }
 
         // Tomar el nro_liqui del primer registro y obtener el período fiscal real
         $primerBloqueo = $bloqueos->first();
         $nroLiqui = (int) $primerBloqueo->nro_liqui;
         $periodo = $this->getPeriodoFiscalFromNroLiqui($nroLiqui);
-        return $periodo ?? $periodoService->getPeriodoFiscal();
+        return $periodo ?? $periodoFiscalService->getPeriodoFiscal();
     }
 
     /**
@@ -310,8 +309,8 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function getNroLiquiFromPeriodoFiscal(array $periodoFiscal): ?int
     {
-        $periodoService = app(PeriodoFiscalService::class);
-        $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
+        $liquidacion = $periodoFiscalService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
         return $liquidacion?->nro_liqui;
     }
 
@@ -324,8 +323,8 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
      */
     private function getPeriodoFiscalFromNroLiqui(int $nroLiqui): ?array
     {
-        $periodoService = app(PeriodoFiscalService::class);
-        $periodo = $periodoService->getPeriodoFiscalFromLiqui($nroLiqui);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
+        $periodo = $periodoFiscalService->getPeriodoFiscalFromLiqui($nroLiqui);
         if (!$periodo || !isset($periodo['year'], $periodo['month'])) {
             return null;
         }

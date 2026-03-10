@@ -16,7 +16,7 @@ class ComprobanteNominaService
 {
     use MapucheConnectionTrait;
 
-    private const LINE_FORMAT = [
+    private const array LINE_FORMAT = [
         'CODIGO' => ['start' => 0, 'length' => 2],
         'DESCRIPCION' => ['start' => 3, 'length' => 50],
         'IMPORTE' => ['start' => 55, 'length' => 16],
@@ -25,7 +25,7 @@ class ComprobanteNominaService
     ];
 
     // Constantes para las posiciones en el header
-    private const HEADER_FORMAT = [
+    private const array HEADER_FORMAT = [
         'YEAR_START' => 0,
         'YEAR_LENGTH' => 2,
         'MONTH_START' => 2,
@@ -93,9 +93,11 @@ class ComprobanteNominaService
             while (($line = fgets($fileHandle)) !== false) {
                 $line = trim($line);
                 $lineNumber++;
-
                 // Ignorar líneas vacías o la marca de fin
-                if (empty($line) || $line === 'FIN') {
+                if ($line === '' || $line === '0') {
+                    continue;
+                }
+                if ($line === 'FIN') {
                     continue;
                 }
 
@@ -137,7 +139,7 @@ class ComprobanteNominaService
     public function processLine(string $line): bool|ComprobanteNominaModel
     {
         // Ignoramos líneas vacías o la marca de fin
-        if (empty($line) || $line === 'FIN') {
+        if (in_array($line, ['', '0', 'FIN'], true)) {
             return false;
         }
         // Convertimos la línea completa a UTF-8
@@ -147,11 +149,11 @@ class ComprobanteNominaService
         $fields = $this->extractFields($line);
 
         // Procesamos el importe eliminando caracteres no numéricos
-        $importe = (float) preg_replace('/[^0-9.-]/', '', $fields['importe']);
+        $importe = (float) preg_replace('/[^0-9.-]/', '', (string) $fields['importe']);
         $esRetencion = preg_match('/^\d{2}\./', $line);
 
 
-        return ComprobanteNominaModel::create([
+        return ComprobanteNominaModel::query()->create([
             'anio_periodo' => $this->currentHeader['anio_periodo'],
             'mes_periodo' => $this->currentHeader['mes_periodo'],
             'nro_liqui' => $this->currentHeader['nro_liqui'],
@@ -161,9 +163,9 @@ class ComprobanteNominaService
             'area_administrativa' => $esRetencion ? '000' : '010',
             'subarea_administrativa' => '000',
             'numero_retencion' => $esRetencion ? (int) str_replace('.', '', $fields['codigo']) : null,
-            'descripcion_retencion' => trim($fields['descripcion']),
+            'descripcion_retencion' => trim((string) $fields['descripcion']),
             'requiere_cheque' => $esRetencion && $fields['tipo'] === 'S',
-            'codigo_grupo' => $esRetencion ? trim($fields['codigo_grupo']) : null,
+            'codigo_grupo' => $esRetencion ? trim((string) $fields['codigo_grupo']) : null,
         ]);
     }
 
@@ -199,17 +201,17 @@ class ComprobanteNominaService
     public function verifyImport(int $year, int $month, int $settlementNumber): array
     {
         return [
-            'total_records' => ComprobanteNominaModel::where([
+            'total_records' => ComprobanteNominaModel::query()->where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
                 'nro_liqui' => $settlementNumber,
             ])->count(),
-            'total_net' => ComprobanteNominaModel::where([
+            'total_net' => ComprobanteNominaModel::query()->where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
                 'nro_liqui' => $settlementNumber,
             ])->sum('importe'),
-            'total_retentions' => ComprobanteNominaModel::where([
+            'total_retentions' => ComprobanteNominaModel::query()->where([
                 'anio_periodo' => $year,
                 'mes_periodo' => $month,
                 'nro_liqui' => $settlementNumber,
@@ -222,7 +224,7 @@ class ComprobanteNominaService
         return $this->currentHeader;
     }
 
-    public static function exportarPdf($liquidacion)
+    public static function exportarPdf($liquidacion): string
     {
         // Convertimos la imagen a base64
         $logoPath = public_path('images/uba.png');
@@ -230,10 +232,10 @@ class ComprobanteNominaService
 
         $data = [
             'liquidacion' => $liquidacion,
-            'registros' => ComprobanteNominaModel::where('nro_liqui', $liquidacion->nro_liqui)
+            'registros' => ComprobanteNominaModel::query()->where('nro_liqui', $liquidacion->nro_liqui)
                 ->select('descripcion_retencion', 'importe')
                 ->get(),
-            'total' => ComprobanteNominaModel::where('nro_liqui', $liquidacion->nro_liqui)
+            'total' => ComprobanteNominaModel::query()->where('nro_liqui', $liquidacion->nro_liqui)
                 ->sum('importe'),
             'logoBase64' => $logoBase64,
         ];
@@ -254,7 +256,7 @@ class ComprobanteNominaService
         }
 
         // Limpiamos caracteres especiales y espacios
-        return trim(preg_replace('/[^\p{L}\p{N}\s\-\.]/u', '', $text));
+        return trim((string) preg_replace('/[^\p{L}\p{N}\s\-\.]/u', '', $text));
     }
 
     private function extractFields(string $line): array

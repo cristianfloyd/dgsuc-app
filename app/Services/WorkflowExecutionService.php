@@ -271,8 +271,6 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
      *
      * @param string $eventName The name of the event to dispatch.
      * @param array<string, string|int|array<string, mixed>> $payload Event payload data
-     *
-     * @return void
      */
     private function dispatchEvent(string $eventName, array $payload = []): void
     {

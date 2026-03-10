@@ -16,7 +16,7 @@ use const STR_PAD_RIGHT;
 
 class AfipMapucheExportService implements ExportServiceInterface
 {
-    private ColumnMetadata $columnMetadata;
+    private readonly ColumnMetadata $columnMetadata;
 
     /**
      * Create a new class instance.
@@ -27,10 +27,10 @@ class AfipMapucheExportService implements ExportServiceInterface
         $this->columnMetadata->setSystem('miSimplificacion');
     }
 
-    public function exportToTxt()
+    public function exportToTxt(): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         try {
-            if (!AfipMapucheMiSimplificacion::exists()) {
+            if (!AfipMapucheMiSimplificacion::query()->exists()) {
                 throw new Exception('No hay registros para exportar');
             }
 
@@ -98,7 +98,7 @@ class AfipMapucheExportService implements ExportServiceInterface
      *
      * @return string Línea formateada de texto
      */
-    private function formatLine($record, array $fieldOrder, array $columnWidths): string
+    private function formatLine(\stdClass $record, array $fieldOrder, array $columnWidths): string
     {
         $line = '';
         foreach ($fieldOrder as $index => $field) {
@@ -141,7 +141,7 @@ class AfipMapucheExportService implements ExportServiceInterface
         }
 
         // Formateo de números: remover comas y decimales
-        if (in_array($field, ['retribucion_pactada'])) {
+        if ($field === 'retribucion_pactada') {
             // Convertir a float, multiplicar por 100 para preservar 2 decimales y convertir a entero
             $value = (int) ((float) (str_replace(',', '', $value)) * 100);
             return str_pad($value, $width, '0', STR_PAD_LEFT);
@@ -156,8 +156,8 @@ class AfipMapucheExportService implements ExportServiceInterface
             }
             try {
                 // Convertimos la fecha al formato deseado usando Carbon
-                $value = Carbon::parse($value)->format('Y/m/d');
-            } catch (Exception $e) {
+                $value = \Illuminate\Support\Facades\Date::parse($value)->format('Y/m/d');
+            } catch (Exception) {
                 // Si hay un error en el parseo, retornamos espacios
                 return str_repeat(' ', $width);
             }
@@ -181,22 +181,22 @@ class AfipMapucheExportService implements ExportServiceInterface
 
         // Formateo de domicilio (5 dígitos con ceros a la izquierda)
         if ($field === 'domicilio') {
-            $value = str_pad($value, 5, '0', STR_PAD_LEFT);
+            $value = str_pad((string) $value, 5, '0', STR_PAD_LEFT);
         }
 
         // Formateo de actividad (6 dígitos)
         if ($field === 'actividad') {
-            $value = str_pad($value, 6, '0', STR_PAD_LEFT);
+            $value = str_pad((string) $value, 6, '0', STR_PAD_LEFT);
         }
 
         // Formateo para campos numéricos
-        if (in_array($field, ['cuil'])) {
-            $value = preg_replace('/[^0-9]/', '', $value); // Remover no-números
+        if ($field === 'cuil') {
+            $value = preg_replace('/[^0-9]/', '', (string) $value); // Remover no-números
             return str_pad($value, $width, '0', STR_PAD_LEFT);
         }
 
         // Formateo por defecto para campos de texto
-        $value = substr($value, 0, $width); // Asegurar que no exceda el ancho
+        $value = substr((string) $value, 0, $width); // Asegurar que no exceda el ancho
         return str_pad($value, $width, ' ', STR_PAD_RIGHT);
     }
 
@@ -208,7 +208,7 @@ class AfipMapucheExportService implements ExportServiceInterface
 
         Log::info('Fecha original: ' . $date);
         try {
-            $date = Carbon::parse($date)->format('Y/m/d');
+            $date = \Illuminate\Support\Facades\Date::parse($date)->format('Y/m/d');
             Log::info("Fecha formateada: $date");
             return $date;
         } catch (Exception $e) {

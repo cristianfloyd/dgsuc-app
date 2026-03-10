@@ -205,12 +205,12 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      *
      * @return bool Verdadero si los parámetros son válidos, falso en caso contrario
      */
-    private function validarParametros(NroLiqui $nroLiqui, $periodoFiscal): bool
+    private function validarParametros(NroLiqui $nroLiqui, int $periodoFiscal): bool
     {
         if (!$this->validarExistenciaEnBaseDeDatos($nroLiqui->value(), $periodoFiscal)) {
             return false;
         }
-        if (empty($nroLiqui->value()) || empty($periodoFiscal)) {
+        if ($nroLiqui->value() === 0 || $periodoFiscal === 0) {
             Log::warning('nroliqui o periodofiscal vacios');
             return false;
         }

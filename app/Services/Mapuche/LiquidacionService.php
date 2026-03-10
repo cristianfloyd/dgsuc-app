@@ -7,13 +7,6 @@ use App\Models\Mapuche\Dh22;
 class LiquidacionService
 {
     /**
-     * Create a new class instance.
-     */
-    public function __construct()
-    {
-    }
-
-    /**
      * Obtiene las liquidaciones disponibles para un período fiscal específico,
      * formateadas para ser usadas en un componente Select de Filament.
      *
@@ -24,22 +17,17 @@ class LiquidacionService
      */
     public function getLiquidacionesForSelect(string $year, string $month): array
     {
-        $resultado = Dh22::query()
+        return Dh22::query()
             ->where('per_liano', $year)
             ->where('per_limes', $month)
             ->pluck('desc_liqui', 'nro_liqui')
             ->toArray();
-
-        return $resultado;
     }
 
     /**
      * Obtiene la liquidación definitiva para un período fiscal.
      *
-     * @param string $year
-     * @param string $month
      *
-     * @return Dh22|null
      */
     public function getLiquidacionDefinitiva(string $year, string $month): ?Dh22
     {

@@ -9,9 +9,6 @@ use Illuminate\Support\Collection;
 
 class ConceptosTotalesService
 {
-    /**
-     * @param ConceptosTotalesRepositoryInterface $repository
-     */
     public function __construct(
         private readonly ConceptosTotalesRepositoryInterface $repository,
     ) {
@@ -30,9 +27,7 @@ class ConceptosTotalesService
     {
         $resultados = $this->repository->getTotalesPorConcepto($conceptos, $year, $month);
 
-        return $resultados->map(function ($item) {
-            return ConceptoTotalItemData::fromRowData($item);
-        });
+        return $resultados->map(fn($item) => ConceptoTotalItemData::fromRowData($item));
     }
 
     /**
@@ -41,8 +36,6 @@ class ConceptosTotalesService
      * @param array $conceptos Códigos de conceptos a incluir
      * @param int $year Año del período
      * @param int $month Mes del período
-     *
-     * @return ConceptoTotalAgrupacionData
      */
     public function getTotalesAgrupados(array $conceptos, int $year, int $month): ConceptoTotalAgrupacionData
     {
@@ -57,8 +50,6 @@ class ConceptosTotalesService
      * @param int $year Año del período
      * @param int $month Mes del período
      * @param array|null $conceptos Códigos de conceptos a incluir (opcional)
-     *
-     * @return ConceptoTotalAgrupacionData
      */
     public function getReporteConceptos(int $year, int $month, ?array $conceptos = null): ConceptoTotalAgrupacionData
     {

@@ -26,18 +26,16 @@ class DuplicateValidationService
      * Los registros únicos se marcan como válidos.
      *
      * @param Collection $rows Los registros a procesar.
-     *
-     * @return void
      */
     public function processRecords(Collection $rows): void
     {
         Log::debug('Agrupando registros por nro_cargo, en DuplicateValidationService');
         $groupedByCargo = $rows->groupBy('n_de_cargo');
 
-        foreach ($groupedByCargo as $nroCargo => $records) {
+        foreach ($groupedByCargo as $records) {
             if ($records->count() > 1) {
                 // Marcamos todos los registros como duplicados pero los mantenemos
-                $markedRecords = $records->map(function ($record) {
+                $markedRecords = $records->map(function (array $record): array {
                     $record['estado'] = BloqueosEstadoEnum::DUPLICADO;
                     return $record;
                 });
@@ -83,10 +81,10 @@ class DuplicateValidationService
         $cargos = $rows->pluck('n_de_cargo')->toArray();
         $duplicates = array_filter(
             array_count_values($cargos),
-            fn($count) => $count > 1,
+            fn($count): bool => $count > 1,
         );
 
-        if (!empty($duplicates)) {
+        if ($duplicates !== []) {
             Log::info('Se encontraron números de cargo duplicados: ' . implode(', ', array_keys($duplicates)));
         }
     }

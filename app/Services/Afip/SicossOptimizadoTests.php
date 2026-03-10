@@ -80,7 +80,7 @@ class SicossOptimizadoTests
     /**
      * Ejecuta una suite completa de pruebas con diferentes cargas.
      */
-    public static function suite_completa_rendimiento($incluir_produccion = false)
+    public static function suite_completa_rendimiento($incluir_produccion = false): array
     {
         Log::info('=== 🚀 INICIANDO SUITE COMPLETA DE RENDIMIENTO ===');
 
@@ -89,10 +89,10 @@ class SicossOptimizadoTests
 
         // Tests progresivos
         $tests = [
-            'rapido_100' => fn() => self::test_rapido_100_legajos(),
-            'estandar_1000' => fn() => self::test_estandar_1000_legajos(),
-            'intensivo_3000' => fn() => self::test_intensivo_3000_legajos(),
-            'masivo_5000' => fn() => self::test_masivo_5000_legajos(),
+            'rapido_100' => self::test_rapido_100_legajos(...),
+            'estandar_1000' => self::test_estandar_1000_legajos(...),
+            'intensivo_3000' => self::test_intensivo_3000_legajos(...),
+            'masivo_5000' => self::test_masivo_5000_legajos(...),
         ];
 
         // Incluir test de producción solo si se solicita
@@ -105,7 +105,7 @@ class SicossOptimizadoTests
             $resultados[$nombre] = $test();
 
             // Pausa entre tests para liberar memoria
-            sleep(2);
+            \Illuminate\Support\Sleep::sleep(2);
         }
 
         $fin_suite = microtime(true);
@@ -141,7 +141,7 @@ class SicossOptimizadoTests
     /**
      * 🔍 Diagnóstica y muestra información detallada del sistema y conexiones.
      */
-    public static function diagnosticar_sistema_y_conexiones()
+    public static function diagnosticar_sistema_y_conexiones(): array
     {
         Log::info('=== 🔍 DIAGNÓSTICO DEL SISTEMA ===');
 
@@ -276,8 +276,9 @@ class SicossOptimizadoTests
 
     /**
      * Método base para ejecutar pruebas con diferentes cantidades de legajos - VERSIÓN MEJORADA.
+     * @return mixed[]
      */
-    private static function ejecutar_prueba_con_legajos($limite_legajos, $nombre_test, $datos = null)
+    private static function ejecutar_prueba_con_legajos(?int $limite_legajos, string $nombre_test, $datos = null): array
     {
         Log::info("=== 🧪 INICIANDO $nombre_test ===");
 
@@ -426,7 +427,7 @@ class SicossOptimizadoTests
     /**
      * Análisis detallado de resultados con métricas avanzadas.
      */
-    private static function analizar_resultados_completos($inicio, $fin, $memoria_inicial, $memoria_final, $disponibles, $procesados, $resultado, $nombre_test)
+    private static function analizar_resultados_completos(float|string $inicio, float|string $fin, int $memoria_inicial, int $memoria_final, int $disponibles, int $procesados, $resultado, $nombre_test): array
     {
         $tiempo_total = $fin - $inicio;
 
@@ -458,7 +459,7 @@ class SicossOptimizadoTests
     /**
      * Clasificaciones de rendimiento.
      */
-    private static function clasificar_velocidad($tiempo, $legajos)
+    private static function clasificar_velocidad(int|float $tiempo, $legajos): string
     {
         $ms_por_legajo = ($tiempo * 1000) / max($legajos, 1);
 
@@ -477,7 +478,7 @@ class SicossOptimizadoTests
         return 'NECESITA MEJORA ❌';
     }
 
-    private static function clasificar_uso_memoria($memoria_bytes)
+    private static function clasificar_uso_memoria(int $memoria_bytes): string
     {
         $memoria_mb = $memoria_bytes / 1024 / 1024;
 
@@ -496,7 +497,7 @@ class SicossOptimizadoTests
         return 'ALTO CONSUMO ❌';
     }
 
-    private static function clasificar_rendimiento_general($tiempo, $legajos, $memoria)
+    private static function clasificar_rendimiento_general(int|float $tiempo, $legajos, int $memoria): string
     {
         $ms_por_legajo = ($tiempo * 1000) / max($legajos, 1);
         $memoria_mb = $memoria / 1024 / 1024;
@@ -518,8 +519,9 @@ class SicossOptimizadoTests
 
     /**
      * Genera recomendaciones basadas en los resultados.
+     * @return list<('⚠️  Considerar optimizaciones adicionales - tiempo por legajo alto' | '✅ Rendimiento óptimo - listo para producción' | '💾 Considerar procesamiento en lotes - uso de memoria alto' | '🔍 Investigar legajos fallidos - tasa de éxito baja' | '🚀 Considerar paralelización para cargas completas')>
      */
-    private static function generar_recomendaciones($estadisticas)
+    private static function generar_recomendaciones(array $estadisticas): array
     {
         $recomendaciones = [];
 
@@ -539,7 +541,7 @@ class SicossOptimizadoTests
             $recomendaciones[] = '🚀 Considerar paralelización para cargas completas';
         }
 
-        if (empty($recomendaciones)) {
+        if ($recomendaciones === []) {
             $recomendaciones[] = '✅ Rendimiento óptimo - listo para producción';
         }
 
@@ -548,8 +550,9 @@ class SicossOptimizadoTests
 
     /**
      * Análisis comparativo de múltiples tests.
+     * @return float[]|int[]|non-falsy-string[]|null[]
      */
-    private static function analizar_suite_comparativa($resultados, $tiempo_total_suite)
+    private static function analizar_suite_comparativa(array $resultados, $tiempo_total_suite): array
     {
         $analisis = [
             'tiempo_total_suite_min' => round($tiempo_total_suite / 60, 2),
@@ -572,7 +575,7 @@ class SicossOptimizadoTests
             }
         }
 
-        if (!empty($velocidades)) {
+        if ($velocidades !== []) {
             $min_vel = min($velocidades);
             $max_vel = max($velocidades);
 
@@ -595,7 +598,7 @@ class SicossOptimizadoTests
     /**
      * Activa monitoreo de performance durante la ejecución.
      */
-    private static function activar_monitoreo_performance($total_legajos): void
+    private static function activar_monitoreo_performance(int $total_legajos): void
     {
         // Log cada 1000 legajos o al 25%, 50%, 75% del progreso
         $intervalos_log = [
@@ -695,7 +698,7 @@ class SicossOptimizadoTests
             if ($codc_reparto && $codc_reparto !== 'NULL') {
                 $legajos_reparto = DB::connection($conexion)->select('
                     SELECT COUNT(*) as total FROM mapuche.dh01 WHERE codc_reparto = ?
-                ', [trim($codc_reparto, "'")])[0]->total ?? 0;
+                ', [trim((string) $codc_reparto, "'")])[0]->total ?? 0;
             }
 
             return [
@@ -704,7 +707,7 @@ class SicossOptimizadoTests
                 'legajos_activos' => $legajos_activos,
                 'legajos_reparto_especifico' => $legajos_reparto,
                 'codc_reparto_utilizado' => $codc_reparto,
-                'periodo_consultado' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT),
+                'periodo_consultado' => $periodo['year'] . '/' . str_pad((string) $periodo['month'], 2, '0', STR_PAD_LEFT),
             ];
         } catch (Exception $e) {
             return [
@@ -727,7 +730,7 @@ class SicossOptimizadoTests
             return [
                 'año_actual' => $periodo['year'],
                 'mes_actual' => $periodo['month'],
-                'periodo_formato' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT),
+                'periodo_formato' => $periodo['year'] . '/' . str_pad((string) $periodo['month'], 2, '0', STR_PAD_LEFT),
                 'nombre_mes' => date('F', mktime(0, 0, 0, $periodo['month'], 1)),
                 'timestamp_consulta' => now()->toDateTimeString(),
             ];

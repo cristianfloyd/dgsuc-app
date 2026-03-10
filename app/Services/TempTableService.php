@@ -13,7 +13,7 @@ class TempTableService extends DatabaseService
 {
     use MapucheConnectionTrait;
 
-    protected $model;
+    protected \App\Models\TablaTempCuils $model;
 
     public function __construct()
     {
@@ -55,9 +55,7 @@ class TempTableService extends DatabaseService
             foreach (array_chunk($cuils, 1000) as $chunk) {
                 DB::connection($this->getConnectionName())
                     ->table($tableName)
-                    ->insert(array_map(function ($cuil) {
-                        return ['cuil' => $cuil];
-                    }, $chunk));
+                    ->insert(array_map(fn($cuil) => ['cuil' => $cuil], $chunk));
             }
 
             DB::connection($this->getConnectionName())->commit();

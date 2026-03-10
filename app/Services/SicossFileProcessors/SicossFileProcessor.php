@@ -10,8 +10,6 @@ use function count;
 
 class SicossFileProcessor
 {
-    private const CHUNK_SIZE = 1000;
-
     public function processFile(string $filePath, int $batchSize = 1000): Generator
     {
         // Validación del tamaño del lote
@@ -32,7 +30,7 @@ class SicossFileProcessor
                 $line = fgets($handle);
 
                 // Saltear líneas vacías
-                if (empty(trim($line))) {
+                if (in_array(trim($line), ['', '0'], true)) {
                     continue;
                 }
 
@@ -46,7 +44,7 @@ class SicossFileProcessor
             }
 
             // Enviar el último lote si quedaron registros en el buffer
-            if (!empty($buffer)) {
+            if ($buffer !== []) {
                 yield $buffer;
             }
         } finally {

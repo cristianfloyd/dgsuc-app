@@ -11,7 +11,7 @@ use DateTime;
 
 class RetResultadoService
 {
-    private RetResultadoRepository $repository;
+    private readonly RetResultadoRepository $repository;
 
     public function __construct(RetResultadoRepository $repository)
     {
@@ -21,12 +21,7 @@ class RetResultadoService
     /**
      * Calcula el retroactivo para un legajo específico.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargoAnt
-     * @param DateTime $fechaRetDesde
-     * @param Periodo $periodo
      *
-     * @return RetResultadoDTO|null
      */
     public function calcularRetroactivo(int $nroLegaj, int $nroCargoAnt, DateTime $fechaRetDesde, Periodo $periodo): ?RetResultadoDTO
     {
@@ -46,9 +41,7 @@ class RetResultadoService
     /**
      * Crea un nuevo resultado de retroactivo.
      *
-     * @param array $datos
      *
-     * @return RetResultado
      */
     public function crearRetResultado(array $datos): RetResultado
     {
@@ -59,10 +52,7 @@ class RetResultadoService
     /**
      * Actualiza un resultado de retroactivo existente.
      *
-     * @param RetResultado $retResultado
-     * @param array $datos
      *
-     * @return bool
      */
     public function actualizarRetResultado(RetResultado $retResultado, array $datos): bool
     {
@@ -73,24 +63,18 @@ class RetResultadoService
     /**
      * Obtiene todos los resultados de retroactivo para un tipo específico.
      *
-     * @param TipoRetro $tipoRetro
      *
-     * @return array
      */
     public function obtenerPorTipoRetro(TipoRetro $tipoRetro): array
     {
         $resultados = $this->repository->obtenerPorTipoRetro($tipoRetro);
-        return $resultados->map(function ($resultado) {
-            return new RetResultadoDTO($resultado, $this->calcularMontoTotal($resultado));
-        })->toArray();
+        return $resultados->map(fn($resultado) => new RetResultadoDTO($resultado, $this->calcularMontoTotal($resultado)))->toArray();
     }
 
     /**
      * Calcula el monto total del retroactivo.
      *
-     * @param RetResultado $retResultado
      *
-     * @return float
      */
     private function calcularMontoTotal(RetResultado $retResultado): float
     {

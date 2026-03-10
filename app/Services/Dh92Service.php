@@ -15,8 +15,6 @@ class Dh92Service
 
     /**
      * Constructor del servicio.
-     *
-     * @param Dh92Repository $repository
      */
     public function __construct(Dh92Repository $repository)
     {
@@ -26,10 +24,8 @@ class Dh92Service
     /**
      * Crea un nuevo registro con transacción.
      *
-     * @param array $data
      *
      * @throws Exception
-     *
      * @return mixed
      */
     public function createWithTransaction(array $data)
@@ -49,10 +45,8 @@ class Dh92Service
      * Actualiza un registro con transacción.
      *
      * @param int $id
-     * @param array $data
      *
      * @throws Exception
-     *
      * @return bool
      */
     public function updateWithTransaction($id, array $data)

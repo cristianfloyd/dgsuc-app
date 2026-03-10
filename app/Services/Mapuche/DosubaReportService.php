@@ -64,7 +64,7 @@ class DosubaReportService
                 'year' => $year,
                 'month' => $month,
             ]);
-            throw new Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage());
+            throw new Exception('Error al generar el reporte DOSUBA: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -73,12 +73,10 @@ class DosubaReportService
      *
      * @param Carbon $fecha Fecha del mes para obtener los legajos
      * @param bool $soloDefinitivas Si true, filtra solo liquidaciones definitivas
-     *
-     * @return Collection
      */
     public function legajosMes(Carbon $fecha, bool $soloDefinitivas = true): Collection
     {
-        $query = Dh21h::query()
+        $builder = Dh21h::query()
             ->join('mapuche.dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
             ->where('dh22.per_liano', $fecha->year)
             ->where('dh22.per_limes', $fecha->month)
@@ -93,16 +91,16 @@ class DosubaReportService
 
         // Aplicamos el filtro de liquidaciones definitivas si es necesario
         if ($soloDefinitivas) {
-            $query->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'");
+            $builder->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'");
         }
 
         Log::info('SQL Query legajosMes:', [
             'fecha' => $fecha->format('Y-m'),
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
+            'sql' => $builder->toSql(),
+            'bindings' => $builder->getBindings(),
         ]);
 
-        return $query->get();
+        return $builder->get();
     }
 
     /**
@@ -110,8 +108,6 @@ class DosubaReportService
      *
      * @param Collection $legajosTercerMes Legajos del tercer mes
      * @param Collection $legajosCombinados Legajos combinados del primer y segundo mes
-     *
-     * @return Collection
      */
     public function cruzarLegajos(Collection $legajosTercerMes, Collection $legajosCombinados): Collection
     {
@@ -185,21 +181,19 @@ class DosubaReportService
             $resultados = $resultados->concat($query->get());
         }
 
-        return $resultados->map(function ($item) {
-            return [
-                'nro_legaj' => $item->nro_legaj,
-                'cuil' => $item->nro_cuil1 . $item->nro_cuil . $item->nro_cuil2,
-                'apellido' => $item->apellido,
-                'nombre' => $item->nombre,
-                'ultima_liquidacion' => $item->nro_liqui,
-                'codc_uacad' => $item->codc_uacad,
-                'periodo_fiscal' => $item->anio . $item->mes,
-                'anio' => $item->anio,
-                'mes' => $item->mes,
-                'embarazada' => $item->embarazada,
-                'fallecido' => $item->fallecido,
-            ];
-        });
+        return $resultados->map(fn($item) => [
+            'nro_legaj' => $item->nro_legaj,
+            'cuil' => $item->nro_cuil1 . $item->nro_cuil . $item->nro_cuil2,
+            'apellido' => $item->apellido,
+            'nombre' => $item->nombre,
+            'ultima_liquidacion' => $item->nro_liqui,
+            'codc_uacad' => $item->codc_uacad,
+            'periodo_fiscal' => $item->anio . $item->mes,
+            'anio' => $item->anio,
+            'mes' => $item->mes,
+            'embarazada' => $item->embarazada,
+            'fallecido' => $item->fallecido,
+        ]);
     }
 
     /**

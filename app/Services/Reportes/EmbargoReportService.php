@@ -75,7 +75,7 @@ class EmbargoReportService
                 ->orderBy('embargos.codn_conce')
                 ->get();
 
-            $embargos = $results->map(function ($item) {
+            $embargos = $results->map(function ($item): \stdClass {
                 $item->caratula = EncodingService::toUtf8($item->caratula);
                 $item->nom_demandado = EncodingService::toUtf8($item->nom_demandado);
                 return $item;
@@ -104,10 +104,10 @@ class EmbargoReportService
                 ->where('nro_liqui', $nro_liqui)
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->get()
-                ->keyBy(fn($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
+                ->keyBy(fn($item): string => "{$item->nro_legaj}-{$item->nro_cargo}");
 
             // Agregar los conceptos adicionales al resultado
-            $embargos = $embargos->map(function ($item) use ($conceptosAdicionales) {
+            $embargos = $embargos->map(function ($item) use ($conceptosAdicionales): \stdClass {
                 $key = $item->nro_legaj . '-' . $item->nro_cargo;
                 $conceptos = $conceptosAdicionales[$key] ?? null;
 
@@ -162,25 +162,21 @@ class EmbargoReportService
     {
         return $embargos
             ->groupBy('nro_legaj')
-            ->map(function ($embargosLegajo) use ($nro_liqui) {
-                return $embargosLegajo->map(function ($embargo) use ($nro_liqui) {
-                    $importes = $embargo->getImporteDescontado($nro_liqui);
+            ->map(fn($embargosLegajo) => $embargosLegajo->map(function ($embargo) use ($nro_liqui) {
+                $importes = $embargo->getImporteDescontado($nro_liqui);
 
-                    return $importes->map(function ($importe) use ($embargo) {
-                        return [
-                            'nro_legaj' => $embargo->nro_legaj,
-                            'nombre_completo' => $embargo->datosPersonales->nombre_completo,
-                            'codn_conce' => $embargo->tipoEmbargo->codn_conce,
-                            'importe_descontado' => $importe->impp_conce,
-                            'nro_embargo' => $embargo->nro_embargo,
-                            'nro_cargo' => $importe->nro_cargo,
-                            'caratula' => $embargo->caratula,
-                            'codc_uacad' => $embargo->datosPersonales->dh03()
-                                ->where('nro_cargo', $importe->nro_cargo)
-                                ->value('codc_uacad'),
-                        ];
-                    });
-                })->flatten(1);
-            })->flatten(1);
+                return $importes->map(fn($importe) => [
+                    'nro_legaj' => $embargo->nro_legaj,
+                    'nombre_completo' => $embargo->datosPersonales->nombre_completo,
+                    'codn_conce' => $embargo->tipoEmbargo->codn_conce,
+                    'importe_descontado' => $importe->impp_conce,
+                    'nro_embargo' => $embargo->nro_embargo,
+                    'nro_cargo' => $importe->nro_cargo,
+                    'caratula' => $embargo->caratula,
+                    'codc_uacad' => $embargo->datosPersonales->dh03()
+                        ->where('nro_cargo', $importe->nro_cargo)
+                        ->value('codc_uacad'),
+                ]);
+            })->flatten(1))->flatten(1);
     }
 }

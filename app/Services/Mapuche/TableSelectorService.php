@@ -34,7 +34,7 @@ class TableSelectorService
 
         try {
             // Obtener el período fiscal de la liquidación
-            $liquidacionModel = Dh22::where('nro_liqui', $nroLiqui)->first();
+            $liquidacionModel = Dh22::query()->where('nro_liqui', $nroLiqui)->first();
 
             if (!$liquidacionModel) {
                 Log::warning("Liquidación no encontrada: {$nroLiqui}. Usando tabla dh21 por defecto.");
@@ -53,7 +53,7 @@ class TableSelectorService
             // Comparar períodos fiscales
             if (
                 $yearLiquidacion < $yearActual
-                || ($yearLiquidacion == $yearActual && $mesLiquidacion < $mesActual)
+                || ($yearLiquidacion === $yearActual && $mesLiquidacion < $mesActual)
             ) {
                 Log::info("Usando tabla histórica dh21h para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
                 return 'dh21h';

@@ -248,7 +248,7 @@ class SicossExportService
         // Verificar la longitud final
         if (strlen($valorLatin1) !== $longitud) {
             // Log de error o ajuste adicional si es necesario
-            $valorLatin1 = str_pad(substr($valorLatin1, 0, $longitud), $longitud, ' ', STR_PAD_RIGHT);
+            return str_pad(substr($valorLatin1, 0, $longitud), $longitud, ' ', STR_PAD_RIGHT);
         }
 
         return $valorLatin1;

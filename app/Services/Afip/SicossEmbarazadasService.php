@@ -16,16 +16,8 @@ class SicossEmbarazadasService
 {
     use MapucheConnectionTrait;
 
-    protected TableSelectorService $tableSelectorService;
-
-    protected PeriodoFiscalService $periodoFiscalService;
-
-    public function __construct(
-        TableSelectorService $tableSelectorService,
-        PeriodoFiscalService $periodoFiscalService,
-    ) {
-        $this->tableSelectorService = $tableSelectorService;
-        $this->periodoFiscalService = $periodoFiscalService;
+    public function __construct(protected TableSelectorService $tableSelectorService, protected PeriodoFiscalService $periodoFiscalService)
+    {
     }
 
     /**
@@ -53,7 +45,7 @@ class SicossEmbarazadasService
         $liquidaciones = $params['liquidaciones'] ?? null;
         if (!$liquidaciones) {
             $liquidaciones = $this->obtenerLiquidaciones($year, $month);
-            if (empty($liquidaciones)) {
+            if ($liquidaciones === []) {
                 return [
                     'status' => 'warning',
                     'message' => "No se encontraron liquidaciones para el período {$year}-{$month}",
@@ -95,13 +87,11 @@ class SicossEmbarazadasService
             }
 
             // Si no tenemos detalles del log, intentar obtener el último registro
-            if (!$logDetails) {
-                $logDetails = DB::connection($this->getConnectionName())
-                    ->table('suc.log_operaciones')
-                    ->where('operacion', 'sicoss_mapuche_update_embarazadas')
-                    ->orderBy('id', 'desc')
-                    ->first();
-            }
+            $logDetails = DB::connection($this->getConnectionName())
+                ->table('suc.log_operaciones')
+                ->where('operacion', 'sicoss_mapuche_update_embarazadas')
+                ->orderBy('id', 'desc')
+                ->first();
 
             $registrosAfectados = $logDetails->registros_afectados ?? 0;
             $duracionMs = $logDetails->duracion_ms ?? 0;

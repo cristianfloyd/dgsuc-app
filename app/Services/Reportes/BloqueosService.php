@@ -10,17 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class BloqueosService implements BloqueosServiceInterface
 {
-    protected BloqueosImportService $importService;
-
-    protected BloqueosProcessService $processService;
-
     public function __construct(
-        BloqueosImportService $importService,
-        BloqueosProcessService $processService,
+        protected BloqueosImportService $importService,
+        protected BloqueosProcessService $processService,
         private readonly int $nroLiqui,
     ) {
-        $this->importService = $importService;
-        $this->processService = $processService;
         Log::debug("numero de liquidacion en BloqueoService: {$this->nroLiqui}");
     }
 

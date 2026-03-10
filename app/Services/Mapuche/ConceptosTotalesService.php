@@ -10,12 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class ConceptosTotalesService
 {
-    protected $repository;
-
     // Inyección de dependencias para el repositorio
-    public function __construct(Dh21RepositoryInterface $repository)
+    public function __construct(protected \App\Contracts\Dh21RepositoryInterface $repository)
     {
-        $this->repository = $repository;
     }
 
     public function calcular(?NroLiqui $nroLiqui = null, ?int $codn_fuent = null): Builder
@@ -25,7 +22,7 @@ class ConceptosTotalesService
             $query = $this->repository->query();
 
             // Aplicar filtros opcionales
-            if ($nroLiqui) {
+            if ($nroLiqui instanceof \App\NroLiqui) {
                 $query->where('nro_liqui', '=', $nroLiqui->getValue());
             }
             if ($codn_fuent !== null) {

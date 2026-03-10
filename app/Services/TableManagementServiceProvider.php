@@ -10,15 +10,12 @@ class TableManagementServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
+    #[\Override]
     public function register(): void
     {
-        $this->app->bind(TableManagementServiceInterface::class, function ($app) {
-            return new TableManagementService();
-        });
+        $this->app->bind(fn($app): \App\Contracts\TableManagementServiceInterface => new TableManagementService());
 
-        $this->app->bind(TableManagementService::class, function ($app) {
-            return new TableManagementService();
-        });
+        $this->app->bind(fn($app): \App\Services\TableManagementService => new TableManagementService());
     }
 
     /**

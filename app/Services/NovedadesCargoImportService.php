@@ -18,8 +18,6 @@ class NovedadesCargoImportService
      *
      * @param string $path Ruta local al archivo .txt
      * @param array $params Parámetros de importación (ej. 'conActualizacion', 'nuevosIdentificadores')
-     *
-     * @return void
      */
     public function processFile(string $path, array $params = []): void
     {
@@ -40,9 +38,11 @@ class NovedadesCargoImportService
             while (($line = fgets($handle)) !== false) {
                 // Limpieza de caracteres finales (\r\n)
                 $line = rtrim($line, "\r\n");
-
                 // En caso de que la línea esté vacía, omitimos el procesamiento
-                if (empty($line)) {
+                if ($line === '') {
+                    continue;
+                }
+                if ($line === '0') {
                     continue;
                 }
 
@@ -148,7 +148,7 @@ class NovedadesCargoImportService
                 // -----------------------------------------------------------------
                 // Inserción en la tabla de "almacén temporal"
                 // -----------------------------------------------------------------
-                NovedadesCargoImportModel::create([
+                NovedadesCargoImportModel::query()->create([
                     // Campos obligatorios o importantes
                     'codigoNovedad' => $codigoNovedad,
                     'numLegajo' => $numLegajo,

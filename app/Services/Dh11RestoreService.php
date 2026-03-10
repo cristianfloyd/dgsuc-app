@@ -13,9 +13,6 @@ class Dh11RestoreService
 {
     /**
      * Constructor del servicio.
-     *
-     * @param Dh61Repository $dh61Repository
-     * @param Dh11RepositoryInterface $dh11Repository
      */
     public function __construct(
         protected Dh61Repository $dh61Repository,
@@ -26,8 +23,6 @@ class Dh11RestoreService
     /**
      * Restaura las categorías para un período fiscal específico.
      *
-     * @param int $year
-     * @param int $month
      *
      * @throws Exception
      */
@@ -78,7 +73,7 @@ class Dh11RestoreService
      *
      * @return array Arreglo de registros actualizados.
      */
-    private function restoreHistoricalRecords($historicalRecords): array
+    private function restoreHistoricalRecords(\Illuminate\Database\Eloquent\Collection $historicalRecords): array
     {
         DB::beginTransaction();
 

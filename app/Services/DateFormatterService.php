@@ -26,13 +26,13 @@ class DateFormatterService
     public static function parseOrDefault($dateString, ?string $format = null, $default = null)
     {
         // Si el valor es nulo o "Sin definir", devolver el valor predeterminado
-        if ($dateString === null || $dateString === 'Sin definir' || $dateString === '') {
+        if (in_array($dateString, [null, 'Sin definir', ''], true)) {
             return $default;
         }
 
         try {
             // Intentar convertir a Carbon usando el formato especificado o auto-detección
-            return $format ? Carbon::createFromFormat($format, $dateString) : Carbon::parse($dateString);
+            return $format ? \Illuminate\Support\Facades\Date::createFromFormat($format, $dateString) : \Illuminate\Support\Facades\Date::parse($dateString);
         } catch (InvalidFormatException $e) {
             // Registrar el error para depuración
             Log::debug("Error al parsear fecha: {$dateString}", [
@@ -54,9 +54,9 @@ class DateFormatterService
      *
      * @return string Fecha formateada o texto predeterminado
      */
-    public static function formatOrDefault($dateString, string $outputFormat = 'd/m/Y', string $defaultText = 'No disponible')
+    public static function formatOrDefault($dateString, string $outputFormat = 'd/m/Y', string $defaultText = 'No disponible'): string
     {
-        $date = self::parseOrDefault($dateString, null, null);
+        $date = self::parseOrDefault($dateString);
 
         return $date instanceof Carbon ? $date->format($outputFormat) : $defaultText;
     }

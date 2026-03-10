@@ -30,16 +30,16 @@ class DateParserService
         }
 
         if ($date instanceof DateTime) {
-            return Carbon::instance($date);
+            return \Illuminate\Support\Facades\Date::instance($date);
         }
 
         foreach ($this->supportedFormats as $format) {
             try {
-                $parsed = Carbon::createFromFormat($format, $date);
+                $parsed = \Illuminate\Support\Facades\Date::createFromFormat($format, $date);
                 if ($parsed && $this->isValidYear($parsed->year)) {
                     return $parsed;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 continue;
             }
         }
