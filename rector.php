@@ -16,7 +16,7 @@ use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/app/Models/',
+        __DIR__ . '/app/Services/',
         // __DIR__ . '/routes',
         // __DIR__ . '/tests',
         // __DIR__ . '/config',
@@ -29,6 +29,8 @@ return RectorConfig::configure()
         __DIR__ . '/storage',
         __DIR__ . '/bootstrap/cache',
         __DIR__ . '/node_modules',
+        __DIR__ . '/app/Services/Afip/sicoss*.php',
+        __DIR__ . '/app/Services/Afip/Sicoss*.php',
 
         // Excluir migraciones generadas automáticamente
         __DIR__ . '/database/migrations/*_create_*_table.php',
