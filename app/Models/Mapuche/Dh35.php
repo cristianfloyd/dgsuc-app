@@ -52,7 +52,8 @@ class Dh35 extends Model
     /**
      * Scope para filtrar por tipo de escalafón.
      */
-    public function scopeTipoEscalafon($query, string $tipoEscal)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function tipoEscalafon($query, string $tipoEscal)
     {
         return $query->where('tipo_escal', $tipoEscal);
     }
@@ -60,11 +61,13 @@ class Dh35 extends Model
     /**
      * Scope para caracteres concursados.
      */
-    public function scopeConcursados($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function concursados($query)
     {
         return $query->where('caracter_concursado', true);
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

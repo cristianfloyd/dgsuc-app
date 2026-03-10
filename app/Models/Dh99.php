@@ -60,22 +60,9 @@ class Dh99 extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'per_anoct' => 'integer',
-        'per_mesct' => 'integer',
-        'codc_uacad' => 'string',
-    ];
-
-    /**
      * Establece el periodo fiscal a partir de un objeto PeriodoFiscal o un string en formato YYYYMM.
      *
      * @param PeriodoFiscal|string $periodoFiscal
-     *
-     * @return bool
      */
     public function setPeriodoFiscal($periodoFiscal): bool
     {
@@ -103,8 +90,8 @@ class Dh99 extends Model
     protected function periodoFiscal(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                $periodoFiscalService = app(PeriodoFiscalService::class);
+            get: function (): string {
+                $periodoFiscalService = resolve(PeriodoFiscalService::class);
                 $periodo = $periodoFiscalService->getPeriodoFiscalFromDatabase();
                 return $periodo['year'] . $periodo['month'];
             },
@@ -117,9 +104,19 @@ class Dh99 extends Model
     protected function periodoFiscalObject(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return new PeriodoFiscal($this->per_anoct, $this->per_mesct);
-            },
+            get: fn() => new PeriodoFiscal($this->per_anoct, $this->per_mesct),
         );
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'per_anoct' => 'integer',
+            'per_mesct' => 'integer',
+            'codc_uacad' => 'string',
+        ];
     }
 }

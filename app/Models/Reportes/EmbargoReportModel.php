@@ -47,70 +47,31 @@ class EmbargoReportModel extends Model
         'nro_liqui',
         '861',
     ];
-
-    // Definimos los tipos de datos para cada columna
-    protected $casts = [
-        'id' => 'integer',
-        'nro_legaj' => 'integer',
-        'nombre_completo' => 'string',
-        'codn_conce' => 'integer',
-        'remunerativo' => 'decimal:2',
-        'importe_descontado' => 'decimal:2',
-        '860' => 'decimal:2',
-        'nov1_conce' => 'decimal:2',
-        'nov2_conce' => 'decimal:2',
-        'nro_embargo' => 'integer',
-        'nro_cargo' => 'integer',
-        'caratula' => 'string',
-        'codc_uacad' => 'string',
-        'session_id' => 'string',
-        'nro_liqui' => 'integer',
-        '861' => 'decimal:2',
-        'created_at' => 'datetime',
-    ];
-
-
-    // ##### mutadores y accesores ##################################
-
-    public function getCodcUacadAttribute($value)
+    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return trim($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
     }
 
-    public function geImporteDescontadoAttribute($value)
+    public function geImporteDescontadoAttribute($value): string
     {
         return number_format($value, 2, ',', '.');
     }
-
-    public function getCaratulaAttribute($value)
+    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return EncodingService::toUtf8($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value), set: fn(?string $value): array => ['caratula' => EncodingService::toLatin1($value)]);
     }
-
-    public function setCaratulaAttribute($value): void
+    protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $this->attributes['caratula'] = EncodingService::toLatin1($value);
-    }
-
-    public function getNombreCompletoAttribute($value)
-    {
-        return EncodingService::toUtf8($value);
-    }
-
-    public function setNombreCompletoAttribute($value): void
-    {
-        $this->attributes['nombre_completo'] = EncodingService::toLatin1($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value), set: fn(?string $value): array => ['nombre_completo' => EncodingService::toLatin1($value)]);
     }
 
     // ######################################################################
     /**
      * Crea la tabla en la base de datos si no existe.
-     *
-     * @return void
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = (new static())->getConnection();
+        $connection = new static()->getConnection();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.embargo_reports')) {
             $connection->statement('
@@ -144,13 +105,11 @@ class EmbargoReportModel extends Model
 
     /**
      * Limpia los datos de la sesión actual en la tabla.
-     *
-     * @return void
      */
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
-        $connection = (new static())->getConnection();
+        $connection = new static()->getConnection();
 
         $connection->table('suc.embargo_reports')->where('session_id', $sessionId)->delete();
     }
@@ -162,7 +121,7 @@ class EmbargoReportModel extends Model
     public static function cleanOldRecords(): void
     {
         $sessionLifetime = config('session.lifetime') * 60; // Convertir minutos a segundos
-        $connection = (new static())->getConnection();
+        $connection = new static()->getConnection();
 
         $connection->statement("
             DELETE FROM suc.embargo_reports
@@ -187,30 +146,28 @@ class EmbargoReportModel extends Model
 
 
             // Preparamos los datos para inserción
-            $dataToInsert = $data->map(function ($item) use ($sessionId, $nro_liqui) {
-                return [
-                    'nro_legaj' => $item->nro_legaj,
-                    'nombre_completo' => $item->nom_demandado,
-                    'codn_conce' => $item->codn_conce,
-                    'remunerativo' => $item->remunerativo,
-                    'importe_descontado' => $item->impp_conce,
-                    '860' => $item->{'860'},
-                    'nov1_conce' => $item->nov1_conce,
-                    'nov2_conce' => $item->nov2_conce,
-                    'nro_embargo' => $item->nro_embargo,
-                    'nro_cargo' => $item->nro_cargo,
-                    'caratula' => $item->caratula,
-                    'codc_uacad' => $item->codc_uacad,
-                    'session_id' => $sessionId,
-                    'nro_liqui' => $nro_liqui,
-                    '861' => $item->{'861'},
-                ];
-            })->toArray();
+            $dataToInsert = $data->map(fn($item) => [
+                'nro_legaj' => $item->nro_legaj,
+                'nombre_completo' => $item->nom_demandado,
+                'codn_conce' => $item->codn_conce,
+                'remunerativo' => $item->remunerativo,
+                'importe_descontado' => $item->impp_conce,
+                '860' => $item->{'860'},
+                'nov1_conce' => $item->nov1_conce,
+                'nov2_conce' => $item->nov2_conce,
+                'nro_embargo' => $item->nro_embargo,
+                'nro_cargo' => $item->nro_cargo,
+                'caratula' => $item->caratula,
+                'codc_uacad' => $item->codc_uacad,
+                'session_id' => $sessionId,
+                'nro_liqui' => $nro_liqui,
+                '861' => $item->{'861'},
+            ])->all();
 
 
 
             // Insertamos los datos en la tabla
-            self::insert($dataToInsert);
+            self::query()->insert($dataToInsert);
 
             // Confirmamos la transacción
             DB::commit();
@@ -231,7 +188,7 @@ class EmbargoReportModel extends Model
     public static function getReportData()
     {
         $sessionId = session()->getId();
-        return self::where('session_id', $sessionId)->get();
+        return self::query()->where('session_id', $sessionId)->get();
     }
 
     /**
@@ -254,4 +211,27 @@ class EmbargoReportModel extends Model
     }
 
     // ##################################### RELACIONES ##########################################
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'nro_legaj' => 'integer',
+            'nombre_completo' => 'string',
+            'codn_conce' => 'integer',
+            'remunerativo' => 'decimal:2',
+            'importe_descontado' => 'decimal:2',
+            '860' => 'decimal:2',
+            'nov1_conce' => 'decimal:2',
+            'nov2_conce' => 'decimal:2',
+            'nro_embargo' => 'integer',
+            'nro_cargo' => 'integer',
+            'caratula' => 'string',
+            'codc_uacad' => 'string',
+            'session_id' => 'string',
+            'nro_liqui' => 'integer',
+            '861' => 'decimal:2',
+            'created_at' => 'datetime',
+        ];
+    }
 }

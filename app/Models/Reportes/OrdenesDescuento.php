@@ -50,19 +50,11 @@ class OrdenesDescuento extends Model implements HasLabel
         'last_sync',
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     */
-    protected $casts = [
-        'fecha_emision' => 'datetime',
-        'total_imp_def' => 'decimal:2',
-        'total_imp_nd' => 'decimal:2',
-    ];
-
     protected $encodedFields = ['desc_conce', 'desc_liqui', 'desc_item'];
 
     private static $connectionInstance;
 
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -73,7 +65,7 @@ class OrdenesDescuento extends Model implements HasLabel
         static::retrieved(function ($model): void {
             foreach ($model->encodedFields as $field) {
                 if (isset($model->attributes[$field])) {
-                    $model->attributes[$field] = iconv('ISO-8859-1', 'UTF-8', $model->attributes[$field]);
+                    $model->attributes[$field] = iconv('ISO-8859-1', 'UTF-8', (string) $model->attributes[$field]);
                 }
             }
         });
@@ -81,7 +73,7 @@ class OrdenesDescuento extends Model implements HasLabel
         static::saving(function ($model): void {
             foreach ($model->encodedFields as $field) {
                 if (isset($model->attributes[$field])) {
-                    $model->attributes[$field] = iconv('UTF-8', 'ISO-8859-1', $model->attributes[$field]);
+                    $model->attributes[$field] = iconv('UTF-8', 'ISO-8859-1', (string) $model->attributes[$field]);
                 }
             }
         });
@@ -96,7 +88,7 @@ class OrdenesDescuento extends Model implements HasLabel
     public static function createTableIfNotExists(): bool
     {
         try {
-            $connection = (new static())->getConnectionName();
+            $connection = new static()->getConnectionName();
 
             if (!Schema::connection($connection)->hasTable('suc.rep_ordenes_descuento')) {
                 Schema::connection($connection)->create('suc.rep_ordenes_descuento', function (Blueprint $table): void {
@@ -145,12 +137,14 @@ class OrdenesDescuento extends Model implements HasLabel
     }
 
     // ######################  Scopes útiles para el reporte  ######################
-    public function scopePeriodo($query, $periodo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function periodo($query, $periodo)
     {
         return $query->where('periodo_fiscal', $periodo);
     }
 
-    public function scopePorLiquidacion($query, $nroLiqui)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLiquidacion($query, $nroLiqui)
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
@@ -168,7 +162,8 @@ class OrdenesDescuento extends Model implements HasLabel
 
     // #######################  Scopes útiles para Filament  ######################
     // Scopes globales útiles para Filament
-    public function scopeSearch(Builder $query, string $search): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search(Builder $query, string $search): Builder
     {
         return $query->where(function ($query) use ($search): void {
             $query->where('desc_liqui', 'like', "%{$search}%")
@@ -178,12 +173,14 @@ class OrdenesDescuento extends Model implements HasLabel
     }
 
     // Relaciones que pueden ser útiles en Filament
-    public function scopeOrdenadoPorUacad($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ordenadoPorUacad($query)
     {
         return $query->orderBy('codc_uacad')->orderBy('codn_conce');
     }
 
-    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
@@ -192,13 +189,13 @@ class OrdenesDescuento extends Model implements HasLabel
     /**
      * Método de diagnóstico para problemas de codificación.
      */
-    public static function diagnosticarCodificacion($id)
+    public static function diagnosticarCodificacion($id): array
     {
         try {
             $connection = static::getMapucheConnection();
             $connection->statement("SET client_encoding TO 'LATIN1'");
 
-            $registro = static::find($id);
+            $registro = static::query()->find($id);
 
             if (!$registro) {
                 return ['error' => 'Registro no encontrado'];
@@ -217,14 +214,14 @@ class OrdenesDescuento extends Model implements HasLabel
 
                     $diagnostico[$campo] = [
                         'valor_original' => $valorOriginal,
-                        'valor_raw_hex' => bin2hex($valorOriginal),
-                        'valor_utf8' => mb_convert_encoding($valorOriginal, 'UTF-8', mb_detect_encoding($valorOriginal)),
+                        'valor_raw_hex' => bin2hex((string) $valorOriginal),
+                        'valor_utf8' => mb_convert_encoding($valorOriginal, 'UTF-8', mb_detect_encoding((string) $valorOriginal)),
                         'valor_desde_iso' => $valorConvertidoISO,
                         'valor_desde_latin1' => $valorConvertidoLATIN1,
-                        'encoding_detectado' => mb_detect_encoding($valorOriginal, ['UTF-8', 'ISO-8859-1', 'ASCII'], true),
-                        'longitud' => strlen($valorOriginal),
-                        'longitud_mb' => mb_strlen($valorOriginal),
-                        'caracteres_especiales' => preg_match('/[áéíóúÁÉÍÓÚñÑ]/', $valorOriginal) ? 'Sí' : 'No',
+                        'encoding_detectado' => mb_detect_encoding((string) $valorOriginal, ['UTF-8', 'ISO-8859-1', 'ASCII'], true),
+                        'longitud' => strlen((string) $valorOriginal),
+                        'longitud_mb' => mb_strlen((string) $valorOriginal),
+                        'caracteres_especiales' => preg_match('/[áéíóúÁÉÍÓÚñÑ]/', (string) $valorOriginal) ? 'Sí' : 'No',
                     ];
                 }
             }
@@ -273,19 +270,19 @@ class OrdenesDescuento extends Model implements HasLabel
         }, $data);
     }
 
-    protected function handleEncodedField($value)
+    protected function handleEncodedField($value): array|null|int|float|false|string
     {
         if (empty($value)) {
             return $value;
         }
-        return iconv('UTF-8', 'UTF-8//TRANSLIT', $value);
+        return iconv('UTF-8', 'UTF-8//TRANSLIT', (string) $value);
     }
 
     protected function descItem(): Attribute
     {
         return Attribute::make(
             get: fn($value) => $this->handleEncodedField($value),
-            set: fn($value) => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $value),
+            set: fn($value): string|array|null|int|float|false => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', (string) $value),
         );
     }
 
@@ -365,5 +362,17 @@ class OrdenesDescuento extends Model implements HasLabel
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
             },
         );
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fecha_emision' => 'datetime',
+            'total_imp_def' => 'decimal:2',
+            'total_imp_nd' => 'decimal:2',
+        ];
     }
 }

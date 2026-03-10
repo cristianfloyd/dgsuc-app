@@ -88,23 +88,27 @@ class Dh21h extends Model
 
     /**####################### SCOPES ################################### **/
 
-    public function scopeByLegajo($query, int $legajo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byLegajo($query, int $legajo)
     {
         return $query->where('nro_legaj', $legajo);
     }
 
-    public function scopeByPeriodo($query, int $año, int $mes)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byPeriodo($query, int $año, int $mes)
     {
         return $query->where('ano_retro', $año)
             ->where('mes_retro', $mes);
     }
 
-    public function scopeLegajosActivos($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function legajosActivos($query)
     {
         return $query->where('nro_cargo', '>', 0);
     }
 
-    public function scopeConDatosPersonales($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conDatosPersonales($query)
     {
         return $query->join('dh01', 'dh21h.nro_legaj', '=', 'dh01.nro_legaj')
             ->select(
@@ -115,12 +119,14 @@ class Dh21h extends Model
             );
     }
 
-    public function scopeDefinitiva($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function definitiva($query)
     {
         return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
     }
 
-    public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function entreFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
             ->where(function ($q) use ($fechaInicio, $fechaFin): void {
@@ -137,6 +143,9 @@ class Dh21h extends Model
     }
 
     // ############################### Relaciones #######################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
+     */
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
@@ -154,6 +163,7 @@ class Dh21h extends Model
     /**
      * Casteos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

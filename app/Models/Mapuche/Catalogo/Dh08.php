@@ -53,11 +53,17 @@ class Dh08 extends Model
         return false;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\Mapuche\Catalogo\Dh30, $this>
+     */
     public function dh30(): HasOne
     {
         // return $this->belongsTo(Dh30::class, ['nro_tab03', 'codc_nacio'], ['nro_tabla', 'desc_abrev']);
@@ -72,6 +78,7 @@ class Dh08 extends Model
             ->where('codc_nacio', $this->getAttribute('codc_nacio'));
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

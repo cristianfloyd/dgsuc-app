@@ -34,7 +34,7 @@ class Dhb3 extends Model
     ];
 
     // Define las reglas de validación para los atributos del modelo
-    public static function rules()
+    public static function rules(): array
     {
         return [
             'codigo' => 'required|integer',
@@ -43,7 +43,8 @@ class Dhb3 extends Model
     }
 
     // Define un alcance local para buscar por descripción
-    public function scopeByDescripcion(Builder $query, string $descripcion)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byDescripcion(Builder $query, string $descripcion)
     {
         return $query->where('descripcion', $descripcion);
     }

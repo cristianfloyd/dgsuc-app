@@ -17,9 +17,13 @@ class ControlArtDiferencia extends Model
         'diferencia',
     ];
 
-    protected $casts = [
-        'art_contrib' => 'decimal:2',
-        'calculo_teorico' => 'decimal:2',
-        'diferencia' => 'decimal:2',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'art_contrib' => 'decimal:2',
+            'calculo_teorico' => 'decimal:2',
+            'diferencia' => 'decimal:2',
+        ];
+    }
 }

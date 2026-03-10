@@ -42,34 +42,32 @@ class RetTablaBasicosConcesp extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'fecha_desde' => 'date',
-        'fecha_hasta' => 'date',
-        'monto' => 'float',
-        'anios' => 'integer',
-    ];
-
-    /**
      * Obtiene los registros que coinciden con los criterios de búsqueda.
      *
      * @param Builder $query
-     * @param DateTime $fecha
-     * @param string $catId
-     * @param string $concLiqId
-     * @param int $anios
      *
      * @return Builder
      */
-    public function scopeBuscarRegistros($query, DateTime $fecha, string $catId, string $concLiqId, int $anios)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function buscarRegistros($query, DateTime $fecha, string $catId, string $concLiqId, int $anios)
     {
         return $query->where('fecha_desde', '<=', $fecha)
             ->where('fecha_hasta', '>=', $fecha)
             ->where('cat_id', $catId)
             ->where('conc_liq_id', $concLiqId)
             ->where('anios', $anios);
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fecha_desde' => 'date',
+            'fecha_hasta' => 'date',
+            'monto' => 'float',
+            'anios' => 'integer',
+        ];
     }
 }

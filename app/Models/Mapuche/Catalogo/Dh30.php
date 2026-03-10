@@ -82,12 +82,14 @@ class Dh30 extends Model
         return $value;
     }
 
-    public function scopeWithoutEncoding($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withoutEncoding($query)
     {
         return $query->whereRaw("encode(desc_abrev::bytea, 'escape') IS NOT NULL");
     }
 
-    public function scopeByEncoding($query, $encoding)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byEncoding($query, $encoding)
     {
         return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
             ->get()
@@ -106,6 +108,9 @@ class Dh30 extends Model
         return false;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dh08, $this>
+     */
     public function dh08(): HasMany
     {
         // return $this->hasMany(Dh08::class, ['nro_tabla', 'desc_abrev'], ['nro_tabla', 'desc_abrev']);
@@ -113,27 +118,42 @@ class Dh30 extends Model
             ->where('desc_abrev', $this->desc_abrev);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
+     */
     public function dh03(): HasMany
     {
         return $this->hasMany(Dh03::class, 'codc_uacad', 'desc_abrev');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dhe2, $this>
+     */
     public function dhe2(): HasMany
     {
         return $this->hasMany(related: Dhe2::class, foreignKey: 'nro_tabla', localKey: 'nro_tabla')
             ->where(column: 'desc_abrev', operator: $this->desc_abrev);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Mapuche\Dh19, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function dh19(): BelongsToMany
     {
         return $this->belongsToMany(Dh19::class, 'dh30_dh19', 'nro_tabla', 'codc_uacad', 'nro_tabla', 'codc_uacad');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Mapuche\Catalogo\Dhe4, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function dhe4(): BelongsToMany
     {
         return $this->belongsToMany(related: Dhe4::class, table: 'dhe2', foreignPivotKey: 'nro_tabla', relatedPivotKey: 'cod_organismo', parentKey: 'nro_tabla', relatedKey: 'cod_organismo');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Mapuche\Catalogo\Dhe4, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function organismos(): BelongsToMany
     {
         return $this->belongsToMany(related: Dhe4::class, table: 'dhe2', foreignPivotKey: 'nro_tabla', relatedPivotKey: 'cod_organismo')
@@ -187,6 +207,7 @@ class Dh30 extends Model
             ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

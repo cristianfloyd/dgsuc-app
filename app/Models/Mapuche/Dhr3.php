@@ -51,6 +51,7 @@ class Dhr3 extends Model
 
     /**
      * Relación con la tabla dh12 (conceptos).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function concepto(): BelongsTo
     {
@@ -59,6 +60,7 @@ class Dhr3 extends Model
 
     /**
      * Relación con la tabla dhr2 (liquidación-legajo).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dhr2, $this>
      */
     public function liquidacionLegajo(): BelongsTo
     {
@@ -67,6 +69,7 @@ class Dhr3 extends Model
             ->where('nro_cargo', $this->nro_cargo);
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

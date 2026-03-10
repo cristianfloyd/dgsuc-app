@@ -178,158 +178,137 @@ class RetResultado extends Model
         'monto_180', 'monto_123', 'monto_168', 'cat_basico_7', 'cat_basico_n_perm', 'cat_basico_v_perm',
     ];
 
-    protected $casts = [
-        'cat_basico_n' => 'float',
-        'cat_basico_v' => 'float',
-        'anios_n' => 'integer',
-        'anios_v' => 'integer',
-        'anios_perm_n' => 'integer',
-        'anios_perm_v' => 'integer',
-        'porcentaje_n' => 'float',
-        'porcentaje_v' => 'float',
-        'hs_cat_n' => 'integer',
-        'hs_cat_v' => 'integer',
-        'x11_n' => 'boolean',
-        'x11_v' => 'boolean',
-        'zona_n' => 'boolean',
-        'zona_v' => 'boolean',
-        'riesgo_n' => 'boolean',
-        'riesgo_v' => 'boolean',
-        'falla_n' => 'boolean',
-        'falla_v' => 'boolean',
-        'dede_n' => 'boolean',
-        'dede_v' => 'boolean',
-        'adi_col_sec_n' => 'boolean',
-        'adi_col_sec_v' => 'boolean',
-        'sub_basico_n' => 'float',
-        'sub_basico_v' => 'float',
-        'porcehaber' => 'float',
-        'dias_mes_trab' => 'integer',
-        'porcentaje_dias_trab' => 'integer',
-        'tipo_retro' => 'integer',
-        'c101_n' => 'float',
-        'c101_sub_n' => 'float',
-        'c102_n' => 'float',
-        'c103_n' => 'float',
-        'c103_sub_n' => 'float',
-        'c103_dias_cpto_trab' => 'integer',
-        'c106_n' => 'float',
-        'c106_sub_n' => 'float',
-        'c106_dias_cpto_trab' => 'integer',
-        'c107_n' => 'float',
-        'c107_sub_n' => 'float',
-        'c108_n' => 'float',
-        'c108_dias_cpto_trab' => 'integer',
-        'c110_n' => 'float',
-        'c110_sub_n' => 'float',
-        'c110_dias_cpto_trab' => 'integer',
-        'c111_n' => 'float',
-        'c111_dias_cpto_trab' => 'integer',
-        'c113_n' => 'float',
-        'c113_sub_n' => 'float',
-        'c114_n' => 'float',
-        'c114_sub_n' => 'float',
-        'c116_n' => 'float',
-        'c116_sub_n' => 'float',
-        'c116_dias_cpto_trab' => 'integer',
-        'c118_n' => 'float',
-        'c118_sub_n' => 'float',
-        'c118_dias_cpto_trab' => 'integer',
-        'c119_n' => 'float',
-        'c119_sub_n' => 'float',
-        'c119_dias_cpto_trab' => 'integer',
-        'c120_n' => 'float',
-        'c138_n' => 'float',
-        'c165_n' => 'float',
-        'c173_n' => 'float',
-        'c174_n' => 'float',
-        'c101_v' => 'float',
-        'c101_sub_v' => 'float',
-        'c102_v' => 'float',
-        'c103_v' => 'float',
-        'c103_sub_v' => 'float',
-        'c106_v' => 'float',
-        'c106_sub_v' => 'float',
-        'c107_v' => 'float',
-        'c107_sub_v' => 'float',
-        'c108_v' => 'float',
-        'c110_v' => 'float',
-        'c110_sub_v' => 'float',
-        'c111_v' => 'float',
-        'c113_v' => 'float',
-        'c113_sub_v' => 'float',
-        'c114_v' => 'float',
-        'c114_sub_v' => 'float',
-        'c116_v' => 'float',
-        'c116_sub_v' => 'float',
-        'c118_v' => 'float',
-        'c118_sub_v' => 'float',
-        'c119_v' => 'float',
-        'c119_sub_v' => 'float',
-        'c120_v' => 'float',
-        'c138_v' => 'float',
-        'c165_v' => 'float',
-        'c173_v' => 'float',
-        'c174_v' => 'float',
-        'monto_180' => 'float',
-        'monto_123' => 'float',
-        'monto_168' => 'float',
-        'cat_basico_7' => 'float',
-        'cat_basico_n_perm' => 'float',
-        'cat_basico_v_perm' => 'float',
-        'fecha_ret_desde' => 'date',
-        'fecha_ret_hasta' => 'date',
-    ];
-
     /**
      * Obtiene el resultado del retroactivo para un legajo específico.
      *
-     * @param int $nroLegaj
      *
-     * @return RetResultado|null
      */
     public static function obtenerPorLegajo(int $nroLegaj): ?RetResultado
     {
-        return self::where('nro_legaj', $nroLegaj)->first();
+        return self::query()->where('nro_legaj', $nroLegaj)->first();
     }
-
     /**
      * Obtiene el periodo como un ValueObject Periodo.
      *
      * @return Periodo
      */
-    public function getPeriodoAttribute(): Periodo
+    protected function periodo(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return new Periodo($this->attributes['periodo']);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): \App\ValueObjects\Periodo => new Periodo($this->attributes['periodo']), set: fn(Periodo $periodo): array => ['periodo' => $periodo->getValue()]);
     }
-
-    /**
-     * Establece el periodo desde un ValueObject Periodo.
-     *
-     * @param Periodo $periodo
-     */
-    public function setPeriodoAttribute(Periodo $periodo): void
-    {
-        $this->attributes['periodo'] = $periodo->getValue();
-    }
-
     /**
      * Obtiene el tipo_retro como un ValueObject TipoRetro.
      *
      * @return TipoRetro
      */
-    public function getTipoRetroAttribute(): TipoRetro
+    protected function tipoRetro(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return new TipoRetro($this->attributes['tipo_retro']);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): \App\ValueObjects\TipoRetro => new TipoRetro($this->attributes['tipo_retro']), set: fn(TipoRetro $tipoRetro): array => ['tipo_retro' => $tipoRetro->getValue()]);
     }
-
-    /**
-     * Establece el tipo_retro desde un ValueObject TipoRetro.
-     *
-     * @param TipoRetro $tipoRetro
-     */
-    public function setTipoRetroAttribute(TipoRetro $tipoRetro): void
+    #[\Override]
+    protected function casts(): array
     {
-        $this->attributes['tipo_retro'] = $tipoRetro->getValue();
+        return [
+            'cat_basico_n' => 'float',
+            'cat_basico_v' => 'float',
+            'anios_n' => 'integer',
+            'anios_v' => 'integer',
+            'anios_perm_n' => 'integer',
+            'anios_perm_v' => 'integer',
+            'porcentaje_n' => 'float',
+            'porcentaje_v' => 'float',
+            'hs_cat_n' => 'integer',
+            'hs_cat_v' => 'integer',
+            'x11_n' => 'boolean',
+            'x11_v' => 'boolean',
+            'zona_n' => 'boolean',
+            'zona_v' => 'boolean',
+            'riesgo_n' => 'boolean',
+            'riesgo_v' => 'boolean',
+            'falla_n' => 'boolean',
+            'falla_v' => 'boolean',
+            'dede_n' => 'boolean',
+            'dede_v' => 'boolean',
+            'adi_col_sec_n' => 'boolean',
+            'adi_col_sec_v' => 'boolean',
+            'sub_basico_n' => 'float',
+            'sub_basico_v' => 'float',
+            'porcehaber' => 'float',
+            'dias_mes_trab' => 'integer',
+            'porcentaje_dias_trab' => 'integer',
+            'tipo_retro' => 'integer',
+            'c101_n' => 'float',
+            'c101_sub_n' => 'float',
+            'c102_n' => 'float',
+            'c103_n' => 'float',
+            'c103_sub_n' => 'float',
+            'c103_dias_cpto_trab' => 'integer',
+            'c106_n' => 'float',
+            'c106_sub_n' => 'float',
+            'c106_dias_cpto_trab' => 'integer',
+            'c107_n' => 'float',
+            'c107_sub_n' => 'float',
+            'c108_n' => 'float',
+            'c108_dias_cpto_trab' => 'integer',
+            'c110_n' => 'float',
+            'c110_sub_n' => 'float',
+            'c110_dias_cpto_trab' => 'integer',
+            'c111_n' => 'float',
+            'c111_dias_cpto_trab' => 'integer',
+            'c113_n' => 'float',
+            'c113_sub_n' => 'float',
+            'c114_n' => 'float',
+            'c114_sub_n' => 'float',
+            'c116_n' => 'float',
+            'c116_sub_n' => 'float',
+            'c116_dias_cpto_trab' => 'integer',
+            'c118_n' => 'float',
+            'c118_sub_n' => 'float',
+            'c118_dias_cpto_trab' => 'integer',
+            'c119_n' => 'float',
+            'c119_sub_n' => 'float',
+            'c119_dias_cpto_trab' => 'integer',
+            'c120_n' => 'float',
+            'c138_n' => 'float',
+            'c165_n' => 'float',
+            'c173_n' => 'float',
+            'c174_n' => 'float',
+            'c101_v' => 'float',
+            'c101_sub_v' => 'float',
+            'c102_v' => 'float',
+            'c103_v' => 'float',
+            'c103_sub_v' => 'float',
+            'c106_v' => 'float',
+            'c106_sub_v' => 'float',
+            'c107_v' => 'float',
+            'c107_sub_v' => 'float',
+            'c108_v' => 'float',
+            'c110_v' => 'float',
+            'c110_sub_v' => 'float',
+            'c111_v' => 'float',
+            'c113_v' => 'float',
+            'c113_sub_v' => 'float',
+            'c114_v' => 'float',
+            'c114_sub_v' => 'float',
+            'c116_v' => 'float',
+            'c116_sub_v' => 'float',
+            'c118_v' => 'float',
+            'c118_sub_v' => 'float',
+            'c119_v' => 'float',
+            'c119_sub_v' => 'float',
+            'c120_v' => 'float',
+            'c138_v' => 'float',
+            'c165_v' => 'float',
+            'c173_v' => 'float',
+            'c174_v' => 'float',
+            'monto_180' => 'float',
+            'monto_123' => 'float',
+            'monto_168' => 'float',
+            'cat_basico_7' => 'float',
+            'cat_basico_n_perm' => 'float',
+            'cat_basico_v_perm' => 'float',
+            'fecha_ret_desde' => 'date',
+            'fecha_ret_hasta' => 'date',
+        ];
     }
 }

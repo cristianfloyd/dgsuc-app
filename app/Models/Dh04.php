@@ -49,21 +49,6 @@ class Dh04 extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'nro_cuit' => 'decimal:0',
-        'fec_ingre' => 'date',
-        'fec_egres' => 'date',
-        'relprofesion' => 'boolean',
-        'aporta_antig_remun' => 'boolean',
-        'aporta_antig_lao' => 'boolean',
-        'aporta_ant_jubil' => 'boolean',
-    ];
-
-    /**
      * Obtiene el legajo asociado a esta actividad.
      */
     public function legajo()
@@ -111,8 +96,25 @@ class Dh04 extends Model
         return $this->belongsTo(Dhe8::class, 'codgradooa', 'codigogradooa');
     }
 
-    public function scopeActivo($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activo($query)
     {
         return $query->whereNull('fec_egres');
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_cuit' => 'decimal:0',
+            'fec_ingre' => 'date',
+            'fec_egres' => 'date',
+            'relprofesion' => 'boolean',
+            'aporta_antig_remun' => 'boolean',
+            'aporta_antig_lao' => 'boolean',
+            'aporta_ant_jubil' => 'boolean',
+        ];
     }
 }

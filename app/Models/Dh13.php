@@ -68,20 +68,11 @@ class Dh13 extends Model
         'desc_condi',
     ];
 
-    /**
-     * Casting de atributos.
-     */
-    protected $casts = [
-        'codn_conce' => 'integer',
-        'nro_orden_formula' => 'integer',
-        'desc_calcu' => 'string',
-        'desc_condi' => 'string',
-    ];
-
     private static $connectionInstance;
 
     /**
      * Obtiene el Dh12 asociado con este Dh13.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function dh12(): BelongsTo
     {
@@ -98,6 +89,7 @@ class Dh13 extends Model
      *
      * @return string
      */
+    #[\Override]
     public function getKeyName()
     {
         return 'id';
@@ -106,9 +98,8 @@ class Dh13 extends Model
     /**
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
-     *
-     * @return string
      */
+    #[\Override]
     public function getKey(): string
     {
         return "{$this->codn_conce}-{$this->nro_orden_formula}";
@@ -118,9 +109,8 @@ class Dh13 extends Model
      * Establece la clave única para el modelo.
      *
      * @param mixed $key
-     *
-     * @return void
      */
+    #[\Override]
     public function setKeyName($key): void
     {
         $this->primaryKey = $key;
@@ -131,6 +121,7 @@ class Dh13 extends Model
      *
      * @return string
      */
+    #[\Override]
     public function getRouteKeyName()
     {
         return 'id';
@@ -144,10 +135,11 @@ class Dh13 extends Model
      *
      * @return Model|Collection|static[]|static|null
      */
+    #[\Override]
     public function resolveRouteBinding($key, $field = null)
     {
         if ($field === 'id') {
-            [$codn_conce, $nro_orden_formula] = explode('-', $key);
+            [$codn_conce, $nro_orden_formula] = explode('-', (string) $key);
             return $this->where('codn_conce', $codn_conce)
                 ->where('nro_orden_formula', $nro_orden_formula)
                 ->first();
@@ -160,6 +152,7 @@ class Dh13 extends Model
      *
      * @return Builder
      */
+    #[\Override]
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
@@ -186,7 +179,8 @@ class Dh13 extends Model
             ->first($columns);
     }
 
-    public function scopeDefaultOrder($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function defaultOrder($query)
     {
         return $query->orderBy('codn_conce')->orderBy('nro_orden_formula');
     }
@@ -204,14 +198,14 @@ class Dh13 extends Model
             'dh13' => [
                 'codn_conce' => $registro->codn_conce,
                 'desc_calcu_raw' => $registro->getAttributes()['desc_calcu'],
-                'desc_calcu_hex' => bin2hex($registro->getAttributes()['desc_calcu']),
+                'desc_calcu_hex' => bin2hex((string) $registro->getAttributes()['desc_calcu']),
                 'desc_condi_raw' => $registro->getAttributes()['desc_condi'],
-                'desc_condi_hex' => bin2hex($registro->getAttributes()['desc_condi']),
+                'desc_condi_hex' => bin2hex((string) $registro->getAttributes()['desc_condi']),
             ],
             'dh12' => [
                 'desc_conce_raw' => $registro->dh12->getAttributes()['desc_conce'],
                 'desc_conce_utf8' => EncodingService::toUtf8($registro->dh12->getAttributes()['desc_conce']),
-                'desc_conce_hex' => bin2hex($registro->dh12->getAttributes()['desc_conce']),
+                'desc_conce_hex' => bin2hex((string) $registro->dh12->getAttributes()['desc_conce']),
             ],
             'configuracion_db' => [
                 'connection_name' => $connection->getConfig('name'),
@@ -239,6 +233,7 @@ class Dh13 extends Model
         return self::$connectionInstance;
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -267,16 +262,29 @@ class Dh13 extends Model
     protected function descCalcu(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function descCondi(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
+    }
+    /**
+     * Casting de atributos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'codn_conce' => 'integer',
+            'nro_orden_formula' => 'integer',
+            'desc_calcu' => 'string',
+            'desc_condi' => 'string',
+        ];
     }
 }

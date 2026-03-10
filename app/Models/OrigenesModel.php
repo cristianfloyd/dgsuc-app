@@ -20,6 +20,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
         'name',
     ];
 
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -28,20 +29,18 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
 
     public static function connectionName(): string
     {
-        return (new static())->getConnectionName();
+        return new static()->getConnectionName();
     }
 
     /**
      * Verifica si la tabla existe y la crea si no existe.
-     *
-     * @return void
      */
     public static function verificarYCrearTabla(): void
     {
-        $schema = DB::connection(self::connectionName())->getSchemaBuilder();
+        $builder = DB::connection(self::connectionName())->getSchemaBuilder();
 
-        if (!$schema->hasTable('suc.origenes_models')) {
-            $schema->create('suc.origenes_models', function ($table): void {
+        if (!$builder->hasTable('suc.origenes_models')) {
+            $builder->create('suc.origenes_models', function ($table): void {
                 $table->id();
                 $table->string('name');
                 $table->timestamps();

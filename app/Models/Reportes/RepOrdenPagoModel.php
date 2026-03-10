@@ -56,38 +56,16 @@ class RepOrdenPagoModel extends Model implements HasLabel
         'imp_gasto',
     ];
 
-    /**
-     * Indica los tipos de datos que deben ser convertidos automáticamente al acceder a los atributos del modelo.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'banco' => 'integer',
-        'remunerativo' => 'decimal:2',
-        'no_remunerativo' => 'decimal:2',
-        'otros_no_remunerativo' => 'decimal:2',
-        'bruto' => 'decimal:2',
-        'descuentos' => 'decimal:2',
-        'aportes' => 'decimal:2',
-        'sueldo' => 'decimal:2',
-        'neto' => 'decimal:2',
-        'estipendio' => 'decimal:2',
-        'med_resid' => 'decimal:2',
-        'productividad' => 'decimal:2',
-        'sal_fam' => 'decimal:2',
-        'hs_extras' => 'decimal:2',
-        'total' => 'decimal:2',
-        'imp_gasto' => 'decimal:2',
-    ];
-
     public static function generarReporte(array $nro_liqui): void
     {
-        app(RepOrdenPagoService::class)->generateReport($nro_liqui);
+        resolve(RepOrdenPagoService::class)->generateReport($nro_liqui);
     }
 
     /* ####################################################################### */
     /* ########################## RELACIONES ################################# */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
+     */
     public function unidadAcademica(): BelongsTo
     {
         return $this->belongsTo(Dh30::class, 'codc_uacad', 'desc_abrev')
@@ -96,7 +74,8 @@ class RepOrdenPagoModel extends Model implements HasLabel
 
     /* ####################################################################### */
     /* ################ SCOPES PARA BUSQUEDA Y FILTRO ######################## */
-    public function scopeSearch(Builder $query, string $search): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search(Builder $query, string $search): Builder
     {
         return $query->where(function ($query) use ($search): void {
             $query->where('desc_liqui', 'like', "%{$search}%")
@@ -105,17 +84,20 @@ class RepOrdenPagoModel extends Model implements HasLabel
         });
     }
 
-    public function scopePeriodo($query, $periodo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function periodo($query, $periodo)
     {
         return $query->where('periodo_fiscal', $periodo);
     }
 
-    public function scopePorLiquidacion($query, $nroLiqui)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLiquidacion($query, $nroLiqui)
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
 
-    public function scopeOrdenadoPorUacad($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ordenadoPorUacad($query)
     {
         return $query->orderBy('codc_uacad')->orderBy('nro_liqui');
     }
@@ -130,6 +112,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
         return $this->label;
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -160,5 +143,31 @@ class RepOrdenPagoModel extends Model implements HasLabel
                 }
             }
         });
+    }
+    /**
+     * Indica los tipos de datos que deben ser convertidos automáticamente al acceder a los atributos del modelo.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'banco' => 'integer',
+            'remunerativo' => 'decimal:2',
+            'no_remunerativo' => 'decimal:2',
+            'otros_no_remunerativo' => 'decimal:2',
+            'bruto' => 'decimal:2',
+            'descuentos' => 'decimal:2',
+            'aportes' => 'decimal:2',
+            'sueldo' => 'decimal:2',
+            'neto' => 'decimal:2',
+            'estipendio' => 'decimal:2',
+            'med_resid' => 'decimal:2',
+            'productividad' => 'decimal:2',
+            'sal_fam' => 'decimal:2',
+            'hs_extras' => 'decimal:2',
+            'total' => 'decimal:2',
+            'imp_gasto' => 'decimal:2',
+        ];
     }
 }

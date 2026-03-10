@@ -104,50 +104,6 @@ class AfipMapucheSicoss extends Model
         'remimp11',
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'conyuge' => 'boolean',
-        'cant_hijos' => 'integer',
-        'rem_total' => 'decimal:2',
-        'asig_fam_pag' => 'decimal:2',
-        'cod_siniestrado' => 'string',
-        'marca_reduccion' => 'string',
-        'recomp_lrt' => 'decimal:2',
-        'tipo_empresa' => 'string',
-        'aporte_adic_os' => 'decimal:2',
-        'regimen' => 'string',
-        'sit_rev1' => 'string',
-        'dia_ini_sit_rev1' => 'integer',
-        'sit_rev2' => 'string',
-        'dia_ini_sit_rev2' => 'integer',
-        'sit_rev3' => 'string',
-        'dia_ini_sit_rev3' => 'integer',
-        'sueldo_adicc' => 'decimal:2',
-        'horas_extras' => 'decimal:2',
-        'zona_desfav' => 'decimal:2',
-        'vacaciones' => 'decimal:2',
-        'cant_dias_trab' => 'integer',
-        'convencionado' => 'boolean',
-        'tipo_oper' => 'string',
-        'adicionales' => 'decimal:2',
-        'premios' => 'decimal:2',
-        'rem_dec_788' => 'decimal:2',
-        'nro_horas_ext' => 'integer',
-        'cpto_no_remun' => 'decimal:2',
-        'maternidad' => 'decimal:2',
-        'rectificacion_remun' => 'decimal:2',
-        'contrib_dif' => 'decimal:2',
-        'hstrab' => 'integer',
-        'seguro' => 'boolean',
-        'ley' => 'decimal:2',
-        'incsalarial' => 'decimal:2',
-        'remimp11' => 'decimal:2',
-    ];
-
     protected array $encodedFields = ['apnom', 'prov'];
 
     protected $appends = [
@@ -155,10 +111,10 @@ class AfipMapucheSicoss extends Model
         'diferencia_rem',
     ];
 
-    public function nroCuil(): Attribute
+    protected function nroCuil(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?int {
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
@@ -195,19 +151,17 @@ class AfipMapucheSicoss extends Model
     /**
      * Obtiene el registro por período fiscal y CUIL.
      *
-     * @param string $periodoFiscal
-     * @param string $cuil
      *
-     * @return AfipMapucheSicoss|null
      */
     public static function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss
     {
-        return static::where('periodo_fiscal', $periodoFiscal)
+        return static::query()->where('periodo_fiscal', $periodoFiscal)
             ->where('cuil', $cuil)
             ->first();
     }
 
-    public function scopeSearch($query, $search)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, string $search)
     {
         return $query->where('cuil', 'ilike', '%' . $search . '%')
             ->orWhere('apnom', 'ilike', "%$search%");
@@ -217,7 +171,7 @@ class AfipMapucheSicoss extends Model
     public function getPeriodoFiscalFormateado(): string
     {
         $periodo = $this->attributes['periodo_fiscal'];
-        return substr($periodo, 0, 4) . '-' . substr($periodo, 4, 2);
+        return substr((string) $periodo, 0, 4) . '-' . substr((string) $periodo, 4, 2);
     }
 
     // ################################ HELPER FUNCTIONS #########################################
@@ -229,8 +183,6 @@ class AfipMapucheSicoss extends Model
      * @param callable|null $progressCallback Callback para progreso
      *
      * @throws Throwable
-     *
-     * @return array
      */
     public static function poblarTablaSicoss(string $periodoFiscal, bool $includeInactive = false, ?callable $progressCallback = null): array
     {
@@ -248,7 +200,7 @@ class AfipMapucheSicoss extends Model
             $config = self::getConfiguracionSicoss();
 
             // 2. Limpiar registros existentes del período
-            self::where('periodo_fiscal', $periodoFiscal)->delete();
+            self::query()->where('periodo_fiscal', $periodoFiscal)->delete();
 
             // Consulta principal
             $sql = "
@@ -377,7 +329,7 @@ class AfipMapucheSicoss extends Model
             if (isset($connection)) {
                 $connection->rollBack();
             }
-            throw new Exception('Error al poblar tabla SICOSS: ' . $e->getMessage());
+            throw new Exception('Error al poblar tabla SICOSS: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -385,8 +337,6 @@ class AfipMapucheSicoss extends Model
      * Obtener consulta SQL para legajos SICOSS.
      *
      * @param string $where Condiciones adicionales WHERE
-     *
-     * @return string
      */
     public static function getSqlLegajos(string $where = 'true'): string
     {
@@ -429,8 +379,6 @@ class AfipMapucheSicoss extends Model
      *
      * @param string $periodoFiscal Formato: YYYYMM
      * @param bool $includeInactive Incluir empleados inactivos
-     *
-     * @return void
      */
     public static function procesarPeriodo(string $periodoFiscal, bool $includeInactive = false): void
     {
@@ -453,35 +401,30 @@ class AfipMapucheSicoss extends Model
                 );
             }
 
-            self::updateOrCreate(
-                [
-                    'periodo_fiscal' => $periodoFiscal,
-                    'cuil' => $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2,
-                ],
-                array_merge([
-                    'apnom' => $legajo->apyno,
-                    'conyuge' => $legajo->conyugue > 0,
-                    'cant_hijos' => $legajo->hijos,
-                    'cod_situacion' => $legajo->codigosituacion,
-                    'cod_cond' => $legajo->CodigoCondicion,
-                    'cod_act' => $legajo->CodigoActividad,
-                    'cod_zona' => $legajo->codigozona,
-                    'porc_aporte' => $legajo->aporteAdicional,
-                    'cod_mod_cont' => $legajo->codigocontratacion,
-                    'tipo_empresa' => $config['tipo_empresa'],
-                    'regimen' => $legajo->codc_bprev === $config['codc_reparto'] ? '1' : '0',
-                    'sit_rev1' => $legajo->codigosituacion,
-                    'dia_ini_sit_rev1' => '01',
-                    'convencionado' => $legajo->trabajadorconvencionado,
-                ], $importes),
-            );
+            self::query()->updateOrCreate([
+                'periodo_fiscal' => $periodoFiscal,
+                'cuil' => $legajo->nro_cuil1 . str_pad((string) $legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2,
+            ], array_merge([
+                'apnom' => $legajo->apyno,
+                'conyuge' => $legajo->conyugue > 0,
+                'cant_hijos' => $legajo->hijos,
+                'cod_situacion' => $legajo->codigosituacion,
+                'cod_cond' => $legajo->CodigoCondicion,
+                'cod_act' => $legajo->CodigoActividad,
+                'cod_zona' => $legajo->codigozona,
+                'porc_aporte' => $legajo->aporteAdicional,
+                'cod_mod_cont' => $legajo->codigocontratacion,
+                'tipo_empresa' => $config['tipo_empresa'],
+                'regimen' => $legajo->codc_bprev === $config['codc_reparto'] ? '1' : '0',
+                'sit_rev1' => $legajo->codigosituacion,
+                'dia_ini_sit_rev1' => '01',
+                'convencionado' => $legajo->trabajadorconvencionado,
+            ], $importes));
         }
     }
 
     /**
      * Obtener parámetros de configuración para SICOSS.
-     *
-     * @return array
      */
     public static function getConfiguracionSicoss(): array
     {
@@ -500,9 +443,7 @@ class AfipMapucheSicoss extends Model
     /**
      * Procesar datos de SICOSS para el período actual.
      *
-     * @param string $periodoFiscal
      *
-     * @return void
      */
     public static function procesarDatosSicoss(string $periodoFiscal): void
     {
@@ -512,37 +453,34 @@ class AfipMapucheSicoss extends Model
         $legajos = DB::connection(self::getMapucheConnection())->select(self::getSqlLegajos("dh01.tipo_estad = 'A'"));
 
         foreach ($legajos as $legajo) {
-            $cuil = $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2;
+            $cuil = $legajo->nro_cuil1 . str_pad((string) $legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2;
 
             // Crear o actualizar registro
-            self::updateOrCreate(
-                [
-                    'periodo_fiscal' => $periodoFiscal,
-                    'cuil' => $cuil,
-                ],
-                [
-                    'apnom' => $legajo->apyno,
-                    'conyuge' => $legajo->conyugue > 0,
-                    'cant_hijos' => $legajo->hijos,
-                    'cod_situacion' => $legajo->codigosituacion,
-                    'cod_cond' => $legajo->CodigoCondicion,
-                    'cod_act' => $legajo->CodigoActividad,
-                    'cod_zona' => $legajo->codigozona,
-                    'porc_aporte' => $legajo->aporteAdicional,
-                    'cod_mod_cont' => $legajo->codigocontratacion,
-                    'tipo_empresa' => $config['tipo_empresa'],
-                    'regimen' => $legajo->codc_bprev === $config['codc_reparto'] ? '1' : '0',
-                    'sit_rev1' => $legajo->codigosituacion,
-                    'dia_ini_sit_rev1' => '01',
-                    'convencionado' => $legajo->trabajadorconvencionado,
-                    'informar_becarios' => $config['informar_becarios'],
-                    'art_con_tope' => $config['art_con_tope'],
-                    'conceptos_no_remun_art' => $config['conceptos_no_remun_art'],
-                    'categorias_aportes_diferenciales' => $config['categorias_aportes_diferenciales'],
-                    'hs_extras_novedades' => $config['hs_extras_novedades'],
-                    'codc_reparto' => $config['codc_reparto'],
-                ],
-            );
+            self::query()->updateOrCreate([
+                'periodo_fiscal' => $periodoFiscal,
+                'cuil' => $cuil,
+            ], [
+                'apnom' => $legajo->apyno,
+                'conyuge' => $legajo->conyugue > 0,
+                'cant_hijos' => $legajo->hijos,
+                'cod_situacion' => $legajo->codigosituacion,
+                'cod_cond' => $legajo->CodigoCondicion,
+                'cod_act' => $legajo->CodigoActividad,
+                'cod_zona' => $legajo->codigozona,
+                'porc_aporte' => $legajo->aporteAdicional,
+                'cod_mod_cont' => $legajo->codigocontratacion,
+                'tipo_empresa' => $config['tipo_empresa'],
+                'regimen' => $legajo->codc_bprev === $config['codc_reparto'] ? '1' : '0',
+                'sit_rev1' => $legajo->codigosituacion,
+                'dia_ini_sit_rev1' => '01',
+                'convencionado' => $legajo->trabajadorconvencionado,
+                'informar_becarios' => $config['informar_becarios'],
+                'art_con_tope' => $config['art_con_tope'],
+                'conceptos_no_remun_art' => $config['conceptos_no_remun_art'],
+                'categorias_aportes_diferenciales' => $config['categorias_aportes_diferenciales'],
+                'hs_extras_novedades' => $config['hs_extras_novedades'],
+                'codc_reparto' => $config['codc_reparto'],
+            ]);
         }
     }
 
@@ -829,32 +767,32 @@ class AfipMapucheSicoss extends Model
     protected function apnom(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function remTotal(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => trim($value),
-            set: fn($value) => trim($value),
+            get: fn($value): string => trim((string) $value),
+            set: fn($value): string => trim((string) $value),
         );
     }
 
     protected function remImpo6(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => trim($value),
-            set: fn($value) => trim($value),
+            get: fn($value): string => trim((string) $value),
+            set: fn($value): string => trim((string) $value),
         );
     }
 
     protected function remImpo9(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => trim($value),
-            set: fn($value) => trim($value),
+            get: fn($value): string => trim((string) $value),
+            set: fn($value): string => trim((string) $value),
         );
     }
 
@@ -864,15 +802,15 @@ class AfipMapucheSicoss extends Model
     protected function prov(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function diferenciaRem(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function ($value): float|int {
                 // Convertir a números y manejar valores nulos o vacíos
                 $remTotal = is_numeric($this->rem_total) ? (float) $this->rem_total : 0;
                 $remImpo6 = is_numeric($this->rem_impo6) ? (float) $this->rem_impo6 : 0;
@@ -882,6 +820,7 @@ class AfipMapucheSicoss extends Model
         );
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -901,22 +840,16 @@ class AfipMapucheSicoss extends Model
 
     /**
      * Obtener el nombre de la conexión de la base de datos estáticamente.
-     *
-     * @return string
      */
     protected static function getMapucheConnection(): string
     {
-        return (new static())->getConnectionName();
+        return new static()->getConnectionName();
     }
 
     /**
      * Calcular importes para un legajo.
      *
-     * @param int $nroLegaj
-     * @param int $mes
-     * @param int $anio
      *
-     * @return array
      */
     protected static function calculateImportes(int $nroLegaj, int $mes, int $anio): array
     {
@@ -958,6 +891,51 @@ class AfipMapucheSicoss extends Model
             'rem_impo6' => $result->importe_imponible_6 ?? 0,
             'adicionales' => $result->importe_adicionales ?? 0,
             'premios' => $result->importe_premios ?? 0,
+        ];
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'conyuge' => 'boolean',
+            'cant_hijos' => 'integer',
+            'rem_total' => 'decimal:2',
+            'asig_fam_pag' => 'decimal:2',
+            'cod_siniestrado' => 'string',
+            'marca_reduccion' => 'string',
+            'recomp_lrt' => 'decimal:2',
+            'tipo_empresa' => 'string',
+            'aporte_adic_os' => 'decimal:2',
+            'regimen' => 'string',
+            'sit_rev1' => 'string',
+            'dia_ini_sit_rev1' => 'integer',
+            'sit_rev2' => 'string',
+            'dia_ini_sit_rev2' => 'integer',
+            'sit_rev3' => 'string',
+            'dia_ini_sit_rev3' => 'integer',
+            'sueldo_adicc' => 'decimal:2',
+            'horas_extras' => 'decimal:2',
+            'zona_desfav' => 'decimal:2',
+            'vacaciones' => 'decimal:2',
+            'cant_dias_trab' => 'integer',
+            'convencionado' => 'boolean',
+            'tipo_oper' => 'string',
+            'adicionales' => 'decimal:2',
+            'premios' => 'decimal:2',
+            'rem_dec_788' => 'decimal:2',
+            'nro_horas_ext' => 'integer',
+            'cpto_no_remun' => 'decimal:2',
+            'maternidad' => 'decimal:2',
+            'rectificacion_remun' => 'decimal:2',
+            'contrib_dif' => 'decimal:2',
+            'hstrab' => 'integer',
+            'seguro' => 'boolean',
+            'ley' => 'decimal:2',
+            'incsalarial' => 'decimal:2',
+            'remimp11' => 'decimal:2',
         ];
     }
 }

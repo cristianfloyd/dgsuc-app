@@ -47,37 +47,21 @@ class LicenciaVigente extends Model
     ];
 
     /**
-     * Casteos para las propiedades.
-     */
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'condicion' => 'integer',
-        'inicio' => 'integer',
-        'final' => 'integer',
-        'dias_totales' => 'integer',
-        'fecha_desde' => 'date',
-        'fecha_hasta' => 'date',
-        'es_legajo' => 'boolean',
-        'nro_cargo' => 'integer',
-    ];
-
-    /**
      * Campos que requieren conversión de codificación.
      */
     protected $encodedFields = [
         'descripcion_licencia',
     ];
 
-    // #################### ACCESORS #########################
-
-    public function getDescripcionLicenciaAttribute($value): string
+    protected function descripcionLicencia(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return EncodingService::toUtf8($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value));
     }
 
     /**
      * Constructor que asegura que la tabla temporal exista.
      */
+    #[\Override]
     public static function boot(array $attributes = []): void
     {
         parent::boot();
@@ -120,7 +104,7 @@ class LicenciaVigente extends Model
         // Eliminar registros de sesiones que tienen más de 24 horas
         $fechaLimite = now()->subHours(24);
 
-        $count = self::where('created_at', '<', $fechaLimite)->delete();
+        $count = self::query()->where('created_at', '<', $fechaLimite)->delete();
 
         Log::info("Se eliminaron {$count} registros antiguos de licencias vigentes temporales");
     }
@@ -129,9 +113,7 @@ class LicenciaVigente extends Model
      * Pobla la tabla temporal con los resultados de la consulta
      * y devuelve una consulta builder para operar sobre esos datos.
      *
-     * @param array $legajos
      *
-     * @return Builder
      */
     public static function cargarLicenciasVigentes(array $legajos, string $sessionId): Builder
     {
@@ -139,12 +121,12 @@ class LicenciaVigente extends Model
             // Limpiar registros anteriores de esta sesión
             //self::where('session_id', $sessionId)->delete();
 
-            if (empty($legajos)) {
+            if ($legajos === []) {
                 return self::query()->where('session_id', $sessionId);
             }
 
             // Verificar si ya existen registros para esta sesión
-            $existingCount = self::where('session_id', $sessionId)->count();
+            $existingCount = self::query()->where('session_id', $sessionId)->count();
 
             // Si ya hay registros para esta sesión y son los mismos legajos, no recargar
             if ($existingCount > 0) {
@@ -161,7 +143,7 @@ class LicenciaVigente extends Model
                 }
 
                 // Si son diferentes legajos, eliminar los registros anteriores
-                self::where('session_id', $sessionId)->delete();
+                self::query()->where('session_id', $sessionId)->delete();
                 Log::info('Eliminando licencias anteriores para cargar nuevas', [
                     'session_id' => $sessionId,
                 ]);
@@ -171,7 +153,7 @@ class LicenciaVigente extends Model
             Cache::put("licencias_legajos_{$sessionId}", $legajos, 3600);
 
             // Obtener las licencias vigentes desde el servicio
-            $licenciaService = app(LicenciaService::class);
+            $licenciaService = resolve(LicenciaService::class);
             $licencias = $licenciaService->getLicenciasVigentes($legajos);
 
             if ($licencias->count() === 0) {
@@ -202,7 +184,7 @@ class LicenciaVigente extends Model
             }
 
             // Insertar los datos en la tabla temporal
-            self::insert($licenciasData);
+            self::query()->insert($licenciasData);
 
             Log::info('Licencias vigentes cargadas correctamente en la base de datos temporal', [
                 'session_id' => $sessionId,
@@ -228,9 +210,9 @@ class LicenciaVigente extends Model
      *
      * @return string
      */
-    public function getDescripcionCondicionAttribute(): string
+    protected function descripcionCondicion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return match ($this->condicion) {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => match ($this->condicion) {
             5 => 'Maternidad',
             10 => 'Excedencia',
             11 => 'Maternidad Down',
@@ -240,7 +222,7 @@ class LicenciaVigente extends Model
             19 => 'ILT Segundo Tramo',
             51 => 'Protección Integral',
             default => 'Desconocida',
-        };
+        });
     }
 
     /**
@@ -252,24 +234,37 @@ class LicenciaVigente extends Model
     }
 
     // ########################################################
-
     /**
      * Obtener el nombre de la conexión de la base de datos estáticamente.
-     *
-     * @return string
      */
     protected static function getMapucheConnection(): string
     {
-        return (new static())->getConnectionName();
+        return new static()->getConnectionName();
     }
 
     /**
      * Verifica si la tabla temporal existe.
-     *
-     * @return bool
      */
     private static function tablaExiste(): bool
     {
         return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
+    }
+    /**
+     * Casteos para las propiedades.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'condicion' => 'integer',
+            'inicio' => 'integer',
+            'final' => 'integer',
+            'dias_totales' => 'integer',
+            'fecha_desde' => 'date',
+            'fecha_hasta' => 'date',
+            'es_legajo' => 'boolean',
+            'nro_cargo' => 'integer',
+        ];
     }
 }

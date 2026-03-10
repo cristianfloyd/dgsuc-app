@@ -61,13 +61,7 @@ class Dh11 extends Model
         'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao', 'factor_hs_catedra',
     ];
 
-    /**
-     * Atributos que deben ser convertidos a tipos nativos.
-     */
-    protected $dates = [
-        'vig_caano',
-        'vig_cames',
-    ];
+    protected $casts = ['vig_caano' => 'datetime', 'vig_cames' => 'datetime'];
 
     /**
      * Obtiene el recuento de cargos docentes de educación secundaria.
@@ -80,11 +74,9 @@ class Dh11 extends Model
      */
     public static function getCargosDoceSecundario(): int
     {
-        return Cache::remember('cargos_doce_secundario', 3600, function () {
-            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['DOCS'])
-                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
-                ->count();
-        });
+        return Cache::remember('cargos_doce_secundario', 3600, fn() => self::query()->whereIn('dh11.codc_categ', self::CATEGORIAS['DOCS'])
+            ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+            ->count());
     }
 
     /**
@@ -98,11 +90,9 @@ class Dh11 extends Model
      */
     public static function getCargosDoceUniversitario(): int
     {
-        return Cache::remember('cargos_doce_universitario', 3600, function () {
-            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['DOCU'])
-                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
-                ->count();
-        });
+        return Cache::remember('cargos_doce_universitario', 3600, fn() => self::query()->whereIn('dh11.codc_categ', self::CATEGORIAS['DOCU'])
+            ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+            ->count());
     }
 
     /**
@@ -116,11 +106,9 @@ class Dh11 extends Model
      */
     public static function getCargosAutoUniversitario(): int
     {
-        return Cache::remember('cargos_auto_universitario', 3600, function () {
-            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['AUTU'])
-                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
-                ->count();
-        });
+        return Cache::remember('cargos_auto_universitario', 3600, fn() => self::query()->whereIn('dh11.codc_categ', self::CATEGORIAS['AUTU'])
+            ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+            ->count());
     }
 
     /**
@@ -134,11 +122,9 @@ class Dh11 extends Model
      */
     public static function getCargosAutoSecundario(): int
     {
-        return Cache::remember('cargos_auto_secundario', 3600, function () {
-            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['AUTS'])
-                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
-                ->count();
-        });
+        return Cache::remember('cargos_auto_secundario', 3600, fn() => self::query()->whereIn('dh11.codc_categ', self::CATEGORIAS['AUTS'])
+            ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+            ->count());
     }
 
     /**
@@ -152,22 +138,19 @@ class Dh11 extends Model
      */
     public static function getCargosNoDocente(): int
     {
-        return Cache::remember('cargos_no_docente', 3600, function () {
-            return self::whereIn('dh11.codc_categ', self::CATEGORIAS['NODO'])
-                ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
-                ->count();
-        });
+        return Cache::remember('cargos_no_docente', 3600, fn() => self::query()->whereIn('dh11.codc_categ', self::CATEGORIAS['NODO'])
+            ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
+            ->count());
     }
 
     /**
      * Scope para filtrar por tipo de escalafón.
      *
-     * @param Builder $query
      * @param string $type
      *
-     * @return Builder
      */
-    public static function scopeOfTipo(Builder $query, string $tipo): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ofTipo(Builder $query, string $tipo): Builder
     {
         $categorias = self::getCategoriasPorTipo($tipo);
         return $query->whereIn('codc_categ', $categorias);
@@ -179,11 +162,10 @@ class Dh11 extends Model
      * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
      * los registros donde las categorías están activas (es decir, no son nulas).
      *
-     * @param Builder $query
      *
-     * @return Builder
      */
-    public function scopeActive(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function active(Builder $query): Builder
     {
         return $query->whereNotNull('vig_caano')
             ->whereNotNull('vig_cames');
@@ -195,12 +177,11 @@ class Dh11 extends Model
      * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
      * los registros donde el campo `tipo_escal` coincide con el valor proporcionado.
      *
-     * @param Builder $query
      * @param string $type El tipo de escalafón por el que se desea filtrar.
      *
-     * @return Builder
      */
-    public function scopeByScalafon(Builder $query, string $type): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byScalafon(Builder $query, string $type): Builder
     {
         return $query->where('tipo_escal', $type);
     }
@@ -208,9 +189,7 @@ class Dh11 extends Model
     /**
      * Obtiene los códigos de categoría para un tipo específico.
      *
-     * @param string $tipo
      *
-     * @return array
      */
     public static function getCategoriasPorTipo(string $tipo): array
     {
@@ -224,19 +203,22 @@ class Dh11 extends Model
     /**
      * Accessor para obtener el estado de mensualización.
      */
-    public function getIsMensualizedAttribute(): bool
+    protected function isMensualized(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return $this->sino_mensu === 'S';
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_mensu === 'S');
     }
 
     /**
      * Accessor para obtener el estado de jefatura.
      */
-    public function getHasLeadershipAttribute(): bool
+    protected function hasLeadership(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return $this->sino_jefat === 'S';
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_jefat === 'S');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh61, $this>
+     */
     public function dh61(): HasMany
     {
         return $this->hasMany(Dh61::class, 'codc_categ', 'codc_categ')
@@ -244,6 +226,9 @@ class Dh11 extends Model
             ->where('dh61.vig_cames', '=', $this->vig_cames);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\dh31, $this>
+     */
     public function dh31(): BelongsTo
     {
         return $this->belongsTo(dh31::class, 'codc_dedic', 'codc_dedic');
@@ -251,12 +236,16 @@ class Dh11 extends Model
 
     /**
      * Relación con la tabla de escalafón.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\dh89, $this>
      */
     public function dh89(): BelongsTo
     {
         return $this->belongsTo(dh89::class, 'codigoescalafon', 'codigoescalafon');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\dh03, $this>
+     */
     public function dh03(): HasMany
     {
         return $this->hasMany(dh03::class, 'codc_categ', 'codc_categ');
@@ -271,10 +260,11 @@ class Dh11 extends Model
      */
     public function actualizarImppBasicPorPorcentaje(float $porcentaje): bool
     {
-        $service = app(CategoryUpdateServiceInterface::class);
-        return $service->updateCategoryWithHistory($this, $porcentaje);
+        $categoryUpdateService = resolve(CategoryUpdateServiceInterface::class);
+        return $categoryUpdateService->updateCategoryWithHistory($this, $porcentaje);
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -303,9 +293,8 @@ class Dh11 extends Model
      *
      * @param float $value El valor a establecer en los atributos 'impp_basic' e 'impp_asign'.
      */
-    protected function setImppBasicAttribute($value): void
+    protected function imppBasic(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $this->attributes['impp_basic'] = $value;
-        $this->attributes['impp_asign'] = $value;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(set: fn($value): array => ['impp_basic' => $value, 'impp_asign' => $value]);
     }
 }

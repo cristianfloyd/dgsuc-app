@@ -123,7 +123,7 @@ class Embargo extends Model
         'id_tipo_expediente',
     ];
 
-    public function detallenovedad(): Attribute
+    protected function detallenovedad(): Attribute
     {
         return new Attribute(
             get: fn(): string => "{$this->codn_conce}-{$this->nro_oficio}",
@@ -145,6 +145,7 @@ class Embargo extends Model
     // ############### RELACIONES ####################
     /**
      * Relación con el beneficiario.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\Beneficiario, $this>
      */
     public function beneficiario(): BelongsTo
     {
@@ -153,6 +154,7 @@ class Embargo extends Model
 
     /**
      * Relación con el estado del embargo.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\EstadoEmbargo, $this>
      */
     public function estado(): BelongsTo
     {
@@ -161,6 +163,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de remuneración.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoRemuneracion, $this>
      */
     public function tipoRemuneracion(): BelongsTo
     {
@@ -169,6 +172,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de embargo.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoEmbargo, $this>
      */
     public function tipoEmbargo(): BelongsTo
     {
@@ -177,6 +181,7 @@ class Embargo extends Model
 
     /**
      * Relación con el juzgado.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\Juzgado, $this>
      */
     public function juzgado(): BelongsTo
     {
@@ -185,6 +190,7 @@ class Embargo extends Model
 
     /**
      * Relación con la cuenta judicial.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\CuentaJudicial, $this>
      */
     public function cuentaJudicial(): BelongsTo
     {
@@ -196,6 +202,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de juicio.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoJuicio, $this>
      */
     public function tipoJuicio(): BelongsTo
     {
@@ -204,6 +211,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de expediente.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoExpediente, $this>
      */
     public function tipoExpediente(): BelongsTo
     {
@@ -212,7 +220,10 @@ class Embargo extends Model
 
     /*
      *   Relacion con datos personales
-    */
+     */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function datosPersonales(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
@@ -220,6 +231,7 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de liquidaciones asociadas al embargo.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh21, $this>
      */
     public function liquidaciones(): HasMany
     {
@@ -228,6 +240,7 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de cargos asociados al embargo.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
      */
     public function cargo(): HasMany
     {
@@ -252,7 +265,7 @@ class Embargo extends Model
 
     protected function caratula(): Attribute
     {
-        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8($value));
+        return Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value));
     }
 
     protected function nomDemandado(): Attribute
@@ -263,6 +276,7 @@ class Embargo extends Model
     /**
      * Casting de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -36,22 +36,26 @@ class Dh89 extends Model
         'infoadiccateg',
     ];
 
-    protected $casts = [
-        'nroesc' => 'integer',
-        'codigoescalafon' => 'string',
-        'nroorden' => 'integer',
-        'codigoesc' => 'string',
-        'descesc' => 'string',
-        'ctrlgradooblig' => 'integer',
-        'tipo_perm_tran' => 'string',
-        'infoadiccateg' => 'string',
-    ];
-
     /**
      * Relación con el modelo Dh11.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh11, $this>
      */
     public function dh11(): HasMany
     {
         return $this->hasMany(Dh11::class, 'codigoescalafon', 'codigoescalafon');
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nroesc' => 'integer',
+            'codigoescalafon' => 'string',
+            'nroorden' => 'integer',
+            'codigoesc' => 'string',
+            'descesc' => 'string',
+            'ctrlgradooblig' => 'integer',
+            'tipo_perm_tran' => 'string',
+            'infoadiccateg' => 'string',
+        ];
     }
 }

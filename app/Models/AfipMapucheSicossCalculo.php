@@ -63,27 +63,30 @@ class AfipMapucheSicossCalculo extends Model
     ];
 
     /**
-     * Cast de atributos.
-     */
-    protected $casts = [
-        'remtotal' => 'decimal:2',
-        'rem1' => 'decimal:2',
-        'rem2' => 'decimal:2',
-        'aportesijp' => 'decimal:2',
-        'aporteinssjp' => 'decimal:2',
-        'contribucionsijp' => 'decimal:2',
-        'contribucioninssjp' => 'decimal:2',
-        'aportediferencialsijp' => 'decimal:2',
-        'aportesres33_41re' => 'decimal:2',
-        'codc_uacad' => 'string',
-        'caracter' => 'string',
-    ];
-
-    /**
      * Convierte el modelo a DTO.
      */
     public function toData(): AfipMapucheSicossCalculoData
     {
         return AfipMapucheSicossCalculoData::from($this);
+    }
+    /**
+     * Cast de atributos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'remtotal' => 'decimal:2',
+            'rem1' => 'decimal:2',
+            'rem2' => 'decimal:2',
+            'aportesijp' => 'decimal:2',
+            'aporteinssjp' => 'decimal:2',
+            'contribucionsijp' => 'decimal:2',
+            'contribucioninssjp' => 'decimal:2',
+            'aportediferencialsijp' => 'decimal:2',
+            'aportesres33_41re' => 'decimal:2',
+            'codc_uacad' => 'string',
+            'caracter' => 'string',
+        ];
     }
 }

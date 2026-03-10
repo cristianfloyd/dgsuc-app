@@ -38,11 +38,6 @@ class AfipMapucheArt extends Model
         'tarea',           // se mapeará desde Dh03 (campo tipo_escal)
     ];
 
-    // Conversión de tipos de datos
-    protected $casts = [
-        'nacimiento' => 'date',
-    ];
-
     /**
      * Obtiene la conexión de Mapuche.
      *
@@ -50,7 +45,7 @@ class AfipMapucheArt extends Model
      */
     public static function getMapucheConnection()
     {
-        return (new static())->getConnectionFromTrait();
+        return new static()->getConnectionFromTrait();
     }
 
     /**
@@ -67,7 +62,7 @@ class AfipMapucheArt extends Model
     public function actualizarAfipArt(string $periodoFiscal): bool
     {
         // Obtener datos desde AfipMapucheSicoss usando el periodo fiscal
-        $sicoss = AfipMapucheSicoss::where('periodo_fiscal', $periodoFiscal)
+        $sicoss = AfipMapucheSicoss::query()->where('periodo_fiscal', $periodoFiscal)
             ->where('cuil', $this->cuil)
             ->first();
 
@@ -78,13 +73,13 @@ class AfipMapucheArt extends Model
         }
 
         // Obtener datos desde Dh01 usando el CUIL (11 dígitos)
-        $dh01 = Dh01::whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$this->cuil])->first();
+        $dh01 = Dh01::query()->whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$this->cuil])->first();
         if ($dh01) {
             $this->nacimiento = $dh01->fec_nacim;
             $this->sexo = $dh01->tipo_sexo;
 
             // Buscar en Dh03 mediante el número de legajo obtenido de Dh01
-            $dh03 = Dh03::where('nro_legaj', $dh01->nro_legaj)->first();
+            $dh03 = Dh03::query()->where('nro_legaj', $dh01->nro_legaj)->first();
             if ($dh03) {
                 $this->establecimiento = $dh03->codc_uacad;
                 $this->tarea = $dh03->tipo_escal;
@@ -97,7 +92,7 @@ class AfipMapucheArt extends Model
     /**
      * Obtiene la relación de pertenencia entre el modelo AfipMapucheArt y el modelo Dh22.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function dh22(): BelongsTo
     {
@@ -115,21 +110,20 @@ class AfipMapucheArt extends Model
     protected function establecimiento(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value ? trim($value) : null,
-            set: fn($value) => $value ? trim($value) : null,
+            get: fn($value): ?string => $value ? trim((string) $value) : null,
+            set: fn($value): ?string => $value ? trim((string) $value) : null,
         );
     }
 
     /**
      * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
      *
-     * @param string $cuil
      *
      * @return int|null El número de legajo si se encuentra, o null en caso contrario.
      */
     private function obtenerLegajoDesdeCuil(string $cuil): ?int
     {
-        $dh01 = Dh01::whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$cuil])->first();
+        $dh01 = Dh01::query()->whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$cuil])->first();
         return $dh01 ? $dh01->nro_legaj : null;
     }
 
@@ -143,5 +137,12 @@ class AfipMapucheArt extends Model
     private function verificarNroLiqui($nroLiqui): bool
     {
         return Dh22::verificarNroLiqui($nroLiqui);
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nacimiento' => 'date',
+        ];
     }
 }

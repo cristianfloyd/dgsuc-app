@@ -73,7 +73,7 @@ class AfipImportacionCrudaModel extends Model
             }
 
             // Insertar las líneas restantes
-            if (!empty($batchData)) {
+            if ($batchData !== []) {
                 DB::connection($this->connection)
                     ->table($this->table)
                     ->insert($batchData);
@@ -118,12 +118,10 @@ class AfipImportacionCrudaModel extends Model
     private function truncateTableIfNotEmpty(): void
     {
         // Verificar si la tabla existe
-        if (DB::connection($this->connection)->getSchemaBuilder()->hasTable($this->table)) {
-            // Verificar si la tabla no esta vacia
-            if (DB::connection($this->connection)->table($this->table)->count() > 0) {
-                // Eliminar la tabla
-                DB::connection($this->connection)->table($this->table)->truncate();
-            }
+        // Verificar si la tabla no esta vacia
+        if (DB::connection($this->connection)->getSchemaBuilder()->hasTable($this->table) && DB::connection($this->connection)->table($this->table)->count() > 0) {
+            // Eliminar la tabla
+            DB::connection($this->connection)->table($this->table)->truncate();
         }
     }
 }

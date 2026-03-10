@@ -33,6 +33,7 @@ class Dhd7 extends Model
 
     /**
      * Relación con el modelo Dh03.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
      */
     public function dh03s(): HasMany
     {

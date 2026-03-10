@@ -84,6 +84,7 @@ class Dh24 extends Model
 
     /**
      * Relación con el cargo.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
      */
     public function cargo(): BelongsTo
     {
@@ -93,7 +94,8 @@ class Dh24 extends Model
     /**
      * Scope para filtrar por tipo de ejercicio activo.
      */
-    public function scopeActivo($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activo($query)
     {
         return $query->where('tipo_ejercicio', 'A');
     }
@@ -101,6 +103,7 @@ class Dh24 extends Model
     /**
      * Conversión de tipos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

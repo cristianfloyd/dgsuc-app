@@ -42,6 +42,7 @@ class Dh19 extends Model
     /**
      * Obtiene la relación Dh12 que pertenece a la instancia actual de Dh19.
      * La relación se filtra por el valor de `codn_conce` de la instancia actual.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function dh12(): BelongsTo
     {
@@ -51,6 +52,7 @@ class Dh19 extends Model
     /**
      * Obtiene la relación Dh30 que pertenece a la instancia actual de Dh19.
      * La relación se filtra por el valor de `tipo_docum` y `desc_abrev` de la instancia actual.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function dh30(): BelongsTo
     {
@@ -63,6 +65,7 @@ class Dh19 extends Model
      * Especifica el tipo de datos que se utilizarán para los campos de la tabla 'mapuche.dh19'.
      * Esto permite que Laravel realice la conversión automática de los datos al guardarlos o recuperarlos de la base de datos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

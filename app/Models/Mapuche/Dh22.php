@@ -218,15 +218,15 @@ class Dh22 extends Model
 
     /* ################################ ACCESORES Y MUTADORES ################################ */
 
-    public function descLiqui(): Attribute
+    protected function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn($value): ?string => EncodingService::toUtf8($value),
-            set: fn($value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
         );
     }
 
-    public function descripcionCompleta(): Attribute
+    protected function descripcionCompleta(): Attribute
     {
         return Attribute::make(
             get: fn(): string => $this->nro_liqui . ' - ' . EncodingService::toUtf8($this->desc_liqui),
@@ -234,12 +234,14 @@ class Dh22 extends Model
     }
 
     // ########################## SCOPES ###############################################
-    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('dh21.nro_liqui', $nroLiqui);
     }
 
-    public function scopeWithPeriodoFiscal(Builder $query, string $periodoFiscal): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withPeriodoFiscal(Builder $query, string $periodoFiscal): Builder
     {
         $year = substr($periodoFiscal, 0, 4);
         $month = substr($periodoFiscal, 4, 2);
@@ -248,7 +250,8 @@ class Dh22 extends Model
             ->where('per_limes', $month);
     }
 
-    public function scopeAbierta($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function abierta($query)
     {
         return $query->where('sino_cerra', '!=', 'C'); // Asumiendo que 'C' significa cerrada
     }
@@ -260,12 +263,14 @@ class Dh22 extends Model
      *
      * @return Builder
      */
-    public function scopeDefinitiva($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function definitiva($query)
     {
         return $query->whereRaw("LOWER(desc_liqui) LIKE '%definitiva%'");
     }
 
-    public function scopeDefinitivaCerrada($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function definitivaCerrada($query)
     {
         return $query
             ->definitiva()
@@ -281,7 +286,8 @@ class Dh22 extends Model
      *
      * @return Builder<Dh22>
      */
-    public function scopeBetweenPeriodoLiquidacion($query, $fechaInicio, $fechaFin)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function betweenPeriodoLiquidacion($query, $fechaInicio, $fechaFin)
     {
         $añoInicio = $fechaInicio->year;
         $mesInicio = $fechaInicio->month;
@@ -315,7 +321,8 @@ class Dh22 extends Model
      *
      * @return Builder<Dh22>
      */
-    public function scopeGeneraImpositivo($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function generaImpositivo($query)
     {
         return $query->where('sino_genimp', true);
     }
@@ -327,7 +334,8 @@ class Dh22 extends Model
      *
      * @return Builder<Dh22>
      */
-    public function scopeFilterByYearMonth($query, PeriodoFiscal|int $year, PeriodoFiscal|int $month)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function filterByYearMonth($query, PeriodoFiscal|int $year, PeriodoFiscal|int $month)
     {
         if ($year instanceof PeriodoFiscal) {
             return $query->where('per_liano', $year->year())
@@ -346,7 +354,8 @@ class Dh22 extends Model
      *
      * @return Builder<self>
      */
-    public function scopeFilterByPeriodoFiscal($query, array|PeriodoFiscal|null $periodoFiscal = null): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function filterByPeriodoFiscal($query, array|PeriodoFiscal|null $periodoFiscal = null): Builder
     {
         if (!$periodoFiscal) {
             return $query;
@@ -362,7 +371,7 @@ class Dh22 extends Model
         return $query->whereRaw(
             "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
             [
-                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
+                $periodoFiscal['year'] . str_pad((string) $periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
             ],
         );
     }
@@ -374,7 +383,8 @@ class Dh22 extends Model
      *
      * @return Builder<self>
      */
-    public function scopeFormateadoParaSelect($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function formateadoParaSelect($query)
     {
         return $query->select('nro_liqui', 'desc_liqui');
     }

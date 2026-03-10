@@ -44,20 +44,10 @@ class BloqueosDataModel extends Model
         'esta_procesado',
     ];
 
-    protected $casts = [
-        'fecha_registro' => 'datetime',
-        'fecha_baja' => 'date:Y-m-d',
-        'chkstopliq' => 'boolean',
-        'fec_baja' => 'date:Y-m-d',
-        'estado' => BloqueosEstadoEnum::class,
-        'tiene_cargo_asociado' => 'boolean',
-        'esta_procesado' => 'boolean',
-    ];
-
     public function validarEstado(): void
     {
         // Primero verificamos si ya existe un registro con el mismo par legajo-cargo
-        $duplicado = self::where('id', '!=', $this->id)
+        $duplicado = self::query()->where('id', '!=', $this->id)
             ->where('nro_legaj', $this->nro_legaj)
             ->where('nro_cargo', $this->nro_cargo)
             ->exists();
@@ -78,8 +68,8 @@ class BloqueosDataModel extends Model
             }
             // Si el tipo es fallecido o renuncia y tiene fecha de baja, comparamos con la fecha del cargo
             elseif (in_array($this->tipo, ['fallecido', 'renuncia']) && $this->fecha_baja && $cargo->fec_baja) {
-                $fechaBajaImportada = Carbon::parse($this->fecha_baja);
-                $fechaBajaCargo = Carbon::parse($cargo->fec_baja);
+                $fechaBajaImportada = \Illuminate\Support\Facades\Date::parse($this->fecha_baja);
+                $fechaBajaCargo = \Illuminate\Support\Facades\Date::parse($cargo->fec_baja);
 
                 if ($fechaBajaImportada->eq($fechaBajaCargo)) {
                     $this->estado = BloqueosEstadoEnum::FECHAS_COINCIDENTES;
@@ -108,7 +98,7 @@ class BloqueosDataModel extends Model
                 $this->verificarCargoAsociado();
 
                 // Validamos el cargo asociado
-                $fechaBajaImportada = $this->fecha_baja ? Carbon::parse($this->fecha_baja) : null;
+                $fechaBajaImportada = $this->fecha_baja ? \Illuminate\Support\Facades\Date::parse($this->fecha_baja) : null;
                 $resultadoValidacion = $this->validarFechasCargoAsociado($fechaBajaImportada);
 
                 if ($resultadoValidacion) {
@@ -133,7 +123,7 @@ class BloqueosDataModel extends Model
      */
     public function verificarCargoAsociado(): void
     {
-        $tieneCargoAsociado = Dh90::where('nro_cargo', $this->nro_cargo)
+        $tieneCargoAsociado = Dh90::query()->where('nro_cargo', $this->nro_cargo)
             ->whereNotNull('nro_cargoasociado')
             ->exists();
 
@@ -142,40 +132,45 @@ class BloqueosDataModel extends Model
     }
 
     /* ######## ATTRIBUTES ########################################## */
-    public function legajoCargo(): Attribute
+    protected function legajoCargo(): Attribute
     {
         return Attribute::make(
-            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+            get: fn(): \App\Enums\LegajoCargo => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
 
-    public function fechaBaja(): Attribute
+    protected function fechaBaja(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-            set: fn($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            get: fn($value): ?string => $value ? \Illuminate\Support\Facades\Date::parse($value)->format('Y-m-d') : null,
+            set: fn($value): ?string => $value ? \Illuminate\Support\Facades\Date::parse($value)->format('Y-m-d') : null,
         );
     }
 
-    /* ######## ACCESORS ########################################### */
-    public function getFechasCoincidentesAttribute(): bool
+    protected function fechasCoincidentes(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        if (!$this->fecha_baja || !$this->cargo?->fec_baja) {
-            return false;
-        }
-
-        return Carbon::parse($this->fecha_baja)->format('Y-m-d')
-            === Carbon::parse($this->cargo->fec_baja)->format('Y-m-d');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): bool {
+            if (!$this->fecha_baja || !$this->cargo?->fec_baja) {
+                return false;
+            }
+            return \Illuminate\Support\Facades\Date::parse($this->fecha_baja)->format('Y-m-d')
+                === \Illuminate\Support\Facades\Date::parse($this->cargo->fec_baja)->format('Y-m-d');
+        });
     }
 
     /* ####################################################################################################
-    ###########################################  RELACIONES ############################################### */
-
+       ###########################################  RELACIONES ############################################### */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
+     */
     public function cargo(): BelongsTo
     {
         return $this->belongsTo(Dh03::class, 'nro_cargo', 'nro_cargo');
@@ -183,6 +178,7 @@ class BloqueosDataModel extends Model
 
     /**
      * Obtiene la información del cargo asociado desde la tabla dh90.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh90, $this>
      */
     public function cargoAsociado(): BelongsTo
     {
@@ -190,16 +186,19 @@ class BloqueosDataModel extends Model
     }
 
     /* ################## SCOPES ##################################### */
-    public function scopeFechasCoinciden($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function fechasCoinciden($query)
     {
         return $query->whereRaw('DATE(fecha_baja) = DATE(fec_baja)');
     }
 
-    public function scopeTipo($query, $tipo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function tipo($query, $tipo)
     {
-        return $query->where('tipo', strtolower($tipo));
+        return $query->where('tipo', strtolower((string) $tipo));
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -220,7 +219,7 @@ class BloqueosDataModel extends Model
         }
 
         // Obtener información del cargo asociado
-        $cargoAsociadoInfo = Dh90::where('nro_cargo', $this->nro_cargo)
+        $cargoAsociadoInfo = Dh90::query()->where('nro_cargo', $this->nro_cargo)
             ->whereNotNull('nro_cargoasociado')
             ->first();
 
@@ -231,7 +230,7 @@ class BloqueosDataModel extends Model
         $nroCargoAsociado = $cargoAsociadoInfo->nro_cargoasociado;
 
         // Verificar si el cargo asociado está en la tabla de bloqueos
-        $cargoAsociadoEnBloqueos = self::where('nro_cargo', $nroCargoAsociado)
+        $cargoAsociadoEnBloqueos = self::query()->where('nro_cargo', $nroCargoAsociado)
             ->where('id', '!=', $this->id)
             ->exists();
 
@@ -243,10 +242,10 @@ class BloqueosDataModel extends Model
         }
 
         // Verificar que las fechas de baja coincidan si ambos tienen fecha de baja
-        $cargoAsociadoBloqueo = self::where('nro_cargo', $nroCargoAsociado)->first();
+        $cargoAsociadoBloqueo = self::query()->where('nro_cargo', $nroCargoAsociado)->first();
 
         if ($cargoAsociadoBloqueo && $fechaBajaImportada && $cargoAsociadoBloqueo->fecha_baja) {
-            $fechaBajaCargoAsociado = Carbon::parse($cargoAsociadoBloqueo->fecha_baja);
+            $fechaBajaCargoAsociado = \Illuminate\Support\Facades\Date::parse($cargoAsociadoBloqueo->fecha_baja);
 
             if (!$fechaBajaImportada->eq($fechaBajaCargoAsociado)) {
                 return [
@@ -258,5 +257,18 @@ class BloqueosDataModel extends Model
 
         // Si pasa todas las validaciones
         return null;
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fecha_registro' => 'datetime',
+            'fecha_baja' => 'date:Y-m-d',
+            'chkstopliq' => 'boolean',
+            'fec_baja' => 'date:Y-m-d',
+            'estado' => BloqueosEstadoEnum::class,
+            'tiene_cargo_asociado' => 'boolean',
+            'esta_procesado' => 'boolean',
+        ];
     }
 }

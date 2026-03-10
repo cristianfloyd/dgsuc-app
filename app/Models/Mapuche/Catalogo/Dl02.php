@@ -132,6 +132,7 @@ class Dl02 extends Model
 
     /**
      * Relación con licencias (Dh05).
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Dh05, $this>
      */
     public function licencias(): HasMany
     {
@@ -145,7 +146,8 @@ class Dl02 extends Model
     /**
      * Scope para variantes remuneradas.
      */
-    public function scopeRemuneradas(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function remuneradas(Builder $query): Builder
     {
         return $query->where('es_remunerada', true);
     }
@@ -153,7 +155,8 @@ class Dl02 extends Model
     /**
      * Scope para variantes no remuneradas.
      */
-    public function scopeNoRemuneradas(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function noRemuneradas(Builder $query): Builder
     {
         return $query->where('es_remunerada', false);
     }
@@ -161,7 +164,8 @@ class Dl02 extends Model
     /**
      * Scope para licencias por maternidad.
      */
-    public function scopeMaternidad(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function maternidad(Builder $query): Builder
     {
         return $query->where('es_maternidad', true);
     }
@@ -169,7 +173,8 @@ class Dl02 extends Model
     /**
      * Scope para licencias por absorción.
      */
-    public function scopeAbsorcion(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function absorcion(Builder $query): Builder
     {
         return $query->where('es_absorcion', true);
     }
@@ -177,7 +182,8 @@ class Dl02 extends Model
     /**
      * Scope para licencias que generan vacante.
      */
-    public function scopeGeneraVacante(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function generaVacante(Builder $query): Builder
     {
         return $query->where('genera_vacante', true);
     }
@@ -185,7 +191,8 @@ class Dl02 extends Model
     /**
      * Scope para licencias que computan antigüedad.
      */
-    public function scopeComputaAntiguedad(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function computaAntiguedad(Builder $query): Builder
     {
         return $query->where('computa_antiguedad', true);
     }
@@ -193,7 +200,8 @@ class Dl02 extends Model
     /**
      * Scope para filtrar por escalafón.
      */
-    public function scopePorEscalafon(Builder $query, string $escalafon): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porEscalafon(Builder $query, string $escalafon): Builder
     {
         return $query->where('escalafon', $escalafon);
     }
@@ -201,7 +209,8 @@ class Dl02 extends Model
     /**
      * Scope para filtrar por sexo.
      */
-    public function scopePorSexo(Builder $query, string $sexo): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porSexo(Builder $query, string $sexo): Builder
     {
         return $query->where('sexo', $sexo);
     }
@@ -209,7 +218,8 @@ class Dl02 extends Model
     /**
      * Scope para licencias con control de fechas.
      */
-    public function scopeConControlFechas(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conControlFechas(Builder $query): Builder
     {
         return $query->where('control_fechas', true);
     }
@@ -217,7 +227,8 @@ class Dl02 extends Model
     /**
      * Scope para filtrar por tipo de días.
      */
-    public function scopePorTipoDias(Builder $query, string $tipoDias): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porTipoDias(Builder $query, string $tipoDias): Builder
     {
         return $query->where('tipo_dias', $tipoDias);
     }
@@ -225,7 +236,8 @@ class Dl02 extends Model
     /**
      * Scope para ordenar por número de orden de aplicación.
      */
-    public function scopeOrdenadoPorAplicacion(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ordenadoPorAplicacion(Builder $query): Builder
     {
         return $query->orderBy('nroordenaplicacion');
     }
@@ -327,6 +339,7 @@ class Dl02 extends Model
     /**
      * Casteos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

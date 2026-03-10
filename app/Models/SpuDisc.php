@@ -36,6 +36,7 @@ class SpuDisc extends Model
 
     /**
      * Relación con el modelo Dh03.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
      */
     public function dh03s(): HasMany
     {
@@ -45,6 +46,7 @@ class SpuDisc extends Model
     }
 
     // Sobrescribir el método para manejar la clave primaria compuesta
+    #[\Override]
     protected function setKeysForSaveQuery($query)
     {
         $keys = $this->getKeyName();
@@ -66,6 +68,7 @@ class SpuDisc extends Model
      *
      * @return mixed El valor de la clave primaria compuesta.
      */
+    #[\Override]
     protected function getKeyForSaveQuery($keyName = null)
     {
         if ($keyName === null) {

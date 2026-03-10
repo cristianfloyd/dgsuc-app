@@ -39,6 +39,7 @@ class Dhe2 extends Model
 
     /**
      * Relación con la tabla dh30.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function dh30(): BelongsTo
     {
@@ -48,6 +49,7 @@ class Dhe2 extends Model
 
     /**
      * Relación con la tabla dhe4.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function dhe4(): BelongsTo
     {
@@ -61,6 +63,7 @@ class Dhe2 extends Model
             ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

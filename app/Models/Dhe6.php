@@ -34,7 +34,7 @@ class Dhe6 extends Model
     ];
 
     // Define las reglas de validación para los atributos del modelo
-    public static function rules()
+    public static function rules(): array
     {
         return [
             'codigocategoriaoa' => 'required|string|size:4',
@@ -43,7 +43,8 @@ class Dhe6 extends Model
     }
 
     // Define un alcance local para buscar por descripción
-    public function scopeByDescripcion(Builder $query, string $desccategoriaoa)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byDescripcion(Builder $query, string $desccategoriaoa)
     {
         return $query->where('desccategoriaoa', $desccategoriaoa);
     }

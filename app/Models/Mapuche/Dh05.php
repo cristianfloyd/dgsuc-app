@@ -35,6 +35,7 @@ class Dh05 extends Model
 
     /**
      * Relación con el modelo Dh01.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
      */
     public function dh01(): BelongsTo
     {
@@ -43,6 +44,7 @@ class Dh05 extends Model
 
     /**
      * Relación con el modelo Dh03.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
      */
     public function dh03(): BelongsTo
     {
@@ -51,6 +53,7 @@ class Dh05 extends Model
 
     /**
      * Relación con el modelo Dl09 (tipo_norma_alta).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dl09, $this>
      */
     public function dl09(): BelongsTo
     {
@@ -59,12 +62,14 @@ class Dh05 extends Model
 
     /**
      * Relación con el modelo Dl10 (emite_norma_alta).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dl10, $this>
      */
     public function dl10(): BelongsTo
     {
         return $this->belongsTo(Dl10::class, 'emite_norma_alta', 'quien_emite_norma');
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

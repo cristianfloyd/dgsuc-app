@@ -81,6 +81,7 @@ class CuentaJudicial extends Model
 
     /**
      * Relación con embargos.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Embargo, $this>
      */
     public function embargos(): HasMany
     {
@@ -97,6 +98,7 @@ class CuentaJudicial extends Model
     /**
      * Casting de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

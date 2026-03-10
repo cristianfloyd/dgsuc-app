@@ -66,13 +66,15 @@ class Dh36 extends Model
         });
     }
 
-    public function scopeWithoutEncoding($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withoutEncoding($query)
     {
         return $query->whereRaw("encode(descdependesemp::bytea, 'escape') IS NOT NULL");
     }
 
     /**
      * Relación con el modelo Dhe4 (organismo).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismo(): BelongsTo
     {
@@ -81,17 +83,24 @@ class Dh36 extends Model
 
     /**
      * Relación con el modelo Dhe4 (organismo evaluador).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismoEvaluador(): BelongsTo
     {
         return $this->belongsTo(Dhe4::class, 'cod_organismo_eval', 'cod_organismo');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
+     */
     public function cargos(): HasMany
     {
         return $this->hasMany(Dh03::class, 'coddependesemp', 'coddependesemp');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
+     */
     public function dhe4(): BelongsTo
     {
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
@@ -106,6 +115,7 @@ class Dh36 extends Model
         );
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

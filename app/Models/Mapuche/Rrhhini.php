@@ -67,7 +67,7 @@ class Rrhhini extends Model
      */
     public static function getParameterValue($section, $parameter)
     {
-        return static::where('nombre_seccion', $section)
+        return static::query()->where('nombre_seccion', $section)
             ->where('nombre_parametro', $parameter)
             ->value('dato_parametro');
     }
@@ -135,7 +135,7 @@ class Rrhhini extends Model
     {
         if (is_string($key) && str_contains($key, '|')) {
             [$seccion, $parametro] = static::decodeKey($key);
-            return static::where('nombre_seccion', $seccion)
+            return static::query()->where('nombre_seccion', $seccion)
                 ->where('nombre_parametro', $parametro)
                 ->first();
         }
@@ -146,24 +146,24 @@ class Rrhhini extends Model
     protected function nombreSeccion(): Attribute
     {
         return Attribute::make(
-            get: fn($value): ?string => EncodingService::toUtf8($value),
-            set: fn($value): ?string => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function nombreParametro(): Attribute
     {
         return Attribute::make(
-            get: fn($value): ?string => EncodingService::toUtf8($value),
-            set: fn($value): ?string => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function datoParametro(): Attribute
     {
         return Attribute::make(
-            get: fn($value): ?string => EncodingService::toUtf8($value),
-            set: fn($value): ?string => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 }

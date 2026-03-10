@@ -34,49 +34,26 @@ class Dh61 extends Model
 
     protected $fillable = ['codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano', 'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos', 'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif', 'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon', 'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao'];
 
-    protected $casts = [
-        'impp_basic' => 'decimal:2',
-        'impp_asign' => 'decimal:2',
-        'controlcargos' => 'boolean',
-        'remunbonif' => 'float',
-        'noremunbonif' => 'float',
-        'remunnobonif' => 'float',
-        'noremunnobonif' => 'float',
-        'otrasrem' => 'float',
-        'dto1610' => 'float',
-        'reflaboral' => 'float',
-        'refadm95' => 'float',
-        'critico' => 'float',
-        'jefatura' => 'float',
-        'gastosrepre' => 'float',
-        'computaantig' => 'integer',
-        'controlhoras' => 'integer',
-        'controlpuntos' => 'integer',
-        'controlpresup' => 'integer',
-        'cantpuntos' => 'integer',
-        'noinformasipuver' => 'integer',
-        'noinformasirhu' => 'integer',
-        'imppnooblig' => 'integer',
-        'aportalao' => 'integer',
-    ];
-
     private ?string $virtualId = null;
 
     // Scope para filtrar por categoría
-    public function scopeCategoria($query, $categoria)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function categoria($query, $categoria)
     {
-        return $query->where('codc_categ', str_pad(trim($categoria), 4));
+        return $query->where('codc_categ', str_pad(trim((string) $categoria), 4));
     }
 
     // Scope para filtrar por vigencia
-    public function scopeVigencia($query, $ano, $mes)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function vigencia($query, $ano, $mes)
     {
         return $query->where('vig_caano', $ano)
             ->where('vig_cames', $mes);
     }
 
     // Método para obtener categorías activas
-    public function scopeActivas($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activas($query)
     {
         return $query->where('estadolaboral', 'A');
     }
@@ -111,11 +88,13 @@ class Dh61 extends Model
     }
 
     // Método para obtener categorías por escalafón
-    public function scopePorEscalafon($query, $codigoEscalafon)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porEscalafon($query, $codigoEscalafon)
     {
         return $query->where('codigoescalafon', $codigoEscalafon);
     }
 
+    #[\Override]
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
@@ -132,7 +111,7 @@ class Dh61 extends Model
     {
         $parts = explode('-', $virtualId);
 
-        return static::where('codc_categ', $parts[0])
+        return static::query()->where('codc_categ', $parts[0])
             ->where('vig_caano', $parts[1])
             ->where('vig_cames', $parts[2])
             ->first();
@@ -144,7 +123,7 @@ class Dh61 extends Model
             return null;
         }
 
-        $parts = explode('-', $id);
+        $parts = explode('-', (string) $id);
         if (count($parts) !== 3) {
             return null;
         }
@@ -171,6 +150,7 @@ class Dh61 extends Model
     //         ->first();
     // }
 
+    #[\Override]
     public function getKeyName(): string
     {
         return 'id';
@@ -179,9 +159,8 @@ class Dh61 extends Model
     /**
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
-     *
-     * @return mixed
      */
+    #[\Override]
     public function getKey(): string
     {
         return $this->id;
@@ -192,21 +171,25 @@ class Dh61 extends Model
      *
      * @param string $key El valor de la clave a establecer.
      */
+    #[\Override]
     public function setKeyName($key): void
     {
         $this->id = $key;
     }
 
+    #[\Override]
     public function getRouteKeyName(): string
     {
         return 'id';
     }
 
+    #[\Override]
     public function getRouteKey(): string
     {
         return $this->id;
     }
 
+    #[\Override]
     public function resolveRouteBinding($value, $field = null)
     {
         if ($field === null) {
@@ -221,7 +204,7 @@ class Dh61 extends Model
 
     public static function resolveRecordRouteBinding(string $key): ?Model
     {
-        return static::getModel()::find($key);
+        return static::query()->getModel()::find($key);
     }
 
     // public function newQuery()
@@ -238,18 +221,16 @@ class Dh61 extends Model
     protected function id(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return (string) new CategoryIdentifier(
-                    $this->codc_categ,
-                    $this->vig_caano,
-                    $this->vig_cames,
-                );
-            },
-            set: function ($value) {
-                $identifier = CategoryIdentifier::fromString($value);
-                $this->codc_categ = $identifier->getCategory();
-                $this->vig_caano = $identifier->getYear();
-                $this->vig_cames = $identifier->getMonth();
+            get: fn() => (string) new CategoryIdentifier(
+                $this->codc_categ,
+                $this->vig_caano,
+                $this->vig_cames,
+            ),
+            set: function (string $value): string {
+                $categoryIdentifier = CategoryIdentifier::fromString($value);
+                $this->codc_categ = $categoryIdentifier->getCategory();
+                $this->vig_caano = $categoryIdentifier->getYear();
+                $this->vig_cames = $categoryIdentifier->getMonth();
                 return $value;
             },
         );
@@ -258,8 +239,37 @@ class Dh61 extends Model
     protected function codcCateg(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => str_pad(trim($value), 4),
-            set: fn(string $value) => str_pad(trim($value), 4),
+            get: fn(string $value): string => str_pad(trim($value), 4),
+            set: fn(string $value): string => str_pad(trim($value), 4),
         );
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'impp_basic' => 'decimal:2',
+            'impp_asign' => 'decimal:2',
+            'controlcargos' => 'boolean',
+            'remunbonif' => 'float',
+            'noremunbonif' => 'float',
+            'remunnobonif' => 'float',
+            'noremunnobonif' => 'float',
+            'otrasrem' => 'float',
+            'dto1610' => 'float',
+            'reflaboral' => 'float',
+            'refadm95' => 'float',
+            'critico' => 'float',
+            'jefatura' => 'float',
+            'gastosrepre' => 'float',
+            'computaantig' => 'integer',
+            'controlhoras' => 'integer',
+            'controlpuntos' => 'integer',
+            'controlpresup' => 'integer',
+            'cantpuntos' => 'integer',
+            'noinformasipuver' => 'integer',
+            'noinformasirhu' => 'integer',
+            'imppnooblig' => 'integer',
+            'aportalao' => 'integer',
+        ];
     }
 }

@@ -59,7 +59,7 @@ class Dh21 extends Model
 
     public function __construct(?Dh21RepositoryInterface $repository = null)
     {
-        if ($repository) {
+        if ($repository instanceof \App\Contracts\Dh21RepositoryInterface) {
             $this->repository = $repository;
         }
 
@@ -69,7 +69,7 @@ class Dh21 extends Model
     /**
      * Relación de pertenencia con el modelo Dh22.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
      */
     public function dh22(): BelongsTo
     {
@@ -78,17 +78,15 @@ class Dh21 extends Model
 
     public static function conceptosTotales(?NroLiqui $nro_liqui = null, ?int $codn_fuent = null): Builder
     {
-        return app(ConceptosTotalesService::class)->calcular($nro_liqui, $codn_fuent);
+        return resolve(ConceptosTotalesService::class)->calcular($nro_liqui, $codn_fuent);
     }
 
     /**
      * Obtiene la cantidad de legajos distintos en la tabla.
-     *
-     * @return int
      */
-    public static function distinctLegajos()
+    public static function distinctLegajos(): int
     {
-        return app(Dh21RepositoryInterface::class)->getDistinctLegajos();
+        return resolve(Dh21RepositoryInterface::class)->getDistinctLegajos();
     }
 
     public static function distinctCargos()
@@ -113,12 +111,11 @@ class Dh21 extends Model
             ->get()
             ->groupBy('codn_conce')
             ->orderBy('codn_conce')
-            ->map(function ($group) {
-                return $group->sum('impp_conce');
-            });
+            ->map(fn($group) => $group->sum('impp_conce'));
     }
 
-    public function scopeSearch($query, $search)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, $search)
     {
         $columns = ['nro_legaj', 'nro_liqui', 'nro_cargo', 'codn_conce', 'impp_conce', 'tipo_conce', ];
 
@@ -129,21 +126,24 @@ class Dh21 extends Model
         });
     }
 
-    public function scopeConLiquidacionDefinitiva($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conLiquidacionDefinitiva($query)
     {
         return $query->whereHas('dh22', function ($q): void {
             $q->definitiva();
         });
     }
 
-    public function scopeConFechaDeLiquidacion($query, $fecha)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conFechaDeLiquidacion($query, $fecha)
     {
         return $query->whereHas('dh22', function ($q) use ($fecha): void {
             $q->where('fecha_liquidacion', $fecha);
         });
     }
 
-    public function scopeEntreFechas($query, $fechaInicio, $fechaFin)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function entreFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->whereHas('dh22', function ($query) use ($fechaInicio, $fechaFin): void {
             $query->scopeBetweenPeriodoLiquidacion($fechaInicio, $fechaFin);
@@ -157,7 +157,8 @@ class Dh21 extends Model
      *
      * @return Builder
      */
-    public function scopeConDefinitiva($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conDefinitiva($query)
     {
         return $query->whereHas('dh22', function ($q): void {
             $q->definitiva();

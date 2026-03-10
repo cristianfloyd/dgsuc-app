@@ -21,11 +21,6 @@ class Documentation extends Model
         'is_published',
     ];
 
-    protected $casts = [
-        'is_published' => 'boolean',
-        'order' => 'integer',
-    ];
-
     public static function getMarkdownContent(string $file): string
     {
         $path = resource_path("docs/{$file}.md");
@@ -48,6 +43,7 @@ class Documentation extends Model
         ];
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -57,5 +53,13 @@ class Documentation extends Model
                 $doc->slug = Str::slug($doc->title);
             }
         });
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+            'order' => 'integer',
+        ];
     }
 }

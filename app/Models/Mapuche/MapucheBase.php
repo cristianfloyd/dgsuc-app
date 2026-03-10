@@ -20,7 +20,7 @@ abstract class MapucheBase extends Model
         // Si estamos en el contexto del panel AFIP, usar conexión dinámica
         if ($this->shouldUseDynamicConnection()) {
             // Usar el servicio mejorado para obtener la conexión
-            return app(EnhancedDatabaseConnectionService::class)->getCurrentConnection();
+            return resolve(EnhancedDatabaseConnectionService::class)->getCurrentConnection();
         }
 
         // Fallback a la conexión fija de Mapuche

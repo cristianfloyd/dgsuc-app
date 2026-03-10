@@ -102,33 +102,6 @@ class Dh03 extends Model
         'cargo_concursado',
     ];
 
-    protected $casts = [
-        'fec_alta' => 'date:Y-m-d',
-        'fec_baja' => 'date:Y-m-d',
-        'fec_norma' => 'date:Y-m-d',
-        'fec_exped' => 'date:Y-m-d',
-        'fec_exped_baja' => 'date:Y-m-d',
-        'fec_limite' => 'date:Y-m-d',
-        'fecha_norma_baja' => 'date:Y-m-d',
-        'fechanotificacion' => 'date:Y-m-d',
-        'fechagrado' => 'date:Y-m-d',
-        'fechapermanencia' => 'date:Y-m-d',
-        'fecaltadesig' => 'date:Y-m-d',
-        'fecbajadesig' => 'date:Y-m-d',
-        'chk_proye' => 'boolean',
-        'chktrayectoria' => 'boolean',
-        'chkfuncionejec' => 'boolean',
-        'chkretroactivo' => 'boolean',
-        'cargo_concursado' => 'boolean',
-        'chkstopliq' => 'integer',
-        'nro_cargo' => 'integer',
-        'nro_legaj' => 'integer',
-        'porcdedicdocente' => 'double',
-        'porcdedicinvestig' => 'double',
-        'porcdedicagestion' => 'double',
-        'porcdedicaextens' => 'double',
-    ];
-
     protected $attributes = [
         'chkstopliq' => 0,
         'porcdedicdocente' => 0,
@@ -142,6 +115,7 @@ class Dh03 extends Model
         'cargo_concursado' => false,
     ];
 
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -167,20 +141,17 @@ class Dh03 extends Model
     /* ############################### GETTERS ############################## */
     public static function getCargoCount(): int
     {
-        return Dh03::count();
+        return Dh03::query()->count();
     }
 
     /**
      * Obtiene los detalles completos de la validación.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
      *
-     * @return array
      */
     public static function getDetallesValidacion(int $nroLegaj, int $nroCargo): array
     {
-        $cargo = static::validarLegajoCargo($nroLegaj, $nroCargo)->first();
+        $cargo = static::query()->validarLegajoCargo($nroLegaj, $nroCargo)->first();
 
         return [
             'existe' => (bool) $cargo,
@@ -196,17 +167,16 @@ class Dh03 extends Model
     /**
      * Obtiene los cargos activos de un legajo.
      *
-     * @param int $nroLegajo
      *
-     * @return array
      */
     public static function getCargosActivos(int $nroLegajo): array
     {
-        return static::cargosActivos($nroLegajo)->get()->toArray();
+        return static::query()->cargosActivos($nroLegajo)->get()->toArray();
     }
 
     /** ############################## SCOPES ############################## */
-    public function scopeEmpleadosActivos($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function empleadosActivos($query)
     {
         return $query->where('chkstopliq', '=', 0)
             ->where('codc_uacad', '!=', '')
@@ -217,18 +187,18 @@ class Dh03 extends Model
      * Scope para validar la combinación legajo-cargo.
      *
      * @param Builder $query
-     * @param int $nro_legaj
-     * @param int $nro_cargo
      *
      * @return Builder
      */
-    public function scopeValidarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function validarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
     {
         return $query->where('nro_legaj', $nro_legaj)
             ->where('nro_cargo', $nro_cargo);
     }
 
-    public function scopeCargosActivos($query, int $nroLegajo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function cargosActivos($query, int $nroLegajo)
     {
         $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
 
@@ -256,21 +226,33 @@ class Dh03 extends Model
         return $this->hasMany(Dh21::class, 'nro_cargo', 'nro_cargo');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh11, $this>
+     */
     public function dh11(): BelongsTo
     {
         return $this->belongsTo(Dh11::class, 'codc_categ', 'codc_categ');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dhc9, $this>
+     */
     public function dhc9(): BelongsTo
     {
         return $this->belongsTo(Dhc9::class, 'codc_agrup', 'codagrup');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dhd7, $this>
+     */
     public function dhd7(): BelongsTo
     {
         return $this->belongsTo(Dhd7::class, 'cod_clasif_cargo', 'cod_clasif_cargo');
@@ -283,6 +265,9 @@ class Dh03 extends Model
             ->where('area', $this->area);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh05, $this>
+     */
     public function dh05(): BelongsTo
     {
         return $this->belongsTo(Dh05::class, 'nro_licencia', 'nro_licencia');
@@ -300,30 +285,27 @@ class Dh03 extends Model
     /**
      * Obtiene la dependencia de desempeño asociada al cargo.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh36, $this>
      */
     public function dh36(): BelongsTo
     {
         return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
 
-    // ######################## MUTADORES ##############################
-    public function getCodcUacadAttribute($value)
+    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return trim($value);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
     }
 
     /*  ##################### HELPER ##################### */
     public static function validarParLegajoCargo(int $nroLegaj, int $nroCargo): bool
     {
-        return static::validarLegajoCargo($nroLegaj, $nroCargo)->exists();
+        return static::query()->validarLegajoCargo($nroLegaj, $nroCargo)->exists();
     }
 
     /**
      * Método estático para buscar un cargo por legajo y número de cargo.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
      *
      * @return Builder
      */
@@ -333,21 +315,51 @@ class Dh03 extends Model
             ->where('nro_cargo', $nroCargo);
     }
 
-    protected function setCodigocontratoAttribute($value): void
+    protected function codigocontrato(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $this->attributes['codigocontrato'] = (int) $value;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(set: fn($value): array => ['codigocontrato' => (int) $value]);
     }
 
-    protected function setChkstopliqAttribute($value): void
+    protected function chkstopliq(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $this->attributes['chkstopliq'] = (int) $value;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(set: fn($value): array => ['chkstopliq' => (int) $value]);
     }
 
     /* ##################### ATRIBUTOS ##################### */
     protected function legajoCargo(): Attribute
     {
         return Attribute::make(
-            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+            get: fn(): \App\Enums\LegajoCargo => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fec_alta' => 'date:Y-m-d',
+            'fec_baja' => 'date:Y-m-d',
+            'fec_norma' => 'date:Y-m-d',
+            'fec_exped' => 'date:Y-m-d',
+            'fec_exped_baja' => 'date:Y-m-d',
+            'fec_limite' => 'date:Y-m-d',
+            'fecha_norma_baja' => 'date:Y-m-d',
+            'fechanotificacion' => 'date:Y-m-d',
+            'fechagrado' => 'date:Y-m-d',
+            'fechapermanencia' => 'date:Y-m-d',
+            'fecaltadesig' => 'date:Y-m-d',
+            'fecbajadesig' => 'date:Y-m-d',
+            'chk_proye' => 'boolean',
+            'chktrayectoria' => 'boolean',
+            'chkfuncionejec' => 'boolean',
+            'chkretroactivo' => 'boolean',
+            'cargo_concursado' => 'boolean',
+            'chkstopliq' => 'integer',
+            'nro_cargo' => 'integer',
+            'nro_legaj' => 'integer',
+            'porcdedicdocente' => 'double',
+            'porcdedicinvestig' => 'double',
+            'porcdedicagestion' => 'double',
+            'porcdedicaextens' => 'double',
+        ];
     }
 }

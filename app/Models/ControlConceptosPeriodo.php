@@ -29,12 +29,6 @@ class ControlConceptosPeriodo extends Model
         'connection_name',
     ];
 
-    protected $casts = [
-        'year' => 'integer',
-        'month' => 'integer',
-        'importe' => 'decimal:2',
-    ];
-
     protected $appends = [
         'tipo_concepto',
         'es_aporte',
@@ -43,6 +37,7 @@ class ControlConceptosPeriodo extends Model
 
     /**
      * Obtiene el concepto relacionado de la tabla DH12.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function dh12(): BelongsTo
     {
@@ -53,23 +48,23 @@ class ControlConceptosPeriodo extends Model
     /**
      * Determina si el concepto es de tipo Aporte.
      */
-    public function getEsAporteAttribute(): bool
+    protected function esAporte(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return str_starts_with($this->codn_conce, '2');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with($this->codn_conce, '2'));
     }
 
     /**
      * Determina si el concepto es de tipo Contribución.
      */
-    public function getEsContribucionAttribute(): bool
+    protected function esContribucion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return str_starts_with($this->codn_conce, '3');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with($this->codn_conce, '3'));
     }
 
     /**
      * Obtiene el tipo de concepto como string.
      */
-    public function getTipoConceptoAttribute(): string
+    protected function getTipoConceptoAttribute(): string
     {
         return match (substr($this->codn_conce, 0, 1)) {
             '2' => 'Aportes',
@@ -81,7 +76,8 @@ class ControlConceptosPeriodo extends Model
     /**
      * Scope para filtrar por período fiscal.
      */
-    public function scopePeriodoFiscal($query, int $year, int $month)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function periodoFiscal($query, int $year, int $month)
     {
         return $query->where('year', $year)->where('month', $month);
     }
@@ -89,7 +85,8 @@ class ControlConceptosPeriodo extends Model
     /**
      * Scope para filtrar por concepto.
      */
-    public function scopeConcepto($query, string $codn_conce)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function concepto($query, string $codn_conce)
     {
         return $query->where('codn_conce', $codn_conce);
     }
@@ -97,7 +94,8 @@ class ControlConceptosPeriodo extends Model
     /**
      * Scope para agrupar conceptos por tipo (aportes o contribuciones).
      */
-    public function scopeTipoConcepto($query, string $tipo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function tipoConcepto($query, string $tipo)
     {
         if ($tipo === 'aportes') {
             return $query->whereIn('codn_conce', ['201', '202', '203', '204', '205', '247', '248', '403']);
@@ -107,5 +105,14 @@ class ControlConceptosPeriodo extends Model
         }
 
         return $query;
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'year' => 'integer',
+            'month' => 'integer',
+            'importe' => 'decimal:2',
+        ];
     }
 }

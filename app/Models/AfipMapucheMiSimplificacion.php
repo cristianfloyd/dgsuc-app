@@ -91,7 +91,8 @@ class AfipMapucheMiSimplificacion extends Model
     }
 
     // Método para consultas grandes
-    public function scopeChunked($query, $callback, $count = 1000): void
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function chunked($query, $callback, $count = 1000): void
     {
         $query->chunk($count, $callback);
     }
@@ -161,10 +162,8 @@ class AfipMapucheMiSimplificacion extends Model
 
     /**
      * Retorna el nombre de la tabla en la base de datos.
-     *
-     * @return string
      */
-    public static function getDatabaseTableName()
+    public static function getDatabaseTableName(): string
     {
         return static::getTable();
     }
@@ -177,7 +176,8 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * @return Builder
      */
-    public function scopeSearch($query, $value)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, $value)
     {
         return empty($value) ? $query : $query->where('cuil', 'ilike', "%$value%")
             ->orWhere('nro_legaj', 'ilike', "%$value%");
@@ -193,10 +193,9 @@ class AfipMapucheMiSimplificacion extends Model
      *
      * @param Builder $query
      * @param string|PeriodoFiscal $periodoFiscal
-     *
-     * @return Builder
      */
-    public function scopeByPeriodoFiscal($query, $periodoFiscal): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byPeriodoFiscal($query, $periodoFiscal): Builder
     {
         $periodoStr = $periodoFiscal instanceof PeriodoFiscal
             ? $periodoFiscal->toString()
@@ -208,7 +207,8 @@ class AfipMapucheMiSimplificacion extends Model
     /**
      * Scope para filtrar por tipo de puesto.
      */
-    public function scopeByPuesto($query, PuestoDesempenado $puesto)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byPuesto($query, PuestoDesempenado $puesto)
     {
         $categorias = match ($puesto) {
             PuestoDesempenado::PROFESOR_UNIVERSITARIO => $this->getCategoriesByGroup('DOCU'),
@@ -225,7 +225,7 @@ class AfipMapucheMiSimplificacion extends Model
         };
 
         // Asegurarnos de que las categorías se pasen como strings
-        return $query->whereIn('puesto', array_map('strval', $categorias));
+        return $query->whereIn('puesto', array_map(strval(...), $categorias));
     }
 
     // ##################### Funcion Almacencada #########################
@@ -250,7 +250,7 @@ class AfipMapucheMiSimplificacion extends Model
             }
 
             // Obtener la conexión a la base de datos
-            $connection = (new self())->getConnectionName();
+            $connection = new self()->getConnectionName();
 
             // Ejecutar la consulta de inserción
             DB::connection($connection)->statement(
@@ -267,6 +267,7 @@ class AfipMapucheMiSimplificacion extends Model
         }
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -296,7 +297,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected function periodoFiscalObject(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?\App\ValueObjects\PeriodoFiscal {
                 $periodoStr = $this->attributes['periodo_fiscal'] ?? null;
                 if (!$periodoStr) {
                     return null;
@@ -304,7 +305,7 @@ class AfipMapucheMiSimplificacion extends Model
 
                 try {
                     return PeriodoFiscal::fromString($periodoStr);
-                } catch (InvalidArgumentException $e) {
+                } catch (InvalidArgumentException) {
                     Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
                     return null;
                 }
@@ -335,7 +336,7 @@ class AfipMapucheMiSimplificacion extends Model
                     $puestoEnum = $this->determinarPuestoDesempenado($value);
 
                     // Si no funciona, intentamos convertir directamente
-                    if (!$puestoEnum) {
+                    if (!$puestoEnum instanceof \App\Enums\PuestoDesempenado) {
                         $puestoEnum = PuestoDesempenado::tryFrom($value);
                     }
                 }
@@ -356,7 +357,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected function puestoDescripcion(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?string {
                 $categoria = $this->attributes['puesto'] ?? null;
 
                 if (!$categoria) {
@@ -375,7 +376,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected function puestoEscalafon(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?string {
                 $categoria = $this->attributes['puesto'] ?? null;
 
                 if (!$categoria) {
@@ -394,7 +395,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected function domicilio(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function ($value): string {
                 // Si tenemos actividad null pero un código de unidad válido,
                 // intentamos determinar los códigos
                 if ($this->attributes['actividad'] === null && $value) {
@@ -402,7 +403,7 @@ class AfipMapucheMiSimplificacion extends Model
                 }
                 return str_pad($value, 5, '0', STR_PAD_LEFT);
             },
-            set: function ($value) {
+            set: function (?string $value): ?string {
                 $this->determinarCodigosUnidadAcademica($value);
                 return $value;
             },
@@ -413,18 +414,12 @@ class AfipMapucheMiSimplificacion extends Model
      * Accessor y Mutator para la fecha de inicio de relación laboral.
      *
      * Reemplaza los guiones (-) por barras (/) en el formato de fecha
-     *
-     * @return Attribute
      */
     protected function inicioRelLaboral(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                return str_replace('-', '/', $value);
-            },
-            set: function ($value) {
-                return str_replace('-', '/', $value);
-            },
+            get: fn($value) => str_replace('-', '/', $value),
+            set: fn($value) => str_replace('-', '/', $value),
         );
     }
 
@@ -432,18 +427,12 @@ class AfipMapucheMiSimplificacion extends Model
      * Accessor y Mutator para la fecha de fin de relación laboral.
      *
      * Reemplaza los guiones (-) por barras (/) en el formato de fecha
-     *
-     * @return Attribute
      */
     protected function finRelLaboral(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                return str_replace('-', '/', $value);
-            },
-            set: function ($value) {
-                return str_replace('-', '/', $value);
-            },
+            get: fn($value) => str_replace('-', '/', $value),
+            set: fn($value) => str_replace('-', '/', $value),
         );
     }
 }

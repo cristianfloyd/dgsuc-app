@@ -27,18 +27,13 @@ class LiquidacionControl extends Model
         'ejecutado_por',
     ];
 
-    protected $casts = [
-        'datos_resultado' => 'array',
-        'fecha_ejecucion' => 'datetime',
-    ];
-
     /**
      * Obtiene el color de estado para badges.
      */
-    public function estadoColor(): Attribute
+    protected function estadoColor(): Attribute
     {
         return Attribute::make(
-            get: fn() => match ($this->estado) {
+            get: fn(): string => match ($this->estado) {
                 'pendiente' => 'warning',
                 'error' => 'danger',
                 'completado' => 'success',
@@ -49,6 +44,7 @@ class LiquidacionControl extends Model
 
     /**
      * Define relación con el modelo de liquidación.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
      */
     public function liquidacion(): BelongsTo
     {
@@ -58,22 +54,28 @@ class LiquidacionControl extends Model
     /**
      * Scope para filtrar por número de liquidación.
      */
-    public function scopeLiquidacion($query, $nroLiqui)
+    protected function scopeLiquidacion($query, $nroLiqui)
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
 
     /**
      * Verifica si la tabla existe en la base de datos.
-     *
-     * @return bool
      */
     public static function tableExists(): bool
     {
         try {
             return Schema::hasTable('suc.controles_liquidacion');
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'datos_resultado' => 'array',
+            'fecha_ejecucion' => 'datetime',
+        ];
     }
 }

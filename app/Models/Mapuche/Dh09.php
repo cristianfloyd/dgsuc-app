@@ -180,7 +180,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por empleados activos (no fallecidos).
      */
-    public function scopeActivos(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activos(Builder $query): Builder
     {
         return $query->whereNull('fec_defun');
     }
@@ -188,7 +189,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por empleados jubilados.
      */
-    public function scopeJubilados(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function jubilados(Builder $query): Builder
     {
         return $query->where('sino_jubil', 'S');
     }
@@ -196,7 +198,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por empleados con embargo.
      */
-    public function scopeConEmbargo(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conEmbargo(Builder $query): Builder
     {
         return $query->where('sino_embargo', true);
     }
@@ -204,7 +207,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por período de vigencia.
      */
-    public function scopePorPeriodo(Builder $query, int $ano, int $mes): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porPeriodo(Builder $query, int $ano, int $mes): Builder
     {
         return $query->where('vig_otano', $ano)
             ->where('vig_otmes', $mes);
@@ -213,7 +217,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por obra social.
      */
-    public function scopePorObraSocial(Builder $query, string $codigoObraSocial): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porObraSocial(Builder $query, string $codigoObraSocial): Builder
     {
         return $query->where('codc_obsoc', $codigoObraSocial);
     }
@@ -221,7 +226,8 @@ class Dh09 extends Model
     /**
      * Scope para filtrar por dependencia.
      */
-    public function scopePorDependencia(Builder $query, string $codigoDependencia): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porDependencia(Builder $query, string $codigoDependencia): Builder
     {
         return $query->where('codc_uacad', $codigoDependencia);
     }
@@ -277,7 +283,7 @@ class Dh09 extends Model
     public static function buscarPorLegajo(int $numeroLegajo): ?self
     {
         try {
-            return static::where('nro_legaj', $numeroLegajo)->first();
+            return static::query()->where('nro_legaj', $numeroLegajo)->first();
         } catch (Exception $e) {
             Log::error('Error buscando empleado por legajo', [
                 'legajo' => $numeroLegajo,
@@ -293,13 +299,11 @@ class Dh09 extends Model
      * @param int $ano Año del período.
      * @param int $mes Mes del período.
      * @param int $limite Cantidad de registros por página.
-     *
-     * @return LengthAwarePaginator
      */
     public static function obtenerPorPeriodo(int $ano, int $mes, int $limite = 100): LengthAwarePaginator
     {
         try {
-            return static::porPeriodo($ano, $mes)
+            return static::query()->porPeriodo($ano, $mes)
                 ->orderBy('nro_legaj')
                 ->paginate($limite);
         } catch (Exception $e) {
@@ -320,7 +324,7 @@ class Dh09 extends Model
     public static function obtenerEstadisticasPorPeriodo(int $ano, int $mes): array
     {
         try {
-            $query = static::porPeriodo($ano, $mes);
+            $query = static::query()->porPeriodo($ano, $mes);
 
             return [
                 'total_empleados' => $query->count(),
@@ -351,10 +355,10 @@ class Dh09 extends Model
     // ========================================
     // RELACIONES ELOQUENT
     // ========================================
-
     /**
      * Relación con la tabla de empleados (DH01)
      * Un empleado tiene un registro de otros datos.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
      */
     public function empleado(): BelongsTo
     {
@@ -363,6 +367,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab02).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple02(): BelongsTo
     {
@@ -371,6 +376,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab08).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple08(): BelongsTo
     {
@@ -379,6 +385,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab09).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple09(): BelongsTo
     {
@@ -398,9 +405,9 @@ class Dh09 extends Model
 
         try {
             // Validar fechas lógicas con conversión segura
-            $fechaIngreso = $this->fec_ingreso ? Carbon::parse($this->fec_ingreso) : null;
-            $fechaDefuncion = $this->fec_defun ? Carbon::parse($this->fec_defun) : null;
-            $fechaJubilacion = $this->fecha_jubilacion ? Carbon::parse($this->fecha_jubilacion) : null;
+            $fechaIngreso = $this->fec_ingreso ? \Illuminate\Support\Facades\Date::parse($this->fec_ingreso) : null;
+            $fechaDefuncion = $this->fec_defun ? \Illuminate\Support\Facades\Date::parse($this->fec_defun) : null;
+            $fechaJubilacion = $this->fecha_jubilacion ? \Illuminate\Support\Facades\Date::parse($this->fecha_jubilacion) : null;
 
             if ($fechaDefuncion && $fechaIngreso && $fechaDefuncion->lt($fechaIngreso)) {
                 $errores[] = 'La fecha de defunción no puede ser anterior a la fecha de ingreso';
@@ -608,7 +615,7 @@ class Dh09 extends Model
             $registrosLimpiados = 0;
 
             // Buscar registros con datos inconsistentes
-            $registrosInconsistentes = static::whereNotNull('fec_defun')
+            $registrosInconsistentes = static::query()->whereNotNull('fec_defun')
                 ->where('fec_defun', '<', '1900-01-01')
                 ->orWhere('vig_otmes', '>', 12)
                 ->orWhere('vig_otmes', '<', 1);
@@ -656,18 +663,18 @@ class Dh09 extends Model
     {
         try {
             return [
-                'total_registros' => static::count(),
-                'registros_con_periodo_valido' => static::whereNotNull('vig_otano')
+                'total_registros' => static::query()->count(),
+                'registros_con_periodo_valido' => static::query()->whereNotNull('vig_otano')
                     ->whereNotNull('vig_otmes')
                     ->whereBetween('vig_otmes', [1, 12])
                     ->count(),
-                'registros_con_obra_social' => static::whereNotNull('codc_obsoc')
+                'registros_con_obra_social' => static::query()->whereNotNull('codc_obsoc')
                     ->whereNotNull('nro_afili')
                     ->count(),
-                'empleados_jubilados' => static::jubilados()->count(),
-                'empleados_fallecidos' => static::whereNotNull('fec_defun')->count(),
-                'empleados_con_embargo' => static::conEmbargo()->count(),
-                'registros_sin_fecha_ingreso' => static::whereNull('fec_ingreso')->count(),
+                'empleados_jubilados' => static::query()->jubilados()->count(),
+                'empleados_fallecidos' => static::query()->whereNotNull('fec_defun')->count(),
+                'empleados_con_embargo' => static::query()->conEmbargo()->count(),
+                'registros_sin_fecha_ingreso' => static::query()->whereNull('fec_ingreso')->count(),
                 'ultima_actualizacion' => now()->format('Y-m-d H:i:s'),
             ];
         } catch (Exception $e) {
@@ -792,6 +799,7 @@ class Dh09 extends Model
      * Configuración de casting de tipos de datos
      * Organizado por tipos para mejor mantenimiento.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

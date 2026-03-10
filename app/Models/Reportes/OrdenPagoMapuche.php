@@ -11,11 +11,8 @@ class OrdenPagoMapuche extends Model
 {
     use MapucheLiquiConnectionTrait;
 
-    protected $repOrdenPagoRepository;
-
-    public function __construct(RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
+    public function __construct(protected \App\Contracts\RepOrdenPagoRepositoryInterface $repOrdenPagoRepository)
     {
-        $this->repOrdenPagoRepository = $repOrdenPagoRepository;
     }
 
     public function getOrdenPago(): Collection

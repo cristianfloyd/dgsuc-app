@@ -180,9 +180,9 @@ class Dh10 extends Model
     // ==============================================
     // RELACIONES
     // ==============================================
-
     /**
      * Relación con el modelo Dh03 (cargo).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
      */
     public function cargo(): BelongsTo
     {
@@ -191,6 +191,7 @@ class Dh10 extends Model
 
     /**
      * Relación con cargo vinculado (auto-relación).
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh10, $this>
      */
     public function cargoVinculado(): BelongsTo
     {
@@ -204,7 +205,7 @@ class Dh10 extends Model
     /**
      * Scope para cargos con vínculos.
      */
-    public function scopeConVinculo(Builder $query): Builder
+    protected function scopeConVinculo(Builder $query): Builder
     {
         return $query->whereColumn('nro_cargo', '!=', 'vcl_cargo');
     }
@@ -212,7 +213,7 @@ class Dh10 extends Model
     /**
      * Scope para cargos sin vínculos.
      */
-    public function scopeSinVinculo(Builder $query): Builder
+    protected function scopeSinVinculo(Builder $query): Builder
     {
         return $query->whereColumn('nro_cargo', '=', 'vcl_cargo');
     }
@@ -220,7 +221,7 @@ class Dh10 extends Model
     /**
      * Scope para cargos con importes en un mes específico.
      */
-    public function scopeConImportesMes(Builder $query, int $mes): Builder
+    protected function scopeConImportesMes(Builder $query, int $mes): Builder
     {
         if ($mes < 1 || $mes > 12) {
             throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
@@ -232,7 +233,8 @@ class Dh10 extends Model
     /**
      * Scope para filtrar por período fiscal.
      */
-    public function scopePorPeriodoFiscal(Builder $query, int $anio, ?int $semestre = null): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porPeriodoFiscal(Builder $query, int $anio, ?int $semestre = null): Builder
     {
         if ($semestre === 1) {
             // Primer semestre: enero a junio
@@ -502,6 +504,7 @@ class Dh10 extends Model
     /**
      * Casteos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

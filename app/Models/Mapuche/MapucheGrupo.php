@@ -29,6 +29,7 @@ class MapucheGrupo extends Model
 
     /**
      * Los permisos asociados al grupo.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\MapucheGrupoPermiso, $this>
      */
     public function permisos(): HasMany
     {
@@ -37,6 +38,7 @@ class MapucheGrupo extends Model
 
     /**
      * Los legajos asociados al grupo a través de la tabla pivote.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Dh01, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function legajos(): BelongsToMany
     {
@@ -50,6 +52,7 @@ class MapucheGrupo extends Model
 
     /**
      * Relación directa con la tabla pivote.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\MapucheGrupoLegajo, $this>
      */
     public function grupoLegajos(): HasMany
     {
@@ -59,7 +62,8 @@ class MapucheGrupo extends Model
     /**
      * Scope para filtrar por tipo.
      */
-    public function scopeOfTipo(Builder $query, string $tipo): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ofTipo(Builder $query, string $tipo): Builder
     {
         return $query->where('tipo', $tipo);
     }
@@ -67,7 +71,8 @@ class MapucheGrupo extends Model
     /**
      * Scope para buscar por nombre.
      */
-    public function scopeBuscarPorNombre(Builder $query, string $nombre): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function buscarPorNombre(Builder $query, string $nombre): Builder
     {
         return $query->where('nombre', 'ILIKE', "%{$nombre}%");
     }
@@ -92,6 +97,7 @@ class MapucheGrupo extends Model
         });
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

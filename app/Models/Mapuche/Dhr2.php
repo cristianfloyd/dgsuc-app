@@ -47,6 +47,7 @@ class Dhr2 extends Model
 
     /**
      * Relación con la liquidación principal.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dhr1, $this>
      */
     public function liquidacion(): BelongsTo
     {
@@ -56,7 +57,8 @@ class Dhr2 extends Model
     /**
      * Scope para filtrar por legajo.
      */
-    public function scopePorLegajo($query, $legajo): mixed
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLegajo($query, $legajo): mixed
     {
         return $query->where('nro_legaj', $legajo);
     }
@@ -72,6 +74,7 @@ class Dhr2 extends Model
     /**
      * Casteos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -50,27 +50,8 @@ class EmbargoProcesoResult extends Model
         'clas_noved',
     ];
 
-    // Definir la conversión de atributos para los tipos de datos apropiados
-    protected $casts = [
-        'nro_liqui' => 'integer',
-        'nros_liqui_json' => 'json',
-        'tipo_noved' => 'string',
-        'vig_noano' => 'integer',
-        'vig_nomes' => 'integer',
-        'tipo_embargo' => 'integer',
-        'nro_legaj' => 'integer',
-        'remunerativo' => 'decimal:2',
-        'no_remunerativo' => 'decimal:2',
-        'total' => 'decimal:2',
-        'codn_conce' => 'integer',
-        'tipo_foran' => 'string',
-        'clas_noved' => 'string',
-    ];
-
     /**
      * Obtiene una consulta vacía.
-     *
-     * @return Builder
      */
     public function getEmptyQuery(): Builder
     {
@@ -79,8 +60,6 @@ class EmbargoProcesoResult extends Model
 
     /**
      * Obtiene el monto total.
-     *
-     * @return float
      */
     public function getTotalAmount(): float
     {
@@ -89,8 +68,6 @@ class EmbargoProcesoResult extends Model
 
     /**
      * Verifica si es embargo bruto.
-     *
-     * @return bool
      */
     public function isBrutoEmbargo(): bool
     {
@@ -144,9 +121,9 @@ class EmbargoProcesoResult extends Model
             }
 
             // Convertir el array de complementarias en formato PostgreSQL
-            $complementariasArray = !empty($complementarias)
-                ? '{' . implode(',', $complementarias) . '}'
-                : '{0}';
+            $complementariasArray = $complementarias === []
+                ? '{0}'
+                : '{' . implode(',', $complementarias) . '}';
 
             // Verificar si la función existe
             $functionExists = $connection->select(
@@ -264,7 +241,7 @@ class EmbargoProcesoResult extends Model
                     // Si ya viene, úsalo tal cual
                     $registroFiltrado['nros_liqui_json'] = is_array($registro['nros_liqui_json'])
                         ? $registro['nros_liqui_json']
-                        : json_decode($registro['nros_liqui_json'], true);
+                        : json_decode((string) $registro['nros_liqui_json'], true);
                 } elseif (isset($registro['nro_liqui'])) {
                     // Si solo hay uno, lo guardamos como array de uno
                     $registroFiltrado['nros_liqui_json'] = [$registro['nro_liqui']];
@@ -337,19 +314,9 @@ class EmbargoProcesoResult extends Model
             throw new Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
         }
     }
-
-    // #########################################################
-    // ############## accesors y mutators #####################
-    // #########################################################
-
-    public function setNrosLiquiJsonAttribute($value): void
+    protected function nrosLiquiJson(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $this->attributes['nros_liqui_json'] = json_encode($value);
-    }
-
-    public function getNrosLiquiJsonAttribute($value)
-    {
-        return json_decode($value, true);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): mixed => json_decode((string) $value, true), set: fn($value): array => ['nros_liqui_json' => json_encode($value)]);
     }
 
     /**
@@ -376,7 +343,7 @@ class EmbargoProcesoResult extends Model
         // Si no hay método específico, usar el connectionName definido en el trait o el modelo
         $connectionName = $instance->getConnectionName();
 
-        if (empty($connectionName)) {
+        if ($connectionName === '' || $connectionName === '0') {
             // Si aún no hay nombre de conexión, intentar con la configuración predeterminada
             $connectionName = config('database.default');
 
@@ -393,5 +360,24 @@ class EmbargoProcesoResult extends Model
         ]);
 
         return DB::connection($connectionName);
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_liqui' => 'integer',
+            'nros_liqui_json' => 'json',
+            'tipo_noved' => 'string',
+            'vig_noano' => 'integer',
+            'vig_nomes' => 'integer',
+            'tipo_embargo' => 'integer',
+            'nro_legaj' => 'integer',
+            'remunerativo' => 'decimal:2',
+            'no_remunerativo' => 'decimal:2',
+            'total' => 'decimal:2',
+            'codn_conce' => 'integer',
+            'tipo_foran' => 'string',
+            'clas_noved' => 'string',
+        ];
     }
 }

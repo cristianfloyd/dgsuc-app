@@ -47,25 +47,10 @@ class Bloqueos extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'fecha_registro' => 'datetime',
-        'fecha_baja' => 'date',
-        'chkstopliq' => 'boolean',
-        'datos_validacion' => 'json',
-        'fecha_procesamiento' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
-
-    /**
      * Scope para filtrar por número de liquidación.
      */
-    public function scopePorLiquidacion(Builder $query, int $nroLiqui): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
@@ -73,7 +58,8 @@ class Bloqueos extends Model
     /**
      * Scope para filtrar por legajo.
      */
-    public function scopePorLegajo(Builder $query, int $legajo): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLegajo(Builder $query, int $legajo): Builder
     {
         return $query->where('nro_legaj', $legajo);
     }
@@ -81,7 +67,8 @@ class Bloqueos extends Model
     /**
      * Scope para filtrar por tipo de bloqueo.
      */
-    public function scopePorTipo(Builder $query, string $tipo): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porTipo(Builder $query, string $tipo): Builder
     {
         return $query->where('tipo', $tipo);
     }
@@ -89,7 +76,8 @@ class Bloqueos extends Model
     /**
      * Scope para filtrar por estado.
      */
-    public function scopePorEstado(Builder $query, string $estado): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porEstado(Builder $query, string $estado): Builder
     {
         return $query->where('estado', $estado);
     }
@@ -97,7 +85,8 @@ class Bloqueos extends Model
     /**
      * Scope para obtener los bloqueos pendientes de procesar.
      */
-    public function scopePendientes(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function pendientes(Builder $query): Builder
     {
         return $query->whereNull('fecha_procesamiento');
     }
@@ -105,7 +94,8 @@ class Bloqueos extends Model
     /**
      * Scope para obtener los bloqueos procesados.
      */
-    public function scopeProcesados(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function procesados(Builder $query): Builder
     {
         return $query->whereNotNull('fecha_procesamiento');
     }
@@ -113,7 +103,8 @@ class Bloqueos extends Model
     /**
      * Scope para filtrar por rango de fechas de registro.
      */
-    public function scopePorRangoFechaRegistro(Builder $query, string $desde, string $hasta): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porRangoFechaRegistro(Builder $query, string $desde, string $hasta): Builder
     {
         return $query->whereBetween('fecha_registro', [$desde, $hasta]);
     }
@@ -121,7 +112,8 @@ class Bloqueos extends Model
     /**
      * Scope para filtrar bloqueos activos (con chkstopliq = true).
      */
-    public function scopeActivos(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activos(Builder $query): Builder
     {
         return $query->where('chkstopliq', true);
     }
@@ -129,9 +121,30 @@ class Bloqueos extends Model
     // ############################################################
     // ###################### RELACIONES ##########################
     // ############################################################
-
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function legajo(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fecha_registro' => 'datetime',
+            'fecha_baja' => 'date',
+            'chkstopliq' => 'boolean',
+            'datos_validacion' => 'json',
+            'fecha_procesamiento' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
     }
 }

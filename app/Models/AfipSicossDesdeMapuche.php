@@ -175,15 +175,9 @@ class AfipSicossDesdeMapuche extends Model
 
     protected $periodoFiscal = 202312;
 
-    private FileProcessorService $fileProcessor;
-
-    private DataMapperService $dataMapper;
-
-    public function __construct(FileProcessorService $fileProcessor, DataMapperService $dataMapper)
+    public function __construct(private FileProcessorService $fileProcessor, private DataMapperService $dataMapper)
     {
         parent::__construct();
-        $this->fileProcessor = $fileProcessor;
-        $this->dataMapper = $dataMapper;
     }
 
     // ##########################################################################
@@ -200,11 +194,11 @@ class AfipSicossDesdeMapuche extends Model
      */
     public function procesarTabla(array $lineasExtraidas, int $periodoFiscal): array
     {
-        if ($periodoFiscal) {
+        if ($periodoFiscal !== 0) {
             $this->periodoFiscal = $periodoFiscal;
         }
         // Validación de entrada
-        if (empty($lineasExtraidas)) {
+        if ($lineasExtraidas === []) {
             throw new InvalidArgumentException('Las líneas extraídas no pueden estar vacías.');
         }
 
@@ -282,10 +276,9 @@ class AfipSicossDesdeMapuche extends Model
     public function procesar(string $line, array $columnWidths): array
     {
         $processedLine = $this->processLine($line, $columnWidths);
-        $lineaMapeada = $this->dataMapper->mapDataToModel($processedLine);
         // dd($processedLine);
         // Retorno de la línea procesada.
-        return $lineaMapeada;
+        return $this->dataMapper->mapDataToModel($processedLine);
     }
 
     /**
@@ -300,13 +293,11 @@ class AfipSicossDesdeMapuche extends Model
     public function processLine(string $line, array $columnWidths): array
     {
         // Validacion de entrada.
-        if ($line === null || $columnWidths === null || !is_array($columnWidths)) {
+        if (!is_array($columnWidths)) {
             throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
-
-        $datosProcesados = $this->procesarlineainterna($line, $columnWidths);
         // Retornar los datos procesados.
-        return $datosProcesados;
+        return $this->procesarlineainterna($line, $columnWidths);
     }
 
     /**
@@ -315,8 +306,6 @@ class AfipSicossDesdeMapuche extends Model
      * Establece el periodo_fiscal como una constante '202405' para todos los registros.
      *
      * Este método crea una nueva instancia de la clase afipImportacionCrudaModel y recorre su tabla.
-     *
-     * @return void
      */
     public function processTable(): void
     {
@@ -335,6 +324,7 @@ class AfipSicossDesdeMapuche extends Model
     /**
      * @return mixed
      */
+    #[\Override]
     public function getTable()
     {
         return $this->table;
@@ -350,10 +340,10 @@ class AfipSicossDesdeMapuche extends Model
      *
      * @return string[] Un Array con los valores de cada columna procesados.
      */
-    private function procesarlineainterna($line, $columnWidths): array
+    private function procesarlineainterna(string $line, array $columnWidths): array
     {
         //Validad la entrada
-        if (empty($line) || empty($columnWidths)) {
+        if ($line === '' || $line === '0' || $columnWidths === []) {
             throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 
@@ -371,7 +361,6 @@ class AfipSicossDesdeMapuche extends Model
 
         $datosProcesados = [];
         $currentPosition = 0;
-        $ultimaPosicion = $sumaAnchoColumnas;
         /***********************************
          * Recorre el array $columnWidths y para cada posicion
          * extrae el valor de la línea correspondiente al ancho de la columna
@@ -417,7 +406,7 @@ class AfipSicossDesdeMapuche extends Model
 
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
 
-    private function importFromFile($filePath, $periodoFiscal): bool
+    private function importFromFile(string $filePath, int $periodoFiscal): bool
     {
         $this->fileProcessor->setPeriodoFiscal($periodoFiscal);
         $processedLines = $this->fileProcessor->processFile($filePath, $this->columnWidths);
@@ -426,9 +415,9 @@ class AfipSicossDesdeMapuche extends Model
         return self::insertBulkData($processedLines->toArray());
     }
 
-    private function procesarDatos(array $lineasExtraidas, int $periodoFiscal): array
+    private function procesarDatos(array $lineasExtraidas): array
     {
-        return array_map(function ($linea) use ($periodoFiscal) {
+        return array_map(function (string $linea): array {
             $columnWidths = $this->columnWidths;
             $processedLine = $this->processLine($linea, $columnWidths);
             return $this->dataMapper->mapDataToModel($processedLine);
@@ -439,8 +428,6 @@ class AfipSicossDesdeMapuche extends Model
      * Itera sobre una tabla de importación cruda de AFIP y procesa cada línea.
      *
      * @param afipImportacionCrudaModel $request El modelo de importación cruda de AFIP.
-     *
-     * @return void
      */
     private function iterartabla(afipImportacionCrudaModel $request): void
     {
@@ -454,10 +441,8 @@ class AfipSicossDesdeMapuche extends Model
      * Procesa una línea de importación cruda y crea un nuevo registro en la tabla afip_sicoss_desde_mapuche.
      *
      * @param string $lineaImportacionCruda La línea de importación cruda a procesar.
-     *
-     * @return void
      */
-    private function processRow($lineaImportadaCruda): void
+    private function processRow(string $lineaImportadaCruda): void
     {
         $columnWidths = [
             // Anchos de columna para cada campo

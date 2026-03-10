@@ -59,7 +59,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'profile_photo_url',
     ];
 
-    public function scopeSearch($query, $val)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, string $val)
     {
         return $query->where('name', 'like', '%' . $val . '%')
             ->orWhere('email', 'like', '%' . $val . '%');
@@ -86,6 +87,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -97,15 +99,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => strtolower($value),
-            set: fn($value) => strtolower($value),
+            get: fn($value) => strtolower((string) $value),
+            set: fn($value) => strtolower((string) $value),
         );
     }
 
     protected function completeName(): Attribute
     {
         return Attribute::make(
-            get: fn() => "{$this->name} {$this->username}",
+            get: fn(): string => "{$this->name} {$this->username}",
         );
     }
 }

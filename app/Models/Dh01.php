@@ -104,6 +104,9 @@ class Dh01 extends Model
 
     // ###################################################################################
     // ######################################  RELACIONES ################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipRelacionesActivas, $this>
+     */
     public function relacionesActivas(): BelongsTo
     {
         return $this->belongsTo(AfipRelacionesActivas::class, 'cuil', 'cuil');
@@ -124,6 +127,9 @@ class Dh01 extends Model
         return $this->hasMany(Dh21::class, 'nro_legaj', 'nro_legaj');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Mapuche\MapucheGrupo, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
     public function grupos(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -137,7 +143,8 @@ class Dh01 extends Model
     // ####################################################################################
     // ######################################  SCOPES  ####################################
 
-    public function scopeSearch($query, $val)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, $val)
     {
         $searchTerm = EncodingService::toLatin1(strtoupper((string) $val));
 
@@ -164,7 +171,8 @@ class Dh01 extends Model
      *                                               - tipo_estad: Estado del legajo
      *                                               - agente: Nombre completo del agente (apellido, nombre)
      */
-    public function scopeLegajosActivosSinCargosVigentes($query, $where = '1=1')
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function legajosActivosSinCargosVigentes($query, $where = '1=1')
     {
         return $query->select([
             'nro_legaj',
@@ -184,7 +192,8 @@ class Dh01 extends Model
             ->orderBy('nro_legaj');
     }
 
-    public function scopeByCuil($query, $cuil)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byCuil($query, $cuil)
     {
         return $query->whereRaw("(
             LPAD(nro_cuil1::text, 2, '0') ||
@@ -208,14 +217,14 @@ class Dh01 extends Model
             ->exists();
     }
 
-    public function getCuil(): Attribute
+    protected function getCuil(): Attribute
     {
         return Attribute::make(
             get: fn(): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
         );
     }
 
-    public function nombreCompleto(): Attribute
+    protected function nombreCompleto(): Attribute
     {
         return Attribute::make(
             get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
@@ -234,7 +243,7 @@ class Dh01 extends Model
      */
     public static function getLegajosActivosSinCargosVigentes($where)
     {
-        return self::legajosActivosSinCargosVigentes($where)->get()->toArray();
+        return self::query()->legajosActivosSinCargosVigentes($where)->get()->toArray();
     }
 
     /**
@@ -253,7 +262,7 @@ class Dh01 extends Model
         AND dh01.nro_legaj = $nro_legajo
     ";
 
-        $resultado = static::legajosActivosSinCargosVigentes($where_not_dh21)->first();
+        $resultado = static::query()->legajosActivosSinCargosVigentes($where_not_dh21)->first();
 
         return $resultado ? $resultado->toArray() : null;
     }
@@ -271,7 +280,7 @@ class Dh01 extends Model
 
     protected function descNombr(): Attribute
     {
-        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
+        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn(?string $value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
     }
 
     protected function descAppat(): Attribute

@@ -8,8 +8,6 @@ trait BelongsToMapucheSchema
 {
     /**
      * Get the table schema for the model.
-     *
-     * @return string
      */
     public function getSchemaName(): string
     {
@@ -18,8 +16,6 @@ trait BelongsToMapucheSchema
 
     /**
      * Get the fully qualified table name including schema.
-     *
-     * @return string
      */
     public function getQualifiedTableName(): string
     {

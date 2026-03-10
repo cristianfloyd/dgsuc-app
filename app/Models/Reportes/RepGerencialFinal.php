@@ -64,46 +64,14 @@ class RepGerencialFinal extends Model
         'cod_clasif_cargo', 'tipo_carac', 'rem_s_apor',
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     */
-    protected $casts = [
-        'codn_fuent' => 'integer',
-        'codn_depen' => 'integer',
-        'nro_inciso' => 'integer',
-        'nro_legaj' => 'integer',
-        'cant_anios' => 'integer',
-        'ano_antig' => 'float',
-        'mes_antig' => 'float',
-        'nro_cargo' => 'integer',
-        'fecha_alta' => 'date',
-        'fecha_baja' => 'date',
-        'porc_imput' => 'decimal:2',
-        'imp_gasto' => 'decimal:2',
-        'imp_bruto' => 'decimal:2',
-        'imp_neto' => 'decimal:2',
-        'imp_dctos' => 'decimal:2',
-        'imp_aport' => 'decimal:2',
-        'imp_familiar' => 'decimal:2',
-        'ano_liqui' => 'integer',
-        'mes_liqui' => 'integer',
-        'nro_liqui' => 'integer',
-        'hs_catedra' => 'float',
-        'dias_trab' => 'float',
-        'rem_c_apor' => 'decimal:2',
-        'otr_no_rem' => 'decimal:2',
-        'porc_aplic' => 'float',
-        'cod_clasif_cargo' => 'integer',
-        'rem_s_apor' => 'decimal:2',
-    ];
-
 
     /* #################### SCOPES #################### */
 
     /**
      * Scope para filtrar por liquidación.
      */
-    public function scopeLiquidacion(Builder $query, int $nroLiqui): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function liquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
@@ -111,28 +79,69 @@ class RepGerencialFinal extends Model
     /**
      * Scope para filtrar por dependencia.
      */
-    public function scopeDependencia(Builder $query, string $codDependencia): Builder
+    protected function scopeDependencia(Builder $query, string $codDependencia): Builder
     {
         return $query->where('coddependesemp', $codDependencia);
     }
 
-    /* #################### ACCESSORS #################### */
     /**
      * Accessor para obtener nombre completo.
      */
-    public function getNombreCompletoAttribute(): string
+    protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return "{$this->apellido_elegido}, {$this->nombre_elegido}";
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => "{$this->apellido_elegido}, {$this->nombre_elegido}");
     }
 
     /* #################### RELACIONES #################### */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh36, $this>
+     */
     public function dependencia(): BelongsTo
     {
         return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
+     */
     public function unidadAcademica(): BelongsTo
     {
         return $this->belongsTo(Dhe4::class, 'codc_uacad', 'cod_organismo');
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'codn_fuent' => 'integer',
+            'codn_depen' => 'integer',
+            'nro_inciso' => 'integer',
+            'nro_legaj' => 'integer',
+            'cant_anios' => 'integer',
+            'ano_antig' => 'float',
+            'mes_antig' => 'float',
+            'nro_cargo' => 'integer',
+            'fecha_alta' => 'date',
+            'fecha_baja' => 'date',
+            'porc_imput' => 'decimal:2',
+            'imp_gasto' => 'decimal:2',
+            'imp_bruto' => 'decimal:2',
+            'imp_neto' => 'decimal:2',
+            'imp_dctos' => 'decimal:2',
+            'imp_aport' => 'decimal:2',
+            'imp_familiar' => 'decimal:2',
+            'ano_liqui' => 'integer',
+            'mes_liqui' => 'integer',
+            'nro_liqui' => 'integer',
+            'hs_catedra' => 'float',
+            'dias_trab' => 'float',
+            'rem_c_apor' => 'decimal:2',
+            'otr_no_rem' => 'decimal:2',
+            'porc_aplic' => 'float',
+            'cod_clasif_cargo' => 'integer',
+            'rem_s_apor' => 'decimal:2',
+        ];
     }
 }

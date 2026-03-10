@@ -48,9 +48,9 @@ class AfipMapucheParaSicoss extends Model
         'covid',
     ];
 
-    public function getNroLegajAttribute($value)
+    protected function nroLegaj(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return str_pad($value, 8, '0', STR_PAD_LEFT);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => str_pad((string) $value, 8, '0', STR_PAD_LEFT));
     }
 
     /**
@@ -85,7 +85,8 @@ class AfipMapucheParaSicoss extends Model
      *
      * La consulta filtra los registros donde `d.tipo_conce` es 'C' y `d3.chkstopliq` es 0, y los agrupa por los campos mencionados anteriormente.
      */
-    public static function scopeSicossAll($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function sicossAll($query)
     {
         // Consulta SQL
         return $query->selectRaw("

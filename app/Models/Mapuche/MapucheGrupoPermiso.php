@@ -26,12 +26,14 @@ class MapucheGrupoPermiso extends Model
 
     /**
      * El grupo al que pertenece este permiso.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\MapucheGrupo, $this>
      */
     public function grupo(): BelongsTo
     {
         return $this->belongsTo(MapucheGrupo::class, 'id_grupo', 'id_grupo');
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

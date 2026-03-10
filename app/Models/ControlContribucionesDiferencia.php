@@ -29,23 +29,14 @@ class ControlContribucionesDiferencia extends Model
         'connection',
     ];
 
-    protected $casts = [
-        'contribucionsijpdh21' => 'decimal:2',
-        'contribucioninssjpdh21' => 'decimal:2',
-        'contribucionsijp' => 'decimal:2',
-        'contribucioninssjp' => 'decimal:2',
-        'diferencia' => 'decimal:2',
-        'fecha_control' => 'datetime',
-    ];
-
     protected $appends = [
         'nro_cuil',
     ];
 
-    public function nroCuil(): Attribute
+    protected function nroCuil(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?int {
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
@@ -59,16 +50,25 @@ class ControlContribucionesDiferencia extends Model
     // ################################################
     // ################## RELACIONES ##################
     // ################################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipMapucheSicossCalculo, $this>
+     */
     public function sicossCalculo(): BelongsTo
     {
         return $this->belongsTo(AfipMapucheSicossCalculo::class, 'cuil', 'cuil');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipRelacionesActivas, $this>
+     */
     public function relacionActiva(): BelongsTo
     {
         return $this->belongsTo(AfipRelacionesActivas::class, 'cuil', 'cuil');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
@@ -83,12 +83,22 @@ class ControlContribucionesDiferencia extends Model
      *
      * @return Attribute Atributo calculado con la suma total de contribuciones
      */
-    public function totalContribuciones(): Attribute
+    protected function totalContribuciones(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp;
-            },
+            get: fn() => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp,
         );
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'contribucionsijpdh21' => 'decimal:2',
+            'contribucioninssjpdh21' => 'decimal:2',
+            'contribucionsijp' => 'decimal:2',
+            'contribucioninssjp' => 'decimal:2',
+            'diferencia' => 'decimal:2',
+            'fecha_control' => 'datetime',
+        ];
     }
 }

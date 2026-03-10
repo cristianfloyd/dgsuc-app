@@ -15,19 +15,22 @@ class ProcessLog extends Model
         'completed_at',
     ];
 
-    protected $casts = [
-        'steps' => 'array',
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime',
-    ];
-
     /**
      * Obtiene una relación HasMany con los registros de registro de procesos que tienen este registro de registro de proceso como padre.
      *
-     * @return HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ProcessLog, $this>
      */
     public function logs(): HasMany
     {
         return $this->hasMany(ProcessLog::class, 'parent_id');
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'steps' => 'array',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
     }
 }

@@ -89,10 +89,7 @@ class AfipRelacionesActivas extends Model
     /**
      * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
      *
-     * @param array $datosMapeados
-     * @param int $chunkSize
      *
-     * @return bool
      */
     public static function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
     {
@@ -109,7 +106,7 @@ class AfipRelacionesActivas extends Model
             // DB::connection($conexion)->statement('ALTER TABLE afip_sicoss_desde_mapuche DROP CONSTRAINT afip_sicoss_desde_mapuche_pkey');
 
             foreach (array_chunk($datosMapeados, $chunkSize) as $chunk) {
-                static::upsert($chunk, ['cuil'], array_keys($chunk[0]));
+                static::query()->upsert($chunk, ['cuil'], array_keys($chunk[0]));
             }
 
             // Reestablecer la clave primaria: afip_sicoss_desde_mapuche_pkey
@@ -133,7 +130,7 @@ class AfipRelacionesActivas extends Model
      */
     public static function mapearDatosAlModelo(array $datosProcesados): array
     {
-        $datosMapeados = [
+        return [
 
             'periodo_fiscal' => $datosProcesados[0], //periodo fiscal,6
             'codigo_movimiento' => $datosProcesados[1], //codigo movimiento,2
@@ -158,7 +155,6 @@ class AfipRelacionesActivas extends Model
             'ccct' => $datosProcesados[20], //Código de Convenio Colectivo de Trabajo,7
             'no_hay_datos' => $datosProcesados[21], // campo vacio,5
         ];
-        return $datosMapeados;
     }
 
     /**
@@ -168,19 +164,24 @@ class AfipRelacionesActivas extends Model
      *
      * @return mixed
      */
-    public function scopeSearch($query, $search)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, $search)
     {
         // return empty($search) ? $query : $query->where('cuil', 'ilike', "%$search%");
         return empty($search) ? $query : $query->where('cuil', 'ilike', $search); //optimizacion del search
     }
 
-    public function scopeByCuil($query, $cuil)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byCuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
     }
 
     // #######################################################################
     // ###########################  RELACIONES ###############################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
@@ -220,15 +221,15 @@ class AfipRelacionesActivas extends Model
     protected function retribucionPactada(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => (float) (trim($value)),
-            set: fn(float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT),
+            get: fn(string $value): float => (float) (trim($value)),
+            set: fn(float $value): string => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT),
         );
     }
 
     protected function nroCuil(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?int {
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`

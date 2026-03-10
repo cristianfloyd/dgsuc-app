@@ -78,18 +78,20 @@ class RetUda extends Model
 
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
      */
-    protected $casts = [
-        'porc_aplic' => 'float',
-        'hs_cat' => 'float',
-        'antiguedad' => 'float',
-        'permanencia' => 'float',
-        'porchaber' => 'float',
-        'impp_basic' => 'decimal:2',
-        'basico_108' => 'decimal:2',
-        'cat_basico_7' => 'decimal:2',
-        'cat_basico_v_perm' => 'decimal:2',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'porc_aplic' => 'float',
+            'hs_cat' => 'float',
+            'antiguedad' => 'float',
+            'permanencia' => 'float',
+            'porchaber' => 'float',
+            'impp_basic' => 'decimal:2',
+            'basico_108' => 'decimal:2',
+            'cat_basico_7' => 'decimal:2',
+            'cat_basico_v_perm' => 'decimal:2',
+        ];
+    }
 }

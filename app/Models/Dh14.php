@@ -53,23 +53,12 @@ class Dh14 extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'nro_acumu' => 'integer',
-        'observacion' => 'string',
-        'desc_acumu' => 'string',
-    ];
-
-    /**
      * Obtiene los conceptos (Dh12) que utilizan este acumulador.
      * La relación se establece a través del campo flag_acumu de Dh12.
      */
     public function conceptos()
     {
-        return Dh12::where('flag_acumu', 'like', DB::raw("concat(repeat('_', ? - 1), 'S', '%')", [$this->nro_acumu]));
+        return Dh12::query()->where('flag_acumu', 'like', DB::raw("concat(repeat('_', ? - 1), 'S', '%')"));
     }
 
     /**
@@ -78,7 +67,21 @@ class Dh14 extends Model
     protected function descAcumu(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value ? trim($value) : null,
+            get: fn($value): ?string => $value ? trim((string) $value) : null,
         );
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     *
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_acumu' => 'integer',
+            'observacion' => 'string',
+            'desc_acumu' => 'string',
+        ];
     }
 }

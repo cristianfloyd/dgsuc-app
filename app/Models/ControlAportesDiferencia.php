@@ -32,26 +32,14 @@ class ControlAportesDiferencia extends Model
         'connection',
     ];
 
-    protected $casts = [
-        'aportesijpdh21' => 'decimal:2',
-        'aporteinssjpdh21' => 'decimal:2',
-        'contribucionsijpdh21' => 'decimal:2',
-        'contribucioninssjpdh21' => 'decimal:2',
-        'aportesijp' => 'decimal:2',
-        'aporteinssjp' => 'decimal:2',
-        'contribucionsijp' => 'decimal:2',
-        'contribucioninssjp' => 'decimal:2',
-        'diferencia' => 'decimal:2',
-    ];
-
     protected $appends = [
         'nro_cuil',
     ];
 
-    public function nroCuil(): Attribute
+    protected function nroCuil(): Attribute
     {
         return Attribute::make(
-            get: function () {
+            get: function (): ?int {
                 // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
                 if ($this->cuil) {
                     // Extrae los 8 dígitos del medio de `cuil`
@@ -65,21 +53,33 @@ class ControlAportesDiferencia extends Model
     // ###############################################################
     // ######################## RELACIONES ###########################
     // ###############################################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipMapucheSicossCalculo, $this>
+     */
     public function sicossCalculo(): BelongsTo
     {
         return $this->belongsTo(AfipMapucheSicossCalculo::class, 'cuil', 'cuil');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipMapucheSicoss, $this>
+     */
     public function mapucheSicoss(): BelongsTo
     {
         return $this->belongsTo(AfipMapucheSicoss::class, 'cuil', 'cuil');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\AfipRelacionesActivas, $this>
+     */
     public function relacionActiva(): BelongsTo
     {
         return $this->belongsTo(AfipRelacionesActivas::class, 'cuil', 'cuil');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
     public function dh01(): BelongsTo
     {
         return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
@@ -100,40 +100,55 @@ class ControlAportesDiferencia extends Model
     /**
      * Obtiene el total de aportes DH21.
      */
-    public function totalAportesDh21(): Attribute
+    protected function totalAportesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->aportesijpdh21 + $this->aporteinssjpdh21,
+            get: fn(): float|int|array => $this->aportesijpdh21 + $this->aporteinssjpdh21,
         );
     }
 
     /**
      * Obtiene el total de contribuciones DH21.
      */
-    public function totalContribucionesDh21(): Attribute
+    protected function totalContribucionesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
+            get: fn(): float|int|array => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
         );
     }
 
     /**
      * Obtiene el total de aportes SICOSS.
      */
-    public function totalAportesSicoss(): Attribute
+    protected function totalAportesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->aportesijp + $this->aporteinssjp,
+            get: fn(): float|int|array => $this->aportesijp + $this->aporteinssjp,
         );
     }
 
     /**
      * Obtiene el total de contribuciones SICOSS.
      */
-    public function totalContribucionesSicoss(): Attribute
+    protected function totalContribucionesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->contribucionsijp + $this->contribucioninssjp,
+            get: fn(): float|int|array => $this->contribucionsijp + $this->contribucioninssjp,
         );
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'aportesijpdh21' => 'decimal:2',
+            'aporteinssjpdh21' => 'decimal:2',
+            'contribucionsijpdh21' => 'decimal:2',
+            'contribucioninssjpdh21' => 'decimal:2',
+            'aportesijp' => 'decimal:2',
+            'aporteinssjp' => 'decimal:2',
+            'contribucionsijp' => 'decimal:2',
+            'contribucioninssjp' => 'decimal:2',
+            'diferencia' => 'decimal:2',
+        ];
     }
 }

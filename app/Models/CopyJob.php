@@ -26,20 +26,23 @@ class CopyJob extends Model
         'error_message',
     ];
 
-    protected $casts = [
-        'total_records' => 'integer',
-        'copied_records' => 'integer',
-        'started_at' => 'datetime',
-        'finished_at' => 'datetime',
-    ];
-
     /**
      * Relación con la liquidación (Dh22) asociada a este CopyJob.
      *
-     * @return BelongsTo Relación BelongsTo con el modelo Dh22 usando el campo nro_liqui.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this> Relación BelongsTo con el modelo Dh22 usando el campo nro_liqui.
      */
     public function liquidation(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'total_records' => 'integer',
+            'copied_records' => 'integer',
+            'started_at' => 'datetime',
+            'finished_at' => 'datetime',
+        ];
     }
 }

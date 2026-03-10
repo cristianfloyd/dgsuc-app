@@ -45,18 +45,9 @@ class Dh92 extends Model
     ];
 
     /**
-     * Los atributos que deben ser convertidos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'nro_cuent' => 'float',
-    ];
-
-    /**
      * Obtiene el legajo asociado.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
      */
     public function legajo(): BelongsTo
     {
@@ -66,7 +57,7 @@ class Dh92 extends Model
     /**
      * Obtiene el banco asociado.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh84, $this>
      */
     public function banco(): BelongsTo
     {
@@ -76,7 +67,7 @@ class Dh92 extends Model
     /**
      * Obtiene el valor de pago asociado.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh91, $this>
      */
     public function valorPago(): BelongsTo
     {
@@ -86,11 +77,21 @@ class Dh92 extends Model
     /**
      * Obtiene la sucursal bancaria asociada.
      *
-     * @return BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dha9, $this>
      */
     public function sucursalBancaria(): BelongsTo
     {
         return $this->belongsTo(Dha9::class, 'codn_banco', 'codigo_entbancaria')
             ->where('codigo_sucursal', $this->codn_sucur);
+    }
+    /**
+     * Los atributos que deben ser convertidos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_cuent' => 'float',
+        ];
     }
 }

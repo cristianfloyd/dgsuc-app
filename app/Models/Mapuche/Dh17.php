@@ -49,6 +49,7 @@ class Dh17 extends Model
     /**
      * Casteos de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -78,7 +78,8 @@ class UploadedFile extends Model
      *
      * @return Builder El objeto de consulta con las condiciones de búsqueda aplicadas.
      */
-    public function scopeSearch($query, $search)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, $search)
     {
         return $query->where('filename', 'like', "%$search%")
             ->orWhere('original_name', 'like', "%$search%");

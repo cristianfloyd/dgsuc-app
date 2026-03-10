@@ -38,17 +38,12 @@ class DosubaSinLiquidarModel extends Model
         'fallecido',
     ];
 
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'fecha_generacion' => 'datetime',
-    ];
-
     /**
      * Crea la tabla temporal si no existe.
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = (new static())->getConnectionFromTrait();
+        $connection = new static()->getConnectionFromTrait();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
             $connection->statement('
@@ -76,7 +71,7 @@ class DosubaSinLiquidarModel extends Model
 
     public static function dropTableIfExists(): void
     {
-        $connection = (new static())->getConnectionFromTrait();
+        $connection = new static()->getConnectionFromTrait();
         dump($connection);
         if ($connection->getSchemaBuilder()->hasTable('suc.rep_dosuba_sin_liquidar')) {
             $connection->statement('DROP TABLE IF EXISTS suc.rep_dosuba_sin_liquidar');
@@ -89,7 +84,7 @@ class DosubaSinLiquidarModel extends Model
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
-        $connection = (new static())->getConnection();
+        $connection = new static()->getConnection();
 
         $connection->table('suc.rep_dosuba_sin_liquidar')
             ->where('session_id', $sessionId)
@@ -102,7 +97,7 @@ class DosubaSinLiquidarModel extends Model
     public static function cleanOldRecords(): void
     {
         $sessionLifetime = config('session.lifetime') * 60;
-        $connection = (new static())->getConnection();
+        $connection = new static()->getConnection();
 
         $connection->statement("
             DELETE FROM suc.rep_dosuba_sin_liquidar
@@ -124,21 +119,18 @@ class DosubaSinLiquidarModel extends Model
 
             $sessionId = session()->getId();
 
-            $dataToInsert = $data->map(function ($item) use ($sessionId) {
+            $dataToInsert = $data->map(fn($item) => [
+                'nro_legaj' => $item['nro_legaj'],
+                'apellido' => $item['apellido'],
+                'nombre' => $item['nombre'],
+                'cuil' => $item['cuil'],
+                'codc_uacad' => $item['codc_uacad'],
+                'ultima_liquidacion' => $item['ultima_liquidacion'],
+                'periodo_fiscal' => $item['periodo_fiscal'],
+                'session_id' => $sessionId,
+            ])->toArray();
 
-                return [
-                    'nro_legaj' => $item['nro_legaj'],
-                    'apellido' => $item['apellido'],
-                    'nombre' => $item['nombre'],
-                    'cuil' => $item['cuil'],
-                    'codc_uacad' => $item['codc_uacad'],
-                    'ultima_liquidacion' => $item['ultima_liquidacion'],
-                    'periodo_fiscal' => $item['periodo_fiscal'],
-                    'session_id' => $sessionId,
-                ];
-            })->toArray();
-
-            self::insert($dataToInsert);
+            self::query()->insert($dataToInsert);
 
             DB::commit();
         } catch (Exception $e) {
@@ -153,6 +145,14 @@ class DosubaSinLiquidarModel extends Model
      */
     public static function getReportData()
     {
-        return self::where('session_id', session()->getId())->get();
+        return self::query()->where('session_id', session()->getId())->get();
+    }
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'fecha_generacion' => 'datetime',
+        ];
     }
 }

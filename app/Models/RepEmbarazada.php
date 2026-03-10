@@ -84,39 +84,25 @@ class RepEmbarazada extends Model
         'codc_uacad',
     ];
 
-    /**
-     * Casteos de atributos.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'apellido' => 'string',
-        'nombre' => 'string',
-        'cuil' => 'string',
-        'codc_uacad' => 'string',
-    ];
-
     public static function populateFromMapuche(): bool
     {
-        return app(RepEmbarazadaService::class)->populateTable();
+        return resolve(RepEmbarazadaService::class)->populateTable();
     }
 
     public static function truncateTable(): void
     {
-        app(RepEmbarazadaService::class)->truncateTable();
+        resolve(RepEmbarazadaService::class)->truncateTable();
     }
 
     /**
      * Convertir el modelo a un Data Object.
-     *
-     * @return RepEmbarazadaData
      */
     public function toData(): RepEmbarazadaData
     {
         return RepEmbarazadaData::from($this);
     }
 
+    #[\Override]
     protected static function booted(): void
     {
         static::checktable();
@@ -124,7 +110,7 @@ class RepEmbarazada extends Model
 
     protected static function checkTable(): void
     {
-        app(RepEmbarazadaService::class)->ensureTableExists();
+        resolve(RepEmbarazadaService::class)->ensureTableExists();
     }
 
     /**
@@ -133,16 +119,32 @@ class RepEmbarazada extends Model
     protected function apellido(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn(string $value) => str_pad(substr($value, 0, 20), 20),
+            get: fn(string $value): ?string => EncodingService::toUtf8(trim($value)),
+            set: fn(string $value): string => str_pad(substr($value, 0, 20), 20),
         );
     }
 
     protected function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn(string $value) => str_pad(substr($value, 0, 20), 20),
+            get: fn(string $value): ?string => EncodingService::toUtf8(trim($value)),
+            set: fn(string $value): string => str_pad(substr($value, 0, 20), 20),
         );
+    }
+    /**
+     * Casteos de atributos.
+     *
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'apellido' => 'string',
+            'nombre' => 'string',
+            'cuil' => 'string',
+            'codc_uacad' => 'string',
+        ];
     }
 }

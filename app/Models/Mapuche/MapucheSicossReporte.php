@@ -34,7 +34,8 @@ class MapucheSicossReporte extends Model
      *
      * @param Builder $query
      */
-    public function scopeGetReporte($query, string $anio, string $mes): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function getReporte($query, string $anio, string $mes): Builder
     {
         try {
             $tablaPeriodo = $this->determinarTablaPeriodo($anio, $mes);
@@ -72,7 +73,8 @@ class MapucheSicossReporte extends Model
      *
      * @param Builder $query
      */
-    public function scopeGetTotales($query, string $anio, string $mes): array
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function getTotales($query, string $anio, string $mes): array
     {
         try {
             $tablaPeriodo = $this->determinarTablaPeriodo($anio, $mes);
@@ -143,7 +145,7 @@ class MapucheSicossReporte extends Model
     private function determinarTablaPeriodo(string $anio, string $mes): string
     {
         try {
-            $periodoFiscalService = app(PeriodoFiscalService::class);
+            $periodoFiscalService = resolve(PeriodoFiscalService::class);
             $periodoActual = $periodoFiscalService->getPeriodoFiscalFromDatabase();
 
             return ((int) $periodoActual['year'] === (int) $anio && (int) $periodoActual['month'] === (int) $mes)

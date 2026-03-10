@@ -71,8 +71,6 @@ class Dh90 extends Model
 
     /**
      * Obtiene el Data Object a partir del modelo.
-     *
-     * @return Dh90Data
      */
     public function toData(): Dh90Data
     {
@@ -83,11 +81,10 @@ class Dh90 extends Model
      * Scope para filtrar por tipo de asociación.
      *
      * @param Builder $query
-     * @param string $tipo
      *
      * @return Builder
      */
-    public function scopePorTipoAsociacion($query, string $tipo)
+    protected function scopePorTipoAsociacion($query, string $tipo)
     {
         return $query->where('tipoasociacion', $tipo);
     }
@@ -99,7 +96,7 @@ class Dh90 extends Model
      *
      * @return Builder
      */
-    public function scopeConCargosAsociados($query)
+    protected function scopeConCargosAsociados($query)
     {
         return $query->whereNotNull('nro_cargoasociado');
     }
@@ -109,9 +106,9 @@ class Dh90 extends Model
      *
      * @return string|null
      */
-    public function getTipoAsociacionAttribute($value)
+    protected function tipoAsociacion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return $value ? trim($value) : null;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): ?string => $value ? trim((string) $value) : null);
     }
 
     /**
@@ -119,6 +116,7 @@ class Dh90 extends Model
      *
      * @var array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -130,9 +128,8 @@ class Dh90 extends Model
 
     /**
      * Boot del modelo para configurar opciones específicas de PostgreSQL.
-     *
-     * @return void
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();

@@ -28,12 +28,16 @@ class ComprobanteNominaModel extends Model
         'codigo_grupo',
     ];
 
-    protected $casts = [
-        'anio_periodo' => 'integer',
-        'mes_periodo' => 'integer',
-        'nro_liqui' => 'integer',
-        'importe_neto' => 'decimal:2',
-        'importe_retencion' => 'decimal:2',
-        'requiere_cheque' => 'boolean',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'anio_periodo' => 'integer',
+            'mes_periodo' => 'integer',
+            'nro_liqui' => 'integer',
+            'importe_neto' => 'decimal:2',
+            'importe_retencion' => 'decimal:2',
+            'requiere_cheque' => 'boolean',
+        ];
+    }
 }

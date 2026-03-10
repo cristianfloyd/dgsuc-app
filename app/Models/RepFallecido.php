@@ -54,20 +54,6 @@ class RepFallecido extends Model
         'fec_defun',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'nro_legaj' => 'integer',
-        'apellido' => 'string',
-        'nombre' => 'string',
-        'cuil' => 'string',
-        'codc_uacad' => 'string',
-        'fec_defun' => 'date',
-    ];
-
     public static function getTableServiceClass(): string
     {
         return FallecidosTableService::class;
@@ -79,5 +65,22 @@ class RepFallecido extends Model
     public function toData(): FallecidoData
     {
         return FallecidoData::from($this);
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'nro_legaj' => 'integer',
+            'apellido' => 'string',
+            'nombre' => 'string',
+            'cuil' => 'string',
+            'codc_uacad' => 'string',
+            'fec_defun' => 'date',
+        ];
     }
 }

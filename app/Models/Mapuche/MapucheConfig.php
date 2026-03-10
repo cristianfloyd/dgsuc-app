@@ -37,15 +37,12 @@ class MapucheConfig
      */
     public static function setParametroRrhh(string $section, string $parameter, $value): bool
     {
-        return Rrhhini::updateOrCreate(
-            [
-                'nombre_seccion' => $section,
-                'nombre_parametro' => $parameter,
-            ],
-            [
-                'dato_parametro' => $value,
-            ],
-        )->exists;
+        return Rrhhini::query()->updateOrCreate([
+            'nombre_seccion' => $section,
+            'nombre_parametro' => $parameter,
+        ], [
+            'dato_parametro' => $value,
+        ])->exists;
     }
 
     /**
@@ -137,8 +134,8 @@ class MapucheConfig
      */
     public static function getAnioFiscal(): string
     {
-        $periodoService = app(PeriodoFiscalService::class);
-        return $periodoService->getYear();
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
+        return $periodoFiscalService->getYear();
     }
 
     /**
@@ -146,8 +143,8 @@ class MapucheConfig
      */
     public static function getMesFiscal(): string
     {
-        $periodoService = app(PeriodoFiscalService::class);
-        return $periodoService->getMonth();
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
+        return $periodoFiscalService->getMonth();
     }
 
     /**
@@ -159,16 +156,16 @@ class MapucheConfig
      */
     public static function getPeriodoFiscal(): string
     {
-        $periodoService = app(PeriodoFiscalService::class);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
 
-        return $periodoService->getYear() . $periodoService->getMonth();
+        return $periodoFiscalService->getYear() . $periodoFiscalService->getMonth();
     }
 
     public static function getPeriodoCorriente(): array
     {
-        $periodoService = app(PeriodoFiscalService::class);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
 
-        return $periodoService->getPeriodoFiscal();
+        return $periodoFiscalService->getPeriodoFiscal();
     }
 
     /**

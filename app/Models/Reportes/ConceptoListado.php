@@ -46,6 +46,7 @@ class ConceptoListado extends Model
 
     private static $connectionInstance;
 
+    #[\Override]
     public static function boot(): void
     {
         parent::boot();
@@ -56,8 +57,6 @@ class ConceptoListado extends Model
 
     /**
      * Crea la tabla si no existe.
-     *
-     * @return bool
      */
     public static function createTableIfNotExists(): bool
     {
@@ -94,20 +93,21 @@ class ConceptoListado extends Model
         return false;
     }
 
-    public function getNombreCompletoAttribute()
+    protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return "{$this->apellido}, {$this->nombre}";
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => "{$this->apellido}, {$this->nombre}");
     }
 
-    public function getImporteFormateadoAttribute()
+    protected function importeFormateado(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return number_format($this->impp_conce, 2, ',', '.');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => number_format($this->impp_conce, 2, ',', '.'));
     }
 
     // Scope para cachear resultados
-    public function scopeCached($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function cached($query)
     {
-        $cacheKey = 'rep_concepto_listado.' . md5(request()->getQueryString());
+        $cacheKey = 'rep_concepto_listado.' . md5((string) request()->getQueryString());
 
         return Cache::tags(['rep_concepto_listado'])->remember(
             $cacheKey,
@@ -116,35 +116,38 @@ class ConceptoListado extends Model
         );
     }
 
-    public function scopePeriodo($query, $periodo)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function periodo($query, $periodo)
     {
         return $query->where('periodo_fiscal', $periodo);
     }
 
-    public function scopePorCuil($query, $cuil)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porCuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
     }
 
-    public function scopeWithLiquidacion(Builder $query, int $nroLiqui): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withLiquidacion(Builder $query, int $nroLiqui): Builder
     {
         return $query->where('nro_liqui', $nroLiqui);
     }
 
     // ######################## MUTADORES Y ACCESORES ########################
-    public function apellido(): Attribute
+    protected function apellido(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn($value) => strtoupper($value),
+            get: fn($value): ?string => EncodingService::toUtf8(strtoupper((string) $value)),
+            set: fn($value) => strtoupper((string) $value),
         );
     }
 
-    public function nombre(): Attribute
+    protected function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn($value) => strtoupper($value),
+            get: fn($value): ?string => EncodingService::toUtf8(strtoupper((string) $value)),
+            set: fn($value) => strtoupper((string) $value),
         );
     }
 

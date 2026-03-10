@@ -26,7 +26,11 @@ class Dh31 extends Model
         'tipo_horas',
     ];
 
-    protected $casts = [
-        'cant_horas' => 'integer',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'cant_horas' => 'integer',
+        ];
+    }
 }

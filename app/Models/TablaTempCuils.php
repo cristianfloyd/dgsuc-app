@@ -41,8 +41,6 @@ class TablaTempCuils extends Model
 
     /** Crea la tabla suc.tabla_temp_cuils con una columna id como clave primaria
      * y una columna cuil de tipo string de 11 caracteres que es única.
-     *
-     * @return void
      */
     public function createTable(): void
     {
@@ -56,8 +54,8 @@ class TablaTempCuils extends Model
      */
     public static function dropTable(): void
     {
-        $connection = (new TablaTempCuils())->getConnectionName();
-        $table = (new TablaTempCuils())->getTable();
+        $connection = new TablaTempCuils()->getConnectionName();
+        $table = new TablaTempCuils()->getTable();
         Schema::connection($connection)->dropIfExists($table);
     }
 
@@ -84,7 +82,7 @@ class TablaTempCuils extends Model
             });
 
             return true;
-        } catch (Exception $e) {
+        } catch (Exception) {
             // Log the error or handle it as needed
             return false;
         }
@@ -101,7 +99,7 @@ class TablaTempCuils extends Model
     {
         try {
             // Obtener la conexión a la base de datos
-            $connection = (new self())->getConnectionName();
+            $connection = new self()->getConnectionName();
 
             // Ejecutar la consulta de inserción
             DB::connection($connection)->statement(
@@ -119,7 +117,8 @@ class TablaTempCuils extends Model
         }
     }
 
-    public function scopeCuil($query, $cuil)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function cuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
     }

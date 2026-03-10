@@ -83,33 +83,12 @@ class Dh12 extends Model
         'sino_visible',
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'tipo_conce' => TipoConce::class,
-        'tipo_nove1' => TipoNove::class,
-        'tipo_nove2' => TipoNove::class,
-        'tipo_distr' => TipoDistr::class,
-        'chk_acumsac' => 'boolean',
-        'chk_acumproy' => 'boolean',
-        'chk_dcto3' => 'boolean',
-        'chkacumprhbrprom' => 'boolean',
-        'chkdifhbrcargoasoc' => 'boolean',
-        'chkptesubconcep' => 'boolean',
-        'chkinfcuotasnovper' => 'boolean',
-        'genconimp0' => 'boolean',
-        'flag_acumu' => 'string',
-    ];
-
     private static $connectionInstance;
 
     // ######################## RELACIONES ########################
-
     /**
      * Obtiene los Dh13 asociados con este Dh12.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh13, $this>
      */
     public function dh13s(): HasMany
     {
@@ -121,22 +100,22 @@ class Dh12 extends Model
      *
      * @return array<int> Array de números de acumuladores activos
      */
-    public function getAcumuladoresActivosAttribute(): array
+    protected function acumuladoresActivos(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        if (empty($this->flag_acumu)) {
-            return [];
-        }
-
-        $acumuladores = [];
-        $flags = str_split($this->flag_acumu);
-        foreach ($flags as $posicion => $valor) {
-            if (strtoupper($valor) === 'S') {
-                // La posición es 0-based, pero los acumuladores son 1-based
-                $acumuladores[] = $posicion + 1;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): array {
+            if (empty($this->flag_acumu)) {
+                return [];
             }
-        }
-
-        return $acumuladores;
+            $acumuladores = [];
+            $flags = str_split($this->flag_acumu);
+            foreach ($flags as $posicion => $valor) {
+                if (strtoupper($valor) === 'S') {
+                    // La posición es 0-based, pero los acumuladores son 1-based
+                    $acumuladores[] = $posicion + 1;
+                }
+            }
+            return $acumuladores;
+        });
     }
 
     /**
@@ -150,25 +129,27 @@ class Dh12 extends Model
     /**
      * Método para obtener el texto formateado para el select.
      */
-    public function getSelectLabelAttribute(): string
+    protected function selectLabel(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        try {
-            return sprintf(
-                '%d - %s',
-                $this->codn_conce,
-                EncodingService::toUtf8($this->desc_conce),
-            );
-        } catch (Exception $e) {
-            return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
-        }
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
+            try {
+                return sprintf(
+                    '%d - %s',
+                    $this->codn_conce,
+                    EncodingService::toUtf8($this->desc_conce),
+                );
+            } catch (Exception) {
+                return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
+            }
+        });
     }
 
     // ############################# DIAGNOSTICOS #############################
-
     /**
      * Diagnóstico mejorado para caracteres especiales.
+     * @return mixed[]
      */
-    public static function diagnosticarCodificacion($codn_conce)
+    public static function diagnosticarCodificacion($codn_conce): array
     {
         // Usamos la conexión específica
         $connection = static::getMapucheConnection();
@@ -193,13 +174,11 @@ class Dh12 extends Model
         $registro = $resultado[0];
 
         // Análisis byte por byte
-        $bytes = str_split($registro->desc_conce);
-        $analisis_bytes = array_map(function ($byte) {
-            return [
-                'byte' => bin2hex($byte),
-                'ascii' => ord($byte),
-            ];
-        }, $bytes);
+        $bytes = str_split((string) $registro->desc_conce);
+        $analisis_bytes = array_map(fn($byte) => [
+            'byte' => bin2hex($byte),
+            'ascii' => ord($byte),
+        ], $bytes);
 
         return [
             'codn_conce' => $registro->codn_conce,
@@ -217,6 +196,7 @@ class Dh12 extends Model
         ];
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -262,8 +242,30 @@ class Dh12 extends Model
     protected function descConce(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => EncodingService::toUtf8($value),
-            set: fn($value) => EncodingService::toLatin1($value),
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
+    }
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'tipo_conce' => TipoConce::class,
+            'tipo_nove1' => TipoNove::class,
+            'tipo_nove2' => TipoNove::class,
+            'tipo_distr' => TipoDistr::class,
+            'chk_acumsac' => 'boolean',
+            'chk_acumproy' => 'boolean',
+            'chk_dcto3' => 'boolean',
+            'chkacumprhbrprom' => 'boolean',
+            'chkdifhbrcargoasoc' => 'boolean',
+            'chkptesubconcep' => 'boolean',
+            'chkinfcuotasnovper' => 'boolean',
+            'genconimp0' => 'boolean',
+            'flag_acumu' => 'string',
+        ];
     }
 }

@@ -201,6 +201,7 @@ class Dh41 extends Model
      *
      * @return array
      */
+    #[\Override]
     public function getKeyName()
     {
         return $this->compositePrimaryKey;

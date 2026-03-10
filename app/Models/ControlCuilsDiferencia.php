@@ -20,7 +20,11 @@ class ControlCuilsDiferencia extends Model
         'connection',
     ];
 
-    protected $casts = [
-        'fecha_control' => 'datetime',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fecha_control' => 'datetime',
+        ];
+    }
 }

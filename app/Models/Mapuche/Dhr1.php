@@ -65,12 +65,14 @@ class Dhr1 extends Model
 
     /**
      * Relación con la tabla dh22.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
      */
     public function dh22(): BelongsTo
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
+    #[\Override]
     public function uniqueIds(): array
     {
         return ['plantilla'];
@@ -87,6 +89,7 @@ class Dhr1 extends Model
     /**
      * Casting de atributos.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
