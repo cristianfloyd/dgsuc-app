@@ -6,24 +6,22 @@ use Rector\Config\RectorConfig;
 use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
 use Rector\Naming\Rector\Foreach_\RenameForeachValueVariableToMatchMethodCallReturnTypeRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
-use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromAssignsRector;
 use RectorLaravel\Rector\ClassMethod\AddArgumentDefaultValueRector;
 use RectorLaravel\Rector\ClassMethod\AddGenericReturnTypeToRelationsRector;
-use RectorLaravel\Rector\ClassMethod\AddParentBootToModelClassMethodRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/app',
-        __DIR__ . '/routes',
-        __DIR__ . '/tests',
-        __DIR__ . '/config',
-        __DIR__ . '/database/factories',
-        __DIR__ . '/database/seeders',
+        __DIR__ . '/app/Models/',
+        // __DIR__ . '/routes',
+        // __DIR__ . '/tests',
+        // __DIR__ . '/config',
+        // __DIR__ . '/database/factories',
+        // __DIR__ . '/database/seeders',
     ])
     ->withSkip([
         // Excluir archivos/directorios
@@ -63,7 +61,7 @@ return RectorConfig::configure()
     ->withRules([
         // Agrega aquí solo reglas específicas que no estén en los sets
         // La mayoría de reglas ya están cubiertas por los sets
-        ExplicitNullableParamTypeRector::class,
+        //ExplicitNullableParamTypeRector::class,
         RenameVariableToMatchMethodCallReturnTypeRector::class,
         RenameForeachValueVariableToMatchMethodCallReturnTypeRector::class,
         ClassPropertyAssignToConstructorPromotionRector::class,
