@@ -129,21 +129,36 @@ El script suele pedir que ejecutes algo como (los exactos los muestra él):
 
 ## 5. Revisión manual tras el script
 
-- [ ] Revisar `config/filament.php` por claves eliminadas o renombradas en v5 (consultar docs v5 si hace falta).
-- [ ] Buscar en el proyecto usos de APIs deprecadas o eliminadas que el script no haya tocado (p. ej. métodos de recursos, tablas, formularios).
-- [ ] Si el script ha movido o renombrado archivos, comprobar namespaces y `getPages()` en recursos.
-- [ ] Revisar temas CSS de paneles (Tailwind v4): que sigan usando `@source` y no sintaxis antigua.
+- [x] Revisar `config/filament.php` por claves eliminadas o renombradas en v5 (consultar docs v5 si hace falta).
+- [x] Buscar en el proyecto usos de APIs deprecadas o eliminadas que el script no haya tocado (p. ej. métodos de recursos, tablas, formularios).
+- [x] Si el script ha movido o renombrado archivos, comprobar namespaces y `getPages()` en recursos.
+- [x] Revisar temas CSS de paneles (Tailwind v4): que sigan usando `@source` y no sintaxis antigua.
 
 ---
 
 ## 6. Verificación final
 
+Ejecutar en orden (copiar y pegar en terminal):
+
+```bash
+# 1. Calidad de código
+docker compose exec app composer run quality:check
+
+# 2. Tests (conexión por defecto = SQLite en memoria; secundarias no se escriben; Mapuche → test-pgsql)
+docker compose exec app php artisan test --compact
+
+# 3. Filament
+docker compose exec app php artisan filament:optimize
+
+# 4. Assets (si hay cambios de frontend; o npm run dev en otro terminal)
+docker compose exec app npm run build
+```
+
 - [ ] `docker compose exec app composer run quality:check` (o equivalente del proyecto).
-- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).  
-  _En tests: conexión por defecto = SQLite en memoria (no escribe en la BD real). Conexiones secundarias (pgsql-mapuche, pgsql-2503, …) no deben escribirse; si hace falta escribir datos tipo Mapuche, usar la conexión `test-pgsql` (BD demo; configurar TEST_PGSQL_* en .env)._
+- [ ] `docker compose exec app php artisan test --compact` (o los tests que uses).
 - [ ] `docker compose exec app php artisan filament:optimize`
-- [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend; si corres npm en el contenedor: `docker compose exec app npm run build`.
-- [ ] Probar en navegador los paneles que uses: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
+- [ ] `npm run build` (o `npm run dev`) si hay cambios de frontend; en contenedor: `docker compose exec app npm run build`.
+- [ ] Probar en navegador los paneles: Admin, AFIP, Embargos, Liquidaciones, Reportes, Mapuche, Bloqueos, Procesos, Toba, etc.
 - [ ] Probar recursos que usen `SpatieMediaLibraryFileUpload` o columnas/entries de media (si aplica).
 
 ---
