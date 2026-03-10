@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="Laravel Project - Enhanced PSR-12">
-    <description>Configuración PSR-12 mejorada para proyecto Laravel 11 con PHP 8.3</description>
+<ruleset name="Laravel Project - PER Coding Style">
+    <description>Configuración basada en PSR-12 alineada con PER Coding Style para proyecto Laravel 11 con PHP 8.3</description>
     
     <!-- Archivos y directorios a analizar -->
     <file>app/</file>
@@ -25,7 +25,7 @@
     <exclude-pattern>**/vendor/**</exclude-pattern>
     <exclude-pattern>tests/CreatesApplication.php</exclude-pattern>
     
-    <!-- Usar PSR-12 como estándar base -->
+    <!-- Usar PSR-12 como estándar base (aproximando PER-CS en PHPCS) -->
     <rule ref="PSR12"/>
     
     <!-- Reglas adicionales de seguridad y calidad -->

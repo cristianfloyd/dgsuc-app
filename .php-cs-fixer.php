@@ -122,6 +122,7 @@ return (new PhpCsFixer\Config())
         'function_to_constant' => true,  // phpversion() -> PHP_VERSION
         'logical_operators' => true,  // and/or -> &&/||
         'single_line_throw' => true,
+        'single_line_empty_body' => true,
     ])
     ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig(12, 20))
     ->setRiskyAllowed(true)
