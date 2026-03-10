@@ -51,9 +51,7 @@ class BloqueoProcesadoData extends Data
     public static function fromSuccess(BloqueosDataModel $bloqueo): self
     {
         if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
-            throw ValidationException::withMessages([
-                'legajo_cargo' => 'Combinación legajo-cargo inválida',
-            ]);
+            throw ValidationException::withMessages([ 'legajo_cargo' => 'Combinación legajo-cargo inválida', ]);
         }
 
         return new self(

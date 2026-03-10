@@ -39,11 +39,7 @@ abstract class AbstractTableService implements TableServiceInterface
         $extraColumns = array_diff($currentColumns, $expectedColumns);
 
         if (!empty($missingColumns) || !empty($extraColumns)) {
-            throw new TableStructureException(
-                $this->getTableName(),
-                $missingColumns,
-                $extraColumns,
-            );
+            throw new TableStructureException($this->getTableName(), $missingColumns, $extraColumns, );
         }
 
         // Validar tipos de datos y propiedades de columnas
@@ -130,12 +126,7 @@ abstract class AbstractTableService implements TableServiceInterface
         $expectedType = $this->mapColumnType($definition['type']);
 
         if ($columnType !== $expectedType) {
-            throw new TableStructureException(
-                $this->getTableName(),
-                [],
-                [],
-                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}",
-            );
+            throw new TableStructureException($this->getTableName(), [], [], "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}", );
         }
     }
 

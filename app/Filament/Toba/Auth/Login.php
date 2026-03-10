@@ -56,9 +56,7 @@ class Login extends \Filament\Auth\Pages\Login
             return app(TobaLoginResponse::class);
         }
 
-        throw ValidationException::withMessages([
-            'data.usuario' => 'Las credenciales no coinciden con nuestros registros.',
-        ]);
+        throw ValidationException::withMessages([ 'data.usuario' => 'Las credenciales no coinciden con nuestros registros.', ]);
     }
 
     public function getHeading(): string

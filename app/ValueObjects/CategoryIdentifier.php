@@ -59,9 +59,7 @@ readonly class CategoryIdentifier implements Stringable
         $parts = explode('-', $value);
 
         if (count($parts) !== 3) {
-            throw new InvalidArgumentException(
-                'El formato del identificador debe ser: categoria-año-mes',
-            );
+            throw new InvalidArgumentException('El formato del identificador debe ser: categoria-año-mes', );
         }
 
         return new self(
@@ -80,9 +78,7 @@ readonly class CategoryIdentifier implements Stringable
         }
 
         if (strlen($trimmedCategory) > self::CATEGORY_LENGTH) {
-            throw new InvalidArgumentException(
-                'La categoría no puede exceder {self::CATEGORY_LENGTH} caracteres',
-            );
+            throw new InvalidArgumentException('La categoría no puede exceder {self::CATEGORY_LENGTH} caracteres', );
         }
 
         if ($this->year < 1900 || $this->year > 2100) {

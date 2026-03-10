@@ -287,11 +287,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
                 false, // retornar datos para verificación
             );
         } catch (Exception $e) {
-            throw new SicossGenerationException(
-                'Fallo en la generación del archivo SICOSS: ' . $e->getMessage(),
-                0,
-                $e,
-            );
+            throw new SicossGenerationException('Fallo en la generación del archivo SICOSS: ' . $e->getMessage(), 0, $e, );
         }
     }
 

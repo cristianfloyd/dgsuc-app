@@ -107,17 +107,13 @@ class ExcelRowValidationService
     private function validateEmail(?string $email): string
     {
         if (empty($email)) {
-            throw (new ValidationException('El email es requerido'))
-                ->setField('email')
-                ->addError('email', 'Campo requerido');
+            throw (new ValidationException('El email es requerido'))->setField('email')->addError('email', 'Campo requerido');
         }
 
         $email = strtolower(trim($email));
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw (new ValidationException("Email inválido: {$email}"))
-                ->setField('email')
-                ->setContext(['input' => $email]);
+            throw (new ValidationException("Email inválido: {$email}"))->setField('email')->setContext(['input' => $email]);
         }
 
         return $email;
