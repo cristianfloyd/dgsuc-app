@@ -16,7 +16,7 @@ use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/app/Services/',
+        __DIR__ . '/app/Models/',
         // __DIR__ . '/routes',
         // __DIR__ . '/tests',
         // __DIR__ . '/config',
