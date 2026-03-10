@@ -121,6 +121,7 @@ return (new PhpCsFixer\Config())
         'dir_constant' => true,  // dirname(__FILE__) -> __DIR__
         'function_to_constant' => true,  // phpversion() -> PHP_VERSION
         'logical_operators' => true,  // and/or -> &&/||
+        'single_line_throw' => true,
     ])
     ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig(12, 20))
     ->setRiskyAllowed(true)
