@@ -80,7 +80,7 @@ class BloqueosProcessService
 
             if ($bloqueosData instanceof \App\Data\Reportes\BloqueosData) {
                 // Validar que todos los registros estén en estado correcto
-                $registrosInvalidos = collect($bloqueosData)->filter(fn($bloqueo) => $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO
+                $registrosInvalidos = collect($bloqueosData)->filter(fn($bloqueo): bool => $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO
                     || $bloqueo->mensaje_error !== null
                     || $bloqueo->esta_procesado === true);
 

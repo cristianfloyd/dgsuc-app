@@ -73,14 +73,14 @@ class TobaAuthService
     /**
      * Procesa la clave según el algoritmo de Toba.
      */
-    private function procesarClave($clave, $algoritmo, $clave_almacenada)
+    private function procesarClave(string $clave, $algoritmo, $clave_almacenada): string
     {
         if ($algoritmo === 'plano') {
             return $clave;
         }
 
         if ($algoritmo === 'md5') {
-            return hash('md5', (string) $clave);
+            return hash('md5', $clave);
         }
 
         // Para otros algoritmos, necesitas implementar encriptar_con_sal

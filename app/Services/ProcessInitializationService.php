@@ -43,7 +43,7 @@ class ProcessInitializationService
          * Inicia un nuevo proceso si no hay un proceso actual definido.
          * Si no hay un proceso actual, se inicia un nuevo proceso y se guarda.
          */
-        if (!$currentProcess) {
+        if (!$currentProcess instanceof \App\Models\ProcessLog) {
             $currentProcess = $this->processLogService->startProcess('afip_mi_simplificacion_workflow');
         }
 

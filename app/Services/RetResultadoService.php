@@ -68,7 +68,7 @@ class RetResultadoService
     public function obtenerPorTipoRetro(TipoRetro $tipoRetro): array
     {
         $resultados = $this->repository->obtenerPorTipoRetro($tipoRetro);
-        return $resultados->map(fn($resultado) => new RetResultadoDTO($resultado, $this->calcularMontoTotal($resultado)))->toArray();
+        return $resultados->map(fn(\App\Models\Suc\RetResultado $resultado): \App\DTOs\RetResultadoDTO => new RetResultadoDTO($resultado, $this->calcularMontoTotal($resultado)))->toArray();
     }
 
     /**

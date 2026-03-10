@@ -18,7 +18,7 @@ class Dh12Service
         return Dh12::query()->select('codn_conce', 'desc_conce')
             ->orderBy('codn_conce')
             ->get()
-            ->mapWithKeys(fn($item) => [$item->codn_conce => "{$item->codn_conce} - {$item->desc_conce}"])
-            ->toArray();
+            ->mapWithKeys(fn($item): array => [$item->codn_conce => "{$item->codn_conce} - {$item->desc_conce}"])
+            ->all();
     }
 }

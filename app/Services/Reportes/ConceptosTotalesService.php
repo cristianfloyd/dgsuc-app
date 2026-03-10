@@ -27,7 +27,7 @@ class ConceptosTotalesService
     {
         $resultados = $this->repository->getTotalesPorConcepto($conceptos, $year, $month);
 
-        return $resultados->map(fn($item) => ConceptoTotalItemData::fromRowData($item));
+        return $resultados->map(fn(object $item): \App\Data\Responses\ConceptoTotalItemData => ConceptoTotalItemData::fromRowData($item));
     }
 
     /**

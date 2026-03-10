@@ -137,7 +137,7 @@ class SicossCodigoActividadService
 
 
         // Convertir explícitamente cada objeto stdClass a un array asociativo
-        return array_map(fn(\stdClass $item) => [
+        return array_map(fn(\stdClass $item): array => [
             'impp_conce' => $item->impp_conce,
             'nov1_conce' => $item->nov1_conce,
             'codn_conce' => $item->codn_conce,
@@ -198,12 +198,12 @@ class SicossCodigoActividadService
             }
 
             // Grupo 12
-            if (preg_match('/[^\d]+12[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 34) {
+            if (preg_match('/[^\d]+12[^\d]+/', (string) $gruposConcepto) && $prioridadTipoActividad < 34) {
                 $prioridadTipoActividad = 34;
             }
 
             // Grupo 13
-            if (preg_match('/[^\d]+13[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 35) {
+            if (preg_match('/[^\d]+13[^\d]+/', (string) $gruposConcepto) && $prioridadTipoActividad < 35) {
                 $prioridadTipoActividad = 35;
             }
 
@@ -228,12 +228,12 @@ class SicossCodigoActividadService
             }
 
             // Grupo 48
-            if (preg_match('/[^\d]+48[^\d]+/', $gruposConcepto) && ($prioridadTipoActividad < 36 || $prioridadTipoActividad === 88)) {
+            if (preg_match('/[^\d]+48[^\d]+/', (string) $gruposConcepto) && ($prioridadTipoActividad < 36 || $prioridadTipoActividad === 88)) {
                 $prioridadTipoActividad = 87;
             }
 
             // Grupo 49
-            if (preg_match('/[^\d]+49[^\d]+/', $gruposConcepto) && $prioridadTipoActividad < 36) {
+            if (preg_match('/[^\d]+49[^\d]+/', (string) $gruposConcepto) && $prioridadTipoActividad < 36) {
                 $prioridadTipoActividad = 88;
             }
         }

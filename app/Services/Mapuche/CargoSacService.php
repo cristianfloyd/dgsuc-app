@@ -593,7 +593,7 @@ class CargoSacService
     {
         $cacheKey = "dias_mes_{$anio}_{$mes}";
 
-        return Cache::remember($cacheKey, 3600, fn() => self::get_dias_mes($mes, $anio));
+        return Cache::remember($cacheKey, 3600, fn(): int => self::get_dias_mes($mes, $anio));
     }
 
     /**

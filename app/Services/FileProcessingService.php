@@ -153,7 +153,7 @@ class FileProcessingService
         // Paso 3: Insertar los datos mapeados en la base de datos
         $inserted = $this->databaseService->insertBulkData($mappedData, $tableName);
 
-        if ($inserted) {
+        if ($inserted !== []) {
             // Actualizar el flujo de trabajo y notificar al usuario
             $this->workflowService->completeStep($processLog, $step);
             return [
@@ -183,7 +183,7 @@ class FileProcessingService
         try {
             $result = $this->sicossImporterService->importarArchivo($mapucheFile, $tableName, $step);
 
-            if ($result) {
+            if ($result !== []) {
                 Log::info('Archivo Mapuche procesado e importado correctamente.');
                 return [
                     'success' => true,

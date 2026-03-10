@@ -55,7 +55,7 @@ class TempTableService extends DatabaseService
             foreach (array_chunk($cuils, 1000) as $chunk) {
                 DB::connection($this->getConnectionName())
                     ->table($tableName)
-                    ->insert(array_map(fn($cuil) => ['cuil' => $cuil], $chunk));
+                    ->insert(array_map(fn($cuil): array => ['cuil' => $cuil], $chunk));
             }
 
             DB::connection($this->getConnectionName())->commit();

@@ -48,7 +48,7 @@ class Dh22Service
         return Dh22::query()
             ->definitiva()
             ->get()
-            ->mapWithKeys(fn($liquidacion) => [
+            ->mapWithKeys(fn($liquidacion): array => [
                 $liquidacion->nro_liqui => $liquidacion->desc_liqui,
             ])
             ->toArray();

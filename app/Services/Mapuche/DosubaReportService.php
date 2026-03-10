@@ -181,7 +181,7 @@ class DosubaReportService
             $resultados = $resultados->concat($query->get());
         }
 
-        return $resultados->map(fn($item) => [
+        return $resultados->map(fn($item): array => [
             'nro_legaj' => $item->nro_legaj,
             'cuil' => $item->nro_cuil1 . $item->nro_cuil . $item->nro_cuil2,
             'apellido' => $item->apellido,

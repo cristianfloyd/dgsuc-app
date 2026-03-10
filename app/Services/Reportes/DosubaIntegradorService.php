@@ -19,14 +19,14 @@ class DosubaIntegradorService
     public function getLegajosSinLiquidarConDosuba(): Builder
     {
         // Obtenemos los legajos sin liquidar
-        $queryLegajosSinLiquidar = $this->legajosSinLiquidarService->getLegajosSinLiquidar();
-        dump($queryLegajosSinLiquidar);
+        $builder = $this->legajosSinLiquidarService->getLegajosSinLiquidar();
+        dump($builder);
         // Obtenemos los CUIL del reporte DOSUBA
         $cuilsDosuba = $this->dosubaReportService->getDosubaReport()
             ->pluck('CUIL')
             ->toArray();
 
         // Agregamos el filtro de CUIL a la query original
-        return $queryLegajosSinLiquidar->whereIn('dh21h.cuil', $cuilsDosuba);
+        return $builder->whereIn('dh21h.cuil', $cuilsDosuba);
     }
 }

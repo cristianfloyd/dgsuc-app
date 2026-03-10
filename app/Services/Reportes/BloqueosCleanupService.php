@@ -260,7 +260,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             ->get()
             ->filter(
                 // Verificar que existe en el historial antes de marcarlo para eliminar
-                fn($registro) => $this->existeEnHistorial($registro));
+                fn(\App\Models\Reportes\BloqueosDataModel $registro): bool => $this->existeEnHistorial($registro));
     }
 
     /**

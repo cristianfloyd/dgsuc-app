@@ -44,7 +44,7 @@ class CombinacionesService
             }
 
             // Convertir a array para el algoritmo
-            $items = $conceptos->map(fn($item) => [
+            $items = $conceptos->map(fn($item): array => [
                 'codn_conce' => $item->codn_conce,
                 'impp_conce' => (float) $item->impp_conce,
                 'tipo_conce' => $item->tipo_conce,

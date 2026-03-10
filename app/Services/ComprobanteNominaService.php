@@ -94,7 +94,10 @@ class ComprobanteNominaService
                 $line = trim($line);
                 $lineNumber++;
                 // Ignorar líneas vacías o la marca de fin
-                if ($line === '' || $line === '0') {
+                if ($line === '') {
+                    continue;
+                }
+                if ($line === '0') {
                     continue;
                 }
                 if ($line === 'FIN') {

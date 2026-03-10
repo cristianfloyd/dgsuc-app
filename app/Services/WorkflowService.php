@@ -64,11 +64,7 @@ class WorkflowService implements WorkflowServiceInterface
      */
     public function getLatestWorkflow(): ?ProcessLog
     {
-        $latestProcess = $this->processLogService->getLatestProcess();
-        if (!$latestProcess) {
-            return null;
-        }
-        return $latestProcess;
+        return $this->processLogService->getLatestProcess();
     }
 
     /* Devuelve una matriz asociativa de los pasos del proceso de flujo de trabajo.
@@ -247,7 +243,7 @@ class WorkflowService implements WorkflowServiceInterface
     {
         $allCompleted = array_reduce(
             $processLog->steps,
-            fn(true $carry, $step) => $carry && $step === 'completed',
+            fn(true $carry, $step): bool => $carry && $step === 'completed',
             true,
         );
 

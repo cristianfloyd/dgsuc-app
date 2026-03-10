@@ -210,7 +210,7 @@ class CheFileGenerator
      */
     private function formatAportes(array $aportes): array
     {
-        return collect($aportes)->map(fn($aporte) => [
+        return collect($aportes)->map(fn($aporte): array => [
             'codigo' => $this->fillWithZeros($aporte['grupo'], 3),
             'descripcion' => $this->fillWithSpaces($aporte['desc_grupo'], 50),
             'importe' => $this->fillWithLeftSpaces(

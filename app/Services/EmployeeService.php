@@ -24,7 +24,7 @@ class EmployeeService implements EmployeeServiceInterface
     public function searchEmployee(string $dni): ?EmployeeInfoDTO
     {
         $employee = $this->employeeRepository->findByDni($dni);
-        if (!$employee) {
+        if (!$employee instanceof \App\Models\Dh01) {
             return null;
         }
 
@@ -76,7 +76,7 @@ class EmployeeService implements EmployeeServiceInterface
     {
 
         return collect($processedLines)
-            ->map(fn(array $linea) => $this->databaseService->mapearDatosAlModelo($linea))
+            ->map(fn(array $linea): array => $this->databaseService->mapearDatosAlModelo($linea))
             ->all();
     }
 

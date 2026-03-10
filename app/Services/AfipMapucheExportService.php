@@ -122,7 +122,7 @@ class AfipMapucheExportService implements ExportServiceInterface
      *
      * @return string El campo formateado según las reglas establecidas
      */
-    private function formatField($record, string $field, int $width): string
+    private function formatField(\stdClass $record, string $field, int $width): string
     {
         $value = $record->{$field} ?? '';
 
@@ -192,7 +192,7 @@ class AfipMapucheExportService implements ExportServiceInterface
         // Formateo para campos numéricos
         if ($field === 'cuil') {
             $value = preg_replace('/[^0-9]/', '', (string) $value); // Remover no-números
-            return str_pad($value, $width, '0', STR_PAD_LEFT);
+            return str_pad((string) $value, $width, '0', STR_PAD_LEFT);
         }
 
         // Formateo por defecto para campos de texto

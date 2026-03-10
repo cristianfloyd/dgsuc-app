@@ -165,7 +165,7 @@ class EmbargoReportService
             ->map(fn($embargosLegajo) => $embargosLegajo->map(function ($embargo) use ($nro_liqui) {
                 $importes = $embargo->getImporteDescontado($nro_liqui);
 
-                return $importes->map(fn($importe) => [
+                return $importes->map(fn($importe): array => [
                     'nro_legaj' => $embargo->nro_legaj,
                     'nombre_completo' => $embargo->datosPersonales->nombre_completo,
                     'codn_conce' => $embargo->tipoEmbargo->codn_conce,

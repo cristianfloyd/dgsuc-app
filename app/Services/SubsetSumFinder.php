@@ -18,7 +18,7 @@ class SubsetSumFinder
     public function findCombinations(array $items, float $targetSum, float $tolerance = 0.01): array
     {
         // Ordenamos los elementos por valor para optimizar la búsqueda
-        usort($items, fn(array $a, array $b) => $b['importe'] <=> $a['importe']);
+        usort($items, fn(array $a, array $b): int => $b['importe'] <=> $a['importe']);
 
         $results = [];
         $this->findSubsets($items, $targetSum, [], 0, 0, $results, $tolerance);
