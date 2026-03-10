@@ -77,9 +77,9 @@ return (new PhpCsFixer\Config())
         ],
         'no_unused_imports' => true,
         'global_namespace_import' => [
-            'import_classes' => false,
-            'import_constants' => false,
-            'import_functions' => false
+            'import_classes' => true,
+            'import_constants' => true,
+            'import_functions' => true
         ],
         
         // === FUNCIONES ===
