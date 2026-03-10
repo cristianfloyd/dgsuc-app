@@ -2,11 +2,12 @@
 
 namespace App\Filament\Reportes\Pages;
 
+use BackedEnum;
 use Filament\Pages\Dashboard as Page;
 
 class Dashboard extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-home';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home';
 
     protected string $view = 'filament.reportes.pages.dashboard';
 

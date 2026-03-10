@@ -10,6 +10,7 @@ use App\Services\EmbargoTableService;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Tables\EmbargoTable;
 use App\Traits\DisplayResourceProperties;
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -18,6 +19,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use UnitEnum;
+
+use function count;
+
+use const STR_PAD_LEFT;
 
 class EmbargoResource extends Resource
 {
@@ -36,13 +42,13 @@ class EmbargoResource extends Resource
 
     protected static ?string $model = EmbargoProcesoResult::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     protected static ?string $modelLabel = 'Embargo';
 
     protected static ?string $slug = 'embargos';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected EmbargoTable $embargoTable;
 
@@ -97,7 +103,7 @@ class EmbargoResource extends Resource
 
     public static function actualizarDatos(array $data = []): void
     {
-        $instance = new self;
+        $instance = new self();
         $instance->setPropertyValues($data);
 
         // Actualizamos las propiedades del recurso
@@ -111,14 +117,14 @@ class EmbargoResource extends Resource
         $periodoFiscal = 0;
         if (isset($instance->periodoFiscal['year'], $instance->periodoFiscal['month'])) {
             $year = $instance->periodoFiscal['year'];
-            $month = str_pad($instance->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+            $month = str_pad($instance->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
             $periodoFiscal = (int) "{$year}{$month}";
         } else {
             // Obtener el período fiscal del servicio como fallback
             $periodoFiscalData = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $year = $periodoFiscalData['year'] ?? date('Y');
             $month = $periodoFiscalData['month'] ?? date('m');
-            $periodoFiscal = (int) ("{$year}".str_pad($month, 2, '0', \STR_PAD_LEFT));
+            $periodoFiscal = (int) ("{$year}" . str_pad($month, 2, '0', STR_PAD_LEFT));
             Log::warning('Se utilizará el período fiscal del servicio como valor predeterminado', ['periodoFiscal' => $periodoFiscal]);
         }
 
@@ -136,7 +142,7 @@ class EmbargoResource extends Resource
             Notification::make()
                 ->title('Proceso de embargos completado')
                 ->success()
-                ->body('Se procesaron '.\count($results).' registros de embargos')
+                ->body('Se procesaron ' . count($results) . ' registros de embargos')
                 ->send();
 
             // Remover el dd para producción

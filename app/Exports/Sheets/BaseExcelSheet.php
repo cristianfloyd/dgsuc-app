@@ -34,7 +34,7 @@ abstract class BaseExcelSheet implements WithCustomStartCell, WithStyles
         $sheet->setCellValue('A2', 'REPORTE DE EMBARGOS');
 
         $sheet->mergeCells('A3:E3');
-        $sheet->setCellValue('A3', 'Fecha: '.now()->format('d/m/Y'));
+        $sheet->setCellValue('A3', 'Fecha: ' . now()->format('d/m/Y'));
 
         // Aplicar estilos al encabezado
         $sheet->getStyle('A1:E3')->applyFromArray([
@@ -93,7 +93,7 @@ abstract class BaseExcelSheet implements WithCustomStartCell, WithStyles
         ]);
 
         // Estilo para el contenido
-        $sheet->getStyle('A7:Z'.$sheet->getHighestRow())->applyFromArray([
+        $sheet->getStyle('A7:Z' . $sheet->getHighestRow())->applyFromArray([
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
@@ -109,7 +109,7 @@ abstract class BaseExcelSheet implements WithCustomStartCell, WithStyles
         for ($row = 7; $row <= $sheet->getHighestRow(); $row++) {
             if ($row % 2 == 0) {
                 $color = new Color('F8F9FA');
-                $sheet->getStyle('A'.$row.':Z'.$row)->getFill()
+                $sheet->getStyle('A' . $row . ':Z' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->setStartColor($color);
             }

@@ -4,6 +4,9 @@ namespace App\Services;
 
 use InvalidArgumentException;
 
+use function in_array;
+use function is_string;
+
 class ColumnMetadata
 {
     /**
@@ -56,7 +59,7 @@ class ColumnMetadata
 
     public function setSystem(string $system): void
     {
-        if (!\in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
+        if (!in_array($system, ['afip', 'mapuche', 'miSimplificacion', 'sicossCalculo'])) {
             throw new InvalidArgumentException('Sistema no válido');
         }
         $this->currentSystem = $system;
@@ -104,7 +107,7 @@ class ColumnMetadata
      */
     public function setColumnWidth(int|string $identifier, int $width): void
     {
-        $index = \is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
+        $index = is_string($identifier) ? self::COLUMN_MAP[$identifier] : $identifier;
         $this->widthsAfip[$index] = $width;
     }
 

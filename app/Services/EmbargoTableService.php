@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;

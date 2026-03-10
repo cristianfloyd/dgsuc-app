@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use InvalidArgumentException;
 use App\Contracts\Repositories\Dhr2RepositoryInterface;
 use App\Data\DataObjects\Dhr2Data;
 use App\Models\Mapuche\Dhr1;
 use App\Models\Mapuche\Dhr2;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class Dhr2Repository implements Dhr2RepositoryInterface
 {

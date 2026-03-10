@@ -3,11 +3,11 @@
 namespace App\Filament\Reportes\Resources\RepGerencialFinals\RepGerencialFinals;
 
 use App\Filament\Reportes\Resources\RepGerencialFinals\Pages\ListRepGerencialFinals;
-use Filament\Actions\BulkActionGroup;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Catalogo\Dh36;
 use App\Models\Reportes\RepGerencialFinal;
 use App\Traits\MapucheConnectionTrait;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,6 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use UnitEnum;
 
 class RepGerencialFinalResource extends Resource
 {
@@ -28,7 +29,7 @@ class RepGerencialFinalResource extends Resource
 
     protected static ?string $pluralLabel = 'Reporte Gerencial';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Informes';
+    protected static string | UnitEnum | null $navigationGroup = 'Informes';
 
     protected static ?string $navigationLabel = 'Reporte Gerencial';
 

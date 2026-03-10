@@ -2,11 +2,18 @@
 
 namespace App\Services\Afip;
 
+use App\Models\Mapuche\MapucheConfig;
 use Exception;
 use Illuminate\Database\QueryException;
-use App\Models\Mapuche\MapucheConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function array_slice;
+use function count;
+use function ini_get;
+
+use const PHP_VERSION;
+use const STR_PAD_LEFT;
 
 class SicossOptimizadoTests
 {
@@ -122,7 +129,7 @@ class SicossOptimizadoTests
     {
         $conexion = SicossOptimizado::getStaticConnectionName();
         $queries_iniciales = DB::connection($conexion)->getQueryLog();
-        $cantidad_inicial = \count($queries_iniciales);
+        $cantidad_inicial = count($queries_iniciales);
 
         Log::info('🔍 Verificación de optimización iniciada', [
             'legajos_a_procesar' => $total_legajos,
@@ -335,15 +342,15 @@ class SicossOptimizadoTests
 
             // ✅ Aplicar límite si es especificado
             if ($limite_legajos !== null) {
-                $legajos = \array_slice($todos_legajos, 0, $limite_legajos);
+                $legajos = array_slice($todos_legajos, 0, $limite_legajos);
                 $tipo_test = "LIMITADO A $limite_legajos";
             } else {
                 $legajos = $todos_legajos;
                 $tipo_test = 'TODOS LOS LEGAJOS';
             }
 
-            $legajos_obtenidos = \count($legajos);
-            $legajos_disponibles = \count($todos_legajos);
+            $legajos_obtenidos = count($legajos);
+            $legajos_disponibles = count($todos_legajos);
 
             Log::info("✅ Legajos para $nombre_test: $legajos_obtenidos de $legajos_disponibles disponibles ($tipo_test)");
 
@@ -387,7 +394,7 @@ class SicossOptimizadoTests
                 'exito' => true,
                 'nombre_test' => $nombre_test,
                 'estadisticas' => $estadisticas,
-                'legajos_muestra' => \array_slice($resultado, 0, 3), // Primeros 3 para verificar
+                'legajos_muestra' => array_slice($resultado, 0, 3), // Primeros 3 para verificar
                 'recomendaciones' => self::generar_recomendaciones($estadisticas),
             ];
         } catch (Exception $e) {
@@ -427,8 +434,8 @@ class SicossOptimizadoTests
             'nombre_test' => $nombre_test,
             'legajos_disponibles' => $disponibles,
             'legajos_procesados' => $procesados,
-            'legajos_validos_generados' => \count($resultado),
-            'tasa_exito_porcentaje' => round((\count($resultado) / max($procesados, 1)) * 100, 2),
+            'legajos_validos_generados' => count($resultado),
+            'tasa_exito_porcentaje' => round((count($resultado) / max($procesados, 1)) * 100, 2),
             'tiempo_total_segundos' => round($tiempo_total, 2),
             'tiempo_total_minutos' => round($tiempo_total / 60, 2),
             'tiempo_por_legajo_ms' => round(($tiempo_total * 1000) / max($procesados, 1), 2),
@@ -697,7 +704,7 @@ class SicossOptimizadoTests
                 'legajos_activos' => $legajos_activos,
                 'legajos_reparto_especifico' => $legajos_reparto,
                 'codc_reparto_utilizado' => $codc_reparto,
-                'periodo_consultado' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', \STR_PAD_LEFT),
+                'periodo_consultado' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT),
             ];
         } catch (Exception $e) {
             return [
@@ -720,7 +727,7 @@ class SicossOptimizadoTests
             return [
                 'año_actual' => $periodo['year'],
                 'mes_actual' => $periodo['month'],
-                'periodo_formato' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', \STR_PAD_LEFT),
+                'periodo_formato' => $periodo['year'] . '/' . str_pad($periodo['month'], 2, '0', STR_PAD_LEFT),
                 'nombre_mes' => date('F', mktime(0, 0, 0, $periodo['month'], 1)),
                 'timestamp_consulta' => now()->toDateTimeString(),
             ];
@@ -739,9 +746,9 @@ class SicossOptimizadoTests
         return [
             'memoria_actual_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
             'memoria_pico_mb' => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
-            'limite_memoria' => \ini_get('memory_limit'),
-            'limite_tiempo_ejecucion' => \ini_get('max_execution_time'),
-            'php_version' => \PHP_VERSION,
+            'limite_memoria' => ini_get('memory_limit'),
+            'limite_tiempo_ejecucion' => ini_get('max_execution_time'),
+            'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
             'timezone' => config('app.timezone'),
             'environment' => app()->environment(),

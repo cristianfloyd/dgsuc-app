@@ -5,6 +5,8 @@ namespace App\Filament\Afip\Actions;
 use App\Filament\Afip\Handlers\SicossControlActionHandler;
 use Filament\Actions\Action;
 
+use function sprintf;
+
 class EjecutarControlContribucionesAction extends Action
 {
     protected function setUp(): void
@@ -37,7 +39,7 @@ class EjecutarControlContribucionesAction extends Action
         return $this->badge(function () {
             $livewire = $this->getLivewire();
 
-            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
+            return sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
 }

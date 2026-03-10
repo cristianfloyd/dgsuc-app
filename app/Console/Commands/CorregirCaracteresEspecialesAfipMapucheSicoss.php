@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function count;
+use function strlen;
+
+use const JSON_UNESCAPED_UNICODE;
+
 class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
 {
     /**
@@ -90,12 +95,12 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
 
             // Procesar registros en lotes para evitar problemas de memoria
             $query->chunk($batchSize, function ($registros) use (&$cambiosRealizados, $dryRun, $camposACorregir, $debug): void {
-                $this->info('Procesando lote de '.\count($registros).' registros...');
+                $this->info('Procesando lote de ' . count($registros) . ' registros...');
 
                 foreach ($registros as $registro) {
                     $cambios = $this->procesarRegistro($registro, $camposACorregir, $dryRun, $debug);
 
-                    if (! empty($cambios)) {
+                    if (!empty($cambios)) {
                         $cambiosRealizados++;
                     }
                 }
@@ -109,7 +114,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
 
             return 0;
         } catch (Exception $e) {
-            $this->error('Error general: '.$e->getMessage());
+            $this->error('Error general: ' . $e->getMessage());
             Log::error('Error en CorregirCaracteresEspecialesAfipMapucheSicoss', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -122,12 +127,12 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Muestra información de diagnóstico sobre la conexión y modelo.
      *
-     * @param  string|null  $cuilFiltro  CUIL para verificar existencia
+     * @param string|null $cuilFiltro CUIL para verificar existencia
      */
     private function mostrarInformacionDiagnostico($cuilFiltro = null): void
     {
-        $this->info('Conexión a la base de datos: '.config('database.default'));
-        $this->info('Conexión Mapuche: '.config('database.connections.mapuche.driver'));
+        $this->info('Conexión a la base de datos: ' . config('database.default'));
+        $this->info('Conexión Mapuche: ' . config('database.connections.mapuche.driver'));
 
         // Verificar si el modelo existe
         $this->info('Verificando modelo AfipMapucheSicoss...');
@@ -135,14 +140,14 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             $this->info('✓ Modelo encontrado');
 
             // Verificar tabla
-            $tableName = (new AfipMapucheSicoss)->getTable();
-            $connection = (new AfipMapucheSicoss)->getConnectionName();
+            $tableName = (new AfipMapucheSicoss())->getTable();
+            $connection = (new AfipMapucheSicoss())->getConnectionName();
             $this->info("Tabla: {$tableName}");
             $this->info("Conexión del modelo: {$connection}");
 
             // Verificar si la tabla existe
             $tableExists = DB::connection($connection)->getSchemaBuilder()->hasTable($tableName);
-            $this->info('¿Tabla existe? '.($tableExists ? 'Sí' : 'No'));
+            $this->info('¿Tabla existe? ' . ($tableExists ? 'Sí' : 'No'));
 
             // Contar registros totales
             $totalRegistros = AfipMapucheSicoss::count();
@@ -151,16 +156,16 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             // Si hay un CUIL específico, verificar directamente
             if ($cuilFiltro) {
                 $existeCuil = AfipMapucheSicoss::where('cuil', $cuilFiltro)->exists();
-                $this->info("¿Existe registro con CUIL {$cuilFiltro}? ".($existeCuil ? 'Sí' : 'No'));
+                $this->info("¿Existe registro con CUIL {$cuilFiltro}? " . ($existeCuil ? 'Sí' : 'No'));
 
-                if (! $existeCuil) {
+                if (!$existeCuil) {
                     // Intentar buscar con LIKE por si hay espacios o formato diferente
                     $existeCuilLike = AfipMapucheSicoss::where('cuil', 'like', "%{$cuilFiltro}%")->exists();
-                    $this->info("¿Existe registro con CUIL similar a {$cuilFiltro}? ".($existeCuilLike ? 'Sí' : 'No'));
+                    $this->info("¿Existe registro con CUIL similar a {$cuilFiltro}? " . ($existeCuilLike ? 'Sí' : 'No'));
 
                     // Mostrar los primeros 5 CUILs para comparar formato
                     $primerosCuils = AfipMapucheSicoss::select('cuil')->limit(5)->get()->pluck('cuil')->toArray();
-                    $this->info('Ejemplos de CUILs en la base: '.implode(', ', $primerosCuils));
+                    $this->info('Ejemplos de CUILs en la base: ' . implode(', ', $primerosCuils));
                 }
             }
         } else {
@@ -171,12 +176,12 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Aplica los filtros a la consulta según los parámetros especificados.
      *
-     * @param  Builder  $query  Query builder
-     * @param  string|null  $cuilFiltro  Filtro por CUIL
-     * @param  string|null  $nombreFiltro  Filtro por nombre
-     * @param  string|null  $periodoFiltro  Filtro por período
-     * @param  bool  $debug  Mostrar información de debug
-     * @param  array  $camposACorregir  Campos a corregir
+     * @param Builder $query Query builder
+     * @param string|null $cuilFiltro Filtro por CUIL
+     * @param string|null $nombreFiltro Filtro por nombre
+     * @param string|null $periodoFiltro Filtro por período
+     * @param bool $debug Mostrar información de debug
+     * @param array $camposACorregir Campos a corregir
      */
     private function aplicarFiltros($query, $cuilFiltro, $nombreFiltro, $periodoFiltro, $debug, $camposACorregir): void
     {
@@ -190,7 +195,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
                 $sql = $query->toSql();
                 $bindings = $query->getBindings();
                 $this->info("Consulta SQL: {$sql}");
-                $this->info('Parámetros: '.implode(', ', $bindings));
+                $this->info('Parámetros: ' . implode(', ', $bindings));
             }
         }
 
@@ -205,7 +210,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
         }
 
         // Si no hay filtros específicos, buscar por patrones de bytes problemáticos
-        if (! $cuilFiltro && ! $nombreFiltro && ! $periodoFiltro) {
+        if (!$cuilFiltro && !$nombreFiltro && !$periodoFiltro) {
             $query->where(function ($q) use ($camposACorregir): void {
                 foreach ($camposACorregir as $campo) {
                     // Buscar bytes problemáticos usando consultas Raw con codificación hexadecimal
@@ -232,10 +237,11 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Procesa un registro, identificando y aplicando correcciones necesarias.
      *
-     * @param  AfipMapucheSicoss  $registro  Registro a procesar
-     * @param  array  $camposACorregir  Campos a corregir
-     * @param  bool  $dryRun  Modo simulación
-     * @param  bool  $debug  Mostrar información adicional
+     * @param AfipMapucheSicoss $registro Registro a procesar
+     * @param array $camposACorregir Campos a corregir
+     * @param bool $dryRun Modo simulación
+     * @param bool $debug Mostrar información adicional
+     *
      * @return array Cambios realizados
      */
     private function procesarRegistro(AfipMapucheSicoss $registro, array $camposACorregir, bool $dryRun, bool $debug): array
@@ -246,7 +252,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             // Obtener el valor original sin aplicar mutadores
             $valorOriginal = $registro->getRawOriginal($campo);
 
-            if (! $valorOriginal) {
+            if (!$valorOriginal) {
                 continue;
             }
 
@@ -272,10 +278,10 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
             }
         }
 
-        if (! empty($cambios)) {
-            $this->info("Registro #{$registro->id} (CUIL: {$registro->cuil}, Período: {$registro->periodo_fiscal}): ".json_encode($cambios, \JSON_UNESCAPED_UNICODE));
+        if (!empty($cambios)) {
+            $this->info("Registro #{$registro->id} (CUIL: {$registro->cuil}, Período: {$registro->periodo_fiscal}): " . json_encode($cambios, JSON_UNESCAPED_UNICODE));
 
-            if (! $dryRun) {
+            if (!$dryRun) {
                 $this->actualizarRegistro($registro, $cambios);
             }
         }
@@ -286,8 +292,9 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Actualiza un registro con los cambios identificados.
      *
-     * @param  AfipMapucheSicoss  $registro  Registro a actualizar
-     * @param  array  $cambios  Cambios a aplicar
+     * @param AfipMapucheSicoss $registro Registro a actualizar
+     * @param array $cambios Cambios a aplicar
+     *
      * @return bool Éxito de la operación
      */
     private function actualizarRegistro(AfipMapucheSicoss $registro, array $cambios): bool
@@ -322,7 +329,8 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Función para corregir caracteres especiales.
      *
-     * @param  string  $texto  Texto a corregir
+     * @param string $texto Texto a corregir
+     *
      * @return string Texto corregido
      */
     private function corregirCaracteres(string $texto): string
@@ -471,7 +479,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
         }
 
         // Aplicar correcciones de provincias si el campo es 'prov'
-        if (stripos($texto, 'PROVINCIA') !== false || \strlen($texto) < 30) {
+        if (stripos($texto, 'PROVINCIA') !== false || strlen($texto) < 30) {
             foreach ($provinciasComunes as $mal => $bien) {
                 $result = str_ireplace($mal, $bien, $result);
             }
@@ -483,14 +491,15 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Convierte una cadena a su representación hexadecimal.
      *
-     * @param  string  $text  Texto a convertir
+     * @param string $text Texto a convertir
+     *
      * @return string Representación hexadecimal
      */
     private function bytesToHex(string $text): string
     {
         $hex = '';
-        for ($i = 0; $i < \strlen($text); $i++) {
-            $hex .= bin2hex($text[$i]).' ';
+        for ($i = 0; $i < strlen($text); $i++) {
+            $hex .= bin2hex($text[$i]) . ' ';
         }
 
         return trim($hex);
@@ -499,7 +508,8 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
     /**
      * Normaliza el texto corrigiendo patrones sistemáticos de codificación incorrecta.
      *
-     * @param  string  $texto  Texto a normalizar
+     * @param string $texto Texto a normalizar
+     *
      * @return string Texto normalizado
      */
     private function normalizarTexto(string $texto): string
@@ -508,7 +518,7 @@ class CorregirCaracteresEspecialesAfipMapucheSicoss extends Command
         $texto = preg_replace_callback(
             '/\xC3\xC2([\x80-\xFF])/s',
             function ($matches) {
-                return "\xC3".$matches[1];
+                return "\xC3" . $matches[1];
             },
             $texto,
         );

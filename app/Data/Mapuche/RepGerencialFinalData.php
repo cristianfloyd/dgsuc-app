@@ -25,7 +25,8 @@ class RepGerencialFinalData extends Data
         #[Required, Numeric]
         public readonly float $imp_neto,
         public readonly ?string $cuil = null,
-    ) {}
+    ) {
+    }
 
     public static function rules(?ValidationContext $context = null): array
     {

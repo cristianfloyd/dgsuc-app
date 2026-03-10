@@ -2,13 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\EnhancedDatabaseConnectionService;
 use Closure;
 use Exception;
-use App\Services\EnhancedDatabaseConnectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+
+use const PHP_SAPI;
 
 /**
  * Middleware para establecer la conexión de base de datos.
@@ -33,7 +35,7 @@ class SetDatabaseConnection
     {
         try {
             // NO interferir con comandos Artisan (migrate, etc.)
-            if (app()->runningInConsole() || \PHP_SAPI === 'cli') {
+            if (app()->runningInConsole() || PHP_SAPI === 'cli') {
                 return $next($request);
             }
 

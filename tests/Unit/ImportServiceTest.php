@@ -4,9 +4,11 @@ namespace Tests\Unit;
 
 use App\Models\UploadedFile;
 use App\Services\TableManagementService;
+use Exception;
 use Illuminate\Http\UploadedFile as IlluminateUploadedFile;
 use Illuminate\Support\Facades\Log;
 use Livewire\Livewire;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 
 class ImportServiceTest extends TestCase
@@ -18,19 +20,19 @@ class ImportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tableManagementService = \Mockery::mock(TableManagementService::class);
+        $this->tableManagementService = Mockery::mock(TableManagementService::class);
         $this->importService = Livewire::ImportService($this->tableManagementService);
     }
 
     protected function tearDown(): void
     {
-        \Mockery::close();
+        Mockery::close();
         parent::tearDown();
     }
 
     public function testImportFileSuccessfully(): void
     {
-        $uploadedFile = \Mockery::mock(UploadedFile::class);
+        $uploadedFile = Mockery::mock(UploadedFile::class);
         $uploadedFile->file_path = '/ruta/al/archivo.csv';
         $uploadedFile->periodo_fiscal = '202301';
         $uploadedFile->id = 1;
@@ -39,7 +41,7 @@ class ImportServiceTest extends TestCase
             ->once()
             ->with('suc.afip_mapuche_sicoss', null);
 
-        $illuminateFile = \Mockery::mock(IlluminateUploadedFile::class);
+        $illuminateFile = Mockery::mock(IlluminateUploadedFile::class);
 
         Log::shouldReceive('info')
             ->once()
@@ -52,7 +54,7 @@ class ImportServiceTest extends TestCase
 
     public function testImportFileWithInvalidFile(): void
     {
-        $uploadedFile = \Mockery::mock(UploadedFile::class);
+        $uploadedFile = Mockery::mock(UploadedFile::class);
         $uploadedFile->file_path = '/ruta/al/archivo_invalido.txt';
         $uploadedFile->periodo_fiscal = '202301';
 
@@ -60,14 +62,14 @@ class ImportServiceTest extends TestCase
             ->once()
             ->with('suc.afip_mapuche_sicoss', null);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
 
         $this->importService->importFile($uploadedFile);
     }
 
     public function testImportFileWithEmptyFile(): void
     {
-        $uploadedFile = \Mockery::mock(UploadedFile::class);
+        $uploadedFile = Mockery::mock(UploadedFile::class);
         $uploadedFile->file_path = '/ruta/al/archivo_vacio.csv';
         $uploadedFile->periodo_fiscal = '202301';
 
@@ -75,7 +77,7 @@ class ImportServiceTest extends TestCase
             ->once()
             ->with('suc.afip_mapuche_sicoss', null);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
 
         $this->importService->importFile($uploadedFile);
     }

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Mapuche\Dh05Resource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Mapuche\Dh05Resource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDh05 extends EditRecord

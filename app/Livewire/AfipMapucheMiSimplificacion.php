@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Action;
 use App\Models\AfipMapucheMiSimplificacion as ModelsAfipMapucheMiSimplificacion;
 use App\Services\ColumnMetadata;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\TextColumn;
@@ -16,6 +16,11 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+
+use function in_array;
+
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTable, HasActions
 {
@@ -161,7 +166,7 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                     $value = $record->{$field} ?? '';
 
                     // Formatear fechas si es necesario
-                    if (\in_array($field, ['inicio_rel_lab', 'fin_rel_lab'])) {
+                    if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab'])) {
                         $value = $value ? date('Y-m-d', strtotime($value)) : str_repeat(' ', $width);
                     } elseif ($field === 'fecha_tel_renuncia') {
                         $value = '0';
@@ -191,9 +196,9 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
 
                 // Aplicar el padding según el tipo de campo
                 if ($field === 'cuil' || $field === 'retribucion_pactada') {
-                    $line .= str_pad($value, $width, '0', \STR_PAD_LEFT);
+                    $line .= str_pad($value, $width, '0', STR_PAD_LEFT);
                 } else {
-                    $line .= str_pad($value, $width, ' ', \STR_PAD_RIGHT);
+                    $line .= str_pad($value, $width, ' ', STR_PAD_RIGHT);
                 }
             }
             $txtContent .= $line . "\n";

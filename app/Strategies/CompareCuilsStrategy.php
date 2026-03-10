@@ -2,9 +2,9 @@
 
 namespace App\Strategies;
 
-use Exception;
 use App\Contracts\CuilOperationStrategy;
 use App\Contracts\CuilRepositoryInterface;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 

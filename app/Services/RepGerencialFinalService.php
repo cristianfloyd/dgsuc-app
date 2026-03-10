@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Exception;
 use App\QueryBuilder;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

@@ -97,7 +97,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
 
                     return Excel::download(
                         new EmbargoReportExport($query),
-                        'embargos-'.now()->format('Y-m-d').'.xlsx',
+                        'embargos-' . now()->format('Y-m-d') . '.xlsx',
                     );
                 }),
             ExportAction::make('export')
@@ -116,7 +116,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
         session()->put('selected_nro_liqui', $this->nro_liqui);
 
         // Verificamos si ya existen datos para esta liquidación
-        if (! $this->hasReportData()) {
+        if (!$this->hasReportData()) {
             // Solo generamos el reporte si no existe
             $this->generateReport();
         }
@@ -130,7 +130,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
     public function generateReport(): void
     {
 
-        if (! $this->nro_liqui) {
+        if (!$this->nro_liqui) {
             return;
         }
 

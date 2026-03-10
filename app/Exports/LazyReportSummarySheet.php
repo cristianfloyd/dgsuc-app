@@ -23,7 +23,7 @@ class LazyReportSummarySheet implements FromCollection, ShouldAutoSize, WithStyl
 
     public function collection()
     {
-        $collection = new Collection;
+        $collection = new Collection();
 
         // Agregar título
         $collection->push(['RESUMEN DEL REPORTE']);
@@ -102,7 +102,7 @@ class LazyReportSummarySheet implements FromCollection, ShouldAutoSize, WithStyl
             ]);
 
             // Alineación para columnas numéricas
-            $sheet->getStyle('B'.($tableStart + 1).":C{$lastRow}")->applyFromArray([
+            $sheet->getStyle('B' . ($tableStart + 1) . ":C{$lastRow}")->applyFromArray([
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_RIGHT,
                 ],

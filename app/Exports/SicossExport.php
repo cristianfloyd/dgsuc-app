@@ -21,8 +21,8 @@ class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, With
     /**
      * Constructor.
      *
-     * @param  Collection  $registros  Registros a exportar
-     * @param  string|null  $periodoFiscal  Periodo fiscal (formato YYYYMM)
+     * @param Collection $registros Registros a exportar
+     * @param string|null $periodoFiscal Periodo fiscal (formato YYYYMM)
      */
     public function __construct(Collection $registros, ?string $periodoFiscal = null)
     {
@@ -103,7 +103,7 @@ class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, With
     }
 
     /**
-     * @param  mixed  $row
+     * @param mixed $row
      */
     public function map($row): array
     {
@@ -174,7 +174,7 @@ class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, With
 
     public function title(): string
     {
-        return 'SICOSS '.$this->periodoFiscal;
+        return 'SICOSS ' . $this->periodoFiscal;
     }
 
     public function styles(Worksheet $sheet): array

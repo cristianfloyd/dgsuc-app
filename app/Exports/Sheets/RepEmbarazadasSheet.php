@@ -48,7 +48,7 @@ class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormat
     public function headings(): array
     {
         return [
-            ['Período: '.$this->formatPeriodo()],
+            ['Período: ' . $this->formatPeriodo()],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -172,6 +172,6 @@ class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormat
      */
     protected function formatPeriodo(): string
     {
-        return substr($this->periodo, 0, 4).'/'.substr($this->periodo, 4, 2);
+        return substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2);
     }
 }

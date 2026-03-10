@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Services\DatabaseConnectionService;
+use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -16,7 +17,7 @@ class SelectDatabaseConnection extends Page implements HasForms
 
     public ?string $selectedConnection = null;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-circle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-circle-stack';
 
     protected static ?string $navigationLabel = 'Cambiar Base de Datos';
 
@@ -49,7 +50,7 @@ class SelectDatabaseConnection extends Page implements HasForms
 
                         Notification::make()
                             ->title('Conexión cambiada')
-                            ->body('La conexión a la base de datos ha sido cambiada a '.$service->getAvailableConnections()[$state])
+                            ->body('La conexión a la base de datos ha sido cambiada a ' . $service->getAvailableConnections()[$state])
                             ->success()
                             ->send();
 

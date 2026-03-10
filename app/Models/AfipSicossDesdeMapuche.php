@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
-use InvalidArgumentException;
-use Exception;
 use App\Services\DataMapperService;
 use App\Services\FileProcessorService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+
+use function is_array;
+
+use const PHP_INT_MAX;
+use const PHP_INT_MIN;
 
 /**
  * Modelo para representar los datos de AFIP SICOSS desde Mapuche.
@@ -235,8 +240,8 @@ class AfipSicossDesdeMapuche extends Model
             throw new Exception('No se pudo abrir el archivo');
         }
 
-        $minCaracteres = \PHP_INT_MAX;
-        $maxCaracteres = \PHP_INT_MIN;
+        $minCaracteres = PHP_INT_MAX;
+        $maxCaracteres = PHP_INT_MIN;
         $i = 0;
         $kmin = 0;
         $kmax = 0;
@@ -295,7 +300,7 @@ class AfipSicossDesdeMapuche extends Model
     public function processLine(string $line, array $columnWidths): array
     {
         // Validacion de entrada.
-        if ($line === null || $columnWidths === null || !\is_array($columnWidths)) {
+        if ($line === null || $columnWidths === null || !is_array($columnWidths)) {
             throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
 

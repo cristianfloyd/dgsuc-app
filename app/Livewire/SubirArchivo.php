@@ -8,6 +8,9 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+use const PATHINFO_EXTENSION;
+use const PATHINFO_FILENAME;
+
 class SubirArchivo extends Component
 {
     use WithFileUploads;
@@ -39,8 +42,8 @@ class SubirArchivo extends Component
         $original_name = $file->getClientOriginalName();
         $user_name = $this->username;
         $user_id = $this->user_id;
-        $filename = pathinfo($original_name, \PATHINFO_FILENAME); //nombre del archivo
-        $extension = pathinfo($original_name, \PATHINFO_EXTENSION); //extension del archivo
+        $filename = pathinfo($original_name, PATHINFO_FILENAME); //nombre del archivo
+        $extension = pathinfo($original_name, PATHINFO_EXTENSION); //extension del archivo
         $filename = $filename . '_' . time() . '.' . $extension; //nombre del archivo con marca de tiempo
         $filepath = $file->storeAs('public/archivos', $filename); //guardar el archivo en la carpeta publica
 

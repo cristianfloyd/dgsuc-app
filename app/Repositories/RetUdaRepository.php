@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Suc\RetUda;
+use Illuminate\Database\Eloquent\Collection;
 
 class RetUdaRepository
 {

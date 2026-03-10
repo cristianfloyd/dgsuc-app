@@ -17,7 +17,9 @@ class JobFailed
     /**
      * Create a new event instance.
      */
-    public function __construct(string $exception) {}
+    public function __construct(string $exception)
+    {
+    }
 
     /**
      * Get the channels the event should broadcast on.

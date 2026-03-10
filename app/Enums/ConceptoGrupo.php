@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use function in_array;
+
 enum ConceptoGrupo: string
 {
     case DOSUBA = 'dosuba';
@@ -66,7 +68,7 @@ enum ConceptoGrupo: string
      */
     public function containsConcepto(int $codn_conce): bool
     {
-        return \in_array($codn_conce, $this->getConceptos());
+        return in_array($codn_conce, $this->getConceptos());
     }
 
     /**

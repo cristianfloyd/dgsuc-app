@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Dh92Service;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use App\Services\Dh92Service;
 use Illuminate\Http\Request;
 
 class Dh92Controller extends Controller

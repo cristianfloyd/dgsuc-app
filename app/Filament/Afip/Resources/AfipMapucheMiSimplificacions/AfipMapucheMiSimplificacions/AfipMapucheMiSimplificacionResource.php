@@ -12,6 +12,7 @@ use App\Services\AfipMapucheExportService;
 use App\Services\AfipMapucheSicossService;
 use App\Services\Mapuche\LiquidacionService;
 use App\Services\MapucheMiSimplificacionService;
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -28,12 +29,13 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
+use UnitEnum;
 
 class AfipMapucheMiSimplificacionResource extends Resource
 {
     protected static ?string $model = AfipMapucheMiSimplificacion::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
+    protected static string|UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Mi Simplificación';
 
@@ -43,7 +45,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
     protected static ?string $pluralLabel = 'Mi Simplificación';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-right-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-right-circle';
 
     protected static ?int $navigationSort = 3;
 
@@ -131,7 +133,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                             ->label('Número de Liquidación')
                             ->options(function (callable $get, LiquidacionService $liquidacionService): array {
                                 $periodoFiscal = $get('periodo_fiscal');
-                                if (! $periodoFiscal) {
+                                if (!$periodoFiscal) {
                                     return [];
                                 }
                                 $year = substr($periodoFiscal, 0, 4);

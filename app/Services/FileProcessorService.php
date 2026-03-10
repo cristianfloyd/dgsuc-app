@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
-use Exception;
-use RuntimeException;
-use InvalidArgumentException;
 use App\Contracts\DataMapperInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Models\UploadedFile;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use RuntimeException;
+
+use function sprintf;
 
 /**
  * Procesa un archivo subido UploadedFile y devuelve un array de líneas procesadas.
@@ -144,7 +146,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             }
 
             if ($fileContent = Storage::get($filePath)) {
-                Log::info(\sprintf('El archivo existe: %s', $filePath));
+                Log::info(sprintf('El archivo existe: %s', $filePath));
             }
             $encoding = $this->detectEncoding($fileContent);
             Log::info("Encoding detected: $encoding");

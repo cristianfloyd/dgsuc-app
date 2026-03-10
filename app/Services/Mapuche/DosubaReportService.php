@@ -2,15 +2,18 @@
 
 namespace App\Services\Mapuche;
 
-use Exception;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh21h;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoLiquidacion;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function array_slice;
+use function count;
 
 class DosubaReportService
 {
@@ -121,10 +124,10 @@ class DosubaReportService
 
         // Log para debugging
         Log::info('Análisis de legajos:', [
-            'total_tercer_mes' => \count($legajosTercerMesArray),
-            'total_combinados' => \count($legajosCombinados),
-            'diferencia_encontrada' => \count($legajosDiferencia),
-            'ejemplo_legajos_diferencia' => \array_slice($legajosDiferencia, 0, 5), // Muestra los primeros 5 legajos de diferencia
+            'total_tercer_mes' => count($legajosTercerMesArray),
+            'total_combinados' => count($legajosCombinados),
+            'diferencia_encontrada' => count($legajosDiferencia),
+            'ejemplo_legajos_diferencia' => array_slice($legajosDiferencia, 0, 5), // Muestra los primeros 5 legajos de diferencia
         ]);
 
         $resultados = collect();
@@ -174,7 +177,7 @@ class DosubaReportService
                 ->orderBy('dh03.nro_legaj');
 
             Log::info('Query chunk procesado:', [
-                'chunk_size' => \count($chunk),
+                'chunk_size' => count($chunk),
                 'sql' => $query->toSql(),
                 'bindings' => $query->getBindings(),
             ]);

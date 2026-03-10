@@ -2,8 +2,8 @@
 
 namespace App\ValueObjects;
 
-use InvalidArgumentException;
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 class PeriodoLiquidacion
 {

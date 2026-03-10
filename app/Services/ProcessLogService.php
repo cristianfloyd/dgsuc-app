@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\ProcessLog;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use OutOfBoundsException;
-use Exception;
-use App\Models\ProcessLog;
-use Illuminate\Support\Facades\Log;
+
+use function is_array;
 
 class ProcessLogService
 {
@@ -52,7 +54,7 @@ class ProcessLogService
      */
     public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
-        if (!\is_array($processLog->steps)) {
+        if (!is_array($processLog->steps)) {
             throw new InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
         }
 

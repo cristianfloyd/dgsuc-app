@@ -2,9 +2,9 @@
 
 namespace App\Models\Suc;
 
+use App\Traits\MapucheConnectionTrait;
 use DateTime;
 use Illuminate\Database\Eloquent\Builder;
-use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

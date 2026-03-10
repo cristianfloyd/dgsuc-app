@@ -7,6 +7,8 @@ use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Data;
 
+use function sprintf;
+
 class PeriodoFiscalData extends Data
 {
     public function __construct(
@@ -14,14 +16,15 @@ class PeriodoFiscalData extends Data
         public readonly int $year,
         #[IntegerType, Min(1), Max(12)]
         public readonly int $month,
-    ) {}
+    ) {
+    }
 
     /**
      * Obtiene el período fiscal formateado como YYYY-MM.
      */
     public function getFormattedPeriod(): string
     {
-        return \sprintf('%d-%02d', $this->year, $this->month);
+        return sprintf('%d-%02d', $this->year, $this->month);
     }
 
     /**

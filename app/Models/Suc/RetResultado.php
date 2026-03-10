@@ -2,10 +2,10 @@
 
 namespace App\Models\Suc;
 
-use Carbon\Carbon;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

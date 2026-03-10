@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use UnitEnum;
 
 class ReporteConceptoListadoResource extends Resource
 {
@@ -30,7 +31,7 @@ class ReporteConceptoListadoResource extends Resource
 
     protected static ?string $slug = 'listado-concepto';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
     public static function table(Table $table): Table
     {
@@ -67,7 +68,7 @@ class ReporteConceptoListadoResource extends Resource
                             ->label('Liquidación')
                             ->options(function (callable $get): array {
                                 $periodoString = $get('periodo_fiscal');
-                                if (! $periodoString) {
+                                if (!$periodoString) {
                                     return [];
                                 }
 
@@ -77,7 +78,7 @@ class ReporteConceptoListadoResource extends Resource
                             })
                             ->searchable()
                             ->live()
-                            ->disabled(fn (callable $get): bool => ! $get('periodo_fiscal')),
+                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
                         Select::make('codc_uacad')
                             ->label('Dependencia')
                             ->options(fn () => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
@@ -129,7 +130,7 @@ class ReporteConceptoListadoResource extends Resource
                             ->label('Liquidación (opcional)')
                             ->options(function (callable $get): array {
                                 $periodoString = $get('periodo_fiscal');
-                                if (! $periodoString) {
+                                if (!$periodoString) {
                                     return [];
                                 }
 
@@ -139,7 +140,7 @@ class ReporteConceptoListadoResource extends Resource
                             })
                             ->searchable()
                             ->placeholder('Todas las liquidaciones')
-                            ->disabled(fn (callable $get): bool => ! $get('periodo_fiscal')),
+                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
                     ])
                     ->requiresConfirmation()
                     ->modalHeading('Regenerar datos del reporte')
@@ -154,7 +155,7 @@ class ReporteConceptoListadoResource extends Resource
                             // Mostrar notificación de inicio
                             Notification::make()
                                 ->title('Sincronización iniciada')
-                                ->body("Regenerando reporte para el período {$periodoFiscal}".
+                                ->body("Regenerando reporte para el período {$periodoFiscal}" .
                                       ($nroLiqui ? " y liquidación #{$nroLiqui}" : ''))
                                 ->info()
                                 ->persistent()
@@ -182,7 +183,7 @@ class ReporteConceptoListadoResource extends Resource
                             Notification::make()
                                 ->danger()
                                 ->title('Error al regenerar reporte')
-                                ->body('Ocurrió un error: '.$e->getMessage())
+                                ->body('Ocurrió un error: ' . $e->getMessage())
                                 ->persistent()
                                 ->send();
 
@@ -218,7 +219,7 @@ class ReporteConceptoListadoResource extends Resource
                             Notification::make()
                                 ->danger()
                                 ->title('Error')
-                                ->body('Error al limpiar la caché: '.$e->getMessage())
+                                ->body('Error al limpiar la caché: ' . $e->getMessage())
                                 ->send();
                         }
                     }),

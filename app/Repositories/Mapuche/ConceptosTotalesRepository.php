@@ -7,6 +7,8 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+use function in_array;
+
 class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
 {
     use MapucheConnectionTrait;
@@ -65,10 +67,10 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
 
         $agrupados = [
             'haberes' => $resultados->filter(function ($item) {
-                return \in_array(substr($item->codn_conce, 0, 1), ['2', '4', '6', '8']);
+                return in_array(substr($item->codn_conce, 0, 1), ['2', '4', '6', '8']);
             }),
             'descuentos' => $resultados->filter(function ($item) {
-                return \in_array(substr($item->codn_conce, 0, 1), ['3', '5', '7', '9']);
+                return in_array(substr($item->codn_conce, 0, 1), ['3', '5', '7', '9']);
             }),
         ];
 

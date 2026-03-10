@@ -2,17 +2,19 @@
 
 namespace App\Services;
 
-use Exception;
-use Illuminate\Database\Schema\Builder;
-use Illuminate\Database\ConnectionInterface;
 use App\Contracts\TableManagementServiceInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Connection;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+
+use function count;
 
 class TableManagementService implements TableManagementServiceInterface
 {
@@ -35,8 +37,8 @@ class TableManagementService implements TableManagementServiceInterface
         try {
             // Separar schema y nombre de tabla si se proporciona con formato schema.tabla
             $parts = explode('.', $tableName);
-            $schema = \count($parts) > 1 ? $parts[0] : 'suc';  // Default schema 'suc'
-            $tableNameWithoutSchema = \count($parts) > 1 ? $parts[1] : $parts[0];
+            $schema = count($parts) > 1 ? $parts[0] : 'suc';  // Default schema 'suc'
+            $tableNameWithoutSchema = count($parts) > 1 ? $parts[1] : $parts[0];
 
             // Obtenemos el nombre de la conexión como string
             $connectionName = $connection ?: self::getMapucheConnectionName();

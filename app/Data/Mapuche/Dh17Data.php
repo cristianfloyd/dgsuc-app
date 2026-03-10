@@ -13,7 +13,8 @@ class Dh17Data extends Data
         public readonly ?string $objt_gtope,
         public readonly ?string $objt_gtote,
         public readonly ?int $nro_prove,
-    ) {}
+    ) {
+    }
 
     public static function rules($context = null): array
     {

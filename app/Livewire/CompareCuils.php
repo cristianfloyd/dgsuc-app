@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use App\Contracts\MessageManagerInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -15,6 +14,7 @@ use App\Services\CuilCompareService;
 use App\Services\ProcessLogService;
 use App\Services\TempTableService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +23,9 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+
+use function count;
+use function in_array;
 
 class CompareCuils extends Component
 {
@@ -183,7 +186,7 @@ class CompareCuils extends Component
     #[Computed]
     public function shouldShowParaMiSimplificacion(): bool
     {
-        return \in_array($this->currentStep, [
+        return in_array($this->currentStep, [
             WorkflowStatus::OBTENER_CUILS_NO_INSERTADOS->value,
             WorkflowStatus::EXPORTAR_TXT_PARA_AFIP->value,
         ]);
@@ -298,7 +301,7 @@ class CompareCuils extends Component
         $count = AfipMapucheMiSimplificacion::count();
         $this->successMessage = "Datos insertados en Mi Simplificacion: {$count}";
 
-        $result = \count($this->cuilsToSearch) - $count;
+        $result = count($this->cuilsToSearch) - $count;
         $this->ShowMiSimplificacion = true;
 
         $nextStep = $this->workflowService->getNextStep(WorkflowStatus::EJECUTAR_FUNCION_ALMACENADA->value);

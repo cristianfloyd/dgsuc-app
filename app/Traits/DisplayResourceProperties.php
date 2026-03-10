@@ -2,9 +2,9 @@
 
 namespace App\Traits;
 
+use App\Filament\Actions\ViewResourcePropertiesAction;
 use Exception;
 use Filament\Schemas\Components\Section;
-use App\Filament\Actions\ViewResourcePropertiesAction;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;

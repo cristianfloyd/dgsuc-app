@@ -6,6 +6,7 @@ use App\Filament\Mapuche\Resources\AsignacionPresupuestarias\Pages\CreateAsignac
 use App\Filament\Mapuche\Resources\AsignacionPresupuestarias\Pages\EditAsignacionPresupuestaria;
 use App\Filament\Mapuche\Resources\AsignacionPresupuestarias\Pages\ListAsignacionPresupuestarias;
 use App\Models\Mapuche\Dh24;
+use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
@@ -23,7 +24,7 @@ class AsignacionPresupuestariaResource extends Resource
 {
     protected static ?string $model = Dh24::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
     {
@@ -34,7 +35,7 @@ class AsignacionPresupuestariaResource extends Resource
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set): void {
-                        $dh24 = new Dh24;
+                        $dh24 = new Dh24();
                         $total = $dh24->getTotalAllocationByUnit($state);
                         $set('total_allocated', $total);
                     }),
@@ -48,8 +49,8 @@ class AsignacionPresupuestariaResource extends Resource
                         'min:0',
                         'max:100',
                         function ($attribute, $value, $fail): void {
-                            $dh24 = new Dh24;
-                            if (! $dh24->isAllocationWithinLimit($value)) {
+                            $dh24 = new Dh24();
+                            if (!$dh24->isAllocationWithinLimit($value)) {
                                 $fail('El porcentaje supera el límite disponible.');
                             }
                         },
@@ -57,7 +58,7 @@ class AsignacionPresupuestariaResource extends Resource
 
                 Placeholder::make('total_allocated')
                     ->label('Total Asignado')
-                    ->content(fn ($state): string => number_format($state, 2).'%'),
+                    ->content(fn ($state): string => number_format($state, 2) . '%'),
             ]);
     }
 

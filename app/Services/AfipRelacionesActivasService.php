@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\AfipRelacionesActivas;
 use App\Services\Contracts\AfipRelacionesActivasServiceInterface;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

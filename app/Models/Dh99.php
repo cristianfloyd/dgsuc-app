@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use InvalidArgumentException;
-use Exception;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+
+use function is_string;
 
 // (D) Variable Global: Período Corriente
 
@@ -78,7 +80,7 @@ class Dh99 extends Model
     public function setPeriodoFiscal($periodoFiscal): bool
     {
         try {
-            if (\is_string($periodoFiscal)) {
+            if (is_string($periodoFiscal)) {
                 $periodoFiscal = PeriodoFiscal::fromString($periodoFiscal);
             }
 

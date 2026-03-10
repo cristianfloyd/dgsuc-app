@@ -17,6 +17,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function array_slice;
+
 class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithCustomStartCell, WithDrawings, WithHeadings, WithStyles, WithTitle
 {
     protected $query;
@@ -56,7 +58,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
 
     public function drawings()
     {
-        $drawing = new Drawing;
+        $drawing = new Drawing();
         $drawing->setName('Logo');
         $drawing->setDescription('Logo UBA');
         $drawing->setPath(public_path('images/encabezado.png'));
@@ -110,7 +112,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
         $totalAfip = $totalContribucionesAfip + $totalSeguroAfip + $totalArtAfip + $totalAportesAfip;
         $totalGeneral = $totalDosuba + $totalAfip;
 
-        $numberToWords = new NumberToWords;
+        $numberToWords = new NumberToWords();
         $currencyTransformer = $numberToWords->getCurrencyTransformer('es');
         $totalGeneralTexto = strtoupper($currencyTransformer->toWords($totalGeneral, 'ARS'));
 
@@ -129,7 +131,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
             [''], // libre
             [''], // Línea libre
             [
-                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de '.$totalGeneralTexto.' ($ '.number_format($totalGeneral, 2, ',', '.').'.-)',
+                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de ' . $totalGeneralTexto . ' ($ ' . number_format($totalGeneral, 2, ',', '.') . '.-)',
             ],
             [''],
             ['Los mismo corresponden a los siguientes beneficiarios,'],
@@ -164,7 +166,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
                 $row['seguro'],
                 $row['art'],
                 $row['aportes'],
-                array_sum(\array_slice($row, 2)), // Total por fila
+                array_sum(array_slice($row, 2)), // Total por fila
             ]),
 
             // Totales
@@ -225,7 +227,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => 'solid', 'color' => ['rgb' => 'FFEB9C']],
             ],
-            'B1:G'.$lastRow => [
+            'B1:G' . $lastRow => [
                 'numberFormat' => ['formatCode' => '#,##0.00'],
             ],
         ];

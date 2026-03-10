@@ -8,6 +8,8 @@ use App\Models\Mapuche\Dh22;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function sprintf;
+
 /**
  * Clase PeriodoFiscalService.
  *
@@ -68,7 +70,7 @@ class PeriodoFiscalService
     public function setPeriodoFiscal(int $year, int $month): void
     {
         $formattedYear = (string) $year;
-        $formattedMonth = \sprintf('%02d', $month);
+        $formattedMonth = sprintf('%02d', $month);
         session(['year' => $formattedYear, 'month' => $formattedMonth]);
         Log::debug("Período fiscal establecido en la sesión: $formattedYear-$formattedMonth");
     }
@@ -126,7 +128,7 @@ class PeriodoFiscalService
 
         // Formatea el año y el mes al formato deseado.
         $formattedYear = (string) ($periodoFiscal->per_anoct);
-        $formattedMonth = \sprintf('%02d', $periodoFiscal->per_mesct);
+        $formattedMonth = sprintf('%02d', $periodoFiscal->per_mesct);
 
         return [
             'year' => $formattedYear,
@@ -184,7 +186,7 @@ class PeriodoFiscalService
         return $this->getPeriodosFiscales()['periodosFiscales']
             ->mapWithKeys(function ($periodo) {
                 $year = $periodo->per_liano;
-                $month = \sprintf('%02d', $periodo->per_limes);
+                $month = sprintf('%02d', $periodo->per_limes);
                 $label = "$year-$month";
                 $value = "$year-$month";
                 return [$value => $label];

@@ -16,6 +16,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class AfipMapucheArtResource extends Resource
 {
@@ -25,7 +26,7 @@ class AfipMapucheArtResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Afip Art';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
+    protected static string|UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?int $navigationSort = 4;
 
@@ -51,8 +52,8 @@ class AfipMapucheArtResource extends Resource
                     ->label('Apellido y Nombre')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function ($query) use ($search): void {
-                            $query->where('apellido_y_nombre', 'ilike', '%'.strtoupper($search).'%')
-                                ->orWhere('cuil', 'ilike', '%'.$search.'%');
+                            $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
+                                ->orWhere('cuil', 'ilike', '%' . $search . '%');
                         });
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state)),

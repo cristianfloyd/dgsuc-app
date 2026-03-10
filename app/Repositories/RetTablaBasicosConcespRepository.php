@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use DateTime;
 use App\Contracts\RetTablaBasicosConcespInterface;
 use App\Models\Suc\RetTablaBasicosConcesp;
+use DateTime;
 
 class RetTablaBasicosConcespRepository implements RetTablaBasicosConcespInterface
 {

@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use DateTime;
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Suc\RetResultado;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use DateTime;
+use Illuminate\Database\Eloquent\Collection;
 
 class RetResultadoRepository
 {

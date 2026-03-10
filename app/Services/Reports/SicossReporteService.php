@@ -3,15 +3,17 @@
 namespace App\Services\Reports;
 
 // use App\Traits\ReportCacheTrait;
-use Throwable;
-use Exception;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Repositories\Decorators\CachingSicossReporteRepository;
 use App\Repositories\Interfaces\SicossReporteRepositoryInterface;
 use App\Services\Mapuche\PeriodoFiscalService;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Throwable;
+
+use function sprintf;
 
 class SicossReporteService
 {
@@ -194,7 +196,7 @@ class SicossReporteService
             return $periodosFiscalesRespuesta['periodosFiscales']
                 ->mapWithKeys(function ($periodo) {
                     $anio = $periodo->per_liano;
-                    $mes = \sprintf('%02d', $periodo->per_limes);
+                    $mes = sprintf('%02d', $periodo->per_limes);
                     $periodoFiscal = $anio . $mes;
 
                     return [
@@ -224,7 +226,7 @@ class SicossReporteService
             return $this->sicossReporteRepository->getPeriodosFiscalesDisponibles()
                 ->mapWithKeys(function ($periodo) {
                     $anio = $periodo->per_liano;
-                    $mes = \sprintf('%02d', $periodo->per_limes);
+                    $mes = sprintf('%02d', $periodo->per_limes);
                     $periodoFiscal = $anio . $mes;
 
                     return [

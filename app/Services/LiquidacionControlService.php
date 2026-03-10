@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Connection;
-use Exception;
 use App\Models\LiquidacionControl;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+
+use function count;
 
 class LiquidacionControlService
 {
@@ -100,8 +102,8 @@ class LiquidacionControlService
             ', [$nroLiqui]);
 
             return (object) [
-                'success' => \count($result) === 0,
-                'message' => \count($result) > 0 ? 'Se encontraron ' . \count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
+                'success' => count($result) === 0,
+                'message' => count($result) > 0 ? 'Se encontraron ' . count($result) . ' cargos con neto negativo' : 'No se encontraron netos negativos',
                 'data' => $result,
             ];
         } catch (Exception $e) {
@@ -141,8 +143,8 @@ class LiquidacionControlService
             ', [$nroLiqui]);
 
             return (object) [
-                'success' => \count($result) > 0,
-                'message' => 'Se encontraron ' . \count($result) . ' cargos liquidados',
+                'success' => count($result) > 0,
+                'message' => 'Se encontraron ' . count($result) . ' cargos liquidados',
                 'data' => $result,
             ];
         } catch (Exception $e) {

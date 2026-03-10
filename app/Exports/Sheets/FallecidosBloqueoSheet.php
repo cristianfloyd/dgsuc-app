@@ -19,6 +19,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function is_string;
+
 class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $records;
@@ -47,7 +49,7 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
     public function headings(): array
     {
         return [
-            ['Período: '.$this->periodo],
+            ['Período: ' . $this->periodo],
             [''], // Línea en blanco
             [
                 'Legajo',
@@ -68,13 +70,13 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
 
         // Manejo seguro de la fecha
         $fechaBaja = $row->fecha_baja;
-        if (\is_string($fechaBaja)) {
+        if (is_string($fechaBaja)) {
             $fechaBaja = Carbon::parse($fechaBaja);
         }
 
-        $cuil = $row->dh01->nro_cuil1.$row->dh01->nro_cuil.$row->dh01->nro_cuil2;
+        $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
 
-        if (! $row) {
+        if (!$row) {
             return [
                 '',
                 '',

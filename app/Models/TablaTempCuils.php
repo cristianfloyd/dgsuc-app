@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

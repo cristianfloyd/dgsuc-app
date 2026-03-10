@@ -9,5 +9,6 @@ class JuzgadoData extends Data
     public function __construct(
         public readonly string $nom_juzgado,
         public readonly ?int $id_juzgado = null,
-    ) {}
+    ) {
+    }
 }

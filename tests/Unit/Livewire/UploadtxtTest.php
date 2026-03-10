@@ -8,6 +8,7 @@ use App\Contracts\OrigenRepositoryInterface;
 use App\Livewire\Uploadtxt;
 use App\Models\UploadedFile;
 use App\Services\FileUploadService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -62,7 +63,7 @@ class UploadtxtTest extends TestCase
         $this->fileUploadRepository->expects($this->once())
             ->method('findOrFail')
             ->with($fileId)
-            ->willThrowException(new \Exception($errorMessage));
+            ->willThrowException(new Exception($errorMessage));
 
         DB::shouldReceive('transaction')
             ->once()
@@ -131,7 +132,7 @@ class UploadtxtTest extends TestCase
 
         $component->expects($this->once())
             ->method('handleException')
-            ->with($this->isInstanceOf(\Exception::class));
+            ->with($this->isInstanceOf(Exception::class));
 
         $component->save();
     }
@@ -168,7 +169,7 @@ class UploadtxtTest extends TestCase
 
         $component->expects($this->once())
             ->method('handleException')
-            ->with($this->isInstanceOf(\Exception::class));
+            ->with($this->isInstanceOf(Exception::class));
 
         $component->save();
     }

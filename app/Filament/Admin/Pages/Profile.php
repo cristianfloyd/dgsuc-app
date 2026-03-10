@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
+use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -14,8 +15,11 @@ use Illuminate\Support\Facades\Hash;
 class Profile extends Page
 {
     public ?array $data = [];
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user';
+
     protected string $view = 'filament.admin.pages.profile';
+
     protected static ?string $title = 'Mi Perfil';
 
     public function mount(): void
@@ -73,7 +77,7 @@ class Profile extends Page
                                     ->directory('profile-photos')
                                     ->maxSize(1024),
                             ]),
-                    ])
+                    ]),
             ])
             ->statePath('data');
     }
@@ -86,7 +90,7 @@ class Profile extends Page
 
         // Validar contraseña actual si se intenta cambiar
         if ($validated['new_password']) {
-            if (! Hash::check($validated['current_password'], $user->password)) {
+            if (!Hash::check($validated['current_password'], $user->password)) {
                 Notification::make()
                     ->title('La contraseña actual es incorrecta')
                     ->danger()

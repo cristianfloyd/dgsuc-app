@@ -2,8 +2,6 @@
 
 namespace App\Livewire;
 
-use Exception;
-use InvalidArgumentException;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
@@ -14,8 +12,12 @@ use App\Jobs\ImportAfipRelacionesActivasJob;
 use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\ValidationService;
+use Exception;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Livewire\Component;
+
+use function in_array;
 
 /** Componente Livewire que maneja la importación de archivos AFIP y el almacenamiento de las relaciones activas.
  *
@@ -164,7 +166,7 @@ class AfipRelacionesActivas extends Component
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->showUploadForm = \in_array($currentStep, ['import_archivo_afip']);
+        $this->showUploadForm = in_array($currentStep, ['import_archivo_afip']);
         $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
     }
 

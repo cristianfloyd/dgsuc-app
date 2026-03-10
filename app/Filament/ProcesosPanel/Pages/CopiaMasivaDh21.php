@@ -2,20 +2,22 @@
 
 namespace App\Filament\ProcesosPanel\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
 use App\Jobs\CopyDh21ToConsultaJob;
 use App\Models\CopyJob;
 use App\Models\Mapuche\Dh22;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Livewire\Attributes\On;
+
+use function in_array;
 
 /**
  * CopiaMasivaDh21 es una página de Filament
@@ -55,7 +57,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * @var string|null
      */
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
 
     /**
      * Título de la página.
@@ -110,7 +112,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                         ->required()
                         ->searchable()
                         ->disabled(
-                            $this->tracking && \in_array(
+                            $this->tracking && in_array(
                                 $this->tracking->status,
                                 ['running', 'pending'],
                             ),
@@ -188,7 +190,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                 ->label('Iniciar Copia Masiva')
                 ->color('primary')
                 ->disabled(
-                    $this->tracking && \in_array(
+                    $this->tracking && in_array(
                         $this->tracking->status,
                         ['running', 'pending'],
                     ),

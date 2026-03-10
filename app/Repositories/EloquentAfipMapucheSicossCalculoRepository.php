@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Exception;
-use RuntimeException;
 use App\Data\AfipMapucheSicossCalculoData;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
 use App\Services\DatabaseConnectionService;
 use App\Traits\DynamicConnectionTrait;
+use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use RuntimeException;
 
 class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCalculoRepository
 {

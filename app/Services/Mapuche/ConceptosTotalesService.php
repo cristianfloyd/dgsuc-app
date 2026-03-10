@@ -2,9 +2,9 @@
 
 namespace App\Services\Mapuche;
 
-use Exception;
 use App\Contracts\Dh21RepositoryInterface;
 use App\NroLiqui;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 

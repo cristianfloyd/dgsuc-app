@@ -2,10 +2,10 @@
 
 namespace App\Filament\Auth;
 
-use Filament\Auth\Pages\Login;
-use Filament\Schemas\Schema;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Auth\Pages\Login;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 

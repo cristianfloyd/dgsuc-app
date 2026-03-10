@@ -2,13 +2,13 @@
 
 namespace App\Models\Mapuche;
 
-use Exception;
 use App\Models\EstadoLiquidacionModel;
 use App\Services\EncodingService;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\NroLiqui;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Log;
+
+use const STR_PAD_LEFT;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh22.
@@ -360,7 +362,7 @@ class Dh22 extends Model
         return $query->whereRaw(
             "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
             [
-                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
+                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
             ],
         );
     }

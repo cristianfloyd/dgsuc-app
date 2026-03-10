@@ -8,6 +8,7 @@ use App\Models\Mapuche\MapucheConfig;
 use App\Services\DateFormatterService;
 use App\Services\Excel\Exports\LicenciasVigentesExport;
 use App\Services\Mapuche\LicenciaService;
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -21,14 +22,17 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
+
+use function count;
 
 class LicenciaVigenteResource extends Resource
 {
     protected static ?string $model = LicenciaVigente::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Licencias';
+    protected static string|UnitEnum|null $navigationGroup = 'Licencias';
 
     protected static ?int $navigationSort = 100;
 
@@ -144,7 +148,7 @@ class LicenciaVigenteResource extends Resource
 
                 TextColumn::make('nro_cargo')
                     ->label('Cargo')
-                    ->visible(fn (?LicenciaVigente $record): bool => $record ? ! $record->es_legajo : false)
+                    ->visible(fn (?LicenciaVigente $record): bool => $record ? !$record->es_legajo : false)
                     ->sortable(),
             ])
             ->filters([
@@ -193,7 +197,7 @@ class LicenciaVigenteResource extends Resource
                                 Log::info('Forzando recarga de todas las licencias desde base de datos');
                             }
 
-                            $legajos = $licenciaService->getLegajosConLicenciasVigentes(! $forzarRecarga);
+                            $legajos = $licenciaService->getLegajosConLicenciasVigentes(!$forzarRecarga);
 
                             if (empty($legajos)) {
                                 $action->failure('No se encontraron licencias vigentes en el período actual');
@@ -206,10 +210,10 @@ class LicenciaVigenteResource extends Resource
 
                             // Registrar para depuración
                             Log::info('Legajos con licencias cargados en sesión', [
-                                'count' => \count($legajos),
+                                'count' => count($legajos),
                             ]);
 
-                            $action->success('Se han cargado '.\count($legajos).' legajos con licencias vigentes');
+                            $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
 
                             // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
                             // No es necesario llamar a refreshTable manualmente
@@ -217,7 +221,7 @@ class LicenciaVigenteResource extends Resource
                             Log::error('Error al consultar todas las licencias', [
                                 'error' => $e->getMessage(),
                             ]);
-                            $action->failure('Error al consultar licencias: '.$e->getMessage());
+                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
                         }
                     }),
 
@@ -241,8 +245,8 @@ class LicenciaVigenteResource extends Resource
 
                             // Validar que los legajos sean numéricos
                             foreach ($legajos as $legajo) {
-                                if (! is_numeric($legajo)) {
-                                    $action->failure('El legajo "'.$legajo.'" no es válido. Todos los legajos deben ser numéricos.');
+                                if (!is_numeric($legajo)) {
+                                    $action->failure('El legajo "' . $legajo . '" no es válido. Todos los legajos deben ser numéricos.');
 
                                     return;
                                 }
@@ -267,7 +271,7 @@ class LicenciaVigenteResource extends Resource
                                 ]);
                             }
 
-                            $licencias = $licenciaService->getLicenciasVigentes($legajos, ! $forzarRecarga);
+                            $licencias = $licenciaService->getLicenciasVigentes($legajos, !$forzarRecarga);
 
                             if ($licencias->count() === 0) {
                                 // Mostrar notificación pero mantener los legajos en sesión
@@ -277,7 +281,7 @@ class LicenciaVigenteResource extends Resource
                                     ->body('No se encontraron licencias vigentes para los legajos consultados.')
                                     ->send();
                             } else {
-                                $action->success('Se encontraron '.$licencias->count().' licencias para los legajos consultados');
+                                $action->success('Se encontraron ' . $licencias->count() . ' licencias para los legajos consultados');
                             }
 
                             // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
@@ -287,7 +291,7 @@ class LicenciaVigenteResource extends Resource
                                 'error' => $e->getMessage(),
                                 'legajos' => $data['legajos'] ?? 'no proporcionados',
                             ]);
-                            $action->failure('Error al consultar licencias: '.$e->getMessage());
+                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
                         }
                     }),
 
@@ -306,8 +310,8 @@ class LicenciaVigenteResource extends Resource
                         $licenciaService = app(LicenciaService::class);
                         $licencias = $licenciaService->getLicenciasVigentes($legajos);
 
-                        $periodo = MapucheConfig::getAnioFiscal().'-'.MapucheConfig::getMesFiscal();
-                        $nombreArchivo = 'licencias_vigentes_'.$periodo.'.xlsx';
+                        $periodo = MapucheConfig::getAnioFiscal() . '-' . MapucheConfig::getMesFiscal();
+                        $nombreArchivo = 'licencias_vigentes_' . $periodo . '.xlsx';
 
                         return Excel::download(
                             new LicenciasVigentesExport($licencias, $periodo),

@@ -2,7 +2,6 @@
 
 namespace App\Imports;
 
-use Exception;
 use App\Data\Reportes\BloqueosData;
 use App\DTOs\ImportResultDTO;
 use App\Enums\BloqueosEstadoEnum;
@@ -12,6 +11,7 @@ use App\Services\Imports\ImportNotificationService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
 use App\Services\Validation\ExcelRowValidationService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Importable;

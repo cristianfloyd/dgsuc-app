@@ -2,8 +2,8 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
 use App\Models\Reportes\BloqueosDataModel;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 

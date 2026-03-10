@@ -6,6 +6,8 @@ use App\Models\AfipMapucheSicoss;
 use Exception;
 use Illuminate\Console\Command;
 
+use function count;
+
 class GenerarSicoss extends Command
 {
     /**
@@ -33,7 +35,7 @@ class GenerarSicoss extends Command
         $incluirInactivos = $this->option('incluir-inactivos');
 
         // Validar formato del período fiscal
-        if (! preg_match('/^[0-9]{6}$/', $periodoFiscal)) {
+        if (!preg_match('/^[0-9]{6}$/', $periodoFiscal)) {
             $this->error('El período fiscal debe tener el formato YYYYMM');
 
             return 1;
@@ -72,12 +74,12 @@ class GenerarSicoss extends Command
                     ['Total legajos', $resultado['total_legajos']],
                     ['Período fiscal', $resultado['periodo_fiscal']],
                     ['Estado', $resultado['status']],
-                    ['Errores', \count($resultado['errores'])],
+                    ['Errores', count($resultado['errores'])],
                 ],
             );
 
-            if (! empty($resultado['errores'])) {
-                $this->warn('Se encontraron '.\count($resultado['errores']).' errores:');
+            if (!empty($resultado['errores'])) {
+                $this->warn('Se encontraron ' . count($resultado['errores']) . ' errores:');
                 $this->table(
                     ['Legajo', 'Error'],
                     array_map(function ($error) {
@@ -86,7 +88,7 @@ class GenerarSicoss extends Command
                 );
             }
         } catch (Exception $e) {
-            $this->error('Error al generar SICOSS: '.$e->getMessage());
+            $this->error('Error al generar SICOSS: ' . $e->getMessage());
 
             return 1;
         }

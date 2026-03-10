@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use DateTime;
 use App\Contracts\RetTablaBasicosConcespRepository;
 use App\Exceptions\RegistroNoEncontradoException;
+use DateTime;
 
 class RetTablaBasicosConcespService
 {

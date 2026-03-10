@@ -7,6 +7,7 @@ use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ListNovedadesCarg
 use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\ManageNovedadesCargoImportTemp;
 use App\Filament\Mapuche\Resources\NovedadesCargoImports\Pages\NovedadesCargoImport;
 use App\Models\NovedadesCargoImportModel;
+use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -24,7 +25,7 @@ class NovedadesCargoImportResource extends Resource
     // -------------------------------------------------------------------------
     // Configuración del icono y del label
     // -------------------------------------------------------------------------
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Importar Cargos';
 

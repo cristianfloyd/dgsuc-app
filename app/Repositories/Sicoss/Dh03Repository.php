@@ -2,12 +2,15 @@
 
 namespace App\Repositories\Sicoss;
 
-use Exception;
 use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
+use function is_string;
 
 class Dh03Repository implements Dh03RepositoryInterface
 {
@@ -218,14 +221,14 @@ class Dh03Repository implements Dh03RepositoryInterface
     {
         try {
             // Procesamiento de categorías: convertir string a array si es necesario
-            if (\is_string($catDiferencial)) {
+            if (is_string($catDiferencial)) {
                 $categorias = array_map('trim', explode("','", trim($catDiferencial, "'")));
             } else {
                 $categorias = $catDiferencial;
             }
 
             // Construcción de la consulta SQL con parámetros seguros
-            $placeholders = str_repeat('?,', \count($categorias) - 1) . '?';
+            $placeholders = str_repeat('?,', count($categorias) - 1) . '?';
 
             $sql = "SELECT COUNT(*) as total 
                     FROM mapuche.dh03 

@@ -7,6 +7,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use const PATHINFO_FILENAME;
+
 /**
  * Class FileUploadService.
  *
@@ -59,7 +61,7 @@ class FileUploadService
 
 
         try {
-            $filename = pathinfo($file->getClientOriginalName(), \PATHINFO_FILENAME);
+            $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
             $timenow = time();
             $filename = "{$filename}-{$timenow}.{$extension}";

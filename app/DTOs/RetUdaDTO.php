@@ -59,5 +59,6 @@ class RetUdaDTO extends Data
         public ?string $coddependesemp = null,
         #[MapName('adi_col_sec')]
         public ?int $adiColSec = null,
-    ) {}
+    ) {
+    }
 }

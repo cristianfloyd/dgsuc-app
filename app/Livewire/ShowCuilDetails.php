@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

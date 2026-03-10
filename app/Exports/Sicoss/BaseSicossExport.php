@@ -16,6 +16,11 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function chr;
+use function count;
+
+use const STR_PAD_LEFT;
+
 abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected Collection $data;
@@ -62,50 +67,50 @@ abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithC
     public function styles(Worksheet $sheet)
     {
         // Estilo para el título principal
-        $sheet->mergeCells('A1:'.$this->getLastColumn().'1');
+        $sheet->mergeCells('A1:' . $this->getLastColumn() . '1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->setCellValue('A1', $this->reportTitle);
 
         // Estilo para el período fiscal
-        $sheet->mergeCells('A2:'.$this->getLastColumn().'2');
+        $sheet->mergeCells('A2:' . $this->getLastColumn() . '2');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-".str_pad($this->month, 2, '0', \STR_PAD_LEFT));
+        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-" . str_pad($this->month, 2, '0', STR_PAD_LEFT));
 
         // Estilo para la fecha de generación
-        $sheet->mergeCells('A3:'.$this->getLastColumn().'3');
+        $sheet->mergeCells('A3:' . $this->getLastColumn() . '3');
         $sheet->getStyle('A3')->getFont()->setSize(10);
         $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('A3', 'Generado el: '.now()->format('d/m/Y H:i:s'));
+        $sheet->setCellValue('A3', 'Generado el: ' . now()->format('d/m/Y H:i:s'));
 
         // Espacio en blanco
-        $sheet->mergeCells('A4:'.$this->getLastColumn().'4');
+        $sheet->mergeCells('A4:' . $this->getLastColumn() . '4');
 
         // Estilo para los encabezados de columnas
         $headingsRow = 6;
-        $headingStyle = $sheet->getStyle('A'.$headingsRow.':'.$this->getLastColumn().$headingsRow);
+        $headingStyle = $sheet->getStyle('A' . $headingsRow . ':' . $this->getLastColumn() . $headingsRow);
         $headingStyle->getFont()->setBold(true);
         $headingStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('DDEBF7');
         $headingStyle->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $headingStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Configurar AutoFilter para permitir filtrado y ordenación
-        $filterRange = 'A'.$headingsRow.':'.$this->getLastColumn().$headingsRow;
+        $filterRange = 'A' . $headingsRow . ':' . $this->getLastColumn() . $headingsRow;
         $sheet->setAutoFilter($filterRange);
 
         // Estilo para los datos
         $dataFirstRow = $headingsRow + 1;
         $dataLastRow = $headingsRow + $this->data->count();
         if ($dataLastRow >= $dataFirstRow) {
-            $dataRange = 'A'.$dataFirstRow.':'.$this->getLastColumn().$dataLastRow;
+            $dataRange = 'A' . $dataFirstRow . ':' . $this->getLastColumn() . $dataLastRow;
             $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
             $sheet->getStyle($dataRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
             // Estilo para filas alternas
             for ($i = $dataFirstRow; $i <= $dataLastRow; $i++) {
                 if ($i % 2 == 0) {
-                    $sheet->getStyle('A'.$i.':'.$this->getLastColumn().$i)
+                    $sheet->getStyle('A' . $i . ':' . $this->getLastColumn() . $i)
                         ->getFill()
                         ->setFillType(Fill::FILL_SOLID)
                         ->getStartColor()
@@ -126,7 +131,7 @@ abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithC
      */
     protected function getLastColumn(): string
     {
-        $headingsCount = \count($this->headings());
+        $headingsCount = count($this->headings());
 
         return $this->getColumnLetter($headingsCount);
     }
@@ -139,7 +144,7 @@ abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithC
         $columnLetter = '';
         while ($columnNumber > 0) {
             $modulo = ($columnNumber - 1) % 26;
-            $columnLetter = \chr(65 + $modulo).$columnLetter;
+            $columnLetter = chr(65 + $modulo) . $columnLetter;
             $columnNumber = (int) (($columnNumber - $modulo) / 26);
         }
 

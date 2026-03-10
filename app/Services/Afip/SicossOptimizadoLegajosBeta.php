@@ -2,6 +2,8 @@
 
 namespace App\Services\Afip;
 
+use function count;
+
 class SicossOptimizadoLegajosBeta
 {
     /**
@@ -22,8 +24,8 @@ class SicossOptimizadoLegajosBeta
     public static function obtener_estadisticas_precarga($todos_conceptos, $legajos): array
     {
         $stats = [
-            'total_conceptos' => \count($todos_conceptos),
-            'total_legajos_solicitados' => \count($legajos),
+            'total_conceptos' => count($todos_conceptos),
+            'total_legajos_solicitados' => count($legajos),
             'legajos_con_conceptos' => 0,
             'legajos_sin_conceptos' => 0,
             'conceptos_por_legajo' => [],
@@ -54,7 +56,7 @@ class SicossOptimizadoLegajosBeta
 
         // Estadísticas adicionales
         if (!empty($stats['conceptos_por_legajo'])) {
-            $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / \count($stats['conceptos_por_legajo']);
+            $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / count($stats['conceptos_por_legajo']);
             $stats['max_conceptos_por_legajo'] = max($stats['conceptos_por_legajo']);
             $stats['min_conceptos_por_legajo'] = min($stats['conceptos_por_legajo']);
         }

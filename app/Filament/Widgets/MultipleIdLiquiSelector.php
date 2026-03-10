@@ -2,17 +2,19 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Schemas\Schema;
 use App\Models\Mapuche\Dh22;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Schema;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+
+use const STR_PAD_LEFT;
 
 /**
  * @property mixed $form
@@ -54,7 +56,7 @@ class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions, Ha
         $liquidaciones = Dh22::getLiquidacionesForWidget()
             ->when($periodoFiscal, function ($query) use ($periodoFiscal) {
                 return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                    $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT),
+                    $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
                 ]);
             })
             ->pluck('desc_liqui', 'nro_liqui');

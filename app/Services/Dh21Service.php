@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use InvalidArgumentException;
-use Exception;
 use App\Data\Responses\ConceptoTotalData;
 use App\Models\Dh21;
 use App\Repositories\Dh21Repository;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Spatie\LaravelData\DataCollection;
 
 class Dh21Service

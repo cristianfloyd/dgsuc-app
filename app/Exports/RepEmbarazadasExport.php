@@ -27,7 +27,7 @@ class RepEmbarazadasExport implements FromQuery, ShouldAutoSize, WithHeadings, W
     /**
      * Define el mapeo de cada fila.
      *
-     * @param  RepEmbarazada  $embarazada
+     * @param RepEmbarazada $embarazada
      */
     public function map($embarazada): array
     {

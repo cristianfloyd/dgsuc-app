@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Exception;
-use Illuminate\Support\Collection;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61Repository;
+use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

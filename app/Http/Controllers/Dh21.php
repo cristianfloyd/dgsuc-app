@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class Dh21 extends Controller

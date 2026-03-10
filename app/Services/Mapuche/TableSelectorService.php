@@ -2,9 +2,11 @@
 
 namespace App\Services\Mapuche;
 
-use Exception;
 use App\Models\Mapuche\Dh22;
+use Exception;
 use Illuminate\Support\Facades\Log;
+
+use function is_array;
 
 /**
  * Servicio para determinar qué tabla usar (dh21 o dh21h) según el período fiscal de la liquidación.
@@ -28,7 +30,7 @@ class TableSelectorService
     public function getDh21TableName($liquidacion): string
     {
         // Si es un array, tomamos la primera liquidación para determinar el período
-        $nroLiqui = \is_array($liquidacion) ? $liquidacion[0] : $liquidacion;
+        $nroLiqui = is_array($liquidacion) ? $liquidacion[0] : $liquidacion;
 
         try {
             // Obtener el período fiscal de la liquidación

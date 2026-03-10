@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Exception;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Traits\DynamicConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class AfipMapucheSicossCalculoImportService
 {
@@ -36,12 +38,12 @@ class AfipMapucheSicossCalculoImportService
             try {
                 $batch[] = $this->parseLine($line, $periodoFiscal);
 
-                if (\count($batch) >= $batchSize) {
+                if (count($batch) >= $batchSize) {
                     DB::connection($this->getConnectionName())->beginTransaction();
                     AfipMapucheSicossCalculo::insert($batch);
                     DB::connection($this->getConnectionName())->commit();
 
-                    $imported += \count($batch);
+                    $imported += count($batch);
                     $batch = [];
                 }
             } catch (Exception $e) {
@@ -70,7 +72,7 @@ class AfipMapucheSicossCalculoImportService
                 DB::beginTransaction();
                 AfipMapucheSicossCalculo::insert($batch);
                 DB::commit();
-                $imported += \count($batch);
+                $imported += count($batch);
             } catch (Exception $e) {
                 DB::rollBack();
                 $errors[] = "Error en último lote: {$e->getMessage()}";

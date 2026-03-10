@@ -2,15 +2,17 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Schemas\Schema;
 use App\Services\EnhancedDatabaseConnectionService;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+
+use function is_string;
 
 class DatabaseConnectionSelector extends Component implements HasForms, HasActions
 {
@@ -24,7 +26,7 @@ class DatabaseConnectionSelector extends Component implements HasForms, HasActio
         $service = app(EnhancedDatabaseConnectionService::class);
 
         $currentConnection = $service->getCurrentConnection();
-        $this->connection = \is_string($currentConnection) ? $currentConnection : null;
+        $this->connection = is_string($currentConnection) ? $currentConnection : null;
 
         // Log::debug("DatabaseConnectionSelector montado", [
         //     'connection' => $this->connection
@@ -56,7 +58,7 @@ class DatabaseConnectionSelector extends Component implements HasForms, HasActio
                         ];
                     })
                     ->afterStateUpdated(function ($state) use ($service): void {
-                        if (\is_string($state)) {
+                        if (is_string($state)) {
                             Log::debug('Cambiando conexión', ['nueva_conexion' => $state]);
 
                             $service->setConnection($state);

@@ -2,11 +2,13 @@
 
 namespace App\Models\Mapuche;
 
-use Override;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Override;
+
+use function is_string;
 
 /**
  * @property string $nombre_seccion Section Name
@@ -131,7 +133,7 @@ class Rrhhini extends Model
      */
     public static function find($key)
     {
-        if (\is_string($key) && str_contains($key, '|')) {
+        if (is_string($key) && str_contains($key, '|')) {
             [$seccion, $parametro] = static::decodeKey($key);
             return static::where('nombre_seccion', $seccion)
                 ->where('nombre_parametro', $parametro)

@@ -22,6 +22,7 @@ use App\Models\ControlCuilsDiferencia;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\SicossControlService;
 use App\Traits\MapucheConnectionTrait;
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -37,12 +38,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
+
+use function count;
+use function sprintf;
 
 class SicossControles extends Page implements HasTable
 {
     // use SicossConnectionTrait;
     use HasSicossControlTables;
-
     use InteractsWithTable {
         InteractsWithTable::getTable insteadof MapucheConnectionTrait;
     }
@@ -72,9 +76,9 @@ class SicossControles extends Page implements HasTable
 
     public $conceptosSeleccionados = [];
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'SICOSS';
+    protected static string|UnitEnum|null $navigationGroup = 'SICOSS';
 
     protected string $view = 'filament.afip.pages.sicoss-controles';
 
@@ -218,7 +222,7 @@ class SicossControles extends Page implements HasTable
     public function getDiferenciaConteos(): int
     {
         $conteos = $this->getConteosData();
-        if (! $conteos) {
+        if (!$conteos) {
             return 0;
         }
 
@@ -227,7 +231,7 @@ class SicossControles extends Page implements HasTable
 
     public function formatMoney($value): string
     {
-        return '$ '.number_format($value, 2, ',', '.');
+        return '$ ' . number_format($value, 2, ',', '.');
     }
 
     public function getDiferenciasCount(): int
@@ -237,11 +241,11 @@ class SicossControles extends Page implements HasTable
 
     public function getDependenciasCount(): int
     {
-        if (! $this->hasResults()) {
+        if (!$this->hasResults()) {
             return 0;
         }
 
-        return \count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
+        return count($this->resultadosControles['aportes_contribuciones']['diferencias_por_dependencia']);
     }
 
     public function table(Table $table): Table
@@ -794,7 +798,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    ->badge(fn () => \sprintf('%d-%02d', $this->year, $this->month))
+                    ->badge(fn () => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function (): void {
                         $this->ejecutarControles();
                     }),
@@ -916,7 +920,7 @@ class SicossControles extends Page implements HasTable
             default => null
         };
 
-        if (! $data) {
+        if (!$data) {
             Notification::make()
                 ->warning()
                 ->title('No se puede exportar')
@@ -927,7 +931,7 @@ class SicossControles extends Page implements HasTable
         }
 
         // Construir el nombre del archivo con la extensión explícita
-        $filename = \sprintf(
+        $filename = sprintf(
             '%s-%d-%02d-%s.xlsx',
             $data['filename'],
             $this->year,

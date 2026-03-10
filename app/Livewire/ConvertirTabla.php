@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Models\AfipImportacionCrudaModel;
 use App\Models\AfipSicossDesdeMapuche;
 use App\Models\UploadedFile;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+
+use function count;
 
 class ConvertirTabla extends Component
 {
@@ -45,7 +47,7 @@ class ConvertirTabla extends Component
         $this->tabla = $AfipimportacionCruda->all();
         // contar la cantidad de lineas que hay en la tabla $this->tabla si no esta vacia
         if (!empty($this->tabla)) {
-            $this->lineCount = \count($this->tabla);
+            $this->lineCount = count($this->tabla);
         } else {
             // tabla vacia, lanzar una excepción o manejar el error de otra forma
             return null;
@@ -79,7 +81,7 @@ class ConvertirTabla extends Component
     public function cantRegistros(): void
     {
         // calcular la cantidad de registros en el array $this->columnWidths
-        $this->cantRegistros = \count($this->columnWidths);
+        $this->cantRegistros = count($this->columnWidths);
     }
 
     public function extraerFilas(): array

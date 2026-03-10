@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\Abstract\AbstractTableService;
 use App\Traits\Mapuche\TableServiceTrait;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;

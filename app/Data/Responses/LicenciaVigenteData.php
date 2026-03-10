@@ -9,19 +9,22 @@ use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 
+use function in_array;
+use function is_array;
+
 class LicenciaVigenteData extends Data
 {
     /**
-     * @param  int  $nro_legaj  Número de legajo del agente
-     * @param  int|null  $inicio  Día de inicio de la licencia en el periodo
-     * @param  int|null  $final  Día final de la licencia en el periodo
-     * @param  bool  $es_legajo  Indica si la licencia está asociada directamente al legajo (true) o a un cargo (false)
-     * @param  int  $condicion  Código numérico que representa el tipo de condición/licencia
-     * @param  string|null  $descripcion_licencia  Descripción del tipo de licencia
-     * @param  Carbon|null  $fecha_desde  Fecha de inicio de la licencia
-     * @param  Carbon|null  $fecha_hasta  Fecha de finalización de la licencia
-     * @param  string|null  $nro_cargo  Número de cargo asociado (si es_legajo=false)
-     * @param  int|null  $dias_totales  Total de días de la licencia
+     * @param int $nro_legaj Número de legajo del agente
+     * @param int|null $inicio Día de inicio de la licencia en el periodo
+     * @param int|null $final Día final de la licencia en el periodo
+     * @param bool $es_legajo Indica si la licencia está asociada directamente al legajo (true) o a un cargo (false)
+     * @param int $condicion Código numérico que representa el tipo de condición/licencia
+     * @param string|null $descripcion_licencia Descripción del tipo de licencia
+     * @param Carbon|null $fecha_desde Fecha de inicio de la licencia
+     * @param Carbon|null $fecha_hasta Fecha de finalización de la licencia
+     * @param string|null $nro_cargo Número de cargo asociado (si es_legajo=false)
+     * @param int|null $dias_totales Total de días de la licencia
      */
     public function __construct(
         public int $nro_legaj,
@@ -66,7 +69,7 @@ class LicenciaVigenteData extends Data
      */
     public function esLicenciaMaternidad(): bool
     {
-        return \in_array($this->condicion, [5, 11]);
+        return in_array($this->condicion, [5, 11]);
     }
 
     /**
@@ -74,17 +77,17 @@ class LicenciaVigenteData extends Data
      */
     public function esLicenciaEnfermedad(): bool
     {
-        return \in_array($this->condicion, [18, 19]);
+        return in_array($this->condicion, [18, 19]);
     }
 
     /**
      * Crear una colección tipada desde un conjunto de resultados.
      *
-     * @param  Collection|array  $resultados
+     * @param Collection|array $resultados
      */
     public static function fromResultados($resultados): DataCollection
     {
-        if (\is_array($resultados)) {
+        if (is_array($resultados)) {
             $resultados = collect($resultados);
         }
 
@@ -97,7 +100,7 @@ class LicenciaVigenteData extends Data
     /**
      * Crear una instancia desde una fila de resultados.
      *
-     * @param  object|array  $row
+     * @param object|array $row
      */
     public static function fromRow($row): self
     {

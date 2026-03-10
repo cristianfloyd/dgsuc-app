@@ -2,10 +2,10 @@
 
 namespace App\Services\ConceptoListado;
 
-use Exception;
 use App\Models\Reportes\ConceptoListado;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

@@ -6,6 +6,10 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function strlen;
+
+use const PHP_VERSION;
+
 class TobaAuthService
 {
     /**
@@ -88,7 +92,7 @@ class TobaAuthService
      */
     private function encriptarConSal($clave, $metodo, $sal = null)
     {
-        if (version_compare(\PHP_VERSION, '5.3.2') >= 0 || $metodo == 'bcrypt') {
+        if (version_compare(PHP_VERSION, '5.3.2') >= 0 || $metodo == 'bcrypt') {
             $hasher = new TobaHashAdapter($metodo);
             if ($sal === null) {
                 // Hash nuevo
@@ -96,7 +100,7 @@ class TobaAuthService
             }
             // Verificación - $sal es la clave almacenada
             $resultado = $hasher->getHashVerificador($clave, $sal);
-            if (\strlen($resultado) > 13) {
+            if (strlen($resultado) > 13) {
                 return $resultado;
             }
 

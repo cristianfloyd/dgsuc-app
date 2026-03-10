@@ -17,6 +17,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function strlen;
+
 class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithMultipleSheets, WithStrictNullComparison, WithStyles, WithTitle
 {
     use Exportable;
@@ -62,7 +64,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
             switch ($column) {
                 case 'cuil':
                     // Procesar el CUIL: eliminar los primeros 2 dígitos y el último dígito
-                    if (\strlen($value) >= 3) {
+                    if (strlen($value) >= 3) {
                         $value = substr($value, 2, -1);
                     }
                     break;
@@ -93,7 +95,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
     public function styles(Worksheet $sheet)
     {
         // Estilo para el encabezado
-        $sheet->getStyle('A1:'.$sheet->getHighestColumn().'1')->applyFromArray([
+        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -118,7 +120,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
         // Estilo para el cuerpo del reporte
         $lastRow = $sheet->getHighestRow();
         if ($lastRow > 1) {
-            $sheet->getStyle('A2:'.$sheet->getHighestColumn().$lastRow)->applyFromArray([
+            $sheet->getStyle('A2:' . $sheet->getHighestColumn() . $lastRow)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -131,7 +133,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
             ]);
 
             // Estilo para columnas numéricas (importe) - columna I (9)
-            $sheet->getStyle('I2:I'.$lastRow)->applyFromArray([
+            $sheet->getStyle('I2:I' . $lastRow)->applyFromArray([
                 'numberFormat' => [
                     'formatCode' => '#,##0.00',
                 ],
@@ -144,7 +146,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
         // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
             if ($row % 2 == 0) {
-                $sheet->getStyle('A'.$row.':'.$sheet->getHighestColumn().$row)->applyFromArray([
+                $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F2F2F2'],

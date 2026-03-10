@@ -2,12 +2,12 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Action;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\Mapuche\Dh22;
 use App\Services\WorkflowService;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+
+use const STR_PAD_LEFT;
 
 class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasActions
 {
@@ -166,7 +168,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
             foreach ($fieldLengths as $field => $length) {
                 $value = $row[$field] ?? '';
                 $value = $value === null ? '' : $value;
-                $line .= str_pad($value, $length, '0', \STR_PAD_LEFT);
+                $line .= str_pad($value, $length, '0', STR_PAD_LEFT);
             }
             $txtContent .= $line . "\n";
         }

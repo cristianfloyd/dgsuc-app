@@ -18,6 +18,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function strlen;
+
 class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReading, WithHeadings, WithMapping, WithMultipleSheets, WithStrictNullComparison, WithStyles, WithTitle
 {
     use Exportable;
@@ -80,7 +82,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
 
             switch ($column) {
                 case 'cuil':
-                    if (\strlen($value) >= 3) {
+                    if (strlen($value) >= 3) {
                         $value = substr($value, 2, -1);
                     }
                     break;
@@ -104,7 +106,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
     public function styles(Worksheet $sheet)
     {
         // Estilo para el encabezado
-        $sheet->getStyle('A1:'.$sheet->getHighestColumn().'1')->applyFromArray([
+        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -129,7 +131,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
         // Estilo para el cuerpo del reporte
         $lastRow = $sheet->getHighestRow();
         if ($lastRow > 1) {
-            $sheet->getStyle('A2:'.$sheet->getHighestColumn().$lastRow)->applyFromArray([
+            $sheet->getStyle('A2:' . $sheet->getHighestColumn() . $lastRow)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -142,7 +144,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
             ]);
 
             // Estilo para columnas numéricas (importe)
-            $sheet->getStyle('I2:I'.$lastRow)->applyFromArray([
+            $sheet->getStyle('I2:I' . $lastRow)->applyFromArray([
                 'numberFormat' => [
                     'formatCode' => '#,##0.00',
                 ],
@@ -155,7 +157,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
         // Filas alternadas
         for ($row = 2; $row <= $lastRow; $row++) {
             if ($row % 2 == 0) {
-                $sheet->getStyle('A'.$row.':'.$sheet->getHighestColumn().$row)->applyFromArray([
+                $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F2F2F2'],
@@ -194,7 +196,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
             $totalGeneral += $record->impp_conce;
             $totalRegistros++;
 
-            if (! isset($dependencyTotals[$record->codc_uacad])) {
+            if (!isset($dependencyTotals[$record->codc_uacad])) {
                 $dependencyTotals[$record->codc_uacad] = [
                     'dependencia' => $record->codc_uacad,
                     'total' => 0,

@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 
+use const STR_PAD_LEFT;
+
 class AfipMapucheParaSicoss extends Model
 {
     use MapucheConnectionTrait;
@@ -48,7 +50,7 @@ class AfipMapucheParaSicoss extends Model
 
     public function getNroLegajAttribute($value)
     {
-        return str_pad($value, 8, '0', \STR_PAD_LEFT);
+        return str_pad($value, 8, '0', STR_PAD_LEFT);
     }
 
     /**

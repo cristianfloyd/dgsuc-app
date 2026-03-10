@@ -42,7 +42,7 @@ class ListAfipMapucheSicosses extends BaseListRecords
             Action::make('truncate')
                 ->label('Borrar Tabla')
                 ->action(function (): void {
-                    $repository = new AfipMapucheSicossRepository;
+                    $repository = new AfipMapucheSicossRepository();
                     $repository->truncate();
                     Notification::make()
                         ->title('Datos Eliminados')

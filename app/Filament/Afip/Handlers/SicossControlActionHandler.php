@@ -9,12 +9,15 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
+use const STR_PAD_LEFT;
+
 class SicossControlActionHandler
 {
     public function __construct(
         protected SicossControlService $controlService,
         protected PeriodoFiscalService $periodoFiscalService,
-    ) {}
+    ) {
+    }
 
     /**
      * Ejecuta un control específico siguiendo el patrón común.
@@ -83,11 +86,11 @@ class SicossControlActionHandler
      * - Recarga del resumen en el componente Livewire
      * - Notificación de éxito al usuario
      *
-     * @param  object  $livewire  Instancia del componente Livewire que ejecutó el control
-     * @param  string  $tipoControl  Tipo de control ejecutado (aportes, contribuciones, cuils, etc.)
-     * @param  int  $year  Año del período fiscal procesado
-     * @param  int  $month  Mes del período fiscal procesado
-     * @param  array  $resultados  Resultados obtenidos del control ejecutado
+     * @param object $livewire Instancia del componente Livewire que ejecutó el control
+     * @param string $tipoControl Tipo de control ejecutado (aportes, contribuciones, cuils, etc.)
+     * @param int $year Año del período fiscal procesado
+     * @param int $month Mes del período fiscal procesado
+     * @param array $resultados Resultados obtenidos del control ejecutado
      */
     protected function postProcesamiento(
         object $livewire,
@@ -105,8 +108,8 @@ class SicossControlActionHandler
         // Notificación de éxito con formato de período
         Notification::make()
             ->success()
-            ->title(ucfirst($tipoControl).' Control Ejecutado')
-            ->body("Se completó el control de {$tipoControl} para el período {$year}-".str_pad($month, 2, '0', \STR_PAD_LEFT))
+            ->title(ucfirst($tipoControl) . ' Control Ejecutado')
+            ->body("Se completó el control de {$tipoControl} para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
             ->send();
     }
 
@@ -119,8 +122,8 @@ class SicossControlActionHandler
      * - Notificación visual al usuario sobre el error ocurrido
      * - Persistencia de la notificación para asegurar visibilidad
      *
-     * @param  Exception  $e  Excepción capturada durante la ejecución del control
-     * @param  string  $tipoControl  Tipo de control que falló (aportes, contribuciones, cuils, etc.)
+     * @param Exception $e Excepción capturada durante la ejecución del control
+     * @param string $tipoControl Tipo de control que falló (aportes, contribuciones, cuils, etc.)
      */
     protected function manejarError(Exception $e, string $tipoControl): void
     {

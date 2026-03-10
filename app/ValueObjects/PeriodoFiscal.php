@@ -4,10 +4,12 @@
 
 namespace App\ValueObjects;
 
+use Carbon\Carbon;
+use InvalidArgumentException;
 use JsonSerializable;
 use Stringable;
-use InvalidArgumentException;
-use Carbon\Carbon;
+
+use const STR_PAD_LEFT;
 
 /**
  * Value Object que representa un período fiscal en el sistema.
@@ -110,7 +112,7 @@ class PeriodoFiscal implements JsonSerializable, Stringable
      */
     public function formattedMonth(): string
     {
-        return str_pad((string) $this->month, 2, '0', \STR_PAD_LEFT);
+        return str_pad((string) $this->month, 2, '0', STR_PAD_LEFT);
     }
 
     /**

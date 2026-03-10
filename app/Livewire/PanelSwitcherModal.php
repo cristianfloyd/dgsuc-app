@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Illuminate\Support\Collection;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Support\Exceptions\Halt;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 

@@ -3,11 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Support\PanelRegistry;
+use BackedEnum;
 use Filament\Pages\Page;
 
 class DashboardSelector extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-squares-2x2';
 
     protected static ?string $title = 'Seleccionar Panel';
 
@@ -35,13 +36,6 @@ class DashboardSelector extends Page
         return 'Seleccione el panel al que desea acceder';
     }
 
-    protected function getPanels(): array
-    {
-        return PanelRegistry::getAllPanels()
-            ->sortBy('sortOrder')
-            ->toArray();
-    }
-
     /**
      * Clases Tailwind completas por color para que el compilador las incluya.
      * 'primary' se mapea a indigo (color por defecto del panel admin).
@@ -64,5 +58,12 @@ class DashboardSelector extends Page
         $classes['primary'] = $classes['indigo'];
 
         return $classes;
+    }
+
+    protected function getPanels(): array
+    {
+        return PanelRegistry::getAllPanels()
+            ->sortBy('sortOrder')
+            ->toArray();
     }
 }

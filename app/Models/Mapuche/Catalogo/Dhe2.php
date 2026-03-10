@@ -2,10 +2,10 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use Override;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class Dhe2 extends Model
 {

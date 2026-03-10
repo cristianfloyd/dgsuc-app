@@ -7,6 +7,8 @@ use App\Models\Mapuche\Dh21h;
 use App\Models\Mapuche\Dh22;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+use const STR_PAD_LEFT;
+
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Mapuche\Dh21h>
  */
@@ -50,25 +52,25 @@ class Dh21hFactory extends Factory
             'nro_orimp' => 1,
             'tipoescalafon' => 'D',
             'nrogrupoesc' => 1,
-            'codigoescalafon' => str_pad(fake()->numberBetween(1, 999), 3, '0', \STR_PAD_LEFT),
+            'codigoescalafon' => str_pad(fake()->numberBetween(1, 999), 3, '0', STR_PAD_LEFT),
             'codc_regio' => '1',
             'codc_uacad' => fake()->randomElement($codigosUacad),
-            'codn_area' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_subar' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_fuent' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_progr' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_subpr' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_proye' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_activ' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_obra' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_final' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
-            'codn_funci' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
+            'codn_area' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_subar' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_fuent' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_progr' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_subpr' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_proye' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_activ' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_obra' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_final' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'codn_funci' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
             'ano_retro' => 0,
             'mes_retro' => 0,
             'detallenovedad' => null,
-            'codn_grupo_presup' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
+            'codn_grupo_presup' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
             'tipo_ejercicio' => 'D',
-            'codn_subsubar' => str_pad(fake()->numberBetween(1, 99), 2, '0', \STR_PAD_LEFT),
+            'codn_subsubar' => str_pad(fake()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
         ];
     }
 

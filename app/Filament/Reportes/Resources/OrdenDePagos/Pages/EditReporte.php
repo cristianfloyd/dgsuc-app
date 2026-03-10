@@ -2,9 +2,8 @@
 
 namespace App\Filament\Reportes\Resources\OrdenDePagos\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Reportes\Resources\OrdenDePagos\OrdenDePagos\OrdenDePagoResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditReporte extends EditRecord

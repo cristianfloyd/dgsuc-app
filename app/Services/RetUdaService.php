@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Contracts\RetUdaRepository;
 use App\DTOs\RetUdaDTO;
 use App\Models\Suc\RetUda;
+use Illuminate\Database\Eloquent\Collection;
 
 class RetUdaService
 {

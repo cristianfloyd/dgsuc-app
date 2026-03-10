@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use Exception;
-use Override;
-use InvalidArgumentException;
 use App\Models\Dh01;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Traits\Mapuche\Dh09Queries;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,6 +17,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+use Override;
+
+use function in_array;
+use function sprintf;
 
 /**
  * Modelo para la tabla de Otros Datos del Empleado (DH09).
@@ -253,7 +256,7 @@ class Dh09 extends Model
             return 'Sin período definido';
         }
 
-        return \sprintf('%04d-%02d', $this->vig_otano, $this->vig_otmes);
+        return sprintf('%04d-%02d', $this->vig_otano, $this->vig_otmes);
     }
 
     /**
@@ -421,7 +424,7 @@ class Dh09 extends Model
             }
 
             // Validar período de vigencia con rangos más estrictos
-            if ($this->vig_otmes !== null && !\in_array($this->vig_otmes, range(1, 12), true)) {
+            if ($this->vig_otmes !== null && !in_array($this->vig_otmes, range(1, 12), true)) {
                 $errores[] = 'El mes de vigencia debe estar entre 1 y 12';
             }
 
@@ -521,7 +524,7 @@ class Dh09 extends Model
      *                         - 'fecha_ingreso_hasta' (string|Carbon): Fecha de fin del rango de fechas de ingreso.
      *
      * @throws Exception Si ocurre algún error durante la ejecución de la búsqueda, se registrará
-     *                    un error en el log.
+     *                   un error en el log.
      *
      * @return Builder Una instancia de Illuminate\Database\Eloquent\Builder configurada con los
      *                 criterios de búsqueda especificados.

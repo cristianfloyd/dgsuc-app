@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Http\Requests\EmbargoRequest;
+use Illuminate\Http\JsonResponse;
 
 class EmbargoController extends Controller
 {

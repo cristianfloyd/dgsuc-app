@@ -2,12 +2,17 @@
 
 namespace App\Services;
 
-use Exception;
-use BackedEnum;
-use Carbon\Carbon;
 use App\Contracts\ExportServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
+use BackedEnum;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
+
+use function in_array;
+
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 class AfipMapucheExportService implements ExportServiceInterface
 {
@@ -136,15 +141,15 @@ class AfipMapucheExportService implements ExportServiceInterface
         }
 
         // Formateo de números: remover comas y decimales
-        if (\in_array($field, ['retribucion_pactada'])) {
+        if (in_array($field, ['retribucion_pactada'])) {
             // Convertir a float, multiplicar por 100 para preservar 2 decimales y convertir a entero
             $value = (int) ((float) (str_replace(',', '', $value)) * 100);
-            return str_pad($value, $width, '0', \STR_PAD_LEFT);
+            return str_pad($value, $width, '0', STR_PAD_LEFT);
         }
 
 
         // Formateo específico por campo
-        if (\in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
+        if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
             // Si el valor es nulo, 0, '0' o vacío, retornamos espacios
             if (empty($value) || $value === '0000000000' || $value === 0) {
                 return str_repeat(' ', $width);
@@ -176,23 +181,23 @@ class AfipMapucheExportService implements ExportServiceInterface
 
         // Formateo de domicilio (5 dígitos con ceros a la izquierda)
         if ($field === 'domicilio') {
-            $value = str_pad($value, 5, '0', \STR_PAD_LEFT);
+            $value = str_pad($value, 5, '0', STR_PAD_LEFT);
         }
 
         // Formateo de actividad (6 dígitos)
         if ($field === 'actividad') {
-            $value = str_pad($value, 6, '0', \STR_PAD_LEFT);
+            $value = str_pad($value, 6, '0', STR_PAD_LEFT);
         }
 
         // Formateo para campos numéricos
-        if (\in_array($field, ['cuil'])) {
+        if (in_array($field, ['cuil'])) {
             $value = preg_replace('/[^0-9]/', '', $value); // Remover no-números
-            return str_pad($value, $width, '0', \STR_PAD_LEFT);
+            return str_pad($value, $width, '0', STR_PAD_LEFT);
         }
 
         // Formateo por defecto para campos de texto
         $value = substr($value, 0, $width); // Asegurar que no exceda el ancho
-        return str_pad($value, $width, ' ', \STR_PAD_RIGHT);
+        return str_pad($value, $width, ' ', STR_PAD_RIGHT);
     }
 
     private function formatDate($date): string

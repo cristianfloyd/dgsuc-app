@@ -4,6 +4,9 @@ namespace App\Traits;
 
 use InvalidArgumentException;
 
+use function array_key_exists;
+use function in_array;
+
 /**
  * Trait para manejar categorías de cargos.
  */
@@ -62,7 +65,7 @@ trait CategoriasConstantTrait
     public function hasCategory(string $category): bool
     {
         foreach (self::CATEGORIAS as $group) {
-            if (\in_array($category, $group)) {
+            if (in_array($category, $group)) {
                 return true;
             }
         }
@@ -80,7 +83,7 @@ trait CategoriasConstantTrait
      */
     public function getCategoriesByGroup(string $group): array
     {
-        if (!\array_key_exists($group, self::CATEGORIAS)) {
+        if (!array_key_exists($group, self::CATEGORIAS)) {
             throw new InvalidArgumentException("Grupo de categorías '$group' no existe");
         }
         return self::CATEGORIAS[$group];
@@ -96,7 +99,7 @@ trait CategoriasConstantTrait
     public function getGroupByCategory(string $category): ?string
     {
         foreach (self::CATEGORIAS as $group => $categories) {
-            if (\in_array($category, $categories)) {
+            if (in_array($category, $categories)) {
                 return $group;
             }
         }

@@ -8,7 +8,8 @@ class Dhe2DTO
         public int $nroTabla,
         public string $descAbrev,
         public ?int $codOrganismo,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $data): self
     {

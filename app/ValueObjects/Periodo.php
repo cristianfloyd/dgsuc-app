@@ -4,8 +4,8 @@
 
 namespace App\ValueObjects;
 
-use Stringable;
 use InvalidArgumentException;
+use Stringable;
 
 /**
  * Representa un periodo de tiempo en formato YYYYMM.

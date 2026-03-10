@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Pages;
 
-use Exception;
 use App\Services\TableManager\TableInitializationManager;
+use Exception;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
 

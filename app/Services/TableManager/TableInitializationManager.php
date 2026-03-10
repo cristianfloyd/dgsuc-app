@@ -2,8 +2,8 @@
 
 namespace App\Services\TableManager;
 
-use Exception;
 use App\Contracts\TableService\TableServiceInterface;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 /**

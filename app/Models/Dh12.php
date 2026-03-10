@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Enums\ConceptoGrupo;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
@@ -10,9 +9,13 @@ use App\Enums\TipoNove;
 use App\Services\EncodingService;
 use App\Traits\CharacterEncodingTrait;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use function ord;
+use function sprintf;
 
 class Dh12 extends Model
 {
@@ -154,13 +157,13 @@ class Dh12 extends Model
     public function getSelectLabelAttribute(): string
     {
         try {
-            return \sprintf(
+            return sprintf(
                 '%d - %s',
                 $this->codn_conce,
                 EncodingService::toUtf8($this->desc_conce),
             );
         } catch (Exception $e) {
-            return \sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
+            return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
         }
     }
 
@@ -197,7 +200,7 @@ class Dh12 extends Model
         $analisis_bytes = array_map(function ($byte) {
             return [
                 'byte' => bin2hex($byte),
-                'ascii' => \ord($byte),
+                'ascii' => ord($byte),
             ];
         }, $bytes);
 

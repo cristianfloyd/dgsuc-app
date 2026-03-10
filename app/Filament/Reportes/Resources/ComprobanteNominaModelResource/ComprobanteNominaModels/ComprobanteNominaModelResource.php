@@ -3,6 +3,9 @@
 namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels;
 
 use App\Exports\ComprobantesNominaExport;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\GenerateComprobanteNomina;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ImportComprobanteNomina;
+use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ListComprobanteNominaModels;
 use App\Models\ComprobanteNominaModel;
 use App\Services\ComprobanteNominaService;
 use Filament\Actions\Action;
@@ -20,16 +23,16 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
-
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\GenerateComprobanteNomina;
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ImportComprobanteNomina;
-use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages\ListComprobanteNominaModels;
+use UnitEnum;
 
 class ComprobanteNominaModelResource extends Resource
 {
     protected static ?string $model = ComprobanteNominaModel::class;
-    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
+
     protected static ?string $modelLabel = 'CHE';
+
     protected static ?string $pluralModelLabel = 'CHE';
 
     public static function form(Schema $schema): Schema
@@ -97,12 +100,12 @@ class ComprobanteNominaModelResource extends Resource
                     ])
                     ->action(function (array $data, ComprobanteNominaService $service): void {
                         try {
-                            if (! $service->checkTableExists()) {
+                            if (!$service->checkTableExists()) {
                                 $service->createTable();
                             }
 
                             $stats = $service->processFile(
-                                storage_path('app/public/'.$data['archivo']),
+                                storage_path('app/public/' . $data['archivo']),
                             );
 
                             Notification::make()

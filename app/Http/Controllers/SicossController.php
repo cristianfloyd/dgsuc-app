@@ -6,6 +6,8 @@ use App\Models\Dh01;
 use App\Services\SicossCodigoActividadService;
 use Illuminate\Http\Request;
 
+use function count;
+
 class SicossController extends Controller
 {
     protected $sicossService;
@@ -48,7 +50,7 @@ class SicossController extends Controller
         return response()->json([
             'nroLegajo' => $nroLegajo,
             'tipoActividad' => $tipoActividad,
-            'conceptosCount' => \count($conceptosLiquidados),
+            'conceptosCount' => count($conceptosLiquidados),
         ]);
     }
 }

@@ -2,17 +2,19 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
-use App\Services\Mapuche\PeriodoFiscalService;
 use App\Data\Reportes\CleanupResultData;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Mapuche\Bloqueos\RepBloqueo;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Reportes\Interfaces\BloqueosCleanupServiceInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use const STR_PAD_LEFT;
 
 /**
  * Servicio para limpiar la tabla de trabajo de bloqueos.
@@ -33,7 +35,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
         $noEliminados = 0;
         $idsEliminados = [];
         $idsNoEliminados = [];
-        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
 
         Log::info('Iniciando limpieza de tabla de trabajo', [
             'periodo_fiscal' => $periodoFiscal,
@@ -160,7 +162,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
      */
     public function validarLimpieza(array $periodoFiscal): bool
     {
-        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         try {
             // Obtener nro_liqui definitivo
             $periodoService = app(PeriodoFiscalService::class);
@@ -269,7 +271,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
     {
         $periodoService = app(PeriodoFiscalService::class);
         $liquidacion = $periodoService->getLiquidacionDefinitiva($periodoFiscal['year'], $periodoFiscal['month']);
-        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
         if (!$liquidacion) {
             return [
                 'error' => true,

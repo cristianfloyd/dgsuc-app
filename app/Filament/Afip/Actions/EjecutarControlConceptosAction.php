@@ -12,6 +12,8 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View as ViewFacade;
 
+use function sprintf;
+
 class EjecutarControlConceptosAction extends Action
 {
     /**
@@ -88,7 +90,7 @@ class EjecutarControlConceptosAction extends Action
         return $this->badge(function () {
             $livewire = $this->getLivewire();
 
-            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
+            return sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
 
@@ -106,7 +108,7 @@ class EjecutarControlConceptosAction extends Action
      * para el período fiscal especificado, utilizando la conexión de base de datos
      * configurada en el componente Livewire padre.
      *
-     * @param  array  $data  Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
+     * @param array $data Los datos del formulario, si se proporciona, se usarán en lugar de los conceptos por defecto
      *
      * @throws Exception Cuando ocurre un error durante la ejecución del control
      */

@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Exception;
-use InvalidArgumentException;
 use App\Enums\PuestoDesempenado;
 use App\Traits\HasPuestoDesempenado;
 use App\Traits\HasUnidadAcademica;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\NroLiqui;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +16,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use InvalidArgumentException;
+
+use const STR_PAD_LEFT;
 
 class AfipMapucheMiSimplificacion extends Model
 {
@@ -398,7 +400,7 @@ class AfipMapucheMiSimplificacion extends Model
                 if ($this->attributes['actividad'] === null && $value) {
                     $this->determinarCodigosUnidadAcademica($value);
                 }
-                return str_pad($value, 5, '0', \STR_PAD_LEFT);
+                return str_pad($value, 5, '0', STR_PAD_LEFT);
             },
             set: function ($value) {
                 $this->determinarCodigosUnidadAcademica($value);

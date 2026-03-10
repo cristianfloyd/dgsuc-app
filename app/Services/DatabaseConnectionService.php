@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
 
+use function array_key_exists;
+use function is_string;
+
 class DatabaseConnectionService
 {
     public const string SESSION_KEY = 'selected_db_connection';
@@ -45,7 +48,7 @@ class DatabaseConnectionService
         }
 
         // Si no se encontró en ningún lado o no es un string válido, usar el valor predeterminado
-        if (!\is_string($connection) || !\array_key_exists($connection, $this->getAvailableConnections())) {
+        if (!is_string($connection) || !array_key_exists($connection, $this->getAvailableConnections())) {
             return self::DEFAULT_CONNECTION;
         }
 
@@ -57,7 +60,7 @@ class DatabaseConnectionService
      */
     public function setConnection(string $connection): void
     {
-        if (\array_key_exists($connection, $this->getAvailableConnections())) {
+        if (array_key_exists($connection, $this->getAvailableConnections())) {
             Session::put(self::SESSION_KEY, $connection);
 
             // La cookie se establece en el componente Livewire para asegurar

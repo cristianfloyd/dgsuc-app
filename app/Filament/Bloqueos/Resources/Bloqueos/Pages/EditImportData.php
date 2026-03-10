@@ -130,7 +130,7 @@ class EditImportData extends EditRecord
                 ->icon('heroicon-o-check')
                 ->requiresConfirmation()
                 ->action(fn () => $this->record->marcarProcesado())
-                ->visible(fn () => ! $this->record->chkstopliq),
+                ->visible(fn () => !$this->record->chkstopliq),
             Action::make('verificar_mapuche')
                 ->label('Verificar en Mapuche')
                 ->icon('heroicon-o-check-circle')
@@ -145,14 +145,14 @@ class EditImportData extends EditRecord
                         $this->record->nro_cargo,
                     );
 
-                    if (! $resultado['existe']) {
+                    if (!$resultado['existe']) {
                         Notification::make()
                             ->danger()
                             ->title('Error de verificación')
                             ->body($resultado['mensaje'])
                             ->send();
 
-                        throw new Halt;
+                        throw new Halt();
                     }
 
                     $datos = $resultado['datos'];
@@ -169,8 +169,8 @@ class EditImportData extends EditRecord
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
                 ->url(
-                    fn ($record) => BloqueosHistorialResource::getUrl('index').
-                    '?filters[nro_legaj][value]='.$record->nro_legaj,
+                    fn ($record) => BloqueosHistorialResource::getUrl('index') .
+                    '?filters[nro_legaj][value]=' . $record->nro_legaj,
                 ),
         ];
     }

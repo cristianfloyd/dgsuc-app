@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Resources\PersonalResource\Pages\ListPersonals;
 use App\Filament\Resources\PersonalResource\Pages\CreatePersonal;
 use App\Filament\Resources\PersonalResource\Pages\EditPersonal;
-use App\Filament\Resources\PersonalResource\Pages;
+use App\Filament\Resources\PersonalResource\Pages\ListPersonals;
 use App\Models\Dh01;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class PersonalResource extends Resource
 {
@@ -23,9 +24,9 @@ class PersonalResource extends Resource
 
     protected static ?string $plurallabel = 'Personal';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string | UnitEnum | null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

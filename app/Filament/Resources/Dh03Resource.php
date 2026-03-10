@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Resources\Dh03Resource\Pages\ListDh03s;
+use App\Filament\Resources\Dh03Resource\Pages;
 use App\Filament\Resources\Dh03Resource\Pages\CreateDh03;
 use App\Filament\Resources\Dh03Resource\Pages\EditDh03;
-use App\Filament\Resources\Dh03Resource\Pages;
+use App\Filament\Resources\Dh03Resource\Pages\ListDh03s;
 use App\Models\Dh03;
 use App\Models\Dhc9;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -20,6 +20,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class Dh03Resource extends Resource
 {
@@ -29,7 +30,7 @@ class Dh03Resource extends Resource
 
     protected static ?string $navigationLabel = 'Cargos';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string | UnitEnum | null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

@@ -4,7 +4,6 @@ namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use Filament\Actions\DeleteAction;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditComprobanteNominaModel extends EditRecord

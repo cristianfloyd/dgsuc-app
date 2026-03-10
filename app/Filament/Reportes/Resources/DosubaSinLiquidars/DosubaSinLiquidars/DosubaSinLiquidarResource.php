@@ -21,6 +21,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class DosubaSinLiquidarResource extends Resource
 {
@@ -32,7 +33,7 @@ class DosubaSinLiquidarResource extends Resource
 
     protected static ?string $slug = 'reportes/dosuba-sin-liquidar';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Dosuba';
+    protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -113,7 +114,7 @@ class DosubaSinLiquidarResource extends Resource
 
                             return Excel::download(
                                 new DosubaSinLiquidarExport($filteredRecords, $filteredRecords->first()?->periodo_fiscal ?? ''),
-                                'dosuba-sin-liquidar-'.now()->format('Y-m-d').'.xlsx',
+                                'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx',
                             );
                         } catch (Exception $e) {
                             Notification::make()
@@ -155,7 +156,7 @@ class DosubaSinLiquidarResource extends Resource
                                     records: $records,
                                     periodo: $data['periodo'],
                                 ),
-                                'dosuba-sin-liquidar-'.$data['periodo'].'.xlsx',
+                                'dosuba-sin-liquidar-' . $data['periodo'] . '.xlsx',
                             );
                         }),
                 ])->label('Acciones de Tabla')

@@ -13,7 +13,7 @@ class OrdenAportesyContribuciones extends OrdenesDescuentoExport implements With
     {
         parent::styles($sheet);
 
-        $sheet->setCellValue('A1', 'APORTES Y CONTRIBUCIONES - '.now()->format('d/m/Y'));
+        $sheet->setCellValue('A1', 'APORTES Y CONTRIBUCIONES - ' . now()->format('d/m/Y'));
 
         $sheet->getStyle('A1')->getFont()->setSize(16);
         $sheet->getStyle('M:N')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);

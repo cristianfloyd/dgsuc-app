@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Throwable;
 use App\DTOs\RetUdaDTO;
 use App\Services\RetUdaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class RetUdaController extends Controller
 {

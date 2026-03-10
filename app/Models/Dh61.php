@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+use function count;
+
 /*
  * (D) HISTORICO-Tabla de Categorias de Empleados
  * */
@@ -143,7 +145,7 @@ class Dh61 extends Model
         }
 
         $parts = explode('-', $id);
-        if (\count($parts) !== 3) {
+        if (count($parts) !== 3) {
             return null;
         }
 

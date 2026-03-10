@@ -4,10 +4,12 @@ namespace App\Filament\Liquidaciones\Resources\DH21hs\DH21hs;
 
 use App\Filament\Liquidaciones\Resources\DH21hs\Pages\ListDH21hs;
 use App\Models\Mapuche\DH21h;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DH21hResource extends Resource
 {
@@ -17,9 +19,9 @@ class DH21hResource extends Resource
 
     protected static ?string $navigationLabel = 'Liquidaciones Historico';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {

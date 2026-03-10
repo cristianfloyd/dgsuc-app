@@ -2,34 +2,33 @@
 
 namespace App\Filament\Reportes\Resources\OrdenesDescuentos\OrdenesDescuentos;
 
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Reportes\Resources\OrdenesDescuentos\Pages\ListOrdenesDescuentos;
-use App\Filament\Reportes\Resources\OrdenesDescuentos\Pages\EditOrdenesDescuento;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Enums\ConceptoGrupo;
 use App\Exports\OrdenAportesyContribuciones;
 use App\Exports\OrdenesDescuentoMultipleExport;
 use App\Exports\OrdenesDescuentoSheet200;
-use App\Filament\Reportes\Resources\OrdenesDescuentoResource\Pages;
+use App\Filament\Reportes\Resources\OrdenesDescuentos\Pages\EditOrdenesDescuento;
+use App\Filament\Reportes\Resources\OrdenesDescuentos\Pages\ListOrdenesDescuentos;
 use App\Models\Mapuche\Dh22;
 use App\Models\Reportes\OrdenesDescuento;
 use App\Services\OrdenesDescuentoTableService;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class OrdenesDescuentoResource extends Resource
 {
     protected static ?string $model = OrdenesDescuento::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Informes';
+    protected static string | UnitEnum | null $navigationGroup = 'Informes';
 
     protected static ?int $navigationSort = 2;
 

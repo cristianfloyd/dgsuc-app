@@ -21,6 +21,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use const MB_CASE_TITLE;
+
 class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithProperties, WithStyles, WithTitle
 {
     protected $records;
@@ -135,8 +137,8 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
     {
         return [
             $row->nro_legaj,
-            mb_convert_case($row->apellido, \MB_CASE_TITLE, 'UTF-8'),
-            mb_convert_case($row->nombre, \MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case($row->apellido, MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case($row->nombre, MB_CASE_TITLE, 'UTF-8'),
             $this->formatCuil($row->cuil),
             $row->codc_uacad,
             $row->ultima_liquidacion,
@@ -174,7 +176,7 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
                         ->setLocked(false)
                         ->setHidden(false);
                 } catch (Exception $e) {
-                    Log::error('Error en configuración Excel: '.$e->getMessage());
+                    Log::error('Error en configuración Excel: ' . $e->getMessage());
                 }
             },
         ];

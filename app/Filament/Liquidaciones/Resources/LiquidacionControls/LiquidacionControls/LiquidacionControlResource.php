@@ -7,6 +7,7 @@ use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\EditLiquidaci
 use App\Filament\Liquidaciones\Resources\LiquidacionControls\Pages\ListLiquidacionControls;
 use App\Models\LiquidacionControl;
 use App\Services\LiquidacionControlService;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -19,14 +20,15 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class LiquidacionControlResource extends Resource
 {
     protected static ?string $model = LiquidacionControl::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
     protected static ?string $modelLabel = 'Control Post-Liquidación';
 
@@ -123,7 +125,7 @@ class LiquidacionControlResource extends Resource
         // usando LiquidacionControlService
 
         // Ejemplo:
-        $service = new LiquidacionControlService;
+        $service = new LiquidacionControlService();
         $result = match ($record->nombre_control) {
             'controlar_negativos' => $service->controlarNegativos($record->nro_liqui),
             'controlar_cargos_liquidados' => $service->controlarCargosLiquidados($record->nro_liqui),

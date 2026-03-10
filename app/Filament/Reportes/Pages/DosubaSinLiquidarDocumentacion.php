@@ -4,12 +4,13 @@ namespace App\Filament\Reportes\Pages;
 
 use Filament\Pages\Page;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
+use UnitEnum;
 
 class DosubaSinLiquidarDocumentacion extends Page
 {
     protected static ?string $navigationLabel = 'Documentación';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Dosuba';
+    protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
 
     protected static ?int $navigationSort = 100;
 

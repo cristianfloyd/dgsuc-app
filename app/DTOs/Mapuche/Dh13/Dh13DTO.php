@@ -22,7 +22,8 @@ class Dh13DTO extends Data
         public readonly ?string $desc_calcu,
         public readonly int $nro_orden_formula,
         public readonly ?string $desc_condi,
-    ) {}
+    ) {
+    }
 
     /**
      * Convierte el DTO a un array para persistencia.

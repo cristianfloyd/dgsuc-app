@@ -18,6 +18,8 @@ use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use function sprintf;
+
 class ImportAfipMapucheSicossCalculo extends Page
 {
     use InteractsWithForms;
@@ -66,7 +68,7 @@ class ImportAfipMapucheSicossCalculo extends Page
             $filePath = Storage::disk('public')->path($data['file']);
 
             $service = app(AfipMapucheSicossCalculoImportService::class);
-            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
 
             $result = $service->streamImport(
                 $filePath,

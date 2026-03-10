@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Contracts\CuilRepositoryInterface;
 use App\Contracts\MapucheMiSimplificacionServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
@@ -11,6 +10,7 @@ use App\Models\Mapuche\Dh22;
 use App\Models\TablaTempCuils;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\NroLiqui;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;

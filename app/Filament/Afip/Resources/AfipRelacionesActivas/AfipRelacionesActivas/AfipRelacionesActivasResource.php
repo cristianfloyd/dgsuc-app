@@ -6,6 +6,7 @@ use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\CreateAfipRelaciones
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\EditAfipRelacionesActivas;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Pages\ListAfipRelacionesActivas;
 use App\Models\AfipRelacionesActivas;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -20,14 +21,15 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class AfipRelacionesActivasResource extends Resource
 {
     protected static ?string $model = AfipRelacionesActivas::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
+    protected static string|UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?int $navigationSort = 1;
 
@@ -126,8 +128,8 @@ class AfipRelacionesActivasResource extends Resource
                 TextColumn::make('cuil')
                     ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => substr($state, 0, 2).'-'.
-                        substr($state, 2, 8).'-'.
+                    ->formatStateUsing(fn (string $state): string => substr($state, 0, 2) . '-' .
+                        substr($state, 2, 8) . '-' .
                         substr($state, -1)),
 
                 TextColumn::make('codigo_movimiento')

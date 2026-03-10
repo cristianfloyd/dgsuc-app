@@ -2,13 +2,15 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Connection;
 use App\Services\DatabaseConnectionService;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+
+use function defined;
 
 /**
  * Trait MapucheConnectionTrait.
@@ -30,7 +32,7 @@ trait MapucheConnectionTrait
         $hasSecondaryConnection = Config::has('database.connections.secondary');
 
         // Determinamos la conexión predeterminada
-        $defaultConnection = \defined('DatabaseConnectionService::DEFAULT_CONNECTION')
+        $defaultConnection = defined('DatabaseConnectionService::DEFAULT_CONNECTION')
             ? DatabaseConnectionService::DEFAULT_CONNECTION
             : 'pgsql-prod';
 
@@ -131,7 +133,7 @@ trait MapucheConnectionTrait
         $hasSecondaryConnection = Config::has('database.connections.secondary');
 
         // Determinamos la conexión predeterminada
-        $defaultConnection = \defined('DatabaseConnectionService::DEFAULT_CONNECTION')
+        $defaultConnection = defined('DatabaseConnectionService::DEFAULT_CONNECTION')
             ? DatabaseConnectionService::DEFAULT_CONNECTION
             : 'pgsql-prod';
 

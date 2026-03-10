@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Support\Collection;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+
+use function count;
 
 class AfipImportacionCrudaModel extends Model
 {
@@ -62,7 +64,7 @@ class AfipImportacionCrudaModel extends Model
                 $batchData[] = ['linea_completa' => $lineaUtf8];
 
                 // Insertar en lotes
-                if (\count($batchData) >= $batchSize) {
+                if (count($batchData) >= $batchSize) {
                     DB::connection($this->connection)
                         ->table($this->table)
                         ->insert($batchData);

@@ -19,8 +19,9 @@ interface MapucheMiSimplificacionServiceInterface
     /**
      * Ejecuta una operación de simplificación de la liquidación Mapuche para un número de liquidación y período fiscal específicos.
      *
-     * @param  NroLiqui  $nroLiqui  Número de liquidación a simplificar.
-     * @param  int  $periodoFiscal  Período fiscal de la liquidación a simplificar.
+     * @param NroLiqui $nroLiqui Número de liquidación a simplificar.
+     * @param int $periodoFiscal Período fiscal de la liquidación a simplificar.
+     *
      * @return bool Verdadero si la operación de simplificación se ejecutó correctamente, falso en caso contrario.
      */
     public function execute(NroLiqui $nroLiqui, int $periodoFiscal): bool;

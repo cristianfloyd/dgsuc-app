@@ -2,12 +2,12 @@
 
 namespace App\Repositories\Mapuche;
 
-use Illuminate\Database\Eloquent\Collection;
-use Exception;
-use Illuminate\Pagination\LengthAwarePaginator;
 use App\Contracts\Mapuche\Dh21hRepositoryInterface;
 use App\Data\Mapuche\Dh21hData;
 use App\Models\Mapuche\Dh21h;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
 class Dh21hRepository implements Dh21hRepositoryInterface

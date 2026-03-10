@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Connection;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

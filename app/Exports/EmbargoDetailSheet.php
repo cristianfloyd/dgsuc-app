@@ -21,6 +21,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+use function strlen;
+
 class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithColumnFormatting, WithColumnWidths, WithCustomStartCell, WithHeadings, WithMapping, WithTitle
 {
     /**
@@ -36,8 +38,8 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
     /**
      * Constructor.
      *
-     * @param  Builder  $query  Consulta para obtener los datos
-     * @param  string  $periodoLiquidacion  Período de liquidación (opcional)
+     * @param Builder $query Consulta para obtener los datos
+     * @param string $periodoLiquidacion Período de liquidación (opcional)
      */
     public function __construct(Builder $query, string $periodoLiquidacion = '')
     {
@@ -136,14 +138,14 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
      * Mapea cada fila de datos a las columnas de Excel
      * Limita el texto de la caratula a 30 caracteres.
      *
-     * @param  mixed  $row
+     * @param mixed $row
      */
     public function map($row): array
     {
         // Limitar el texto de la caratula a 30 caracteres
         $caratula = $row->caratula;
-        if (\strlen($caratula) > 30) {
-            $caratula = substr($caratula, 0, 27).'...';
+        if (strlen($caratula) > 30) {
+            $caratula = substr($caratula, 0, 27) . '...';
         }
 
         return [
@@ -206,24 +208,24 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
         ]);
 
         // Centrar algunas columnas (solo para los datos, desde la fila 6)
-        $sheet->getStyle('A6:B'.$lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('D6:D'.$lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F6:G'.$lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A6:B' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D6:D' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F6:G' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Alinear a la derecha las columnas numéricas (solo para los datos, desde la fila 6)
-        $sheet->getStyle('I6:N'.$lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('I6:N' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         // Mejorar la presentación de la columna Caratula
-        $sheet->getStyle('E6:E'.$lastRow)->getAlignment()->setWrapText(true);
-        $sheet->getStyle('E6:E'.$lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle('E6:E' . $lastRow)->getAlignment()->setWrapText(true);
+        $sheet->getStyle('E6:E' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
 
         // Mejorar la presentación de la columna Nombre
-        $sheet->getStyle('C6:C'.$lastRow)->getAlignment()->setWrapText(true);
+        $sheet->getStyle('C6:C' . $lastRow)->getAlignment()->setWrapText(true);
 
         // Aplicar colores alternados a las filas para mejorar la legibilidad (desde la fila 7)
         for ($row = 7; $row <= $lastRow; $row++) {
             if (($row - 6) % 2 == 0) {
-                $sheet->getStyle('A'.$row.':N'.$row)->applyFromArray([
+                $sheet->getStyle('A' . $row . ':N' . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'F9F9F9'],
@@ -234,14 +236,14 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
 
         // FORMATO CONDICIONAL: Resaltar embargos con montos altos (más de 50000)
         $conditionalStyles = [
-            new Conditional,
-            new Conditional,
-            new Conditional,
+            new Conditional(),
+            new Conditional(),
+            new Conditional(),
         ];
 
         // IMPLEMENTACIÓN DE FILTROS AUTOMÁTICOS (solo para la fila de encabezados)
         $lastColumn = 'M';
-        $sheet->setAutoFilter('A6:'.$lastColumn.'6');
+        $sheet->setAutoFilter('A6:' . $lastColumn . '6');
 
         // Congelar la fila 6 para que los encabezados permanezcan visibles al desplazarse
         $sheet->freezePane('A7');

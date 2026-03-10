@@ -18,6 +18,8 @@ use Filament\Schemas\Components\Section;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Log;
 
+use function sprintf;
+
 class ExportAfipMapucheSicoss extends Page
 {
     use InteractsWithForms;
@@ -70,14 +72,14 @@ class ExportAfipMapucheSicoss extends Page
         $periodoFiscal = null;
         try {
             $data = $this->form->getState();
-            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
 
             // Obtener registros según el período fiscal
             $query = static::getResource()::getModel()::query()
                 ->where('periodo_fiscal', $periodoFiscal);
 
             // Aplicar filtro de activos/inactivos si es necesario
-            if (! $data['includeInactive']) {
+            if (!$data['includeInactive']) {
                 $query->where('cod_situacion', '!=', '2'); // Asumiendo que '2' es el código para inactivos
             }
 
@@ -116,7 +118,7 @@ class ExportAfipMapucheSicoss extends Page
                 'periodo' => $periodoFiscal,
             ]);
 
-            $this->showErrorNotification('Error durante la exportación: '.$e->getMessage());
+            $this->showErrorNotification('Error durante la exportación: ' . $e->getMessage());
         }
     }
 

@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
+use function array_key_exists;
+use function is_string;
+
 /**
  * EnhancedDatabaseConnectionService.
  *
@@ -83,7 +86,7 @@ class EnhancedDatabaseConnectionService
         }
 
         // Si no se encontró en ningún lado, usar el valor predeterminado
-        if (!\is_string($connection) || !\array_key_exists($connection, $this->getAvailableConnections())) {
+        if (!is_string($connection) || !array_key_exists($connection, $this->getAvailableConnections())) {
             $connection = self::DEFAULT_CONNECTION;
             Log::debug('Usando conexión secundaria predeterminada para usuario nuevo', ['connection' => $connection]);
         }
@@ -99,7 +102,7 @@ class EnhancedDatabaseConnectionService
      */
     public function setConnection(string $connection): void
     {
-        if (\array_key_exists($connection, $this->getAvailableConnections())) {
+        if (array_key_exists($connection, $this->getAvailableConnections())) {
             $userId = auth()->guard('web')->id() ?? session()->getId();
             $cacheKey = self::CACHE_KEY . $userId;
 

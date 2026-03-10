@@ -10,6 +10,8 @@ use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 
+use const PREG_SET_ORDER;
+
 class DocumentationController extends Controller
 {
     public function download()
@@ -56,7 +58,7 @@ class DocumentationController extends Controller
         $htmlContent = $converter->convert($documentation->content);
 
         // Extraer los encabezados para el TOC lateral
-        preg_match_all('/<h([2-4]).*?id="(.*?)".*?>(.*?)<\/h[2-4]>/i', $htmlContent, $matches, \PREG_SET_ORDER);
+        preg_match_all('/<h([2-4]).*?id="(.*?)".*?>(.*?)<\/h[2-4]>/i', $htmlContent, $matches, PREG_SET_ORDER);
 
         $tableOfContents = collect($matches)->map(function ($match) {
             return [

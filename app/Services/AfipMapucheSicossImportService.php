@@ -2,15 +2,21 @@
 
 namespace App\Services;
 
-use RuntimeException;
-use Exception;
-use InvalidArgumentException;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use InvalidArgumentException;
+use RuntimeException;
+
+use function count;
+use function is_string;
+use function ord;
+use function sprintf;
+use function strlen;
 
 class AfipMapucheSicossImportService
 {
@@ -70,15 +76,15 @@ class AfipMapucheSicossImportService
                 $lineNumber++;
                 try {
                     // Validar longitud después de eliminar saltos de línea
-                    if (\strlen($line) !== 500) {
+                    if (strlen($line) !== 500) {
                         // Solo ajustar si la longitud está cerca de 500
-                        if (abs(\strlen($line) - 500) > 5) {
-                            $stats['errors'][] = "Línea {$lineNumber} con longitud inválida: " . \strlen($line);
+                        if (abs(strlen($line) - 500) > 5) {
+                            $stats['errors'][] = "Línea {$lineNumber} con longitud inválida: " . strlen($line);
                             continue;
                         }
 
                         // Ajustar longitud si es necesario
-                        $line = \strlen($line) > 500 ? substr($line, 0, 500) : str_pad($line, 500, ' ');
+                        $line = strlen($line) > 500 ? substr($line, 0, 500) : str_pad($line, 500, ' ');
                         $stats['warnings'][] = "Línea {$lineNumber} ajustada a 500 caracteres";
                     }
 
@@ -95,7 +101,7 @@ class AfipMapucheSicossImportService
                     $stats['processed']++;
 
                     // Procesar batch cuando alcanza el tamaño definido
-                    if (\count($batch) >= self::BATCH_SIZE) {
+                    if (count($batch) >= self::BATCH_SIZE) {
                         $this->processBatch($batch, $stats);
                         $batch = [];
                         $this->freeMemory();
@@ -103,8 +109,8 @@ class AfipMapucheSicossImportService
                         if ($progressCallback) {
                             $progressCallback([
                                 'processed' => $stats['processed'],
-                                'errors' => \count($stats['errors']),
-                                'warnings' => \count($stats['warnings']),
+                                'errors' => count($stats['errors']),
+                                'warnings' => count($stats['warnings']),
                                 'memory' => $this->formatMemoryUsage(memory_get_usage(true)),
                             ]);
                         }
@@ -199,7 +205,7 @@ class AfipMapucheSicossImportService
         $line = rtrim($line, "\r\n");
 
         // Validar líneas de 499 caracteres (ajustado según el análisis)
-        return \strlen($line) === 499;
+        return strlen($line) === 499;
     }
 
     /**
@@ -224,9 +230,9 @@ class AfipMapucheSicossImportService
             $line = rtrim($line, "\r\n");
 
             // Verificar longitud correcta
-            if (\strlen($line) !== 499) {
-                Log::warning("Línea {$lineNumber} con longitud incorrecta: " . \strlen($line));
-                $line = \strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
+            if (strlen($line) !== 499) {
+                Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
+                $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
             }
 
             $structure = $this->getFileStructure();
@@ -328,7 +334,7 @@ class AfipMapucheSicossImportService
                             'posición' => $i,
                             'caracter' => $char,
                             'valor_hex' => bin2hex($char),
-                            'valor_ascii' => \ord($char),
+                            'valor_ascii' => ord($char),
                         ];
                     }
                 }
@@ -352,7 +358,7 @@ class AfipMapucheSicossImportService
                     'caracteres_especiales' => $specialChars,
                     'variantes_encoding' => $encodingVariants,
                     'línea_1_longitud' => [
-                        'original' => \strlen($line),
+                        'original' => strlen($line),
                         'utf8' => mb_strlen($encodingVariants['utf8']),
                         'iso' => mb_strlen($encodingVariants['iso']),
                         'ascii' => mb_strlen($encodingVariants['ascii']),
@@ -408,7 +414,7 @@ class AfipMapucheSicossImportService
                 // Guardar línea original
                 $sampleData[$currentLine] = [
                     'línea_original' => $line,
-                    'longitud' => \strlen($line),
+                    'longitud' => strlen($line),
                     'encoding_detectado' => mb_detect_encoding($line, ['UTF-8', 'ISO-8859-1', 'ASCII', 'Windows-1252'], true) ?: 'Desconocido',
                 ];
 
@@ -473,7 +479,7 @@ class AfipMapucheSicossImportService
                 // Información básica
                 $lineInfo = [
                     'numero_linea' => $lineNumber,
-                    'longitud_original' => \strlen($line),
+                    'longitud_original' => strlen($line),
                     'bytes' => mb_strlen($line, '8bit'),
                 ];
 
@@ -620,8 +626,8 @@ class AfipMapucheSicossImportService
             $lineNumber++;
 
             $longitudes[$lineNumber] = [
-                'original' => \strlen($line),
-                'sin_cr_lf' => \strlen(rtrim($line, "\r\n")),
+                'original' => strlen($line),
+                'sin_cr_lf' => strlen(rtrim($line, "\r\n")),
                 'bytes' => mb_strlen($line, '8bit'),
                 'final_hex' => bin2hex(substr($line, -2)),
                 'tiene_cr' => str_contains($line, "\r"),
@@ -732,11 +738,11 @@ class AfipMapucheSicossImportService
                 ->table((new AfipMapucheSicoss())->getTable())
                 ->insert($batch);
 
-            $stats['imported'] += \count($batch);
+            $stats['imported'] += count($batch);
         } catch (Exception $e) {
             $stats['errors'][] = 'Error al procesar lote: ' . $e->getMessage();
             Log::error('Error al procesar lote SICOSS', [
-                'batch_size' => \count($batch),
+                'batch_size' => count($batch),
             ]);
         }
     }
@@ -744,7 +750,7 @@ class AfipMapucheSicossImportService
     private function logProgress(array $chunk, array $stats): void
     {
         Log::info('Progreso de importación SICOSS', [
-            'registros_procesados' => \count($chunk),
+            'registros_procesados' => count($chunk),
             'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
         ]);
     }
@@ -805,7 +811,7 @@ class AfipMapucheSicossImportService
     {
         if ($progressCallback) {
             $progressCallback([
-                'processed' => \count($chunk),
+                'processed' => count($chunk),
                 'memory' => $this->formatMemoryUsage(memory_get_usage(true)),
             ]);
         }
@@ -844,7 +850,7 @@ class AfipMapucheSicossImportService
         Log::info('Importación SICOSS completada', [
             'registros_importados' => $stats['imported'],
             'duplicados' => $stats['duplicates'],
-            'errores' => \count($stats['errors']),
+            'errores' => count($stats['errors']),
             'tiempo_ejecucion' => round($executionTime, 2) . 's',
             'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
         ]);
@@ -866,7 +872,7 @@ class AfipMapucheSicossImportService
             'registros_procesados' => $stats['imported'],
             'registros_por_segundo' => round($stats['imported'] / $this->getExecutionTime(), 2),
             'memoria_pico' => $this->formatMemoryUsage(memory_get_peak_usage(true)),
-            'errores' => \count($stats['errors']),
+            'errores' => count($stats['errors']),
             'duplicados' => $stats['duplicates'],
         ]);
     }
@@ -890,9 +896,9 @@ class AfipMapucheSicossImportService
     {
         $seconds = $this->getExecutionTime();
         if ($seconds < 60) {
-            return \sprintf('%.2f segundos', $seconds);
+            return sprintf('%.2f segundos', $seconds);
         }
-        return \sprintf('%d minutos %d segundos', floor($seconds / 60), $seconds % 60);
+        return sprintf('%d minutos %d segundos', floor($seconds / 60), $seconds % 60);
     }
 
     private function calculateProgress(int $processed, int $total): int
@@ -907,7 +913,7 @@ class AfipMapucheSicossImportService
     {
         // Aplicar EncodingService a todos los campos string
         $sanitizedData = array_map(function ($value) {
-            return \is_string($value) ? EncodingService::toUtf8($value) : $value;
+            return is_string($value) ? EncodingService::toUtf8($value) : $value;
         }, $data);
 
         AfipMapucheSicoss::updateOrCreate(
@@ -938,7 +944,7 @@ class AfipMapucheSicossImportService
 
     private function validateParsedData(array $data): void
     {
-        if (empty($data['cuil']) || \strlen($data['cuil']) !== 11) {
+        if (empty($data['cuil']) || strlen($data['cuil']) !== 11) {
             throw new Exception('CUIL inválido');
         }
 
@@ -953,8 +959,8 @@ class AfipMapucheSicossImportService
     {
         return !empty($data['cuil']) &&
             !empty($data['periodo_fiscal']) &&
-            \strlen($data['cuil']) === 11 &&
-            \strlen($data['periodo_fiscal']) === 6;
+            strlen($data['cuil']) === 11 &&
+            strlen($data['periodo_fiscal']) === 6;
     }
 
     /**
@@ -1065,9 +1071,9 @@ class AfipMapucheSicossImportService
     {
         $problemChars = [];
 
-        for ($i = 0; $i < \strlen($line); $i++) {
+        for ($i = 0; $i < strlen($line); $i++) {
             $char = $line[$i];
-            $ord = \ord($char);
+            $ord = ord($char);
 
             // Buscar caracteres fuera del rango ASCII básico
             if ($ord > 127) {
@@ -1145,10 +1151,10 @@ class AfipMapucheSicossImportService
             $line = rtrim($line, "\r\n");
 
             // 2. Verificar longitud (debe ser 500 caracteres exactamente)
-            if (\strlen($line) != 499) {
-                Log::warning("Línea {$lineNumber} con longitud incorrecta: " . \strlen($line));
+            if (strlen($line) != 499) {
+                Log::warning("Línea {$lineNumber} con longitud incorrecta: " . strlen($line));
                 // Ajustar longitud si es necesario
-                $line = \strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
+                $line = strlen($line) > 499 ? substr($line, 0, 499) : str_pad($line, 499, ' ');
             }
 
             // 3. Convertir encoding (de ISO-8859-1 o Windows-1252 a UTF-8)
@@ -1371,9 +1377,9 @@ class AfipMapucheSicossImportService
         $firstLine = rtrim($firstLine, "\r\n");
 
         // Verificar longitud - ajustado a 500 caracteres según análisis
-        if (\strlen($firstLine) !== 499) {
-            Log::error('Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: ' . \strlen($firstLine));
-            throw new InvalidArgumentException('Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: ' . \strlen($firstLine));
+        if (strlen($firstLine) !== 499) {
+            Log::error('Formato de archivo inválido. Se esperan registros de 499 caracteres. Se recibió: ' . strlen($firstLine));
+            throw new InvalidArgumentException('Formato de archivo inválido. Se esperan registros de 500 caracteres pero se recibieron: ' . strlen($firstLine));
         }
     }
 
@@ -1498,13 +1504,13 @@ class AfipMapucheSicossImportService
     private function registrarBytesProblematicos(string $texto): void
     {
         $bytes = [];
-        for ($i = 0; $i < \strlen($texto); $i++) {
-            $byte = \ord($texto[$i]);
+        for ($i = 0; $i < strlen($texto); $i++) {
+            $byte = ord($texto[$i]);
             if ($byte > 127) { // Solo registrar bytes no ASCII
                 $bytes[] = [
                     'posición' => $i,
                     'byte' => $byte,
-                    'hex' => \sprintf('0x%02X', $byte),
+                    'hex' => sprintf('0x%02X', $byte),
                     'contexto' => substr($texto, max(0, $i - 5), 10),
                 ];
             }

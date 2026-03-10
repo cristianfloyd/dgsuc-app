@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Sicoss;
 
-use App\Models\Mapuche\MapucheConfig;
 use App\Models\Dh01;
+use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Contracts\SicossCalculoRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Reportes\Resources\RepFallecidos\Pages;
 
-use Exception;
 use App\Filament\Reportes\Resources\RepFallecidos\RepFallecidos\RepFallecidoResource;
 use App\Services\TableManager\TableInitializationManager;
+use Exception;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

@@ -2,11 +2,11 @@
 
 namespace App\Services\MaterializedView;
 
-use Exception;
-use Throwable;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ConceptoListadoViewService
 {

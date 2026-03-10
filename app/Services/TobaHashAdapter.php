@@ -7,6 +7,11 @@ namespace App\Services;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
+use function in_array;
+use function ord;
+use function sprintf;
+use function strlen;
+
 /**
  * Implementación moderna de la clase toba_hash para Laravel optimizada para PHP 8.3
  * Replica la funcionalidad de Toba para el manejo de passwords usando características modernas de PHP.
@@ -54,7 +59,7 @@ class TobaHashAdapter
     {
         $hash = crypt($input, $this->getSalt());
 
-        if (\strlen($hash) <= 13) {
+        if (strlen($hash) <= 13) {
             throw new Exception('Se produjo un error al crear el hash');
         }
 
@@ -113,7 +118,7 @@ class TobaHashAdapter
      */
     public function esSoportado(string $algoritmo): bool
     {
-        return \in_array(strtoupper($algoritmo), ['BCRYPT', 'SHA256', 'SHA512', 'MD5'], true);
+        return in_array(strtoupper($algoritmo), ['BCRYPT', 'SHA256', 'SHA512', 'MD5'], true);
     }
 
     /**
@@ -128,7 +133,7 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'bcrypt',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : null,
-                'valido' => \strlen($hash) === 60,
+                'valido' => strlen($hash) === 60,
             ];
         }
 
@@ -137,7 +142,7 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'sha256',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
-                'valido' => \strlen($hash) > 20,
+                'valido' => strlen($hash) > 20,
             ];
         }
 
@@ -146,14 +151,14 @@ class TobaHashAdapter
             return [
                 'algoritmo' => 'sha512',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
-                'valido' => \strlen($hash) > 20,
+                'valido' => strlen($hash) > 20,
             ];
         }
 
         if (str_starts_with($hash, '$1$')) {
             return [
                 'algoritmo' => 'md5',
-                'valido' => \strlen($hash) === 34,
+                'valido' => strlen($hash) === 34,
             ];
         }
 
@@ -186,9 +191,9 @@ class TobaHashAdapter
     private function getSalt(): string
     {
         $salt = match (strtoupper($this->metodo)) {
-            'BCRYPT' => '$2y$' . \sprintf('%02d$', $this->rounds),
-            'SHA512' => \sprintf('$6$rounds=%d$', $this->calculateRounds()),
-            'SHA256' => \sprintf('$5$rounds=%d$', $this->calculateRounds()),
+            'BCRYPT' => '$2y$' . sprintf('%02d$', $this->rounds),
+            'SHA512' => sprintf('$6$rounds=%d$', $this->calculateRounds()),
+            'SHA256' => sprintf('$5$rounds=%d$', $this->calculateRounds()),
             'MD5' => '$1$',
             default => throw new Exception("Algoritmo de hash no soportado: {$this->metodo}")
         };
@@ -239,7 +244,7 @@ class TobaHashAdapter
                 $bytes = fread($handle, $count);
                 fclose($handle);
 
-                if ($bytes !== false && \strlen($bytes) === $count) {
+                if ($bytes !== false && strlen($bytes) === $count) {
                     return $bytes;
                 }
             }
@@ -264,10 +269,10 @@ class TobaHashAdapter
     private function encodeBytes(string $input): string
     {
         $output = '';
-        $inputLength = \strlen($input);
+        $inputLength = strlen($input);
 
         for ($i = 0; $i < $inputLength; $i += 3) {
-            $c1 = \ord($input[$i]);
+            $c1 = ord($input[$i]);
             $output .= self::ITOA64[$c1 >> 2];
             $c1 = ($c1 & 0x03) << 4;
 
@@ -276,7 +281,7 @@ class TobaHashAdapter
                 break;
             }
 
-            $c2 = \ord($input[$i + 1]);
+            $c2 = ord($input[$i + 1]);
             $c1 |= $c2 >> 4;
             $output .= self::ITOA64[$c1];
             $c1 = ($c2 & 0x0f) << 2;
@@ -286,7 +291,7 @@ class TobaHashAdapter
                 break;
             }
 
-            $c3 = \ord($input[$i + 2]);
+            $c3 = ord($input[$i + 2]);
             $c1 |= $c3 >> 6;
             $output .= self::ITOA64[$c1];
             $output .= self::ITOA64[$c3 & 0x3f];
@@ -300,6 +305,6 @@ class TobaHashAdapter
      */
     private function isBcryptHash(string $hash): bool
     {
-        return \in_array(substr($hash, 0, 4), self::BCRYPT_INDICATORS, true);
+        return in_array(substr($hash, 0, 4), self::BCRYPT_INDICATORS, true);
     }
 }

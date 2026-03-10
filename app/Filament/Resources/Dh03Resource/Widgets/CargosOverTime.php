@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources\Dh03Resource\Widgets;
 
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\Utilities\Get;
-use Exception;
 use App\Contracts\CargoFilterServiceInterface;
 use App\Models\Dh03;
 use App\Models\Dh11;
 use Carbon\Carbon;
+use Exception;
 use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\DB;
+
+use function count;
 
 class CargosOverTime extends ChartWidget
 {
@@ -181,7 +183,7 @@ class CargosOverTime extends ChartWidget
     // Formatear los datos para el gráfico
     private function formatData(array $labels, $data)
     {
-        $formattedData = array_fill(0, \count($labels), 0);
+        $formattedData = array_fill(0, count($labels), 0);
         foreach ($data as $item) {
             $index = array_search($item->month, $labels);
             if ($index !== false) {

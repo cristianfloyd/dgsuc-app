@@ -7,6 +7,8 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+use function is_array;
+
 /**
  * Servicio para manejar consultas relacionadas con conceptos de listado.
  *
@@ -87,7 +89,7 @@ class ConceptoListadoQueryService implements ConceptoListadoServiceInterface
                 'dh21.impp_conce',
             ])
             ->when($codn_conce !== null, function ($query) use ($codn_conce) {
-                return \is_array($codn_conce)
+                return is_array($codn_conce)
                     ? $query->whereIn('dh21.codn_conce', $codn_conce)
                     : $query->where('dh21.codn_conce', $codn_conce);
             })

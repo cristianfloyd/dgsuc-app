@@ -7,6 +7,7 @@ use App\Filament\Liquidaciones\Resources\Dh21s\Pages\EditDh21;
 use App\Filament\Liquidaciones\Resources\Dh21s\Pages\ListDh21s;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Models\Dh21;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -15,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Livewire\Livewire;
+use UnitEnum;
 
 class Dh21Resource extends Resource
 {
@@ -26,9 +28,9 @@ class Dh21Resource extends Resource
 
     protected static ?string $slug = 'dh21';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {
@@ -143,7 +145,7 @@ class Dh21Resource extends Resource
     public static function generarReporte($record)
     {
         // Verificamos que el registro tenga un ID válido
-        if (! $record->nro_liqui) {
+        if (!$record->nro_liqui) {
             Notification::make()
                 ->title('Error')
                 ->body('No se pudo generar el reporte. Liquidación inválida.')
@@ -171,7 +173,7 @@ class Dh21Resource extends Resource
     protected static function descargarReportePDF($liquidacionId)
     {
         $reporteHtml = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
-        $nombreArchivo = 'orden_pago_'.$liquidacionId.'_'.now()->format('YmdHis').'.pdf';
+        $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
         $pdf = Pdf::loadHTML($reporteHtml);
 
         return response()->streamDownload(

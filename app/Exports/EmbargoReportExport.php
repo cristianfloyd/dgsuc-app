@@ -25,8 +25,8 @@ class EmbargoReportExport implements WithMultipleSheets, WithProperties
     /**
      * Constructor.
      *
-     * @param  Builder  $query  Consulta para obtener los datos
-     * @param  string  $periodoLiquidacion  Período de liquidación (opcional)
+     * @param Builder $query Consulta para obtener los datos
+     * @param string $periodoLiquidacion Período de liquidación (opcional)
      */
     public function __construct(Builder $query, string $periodoLiquidacion = '')
     {

@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Models\UploadedFile;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class FileUploadRepository implements FileUploadRepositoryInterface
 {

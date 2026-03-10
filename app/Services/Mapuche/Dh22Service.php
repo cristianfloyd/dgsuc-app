@@ -2,8 +2,8 @@
 
 namespace App\Services\Mapuche;
 
-use Exception;
 use App\Models\Mapuche\Dh22;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

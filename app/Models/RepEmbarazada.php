@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Database\Factories\RepEmbarazadaFactory;
 use App\Data\RepEmbarazadaData;
 use App\Services\EncodingService;
 use App\Services\RepEmbarazadaService;
 use App\Traits\HasUacadScope;
 use App\Traits\MapucheConnectionTrait;
+use Database\Factories\RepEmbarazadaFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

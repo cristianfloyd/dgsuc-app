@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use App\Scripts\GenerarSicossLegajo;
 use Illuminate\Console\Command;
 
+use function array_slice;
+use function count;
+
 /**
  * Comando Artisan simple para generar archivos SICOSS.
  */
@@ -32,7 +35,7 @@ class GenerarSicossCommand extends Command
         $numeroLegajo = $legajo ? (int) $legajo : null;
 
         // Crear instancia del generador
-        $generador = new GenerarSicossLegajo;
+        $generador = new GenerarSicossLegajo();
 
         // Mostrar mensaje inicial
         if ($numeroLegajo) {
@@ -138,15 +141,15 @@ class GenerarSicossCommand extends Command
         $this->newLine();
 
         // Mostrar algunos legajos como muestra (máximo 10)
-        $legajosMuestra = \array_slice($datos['legajos'], 0, 10);
+        $legajosMuestra = array_slice($datos['legajos'], 0, 10);
 
         $this->info('👥 Legajos Procesados (muestra):');
         foreach ($legajosMuestra as $legajo) {
             $this->line("   • {$legajo['legajo']} - {$legajo['apellido_nombres']} - Bruto: $ {$legajo['bruto']}");
         }
 
-        if (\count($datos['legajos']) > 10) {
-            $restantes = \count($datos['legajos']) - 10;
+        if (count($datos['legajos']) > 10) {
+            $restantes = count($datos['legajos']) - 10;
             $this->line("   ... y {$restantes} legajos más");
         }
     }

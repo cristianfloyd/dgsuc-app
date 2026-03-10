@@ -2,13 +2,17 @@
 
 namespace App\Services\Mapuche;
 
-use InvalidArgumentException;
+use App\Models\Mapuche\MapucheConfig;
+use App\Repositories\Sicoss\Dh03Repository;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Cache;
-use App\Models\Mapuche\MapucheConfig;
-use App\Repositories\Sicoss\Dh03Repository;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+
+use function count;
+use function in_array;
+use function is_array;
 
 class CargoSacService
 {
@@ -243,12 +247,12 @@ class CargoSacService
         $vinculos = []; //arreglo para ir sumando los imp. para el caso de cargos vinculados
 
         foreach ($rs as $row) {
-            if (\in_array($row['nro_cargo'], $vinculos)) {
+            if (in_array($row['nro_cargo'], $vinculos)) {
                 continue;
             }
 
             if ($idAgente != $row['nro_legaj'] && $idAgente != -1) {
-                if (\count($cargosVigentes) == 0) {
+                if (count($cargosVigentes) == 0) {
                     $cv = [];
                     $cv['nro_cargo'] = '-';
                     $cv['fecha_alta'] = '--/--/----';
@@ -286,7 +290,7 @@ class CargoSacService
                     $continuarVinculos = true;
                     $cargovinculado = $row;
                     while ($continuarVinculos) {
-                        if (\count($meses) == 0) {
+                        if (count($meses) == 0) {
                             $meses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                         }
                         for ($j = 1; $j <= 12; $j++) {
@@ -335,7 +339,7 @@ class CargoSacService
                         $cv['vinculado'] = 'VINC';
                         $cargosVigentes[] = $cv;
                     }
-                    if (\count($legajo) == 0) {
+                    if (count($legajo) == 0) {
                         $legajo['nro_legaj'] = $row['nro_legaj'];
                         $legajo['nyapel'] = $row['nyapel'];
                         $legajo['documento'] = $row['documento'];
@@ -368,7 +372,7 @@ class CargoSacService
                     $detalleCargo = [];
                     $meses = [];
 
-                    if (\count($legajo) == 0) {
+                    if (count($legajo) == 0) {
                         $legajo['nro_legaj'] = $row['nro_legaj'];
                         $legajo['nyapel'] = $row['nyapel'];
                         $legajo['documento'] = $row['documento'];
@@ -419,9 +423,9 @@ class CargoSacService
                 }
             }
         }
-        if (\count($rs) > 0) {
+        if (count($rs) > 0) {
             //Es para el ultimo caso
-            if (\count($cargosVigentes) == 0) {
+            if (count($cargosVigentes) == 0) {
                 $cv = [];
                 $cv['nro_cargo'] = '-';
                 $cv['fecha_alta'] = '--/--/----';
@@ -513,7 +517,7 @@ class CargoSacService
                    ';
 
         $result = DB::connection(MapucheConfig::getStaticConnectionName())->select($sql);
-        if (\count($result) > 0) {
+        if (count($result) > 0) {
             return $result[0];
         }
 
@@ -545,7 +549,7 @@ class CargoSacService
                                dh10.nro_cargo = $nro_cargo
                            ";
             $datos_cargo_sac = DB::connection(MapucheConfig::getStaticConnectionName())->selectOne($sql);
-            if (!\is_array($datos_cargo_sac)) {
+            if (!is_array($datos_cargo_sac)) {
                 $datos_cargo_sac = [];
             } // retorna false si no obtiene datos y despues se lo trata como array
             // Si no existe o es alta preparo la nueva entrada para dh10, necesito igualar todos los valores en cero sino se guarda como nulls

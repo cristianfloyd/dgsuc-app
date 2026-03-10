@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use function count;
+
 class SubsetSumFinder
 {
     /**
@@ -62,13 +64,13 @@ class SubsetSumFinder
         }
 
         // Si ya procesamos todos los elementos o la suma excede demasiado el objetivo, terminamos
-        if ($index >= \count($items) || $currentSum > $targetSum * 1.5) {
+        if ($index >= count($items) || $currentSum > $targetSum * 1.5) {
             return;
         }
 
         // Optimización: si con todos los elementos restantes no llegamos al objetivo, terminamos
         $remainingSum = 0;
-        for ($i = $index; $i < \count($items); $i++) {
+        for ($i = $index; $i < count($items); $i++) {
             $remainingSum += $items[$i]['importe'];
         }
 

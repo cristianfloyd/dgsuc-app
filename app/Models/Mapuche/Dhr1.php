@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use DateTime;
 use App\Traits\MapucheConnectionTrait;
+use DateTime;
 use Illuminate\Database\Eloquent\Casts\AsStringable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;

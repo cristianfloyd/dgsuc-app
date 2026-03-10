@@ -94,8 +94,8 @@ interface WorkflowServiceInterface
     /**
      * Marca un paso como fallido en el flujo de trabajo.
      *
-     * @param  string  $step  El paso que se ha marcado como fallido.
-     * @param  string|null  $message  Un mensaje opcional que describe el motivo del fallo.
+     * @param string $step El paso que se ha marcado como fallido.
+     * @param string|null $message Un mensaje opcional que describe el motivo del fallo.
      */
     public function failStep(string $step, ?string $message = null): void;
 

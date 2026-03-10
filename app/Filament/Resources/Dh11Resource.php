@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Utilities\Set;
-use App\Filament\Resources\Dh11Resource\Pages\ListDh11s;
 use App\Filament\Resources\Dh11Resource\Pages\CreateDh11;
 use App\Filament\Resources\Dh11Resource\Pages\EditDh11;
-use App\Filament\Resources\Dh11Resource\Pages;
+use App\Filament\Resources\Dh11Resource\Pages\ListDh11s;
 use App\Models\Dh11;
 use App\Traits\CategoriasConstantTrait;
+use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -20,6 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class Dh11Resource extends Resource
 {
@@ -31,9 +32,9 @@ class Dh11Resource extends Resource
 
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string | UnitEnum | null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

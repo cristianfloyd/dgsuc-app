@@ -39,7 +39,7 @@ class TobaUserProvider implements UserProvider
     {
         Log::debug('TobaUserProvider retrieveByCredentials start', ['usuario' => $credentials['usuario'] ?? 'not_set']);
 
-        if (! isset($credentials['usuario'])) {
+        if (!isset($credentials['usuario'])) {
             Log::debug('TobaUserProvider: usuario not set in credentials');
 
             return null;
@@ -47,7 +47,7 @@ class TobaUserProvider implements UserProvider
 
         // Buscar usuario de Toba con corrección de encoding automática
         $tobaUser = ApexUsuario::where('usuario', $credentials['usuario'])->first();
-        if (! $tobaUser) {
+        if (!$tobaUser) {
             Log::debug('TobaUserProvider: Toba user not found', ['usuario' => $credentials['usuario']]);
 
             return null;
@@ -58,7 +58,7 @@ class TobaUserProvider implements UserProvider
         // Buscar usuario en Laravel: primero por toba_usuario, luego por name
         $laravelUser = User::where('toba_usuario', $credentials['usuario'])->first();
 
-        if (! $laravelUser) {
+        if (!$laravelUser) {
             // Si no existe por toba_usuario, buscar por name o username (usuario existente de Laravel)
             $laravelUser = User::where('name', $credentials['usuario'])
                 ->orWhere('username', $credentials['usuario'])
@@ -82,7 +82,7 @@ class TobaUserProvider implements UserProvider
                 $laravelUser = User::create([
                     'name' => $credentials['usuario'], // name = toba_usuario
                     'username' => $credentials['usuario'], // username = toba_usuario
-                    'email' => $tobaUser->email ?? $credentials['usuario'].'@toba.local',
+                    'email' => $tobaUser->email ?? $credentials['usuario'] . '@toba.local',
                     'password' => bcrypt('toba_user'), // Password dummy, no se usa
                     'toba_usuario' => $credentials['usuario'],
                     'email_verified_at' => now(),
@@ -109,7 +109,7 @@ class TobaUserProvider implements UserProvider
                 $updates['email'] = $tobaUser->email;
             }
 
-            if (! empty($updates)) {
+            if (!empty($updates)) {
                 $laravelUser->update($updates);
                 Log::debug('Updated synchronized Laravel user', [
                     'toba_usuario' => $credentials['usuario'],

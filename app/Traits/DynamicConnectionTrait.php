@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Connection;
 use App\Services\DatabaseConnectionService;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

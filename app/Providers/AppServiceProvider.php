@@ -76,14 +76,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SicossExportService::class, function ($app) {
-            return new SicossExportService;
+            return new SicossExportService();
         });
 
         $this->app->bind(Dh16RepositoryInterface::class, Dh16Repository::class);
 
         $this->app->bind(OrdenesDescuentoTableService::class, function ($app) {
             return new OrdenesDescuentoTableService(
-                new OrdenesDescuentoTableDefinition,
+                new OrdenesDescuentoTableDefinition(),
             );
         });
 
@@ -106,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
             ->needs(DatabaseOperationInterface::class)
             ->give(function ($app) {
                 // Usar conexión dinámica que respeta el EnhancedDatabaseConnectionService
-                return new DatabaseOperationRepository;
+                return new DatabaseOperationRepository();
             });
     }
 
@@ -116,7 +116,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Queue::before(function ($job) {
-            return (new InspectJobDependencies)->handle($job, function ($job) {
+            return (new InspectJobDependencies())->handle($job, function ($job) {
                 return $job;
             });
         });

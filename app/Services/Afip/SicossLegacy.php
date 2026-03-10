@@ -2,7 +2,6 @@
 
 namespace App\Services\Afip;
 
-use Exception;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh21RepositoryInterface;
@@ -17,7 +16,10 @@ use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class SicossLegacy
 {
@@ -183,9 +185,9 @@ class SicossLegacy
             $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
 
             Log::info('Licencias de agentes obtenidas', [
-                'no_remuneradas' => \count($licencias_agentes_no_remunem),
-                'remuneradas' => \count($licencias_agentes_remunem),
-                'total' => \count($licencias_agentes),
+                'no_remuneradas' => count($licencias_agentes_no_remunem),
+                'remuneradas' => count($licencias_agentes_remunem),
+                'total' => count($licencias_agentes),
             ]);
 
             return $licencias_agentes;
@@ -284,7 +286,7 @@ class SicossLegacy
             }
             // Transformar los totales a formato recordset
             Log::info('Transformando totales a recordset', [
-                'cantidad_totales' => \count($totales),
+                'cantidad_totales' => count($totales),
             ]);
 
             return $this->sicossFormateadorRepository->transformarARecordset($totales);

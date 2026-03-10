@@ -14,6 +14,7 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Mapuche\TableSelectorService;
 use App\Services\SicossExportService;
 use App\Traits\FilamentAfipMapucheSicossTableTrait;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -30,6 +31,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
+use UnitEnum;
+
+use function strlen;
+
+use const PHP_EOL;
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 class AfipMapucheSicossResource extends Resource
 {
@@ -37,9 +45,9 @@ class AfipMapucheSicossResource extends Resource
 
     protected static ?string $model = AfipMapucheSicoss::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
+    protected static string|UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'Mapuche SICOSS';
 
@@ -292,8 +300,9 @@ class AfipMapucheSicossResource extends Resource
      * requerido por el sistema SICOSS. El archivo se guarda en el directorio temporal y se
      * devuelve la ruta completa del archivo generado.
      *
-     * @param  ?Collection  $registros  Una colección de registros a incluir en el archivo SICOSS.
-     *                                  Si no se proporciona, se utilizarán todos los registros.
+     * @param ?Collection $registros Una colección de registros a incluir en el archivo SICOSS.
+     *                               Si no se proporciona, se utilizarán todos los registros.
+     *
      * @return string La ruta completa del archivo SICOSS generado.
      */
     public static function generarArchivoSicoss(?Collection $registros = null): string
@@ -308,7 +317,7 @@ class AfipMapucheSicossResource extends Resource
             $numeroFormateado = number_format($valor, 2, '.', '');
 
             // Rellena con ceros a la izquierda hasta alcanzar la longitud deseada
-            return str_pad($numeroFormateado, $longitud, '0', \STR_PAD_LEFT);
+            return str_pad($numeroFormateado, $longitud, '0', STR_PAD_LEFT);
         };
 
         // Nueva función para manejar strings con caracteres especiales
@@ -320,32 +329,32 @@ class AfipMapucheSicossResource extends Resource
             $valor = substr($valor, 0, $longitud);
 
             // Rellenar con espacios hasta alcanzar la longitud exacta
-            return str_pad($valor, $longitud, ' ', \STR_PAD_RIGHT);
+            return str_pad($valor, $longitud, ' ', STR_PAD_RIGHT);
         };
 
         foreach ($registros as $registro) {
             $linea = '';
 
             // Datos de identificación personal
-            $linea .= str_pad($registro->cuil ?? '0', 11, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cuil ?? '0', 11, '0', STR_PAD_LEFT);
             $linea .= $formatearString($registro->apnom, 30);
 
             // Datos familiares
             $linea .= $registro->conyuge ? '1' : '0';
-            $linea .= str_pad($registro->cant_hijos ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cant_hijos ?? '0', 2, '0', STR_PAD_LEFT);
 
             // Datos situación laboral
-            $linea .= str_pad($registro->cod_situacion ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_cond ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_act ?? '0', 3, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_situacion ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_cond ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_act ?? '0', 3, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_zona ?? '0', 2, '0', STR_PAD_LEFT);
 
             // Datos aportes y obra social
 
             $linea .= $formatearDecimal($registro->porc_aporte, 5);
-            $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->cod_os ?? '0', 6, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->cant_adh ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_mod_cont ?? '0', 3, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_os ?? '0', 6, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->cant_adh ?? '0', 2, '0', STR_PAD_LEFT);
 
             // Remuneraciones principales
             $linea .= $formatearDecimal($registro->rem_total, 12);
@@ -355,7 +364,7 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->imp_adic_os, 9);
             $linea .= $formatearDecimal($registro->exc_aport_ss, 9);
             $linea .= $formatearDecimal($registro->exc_aport_os, 9);
-            $linea .= str_pad($registro->prov ?? 'CABA', 50, ' ', \STR_PAD_RIGHT);
+            $linea .= str_pad($registro->prov ?? 'CABA', 50, ' ', STR_PAD_RIGHT);
 
             // Remuneraciones adicionales
             $linea .= $formatearDecimal($registro->rem_impo2, 12);
@@ -363,7 +372,7 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->rem_impo4, 12);
 
             // Datos siniestros y tipo empresa
-            $linea .= str_pad($registro->cod_siniestrado ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cod_siniestrado ?? '0', 2, '0', STR_PAD_LEFT);
             $linea .= $registro->marca_reduccion ? '1' : '0';
             $linea .= $formatearDecimal($registro->recomp_lrt, 9);
             $linea .= $registro->tipo_empresa ?? '0';
@@ -371,12 +380,12 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $registro->regimen ?? '0';
 
             // Situaciones de revista
-            $linea .= str_pad($registro->sit_rev1 ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev1 ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->sit_rev2 ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev2 ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->sit_rev3 ?? '0', 2, '0', \STR_PAD_LEFT);
-            $linea .= str_pad($registro->dia_ini_sit_rev3 ?? '0', 2, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->sit_rev1 ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev1 ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->sit_rev2 ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev2 ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->sit_rev3 ?? '0', 2, '0', STR_PAD_LEFT);
+            $linea .= str_pad($registro->dia_ini_sit_rev3 ?? '0', 2, '0', STR_PAD_LEFT);
 
             // Conceptos salariales
             $linea .= $formatearDecimal($registro->sueldo_adicc, 12);
@@ -386,7 +395,7 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->vacaciones, 12);
 
             // Datos laborales
-            $linea .= str_pad($registro->cant_dias_trab ?? '0', 9, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->cant_dias_trab ?? '0', 9, '0', STR_PAD_LEFT);
             $linea .= $formatearDecimal($registro->rem_impo5, 12);
             $linea .= $registro->convencionado ? '1' : '0';
             $linea .= $formatearDecimal($registro->rem_impo6, 12);
@@ -397,7 +406,7 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->premios, 12);
             $linea .= $formatearDecimal($registro->rem_dec_788, 12);
             $linea .= $formatearDecimal($registro->rem_imp7, 12);
-            $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->nro_horas_ext ?? '0', 3, '0', STR_PAD_LEFT);
             $linea .= $formatearDecimal($registro->cpto_no_remun, 12);
 
             // Conceptos especiales
@@ -407,26 +416,26 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->contrib_dif, 9);
 
             // Datos finales
-            $linea .= str_pad($registro->hstrab ?? '0', 3, '0', \STR_PAD_LEFT);
+            $linea .= str_pad($registro->hstrab ?? '0', 3, '0', STR_PAD_LEFT);
             $linea .= $registro->seguro ? '1' : '0';
             $linea .= $formatearDecimal($registro->ley, 12);
             $linea .= $formatearDecimal($registro->incsalarial, 12);
             $linea .= $formatearDecimal($registro->remimp11, 12);
 
             // Asegurar que la línea tenga exactamente 500 caracteres
-            if (\strlen($linea) > 500) {
+            if (strlen($linea) > 500) {
                 $linea = substr($linea, 0, 500);
             } else {
-                $linea = str_pad($linea, 500, ' ', \STR_PAD_RIGHT);
+                $linea = str_pad($linea, 500, ' ', STR_PAD_RIGHT);
             }
 
-            $contenido .= $linea.\PHP_EOL;
+            $contenido .= $linea . PHP_EOL;
         }
 
-        $nombreArchivo = 'SICOSS_'.date('Ym').'.txt';
-        Storage::disk('local')->put('tmp/'.$nombreArchivo, $contenido);
+        $nombreArchivo = 'SICOSS_' . date('Ym') . '.txt';
+        Storage::disk('local')->put('tmp/' . $nombreArchivo, $contenido);
 
-        return storage_path('app/tmp/'.$nombreArchivo);
+        return storage_path('app/tmp/' . $nombreArchivo);
     }
 
     /**
@@ -435,8 +444,9 @@ class AfipMapucheSicossResource extends Resource
      * Esta función utiliza el query builder de Livewire para obtener los registros filtrados
      * y luego llama a la función exportarRegistros para generar el archivo de exportación.
      *
-     * @param  $livewire  El objeto Livewire que contiene el query builder filtrado.
-     * @param  string  $formato  El formato de exportación ('txt' o 'excel').
+     * @param $livewire El objeto Livewire que contiene el query builder filtrado.
+     * @param string $formato El formato de exportación ('txt' o 'excel').
+     *
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistrosFiltrados($livewire, string $formato = 'txt'): Response
@@ -449,8 +459,9 @@ class AfipMapucheSicossResource extends Resource
     /**
      * Exporta los registros proporcionados a un archivo.
      *
-     * @param  Collection  $registros  Los registros a exportar.
-     * @param  string  $formato  El formato de exportación ('txt' o 'excel').
+     * @param Collection $registros Los registros a exportar.
+     * @param string $formato El formato de exportación ('txt' o 'excel').
+     *
      * @return Response El objeto Response que contiene el archivo de exportación.
      */
     protected static function exportarRegistros(Collection $registros, string $formato = 'txt'): Response

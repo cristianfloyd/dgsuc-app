@@ -2,18 +2,20 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
-use App\Services\Mapuche\PeriodoFiscalService;
 use App\Data\Reportes\TransferResultData;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Mapuche\Bloqueos\RepBloqueo;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Reportes\Interfaces\BloqueosHistorialServiceInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function in_array;
 
 /**
  * Servicio para transferir bloqueos procesados al historial.
@@ -169,7 +171,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         ];
 
         $estadosInvalidos = $bloqueos->filter(
-            fn ($bloqueo) => !\in_array($bloqueo->estado, $estadosValidos),
+            fn ($bloqueo) => !in_array($bloqueo->estado, $estadosValidos),
         );
 
         if ($estadosInvalidos->isNotEmpty()) {

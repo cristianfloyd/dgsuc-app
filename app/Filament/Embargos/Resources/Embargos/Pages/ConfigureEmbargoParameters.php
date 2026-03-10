@@ -46,7 +46,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
 
     public function mount(): void
     {
-        $embargoResource = new EmbargoResource;
+        $embargoResource = new EmbargoResource();
 
         $this->data = $embargoResource->getPropertiesToDisplay();
         foreach ($this->data as $key => $value) {
@@ -130,7 +130,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal(array $periodoFiscal): void
     {
-        $instance = new EmbargoResource;
+        $instance = new EmbargoResource();
         $currentProperties = $instance->getPropertiesToDisplay();
         $this->periodoFiscal = [
             'periodoFiscal' => $periodoFiscal,

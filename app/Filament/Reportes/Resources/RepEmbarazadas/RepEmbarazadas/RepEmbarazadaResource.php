@@ -2,27 +2,26 @@
 
 namespace App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadas;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Reportes\Resources\RepEmbarazadas\Pages\ListRepEmbarazadas;
-use App\Filament\Reportes\Resources\RepEmbarazadas\Pages\EditRepEmbarazada;
 use App\Exports\RepEmbarazadasExport;
 use App\Filament\Reportes\Resources\RepEmbarazadaResource\Pages;
+use App\Filament\Reportes\Resources\RepEmbarazadas\Pages\EditRepEmbarazada;
+use App\Filament\Reportes\Resources\RepEmbarazadas\Pages\ListRepEmbarazadas;
 use App\Models\RepEmbarazada;
 use App\Services\RepEmbarazadaService;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class RepEmbarazadaResource extends Resource
 {
@@ -32,7 +31,7 @@ class RepEmbarazadaResource extends Resource
 
     protected static ?string $navigationLabel = 'Reporte Embarazadas';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string | UnitEnum | null $navigationGroup = 'Dosuba';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema

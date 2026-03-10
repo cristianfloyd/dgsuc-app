@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use Throwable;
 use App\Models\CopyJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,6 +9,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Throwable;
+
+use function count;
 
 class CopyDh21ToConsultaJob implements ShouldQueue
 {
@@ -61,7 +63,7 @@ class CopyDh21ToConsultaJob implements ShouldQueue
                     }
                     if (!empty($insertData)) {
                         DB::connection('pgsql-consulta')->table('dh21')->insert($insertData);
-                        $copyJob->copied_records += \count($insertData);
+                        $copyJob->copied_records += count($insertData);
                         $copyJob->save();
                     }
                 });

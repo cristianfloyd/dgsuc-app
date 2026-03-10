@@ -2,7 +2,6 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use Override;
 use App\Models\Dh03;
 use App\Models\Mapuche\Dh19;
 use App\Services\EncodingService;
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh30' en la base de datos.

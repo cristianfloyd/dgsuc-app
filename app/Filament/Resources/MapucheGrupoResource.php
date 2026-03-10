@@ -2,17 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\MapucheGrupoResource\Pages\CreateMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\Pages\EditMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\Pages\ListMapucheGrupos;
@@ -20,18 +9,29 @@ use App\Filament\Resources\MapucheGrupoResource\Pages\ManageMapucheGrupoLegajos;
 use App\Filament\Resources\MapucheGrupoResource\Pages\ViewMapucheGrupo;
 use App\Filament\Resources\MapucheGrupoResource\RelationManagers\LegajosRelationManager;
 use App\Models\Mapuche\MapucheGrupo;
-use Filament\Forms;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class MapucheGrupoResource extends Resource
 {
     protected static ?string $model = MapucheGrupo::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string | UnitEnum | null $navigationGroup = 'Liquidaciones';
 
     protected static ?string $modelLabel = 'Grupo';
 

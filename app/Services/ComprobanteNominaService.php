@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use Exception;
-use Throwable;
 use App\Models\ComprobanteNominaModel;
 use App\Traits\MapucheConnectionTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class ComprobanteNominaService
 {

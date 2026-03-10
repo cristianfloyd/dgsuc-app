@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Exception;
-use Throwable;
 use App\Models\NovedadesCargoImportModel;
+use Exception;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NovedadesCargoImportService
 {

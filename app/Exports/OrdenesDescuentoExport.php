@@ -96,7 +96,7 @@ class OrdenesDescuentoExport implements FromQuery, ShouldAutoSize, WithBackgroun
     public function styles(Worksheet $sheet)
     {
         $sheet->mergeCells('A1:O1');
-        $sheet->setCellValue('A1', 'REPORTE DE ÓRDENES DE DESCUENTO - '.now()->format('d/m/Y'));
+        $sheet->setCellValue('A1', 'REPORTE DE ÓRDENES DE DESCUENTO - ' . now()->format('d/m/Y'));
 
         // Aplicar filtros a los encabezados
         $lastColumn = 'O';

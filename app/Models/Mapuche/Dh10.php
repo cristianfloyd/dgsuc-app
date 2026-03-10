@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche;
 
-use InvalidArgumentException;
 use App\Models\Dh03;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
@@ -12,6 +11,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use InvalidArgumentException;
+
+use function array_slice;
+use function count;
 
 /**
  * Modelo para la tabla de Brutos Acumulados para SAC (dh10).
@@ -353,13 +356,13 @@ class Dh10 extends Model
         return [
             'total_anual' => $this->total_importes_brutos,
             'promedio_mensual' => $this->promedio_mensual_brutos,
-            'meses_con_importes' => \count($importesConValor),
+            'meses_con_importes' => count($importesConValor),
             'mes_mayor_importe' => $this->getMayorImporteSemestre(1)['importe'] > $this->getMayorImporteSemestre(2)['importe']
                 ? $this->getMayorImporteSemestre(1)
                 : $this->getMayorImporteSemestre(2),
             'tiene_vinculo' => $this->tiene_vinculo,
-            'primer_semestre_total' => array_sum(\array_slice($importes, 0, 6)),
-            'segundo_semestre_total' => array_sum(\array_slice($importes, 6, 6)),
+            'primer_semestre_total' => array_sum(array_slice($importes, 0, 6)),
+            'segundo_semestre_total' => array_sum(array_slice($importes, 6, 6)),
         ];
     }
 
@@ -491,7 +494,7 @@ class Dh10 extends Model
         return Attribute::make(
             get: function (): int|float {
                 $importes = array_filter($this->importes_brutos_mensuales, fn ($importe): bool => $importe > 0);
-                return \count($importes) > 0 ? array_sum($importes) / \count($importes) : 0;
+                return count($importes) > 0 ? array_sum($importes) / count($importes) : 0;
             },
         );
     }

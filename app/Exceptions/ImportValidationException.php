@@ -17,11 +17,11 @@ class ImportValidationException extends Exception
     /**
      * Constructor de la excepción de validación.
      *
-     * @param  string  $message  Mensaje de error
-     * @param  array  $rowData  Datos de la fila que causó el error
-     * @param  int  $rowNumber  Número de fila en el archivo
-     * @param  int  $code  Código de error
-     * @param  Throwable|null  $previous  Excepción previa
+     * @param string $message Mensaje de error
+     * @param array $rowData Datos de la fila que causó el error
+     * @param int $rowNumber Número de fila en el archivo
+     * @param int $code Código de error
+     * @param Throwable|null $previous Excepción previa
      */
     public function __construct(
         string $message,
@@ -34,7 +34,7 @@ class ImportValidationException extends Exception
 
         $this->rowData = $rowData;
         $this->rowNumber = $rowNumber;
-        $this->failures = new Collection;
+        $this->failures = new Collection();
     }
 
     /**

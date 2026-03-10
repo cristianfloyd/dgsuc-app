@@ -2,19 +2,19 @@
 
 namespace App\Services\Reportes;
 
-use App\Data\Reportes\TransferResultData;
-use App\Data\Reportes\CleanupResultData;
-use Exception;
-use App\Models\Mapuche\Bloqueos\RepBloqueo;
-use Illuminate\Support\Collection;
-use App\Services\Mapuche\PeriodoFiscalService;
-use App\Enums\BloqueosEstadoEnum;
 use App\Data\Reportes\ArchiveProcessData;
+use App\Data\Reportes\CleanupResultData;
+use App\Data\Reportes\TransferResultData;
+use App\Enums\BloqueosEstadoEnum;
+use App\Models\Mapuche\Bloqueos\RepBloqueo;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Reportes\Interfaces\BloqueosArchiveOrchestratorInterface;
 use App\Services\Reportes\Interfaces\BloqueosCleanupServiceInterface;
 use App\Services\Reportes\Interfaces\BloqueosHistorialServiceInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

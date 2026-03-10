@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Reportes;
 
-use Exception;
 use App\Enums\ConceptosEmbargoEnum;
 use App\Models\Mapuche\Embargo;
 use App\Models\Reportes\EmbargoReportModel;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

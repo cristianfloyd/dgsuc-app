@@ -2,12 +2,14 @@
 
 namespace App\Filament\Reportes\Resources\LicenciaVigentes\Pages;
 
-use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Reportes\Resources\LicenciaVigentes\LicenciaVigentes\LicenciaVigenteResource;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class ListLicenciaVigentes extends ListRecords
 {
@@ -25,7 +27,7 @@ class ListLicenciaVigentes extends ListRecords
 
         if (!empty($legajos)) {
             Log::info('Montando componente con legajos en sesión', [
-                'legajos_count' => \count($legajos),
+                'legajos_count' => count($legajos),
             ]);
         } else {
             Log::info('Montando componente sin legajos en sesión');

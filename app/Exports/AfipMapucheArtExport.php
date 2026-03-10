@@ -109,7 +109,7 @@ class AfipMapucheArtExport implements FromQuery, ShouldAutoSize, WithColumnForma
                 $lastRow = $event->sheet->getHighestRow();
 
                 // Agregar filtros
-                $event->sheet->setAutoFilter('A1:'.$lastColumn.'1');
+                $event->sheet->setAutoFilter('A1:' . $lastColumn . '1');
 
                 // Ajustar el ancho de las columnas
                 foreach (range('A', $lastColumn) as $column) {
@@ -117,7 +117,7 @@ class AfipMapucheArtExport implements FromQuery, ShouldAutoSize, WithColumnForma
                 }
 
                 // Agregar bordes a toda la tabla
-                $event->sheet->getStyle('A1:'.$lastColumn.$lastRow)->applyFromArray([
+                $event->sheet->getStyle('A1:' . $lastColumn . $lastRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,

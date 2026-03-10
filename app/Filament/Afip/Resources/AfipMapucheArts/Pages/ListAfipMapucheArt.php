@@ -46,7 +46,7 @@ class ListAfipMapucheArt extends ListRecords
                             session('periodo_fiscal', date('Ym')),
                             $livewire->getFilteredTableQuery(),
                         ),
-                        'reporte-afip-art-'.session('periodo_fiscal', date('Ym')).'.xlsx',
+                        'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx',
                     );
                 }),
             PoblarAfipArtAction::make()

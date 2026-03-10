@@ -2,9 +2,9 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Reportes\BloqueosDataModel;
+use Exception;
 use Illuminate\Support\Collection;
 
 /**

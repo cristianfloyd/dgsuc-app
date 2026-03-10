@@ -2,9 +2,9 @@
 
 namespace App\Models\Reportes;
 
-use Exception;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;

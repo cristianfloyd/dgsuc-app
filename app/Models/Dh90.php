@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use App\Data\Dh90Data;
 use App\Traits\CargoQueries;
 use App\Traits\DatabaseSchema;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

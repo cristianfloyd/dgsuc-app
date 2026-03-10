@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
 
-use Override;
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla mapuche.emb_cuenta_judicial.

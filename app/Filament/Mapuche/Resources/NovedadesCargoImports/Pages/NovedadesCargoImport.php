@@ -31,7 +31,7 @@ class NovedadesCargoImport extends ListRecords
     {
         try {
             // Verifica que haya un archivo seleccionado
-            if (! $this->txtFile) {
+            if (!$this->txtFile) {
                 $this->notify('danger', 'No se seleccionó archivo para importar.');
 
                 return;
@@ -41,7 +41,7 @@ class NovedadesCargoImport extends ListRecords
             $path = Storage::disk('local')->path($this->txtFile);
 
             // Llama al servicio que realiza el parseo y validaciones
-            $service = new NovedadesCargoImportService;
+            $service = new NovedadesCargoImportService();
             $service->processFile($path, [
                 'conActualizacion' => $this->conActualizacion,
                 'nuevosIdentificadores' => $this->nuevosIdentificadores,
@@ -51,7 +51,7 @@ class NovedadesCargoImport extends ListRecords
 
         } catch (Throwable $th) {
             // Manejo de errores genéricos
-            $this->notify('danger', 'Error al importar: '.$th->getMessage());
+            $this->notify('danger', 'Error al importar: ' . $th->getMessage());
         }
     }
 

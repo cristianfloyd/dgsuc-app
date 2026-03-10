@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
+use const PHP_SAPI;
+
 class DatabaseConnectionMiddleware
 {
     /**
@@ -18,7 +20,7 @@ class DatabaseConnectionMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // NO cambiar la conexión por defecto en comandos Artisan
-        if (app()->runningInConsole() || \PHP_SAPI === 'cli') {
+        if (app()->runningInConsole() || PHP_SAPI === 'cli') {
             return $next($request);
         }
 

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Mapuche\Embargos;
 
-use Override;
-use InvalidArgumentException;
 use App\Models\Dh12;
 use App\Models\Mapuche\Embargo;
 use App\Traits\MapucheConnectionTrait;
@@ -13,6 +11,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use InvalidArgumentException;
+use Override;
+
+use function in_array;
 
 /**
  * Modelo Eloquent para la tabla mapuche.emb_tipo_embargo.
@@ -88,7 +90,7 @@ class TipoEmbargo extends Model
         parent::boot();
 
         static::saving(function ($model): void {
-            if (!\in_array($model->mov_inicial_cta_cte, [0, 1, 2])) {
+            if (!in_array($model->mov_inicial_cta_cte, [0, 1, 2])) {
                 throw new InvalidArgumentException('mov_inicial_cta_cte debe ser 0, 1 o 2');
             }
         });

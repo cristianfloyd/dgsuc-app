@@ -2,8 +2,8 @@
 
 namespace App\Models\Mapuche;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Traits\MapucheConnectionTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

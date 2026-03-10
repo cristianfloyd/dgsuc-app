@@ -2,20 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Dh41Resource\Pages\ListDh41s;
 use App\Filament\Resources\Dh41Resource\Pages\CreateDh41;
 use App\Filament\Resources\Dh41Resource\Pages\EditDh41;
-use App\Filament\Resources\Dh41Resource\Pages;
+use App\Filament\Resources\Dh41Resource\Pages\ListDh41s;
 use App\Models\Dh41;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class Dh41Resource extends Resource
 {
@@ -25,9 +25,9 @@ class Dh41Resource extends Resource
 
     protected static ?string $navigationLabel = 'Ganancias Iniciales';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string | UnitEnum | null $navigationGroup = 'Liquidaciones';
 
     public static function form(Schema $schema): Schema
     {

@@ -2,10 +2,10 @@
 
 namespace App\Models\Mapuche;
 
-use Override;
 use App\Services\EnhancedDatabaseConnectionService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 abstract class MapucheBase extends Model
 {

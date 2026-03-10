@@ -42,5 +42,6 @@ class Dhr3Data extends Data
         public readonly ?string $observa,
         #[StringType]
         public readonly ?string $tipo_conce,
-    ) {}
+    ) {
+    }
 }

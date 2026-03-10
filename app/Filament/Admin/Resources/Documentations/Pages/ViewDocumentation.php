@@ -15,7 +15,7 @@ class ViewDocumentation extends Page
 
     public function getViewData(): array
     {
-        $converter = new CommonMarkConverter;
+        $converter = new CommonMarkConverter();
 
         // Lee el archivo markdown
         $markdown = File::get(resource_path('docs/index.md'));

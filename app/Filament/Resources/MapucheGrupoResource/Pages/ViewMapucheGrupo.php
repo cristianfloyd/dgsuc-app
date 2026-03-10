@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\MapucheGrupoResource\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Actions\Action;
 use App\Filament\Resources\MapucheGrupoResource;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewMapucheGrupo extends ViewRecord

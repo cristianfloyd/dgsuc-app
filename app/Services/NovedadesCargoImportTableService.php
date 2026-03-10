@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Throwable;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Este servicio maneja la creación y eliminación de la tabla (temporal) de NovedadesCargoImport

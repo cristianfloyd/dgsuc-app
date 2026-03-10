@@ -12,9 +12,10 @@ class UpdateDh13DTO extends Dh13DTO
     /**
      * Crea una instancia desde una Request.
      *
-     * @param  Request  $request  Request HTTP
-     * @param  int  $codn_conce  Código de concepto existente
-     * @param  int  $nro_orden_formula  Número de orden existente
+     * @param Request $request Request HTTP
+     * @param int $codn_conce Código de concepto existente
+     * @param int $nro_orden_formula Número de orden existente
+     *
      * @return self Nueva instancia del DTO
      */
     public static function fromRequest(

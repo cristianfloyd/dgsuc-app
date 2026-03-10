@@ -2,16 +2,19 @@
 
 namespace App\Repositories;
 
-use Exception;
-use Throwable;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
+
+use function is_array;
+use function is_int;
 
 class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
@@ -34,9 +37,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             ->orderBy('codn_fuent', 'asc')
             ->orderBy('codc_uacad', 'asc');
 
-        if (\is_array($nroLiquis)) {
+        if (is_array($nroLiquis)) {
             $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (\is_int(value: $nroLiquis)) {
+        } elseif (is_int(value: $nroLiquis)) {
             $query->where(column: 'nro_liqui', operator: $nroLiquis);
         }
 
@@ -60,9 +63,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             ->orderBy('codn_fuent', 'asc')
             ->orderBy('codc_uacad', 'asc');
 
-        if (\is_array($nroLiquis)) {
+        if (is_array($nroLiquis)) {
             $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (\is_int(value: $nroLiquis)) {
+        } elseif (is_int(value: $nroLiquis)) {
             $query->where(column: 'nro_liqui', operator: $nroLiquis);
         }
 

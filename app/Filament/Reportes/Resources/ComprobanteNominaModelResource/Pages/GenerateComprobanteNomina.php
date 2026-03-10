@@ -12,9 +12,9 @@ use App\Traits\MapucheConnectionTrait;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -24,13 +24,21 @@ class GenerateComprobanteNomina extends Page
     use MapucheConnectionTrait;
 
     public $descLiqui;
+
     public ?array $liquidaciones = [];
+
     public ?int $anio = null;
+
     public ?int $mes = null;
+
     public ?array $data = [];
+
     protected static string $resource = ComprobanteNominaModelResource::class;
+
     protected string $view = 'filament.resources.comprobante-nomina.pages.generate';
+
     protected static ?string $title = 'Generar Comprobantes';
+
     protected $connection;
 
     public function mount(): void
@@ -68,7 +76,7 @@ class GenerateComprobanteNomina extends Page
                             )
                             ->live()
                             ->afterStateUpdated(function (Get $get, Set $set, $state): void {
-                                if (! empty($state)) {
+                                if (!empty($state)) {
                                     $liquidacion = Dh22::query()->where('nro_liqui', $state[0])->first();
                                     $set('anio', $liquidacion->per_liano);
                                     $set('mes', $liquidacion->per_limes);

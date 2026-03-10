@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Exception;
-use InvalidArgumentException;
 use App\Models\ApexUsuario;
 use App\Repositories\Contracts\ApexUsuarioRepositoryInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+
+use function in_array;
 
 class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
 {
@@ -214,7 +216,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             $parametro = strtolower(trim($parametro));
-            if (!\in_array($parametro, ['a', 'b', 'c'])) {
+            if (!in_array($parametro, ['a', 'b', 'c'])) {
                 throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
             }
 

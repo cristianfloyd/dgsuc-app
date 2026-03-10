@@ -37,7 +37,7 @@ class AdminStatsOverview extends BaseWidget
 
             // Estadísticas de Cargos Activos
             Stat::make('Cargos Activos', $this->getActiveCargos())
-                ->description($this->getActivePercentage().'% del total')
+                ->description($this->getActivePercentage() . '% del total')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->chart($this->getActivosTrend())
                 ->color('info'),

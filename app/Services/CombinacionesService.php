@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\Dh21;
 use App\ValueObjects\NroLiqui;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+
+use function array_slice;
+use function count;
 
 class CombinacionesService
 {
@@ -53,12 +56,12 @@ class CombinacionesService
             $combinaciones = $this->encontrarCombinaciones($items, $valorObjetivo, $tolerancia);
 
             // Limitar el número de combinaciones devueltas
-            $combinacionesLimitadas = \array_slice($combinaciones, 0, $maxCombinaciones);
+            $combinacionesLimitadas = array_slice($combinaciones, 0, $maxCombinaciones);
 
             return [
                 'success' => true,
-                'message' => \count($combinacionesLimitadas) > 0
-                    ? 'Se encontraron ' . \count($combinacionesLimitadas) . ' combinaciones posibles'
+                'message' => count($combinacionesLimitadas) > 0
+                    ? 'Se encontraron ' . count($combinacionesLimitadas) . ' combinaciones posibles'
                     : 'No se encontraron combinaciones que se aproximen al valor objetivo',
                 'combinaciones' => $combinacionesLimitadas,
             ];
@@ -182,13 +185,13 @@ class CombinacionesService
             ];
 
             // Si ya tenemos suficientes resultados exactos, podemos terminar
-            if (\count($resultados) >= 10 && abs($sumaActual - $valorObjetivo) < 0.001) {
+            if (count($resultados) >= 10 && abs($sumaActual - $valorObjetivo) < 0.001) {
                 return false;
             }
         }
 
         // Si ya procesamos todos los elementos o la profundidad es excesiva
-        if ($indice >= \count($items) || $profundidad > 10) {
+        if ($indice >= count($items) || $profundidad > 10) {
             return true;
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Models\Todo;
+use Exception;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;

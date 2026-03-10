@@ -2,7 +2,6 @@
 
 namespace App\Services\Reportes;
 
-use Exception;
 use App\Data\Reportes\BloqueoProcesadoData;
 use App\Data\Reportes\BloqueosData;
 use App\Enums\BloqueosEstadoEnum;
@@ -10,6 +9,7 @@ use App\Models\Dh03;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

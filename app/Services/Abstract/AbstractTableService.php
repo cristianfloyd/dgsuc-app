@@ -2,13 +2,13 @@
 
 namespace App\Services\Abstract;
 
-use Exception;
-use InvalidArgumentException;
 use App\Contracts\TableService\TableServiceInterface;
 use App\Exceptions\TableStructureException;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use InvalidArgumentException;
 
 /**
  * Clase base abstracta para servicios de gestión de tablas.

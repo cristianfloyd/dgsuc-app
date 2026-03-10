@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Models\User;
+use Exception;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;

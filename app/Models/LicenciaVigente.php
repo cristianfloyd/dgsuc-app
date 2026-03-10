@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Exception;
 use App\Services\EncodingService;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+
+use function count;
 
 class LicenciaVigente extends Model
 {
@@ -204,7 +206,7 @@ class LicenciaVigente extends Model
 
             Log::info('Licencias vigentes cargadas correctamente en la base de datos temporal', [
                 'session_id' => $sessionId,
-                'count' => \count($licenciasData),
+                'count' => count($licenciasData),
             ]);
 
             // Devolver una consulta que filtra por la sesión actual

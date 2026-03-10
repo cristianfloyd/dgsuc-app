@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Support\Carbon;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use const STR_PAD_LEFT;
 
 /**
  * Modelo para las relaciones activas de AFIP.
@@ -219,7 +221,7 @@ class AfipRelacionesActivas extends Model
     {
         return Attribute::make(
             get: fn (string $value) => (float) (trim($value)),
-            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', \STR_PAD_LEFT),
+            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT),
         );
     }
 

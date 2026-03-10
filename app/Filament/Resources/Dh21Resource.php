@@ -2,23 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Resources\Dh21Resource\Pages\ListDh21s;
-use App\Filament\Resources\Dh21Resource\Pages\EditDh21;
 use App\Filament\Resources\Dh21Resource\Pages\ConceptosTotales;
-use App\Filament\Resources\Dh21Resource\Pages;
+use App\Filament\Resources\Dh21Resource\Pages\EditDh21;
+use App\Filament\Resources\Dh21Resource\Pages\ListDh21s;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21Concepto101Total;
 use App\Filament\Resources\Dh21Resource\Widgets\Dh21LegajoCounter;
 use App\Livewire\Reportes\OrdenPagoReporte;
 use App\Models\Dh21;
+use BackedEnum;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Livewire\Livewire;
+use UnitEnum;
 
 class Dh21Resource extends Resource
 {
@@ -28,9 +29,9 @@ class Dh21Resource extends Resource
 
     protected static ?string $navigationLabel = 'Liquidaciones';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string | UnitEnum | null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {

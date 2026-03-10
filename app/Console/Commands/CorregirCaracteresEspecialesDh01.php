@@ -8,6 +8,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function strlen;
+
+use const JSON_UNESCAPED_UNICODE;
+
 class CorregirCaracteresEspecialesDh01 extends Command
 {
     protected $signature = 'mapuche:corregir-caracteres
@@ -83,7 +87,7 @@ class CorregirCaracteresEspecialesDh01 extends Command
             foreach ($camposACorregir as $campo) {
                 $valorOriginal = $registro->getRawOriginal($campo);
 
-                if (! $valorOriginal) {
+                if (!$valorOriginal) {
                     continue;
                 }
 
@@ -100,10 +104,10 @@ class CorregirCaracteresEspecialesDh01 extends Command
                 }
             }
 
-            if (! empty($cambios)) {
-                $this->info("Registro #{$registro->nro_legaj}: ".json_encode($cambios, \JSON_UNESCAPED_UNICODE));
+            if (!empty($cambios)) {
+                $this->info("Registro #{$registro->nro_legaj}: " . json_encode($cambios, JSON_UNESCAPED_UNICODE));
 
-                if (! $dryRun) {
+                if (!$dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();
 
                     try {
@@ -142,7 +146,8 @@ class CorregirCaracteresEspecialesDh01 extends Command
     /**
      * Función especializada para corregir caracteres en registros de Dh01.
      *
-     * @param  string  $texto  Texto a corregir
+     * @param string $texto Texto a corregir
+     *
      * @return string Texto corregido
      */
     private function corregirCaracteresDh01(string $texto): string
@@ -213,8 +218,8 @@ class CorregirCaracteresEspecialesDh01 extends Command
     private function bytesToHex(string $text): string
     {
         $hex = '';
-        for ($i = 0; $i < \strlen($text); $i++) {
-            $hex .= bin2hex($text[$i]).' ';
+        for ($i = 0; $i < strlen($text); $i++) {
+            $hex .= bin2hex($text[$i]) . ' ';
         }
 
         return trim($hex);

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use App\Data\Reportes\FallecidoData;
 use App\Services\FallecidosTableService;
 use App\Traits\FilamentTableInitializationTrait;
 use App\Traits\MapucheConnectionTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

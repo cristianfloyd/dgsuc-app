@@ -5,12 +5,14 @@ namespace App\Filament\Bloqueos\Resources\BloqueosHistorials\BloqueosHistorials;
 use App\Filament\Bloqueos\Resources\BloqueosHistorials\Pages\ListBloqueosHistorial;
 use App\Filament\Bloqueos\Resources\BloqueosHistorials\Pages\ViewBloqueoHistorial;
 use App\Models\Mapuche\Bloqueos\RepBloqueo;
+use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class BloqueosHistorialResource extends Resource
 {
@@ -20,9 +22,9 @@ class BloqueosHistorialResource extends Resource
 
     protected static ?string $pluralLabel = 'Historial de Bloqueos';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Consultas';
+    protected static string|UnitEnum|null $navigationGroup = 'Consultas';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-archive-box';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-archive-box';
 
     protected static ?int $navigationSort = 90;
 

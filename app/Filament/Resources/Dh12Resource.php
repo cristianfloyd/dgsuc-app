@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Resources\Dh12Resource\Pages\ListDh12s;
 use App\Filament\Resources\Dh12Resource\Pages\CreateDh12;
 use App\Filament\Resources\Dh12Resource\Pages\EditDh12;
-use App\Filament\Resources\Dh12Resource\Pages;
+use App\Filament\Resources\Dh12Resource\Pages\ListDh12s;
 use App\Models\Dh12;
-use Filament\Forms;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class Dh12Resource extends Resource
 {
@@ -26,11 +26,11 @@ class Dh12Resource extends Resource
 
     protected static ?string $navigationLabel = 'Conceptos';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Conceptos';
+    protected static string | UnitEnum | null $navigationGroup = 'Conceptos';
 
     public static function form(Schema $schema): Schema
     {

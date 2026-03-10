@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Documentation;
 use Livewire\Component;
 
+use function strlen;
+
 class DocumentationSearch extends Component
 {
     public string $search = '';
@@ -13,7 +15,7 @@ class DocumentationSearch extends Component
     {
         $results = [];
 
-        if (\strlen($this->search) >= 2) {
+        if (strlen($this->search) >= 2) {
             $results = Documentation::where('is_published', true)
                 ->where(function ($query): void {
                     $query->where('title', 'like', '%' . $this->search . '%')

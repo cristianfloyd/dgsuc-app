@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\UploadedFiles\Pages\CreateUploadedFile;
 use App\Filament\Admin\Resources\UploadedFiles\Pages\EditUploadedFile;
 use App\Filament\Admin\Resources\UploadedFiles\Pages\ListUploadedFiles;
 use App\Models\UploadedFile;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,7 +22,7 @@ class UploadedFileResource extends Resource
 
     protected static ?string $label = 'Archivos';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
     {

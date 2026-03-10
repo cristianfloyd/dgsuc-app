@@ -88,7 +88,7 @@ class DatabaseHealthWidget extends Widget
             return [
                 'status' => 'error',
                 'latencia' => 0,
-                'mensaje' => 'Error de conexión: '.$e->getMessage(),
+                'mensaje' => 'Error de conexión: ' . $e->getMessage(),
             ];
         }
     }

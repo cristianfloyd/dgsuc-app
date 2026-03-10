@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\Mapuche\PeriodoFiscalService;
 use App\Contracts\CategoryUpdateServiceInterface;
 use App\Contracts\Dh01RepositoryInterface;
 use App\Contracts\Dh19RepositoryInterface;
@@ -50,6 +49,7 @@ use App\Repositories\Sicoss\SicossLegajoProcessorRepository;
 use App\Repositories\Sicoss\SicossOrchestatorRepository;
 use App\Repositories\SicossReporteRepository;
 use App\Services\CategoryUpdateService;
+use App\Services\Mapuche\PeriodoFiscalService;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider

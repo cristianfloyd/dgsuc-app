@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
-use Exception;
 use App\Contracts\Repositories\EmbargoRepositoryInterface;
 use App\Models\EmbargoProcesoResult;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;

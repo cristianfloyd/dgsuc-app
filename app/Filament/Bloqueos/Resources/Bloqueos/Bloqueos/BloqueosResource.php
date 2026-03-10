@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
+use UnitEnum;
 
 class BloqueosResource extends Resource
 {
@@ -49,7 +50,7 @@ class BloqueosResource extends Resource
 
     protected static ?string $pluralLabel = 'Bloqueos';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?Collection $resultadosProcesamiento = null;
@@ -115,7 +116,7 @@ class BloqueosResource extends Resource
 
     protected static function getResultados(): Collection
     {
-        $cacheKey = 'bloqueos_resultados_'.auth()->guard('web')->id();
+        $cacheKey = 'bloqueos_resultados_' . auth()->guard('web')->id();
 
         // Invalidar caché cuando sea necesario
         if (session()->has('invalidate_bloqueos_cache')) {
@@ -150,7 +151,7 @@ class BloqueosResource extends Resource
                 'total_procesados' => $repository->getTotalProcesados(),
             ]);
         } catch (Exception $e) {
-            Log::error('Error al procesar bloqueos: '.$e->getMessage(), [
+            Log::error('Error al procesar bloqueos: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -169,7 +170,7 @@ class BloqueosResource extends Resource
     /**
      * Genera un resumen estadístico del procesamiento.
      *
-     * @param  Collection  $resultados
+     * @param Collection $resultados
      */
     protected static function generarResumenProcesamiento($resultados): array
     {
@@ -189,7 +190,7 @@ class BloqueosResource extends Resource
     {
         return Excel::download(
             new BloqueosResultadosExport($resultados),
-            'resultados_bloqueos_'.now()->format('Y-m-d_His').'.xlsx',
+            'resultados_bloqueos_' . now()->format('Y-m-d_His') . '.xlsx',
         );
     }
 
@@ -398,7 +399,7 @@ class BloqueosResource extends Resource
 
                     return Excel::download(
                         new BloqueosResultadosExport($records),
-                        'resultados_bloqueos_seleccionados_'.now()->format('Y-m-d_His').'.xlsx',
+                        'resultados_bloqueos_seleccionados_' . now()->format('Y-m-d_His') . '.xlsx',
                     );
                 }),
 
@@ -428,7 +429,7 @@ class BloqueosResource extends Resource
                         if (isset($estadisticas['error_general'])) {
                             Notification::make()
                                 ->title('Advertencia')
-                                ->body('Ocurrieron algunos errores durante el proceso: '.$estadisticas['error_general'])
+                                ->body('Ocurrieron algunos errores durante el proceso: ' . $estadisticas['error_general'])
                                 ->warning()
                                 ->send();
                         }
@@ -474,7 +475,7 @@ class BloqueosResource extends Resource
                     $registrosRep = RepFallecido::query()
                         ->get();
 
-                    if (! $registrosBloqueos && ! $registrosRep) {
+                    if (!$registrosBloqueos && !$registrosRep) {
                         Notification::make()
                             ->title('No hay registros de fallecidos para exportar')
                             ->warning()
@@ -494,7 +495,7 @@ class BloqueosResource extends Resource
                             $registrosBloqueos,
                             $periodoFiscal,
                         ),
-                        'fallecidos_consolidado_'.now()->format('Y-m-d_His').'.xlsx',
+                        'fallecidos_consolidado_' . now()->format('Y-m-d_His') . '.xlsx',
                     );
                 }),
 
@@ -516,7 +517,7 @@ class BloqueosResource extends Resource
                 ->action(function (array $data): void {
                     $periodoFiscal = $data['periodo_fiscal'];
                     $confirmado = $data['confirmar_archivado'] ?? false;
-                    if (! $confirmado) {
+                    if (!$confirmado) {
                         Notification::make()
                             ->title('Debes confirmar el archivado')
                             ->warning()

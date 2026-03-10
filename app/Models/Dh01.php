@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
+use const STR_PAD_LEFT;
+
 /**
  * @property int $nro_legaj
  * @property string $desc_appat
@@ -260,9 +262,9 @@ class Dh01 extends Model
     {
         return Attribute::make(get: function (): string {
             // Aseguramos que cada parte tenga el largo correcto
-            $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
-            $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
-            $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
+            $cuil1 = str_pad($this->nro_cuil1, 2, '0', STR_PAD_LEFT);
+            $cuil = str_pad($this->nro_cuil, 8, '0', STR_PAD_LEFT);
+            $cuil2 = str_pad($this->nro_cuil2, 1, '0', STR_PAD_LEFT);
             return $cuil1 . $cuil . $cuil2;
         });
     }
@@ -282,9 +284,9 @@ class Dh01 extends Model
         return Attribute::make(
             get: function (): string {
                 // Aseguramos que cada parte tenga el largo correcto
-                $cuil1 = str_pad($this->nro_cuil1, 2, '0', \STR_PAD_LEFT);
-                $cuil = str_pad($this->nro_cuil, 8, '0', \STR_PAD_LEFT);
-                $cuil2 = str_pad($this->nro_cuil2, 1, '0', \STR_PAD_LEFT);
+                $cuil1 = str_pad($this->nro_cuil1, 2, '0', STR_PAD_LEFT);
+                $cuil = str_pad($this->nro_cuil, 8, '0', STR_PAD_LEFT);
+                $cuil2 = str_pad($this->nro_cuil2, 1, '0', STR_PAD_LEFT);
 
                 return "$cuil1$cuil$cuil2";
             },

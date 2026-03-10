@@ -2,12 +2,12 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use Override;
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Override;
 
 /**
  * Representa un modelo de la tabla 'mapuche.dh08' en la base de datos PostgreSQL.

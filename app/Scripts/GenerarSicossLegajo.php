@@ -2,11 +2,14 @@
 
 namespace App\Scripts;
 
-use Exception;
 use App\Contracts\SicossGeneratorInterface;
 use App\Exceptions\SicossGenerationException;
 use App\Services\Afip\Sicoss;
+use Exception;
 use Illuminate\Support\Facades\Log;
+
+use function count;
+use function is_array;
 
 /**
  * Clase responsable de generar archivos SICOSS para AFIP
@@ -121,7 +124,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     private function formatearResultado($resultado, ?int $numeroLegajo): array
     {
         // Si no hay resultado o está vacío
-        if (empty($resultado) || !\is_array($resultado)) {
+        if (empty($resultado) || !is_array($resultado)) {
             return [
                 'tipo' => 'sin_datos',
                 'mensaje' => 'No se encontraron datos para procesar',
@@ -197,7 +200,7 @@ class GenerarSicossLegajo implements SicossGeneratorInterface
     private function formatearResumenMultiple(array $resultados): array
     {
 
-        $totalLegajos = \count($resultados);
+        $totalLegajos = count($resultados);
         $totalBruto = 0;
         $totalImponible = 0;
         $legajosProcesados = [];

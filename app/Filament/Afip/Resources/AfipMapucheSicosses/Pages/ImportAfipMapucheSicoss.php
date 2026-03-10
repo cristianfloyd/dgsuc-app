@@ -18,6 +18,10 @@ use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use function sprintf;
+
+use const PATHINFO_EXTENSION;
+
 class ImportAfipMapucheSicoss extends Page
 {
     use InteractsWithForms;
@@ -70,14 +74,14 @@ class ImportAfipMapucheSicoss extends Page
             $data = $this->form->getState();
             $filePath = Storage::disk('public')->path($data['file']);
 
-            if (! $this->validateFile($filePath)) {
+            if (!$this->validateFile($filePath)) {
                 $this->showErrorNotification('El archivo no cumple con el formato esperado');
 
                 return;
             }
 
             $service = app(AfipMapucheSicossImportService::class);
-            $periodoFiscal = $data['year'].\sprintf('%02d', $data['month']);
+            $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
 
             // Usar streams para procesar el archivo
             $result = $service->streamImport(
@@ -94,7 +98,7 @@ class ImportAfipMapucheSicoss extends Page
                 'file' => $data['file'] ?? 'No file specified',
             ]);
 
-            $this->showErrorNotification('Error durante la importación: '.$e->getMessage());
+            $this->showErrorNotification('Error durante la importación: ' . $e->getMessage());
         }
     }
 
@@ -157,7 +161,7 @@ class ImportAfipMapucheSicoss extends Page
     protected function validateFile(string $filePath): bool
     {
         // Verificar extensión
-        $extension = pathinfo($filePath, \PATHINFO_EXTENSION);
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
         if (strtolower($extension) !== 'txt') {
             return false;
         }
@@ -215,7 +219,7 @@ class ImportAfipMapucheSicoss extends Page
                 ->send();
         } else {
             $this->showErrorNotification(
-                'Importación con errores: '.implode("\n", $result['errors']),
+                'Importación con errores: ' . implode("\n", $result['errors']),
             );
         }
     }

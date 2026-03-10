@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use DateTime;
 use App\Contracts\RetResultadoRepository;
 use App\DTOs\RetResultadoDTO;
 use App\Models\Suc\RetResultado;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use DateTime;
 
 class RetResultadoService
 {

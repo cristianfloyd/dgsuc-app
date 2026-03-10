@@ -2,9 +2,9 @@
 
 namespace App\ValueObjects;
 
-use Stringable;
 use InvalidArgumentException;
 use JsonSerializable;
+use Stringable;
 
 /**
  * Value Object que representa un número de liquidación en el sistema Mapuche.

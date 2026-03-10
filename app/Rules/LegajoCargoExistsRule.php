@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Closure;
 use App\Models\Dh03;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class LegajoCargoExistsRule implements ValidationRule

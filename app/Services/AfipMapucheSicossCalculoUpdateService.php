@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Exception;
 use App\Traits\DynamicConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class AfipMapucheSicossCalculoUpdateService

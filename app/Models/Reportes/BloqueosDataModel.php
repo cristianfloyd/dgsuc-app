@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use function in_array;
+
 class BloqueosDataModel extends Model
 {
     use MapucheConnectionTrait;
@@ -75,7 +77,7 @@ class BloqueosDataModel extends Model
                 $this->mensaje_error = 'El cargo ya tiene el stop de liquidación activado';
             }
             // Si el tipo es fallecido o renuncia y tiene fecha de baja, comparamos con la fecha del cargo
-            elseif (\in_array($this->tipo, ['fallecido', 'renuncia']) && $this->fecha_baja && $cargo->fec_baja) {
+            elseif (in_array($this->tipo, ['fallecido', 'renuncia']) && $this->fecha_baja && $cargo->fec_baja) {
                 $fechaBajaImportada = Carbon::parse($this->fecha_baja);
                 $fechaBajaCargo = Carbon::parse($cargo->fec_baja);
 

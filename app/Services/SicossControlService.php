@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Exception;
-use RuntimeException;
 use App\Enums\ConceptosSicossEnum;
 use App\Models\ControlAportesDiferencia;
 use App\Models\ControlConceptosPeriodo;
@@ -11,9 +9,13 @@ use App\Models\ControlContribucionesDiferencia;
 use App\Models\ControlCuilsDiferencia;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
+
+use function count;
 
 /**
  * Servicio para ejecutar controles de SICOSS.
@@ -652,7 +654,7 @@ class SicossControlService
                 'connection' => $this->connection,
                 'year' => $anio,
                 'month' => $mes,
-                'conceptos_count' => \count($conceptos),
+                'conceptos_count' => count($conceptos),
             ]);
 
             // Ejecutar la consulta

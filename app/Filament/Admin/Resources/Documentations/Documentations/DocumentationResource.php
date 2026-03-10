@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\Documentations\Pages\EditDocumentation;
 use App\Filament\Admin\Resources\Documentations\Pages\ListDocumentation;
 use App\Filament\Admin\Resources\Documentations\Pages\ViewDocumentation;
 use App\Models\Documentation;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
@@ -18,14 +19,15 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DocumentationResource extends Resource
 {
     protected static ?string $model = Documentation::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Sistema';
+    protected static string|UnitEnum|null $navigationGroup = 'Sistema';
 
     protected static ?string $label = 'Documentacion';
 

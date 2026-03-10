@@ -42,7 +42,7 @@ class RepFallecidosSheet implements FromCollection, ShouldAutoSize, WithColumnFo
     public function headings(): array
     {
         return [
-            ['Período: '.substr($this->periodo, 0, 4).'/'.substr($this->periodo, 4, 2)],
+            ['Período: ' . substr($this->periodo, 0, 4) . '/' . substr($this->periodo, 4, 2)],
             [''], // Línea en blanco
             [
                 'Legajo',

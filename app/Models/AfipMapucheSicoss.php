@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-use Exception;
-use Throwable;
 use App\Models\Mapuche\MapucheConfig;
 use App\Services\EncodingService;
 use App\Traits\HasFixedWithImportes;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Reedware\LaravelCompositeRelations\HasCompositeRelations;
+use Throwable;
+
+use const STR_PAD_LEFT;
 
 /**
  * Modelo AfipMapucheSicoss.
@@ -177,7 +179,7 @@ class AfipMapucheSicoss extends Model
             number_format($valor, 2, '', ''),
             $longitud,
             '0',
-            \STR_PAD_LEFT,
+            STR_PAD_LEFT,
         );
     }
 
@@ -454,7 +456,7 @@ class AfipMapucheSicoss extends Model
             self::updateOrCreate(
                 [
                     'periodo_fiscal' => $periodoFiscal,
-                    'cuil' => $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', \STR_PAD_LEFT) . $legajo->nro_cuil2,
+                    'cuil' => $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2,
                 ],
                 array_merge([
                     'apnom' => $legajo->apyno,
@@ -510,7 +512,7 @@ class AfipMapucheSicoss extends Model
         $legajos = DB::connection(self::getMapucheConnection())->select(self::getSqlLegajos("dh01.tipo_estad = 'A'"));
 
         foreach ($legajos as $legajo) {
-            $cuil = $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', \STR_PAD_LEFT) . $legajo->nro_cuil2;
+            $cuil = $legajo->nro_cuil1 . str_pad($legajo->nro_cuil, 8, '0', STR_PAD_LEFT) . $legajo->nro_cuil2;
 
             // Crear o actualizar registro
             self::updateOrCreate(

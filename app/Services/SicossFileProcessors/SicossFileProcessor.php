@@ -3,8 +3,10 @@
 namespace App\Services\SicossFileProcessors;
 
 use Generator;
-use RuntimeException;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
+
+use function count;
 
 class SicossFileProcessor
 {
@@ -37,7 +39,7 @@ class SicossFileProcessor
                 $buffer[] = $line;
 
                 // Cuando el buffer alcanza el tamaño del lote, lo enviamos
-                if (\count($buffer) >= $batchSize) {
+                if (count($buffer) >= $batchSize) {
                     yield $buffer;
                     $buffer = [];
                 }

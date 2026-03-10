@@ -8,6 +8,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function strlen;
+
+use const JSON_UNESCAPED_UNICODE;
+
 class CorregirCaracteresEspecialesDh30 extends Command
 {
     protected $signature = 'mapuche:corregir-caracteres-dh30
@@ -52,7 +56,7 @@ class CorregirCaracteresEspecialesDh30 extends Command
         }
 
         // Si no hay filtros específicos, buscar por patrones
-        if (! $tablaFiltro && ! $abrevFiltro && ! $itemFiltro) {
+        if (!$tablaFiltro && !$abrevFiltro && !$itemFiltro) {
             // Palabras clave para buscar posibles registros problemáticos
             $patronesBusqueda = [
                 // Patrones para Ñ
@@ -92,7 +96,7 @@ class CorregirCaracteresEspecialesDh30 extends Command
                 // Obtener el valor original sin procesar
                 $valorOriginal = $registro->getRawOriginal($campo);
 
-                if (! $valorOriginal) {
+                if (!$valorOriginal) {
                     continue;
                 }
 
@@ -109,11 +113,11 @@ class CorregirCaracteresEspecialesDh30 extends Command
                 }
             }
 
-            if (! empty($cambios)) {
-                $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: ".
-                             json_encode($cambios, \JSON_UNESCAPED_UNICODE));
+            if (!empty($cambios)) {
+                $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: " .
+                             json_encode($cambios, JSON_UNESCAPED_UNICODE));
 
-                if (! $dryRun) {
+                if (!$dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();
 
                     try {
@@ -153,7 +157,8 @@ class CorregirCaracteresEspecialesDh30 extends Command
     /**
      * Función especializada para corregir caracteres en registros de Dh30.
      *
-     * @param  string  $texto  Texto a corregir
+     * @param string $texto Texto a corregir
+     *
      * @return string Texto corregido
      */
     private function corregirCaracteresDh30(string $texto): string
@@ -215,7 +220,7 @@ class CorregirCaracteresEspecialesDh30 extends Command
 
         foreach ($palabrasComunes as $mal => $bien) {
             // Usar expresión regular para reemplazar solo palabras completas
-            $result = preg_replace('/\b'.preg_quote($mal, '/').'\b/i', $bien, $result);
+            $result = preg_replace('/\b' . preg_quote($mal, '/') . '\b/i', $bien, $result);
         }
 
         return $result;
@@ -227,8 +232,8 @@ class CorregirCaracteresEspecialesDh30 extends Command
     private function bytesToHex(string $text): string
     {
         $hex = '';
-        for ($i = 0; $i < \strlen($text); $i++) {
-            $hex .= bin2hex($text[$i]).' ';
+        for ($i = 0; $i < strlen($text); $i++) {
+            $hex .= bin2hex($text[$i]) . ' ';
         }
 
         return trim($hex);

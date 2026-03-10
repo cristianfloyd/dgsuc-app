@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Dh92;
+use Illuminate\Database\Eloquent\Collection;
 
 class Dh92Repository
 {

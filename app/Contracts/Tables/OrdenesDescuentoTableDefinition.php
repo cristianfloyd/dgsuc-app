@@ -38,7 +38,7 @@ class OrdenesDescuentoTableDefinition implements AbstractTableDefinitionInterfac
 
     public function getTableName(): string
     {
-        return self::SCHEMA.'.'.self::TABLE;
+        return self::SCHEMA . '.' . self::TABLE;
     }
 
     public function getColumns(): array

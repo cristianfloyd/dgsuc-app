@@ -2,22 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Actions\EditAction;
-use App\Filament\Resources\Dh13Resource\Pages\ListDh13s;
 use App\Filament\Resources\Dh13Resource\Pages\CreateDh13;
 use App\Filament\Resources\Dh13Resource\Pages\EditDh13;
-use App\Filament\Resources\Dh13Resource\Pages;
+use App\Filament\Resources\Dh13Resource\Pages\ListDh13s;
 use App\Models\Dh13;
 use App\Services\EncodingService;
+use BackedEnum;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
+
+use function strlen;
 
 class Dh13Resource extends Resource
 {
@@ -27,11 +29,11 @@ class Dh13Resource extends Resource
 
     protected static ?string $modelLabel = 'Formulas';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Conceptos';
+    protected static string | UnitEnum | null $navigationGroup = 'Conceptos';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $recordTitleAttribute = 'id';
 
@@ -82,7 +84,7 @@ class Dh13Resource extends Resource
                     ->limit(30)
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = mb_convert_encoding($column->getState(), 'ISO-8859-1', 'UTF-8');
-                        if (\strlen($state) <= $column->getCharacterLimit()) {
+                        if (strlen($state) <= $column->getCharacterLimit()) {
                             return null;
                         }
                         return $state;

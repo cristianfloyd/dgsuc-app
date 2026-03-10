@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Database\Connection;
 use App\Traits\Mapuche\EncodingTrait;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function array_slice;
+use function count;
+use function is_array;
 
 /**
  * @method static hydrate(array $results)
@@ -177,7 +181,7 @@ class EmbargoProcesoResult extends Model
             $registrosInsertados = self::guardarResultadosProceso($results);
 
             Log::info('Proceso de embargo ejecutado y resultados guardados correctamente', [
-                'resultados_obtenidos' => \count($results),
+                'resultados_obtenidos' => count($results),
                 // 'resultados_insertados' => $registrosInsertados,
                 'parametros' => [
                     'complementarias' => $complementarias,
@@ -218,7 +222,7 @@ class EmbargoProcesoResult extends Model
     public static function guardarResultadosProceso(array $results, bool $limpiarTabla = true): int
     {
         // Verificar si hay resultados para procesar
-        $cantidadRegistros = \count($results);
+        $cantidadRegistros = count($results);
         if ($cantidadRegistros === 0) {
             Log::warning('No hay registros para insertar en la tabla de resultados de embargo');
             return 0;
@@ -258,7 +262,7 @@ class EmbargoProcesoResult extends Model
                 // Si ya viene un array de liquis, úsalo; si no, crea uno con el nro_liqui simple
                 if (isset($registro['nros_liqui_json'])) {
                     // Si ya viene, úsalo tal cual
-                    $registroFiltrado['nros_liqui_json'] = \is_array($registro['nros_liqui_json'])
+                    $registroFiltrado['nros_liqui_json'] = is_array($registro['nros_liqui_json'])
                         ? $registro['nros_liqui_json']
                         : json_decode($registro['nros_liqui_json'], true);
                 } elseif (isset($registro['nro_liqui'])) {
@@ -273,14 +277,14 @@ class EmbargoProcesoResult extends Model
 
 
                 // Verificar que tengamos todos los campos requeridos
-                if (\count($registroFiltrado) < \count($fillable)) {
+                if (count($registroFiltrado) < count($fillable)) {
                     Log::warning("El registro {$index} no contiene todos los campos esperados", [
                         'esperados' => $fillable,
                         'recibidos' => array_keys($registroFiltrado),
                     ]);
                 }
                 // Convertir a JSON antes de insertar
-                if (isset($registroFiltrado['nros_liqui_json']) && \is_array($registroFiltrado['nros_liqui_json'])) {
+                if (isset($registroFiltrado['nros_liqui_json']) && is_array($registroFiltrado['nros_liqui_json'])) {
                     $registroFiltrado['nros_liqui_json'] = json_encode($registroFiltrado['nros_liqui_json']);
                 }
 
@@ -296,11 +300,11 @@ class EmbargoProcesoResult extends Model
 
             // Insertar en bloques para optimizar rendimiento
             for ($i = 0; $i < $cantidadRegistros; $i += $tamañoBloque) {
-                $bloque = \array_slice($registrosParaInsertar, $i, $tamañoBloque);
+                $bloque = array_slice($registrosParaInsertar, $i, $tamañoBloque);
 
                 // Insertar usando la conexión obtenida, más eficiente que self::insert
                 $connection->table($tableName)->insert($bloque);
-                $registrosInsertados += \count($bloque);
+                $registrosInsertados += count($bloque);
 
                 // Log cada X bloques para no sobrecargar los logs
                 if ($i % ($tamañoBloque * 10) === 0 || $i + $tamañoBloque >= $cantidadRegistros) {

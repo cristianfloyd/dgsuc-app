@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
+use function ini_get;
+
+use const PHP_OS_FAMILY;
+
 /**
  * Modelo para la tabla mapuche.dh13.
  *
@@ -218,10 +222,10 @@ class Dh13 extends Model
             ],
             'encoding_info' => [
                 'php_internal_encoding' => mb_internal_encoding(),
-                'default_charset' => \ini_get('default_charset'),
+                'default_charset' => ini_get('default_charset'),
                 'detected_encodings' => mb_detect_order(),
-                'mbstring_encoding_translation' => \ini_get('mbstring.encoding_translation'),
-                'filesystem_encoding' => \PHP_OS_FAMILY === 'Windows' ? 'UTF-16LE' : 'UTF-8',
+                'mbstring_encoding_translation' => ini_get('mbstring.encoding_translation'),
+                'filesystem_encoding' => PHP_OS_FAMILY === 'Windows' ? 'UTF-16LE' : 'UTF-8',
             ],
         ]);
     }

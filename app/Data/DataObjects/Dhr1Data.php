@@ -31,5 +31,6 @@ class Dhr1Data extends Data
         #[StringType]
         public readonly ?string $desc_lugap,
         public readonly mixed $plantilla = null,
-    ) {}
+    ) {
+    }
 }

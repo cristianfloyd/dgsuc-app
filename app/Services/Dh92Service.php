@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Contracts\Dh92Repository;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class Dh92Service

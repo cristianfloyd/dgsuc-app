@@ -2,9 +2,8 @@
 
 namespace App\Filament\Reportes\Resources\RepEmbarazadas\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Reportes\Resources\RepEmbarazadas\RepEmbarazadas\RepEmbarazadaResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditRepEmbarazada extends EditRecord

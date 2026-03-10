@@ -9,6 +9,8 @@ use App\ValueObjects\PeriodoFiscal;
 use Exception;
 use Illuminate\Console\Command;
 
+use function is_array;
+
 class GenerarSicossBDPrueba extends Command
 {
     /**
@@ -40,7 +42,7 @@ class GenerarSicossBDPrueba extends Command
         $legajoEspecifico = $this->option('legajo');
         $incluirInactivos = $this->option('incluir-inactivos');
 
-        if (! preg_match('/^\d{6}$/', $periodo)) {
+        if (!preg_match('/^\d{6}$/', $periodo)) {
             $this->error('El período debe tener formato YYYYMM');
 
             return 1;
@@ -54,9 +56,9 @@ class GenerarSicossBDPrueba extends Command
             $this->mostrarConfiguracion($datos, $periodo, $legajoEspecifico);
 
             // Confirmar ejecución si es todos los legajos
-            if (! $legajoEspecifico) {
+            if (!$legajoEspecifico) {
                 $this->info("⚠️  Procesando TODOS los legajos para período {$periodo}");
-                if (! $this->confirm('¿Estás seguro de procesar TODOS los legajos?')) {
+                if (!$this->confirm('¿Estás seguro de procesar TODOS los legajos?')) {
                     $this->info('Operación cancelada');
 
                     return 0;
@@ -84,8 +86,8 @@ class GenerarSicossBDPrueba extends Command
 
             return 0;
         } catch (Exception $e) {
-            $this->error('❌ Error: '.$e->getMessage());
-            $this->error('📍 En: '.$e->getFile().':'.$e->getLine());
+            $this->error('❌ Error: ' . $e->getMessage());
+            $this->error('📍 En: ' . $e->getFile() . ':' . $e->getLine());
             if ($this->option('verbose')) {
                 $this->error('Stack trace:');
                 $this->error($e->getTraceAsString());
@@ -130,12 +132,12 @@ class GenerarSicossBDPrueba extends Command
         }
 
         $this->info("📅 Período: {$periodo}");
-        $this->info('🔧 Incluir inactivos: '.($datos['check_sin_activo'] ? 'Sí' : 'No'));
-        $this->info('🔧 Licencias especiales: '.($datos['check_lic'] ? 'Sí' : 'No'));
-        $this->info('🔧 Retroactivos: '.($datos['check_retro'] ? 'Sí' : 'No'));
+        $this->info('🔧 Incluir inactivos: ' . ($datos['check_sin_activo'] ? 'Sí' : 'No'));
+        $this->info('🔧 Licencias especiales: ' . ($datos['check_lic'] ? 'Sí' : 'No'));
+        $this->info('🔧 Retroactivos: ' . ($datos['check_retro'] ? 'Sí' : 'No'));
 
         if (isset($datos['TopeJubilatorioPersonal'])) {
-            $this->info('💰 Tope Jubilatorio Personal: '.number_format($datos['TopeJubilatorioPersonal'], 2));
+            $this->info('💰 Tope Jubilatorio Personal: ' . number_format($datos['TopeJubilatorioPersonal'], 2));
         }
     }
 
@@ -143,7 +145,7 @@ class GenerarSicossBDPrueba extends Command
     {
         $this->info('✅ SICOSS BD completado:');
 
-        if (\is_array($resultado)) {
+        if (is_array($resultado)) {
             $this->table(
                 ['Métrica', 'Valor'],
                 [
@@ -152,7 +154,7 @@ class GenerarSicossBDPrueba extends Command
                     ['Insertados', $resultado['insertados'] ?? 'N/A'],
                     ['Chunks procesados', $resultado['chunks_procesados'] ?? 'N/A'],
                     ['Errores', $resultado['errores'] ?? 'N/A'],
-                    ['Tiempo total', $tiempo.'s'],
+                    ['Tiempo total', $tiempo . 's'],
                 ],
             );
         } else {

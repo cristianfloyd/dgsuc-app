@@ -2,9 +2,6 @@
 
 namespace App\Livewire;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Exception;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\OrigenRepositoryInterface;
 use App\Contracts\WorkflowServiceInterface;
@@ -13,6 +10,9 @@ use App\Models\OrigenesModel;
 use App\Models\UploadedFile;
 use App\Services\FileProcessingService;
 use App\Services\FileUploadService;
+use Exception;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -22,6 +22,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+
+use function in_array;
 
 class Uploadtxt extends Component implements HasForms, HasActions
 {
@@ -122,7 +124,7 @@ class Uploadtxt extends Component implements HasForms, HasActions
     {
         $processLog = $this->workflowService->getLatestWorkflow();
         $currentStep = $this->workflowService->getCurrentStep($processLog);
-        $this->showUploadForm = \in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
+        $this->showUploadForm = in_array($currentStep, ['subir_archivo_afip', 'subir_archivo_mapuche']);
         $this->nextStepUrl = $this->workflowService->getStepUrl($currentStep);
         $this->checkShowButtonProcessFiles();
     }

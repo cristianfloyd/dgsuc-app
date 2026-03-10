@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Exception;
 use App\Enums\SicossCodigoActividad;
 use App\Enums\SicossCodigoCondicion;
 use App\Enums\SicossCodigoModalContrat;
 use App\Enums\SicossCodigoSituacion;
 use App\Services\Mapuche\TableSelectorService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class SicossUpdateService
 {
@@ -322,7 +324,7 @@ class SicossUpdateService
     public function updateDocentesExclusivaHorasCatedra(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
-        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
 
         $query = "
@@ -419,7 +421,7 @@ class SicossUpdateService
 
         try {
             // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-            $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+            $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
             // Determinar qué tabla usar según el período fiscal
             $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -465,7 +467,7 @@ class SicossUpdateService
 
             $affected = $connection->select($query, $liquidaciones);
 
-            $results['tables']['base'] = \count($affected);
+            $results['tables']['base'] = count($affected);
 
             // 2. Agregar columnas adicionales
             $connection->statement('ALTER TABLE tcargosliq ADD codsit INTEGER DEFAULT 1');
@@ -499,7 +501,7 @@ class SicossUpdateService
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -565,7 +567,7 @@ class SicossUpdateService
     {
         $connection = DB::connection($this->getConnectionName());
         // Se genera una cadena de placeholders según la cantidad de liquidaciones seleccionadas.
-        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -683,7 +685,7 @@ class SicossUpdateService
     {
         $connection = DB::connection($this->getConnectionName());
         // Ejemplo de generación de placeholders si es necesario parametrizar liquidaciones:
-        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -732,7 +734,7 @@ class SicossUpdateService
     public function verificarAgentesInactivos(array $liquidaciones = [6]): array
     {
         $connection = DB::connection($this->getConnectionName());
-        $placeholders = implode(',', array_fill(0, \count($liquidaciones), '?'));
+        $placeholders = implode(',', array_fill(0, count($liquidaciones), '?'));
 
         // Determinar qué tabla usar según el período fiscal
         $dh21Table = $this->tableSelectorService->getDh21TableName($liquidaciones);
@@ -761,7 +763,7 @@ class SicossUpdateService
         return [
             'status' => 'success',
             'agentes_sin_actividad' => $agentes,
-            'total_agentes' => \count($agentes),
+            'total_agentes' => count($agentes),
         ];
     }
 }

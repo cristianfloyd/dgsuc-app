@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
 
+use function is_callable;
+
 /**
  * @extends Factory<User>
  */
@@ -65,7 +67,7 @@ class UserFactory extends Factory
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])
-                ->when(\is_callable($callback), $callback),
+                ->when(is_callable($callback), $callback),
             'ownedTeams',
         );
     }

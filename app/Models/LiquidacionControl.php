@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

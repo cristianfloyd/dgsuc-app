@@ -15,6 +15,8 @@ use OpenSpout\Writer\XLSX\Properties;
 use OpenSpout\Writer\XLSX\Writer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+use function strlen;
+
 class OpenSpoutReportExport
 {
     protected $query;
@@ -40,7 +42,7 @@ class OpenSpoutReportExport
             'codn_conce' => 'Concepto',
             'impp_conce' => 'Importe',
         ];
-        $this->tempFile = 'temp/export_'.uniqid().'.xlsx';
+        $this->tempFile = 'temp/export_' . uniqid() . '.xlsx';
 
         // Preparar los datos para la hoja de resumen
         $this->prepareSummaryData();
@@ -49,7 +51,7 @@ class OpenSpoutReportExport
     public function download(string $fileName): StreamedResponse
     {
         // Asegurar que el directorio temporal exista
-        if (! Storage::exists('temp')) {
+        if (!Storage::exists('temp')) {
             Storage::makeDirectory('temp');
         }
 
@@ -68,7 +70,7 @@ class OpenSpoutReportExport
             Storage::delete($this->tempFile);
         }, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
             'Cache-Control' => 'max-age=0',
         ]);
     }
@@ -87,7 +89,7 @@ class OpenSpoutReportExport
         );
 
         // Crear opciones para el escritor
-        $options = new Options;
+        $options = new Options();
         $options->setProperties($customProperties);
 
         // Crear el escritor de OpenSpout
@@ -120,7 +122,7 @@ class OpenSpoutReportExport
         );
 
         // Crear estilo para la cabecera
-        $headerStyle = new Style;
+        $headerStyle = new Style();
         $headerStyle->setFontBold();
         $headerStyle->setFontColor(Color::WHITE);
         $headerStyle->setBackgroundColor('4472C4');
@@ -137,7 +139,7 @@ class OpenSpoutReportExport
             $rowData = [];
 
             // Crear estilo para las filas de datos (alternadas)
-            $dataStyle = new Style;
+            $dataStyle = new Style();
             $dataStyle->setBorder($borderStyle);
             $dataStyle->setCellAlignment(CellAlignment::CENTER);
 
@@ -155,7 +157,7 @@ class OpenSpoutReportExport
 
                 switch ($column) {
                     case 'cuil':
-                        if (\strlen($value) >= 3) {
+                        if (strlen($value) >= 3) {
                             $value = substr($value, 2, -1);
                         }
                         break;
@@ -190,24 +192,24 @@ class OpenSpoutReportExport
     protected function writeSummarySheet(Writer $writer): void
     {
         // Crear estilos para la hoja de resumen
-        $headerStyle = new Style;
+        $headerStyle = new Style();
         $headerStyle->setFontBold();
         $headerStyle->setFontColor(Color::WHITE);
         $headerStyle->setBackgroundColor('4472C4');
         $headerStyle->setCellAlignment(CellAlignment::CENTER);
 
-        $titleStyle = new Style;
+        $titleStyle = new Style();
         $titleStyle->setFontBold();
         $titleStyle->setFontSize(14);
 
-        $subtitleStyle = new Style;
+        $subtitleStyle = new Style();
         $subtitleStyle->setFontBold();
         $subtitleStyle->setFontSize(12);
 
-        $dataStyle = new Style;
+        $dataStyle = new Style();
         $dataStyle->setCellAlignment(CellAlignment::LEFT);
 
-        $numericStyle = new Style;
+        $numericStyle = new Style();
         $numericStyle->setCellAlignment(CellAlignment::RIGHT);
 
         // Título de la hoja
@@ -228,7 +230,7 @@ class OpenSpoutReportExport
 
         // Datos de la tabla
         foreach ($this->summaryData['totalsByDependency'] as $index => $dep) {
-            $rowStyle = new Style;
+            $rowStyle = new Style();
             if ($index % 2 == 0) {
                 $rowStyle->setBackgroundColor('F2F2F2');
             }
@@ -252,7 +254,7 @@ class OpenSpoutReportExport
             $totalGeneral += $record->impp_conce;
             $totalRegistros++;
 
-            if (! isset($dependencyTotals[$record->codc_uacad])) {
+            if (!isset($dependencyTotals[$record->codc_uacad])) {
                 $dependencyTotals[$record->codc_uacad] = [
                     'dependencia' => $record->codc_uacad,
                     'total' => 0,

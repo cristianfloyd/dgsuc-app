@@ -2,13 +2,15 @@
 
 namespace App\Repositories;
 
-use Exception;
-use Illuminate\Database\Connection;
 use App\Contracts\DatabaseOperationInterface;
 use App\Services\EnhancedDatabaseConnectionService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class DatabaseOperationRepository implements DatabaseOperationInterface
 {
@@ -155,7 +157,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
     {
         try {
             Log::info('Iniciando transacción con múltiples consultas', [
-                'query_count' => \count($queries),
+                'query_count' => count($queries),
             ]);
 
             $result = $this->getConnection()->transaction(function () use ($queries) {
@@ -178,7 +180,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
         } catch (Exception $e) {
             Log::error('Error en transacción de base de datos', [
                 'error' => $e->getMessage(),
-                'query_count' => \count($queries),
+                'query_count' => count($queries),
             ]);
 
             return false;

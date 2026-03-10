@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\CheData;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+
+use function strlen;
+
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 class CheFileGenerator
 {
@@ -146,26 +151,26 @@ class CheFileGenerator
 
     public function fillWithZeros($valor, $longitud): string
     {
-        if (\strlen(trim($valor)) > $longitud) {
+        if (strlen(trim($valor)) > $longitud) {
             return substr($valor, -$longitud);
         }
-        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
+        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     public function fillWithSpaces($texto, $longitud): string
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -$longitud);
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public function fillWithLeftSpaces($texto, $longitud): string
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -$longitud);
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     public function set_progreso($porcentaje): void

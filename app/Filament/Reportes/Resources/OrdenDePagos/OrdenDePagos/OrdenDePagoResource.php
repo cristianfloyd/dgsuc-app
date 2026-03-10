@@ -2,22 +2,22 @@
 
 namespace App\Filament\Reportes\Resources\OrdenDePagos\OrdenDePagos;
 
-use Filament\Schemas\Schema;
-use Illuminate\Support\HtmlString;
-use Filament\Actions\Action;
 use App\Filament\Reportes\Resources\OrdenDePagos\Pages\ListReportes;
 use App\Filament\Reportes\Resources\OrdenDePagos\Pages\ReporteOrdenPago;
-use Exception;
-use App\Filament\Reportes\Resources\OrdenDePagoResource\Pages;
 use App\Models\Reportes\RepOrdenPagoModel;
+use Exception;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
+use UnitEnum;
 
 class OrdenDePagoResource extends Resource
 {
@@ -27,7 +27,7 @@ class OrdenDePagoResource extends Resource
 
     protected static ?string $navigationLabel = 'Orden de Pago';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Informes';
+    protected static string | UnitEnum | null $navigationGroup = 'Informes';
 
     public static function form(Schema $schema): Schema
     {

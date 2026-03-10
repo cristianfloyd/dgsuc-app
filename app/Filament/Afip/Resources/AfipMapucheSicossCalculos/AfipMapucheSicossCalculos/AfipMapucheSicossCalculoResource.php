@@ -9,6 +9,7 @@ use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages\ImportAfipMapuch
 use App\Filament\Afip\Resources\AfipMapucheSicossCalculos\Pages\ListAfipMapucheSicossCalculos;
 use App\Models\AfipMapucheSicossCalculo;
 use App\Repositories\Contracts\AfipMapucheSicossCalculoRepository;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -19,14 +20,15 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AfipMapucheSicossCalculoResource extends Resource
 {
     protected static ?string $model = AfipMapucheSicossCalculo::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-left-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AFIP';
+    protected static string|UnitEnum|null $navigationGroup = 'AFIP';
 
     protected static ?string $navigationLabel = 'SICOSS Calculo';
 

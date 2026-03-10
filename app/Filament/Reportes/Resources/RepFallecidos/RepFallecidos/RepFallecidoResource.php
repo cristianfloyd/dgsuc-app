@@ -2,32 +2,31 @@
 
 namespace App\Filament\Reportes\Resources\RepFallecidos\RepFallecidos;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\Action;
-use App\Filament\Reportes\Resources\RepFallecidos\Pages\ListRepFallecidos;
+use App\Exports\FallecidosExport;
 use App\Filament\Reportes\Resources\RepFallecidos\Pages\CreateRepFallecido;
 use App\Filament\Reportes\Resources\RepFallecidos\Pages\EditRepFallecido;
-use App\Exports\FallecidosExport;
-use App\Filament\Reportes\Resources\RepFallecidoResource\Pages;
+use App\Filament\Reportes\Resources\RepFallecidos\Pages\ListRepFallecidos;
 use App\Models\RepFallecido;
 use App\Services\FallecidosTableService;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class RepFallecidoResource extends Resource
 {
     protected static ?string $model = RepFallecido::class;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static string | \UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string | UnitEnum | null $navigationGroup = 'Dosuba';
 
     public static function form(Schema $schema): Schema
     {

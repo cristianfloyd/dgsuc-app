@@ -16,6 +16,9 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use const PATHINFO_EXTENSION;
+use const PATHINFO_FILENAME;
+
 class ImportAction extends Action
 {
     protected function setUp(): void
@@ -69,9 +72,9 @@ class ImportAction extends Action
                     $file = $data['file'];
                     $filePath = $file;
                     $filename = basename($filePath);
-                    $extension = pathinfo($filename, \PATHINFO_EXTENSION);
+                    $extension = pathinfo($filename, PATHINFO_EXTENSION);
                     $timenow = time();
-                    $newFilename = pathinfo($filename, \PATHINFO_FILENAME)."-{$timenow}.{$extension}";
+                    $newFilename = pathinfo($filename, PATHINFO_FILENAME) . "-{$timenow}.{$extension}";
 
                     // Filament ya movió el archivo a almacenamiento, solo necesitamos la ruta
                     $filePath = Storage::disk('public')->path($file);
@@ -93,8 +96,8 @@ class ImportAction extends Action
 
                     // Instanciamos los servicios necesarios
                     $fileProcessor = new FileProcessorService(
-                        new DatabaseService,
-                        new ColumnMetadata,
+                        new DatabaseService(),
+                        new ColumnMetadata(),
                         app()->make('App\Contracts\DataMapperInterface'),
                         $periodoFiscal,
                     );
@@ -116,7 +119,7 @@ class ImportAction extends Action
                         throw new Exception($result['message']);
                     }
                 } catch (Exception $e) {
-                    Log::error('Error en importación: '.$e->getMessage());
+                    Log::error('Error en importación: ' . $e->getMessage());
 
                     Notification::make()
                         ->title('Error al importar archivo')

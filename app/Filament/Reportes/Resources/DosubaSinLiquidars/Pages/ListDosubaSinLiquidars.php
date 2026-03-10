@@ -39,7 +39,7 @@ class ListDosubaSinLiquidars extends ListRecords
                 ->modalContent(function () {
                     $markdownPath = base_path('resources/docs/documentacion-dosuba-sin-liquidar.md');
 
-                    if (! File::exists($markdownPath)) {
+                    if (!File::exists($markdownPath)) {
                         return 'La documentación no está disponible en este momento.';
                     }
 
@@ -55,7 +55,7 @@ class ListDosubaSinLiquidars extends ListRecords
                     // Agregar estilos para mejorar la presentación
                     $styledHtml = '
                         <div class="prose prose-sm md:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-primary-600 dark:prose-headings:text-primary-400 prose-img:rounded-xl prose-img:shadow-md">
-                            '.$html.'
+                            ' . $html . '
                         </div>
                     ';
 

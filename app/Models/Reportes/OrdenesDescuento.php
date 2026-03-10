@@ -2,10 +2,10 @@
 
 namespace App\Models\Reportes;
 
-use Exception;
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
 use App\Services\OrdenesDescuentoTableService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+
+use function ini_get;
+use function is_string;
+use function strlen;
 
 class OrdenesDescuento extends Model implements HasLabel
 {
@@ -218,7 +222,7 @@ class OrdenesDescuento extends Model implements HasLabel
                         'valor_desde_iso' => $valorConvertidoISO,
                         'valor_desde_latin1' => $valorConvertidoLATIN1,
                         'encoding_detectado' => mb_detect_encoding($valorOriginal, ['UTF-8', 'ISO-8859-1', 'ASCII'], true),
-                        'longitud' => \strlen($valorOriginal),
+                        'longitud' => strlen($valorOriginal),
                         'longitud_mb' => mb_strlen($valorOriginal),
                         'caracteres_especiales' => preg_match('/[áéíóúÁÉÍÓÚñÑ]/', $valorOriginal) ? 'Sí' : 'No',
                     ];
@@ -245,7 +249,7 @@ class OrdenesDescuento extends Model implements HasLabel
                     'database_collate' => $dbEncodings[0]->datcollate ?? 'Unknown',
                     'database_ctype' => $dbEncodings[0]->datctype ?? 'Unknown',
                     'php_encoding' => mb_internal_encoding(),
-                    'default_charset' => \ini_get('default_charset'),
+                    'default_charset' => ini_get('default_charset'),
                 ],
             ];
         } catch (Exception $e) {
@@ -262,7 +266,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function sanitizeData(array $data): array
     {
         return array_map(function ($item) {
-            if (\is_string($item)) {
+            if (is_string($item)) {
                 return mb_convert_encoding($item, 'UTF-8', 'auto');
             }
             return $item;

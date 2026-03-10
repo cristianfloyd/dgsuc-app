@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\File;
 use League\CommonMark\CommonMarkConverter;
+use UnitEnum;
 
 class DocumentationPage extends Page
 {
@@ -18,7 +19,7 @@ class DocumentationPage extends Page
 
     protected string $view = 'filament.pages.documentation';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Ayuda';
+    protected static string|UnitEnum|null $navigationGroup = 'Ayuda';
 
     protected static ?int $navigationSort = 100;
 
@@ -59,7 +60,7 @@ class DocumentationPage extends Page
         $currentDoc = collect($this->documentationData)
             ->firstWhere('section', $this->activeSection);
 
-        if (! $currentDoc) {
+        if (!$currentDoc) {
             return [];
         }
 

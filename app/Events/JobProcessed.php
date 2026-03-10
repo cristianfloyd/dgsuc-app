@@ -18,7 +18,9 @@ class JobProcessed
     /**
      * Create a new event instance.
      */
-    public function __construct(UploadedFile $uploadedFile) {}
+    public function __construct(UploadedFile $uploadedFile)
+    {
+    }
 
     /**
      * Get the channels the event should broadcast on.

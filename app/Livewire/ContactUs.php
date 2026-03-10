@@ -7,6 +7,8 @@ use App\Models\Contact;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+use function is_array;
+
 class ContactUs extends Component
 {
     use WithFileUploads;
@@ -17,7 +19,7 @@ class ContactUs extends Component
     {
         $validated = $this->validate();
         // Save to database
-        if (\is_array($this->form->images)) {
+        if (is_array($this->form->images)) {
             foreach ($this->form->images as $image) {
                 $image->store('images', 'public');
             }

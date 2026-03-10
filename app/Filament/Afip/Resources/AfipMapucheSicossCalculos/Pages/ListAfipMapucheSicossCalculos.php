@@ -22,7 +22,7 @@ class ListAfipMapucheSicossCalculos extends ListRecords
         $service = app(AfipMapucheSicossCalculoTableService::class);
 
         try {
-            if (! $manager->isTableInitialized($service)) {
+            if (!$manager->isTableInitialized($service)) {
                 $manager->initializeTable($service);
             }
         } catch (Exception $e) {

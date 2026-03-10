@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\Dh21Resource\Pages;
 
-use Filament\Schemas\Components\Utilities\Get;
-use Throwable;
-use Filament\Support\Enums\Width;
 use App\Filament\Resources\Dh21Resource;
 use App\Filament\Widgets\IdLiquiSelector;
 use App\Models\Dh21;
 use App\Models\Mapuche\Dh22;
 use App\Services\Dh21Service;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -18,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Throwable;
 
 class ConceptosTotales extends Page implements HasTable
 {

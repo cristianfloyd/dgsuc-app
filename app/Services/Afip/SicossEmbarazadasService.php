@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Exception;
 use App\Models\Mapuche\Dh22;
 use App\Services\Mapuche\PeriodoFiscalService;
 use App\Services\Mapuche\TableSelectorService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

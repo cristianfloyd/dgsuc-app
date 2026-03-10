@@ -13,6 +13,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+use function count;
+
 class AfipMiSimplificacion extends Component
 {
     // use MessageTrait;
@@ -269,7 +271,7 @@ class AfipMiSimplificacion extends Component
     public function showResetButton()
     {
         $currentStepIndex = $this->getCurrentStepIndex();
-        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== \count($this->steps) - 1;
+        return $this->currentProcess !== null && $currentStepIndex !== null && $currentStepIndex !== count($this->steps) - 1;
     }
 
     public function getCurrentStepIndex()

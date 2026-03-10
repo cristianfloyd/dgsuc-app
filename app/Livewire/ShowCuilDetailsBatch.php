@@ -2,14 +2,17 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
+
+use function array_slice;
+use function count;
 
 class ShowCuilDetailsBatch extends Component
 {
@@ -47,9 +50,9 @@ class ShowCuilDetailsBatch extends Component
 
     public function loadBatch(): void
     {
-        $totalCuils = \count($this->cuilsNotInAfip);
-        $processedCuils = $this->allResults->count() + \count($this->failedCuils);
-        $remainingCuils = \array_slice($this->cuilsNotInAfip, $processedCuils, self::BATCH_SIZE);
+        $totalCuils = count($this->cuilsNotInAfip);
+        $processedCuils = $this->allResults->count() + count($this->failedCuils);
+        $remainingCuils = array_slice($this->cuilsNotInAfip, $processedCuils, self::BATCH_SIZE);
 
         $query = 'SELECT * FROM suc.get_mi_simplificacion(?, ?, ?) WHERE cuil = ANY(?)';
         $params = [$this->nroLiqui, $this->periodoFiscal, implode(',', $remainingCuils)];
@@ -61,7 +64,7 @@ class ShowCuilDetailsBatch extends Component
                 $this->allResults->push($result);
             }
 
-            $processedCuils += \count($results);
+            $processedCuils += count($results);
             $failedCuils = array_diff($remainingCuils, array_column($results, 'cuil'));
             $this->failedCuils = array_merge($this->failedCuils, $failedCuils);
 

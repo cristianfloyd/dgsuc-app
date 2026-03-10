@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Contracts\EmployeeRepositoryInterface;
 use App\Contracts\EmployeeServiceInterface;
 use App\DTOs\EmployeeInfoDTO;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class EmployeeService implements EmployeeServiceInterface

@@ -32,7 +32,7 @@ class ListEmbargos extends ListRecords
 
     public function mount(): void
     {
-        $this->embargoResource = new EmbargoResource;
+        $this->embargoResource = new EmbargoResource();
     }
 
     public function getHeaderWidgetsColumns(): int|array
@@ -48,7 +48,7 @@ class ListEmbargos extends ListRecords
     #[On('updated-periodo-fiscal')]
     public function updatedPeriodoFiscal($periodoFiscal): void
     {
-        $instance = new EmbargoResource;
+        $instance = new EmbargoResource();
         $currentProperties = $instance->getPropertiesToDisplay();
         $this->periodoFiscal = [
             'periodoFiscal' => $periodoFiscal,
@@ -60,7 +60,7 @@ class ListEmbargos extends ListRecords
 
     protected function getHeaderWidgets(): array
     {
-        $embargoResource = new EmbargoResource;
+        $embargoResource = new EmbargoResource();
         $data = $embargoResource->getPropertiesToDisplay();
 
         return [
@@ -79,7 +79,7 @@ class ListEmbargos extends ListRecords
             Action::make('reset')
                 ->label('Reset')
                 ->action(function (): void {
-                    $instance = new EmbargoResource;
+                    $instance = new EmbargoResource();
                     $instance->resetPropertiesToDefault();
                     $this->dispatch('propertiesUpdated', $instance->getPropertiesToDisplay());
                 }),

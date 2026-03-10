@@ -2,18 +2,29 @@
 
 namespace App\Services\Afip;
 
-use Exception;
-use App\Services\EncodingService;
 use App\Models\Dh01;
 use App\Models\Dh03;
 use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Dh03Repository;
+use App\Services\EncodingService;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoFiscal;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+
+use function array_slice;
+use function count;
+use function in_array;
+use function ini_get;
+use function is_array;
+use function strlen;
+
+use const PHP_INT_MAX;
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 class SicossOptimizado
 {
@@ -154,9 +165,9 @@ class SicossOptimizado
                 $periodos_retro = self::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
                 $total = [];
 
-                for ($i = 0; $i < \count($periodos_retro); $i++) {
+                for ($i = 0; $i < count($periodos_retro); $i++) {
                     $p = $periodos_retro[$i];
-                    $mes = str_pad($p['mes_retro'], 2, '0', \STR_PAD_LEFT);
+                    $mes = str_pad($p['mes_retro'], 2, '0', STR_PAD_LEFT);
                     //agrego cero adelante a meses
                     $where_periodo = 't.ano_retro=' . $p['ano_retro'] . ' AND t.mes_retro=' . $mes;
                     $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
@@ -951,7 +962,7 @@ class SicossOptimizado
     {
         $controlar_maternidad = false;
         $revista_legajo = [];
-        $cantidad_cambios = \count($cambios_estado);
+        $cantidad_cambios = count($cambios_estado);
         $dias = array_keys($cambios_estado);
 
         $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];
@@ -1029,7 +1040,7 @@ class SicossOptimizado
         $total['imponible_9'] = 0;
         $legajos_validos = [];
         $j = 0;
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
 
         // ✅ PASO 1: Pre-carga masiva de conceptos (ya optimizado)
         $todos_conceptos = self::precargar_conceptos_todos_legajos($legajos);
@@ -1051,12 +1062,12 @@ class SicossOptimizado
 
         Log::info('=== 🏁 ÚLTIMA OPTIMIZACIÓN COMPLETADA - CÓDIGOS OBRA SOCIAL ===', [
             'tiempo_precarga_codigo_os_ms' => round(($fin_codigo_os - $inicio_codigo_os) * 1000, 2),
-            'consultas_eliminadas' => \count($legajos) * 2, // 2 consultas por legajo eliminadas
-            'legajos_con_codigo_os' => \count($codigos_dgi_por_legajo),
+            'consultas_eliminadas' => count($legajos) * 2, // 2 consultas por legajo eliminadas
+            'legajos_con_codigo_os' => count($codigos_dgi_por_legajo),
         ]);
 
         Log::info('🎯 ===== OPTIMIZACIÓN TOTAL COMPLETADA ===== 🎯', [
-            'total_consultas_eliminadas' => (\count($legajos) * 6) + 38000, // Estimación conservadora
+            'total_consultas_eliminadas' => (count($legajos) * 6) + 38000, // Estimación conservadora
             'mejora_estimada' => '99%+ más rápido que versión original',
         ]);
 
@@ -1135,7 +1146,7 @@ class SicossOptimizado
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
-                                if (!\in_array($dia, $dias_lic_legajo)) { // Los das con licencia de legajo no se tocan
+                                if (!in_array($dia, $dias_lic_legajo)) { // Los das con licencia de legajo no se tocan
                                     if ($limites['maximo'] >= $dia) {
                                         $estado_situacion[$dia] = self::evaluar_condicion_licencia($estado_situacion[$dia], $licencia['condicion']);
                                     }
@@ -1155,8 +1166,8 @@ class SicossOptimizado
                 Log::debug('Licencias Cargos: ', $licencias_cargos);
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
-                    for ($dia = 1; $dia <= \count($cargo); $dia++) {
-                        if (!\in_array($dia, $dias_lic_legajo)) {
+                    for ($dia = 1; $dia <= count($cargo); $dia++) {
+                        if (!in_array($dia, $dias_lic_legajo)) {
                             if ((isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
                                 $estado_situacion[$dia] = $cargo[$dia]; // Si estaba trabajando en algn cargo se prioriza el cdigo en dha8
                             }
@@ -1643,7 +1654,7 @@ class SicossOptimizado
 
         Log::info('=== ✅ OPTIMIZACIÓN COMPLETADA ===', [
             'total_legajos_procesados' => $total_legajos,
-            'legajos_validos_generados' => \count($legajos_validos),
+            'legajos_validos_generados' => count($legajos_validos),
             'memoria_final_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
             'mejora_estimada' => 'Eliminadas ' . $total_legajos . ' consultas N+1 individuales',
         ]);
@@ -1685,7 +1696,7 @@ class SicossOptimizado
             Log::error('No se pudo abrir el archivo: ' . $archivo . ' - Error: ' . $error['message']);
         }
         // Proceso la tabla, le agrego las longitudes correpondientes
-        for ($i = 0; $i < \count($legajos); $i++) {
+        for ($i = 0; $i < count($legajos); $i++) {
             fwrite(
                 $fh,
                 $legajos[$i]['cuit'] .                                                                // Campo 1
@@ -1832,7 +1843,7 @@ class SicossOptimizado
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
         $conce_hs_extr = [];
         $cont = 0;
-        for ($i = 0; $i < \count($conceptos_liq_por_leg); $i++) {
+        for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
             $importe = $conceptos_liq_por_leg[$i]['impp_conce'];
             $importe_novedad = $conceptos_liq_por_leg[$i]['nov1_conce'];
             $grupos_concepto = $conceptos_liq_por_leg[$i]['tipos_grupos'];
@@ -1847,7 +1858,7 @@ class SicossOptimizado
                 if (self::$hs_extras_por_novedad == 1) {
                     $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
                     //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
-                    if (!\in_array($codn_concepto, $conce_hs_extr)) {
+                    if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
                     }
@@ -2056,7 +2067,7 @@ class SicossOptimizado
                        --filtro solo los que tienen tipo de concepto = 9 como es una lista uso exp. reg.
                        AND array_to_string(tipos_grupos,',') ~ '(:?^|,)+9(:?$|,)'";
             $conceptos_liq_por_leg = self::consultar_conceptos_liquidados($nro_leg, $where);
-            for ($j = 0; $j < \count($conceptos_liq_por_leg); $j++) {
+            for ($j = 0; $j < count($conceptos_liq_por_leg); $j++) {
                 $sacInvestigador += $conceptos_liq_por_leg[$j]['impp_conce'];
             }
         }
@@ -2294,35 +2305,35 @@ class SicossOptimizado
         if ($valor === null) {
             $valor = '';
         }
-        if (\strlen(trim($valor)) > $longitud) {
+        if (strlen(trim($valor)) > $longitud) {
             return substr($valor, -($longitud));
         }
-        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
+        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     public static function llena_blancos_izq($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
     public static function llena_blancos_mod($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, 0, ($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public static function llena_blancos($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public static function transformar_a_recordset($totales_periodo)
@@ -2401,7 +2412,7 @@ class SicossOptimizado
             return 'NULL';
         }
 
-        if (!\is_array($dato)) {
+        if (!is_array($dato)) {
             // Asumiendo que $this->conexion es una instancia de PDO
             return DB::connection()->getPdo()->quote($dato);
         }
@@ -2451,7 +2462,7 @@ class SicossOptimizado
         $legajos_in = implode(',', $nros_legajos);
 
         Log::info('precargar_conceptos_todos_legajos: Iniciando pre-carga', [
-            'cantidad_legajos' => \count($nros_legajos),
+            'cantidad_legajos' => count($nros_legajos),
             'memoria_antes' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
         ]);
 
@@ -2483,10 +2494,10 @@ class SicossOptimizado
             $tiempo_consulta = ($fin - $inicio) * 1000; // en milisegundos
 
             Log::info('precargar_conceptos_todos_legajos: Pre-carga completada', [
-                'conceptos_cargados' => \count($resultado),
+                'conceptos_cargados' => count($resultado),
                 'tiempo_consulta_ms' => round($tiempo_consulta, 2),
                 'memoria_despues' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
-                'promedio_conceptos_por_legajo' => \count($nros_legajos) > 0 ? round(\count($resultado) / \count($nros_legajos), 2) : 0,
+                'promedio_conceptos_por_legajo' => count($nros_legajos) > 0 ? round(count($resultado) / count($nros_legajos), 2) : 0,
             ]);
 
             // Convertir objetos stdClass a arrays para consistencia
@@ -2496,7 +2507,7 @@ class SicossOptimizado
         } catch (Exception $e) {
             Log::error('precargar_conceptos_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
-                'cantidad_legajos' => \count($nros_legajos),
+                'cantidad_legajos' => count($nros_legajos),
             ]);
 
             // En caso de error, devolver array vacío para evitar que falle el proceso
@@ -2515,8 +2526,8 @@ class SicossOptimizado
     public static function obtener_estadisticas_precarga($todos_conceptos, $legajos): array
     {
         $stats = [
-            'total_conceptos' => \count($todos_conceptos),
-            'total_legajos_solicitados' => \count($legajos),
+            'total_conceptos' => count($todos_conceptos),
+            'total_legajos_solicitados' => count($legajos),
             'legajos_con_conceptos' => 0,
             'legajos_sin_conceptos' => 0,
             'conceptos_por_legajo' => [],
@@ -2547,7 +2558,7 @@ class SicossOptimizado
 
         // Estadísticas adicionales
         if (!empty($stats['conceptos_por_legajo'])) {
-            $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / \count($stats['conceptos_por_legajo']);
+            $stats['promedio_conceptos_por_legajo'] = array_sum($stats['conceptos_por_legajo']) / count($stats['conceptos_por_legajo']);
             $stats['max_conceptos_por_legajo'] = max($stats['conceptos_por_legajo']);
             $stats['min_conceptos_por_legajo'] = min($stats['conceptos_por_legajo']);
         }
@@ -2581,8 +2592,8 @@ class SicossOptimizado
         $tiempo_agrupacion = ($fin - $inicio) * 1000;
 
         Log::info('agrupar_conceptos_por_legajo: Agrupación completada', [
-            'total_conceptos' => \count($todos_conceptos),
-            'legajos_agrupados' => \count($conceptos_por_legajo),
+            'total_conceptos' => count($todos_conceptos),
+            'legajos_agrupados' => count($conceptos_por_legajo),
             'tiempo_agrupacion_ms' => round($tiempo_agrupacion, 2),
             'memoria_utilizada_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
         ]);
@@ -2657,7 +2668,7 @@ class SicossOptimizado
                 if (self::$hs_extras_por_novedad == 1) {
                     $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
                     //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
-                    if (!\in_array($codn_concepto, $conce_hs_extr)) {
+                    if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
                     }
@@ -2854,7 +2865,7 @@ class SicossOptimizado
 
             // Verificar si el cargo está en la lista Y tiene tipo de grupo 9
             if (
-                \in_array($nro_cargo, $cargos) &&
+                in_array($nro_cargo, $cargos) &&
                 preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)
             ) {
                 $sacInvestigador += $concepto['impp_conce'];
@@ -2970,7 +2981,7 @@ class SicossOptimizado
      */
     public static function calcular_memoria_necesaria($legajos): array
     {
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
 
         if ($total_legajos === 0) {
             return ['estimacion_mb' => 0, 'factible' => true, 'metodo_recomendado' => 'vacio'];
@@ -2982,7 +2993,7 @@ class SicossOptimizado
 
         // PASO 1: Muestra representativa (1-5% de legajos, mín 50, máx 500)
         $muestra_size = max(50, min(30000, (int) ($total_legajos * 0.03)));
-        $legajos_muestra = \array_slice($legajos, 0, $muestra_size);
+        $legajos_muestra = array_slice($legajos, 0, $muestra_size);
         $nros_legajos_muestra = implode(',', array_column($legajos_muestra, 'nro_legaj'));
 
         // PASO 2: Medir memoria antes de la consulta muestra
@@ -3020,8 +3031,8 @@ class SicossOptimizado
         $memoria_muestra = $memoria_despues - $memoria_antes;
 
         // PASO 5: Calcular estadísticas de la muestra
-        $conceptos_en_muestra = \count($conceptos_muestra);
-        $legajos_con_conceptos = \count(array_unique(array_column($conceptos_muestra, 'nro_legaj')));
+        $conceptos_en_muestra = count($conceptos_muestra);
+        $legajos_con_conceptos = count(array_unique(array_column($conceptos_muestra, 'nro_legaj')));
 
         $promedio_conceptos_por_legajo = $legajos_con_conceptos > 0
             ? $conceptos_en_muestra / $legajos_con_conceptos
@@ -3119,7 +3130,7 @@ class SicossOptimizado
         $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
 
         Log::info('precargar_todos_datos_cargos: Iniciando pre-carga', [
-            'cantidad_legajos' => \count($nros_legajos),
+            'cantidad_legajos' => count($nros_legajos),
             'memoria_antes' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
         ]);
 
@@ -3285,7 +3296,7 @@ class SicossOptimizado
             $tiempo_consulta = ($fin - $inicio) * 1000;
 
             Log::info('precargar_todos_datos_cargos: Pre-carga completada', [
-                'registros_cargados' => \count($resultado),
+                'registros_cargados' => count($resultado),
                 'tiempo_consulta_ms' => round($tiempo_consulta, 2),
                 'memoria_despues' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
             ]);
@@ -3295,7 +3306,7 @@ class SicossOptimizado
         } catch (Exception $e) {
             Log::error('precargar_todos_datos_cargos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
-                'cantidad_legajos' => \count($nros_legajos),
+                'cantidad_legajos' => count($nros_legajos),
             ]);
             return [];
         }
@@ -3354,8 +3365,8 @@ class SicossOptimizado
         $tiempo_agrupacion = ($fin - $inicio) * 1000;
 
         Log::info('agrupar_datos_cargos_por_legajo: Agrupación completada', [
-            'datos_procesados' => \count($datos_cargos),
-            'legajos_agrupados' => \count($datos_por_legajo),
+            'datos_procesados' => count($datos_cargos),
+            'legajos_agrupados' => count($datos_por_legajo),
             'tiempo_agrupacion_ms' => round($tiempo_agrupacion, 2),
         ]);
 
@@ -3431,7 +3442,7 @@ class SicossOptimizado
         $legajos_in = implode(',', $nros_legajos);
 
         Log::info('precargar_otra_actividad_todos_legajos: Iniciando pre-carga', [
-            'cantidad_legajos' => \count($nros_legajos),
+            'cantidad_legajos' => count($nros_legajos),
             'memoria_antes' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
         ]);
 
@@ -3471,11 +3482,11 @@ class SicossOptimizado
             $tiempo_consulta = ($fin - $inicio) * 1000;
 
             Log::info('precargar_otra_actividad_todos_legajos: Pre-carga completada', [
-                'registros_cargados' => \count($resultado),
+                'registros_cargados' => count($resultado),
                 'tiempo_consulta_ms' => round($tiempo_consulta, 2),
                 'memoria_despues' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
-                'legajos_con_otra_actividad' => \count($resultado),
-                'legajos_sin_otra_actividad' => \count($nros_legajos) - \count($resultado),
+                'legajos_con_otra_actividad' => count($resultado),
+                'legajos_sin_otra_actividad' => count($nros_legajos) - count($resultado),
             ]);
 
             // Agrupar por legajo para acceso O(1)
@@ -3483,7 +3494,7 @@ class SicossOptimizado
         } catch (Exception $e) {
             Log::error('precargar_otra_actividad_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
-                'cantidad_legajos' => \count($nros_legajos),
+                'cantidad_legajos' => count($nros_legajos),
             ]);
             return [];
         }
@@ -3514,7 +3525,7 @@ class SicossOptimizado
                 'importebrutootraactividad' => (float) $dato->ImporteBrutoOtraActividad,
                 'importesacotraactividad' => (float) $dato->ImporteSACOtraActividad,
                 'tiene_datos' => true,
-                'periodo' => $dato->vig_ano . '/' . str_pad($dato->vig_mes, 2, '0', \STR_PAD_LEFT),
+                'periodo' => $dato->vig_ano . '/' . str_pad($dato->vig_mes, 2, '0', STR_PAD_LEFT),
             ];
         }
 
@@ -3524,10 +3535,10 @@ class SicossOptimizado
         $legajos_con_datos = array_filter($datos_por_legajo, fn ($d) => $d['tiene_datos']);
 
         Log::info('agrupar_otra_actividad_por_legajo: Agrupación completada', [
-            'datos_procesados' => \count($datos_otra_actividad),
-            'total_legajos' => \count($datos_por_legajo),
-            'legajos_con_datos' => \count($legajos_con_datos),
-            'legajos_sin_datos' => \count($datos_por_legajo) - \count($legajos_con_datos),
+            'datos_procesados' => count($datos_otra_actividad),
+            'total_legajos' => count($datos_por_legajo),
+            'legajos_con_datos' => count($legajos_con_datos),
+            'legajos_sin_datos' => count($datos_por_legajo) - count($legajos_con_datos),
             'tiempo_agrupacion_ms' => round($tiempo_agrupacion, 2),
         ]);
 
@@ -3583,7 +3594,7 @@ class SicossOptimizado
         $legajos_in = implode(',', $nros_legajos);
 
         Log::info('precargar_codigos_obra_social_todos_legajos: Iniciando pre-carga', [
-            'cantidad_legajos' => \count($nros_legajos),
+            'cantidad_legajos' => count($nros_legajos),
             'memoria_antes' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
         ]);
 
@@ -3654,9 +3665,9 @@ class SicossOptimizado
             $tiempo_dh09_ms = ($tiempo_dh09 - $inicio) * 1000;
 
             Log::info('precargar_codigos_obra_social_todos_legajos: Pre-carga completada', [
-                'legajos_procesados' => \count($legajos_obra_social),
-                'codigos_obra_social_unicos' => \count($codigos_unicos),
-                'codigos_dgi_encontrados' => \count($resultado_dh37),
+                'legajos_procesados' => count($legajos_obra_social),
+                'codigos_obra_social_unicos' => count($codigos_unicos),
+                'codigos_dgi_encontrados' => count($resultado_dh37),
                 'tiempo_total_ms' => round($tiempo_total, 2),
                 'tiempo_dh09_ms' => round($tiempo_dh09_ms, 2),
                 'tiempo_dh37_ms' => round($tiempo_dh37, 2),
@@ -3668,7 +3679,7 @@ class SicossOptimizado
         } catch (Exception $e) {
             Log::error('precargar_codigos_obra_social_todos_legajos: Error en consulta SQL', [
                 'error' => $e->getMessage(),
-                'cantidad_legajos' => \count($nros_legajos),
+                'cantidad_legajos' => count($nros_legajos),
             ]);
             return [];
         }
@@ -3703,9 +3714,9 @@ class SicossOptimizado
         $jubilados = array_filter($codigos_dgi_por_legajo, fn ($codigo) => $codigo === '000000');
 
         Log::info('construir_mapa_codigos_dgi_final: Construcción completada', [
-            'total_legajos' => \count($codigos_dgi_por_legajo),
-            'jubilados_detectados' => \count($jubilados),
-            'legajos_con_obra_social' => \count($codigos_dgi_por_legajo) - \count($jubilados),
+            'total_legajos' => count($codigos_dgi_por_legajo),
+            'jubilados_detectados' => count($jubilados),
+            'legajos_con_obra_social' => count($codigos_dgi_por_legajo) - count($jubilados),
             'tiempo_construccion_ms' => round($tiempo_construccion, 2),
         ]);
 
@@ -3740,7 +3751,7 @@ class SicossOptimizado
     public static function guardar_en_bd(array $legajos, PeriodoFiscal $periodo_fiscal): array
     {
         $stats = [
-            'total_procesados' => \count($legajos),
+            'total_procesados' => count($legajos),
             'insertados' => 0,
             'chunks_procesados' => 0,
             'errores' => 0,
@@ -3773,13 +3784,13 @@ class SicossOptimizado
                     $datos_para_insertar[] = $datos_mapeados;
 
                     // Insertar cuando llegamos al chunk_size o al final
-                    if (\count($datos_para_insertar) === $chunk_size || $index === \count($legajos) - 1) {
+                    if (count($datos_para_insertar) === $chunk_size || $index === count($legajos) - 1) {
                         // Inserción masiva
                         $connection->table('suc.afip_mapuche_sicoss')->insert($datos_para_insertar);
-                        $stats['insertados'] += \count($datos_para_insertar);
+                        $stats['insertados'] += count($datos_para_insertar);
                         $stats['chunks_procesados']++;
 
-                        Log::info("Chunk {$stats['chunks_procesados']}: Insertados " . \count($datos_para_insertar) . " registros. Total: {$stats['insertados']}/{$stats['total_procesados']}");
+                        Log::info("Chunk {$stats['chunks_procesados']}: Insertados " . count($datos_para_insertar) . " registros. Total: {$stats['insertados']}/{$stats['total_procesados']}");
 
                         // Limpiar array para el siguiente chunk
                         $datos_para_insertar = [];
@@ -3859,7 +3870,7 @@ class SicossOptimizado
                 $datos_completos['check_sin_activo'],
             );
 
-            Log::info('Legajos obtenidos para procesamiento', ['cantidad' => \count($legajos)]);
+            Log::info('Legajos obtenidos para procesamiento', ['cantidad' => count($legajos)]);
 
             // Procesar SICOSS y guardar en BD
             return self::procesa_sicoss_bd(
@@ -3893,7 +3904,7 @@ class SicossOptimizado
     public static function procesa_sicoss_bd(array $datos, int $per_anoct, int $per_mesct, array $legajos, PeriodoFiscal $periodo_fiscal): array
     {
         $inicio_total = microtime(true);
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
 
         Log::info('Iniciando procesamiento SICOSS optimizado para BD', [
             'total_legajos' => $total_legajos,
@@ -3935,28 +3946,28 @@ class SicossOptimizado
             );
         }
 
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
         Log::info('Iniciando procesamiento optimizado', ['legajos' => $total_legajos]);
 
         // 1. Precarga masiva de conceptos liquidados
         Log::info('Precargando conceptos liquidados...');
         $conceptos_por_legajo = self::precargar_conceptos_todos_legajos($legajos);
-        Log::info('Conceptos precargados: ' . \count($conceptos_por_legajo));
+        Log::info('Conceptos precargados: ' . count($conceptos_por_legajo));
 
         // 2. Precarga masiva de datos de cargos
         Log::info('Precargando datos de cargos...');
         $datos_cargos_por_legajo = self::precargar_todos_datos_cargos($legajos);
-        Log::info('Datos de cargos precargados para ' . \count($datos_cargos_por_legajo) . ' legajos');
+        Log::info('Datos de cargos precargados para ' . count($datos_cargos_por_legajo) . ' legajos');
 
         // 3. Precarga otra actividad
         Log::info('Precargando otra actividad...');
         $otra_actividad_por_legajo = self::precargar_otra_actividad_todos_legajos($legajos);
-        Log::info('Otra actividad precargada para ' . \count($otra_actividad_por_legajo) . ' legajos');
+        Log::info('Otra actividad precargada para ' . count($otra_actividad_por_legajo) . ' legajos');
 
         // 4. Precarga códigos obra social
         Log::info('Precargando códigos obra social...');
         $codigos_dgi_por_legajo = self::precargar_codigos_obra_social_todos_legajos($legajos);
-        Log::info('Códigos DGI precargados para ' . \count($codigos_dgi_por_legajo) . ' legajos');
+        Log::info('Códigos DGI precargados para ' . count($codigos_dgi_por_legajo) . ' legajos');
 
         // 5. Procesar cada legajo usando datos precargados
         $legajos_procesados = [];
@@ -4001,7 +4012,7 @@ class SicossOptimizado
         $tiempo_procesamiento = round(microtime(true) - $inicio, 2);
         Log::info('Procesamiento completado', [
             'tiempo' => $tiempo_procesamiento . 's',
-            'legajos_validos' => \count($legajos_procesados),
+            'legajos_validos' => count($legajos_procesados),
             'errores' => $errores,
         ]);
 
@@ -4051,11 +4062,11 @@ class SicossOptimizado
             );
 
             // 🔍 LIMITAR para prueba
-            $legajos_prueba = \array_slice($todos_legajos, 0, $limite);
+            $legajos_prueba = array_slice($todos_legajos, 0, $limite);
 
             Log::info('Legajos para prueba seleccionados', [
-                'total_disponibles' => \count($todos_legajos),
-                'seleccionados_para_prueba' => \count($legajos_prueba),
+                'total_disponibles' => count($todos_legajos),
+                'seleccionados_para_prueba' => count($legajos_prueba),
             ]);
 
             // Procesar con el conjunto limitado
@@ -4069,8 +4080,8 @@ class SicossOptimizado
 
             // 📋 Agregar información de muestra para debugging
             $resultado['info_prueba'] = [
-                'total_disponibles' => \count($todos_legajos),
-                'procesados_en_prueba' => \count($legajos_prueba),
+                'total_disponibles' => count($todos_legajos),
+                'procesados_en_prueba' => count($legajos_prueba),
                 'primer_legajo_ejemplo' => $legajos_prueba[0] ?? null,
                 'periodo_fiscal' => $periodo_fiscal,
             ];
@@ -4108,11 +4119,11 @@ class SicossOptimizado
                 false,
             );
 
-            $muestra_legajos = \array_slice($legajos, 0, $muestra);
+            $muestra_legajos = array_slice($legajos, 0, $muestra);
 
             // Verificar estructura de un legajo sin procesamiento
             $verificacion = [
-                'total_legajos_disponibles' => \count($legajos),
+                'total_legajos_disponibles' => count($legajos),
                 'estructura_legajo_crudo' => $muestra_legajos[0] ?? null,
                 'campos_disponibles' => array_keys($muestra_legajos[0] ?? []),
             ];
@@ -4239,10 +4250,10 @@ class SicossOptimizado
      */
     private static function obtener_limite_memoria_bytes(): int
     {
-        $limite = \ini_get('memory_limit');
+        $limite = ini_get('memory_limit');
 
         if ($limite == -1) {
-            return \PHP_INT_MAX; // Sin límite
+            return PHP_INT_MAX; // Sin límite
         }
 
         $unidad = strtolower(substr($limite, -1));

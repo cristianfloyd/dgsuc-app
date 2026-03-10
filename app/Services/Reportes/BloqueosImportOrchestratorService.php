@@ -2,8 +2,8 @@
 
 namespace App\Services\Reportes;
 
-use Throwable;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class BloqueosImportOrchestratorService
 {

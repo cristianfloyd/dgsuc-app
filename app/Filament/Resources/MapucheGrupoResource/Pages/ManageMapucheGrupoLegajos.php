@@ -150,7 +150,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->color('success')
                     ->action(function ($records): void {
                         $records->each(function ($record): void {
-                            if (! $record->grupos()->where('mapuche.grupo.id_grupo', $this->record->id_grupo)->exists()) {
+                            if (!$record->grupos()->where('mapuche.grupo.id_grupo', $this->record->id_grupo)->exists()) {
                                 MapucheGrupoLegajo::create([
                                     'nro_legaj' => $record->nro_legaj,
                                     'id_grupo' => $this->record->id_grupo,
@@ -165,7 +165,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
-                    ->visible(fn (): bool => ! request()->boolean('filters.en_grupo')),
+                    ->visible(fn (): bool => !request()->boolean('filters.en_grupo')),
 
                 BulkAction::make('quitar_del_grupo')
                     ->label('Quitar del Grupo')
@@ -195,7 +195,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
                         $records->each(function ($record): void {
-                            if (! $this->record->legajos()->where('nro_legaj', $record->nro_legaj)->exists()) {
+                            if (!$this->record->legajos()->where('nro_legaj', $record->nro_legaj)->exists()) {
                                 $this->record->legajos()->create(['nro_legaj' => $record->nro_legaj]);
                             }
                         });

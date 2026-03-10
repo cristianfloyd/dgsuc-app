@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use Exception;
-use RuntimeException;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 class NominaRepository
 {

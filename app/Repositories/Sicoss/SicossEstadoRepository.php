@@ -5,6 +5,8 @@ namespace App\Repositories\Sicoss;
 use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 
+use function count;
+
 class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 {
     /**
@@ -120,7 +122,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     {
         $controlar_maternidad = false;
         $revista_legajo = [];
-        $cantidad_cambios = \count($cambios_estado);
+        $cantidad_cambios = count($cambios_estado);
         $dias = array_keys($cambios_estado);
 
         $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];

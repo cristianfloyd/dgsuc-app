@@ -2,7 +2,6 @@
 
 namespace App\Models\Mapuche\Catalogo;
 
-use Override;
 use App\Models\Dh03;
 use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
@@ -11,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla 'mapuche.dh36' que representa los datos de dependencias de empleados.

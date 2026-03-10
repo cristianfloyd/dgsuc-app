@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Models\AfipMapucheMiSimplificacion;
 use App\Models\TablaTempCuils as TableModel;
 use App\Services\WorkflowService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

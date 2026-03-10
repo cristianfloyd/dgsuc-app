@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Services\Abstract\AbstractTableService;
 use App\Tables\Definitions\AfipMapucheSicossTableDefinition;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

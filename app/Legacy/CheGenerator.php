@@ -7,6 +7,11 @@ use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 
+use function strlen;
+
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
+
 class CheGenerator
 {
     use MapucheConnectionTrait;
@@ -36,10 +41,10 @@ class CheGenerator
      */
     public function llenaImportes($valor, $longitud): string
     {
-        if (\strlen(trim($valor)) > $longitud) {
+        if (strlen(trim($valor)) > $longitud) {
             return substr($valor, -($longitud));
         }
-        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
+        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -47,10 +52,10 @@ class CheGenerator
      */
     public function llenaBlancos($texto, $longitud): string
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     /**
@@ -58,10 +63,10 @@ class CheGenerator
      */
     public function llenaBlancoIzq($texto, $longitud): string
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     /**

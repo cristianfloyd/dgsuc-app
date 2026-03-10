@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Afip;
 
-use Exception;
 use App\Repositories\Afip\SicossCpto205Repository;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class SicossCpto205Service

@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Sicoss;
 
-use Exception;
 use App\Contracts\DatabaseOperationInterface;
 use App\Contracts\Dh21RepositoryInterface;
 use App\Data\Sicoss\SicossProcessData;
@@ -10,7 +9,10 @@ use App\Repositories\Sicoss\Contracts\SicossLegajoFilterRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossOrchestatorRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterface
 {
@@ -162,7 +164,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
             Log::info('Procesamiento sin retro completado', [
                 'archivo' => $nombre_arch,
-                'legajos_procesados' => \count($legajos),
+                'legajos_procesados' => count($legajos),
             ]);
 
             return $totales;
@@ -210,7 +212,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             );
 
             Log::info('Iniciando procesamiento con retro', [
-                'periodos_retro' => \count($periodos_retro),
+                'periodos_retro' => count($periodos_retro),
                 'periodo_actual' => "{$per_mesct}/{$per_anoct}",
             ]);
 
@@ -254,8 +256,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             $this->databaseOperation->dropTemporaryTable('conceptos_liquidados');
 
             Log::info('Procesamiento con retro completado', [
-                'total_periodos' => \count($totales),
-                'legajos_base' => \count($legajos),
+                'total_periodos' => count($totales),
+                'legajos_base' => count($legajos),
             ]);
 
             return $totales;
@@ -277,8 +279,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             }
 
             Log::info('Proceso SICOSS finalizado exitosamente', [
-                'total_periodos' => \count($totales),
-                'archivos_generados' => \count($this->archivos),
+                'total_periodos' => count($totales),
+                'archivos_generados' => count($this->archivos),
             ]);
 
             return [
@@ -289,7 +291,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         } catch (Exception $e) {
             Log::error('Error en procesamiento de resultado final', [
                 'error' => $e->getMessage(),
-                'totales' => \count($totales),
+                'totales' => count($totales),
             ]);
             throw $e;
         }
@@ -336,7 +338,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             Log::info('Procesando período retro', [
                 'periodo' => $item,
                 'archivo' => $nombre_arch,
-                'legajos' => \count($legajos),
+                'legajos' => count($legajos),
             ]);
 
             $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(
@@ -373,7 +375,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             Log::info('Procesando período vigente', [
                 'periodo' => $periodo_display,
                 'archivo' => $nombre_arch,
-                'legajos' => \count($legajos),
+                'legajos' => count($legajos),
             ]);
 
             $subtotal = $this->sicossLegajoProcessorRepository->procesarSicoss(

@@ -10,6 +10,14 @@ use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 
+use function count;
+use function in_array;
+use function is_array;
+use function strlen;
+
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
+
 class Sicoss
 {
     use mapucheConnectionTrait;
@@ -140,9 +148,9 @@ class Sicoss
             $periodos_retro = self::obtener_periodos_retro($datos['check_lic'], $datos['check_retro']);
             $total = [];
 
-            for ($i = 0; $i < \count($periodos_retro); $i++) {
+            for ($i = 0; $i < count($periodos_retro); $i++) {
                 $p = $periodos_retro[$i];
-                $mes = str_pad($p['mes_retro'], 2, '0', \STR_PAD_LEFT);
+                $mes = str_pad($p['mes_retro'], 2, '0', STR_PAD_LEFT);
                 //agrego cero adelante a meses
                 $where_periodo = 't.ano_retro=' . $p['ano_retro'] . ' AND t.mes_retro=' . $mes;
                 $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
@@ -865,7 +873,7 @@ class Sicoss
     {
         $controlar_maternidad = false;
         $revista_legajo = [];
-        $cantidad_cambios = \count($cambios_estado);
+        $cantidad_cambios = count($cambios_estado);
         $dias = array_keys($cambios_estado);
 
         $revista_legajo[1] = ['codigo' => 0, 'dia' => 0];
@@ -922,7 +930,7 @@ class Sicoss
         $total['imponible_8'] = 0;
         $total['imponible_9'] = 0;
         $legajos_validos = [];
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
         $j = 0;
 
         // En este for se completan los campos necesarios para cada uno de los legajos liquidados
@@ -985,7 +993,7 @@ class Sicoss
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
-                                if (!\in_array($dia, $dias_lic_legajo)) { // Los d�as con licencia de legajo no se tocan
+                                if (!in_array($dia, $dias_lic_legajo)) { // Los d�as con licencia de legajo no se tocan
                                     if ($limites['maximo'] >= $dia) {
                                         $estado_situacion[$dia] = self::evaluar_condicion_licencia($estado_situacion[$dia], $licencia['condicion']);
                                     }
@@ -1016,8 +1024,8 @@ class Sicoss
 
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
-                    for ($dia = 1; $dia <= \count($cargo); $dia++) {
-                        if (!\in_array($dia, $dias_lic_legajo)) {
+                    for ($dia = 1; $dia <= count($cargo); $dia++) {
+                        if (!in_array($dia, $dias_lic_legajo)) {
                             if ((isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
                                 $estado_situacion[$dia] = $cargo[$dia]; // Si estaba trabajando en alg�n cargo se prioriza el c�digo en dha8
                             }
@@ -1358,7 +1366,7 @@ class Sicoss
         //Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
         $archivo = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
         $fh = fopen($archivo, 'w') || die('Error!!');
-        $total_legajos = \count($legajos);
+        $total_legajos = count($legajos);
         // Proceso la tabla, le agrego las longitudes correpondientes
         for ($i = 0; $i < $total_legajos; $i++) {
             $legajoActual = &$legajos[$i];
@@ -1485,7 +1493,7 @@ class Sicoss
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
         $conce_hs_extr = [];
         $cont = 0;
-        for ($i = 0; $i < \count($conceptos_liq_por_leg); $i++) {
+        for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
             $importe = $conceptos_liq_por_leg[$i]['impp_conce'];
             $importe_novedad = $conceptos_liq_por_leg[$i]['nov1_conce'];
             $grupos_concepto = $conceptos_liq_por_leg[$i]['tipos_grupos'];
@@ -1500,7 +1508,7 @@ class Sicoss
                 if (self::$hs_extras_por_novedad == 1) {
                     $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
                     //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
-                    if (!\in_array($codn_concepto, $conce_hs_extr)) {
+                    if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
                     }
@@ -1697,7 +1705,7 @@ class Sicoss
                        --filtro solo los que tienen tipo de concepto = 9 como es una lista uso exp. reg.
                        AND array_to_string(tipos_grupos,',') ~ '(:?^|,)+9(:?$|,)'";
             $conceptos_liq_por_leg = self::consultar_conceptos_liquidados($nro_leg, $where);
-            for ($j = 0; $j < \count($conceptos_liq_por_leg); $j++) {
+            for ($j = 0; $j < count($conceptos_liq_por_leg); $j++) {
                 $sacInvestigador += $conceptos_liq_por_leg[$j]['impp_conce'];
             }
         }
@@ -1866,35 +1874,35 @@ class Sicoss
         if ($valor === null) {
             $valor = '';
         }
-        if (\strlen(trim($valor)) > $longitud) {
+        if (strlen(trim($valor)) > $longitud) {
             return substr($valor, -($longitud));
         }
-        return str_pad($valor, $longitud, '0', \STR_PAD_LEFT);
+        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     public static function llena_blancos_izq($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_LEFT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
     // En los casos que se supera la longitud maxima con llena_blancos_izq se cortaban las iniciales en los agentes
     public static function llena_blancos_mod($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, 0, ($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public static function llena_blancos($texto, $longitud)
     {
-        if (\strlen(trim($texto)) > $longitud) {
+        if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
-        return str_pad($texto, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
     public static function transformar_a_recordset($totales_periodo)
@@ -1973,7 +1981,7 @@ class Sicoss
             return 'NULL';
         }
 
-        if (!\is_array($dato)) {
+        if (!is_array($dato)) {
             // Asumiendo que $this->conexion es una instancia de PDO
             return DB::connection()->getPdo()->quote($dato);
         }

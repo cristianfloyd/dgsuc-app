@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use Exception;
-use InvalidArgumentException;
 use Illuminate\Http\UploadedFile as HttpUploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+
+use const PATHINFO_FILENAME;
 
 class UploadService
 {
@@ -27,7 +29,7 @@ class UploadService
 
 
         //filename without extension
-        $filename = pathinfo($file->getClientOriginalName(), \PATHINFO_FILENAME);
+        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
         //extension
         $extension = $file->getClientOriginalExtension();

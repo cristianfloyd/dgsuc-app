@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use function count;
+use function is_array;
+
 /**
  * Trait que proporciona funcionalidad para trabajar con claves primarias compuestas en modelos Eloquent.
  */
@@ -112,7 +115,7 @@ trait HasCompositePrimaryKey
              */
             public function qualifySubSelectColumn(array|string $columns): array|string
             {
-                if (\is_array($columns)) {
+                if (is_array($columns)) {
                     return array_map($this->query->qualifyColumn(...), $columns);
                 }
                 return $this->query->qualifyColumn($columns);
@@ -146,7 +149,7 @@ trait HasCompositePrimaryKey
              */
             protected function wrapValuesInArray(mixed $values): array
             {
-                return \count($this->foreignKeys) > 1 ? [$values] : $values;
+                return count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }
@@ -204,7 +207,7 @@ trait HasCompositePrimaryKey
              */
             protected function wrapValuesInArray($values)
             {
-                return \count($this->foreignKeys) > 1 ? [$values] : $values;
+                return count($this->foreignKeys) > 1 ? [$values] : $values;
             }
         };
     }

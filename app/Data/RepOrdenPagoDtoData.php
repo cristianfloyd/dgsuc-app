@@ -13,28 +13,28 @@ class RepOrdenPagoDtoData extends Data
     /**
      * Constructor del DTO para RepOrdenPago.
      *
-     * @param  int  $nroLiqui  Número de liquidación
-     * @param  int  $banco  Código del banco
-     * @param  string  $codnFunci  Código de función
-     * @param  string  $codnFuent  Código de fuente
-     * @param  string  $codcUacad  Código de unidad académica
-     * @param  string  $caracter  Caracter
-     * @param  string  $codnProgr  Código de programa
-     * @param  float  $remunerativo  Monto remunerativo
-     * @param  float  $noRemunerativo  Monto no remunerativo
-     * @param  float  $otrosNoRemunerativo  Otros montos no remunerativos
-     * @param  float  $bruto  Monto bruto
-     * @param  float  $descuentos  Descuentos
-     * @param  float  $aportes  Aportes
-     * @param  float  $sueldo  Sueldo
-     * @param  float  $neto  Monto neto
-     * @param  float  $estipendio  Estipendio
-     * @param  float  $medResid  Médicos residentes
-     * @param  float  $productividad  Productividad
-     * @param  float  $salFam  Salario familiar
-     * @param  float  $hsExtras  Horas extras
-     * @param  float  $total  Total
-     * @param  float  $impGasto  Importe de gasto
+     * @param int $nroLiqui Número de liquidación
+     * @param int $banco Código del banco
+     * @param string $codnFunci Código de función
+     * @param string $codnFuent Código de fuente
+     * @param string $codcUacad Código de unidad académica
+     * @param string $caracter Caracter
+     * @param string $codnProgr Código de programa
+     * @param float $remunerativo Monto remunerativo
+     * @param float $noRemunerativo Monto no remunerativo
+     * @param float $otrosNoRemunerativo Otros montos no remunerativos
+     * @param float $bruto Monto bruto
+     * @param float $descuentos Descuentos
+     * @param float $aportes Aportes
+     * @param float $sueldo Sueldo
+     * @param float $neto Monto neto
+     * @param float $estipendio Estipendio
+     * @param float $medResid Médicos residentes
+     * @param float $productividad Productividad
+     * @param float $salFam Salario familiar
+     * @param float $hsExtras Horas extras
+     * @param float $total Total
+     * @param float $impGasto Importe de gasto
      */
     public function __construct(
         #[Required, Min(1)]
@@ -81,7 +81,8 @@ class RepOrdenPagoDtoData extends Data
         public readonly float $total,
         #[Required, Min(0)]
         public readonly float $impGasto,
-    ) {}
+    ) {
+    }
 
     /**
      * Convierte el DTO a un array con las claves en snake_case

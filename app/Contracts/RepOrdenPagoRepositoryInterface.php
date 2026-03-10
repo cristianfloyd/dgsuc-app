@@ -59,7 +59,7 @@ interface RepOrdenPagoRepositoryInterface
     /**
      * Ejecuta el procedimiento almacenado rep_orden_pago con las liquidaciones proporcionadas.
      *
-     * @param  array  $liquidaciones  Array de números de liquidación
+     * @param array $liquidaciones Array de números de liquidación
      *
      * @throws Exception
      */

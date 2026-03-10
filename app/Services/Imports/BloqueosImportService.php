@@ -2,15 +2,17 @@
 
 namespace App\Services\Imports;
 
-use Exception;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Exceptions\Imports\ImportException;
 use App\Exceptions\ImportValidationException;
 use App\Imports\BloqueosImport;
 use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+
+use function is_callable;
 
 class BloqueosImportService
 {
@@ -102,7 +104,7 @@ class BloqueosImportService
 
             foreach ($formats as $format) {
                 try {
-                    if (\is_callable($format)) {
+                    if (is_callable($format)) {
                         $parsed = $format($date);
                     } else {
                         $parsed = Carbon::createFromFormat($format, $date);

@@ -33,7 +33,8 @@ class CreateDh13DTO extends Dh13DTO
     /**
      * Crea una instancia desde una Request.
      *
-     * @param  Request  $request  Request HTTP
+     * @param Request $request Request HTTP
+     *
      * @return static Nueva instancia del DTO
      */
     public static function fromRequest(Request $request): self

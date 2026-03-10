@@ -2,10 +2,10 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
-use Override;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Override;
 
 class RepBloqueo extends Model
 {

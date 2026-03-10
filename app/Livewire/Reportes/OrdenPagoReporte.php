@@ -2,17 +2,17 @@
 
 namespace App\Livewire\Reportes;
 
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Application;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Services\ReportHeaderService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrdenPagoReporte extends Component implements Htmlable
 {

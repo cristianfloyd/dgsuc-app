@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+use function array_key_exists;
+
 class DynamicPropertiesComponent extends Component
 {
     public array $properties = [];
@@ -21,7 +23,7 @@ class DynamicPropertiesComponent extends Component
 
     public function updateProperty($key, $value): void
     {
-        if (\array_key_exists($key, $this->properties)) {
+        if (array_key_exists($key, $this->properties)) {
             $this->properties[$key] = $value;
         }
     }

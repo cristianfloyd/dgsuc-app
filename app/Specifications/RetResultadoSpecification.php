@@ -2,9 +2,9 @@
 
 namespace App\Specifications;
 
-use DateTime;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
+use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 
 class RetResultadoSpecification

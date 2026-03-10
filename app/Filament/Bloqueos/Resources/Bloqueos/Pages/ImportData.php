@@ -43,7 +43,7 @@ class ImportData extends Page
 
     public function mount(): void
     {
-        $tableService = new ImportDataTableService;
+        $tableService = new ImportDataTableService();
         $tableService->ensureTableExists();
     }
 
@@ -55,7 +55,7 @@ class ImportData extends Page
 
     public function form(Schema $schema): Schema
     {
-        $dh22Service = new Dh22Service;
+        $dh22Service = new Dh22Service();
         $liquidaciones = $dh22Service->getLiquidacionesParaSelect();
 
         return $schema
@@ -112,7 +112,7 @@ class ImportData extends Page
 
         try {
             // Validación previa del archivo
-            if (! file_exists($filePath)) {
+            if (!file_exists($filePath)) {
                 throw new Exception('El archivo no existe o no es accesible');
             }
 
@@ -150,9 +150,9 @@ class ImportData extends Page
                 Log::info('Importación completada exitosamente', $importResult->toArray());
 
                 // --- INICIO: Ejecutar el orquestador ---
-                $procesarTodo = ! empty($this->data['procesar_todo']);
-                $validarTodos = ! empty($this->data['validar_todos']);
-                $validarCargosAsociados = ! empty($this->data['validar_cargos_asociados']);
+                $procesarTodo = !empty($this->data['procesar_todo']);
+                $validarTodos = !empty($this->data['validar_todos']);
+                $validarCargosAsociados = !empty($this->data['validar_cargos_asociados']);
                 $orquestador = app(BloqueosImportOrchestratorService::class);
                 $resultados = $orquestador->ejecutarSecuenciaCompleta($procesarTodo, $validarTodos, $validarCargosAsociados);
 
@@ -165,7 +165,7 @@ class ImportData extends Page
                 } else {
                     Notification::make()
                         ->title('Error en el procesamiento posterior a la importación')
-                        ->body('Ocurrió un error: '.$resultados['error'])
+                        ->body('Ocurrió un error: ' . $resultados['error'])
                         ->danger()
                         ->send();
                     // decidir si redirigir o no en caso de error

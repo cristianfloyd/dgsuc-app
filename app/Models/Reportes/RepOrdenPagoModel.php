@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Reportes;
 
-use InvalidArgumentException;
 use App\Models\Mapuche\Catalogo\Dh30;
 use App\Services\RepOrdenPagoService;
 use App\Traits\MapucheConnectionTrait;
@@ -13,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use InvalidArgumentException;
 
 class RepOrdenPagoModel extends Model implements HasLabel
 {

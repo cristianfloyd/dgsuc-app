@@ -5,6 +5,8 @@ namespace App\Auth;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Log;
 
+use function get_class;
+
 class TobaGuard extends SessionGuard
 {
     public function attempt(array $credentials = [], $remember = false)
@@ -28,7 +30,7 @@ class TobaGuard extends SessionGuard
             Log::debug('TobaGuard login exitoso', [
                 'user_id' => $this->user()->getAuthIdentifier(),
                 'username' => $this->user()->getAuthIdentifierName(),
-                'user_class' => \get_class($this->user()),
+                'user_class' => get_class($this->user()),
             ]);
         } else {
             Log::debug('TobaGuard login fallido');

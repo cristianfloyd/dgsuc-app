@@ -6,6 +6,8 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use function is_array;
+
 class SpuDisc extends Model
 {
     // Especificar la conexión de la base de datos si no es la predeterminada
@@ -46,7 +48,7 @@ class SpuDisc extends Model
     protected function setKeysForSaveQuery($query)
     {
         $keys = $this->getKeyName();
-        if (!\is_array($keys)) {
+        if (!is_array($keys)) {
             return parent::setKeysForSaveQuery($query);
         }
 

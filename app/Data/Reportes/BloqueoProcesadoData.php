@@ -30,7 +30,8 @@ class BloqueoProcesadoData extends Data
         public readonly ?array $metadata = [],
         public bool $cambiosRealizados = false,
         public array $datosOriginales = [],
-    ) {}
+    ) {
+    }
 
     public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {
@@ -50,7 +51,7 @@ class BloqueoProcesadoData extends Data
 
     public static function fromSuccess(BloqueosDataModel $bloqueo): self
     {
-        if (! Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+        if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
             throw ValidationException::withMessages([
                 'legajo_cargo' => 'Combinación legajo-cargo inválida',
             ]);

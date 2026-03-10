@@ -2,14 +2,16 @@
 
 namespace App\Services\Mapuche;
 
-use Exception;
 use App\Data\Responses\LicenciaVigenteData;
 use App\Models\Mapuche\MapucheConfig;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Spatie\LaravelData\DataCollection;
+
+use function count;
 
 class LicenciaService
 {
@@ -74,13 +76,13 @@ class LicenciaService
             $cacheKey = $this->cachePrefix . "vigentes:{$periodoActual}:" . md5(json_encode($legajos));
 
             // Si no se debe usar caché o hay demasiados legajos, ejecutar consulta directamente
-            if (!$useCache || \count($legajos) > 100) {
+            if (!$useCache || count($legajos) > 100) {
                 return $this->fetchLicenciasFromDatabase($legajos);
             }
 
             // Verificar si los datos están en caché
             if (Redis::exists($cacheKey)) {
-                Log::info('Obteniendo licencias desde caché Redis', ['legajos_count' => \count($legajos)]);
+                Log::info('Obteniendo licencias desde caché Redis', ['legajos_count' => count($legajos)]);
                 $cachedData = json_decode(Redis::get($cacheKey), true);
 
                 // Si los datos cacheados están vacíos, verificar directamente en la base de datos para confirmar
@@ -106,7 +108,7 @@ class LicenciaService
             }
 
             // Si no está en caché, obtener de la base de datos
-            Log::info('Cargando licencias desde la base de datos para caché', ['legajos_count' => \count($legajos)]);
+            Log::info('Cargando licencias desde la base de datos para caché', ['legajos_count' => count($legajos)]);
             $licencias = $this->fetchLicenciasFromDatabase($legajos);
 
             // Guardar en caché si hay resultados
@@ -246,7 +248,7 @@ class LicenciaService
             }
 
             // Si hay varios legajos, también invalidar su caché conjunto
-            if (\count($legajos) > 1) {
+            if (count($legajos) > 1) {
                 sort($legajos);
                 $cacheKey = $this->cachePrefix . "vigentes:{$periodoActual}:" . md5(json_encode($legajos));
                 Redis::del($cacheKey);
@@ -651,7 +653,7 @@ class LicenciaService
                 ->select($sql, $params);
 
             Log::info('Consulta SQL ejecutada correctamente', [
-                'filas_encontradas' => \count($resultados),
+                'filas_encontradas' => count($resultados),
             ]);
 
             // Convertir resultados a DTO

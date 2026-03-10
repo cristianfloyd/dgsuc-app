@@ -6,6 +6,7 @@ use App\Exports\SicossReporteExport;
 use App\Filament\Afip\Pages\Widgets\SicossTotalesWidget;
 use App\Models\Mapuche\MapucheSicossReporte;
 use App\Services\Reports\SicossReporteService;
+use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
+use UnitEnum;
 
 class SicossReportePage extends Page implements HasTable
 {
@@ -41,13 +43,13 @@ class SicossReportePage extends Page implements HasTable
 
     public bool $isLoading = false;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Reporte SICOSS';
 
     protected static ?string $title = 'Reporte SICOSS';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'SICOSS';
+    protected static string|UnitEnum|null $navigationGroup = 'SICOSS';
 
     protected static ?int $navigationSort = 2;
 
@@ -125,7 +127,7 @@ class SicossReportePage extends Page implements HasTable
                             ),
                         )
                         ->afterStateUpdated(function ($state): void {
-                            if (! $state) {
+                            if (!$state) {
                                 return;
                             }
 
@@ -180,7 +182,7 @@ class SicossReportePage extends Page implements HasTable
      */
     public function getTotales(): array
     {
-        if (! $this->anio || ! $this->mes) {
+        if (!$this->anio || !$this->mes) {
             Log::info('SicossReportePage:: No se pudo obtener los totales', ['anio' => $this->anio, 'mes' => $this->mes]);
 
             return [];

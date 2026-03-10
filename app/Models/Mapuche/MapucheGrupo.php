@@ -2,7 +2,6 @@
 
 namespace App\Models\Mapuche;
 
-use Override;
 use App\Data\Mapuche\GrupoData;
 use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
@@ -10,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 class MapucheGrupo extends Model
 {

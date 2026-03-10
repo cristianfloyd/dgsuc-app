@@ -9,6 +9,10 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
+use function sprintf;
+
+use const STR_PAD_LEFT;
+
 class EjecutarControlAportesAction extends Action
 {
     protected function setUp(): void
@@ -41,7 +45,7 @@ class EjecutarControlAportesAction extends Action
         return $this->badge(function () {
             $livewire = $this->getLivewire();
 
-            return \sprintf('%d-%02d', $livewire->year, $livewire->month);
+            return sprintf('%d-%02d', $livewire->year, $livewire->month);
         });
     }
 
@@ -81,7 +85,7 @@ class EjecutarControlAportesAction extends Action
             Notification::make()
                 ->success()
                 ->title('Control de Aportes Ejecutado')
-                ->body("Se completó el control de aportes para el período {$year}-".str_pad($month, 2, '0', \STR_PAD_LEFT))
+                ->body("Se completó el control de aportes para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
                 ->send();
         } catch (Exception $e) {
             Log::error('Error en control de aportes', [

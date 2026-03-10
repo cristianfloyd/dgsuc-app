@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use function in_array;
+
 enum TipoConce: string
 {
     /**
@@ -75,7 +77,7 @@ enum TipoConce: string
      */
     public function isRemunerativo(): bool
     {
-        return \in_array($this, [
+        return in_array($this, [
             self::REMUNERACION_CON_APORTE,
             self::REMUNERACION_SIN_APORTE,
         ]);
@@ -94,7 +96,7 @@ enum TipoConce: string
      */
     public function esDescuentoOAporte(): bool
     {
-        return \in_array($this, [
+        return in_array($this, [
             self::DESCUENTO,
             self::APORTE_PATRONAL,
         ]);

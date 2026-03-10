@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Sicoss;
 
-use Exception;
 use App\Data\Sicoss\SicossProcessData;
 use App\Models\Dh01;
 use App\Models\Dh03;
@@ -16,8 +15,17 @@ use App\Repositories\Sicoss\Contracts\SicossFormateadorRepositoryInterface;
 use App\Repositories\Sicoss\Contracts\SicossLegajoProcessorRepositoryInterface;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
+use function in_array;
+use function is_object;
+use function strlen;
+
+use const PHP_EOL;
+use const STR_PAD_RIGHT;
 
 class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepositoryInterface
 {
@@ -60,7 +68,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     ): array {
         // Convertir objetos stdClass a arrays si es necesario
         $legajos = array_map(function ($legajo) {
-            return \is_object($legajo) ? (array) $legajo : $legajo;
+            return is_object($legajo) ? (array) $legajo : $legajo;
         }, $legajos);
 
         // Usar los valores del DTO directamente
@@ -88,7 +96,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $j = 0;
 
         // En este for se completan los campos necesarios para cada uno de los legajos liquidados
-        for ($i = 0; $i < \count(array_values($legajos)); $i++) {
+        for ($i = 0; $i < count(array_values($legajos)); $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
 
             $legajos[$i]['ImporteSACOtroAporte'] = 0;
@@ -116,7 +124,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Convertir objetos stdClass a arrays si es necesario
                 $limites = array_map(function ($limite) {
-                    return \is_object($limite) ? (array) $limite : $limite;
+                    return is_object($limite) ? (array) $limite : $limite;
                 }, $limites);
 
                 //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
@@ -134,7 +142,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Convertir objetos stdClass a arrays si es necesario
                 $cargos_legajo = array_map(function ($cargo) {
-                    return \is_object($cargo) ? (array) $cargo : $cargo;
+                    return is_object($cargo) ? (array) $cargo : $cargo;
                 }, $cargos_legajo);
                 // En el caso de las licencias de legajo, se mantiene el código de condición en esos días
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
@@ -146,7 +154,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
-                                if (!\in_array($dia, $dias_lic_legajo)) { // Los días con licencia de legajo no se tocan
+                                if (!in_array($dia, $dias_lic_legajo)) { // Los días con licencia de legajo no se tocan
                                     if ($limites[0]['maximo'] >= $dia) {
                                         $estado_situacion[$dia] = $this->sicossEstadoRepository->evaluarCondicionLicencia($estado_situacion[$dia], $licencia['condicion']);
                                     }
@@ -177,8 +185,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
-                    for ($dia = 1; $dia <= \count($cargo); $dia++) {
-                        if (!\in_array($dia, $dias_lic_legajo)) {
+                    for ($dia = 1; $dia <= count($cargo); $dia++) {
+                        if (!in_array($dia, $dias_lic_legajo)) {
                             if ((isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
                                 $estado_situacion[$dia] = $cargo[$dia]; // Si estaba trabajando en algún cargo se prioriza el código en dha8
                             }
@@ -522,7 +530,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     {
         try {
             $contenido = '';
-            $totalLegajos = \count($legajos);
+            $totalLegajos = count($legajos);
             $procesados = 0;
 
             Log::info('Iniciando grabación de archivo SICOSS TXT', [
@@ -532,7 +540,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
             foreach ($legajos as $legajo) {
                 $linea = $this->generarLineaSicoss($legajo);
-                $contenido .= $linea . \PHP_EOL;
+                $contenido .= $linea . PHP_EOL;
                 $procesados++;
 
                 // Loguear progreso cada 100 registros
@@ -618,7 +626,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
         $conce_hs_extr = [];
         $cont = 0;
-        for ($i = 0; $i < \count($conceptos_liq_por_leg); $i++) {
+        for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
             $importe = $conceptos_liq_por_leg[$i]['impp_conce'];
             $importe_novedad = $conceptos_liq_por_leg[$i]['nov1_conce'];
             $grupos_concepto = $conceptos_liq_por_leg[$i]['tipos_grupos'];
@@ -633,7 +641,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 if ($this->sicossConfigurationRepository->getHorasExtrasPorNovedad() == 1) {
                     $horas = $this->sicossCalculoRepository->calculoHorasExtras($codn_concepto, $nro_cargo);
                     //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
-                    if (!\in_array($codn_concepto, $conce_hs_extr)) {
+                    if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
                     }
@@ -864,7 +872,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                            --filtro solo los que tienen tipo de concepto = 9 como es una lista uso exp. reg.
                            AND array_to_string(tipos_grupos,',') ~ '(:?^|,)+9(:?$|,)'";
             $conceptos_liq_por_leg = $this->consultarConceptosLiquidados($nro_leg, $where);
-            for ($j = 0; $j < \count($conceptos_liq_por_leg); $j++) {
+            for ($j = 0; $j < count($conceptos_liq_por_leg); $j++) {
                 $sacInvestigador += $conceptos_liq_por_leg[$j]['impp_conce'];
             }
         }
@@ -1079,9 +1087,9 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
      */
     protected function ajustarLongitud(string $linea, int $longitud): string
     {
-        if (\strlen($linea) > $longitud) {
+        if (strlen($linea) > $longitud) {
             return substr($linea, 0, $longitud);
         }
-        return str_pad($linea, $longitud, ' ', \STR_PAD_RIGHT);
+        return str_pad($linea, $longitud, ' ', STR_PAD_RIGHT);
     }
 }

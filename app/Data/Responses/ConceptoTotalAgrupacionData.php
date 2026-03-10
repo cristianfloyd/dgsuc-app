@@ -19,7 +19,8 @@ class ConceptoTotalAgrupacionData extends Data
         public readonly float $totalDescuentos,
         #[MapName('neto')]
         public readonly float $neto,
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia desde el resultado del repositorio.

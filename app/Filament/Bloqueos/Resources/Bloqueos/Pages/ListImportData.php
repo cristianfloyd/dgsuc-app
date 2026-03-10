@@ -116,7 +116,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error en la validación')
-                            ->body('Error: '.$th->getMessage())
+                            ->body('Error: ' . $th->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -141,13 +141,13 @@ class ListImportData extends ListRecords
                         Notification::make()
                             ->title('Procesamiento completo')
                             ->body(
-                                'Bloqueos procesados:<br>'.
-                                'Total procesados: '.($resBloqueos['procesados'] ?? '-').'<br>'.
-                                'Errores: '.($resBloqueos['errores'] ?? '0').'<br>'.
-                                '<br>'.
-                                'Duplicados procesados:<br>'.
-                                'Grupos detectados: '.($resDuplicados['grupos'] ?? '-').'<br>'.
-                                'Registros eliminados: '.($resDuplicados['eliminados'] ?? '-'),
+                                'Bloqueos procesados:<br>' .
+                                'Total procesados: ' . ($resBloqueos['procesados'] ?? '-') . '<br>' .
+                                'Errores: ' . ($resBloqueos['errores'] ?? '0') . '<br>' .
+                                '<br>' .
+                                'Duplicados procesados:<br>' .
+                                'Grupos detectados: ' . ($resDuplicados['grupos'] ?? '-') . '<br>' .
+                                'Registros eliminados: ' . ($resDuplicados['eliminados'] ?? '-'),
                             )
                             ->success()
                             ->send();
@@ -159,7 +159,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error en el procesamiento')
-                            ->body('Error: '.$e->getMessage())
+                            ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -188,7 +188,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error al restaurar cambios')
-                            ->body('Error: '.$e->getMessage())
+                            ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -217,7 +217,7 @@ class ListImportData extends ListRecords
                         ]);
                         Notification::make()
                             ->title('Error al vaciar la tabla')
-                            ->body('Error: '.$e->getMessage())
+                            ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
@@ -231,9 +231,9 @@ class ListImportData extends ListRecords
                 ->modalContent(function () {
                     $markdown = file_get_contents(resource_path('docs/documentacion_bloqueos_resource.md'));
 
-                    $environment = new Environment;
-                    $environment->addExtension(new CommonMarkCoreExtension);
-                    $environment->addExtension(new GithubFlavoredMarkdownExtension);
+                    $environment = new Environment();
+                    $environment->addExtension(new CommonMarkCoreExtension());
+                    $environment->addExtension(new GithubFlavoredMarkdownExtension());
 
                     $converter = new MarkdownConverter($environment);
                     $html = $converter->convert($markdown)->getContent();

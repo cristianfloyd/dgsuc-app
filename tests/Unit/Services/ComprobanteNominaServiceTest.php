@@ -6,6 +6,8 @@ use App\Services\ComprobanteNominaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use function dirname;
+
 class ComprobanteNominaServiceTest extends TestCase
 {
     // use RefreshDatabase;
@@ -90,8 +92,8 @@ class ComprobanteNominaServiceTest extends TestCase
 
     private function createTestFile(): void
     {
-        if (!file_exists(\dirname($this->testFilePath))) {
-            mkdir(\dirname($this->testFilePath), 0o777, true);
+        if (!file_exists(dirname($this->testFilePath))) {
+            mkdir(dirname($this->testFilePath), 0o777, true);
         }
 
         $content = <<<EOT

@@ -2,15 +2,17 @@
 
 namespace app\Services;
 
-use Exception;
-use PDO;
 use App\Contracts\DatabaseServiceInterface;
 use App\Models\AfipRelacionesActivas;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\LazyCollection;
+use PDO;
+
+use function count;
 
 class DatabaseService implements DatabaseServiceInterface
 {
@@ -75,7 +77,7 @@ class DatabaseService implements DatabaseServiceInterface
             // Divide los datos en lotes y los inserta
             foreach (array_chunk($datosMapeados, $tamanoLote) as $lote) {
                 // Crea los placeholders para la consulta
-                $placeholders = implode(',', array_fill(0, \count($lote[0]), '?'));
+                $placeholders = implode(',', array_fill(0, count($lote[0]), '?'));
 
                 // Construye la consulta de inserción
                 $query = 'INSERT INTO afip_relaciones_activas (' . implode(',', array_keys($lote[0])) . ") VALUES ($placeholders)";

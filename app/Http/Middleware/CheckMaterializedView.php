@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Exception;
 use App\Jobs\RefreshMaterializedViewJob;
 use App\Services\MaterializedView\ConceptoListadoViewService;
+use Closure;
+use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

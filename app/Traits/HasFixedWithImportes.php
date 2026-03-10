@@ -4,6 +4,8 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+use const STR_PAD_LEFT;
+
 trait HasFixedWithImportes
 {
     /**
@@ -36,7 +38,7 @@ trait HasFixedWithImportes
                         ),
                         length: 12,
                         pad_string: ' ',
-                        pad_type: \STR_PAD_LEFT,
+                        pad_type: STR_PAD_LEFT,
                     ),
                 ];
             },
@@ -54,7 +56,7 @@ trait HasFixedWithImportes
     {
         return Attribute::make(
             get: fn ($value, $attributes) =>
-            str_pad(rtrim($attributes[$field] ?? ''), 12, ' ', \STR_PAD_LEFT),
+            str_pad(rtrim($attributes[$field] ?? ''), 12, ' ', STR_PAD_LEFT),
         );
     }
 }

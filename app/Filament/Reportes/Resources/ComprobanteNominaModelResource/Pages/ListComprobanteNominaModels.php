@@ -4,15 +4,16 @@ namespace App\Filament\Reportes\Resources\ComprobanteNominaModelResource\Pages;
 
 use App\Filament\Reportes\Resources\ComprobanteNominaModelResource\ComprobanteNominaModels\ComprobanteNominaModelResource;
 use App\Services\ComprobanteNominaService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class ListComprobanteNominaModels extends ListRecords
 {
     protected static string $resource = ComprobanteNominaModelResource::class;
+
     protected ComprobanteNominaService $comprobanteNominaService;
 
     public function boot(ComprobanteNominaService $comprobanteNominaService): void
@@ -23,7 +24,7 @@ class ListComprobanteNominaModels extends ListRecords
 
     public function mount(): void
     {
-        if (! $this->comprobanteNominaService->checkTableExists()) {
+        if (!$this->comprobanteNominaService->checkTableExists()) {
             $this->comprobanteNominaService->createTable();
         }
     }
@@ -49,7 +50,7 @@ class ListComprobanteNominaModels extends ListRecords
                             ->success()
                             ->send();
                     } catch (Exception $e) {
-                        Log::error('Error al truncar tabla: '.$e->getMessage());
+                        Log::error('Error al truncar tabla: ' . $e->getMessage());
 
                         Notification::make()
                             ->title('Error al limpiar la tabla')

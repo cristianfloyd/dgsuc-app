@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
-use Exception;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+
+use function is_object;
 
 class MapucheSicossTable extends Component
 {
@@ -82,7 +84,7 @@ class MapucheSicossTable extends Component
     {
         try {
             $value = $model->getRawOriginal($attribute);
-            if (\is_object($value)) {
+            if (is_object($value)) {
                 return method_exists($value, '__toString') ? (string) $value : $value::class;
             }
             return $value;

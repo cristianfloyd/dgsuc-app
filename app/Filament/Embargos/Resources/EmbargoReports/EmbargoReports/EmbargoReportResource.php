@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class EmbargoReportResource extends Resource
 {
@@ -17,7 +18,7 @@ class EmbargoReportResource extends Resource
 
     protected static ?string $label = 'Reporte Embargos';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
     public static function table(Table $table): Table
     {
@@ -57,7 +58,7 @@ class EmbargoReportResource extends Resource
                         $importes = $record->getImporteDescontado(3);
 
                         return $importes->map(function ($importe) {
-                            return "Cargo {$importe->nro_cargo}: $ ".number_format($importe->impp_conce, 2);
+                            return "Cargo {$importe->nro_cargo}: $ " . number_format($importe->impp_conce, 2);
                         })->join("\n");
                     })
                     ->sortable(),

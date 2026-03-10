@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\UploadedFile;
 use InvalidArgumentException;
 use RuntimeException;
-use App\Models\UploadedFile;
+
+use function in_array;
+
+use const PATHINFO_EXTENSION;
 
 class ValidationService
 {
@@ -34,8 +38,8 @@ class ValidationService
         }
 
         $allowedExtensions = ['txt', 'csv'];
-        $fileExtension = pathinfo($filePath, \PATHINFO_EXTENSION);
-        if (!\in_array($fileExtension, $allowedExtensions)) {
+        $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($fileExtension, $allowedExtensions)) {
             throw new InvalidArgumentException('El tipo de archivo seleccionado no es válido. Se esperaba un archivo .txt o .csv.');
         }
     }

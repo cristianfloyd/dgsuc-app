@@ -2,10 +2,10 @@
 
 namespace App\Services\Afip;
 
-use Throwable;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SicossActividadUpdateService
 {

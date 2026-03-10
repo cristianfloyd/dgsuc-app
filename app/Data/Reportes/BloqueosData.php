@@ -11,6 +11,8 @@ use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
+use function in_array;
+
 class BloqueosData extends Data
 {
     public function __construct(
@@ -31,7 +33,8 @@ class BloqueosData extends Data
         public readonly int $nro_liqui,
         public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE,
         public readonly ?string $mensaje_error = null,
-    ) {}
+    ) {
+    }
 
     public static function rules(?ValidationContext $context = null): array
     {
@@ -54,7 +57,7 @@ class BloqueosData extends Data
                 'required_if:tipo_de_movimiento,Fallecido,Renuncia',
                 function ($attribute, $value, $fail): void {
                     // Permitir tanto fechas como números (formato Excel)
-                    if (! empty($value) && ! is_numeric($value) && ! strtotime($value)) {
+                    if (!empty($value) && !is_numeric($value) && !strtotime($value)) {
                         $fail('El formato de fecha no es válido.');
                     }
                 },
@@ -122,7 +125,7 @@ class BloqueosData extends Data
     {
 
         // Si no es un tipo que requiera fecha, retornamos null
-        if (! \in_array($tipo, ['fallecido', 'renuncia'])) {
+        if (!in_array($tipo, ['fallecido', 'renuncia'])) {
             return null;
         }
 

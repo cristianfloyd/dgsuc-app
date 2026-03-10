@@ -2,19 +2,19 @@
 
 namespace App\Filament\Resources\Mapuche;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\BulkActionGroup;
-use App\Filament\Resources\Mapuche\Dh05Resource\Pages\ListDh05s;
 use App\Filament\Resources\Mapuche\Dh05Resource\Pages\CreateDh05;
 use App\Filament\Resources\Mapuche\Dh05Resource\Pages\EditDh05;
-use App\Filament\Resources\Mapuche\Dh05Resource\Pages;
+use App\Filament\Resources\Mapuche\Dh05Resource\Pages\ListDh05s;
 use App\Models\Mapuche\Dh05;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class Dh05Resource extends Resource
 {
@@ -26,7 +26,7 @@ class Dh05Resource extends Resource
 
     protected static ?string $navigationLabel = 'Licencias';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Personal';
+    protected static string | UnitEnum | null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

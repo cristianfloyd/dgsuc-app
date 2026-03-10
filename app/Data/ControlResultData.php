@@ -5,16 +5,18 @@ namespace App\Data;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 
+use function count;
+
 class ControlResultData extends Data
 {
     /**
      * Constructor para los resultados de un control post-liquidación.
      *
-     * @param  bool  $success  Indica si el control fue exitoso (true) o detectó errores (false)
-     * @param  string  $message  Mensaje descriptivo del resultado del control
-     * @param  array|Collection  $data  Datos resultantes del control para análisis posterior
-     * @param  int  $count  Cantidad de registros encontrados en el control
-     * @param  string  $tipo  Tipo de control ejecutado (categorización)
+     * @param bool $success Indica si el control fue exitoso (true) o detectó errores (false)
+     * @param string $message Mensaje descriptivo del resultado del control
+     * @param array|Collection $data Datos resultantes del control para análisis posterior
+     * @param int $count Cantidad de registros encontrados en el control
+     * @param string $tipo Tipo de control ejecutado (categorización)
      */
     public function __construct(
         public bool $success,
@@ -25,7 +27,7 @@ class ControlResultData extends Data
     ) {
         // Si no se proporciona un count explícito, intentamos calcularlo desde los datos
         if ($this->count === null) {
-            $this->count = \count($this->data);
+            $this->count = count($this->data);
         }
     }
 

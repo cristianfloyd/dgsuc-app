@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Contracts\Dh61RepositoryInterface;
 use App\Models\Dh11;
 
+use function count;
+
 class Dh61Service
 {
     private Dh61RepositoryInterface $dh61Repository;
@@ -89,7 +91,7 @@ class Dh61Service
         }
 
         return [
-            'success' => \count($failedCategories) === 0, // Si no hay categorías fallidas, la operación es exitosa.
+            'success' => count($failedCategories) === 0, // Si no hay categorías fallidas, la operación es exitosa.
             'message' => $message,
         ];
     }

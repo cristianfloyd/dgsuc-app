@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use Exception;
 use App\Contracts\DatabaseServiceInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Contracts\TableManagementServiceInterface;
@@ -12,6 +11,7 @@ use App\Models\UploadedFile;
 use App\Services\ColumnMetadata;
 use App\Services\EmployeeService;
 use App\Services\ValidationService;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;

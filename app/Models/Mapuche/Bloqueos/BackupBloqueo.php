@@ -2,8 +2,8 @@
 
 namespace App\Models\Mapuche\Bloqueos;
 
-use Override;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class BackupBloqueo extends Model
 {

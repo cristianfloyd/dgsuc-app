@@ -2,12 +2,17 @@
 
 namespace App\Services\Validation;
 
-use Exception;
 use App\Enums\BloqueosEstadoEnum;
 use App\Exceptions\ValidationException;
 use App\Services\DateParserService;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+
+use function in_array;
+use function strlen;
+
+use const FILTER_VALIDATE_EMAIL;
 
 class ExcelRowValidationService
 {
@@ -110,7 +115,7 @@ class ExcelRowValidationService
 
         $email = strtolower(trim($email));
 
-        if (!filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw (new ValidationException("Email inválido: {$email}"))
                 ->setField('email')
                 ->setContext(['input' => $email]);
@@ -130,7 +135,7 @@ class ExcelRowValidationService
 
         $nombre = trim($nombre);
 
-        if (\strlen($nombre) < 2) {
+        if (strlen($nombre) < 2) {
             throw new ValidationException('El nombre debe tener al menos 2 caracteres');
         }
 
@@ -260,7 +265,7 @@ class ExcelRowValidationService
         $tipo = strtolower(trim($tipo));
         $tiposValidos = ['licencia', 'fallecido', 'renuncia'];
 
-        if (!\in_array($tipo, $tiposValidos)) {
+        if (!in_array($tipo, $tiposValidos)) {
             return [
                 'value' => $tipo,
                 'estado' => BloqueosEstadoEnum::ERROR_VALIDACION,

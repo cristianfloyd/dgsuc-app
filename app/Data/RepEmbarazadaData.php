@@ -29,5 +29,6 @@ class RepEmbarazadaData extends Data
         #[Required]
         #[StringType]
         public readonly string $codc_uacad,
-    ) {}
+    ) {
+    }
 }

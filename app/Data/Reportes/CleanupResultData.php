@@ -7,6 +7,8 @@ use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 
+use const STR_PAD_LEFT;
+
 /**
  * Data Transfer Object para el resultado de limpieza de la tabla de trabajo.
  */
@@ -36,7 +38,8 @@ class CleanupResultData extends Data
         public readonly array $estadisticasAntes = [],
         /** @var array Estadísticas después de la limpieza */
         public readonly array $estadisticasDespues = [],
-    ) {}
+    ) {
+    }
 
     /**
      * Crea una instancia exitosa.
@@ -103,7 +106,7 @@ class CleanupResultData extends Data
      */
     public static function nothingToClean(array $periodoFiscal): self
     {
-        $periodoString = $periodoFiscal['year'].'-'.str_pad((string) $periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        $periodoString = $periodoFiscal['year'] . '-' . str_pad((string) $periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
 
         return new self(
             success: true,
@@ -146,6 +149,6 @@ class CleanupResultData extends Data
      */
     public function getPeriodoFiscalString(): string
     {
-        return $this->periodoFiscal['year'].'-'.str_pad((string) $this->periodoFiscal['month'], 2, '0', \STR_PAD_LEFT);
+        return $this->periodoFiscal['year'] . '-' . str_pad((string) $this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT);
     }
 }
