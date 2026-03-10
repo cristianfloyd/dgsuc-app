@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ConceptoGrupo;
 use App\Enums\TipoConce;
 use App\Enums\TipoDistr;
 use App\Enums\TipoNove;
@@ -107,12 +106,8 @@ class Dh12 extends Model
 
     private static $connectionInstance;
 
-    public function perteneceAGrupo(ConceptoGrupo $grupo): bool
-    {
-        return $grupo->containsConcepto($this->codn_conce);
-    }
-
     // ######################## RELACIONES ########################
+
     /**
      * Obtiene los Dh13 asociados con este Dh12.
      */
@@ -140,6 +135,7 @@ class Dh12 extends Model
                 $acumuladores[] = $posicion + 1;
             }
         }
+
         return $acumuladores;
     }
 
@@ -168,6 +164,7 @@ class Dh12 extends Model
     }
 
     // ############################# DIAGNOSTICOS #############################
+
     /**
      * Diagnóstico mejorado para caracteres especiales.
      */
@@ -253,16 +250,17 @@ class Dh12 extends Model
             $model = new static();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 
     // ######################## ACCESORES ########################
+
     /**
      * Accessor para asegurar la codificación UTF-8 del campo desc_conce.
      */
     protected function descConce(): Attribute
     {
-
         return Attribute::make(
             get: fn($value) => EncodingService::toUtf8($value),
             set: fn($value) => EncodingService::toLatin1($value),

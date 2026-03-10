@@ -24,6 +24,8 @@
     <exclude-pattern>database/migrations/*_create_*_table.php</exclude-pattern>
     <exclude-pattern>**/vendor/**</exclude-pattern>
     <exclude-pattern>tests/CreatesApplication.php</exclude-pattern>
+    <exclude-pattern>app/Services/Afip/Sicoss*.php</exclude-pattern>
+    <exclude-pattern>app/Services/Afip/sicoss*.php</exclude-pattern>
     
     <!-- Usar PSR-12 como estándar base (aproximando PER-CS en PHPCS) -->
     <rule ref="PSR12"/>

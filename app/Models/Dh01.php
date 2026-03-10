@@ -215,7 +215,7 @@ class Dh01 extends Model
         );
     }
 
-    public function NombreCompleto(): Attribute
+    public function nombreCompleto(): Attribute
     {
         return Attribute::make(
             get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
