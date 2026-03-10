@@ -44,13 +44,13 @@ class CargosOverTime extends ChartWidget
                 ->label('Inicio')
                 ->default(now()->subYear()->format('Y-m-d'))
                 ->reactive()
-                ->afterStateUpdated(fn (Set $set) => $set('endDate', null)),
+                ->afterStateUpdated(fn(Set $set) => $set('endDate', null)),
             DatePicker::make('endDate')
                 ->label('Fin')
                 ->default(now()->format('Y-m-d'))
                 ->reactive()
-                ->afterStateUpdated(fn (Get $get, Set $set) => $set('startDate', $get('startDate')))
-                ->minDate(fn (Get $get) => $get('startDate')),
+                ->afterStateUpdated(fn(Get $get, Set $set) => $set('startDate', $get('startDate')))
+                ->minDate(fn(Get $get) => $get('startDate')),
         ];
     }
 

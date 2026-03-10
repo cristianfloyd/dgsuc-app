@@ -29,9 +29,9 @@ class Dh21Resource extends Resource
 
     protected static ?string $navigationLabel = 'Liquidaciones';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     public static function table(Table $table): Table
     {
@@ -183,7 +183,7 @@ class Dh21Resource extends Resource
             ->color('success')
             ->modalHeading('Reporte de Orden de Pago')
             ->modalContent(
-                fn () => Livewire::mount(
+                fn() => Livewire::mount(
                     name: OrdenPagoReporte::class,
                     params: ['liquidacionId' => $record->nro_liqui],
                 ),
@@ -197,7 +197,7 @@ class Dh21Resource extends Resource
         $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';
         $pdf = Pdf::loadHTML($reporteHtml);
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn() => print($pdf->output()),
             $nombreArchivo,
             ['Content-Type' => 'application/pdf'],
         );

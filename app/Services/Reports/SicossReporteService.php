@@ -52,7 +52,7 @@ class SicossReporteService
     {
         try {
             return $this->sicossReporteRepository->getReporte($anio, $mes)
-                ->map(fn ($item) => SicossReporteData::fromModel($item));
+                ->map(fn($item) => SicossReporteData::fromModel($item));
         } catch (Throwable $th) {
             Log::error('Error al obtener datos del reporte SICOSS desde el servicio:', [
                 'error' => $th->getMessage(),

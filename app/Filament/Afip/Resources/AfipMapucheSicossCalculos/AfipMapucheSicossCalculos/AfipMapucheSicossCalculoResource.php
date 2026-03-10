@@ -98,7 +98,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                         ->label('Importar SICOSS Calculos')
                         ->icon('heroicon-o-arrow-up-tray')
                         ->color('primary')
-                        ->url(fn (): string => static::getUrl('import'))
+                        ->url(fn(): string => static::getUrl('import'))
                         ->button(),
 
                     Action::make('truncateTable')
@@ -130,7 +130,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->label('Importar SICOSS Calculos')
                     ->icon('heroicon-o-arrow-up-tray')
                     ->color('primary')
-                    ->url(fn (): string => static::getUrl('import'))
+                    ->url(fn(): string => static::getUrl('import'))
                     ->button(),
                 Action::make('truncateTable')
                     ->label('Vaciar Tabla')

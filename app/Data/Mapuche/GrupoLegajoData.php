@@ -13,8 +13,7 @@ class GrupoLegajoData extends Data
         public readonly int $idGrupo,
         #[MapName('nro_legaj')]
         public readonly int $nroLegajo,
-    ) {
-    }
+    ) {}
 
     public static function rules(?ValidationContext $context = null): array
     {

@@ -125,7 +125,7 @@ class BloqueosDataProcessor extends Component
         return Cache::remember(
             $this->getCacheKey(),
             now()->addHour(),
-            fn () => $this->resultados ?? collect(),
+            fn() => $this->resultados ?? collect(),
         );
     }
 
@@ -137,7 +137,7 @@ class BloqueosDataProcessor extends Component
             'exitosos' => $resultados->where('success', true)->count(),
             'fallidos' => $resultados->where('success', false)->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn ($grupo) => $grupo->count()),
+                ->map(fn($grupo) => $grupo->count()),
             'nro_liqui' => $this->getNroLiquidacion(),
         ];
     }

@@ -59,7 +59,7 @@ enum ConceptoGrupo: string
             self::APORTES_Y_CONTRIBUCIONES => [
                 ...self::DOSUBA->getConceptos(),
                 ...self::AFIP->getConceptos(),
-            ]
+            ],
         };
     }
 

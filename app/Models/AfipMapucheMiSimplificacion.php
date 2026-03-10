@@ -318,7 +318,7 @@ class AfipMapucheMiSimplificacion extends Model
     protected function puestoRaw(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => $attributes['puesto'],
+            get: fn($value, $attributes) => $attributes['puesto'],
         );
     }
 
@@ -346,7 +346,7 @@ class AfipMapucheMiSimplificacion extends Model
 
                 return $puestoEnum;
             },
-            set: fn ($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
+            set: fn($value) => $value instanceof PuestoDesempenado ? $value->value : $value,
         );
     }
 

@@ -25,8 +25,7 @@ class SetDatabaseConnection
 {
     public function __construct(
         protected EnhancedDatabaseConnectionService $connectionService,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.

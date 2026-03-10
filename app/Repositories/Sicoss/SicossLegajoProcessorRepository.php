@@ -37,8 +37,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         protected SicossEstadoRepositoryInterface $sicossEstadoRepository,
         protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository,
         protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Procesa los legajos para el cálculo de SICOSS.
@@ -440,13 +439,13 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
                 }
                 // Calcular Sueldo más Adicionales
-                $legajos[$i]['ImporteSueldoMasAdicionales'] = $legajos[$i]['ImporteImponiblePatronal'] -
-                    $legajos[$i]['ImporteSAC'] -
-                    $legajos[$i]['ImporteHorasExtras'] -
-                    $legajos[$i]['ImporteZonaDesfavorable'] -
-                    $legajos[$i]['ImporteVacaciones'] -
-                    $legajos[$i]['ImportePremios'] -
-                    $legajos[$i]['ImporteAdicionales'];
+                $legajos[$i]['ImporteSueldoMasAdicionales'] = $legajos[$i]['ImporteImponiblePatronal']
+                    - $legajos[$i]['ImporteSAC']
+                    - $legajos[$i]['ImporteHorasExtras']
+                    - $legajos[$i]['ImporteZonaDesfavorable']
+                    - $legajos[$i]['ImporteVacaciones']
+                    - $legajos[$i]['ImportePremios']
+                    - $legajos[$i]['ImporteAdicionales'];
                 if ($legajos[$i]['ImporteSueldoMasAdicionales'] > 0) {
                     $legajos[$i]['ImporteSueldoMasAdicionales'] -= $legajos[$i]['IncrementoSolidario'];
                 }
@@ -819,8 +818,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
         } elseif (
-            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
-            $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
+            ($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37)
+            || $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88
         ) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
         }
@@ -834,8 +833,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
      */
     public function consultarConceptosLiquidados(int $nro_leg, string $where): array
     {
-        $sql_conceptos_fltrados =
-            "
+        $sql_conceptos_fltrados
+            = "
                                             SELECT
                                                     impp_conce,
                                                     nov1_conce,

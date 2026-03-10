@@ -13,7 +13,7 @@ abstract class AbstractFileProcessor
     public function processFile(string $filePath, array $columnWidths): Collection
     {
         return collect($this->readFileLines($filePath))
-            ->map(fn ($line) => $this->processLine($line, $columnWidths));
+            ->map(fn($line) => $this->processLine($line, $columnWidths));
     }
 
     // Método para validar el archivo

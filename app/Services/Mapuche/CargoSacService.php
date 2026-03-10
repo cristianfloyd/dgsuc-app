@@ -21,9 +21,7 @@ class CargoSacService
     /**
      * Create a new class instance.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public static function getBrutosSacCargo(int $legajo, int $nro_cargo)
     {
@@ -165,8 +163,8 @@ class CargoSacService
         if (isset($filtro['periodo'])) {
             //periodo Actual
             if (
-                ($filtro['periodo']['condicion'] == 'es_igual_a' && $filtro['periodo']['valor'] == 0) ||
-                ($filtro['periodo']['condicion'] == 'es_distinto_de' && $filtro['periodo']['valor'] == 1)
+                ($filtro['periodo']['condicion'] == 'es_igual_a' && $filtro['periodo']['valor'] == 0)
+                || ($filtro['periodo']['condicion'] == 'es_distinto_de' && $filtro['periodo']['valor'] == 1)
             ) {
                 if ($mes_periodo > 6) {
                     $f_alta = $anio_periodo . '-7-1';

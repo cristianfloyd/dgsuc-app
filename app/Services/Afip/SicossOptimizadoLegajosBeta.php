@@ -9,9 +9,7 @@ class SicossOptimizadoLegajosBeta
     /**
      * Create a new class instance.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Método auxiliar para obtener estadísticas de la pre-carga.

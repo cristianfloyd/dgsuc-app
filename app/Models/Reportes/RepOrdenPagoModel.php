@@ -120,7 +120,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
         return $query->orderBy('codc_uacad')->orderBy('nro_liqui');
     }
 
-    public function getLabel(): string|null
+    public function getLabel(): ?string
     {
         return $this->label;
     }

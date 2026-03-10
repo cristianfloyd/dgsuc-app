@@ -145,15 +145,15 @@ class BloqueosDataModel extends Model
     public function legajoCargo(): Attribute
     {
         return Attribute::make(
-            get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
 
     public function fechaBaja(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-            set: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            get: fn($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            set: fn($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
         );
     }
 
@@ -164,8 +164,8 @@ class BloqueosDataModel extends Model
             return false;
         }
 
-        return Carbon::parse($this->fecha_baja)->format('Y-m-d') ===
-            Carbon::parse($this->cargo->fec_baja)->format('Y-m-d');
+        return Carbon::parse($this->fecha_baja)->format('Y-m-d')
+            === Carbon::parse($this->cargo->fec_baja)->format('Y-m-d');
     }
 
     /* ####################################################################################################

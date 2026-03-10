@@ -117,7 +117,7 @@ class SicossUpdates extends Page
         $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
             ->generaImpositivo()
             ->pluck('nro_liqui', 'desc_liqui')
-            ->map(fn ($nro, $desc) => "#{$nro} - {$desc}")
+            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
             ->toArray();
 
         // Actualizar la propiedad selectedIdLiqui
@@ -128,7 +128,7 @@ class SicossUpdates extends Page
             ->generaImpositivo()
             ->definitiva()
             ->pluck('nro_liqui', 'desc_liqui')
-            ->map(fn ($nro, $desc) => "#{$nro} - {$desc}")
+            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
             ->toArray();
 
         // Notificar al usuario
@@ -441,8 +441,8 @@ class SicossUpdates extends Page
     {
         return [
             Action::make('show_help')
-                ->label(fn () => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
-                ->icon(fn () => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                ->label(fn() => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
+                ->icon(fn() => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                 ->action(
                     function (): void {
                         $this->isHelpVisible = !$this->isHelpVisible;
@@ -455,9 +455,9 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalDescription(
-                    '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso puede tomar varios minutos.',
+                    '¿Está seguro que desea ejecutar las actualizaciones SICOSS para el período '
+                    . $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT)
+                    . '? Este proceso puede tomar varios minutos.',
                 ),
 
             Action::make('run_embarazadas_update')
@@ -469,9 +469,9 @@ class SicossUpdates extends Page
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Situación de Embarazadas')
                 ->modalDescription(
-                    '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período ' .
-                    $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT) .
-                    '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.',
+                    '¿Está seguro que desea actualizar la situación de revista de embarazadas para el período '
+                    . $this->year . '-' . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT)
+                    . '? Este proceso actualizará los códigos de situación de revista para las agentes con licencia por embarazo.',
                 ),
 
             Action::make('run_actividad_update')

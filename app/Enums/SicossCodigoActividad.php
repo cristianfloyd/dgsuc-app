@@ -29,7 +29,7 @@ enum SicossCodigoActividad: int
             2 => self::DOCENTE_UNIVERSITARIO,
             3 => self::DOCENTE_ESPECIAL,
             4 => self::DOCENTE_ADMINISTRATIVO,
-            default => null
+            default => null,
         };
     }
 }

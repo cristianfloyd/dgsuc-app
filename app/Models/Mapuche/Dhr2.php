@@ -66,7 +66,7 @@ class Dhr2 extends Model
      */
     protected function descApyno(): Attribute
     {
-        return Attribute::make(get: fn ($value) => mb_strtoupper((string) $value));
+        return Attribute::make(get: fn($value) => mb_strtoupper((string) $value));
     }
 
     /**

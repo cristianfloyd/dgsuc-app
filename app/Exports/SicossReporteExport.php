@@ -80,7 +80,7 @@ class SicossReporteExport implements WithMultipleSheets
                 {
                     try {
                         if ($this->records) {
-                            $records = $this->records->map(fn ($item) => SicossReporteData::fromModel($item));
+                            $records = $this->records->map(fn($item) => SicossReporteData::fromModel($item));
 
                             return $records;
                         }

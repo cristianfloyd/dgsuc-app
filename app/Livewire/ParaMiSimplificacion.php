@@ -55,9 +55,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
         $this->resetPage();
     }
 
-    public function mount(): void
-    {
-    }
+    public function mount(): void {}
 
     #[Computed()]
     public function headers(): array
@@ -112,7 +110,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
             ->filters([
                 SelectFilter::make('periodo_fiscal')
                     ->label('Período')
-                    ->options(fn () => AfipMapucheMiSimplificacion::distinct()
+                    ->options(fn() => AfipMapucheMiSimplificacion::distinct()
                         ->pluck('periodo_fiscal', 'periodo_fiscal')
                         ->toArray())
                     ->multiple(),
@@ -121,7 +119,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
                 Action::make('exportar')
                     ->label('Exportar TXT')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(fn () => $this->exportarTxt())
+                    ->action(fn() => $this->exportarTxt())
                     ->requiresConfirmation(),
             ])
             ->defaultSort('periodo_fiscal', 'desc')
@@ -180,9 +178,7 @@ class ParaMiSimplificacion extends Component implements HasTable, HasForms, HasA
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
-    public function toggleFinished(): void
-    {
-    }
+    public function toggleFinished(): void {}
 
     public function render()
     {

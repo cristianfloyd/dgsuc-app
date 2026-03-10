@@ -20,8 +20,7 @@ class ExcelRowValidationService
 
     public function __construct(
         private readonly DateParserService $dateParserService,
-    ) {
-    }
+    ) {}
 
     /**
      * Valida y normaliza una fila completa del Excel.

@@ -128,14 +128,14 @@ class AfipRelacionesActivasResource extends Resource
                 TextColumn::make('cuil')
                     ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => substr($state, 0, 2) . '-' .
-                        substr($state, 2, 8) . '-' .
-                        substr($state, -1)),
+                    ->formatStateUsing(fn(string $state): string => substr($state, 0, 2) . '-'
+                        . substr($state, 2, 8) . '-'
+                        . substr($state, -1)),
 
                 TextColumn::make('codigo_movimiento')
                     ->sortable()
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         '00' => 'success',
                         '01' => 'danger',
                         '02' => 'warning',
@@ -167,11 +167,11 @@ class AfipRelacionesActivasResource extends Resource
                         return $query
                             ->when(
                                 $data['desde'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
                             )
                             ->when(
                                 $data['hasta'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
                             );
                     }),
             ])

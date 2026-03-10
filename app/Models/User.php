@@ -76,7 +76,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     /**
      * @inheritDoc
      */
-    public function getFilamentAvatarUrl(): string|null
+    public function getFilamentAvatarUrl(): ?string
     {
         return $this->profile_photo_path;
     }
@@ -97,15 +97,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => strtolower($value),
-            set: fn ($value) => strtolower($value),
+            get: fn($value) => strtolower($value),
+            set: fn($value) => strtolower($value),
         );
     }
 
     protected function completeName(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->name} {$this->username}",
+            get: fn() => "{$this->name} {$this->username}",
         );
     }
 }

@@ -91,7 +91,7 @@ class Dh30 extends Model
     {
         return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
             ->get()
-            ->filter(fn ($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
+            ->filter(fn($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
     }
 
     #[Override]

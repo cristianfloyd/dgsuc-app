@@ -162,7 +162,7 @@ class Dh21Resource extends Resource
             ->color('success')
             ->modalHeading('Reporte de Orden de Pago')
             ->modalContent(
-                fn () => Livewire::mount(
+                fn() => Livewire::mount(
                     name: OrdenPagoReporte::class,
                     params: ['liquidacionId' => $record->nro_liqui],
                 ),
@@ -177,7 +177,7 @@ class Dh21Resource extends Resource
         $pdf = Pdf::loadHTML($reporteHtml);
 
         return response()->streamDownload(
-            fn () => print ($pdf->output()),
+            fn() => print ($pdf->output()),
             $nombreArchivo,
             ['Content-Type' => 'application/pdf'],
         );

@@ -20,8 +20,7 @@ class Dh11RestoreService
     public function __construct(
         protected Dh61Repository $dh61Repository,
         protected Dh11RepositoryInterface $dh11Repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Restaura las categorías para un período fiscal específico.

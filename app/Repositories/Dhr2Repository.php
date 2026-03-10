@@ -15,9 +15,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     /**
      * Create a new class instance.
      */
-    public function __construct(protected Dhr2 $model)
-    {
-    }
+    public function __construct(protected Dhr2 $model) {}
 
     public function findByPrimaryKey(int $nro_liqui, int $nro_legaj, int $nro_cargo): ?Dhr2Data
     {
@@ -34,7 +32,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
             ->with('liquidacion')
             ->where('nro_liqui', $nro_liqui)
             ->get()
-            ->map(fn ($record) => Dhr2Data::from($record));
+            ->map(fn($record) => Dhr2Data::from($record));
     }
 
     /**
@@ -73,7 +71,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     {
         return $this->model->where('nro_legaj', $nro_legaj)
             ->get()
-            ->map(fn ($record) => Dhr2Data::from($record));
+            ->map(fn($record) => Dhr2Data::from($record));
     }
 
     /**

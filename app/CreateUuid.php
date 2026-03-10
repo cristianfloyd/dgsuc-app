@@ -8,9 +8,7 @@ class CreateUuid
 {
     protected $uuid;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function getUuid()
     {

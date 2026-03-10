@@ -24,9 +24,9 @@ class PersonalResource extends Resource
 
     protected static ?string $plurallabel = 'Personal';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

@@ -258,7 +258,7 @@ class SicossControlService
             ->get();
 
         // Inserción masiva en la tabla de control
-        $diferencias->map(fn ($diferencia): array => [
+        $diferencias->map(fn($diferencia): array => [
             'cuil' => $diferencia->cuil,
             'codc_uacad' => $diferencia->codc_uacad,
             'caracter' => $diferencia->caracter,
@@ -332,7 +332,7 @@ class SicossControlService
 
 
             // Inserción masiva en la tabla de control
-            $diferencias->map(fn ($diferencia): array => [
+            $diferencias->map(fn($diferencia): array => [
                 'cuil' => $diferencia->cuil,
                 'codc_uacad' => $diferencia->codc_uacad,
                 'caracter' => $diferencia->caracter,

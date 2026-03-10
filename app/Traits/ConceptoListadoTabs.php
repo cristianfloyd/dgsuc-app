@@ -17,29 +17,29 @@ trait ConceptoListadoTabs
     {
         return [
             'todos' => Tab::make('Todos')
-                ->badge(fn () => $this->getFilteredTableQuery()->count()),
+                ->badge(fn() => $this->getFilteredTableQuery()->count()),
 
             'dosuba' => Tab::make('DOSUBA')
                 ->icon('heroicon-o-heart')
-                ->badge(fn () => $this->getTabBadge(ConceptosSindicatosService::getDosubaCodigos()))
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getDosubaCodigos()))
                 ->modifyQueryUsing(
-                    fn (Builder $query) =>
-                    $this->getTabQuery($query, ConceptosSindicatosService::getDosubaCodigos()),
+                    fn(Builder $query)
+                    => $this->getTabQuery($query, ConceptosSindicatosService::getDosubaCodigos()),
                 ),
 
             'apuba' => Tab::make('APUBA')
                 ->icon('heroicon-o-users')
-                ->badge(fn () => $this->getTabBadge(ConceptosSindicatosService::getApubaCodigos()))
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getApubaCodigos()))
                 ->modifyQueryUsing(
-                    fn (Builder $query) =>
-                    $this->getTabQuery($query, ConceptosSindicatosService::getApubaCodigos()),
+                    fn(Builder $query)
+                    => $this->getTabQuery($query, ConceptosSindicatosService::getApubaCodigos()),
                 ),
             'aduba' => Tab::make('ADUBA')
                 ->icon('heroicon-o-users')
-                ->badge(fn () => $this->getTabBadge(ConceptosSindicatosService::getAdubaCodigos()))
+                ->badge(fn() => $this->getTabBadge(ConceptosSindicatosService::getAdubaCodigos()))
                 ->modifyQueryUsing(
-                    fn (Builder $query) =>
-                    $this->getTabQuery($query, ConceptosSindicatosService::getAdubaCodigos()),
+                    fn(Builder $query)
+                    => $this->getTabQuery($query, ConceptosSindicatosService::getAdubaCodigos()),
                 ),
         ];
     }

@@ -16,8 +16,7 @@ class SicossControlActionHandler
     public function __construct(
         protected SicossControlService $controlService,
         protected PeriodoFiscalService $periodoFiscalService,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta un control específico siguiendo el patrón común.
@@ -73,7 +72,7 @@ class SicossControlActionHandler
             'cuils' => $this->controlService->ejecutarControlCuils($year, $month),
             'conceptos' => ['status' => 'completed'], // Placeholder
             'conteos' => ['status' => 'completed'], // Placeholder
-            default => throw new InvalidArgumentException("Tipo de control no válido: {$tipo}")
+            default => throw new InvalidArgumentException("Tipo de control no válido: {$tipo}"),
         };
     }
 

@@ -38,7 +38,7 @@ class LiquidacionControl extends Model
     public function estadoColor(): Attribute
     {
         return Attribute::make(
-            get: fn () => match ($this->estado) {
+            get: fn() => match ($this->estado) {
                 'pendiente' => 'warning',
                 'error' => 'danger',
                 'completado' => 'success',

@@ -88,11 +88,11 @@ class ConceptoListadoResourceService
         $query = ConceptoListado::query()
             ->when(
                 $filters['codn_conce'] ?? null,
-                fn ($query, $concepto) => $query->whereIn('codn_conce', (array) $concepto),
+                fn($query, $concepto) => $query->whereIn('codn_conce', (array) $concepto),
             )
             ->when(
                 $filters['nro_liqui'] ?? null,
-                fn ($query, $liquidacion) => $query->where('nro_liqui', $liquidacion),
+                fn($query, $liquidacion) => $query->where('nro_liqui', $liquidacion),
             );
 
         return $query;
@@ -104,7 +104,7 @@ class ConceptoListadoResourceService
         return Cache::store('file')->remember(
             $cacheKey,
             now()->addHours(2),
-            fn () => $query->get(),
+            fn() => $query->get(),
         );
     }
 }

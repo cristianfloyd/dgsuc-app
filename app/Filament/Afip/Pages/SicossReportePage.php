@@ -152,7 +152,7 @@ class SicossReportePage extends Page implements HasTable
     {
         try {
             // Actualizar la tabla
-            $this->table->query(fn () => MapucheSicossReporte::query()->getReporte($this->anio, $this->mes));
+            $this->table->query(fn() => MapucheSicossReporte::query()->getReporte($this->anio, $this->mes));
 
             // Actualizar los totales
             $this->updateWidgetData();

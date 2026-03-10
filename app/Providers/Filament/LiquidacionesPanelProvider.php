@@ -42,7 +42,7 @@ class LiquidacionesPanelProvider extends PanelProvider
                 'panel-selector' => MenuItem::make()
                     ->label('Cambiar Panel')
                     ->icon('heroicon-o-arrows-right-left')
-                    ->url(fn (): string => '/selector-panel'),
+                    ->url(fn(): string => '/selector-panel'),
             ])
             ->discoverResources(in: app_path('Filament/Liquidaciones/Resources'), for: 'App\\Filament\\Liquidaciones\\Resources')
             ->discoverPages(in: app_path('Filament/Liquidaciones/Pages'), for: 'App\\Filament\\Liquidaciones\\Pages')

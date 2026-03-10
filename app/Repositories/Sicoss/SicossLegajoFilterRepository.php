@@ -14,8 +14,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
 
     public function __construct(
         protected Dh01RepositoryInterface $dh01Repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los legajos filtrados para el proceso SICOSS

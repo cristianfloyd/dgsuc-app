@@ -104,7 +104,7 @@ class EmbargoReportService
                 ->where('nro_liqui', $nro_liqui)
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->get()
-                ->keyBy(fn ($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
+                ->keyBy(fn($item) => "{$item->nro_legaj}-{$item->nro_cargo}");
 
             // Agregar los conceptos adicionales al resultado
             $embargos = $embargos->map(function ($item) use ($conceptosAdicionales) {

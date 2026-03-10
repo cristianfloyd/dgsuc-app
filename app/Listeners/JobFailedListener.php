@@ -11,9 +11,7 @@ class JobFailedListener
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function handle(JobFailed $event): void
     {

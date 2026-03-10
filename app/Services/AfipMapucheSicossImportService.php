@@ -265,7 +265,7 @@ class AfipMapucheSicossImportService
                     $parsedData[$field] = match ($config['type']) {
                         'N' => (int) ltrim(trim($value), '0') ?: 0,
                         'D' => $this->parseAmount($value),
-                        default => throw new Exception("Tipo de dato no soportado: {$config['type']}")
+                        default => throw new Exception("Tipo de dato no soportado: {$config['type']}"),
                     };
                 }
             }
@@ -957,10 +957,10 @@ class AfipMapucheSicossImportService
      */
     private function validateData(array $data): bool
     {
-        return !empty($data['cuil']) &&
-            !empty($data['periodo_fiscal']) &&
-            strlen($data['cuil']) === 11 &&
-            strlen($data['periodo_fiscal']) === 6;
+        return !empty($data['cuil'])
+            && !empty($data['periodo_fiscal'])
+            && strlen($data['cuil']) === 11
+            && strlen($data['periodo_fiscal']) === 6;
     }
 
     /**
@@ -1172,7 +1172,7 @@ class AfipMapucheSicossImportService
                     'N' => (int) ltrim(trim($value), '0') ?: 0,
                     'D' => $this->parseAmount($value),
                     'C' => trim($value),
-                    default => throw new Exception("Tipo de dato no soportado: {$config['type']}")
+                    default => throw new Exception("Tipo de dato no soportado: {$config['type']}"),
                 };
             }
 
@@ -1342,12 +1342,12 @@ class AfipMapucheSicossImportService
             'consistente' => true,
             'longitud_sin_crlf' => $longSinCRLF,
             'tiene_crlf' => $tienenCRLF,
-            'detalle' => $tienenCRLF ?
-                "Las líneas tienen {$longSinCRLF} caracteres + CRLF" :
-                "Las líneas tienen {$longSinCRLF} caracteres sin CRLF",
-            'recomendacion' => $longSinCRLF === 500 ?
-                'La longitud es correcta (500 caracteres)' :
-                'Ajustar validación para aceptar ' . ($longSinCRLF) . ' caracteres en lugar de 500',
+            'detalle' => $tienenCRLF
+                ? "Las líneas tienen {$longSinCRLF} caracteres + CRLF"
+                : "Las líneas tienen {$longSinCRLF} caracteres sin CRLF",
+            'recomendacion' => $longSinCRLF === 500
+                ? 'La longitud es correcta (500 caracteres)'
+                : 'Ajustar validación para aceptar ' . ($longSinCRLF) . ' caracteres en lugar de 500',
         ];
     }
 

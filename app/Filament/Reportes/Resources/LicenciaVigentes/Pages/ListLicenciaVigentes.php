@@ -77,15 +77,15 @@ class ListLicenciaVigentes extends ListRecords
         return [
             'todas' => Tab::make('Todas'),
             'maternidad' => Tab::make('Maternidad')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('condicion', 5)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('condicion', 5)),
             'excedencia' => Tab::make('Excedencia')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('condicion', 10)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('condicion', 10)),
             'vacaciones' => Tab::make('Vacaciones')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('condicion', 12)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('condicion', 12)),
             'ilt' => Tab::make('ILT')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('condicion', [18, 19])),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereIn('condicion', [18, 19])),
             'proteccion_integral' => Tab::make('Protección Integral')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('condicion', 51)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('condicion', 51)),
         ];
     }
 

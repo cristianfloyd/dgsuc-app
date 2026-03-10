@@ -107,7 +107,7 @@ class AfipMapucheMiSimplificacion extends Component implements HasForms, HasTabl
                 Action::make('exportTxt')
                     ->label('Exportar TXT')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn () => $this->exportarTxt())
+                    ->action(fn() => $this->exportarTxt())
                     ->color('success'),
             ])
             ->defaultSort('nro_legaj', 'asc')

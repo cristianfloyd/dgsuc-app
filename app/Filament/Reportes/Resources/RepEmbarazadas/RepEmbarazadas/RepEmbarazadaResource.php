@@ -31,7 +31,7 @@ class RepEmbarazadaResource extends Resource
 
     protected static ?string $navigationLabel = 'Reporte Embarazadas';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema

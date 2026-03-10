@@ -151,11 +151,11 @@ class SicossControles extends Page implements HasTable
             // Pasar el período fiscal al servicio
             $this->resultadosControles = $service->ejecutarControlesPostImportacion($this->year, $this->month);
 
-            $diferenciasAportes = abs($this->resultadosControles['totales']['dh21']['aportes'] -
-                $this->resultadosControles['totales']['sicoss']['aportes']);
+            $diferenciasAportes = abs($this->resultadosControles['totales']['dh21']['aportes']
+                - $this->resultadosControles['totales']['sicoss']['aportes']);
 
-            $diferenciasContribuciones = abs($this->resultadosControles['totales']['dh21']['contribuciones'] -
-                $this->resultadosControles['totales']['sicoss']['contribuciones']);
+            $diferenciasContribuciones = abs($this->resultadosControles['totales']['dh21']['contribuciones']
+                - $this->resultadosControles['totales']['sicoss']['contribuciones']);
 
             $viewContent = ViewFacade::make('filament.afip.notifications.control-sicoss', [
                 'diferenciasAportes' => number_format($diferenciasAportes, 2, ',', '.'),
@@ -179,7 +179,7 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Resumen')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn () => $this->activeTab = 'resumen'),
+                        ->action(fn() => $this->activeTab = 'resumen'),
                 ])
                 ->persistent()
                 ->send();
@@ -264,7 +264,7 @@ class SicossControles extends Page implements HasTable
             'conceptos' => ControlConceptosPeriodo::query()
                 ->where('year', $this->year)
                 ->where('month', $this->month),
-            default => ControlAportesDiferencia::query()
+            default => ControlAportesDiferencia::query(),
         };
 
         // TODO: Agregar el header y una vista que incluya un search
@@ -277,11 +277,11 @@ class SicossControles extends Page implements HasTable
             ->columns($this->getColumnsForActiveTab())
             ->when(
                 $this->activeTab !== 'diferencias_cuils' && $this->activeTab !== 'conceptos',
-                fn (Table $table) => $table->defaultSort('diferencia', 'desc'),
+                fn(Table $table) => $table->defaultSort('diferencia', 'desc'),
             )
             ->when(
                 $this->activeTab === 'conceptos',
-                fn (Table $table) => $table->defaultSort('codn_conce', 'asc'),
+                fn(Table $table) => $table->defaultSort('codn_conce', 'asc'),
             )
             ->striped()
             ->defaultPaginationPageOption(5)
@@ -543,7 +543,7 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn () => $this->activeTab = 'conceptos'),
+                        ->action(fn() => $this->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();
@@ -617,8 +617,8 @@ class SicossControles extends Page implements HasTable
 
     protected function hasResults(): bool
     {
-        return $this->resultadosControles !== null &&
-            isset($this->resultadosControles['aportes_contribuciones']);
+        return $this->resultadosControles !== null
+            && isset($this->resultadosControles['aportes_contribuciones']);
     }
 
     protected function getResumenStats(): array
@@ -706,7 +706,7 @@ class SicossControles extends Page implements HasTable
                             'dh01' => $record->dh01,
                         ]);
                     })
-                    ->modalHeading(fn ($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
+                    ->modalHeading(fn($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_contribuciones' => [
@@ -721,7 +721,7 @@ class SicossControles extends Page implements HasTable
                             'dh01' => $record->dh01,
                         ]);
                     })
-                    ->modalHeading(fn ($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
+                    ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_cuils' => [
@@ -733,7 +733,7 @@ class SicossControles extends Page implements HasTable
                             'record' => $record,
                         ]);
                     })
-                    ->modalHeading(fn ($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
+                    ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'conceptos' => [
@@ -745,7 +745,7 @@ class SicossControles extends Page implements HasTable
                             'record' => $record,
                         ]);
                     })
-                    ->modalHeading(fn ($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
+                    ->modalHeading(fn($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             default => [],
@@ -798,7 +798,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    ->badge(fn () => sprintf('%d-%02d', $this->year, $this->month))
+                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function (): void {
                         $this->ejecutarControles();
                     }),
@@ -832,7 +832,7 @@ class SicossControles extends Page implements HasTable
             ->action(function () {
                 return $this->exportActiveTable();
             })
-            ->disabled(fn () => false);
+            ->disabled(fn() => false);
 
         return $actions;
     }
@@ -917,7 +917,7 @@ class SicossControles extends Page implements HasTable
                     ->where('month', $this->month)
                     ->get(),
             ],
-            default => null
+            default => null,
         };
 
         if (!$data) {
@@ -957,8 +957,8 @@ class SicossControles extends Page implements HasTable
     private function conexionesDisponibles(): array
     {
         return collect(config('database.connections'))
-            ->filter(fn ($config, $name) => str_starts_with($name, 'pgsql-'))
-            ->mapWithKeys(fn ($config, $name) => [$name => $name])
+            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->mapWithKeys(fn($config, $name) => [$name => $name])
             ->all();
     }
 }

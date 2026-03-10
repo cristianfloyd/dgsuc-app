@@ -239,9 +239,9 @@ class Dl02 extends Model
      */
     public function esRemuneradaConPorcentaje(float $porcentaje = 100.0): bool
     {
-        return $this->es_remunerada &&
-               $this->porcremuneracion !== null &&
-               $this->porcremuneracion >= $porcentaje;
+        return $this->es_remunerada
+               && $this->porcremuneracion !== null
+               && $this->porcremuneracion >= $porcentaje;
     }
 
     /**
@@ -249,8 +249,8 @@ class Dl02 extends Model
      */
     public function esCompletamenteNoRemunerada(): bool
     {
-        return !$this->es_remunerada ||
-               ($this->porcremuneracion !== null && $this->porcremuneracion == 0);
+        return !$this->es_remunerada
+               || ($this->porcremuneracion !== null && $this->porcremuneracion == 0);
     }
 
     /**

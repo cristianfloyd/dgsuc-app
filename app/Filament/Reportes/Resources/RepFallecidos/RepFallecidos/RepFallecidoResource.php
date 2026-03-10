@@ -26,7 +26,7 @@ class RepFallecidoResource extends Resource
     protected static ?string $model = RepFallecido::class;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static string | UnitEnum | null $navigationGroup = 'Dosuba';
+    protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
 
     public static function form(Schema $schema): Schema
     {
@@ -113,7 +113,7 @@ class RepFallecidoResource extends Resource
                                     }
                                     return $options;
                                 })
-                                ->default(fn () => Carbon::now()->subMonth()->format('Ym'))
+                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
                                 ->required(),
                         ])
                         ->action(function (array $data) {

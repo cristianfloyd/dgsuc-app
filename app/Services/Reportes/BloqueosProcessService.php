@@ -83,15 +83,15 @@ class BloqueosProcessService
             if ($bloqueosData !== null) {
                 // Validar que todos los registros estén en estado correcto
                 $registrosInvalidos = collect($bloqueosData)->filter(function ($bloqueo) {
-                    return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO ||
-                        $bloqueo->mensaje_error !== null ||
-                        $bloqueo->esta_procesado === true;
+                    return $bloqueo->estado !== BloqueosEstadoEnum::VALIDADO
+                        || $bloqueo->mensaje_error !== null
+                        || $bloqueo->esta_procesado === true;
                 });
 
                 if ($registrosInvalidos->isNotEmpty()) {
                     throw new Exception(
-                        'Existen registros no validados, con errores o ya procesados. ' .
-                            'Por favor, valide todos los registros antes de procesar.',
+                        'Existen registros no validados, con errores o ya procesados. '
+                            . 'Por favor, valide todos los registros antes de procesar.',
                     );
                 }
 
@@ -213,7 +213,7 @@ class BloqueosProcessService
             $cambiosRealizados = match ($bloqueo->tipo) {
                 'licencia' => $this->procesarLicencia($cargo),
                 'fallecido', 'renuncia' => $this->procesarBaja($cargo, $bloqueo->fecha_baja),
-                default => throw new Exception('Tipo de bloqueo no válido')
+                default => throw new Exception('Tipo de bloqueo no válido'),
             };
 
             // Si llegamos aquí, el proceso fue exitoso

@@ -114,9 +114,9 @@ class TobaAuthService
         }
 
         // Si el mecanismo es bcrypt no debería llegar hasta aquí
-        return ($metodo != 'bcrypt') ?
-            $sal . hash($metodo, $sal . $clave) :
-            hash('sha256', $this->getSalt() . ($resultado ?? ''));
+        return ($metodo != 'bcrypt')
+            ? $sal . hash($metodo, $sal . $clave)
+            : hash('sha256', $this->getSalt() . ($resultado ?? ''));
     }
 
     /**

@@ -22,8 +22,8 @@ use Livewire\Component;
 class SicossImporter extends Component
 {
     // Constantes de clase
-    private const  STEP_IMPORT_ARCHIVO = 'import_archivo_mapuche';
-    private const  TABLE_NAME = 'suc.afip_mapuche_sicoss';
+    private const STEP_IMPORT_ARCHIVO = 'import_archivo_mapuche';
+    private const TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
     // Propiedades públicas
     public ?UploadedFile $selectedArchivo;

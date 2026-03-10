@@ -24,7 +24,7 @@ enum CategoriaGrupo: string
             self::DOCU => 'Categorías docentes universitarias',
             self::AUTS => 'Categorías autoridades secundarias',
             self::AUTU => 'Categorías autoridades universitarias',
-            self::NODO => 'Categorías no docentes'
+            self::NODO => 'Categorías no docentes',
         };
     }
 }

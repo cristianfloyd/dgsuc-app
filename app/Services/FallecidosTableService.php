@@ -12,8 +12,7 @@ class FallecidosTableService extends AbstractTableService
 {
     public function __construct(
         private readonly FallecidosTableDefinition $definition,
-    ) {
-    }
+    ) {}
 
     public function getTableName(): string
     {

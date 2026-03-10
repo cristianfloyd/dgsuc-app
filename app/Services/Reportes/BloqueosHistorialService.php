@@ -156,7 +156,7 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         }
 
         // Verificar que todos estén procesados
-        $noProceados = $bloqueos->filter(fn ($bloqueo) => !$bloqueo->esta_procesado);
+        $noProceados = $bloqueos->filter(fn($bloqueo) => !$bloqueo->esta_procesado);
         if ($noProceados->isNotEmpty()) {
             Log::error('Existen bloqueos no procesados', [
                 'ids_no_procesados' => $noProceados->pluck('id')->toArray(),
@@ -171,12 +171,12 @@ class BloqueosHistorialService implements BloqueosHistorialServiceInterface
         ];
 
         $estadosInvalidos = $bloqueos->filter(
-            fn ($bloqueo) => !in_array($bloqueo->estado, $estadosValidos),
+            fn($bloqueo) => !in_array($bloqueo->estado, $estadosValidos),
         );
 
         if ($estadosInvalidos->isNotEmpty()) {
             Log::error('Existen bloqueos con estados inválidos para transferir', [
-                'ids_estados_invalidos' => $estadosInvalidos->map(fn ($b) => [
+                'ids_estados_invalidos' => $estadosInvalidos->map(fn($b) => [
                     'id' => $b->id,
                     'estado' => $b->estado->value,
                 ])->toArray(),

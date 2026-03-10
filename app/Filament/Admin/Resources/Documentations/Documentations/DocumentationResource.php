@@ -44,7 +44,7 @@ class DocumentationResource extends Resource
 
                 TextInput::make('slug')
                     ->required()
-                    ->unique(ignorable: fn ($record) => $record)
+                    ->unique(ignorable: fn($record) => $record)
                     ->maxLength(255),
 
                 Select::make('section')
@@ -104,7 +104,7 @@ class DocumentationResource extends Resource
                             ->danger()
                             ->send();
                     })
-                    ->visible(fn (Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md"))),
+                    ->visible(fn(Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md"))),
             ]);
     }
 
@@ -143,7 +143,7 @@ class DocumentationResource extends Resource
         }
 
         // Optionally remove records that don't have corresponding files
-        $existingSlugs = collect($markdownFiles)->map(fn ($file) => basename($file, '.md'));
+        $existingSlugs = collect($markdownFiles)->map(fn($file) => basename($file, '.md'));
         Documentation::where('section', 'filament')
             ->whereNotIn('slug', $existingSlugs)
             ->delete();

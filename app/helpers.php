@@ -25,7 +25,7 @@ if (!\function_exists('nombreMes')) {
             10 => 'Octubre',
             11 => 'Noviembre',
             12 => 'Diciembre',
-            default => ''
+            default => '',
         };
     }
 }
@@ -87,7 +87,7 @@ if (!\function_exists('tipoComprobanteTexto')) {
             'A' => 'Aporte',
             'D' => 'Descuento',
             'N' => 'Neto',
-            default => 'Otro'
+            default => 'Otro',
         };
     }
 }

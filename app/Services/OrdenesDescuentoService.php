@@ -18,8 +18,8 @@ class OrdenesDescuentoService
     public function getReporteOrdenesDescuento(string $periodoFiscal, ?int $nroLiqui = null): Builder
     {
         return $this->getBaseQuery()
-            ->when($periodoFiscal, fn ($q) => $q->periodo($periodoFiscal))
-            ->when($nroLiqui, fn ($q) => $q->porLiquidacion($nroLiqui))
+            ->when($periodoFiscal, fn($q) => $q->periodo($periodoFiscal))
+            ->when($nroLiqui, fn($q) => $q->porLiquidacion($nroLiqui))
             ->orderBy('codc_uacad')
             ->orderBy('descripcion_dep_pago');
     }

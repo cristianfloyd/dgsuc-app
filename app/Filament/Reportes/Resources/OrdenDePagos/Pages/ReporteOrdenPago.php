@@ -142,7 +142,7 @@ class ReporteOrdenPago extends Page implements HasTable
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn () => $this->reporteGenerado),
+                ->visible(fn() => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar OP')
                 ->action(function (): void {

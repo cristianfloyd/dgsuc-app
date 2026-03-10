@@ -38,31 +38,31 @@ class ListImportData extends ListRecords
     {
         return [
             'Todo' => Tab::make()
-                ->badge(fn () => $this->getModel()::count()),
+                ->badge(fn() => $this->getModel()::count()),
             'valido' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
+                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::VALIDADO->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::VALIDADO->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::VALIDADO->value)),
             'Duplicados' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
+                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::DUPLICADO->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::DUPLICADO->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::DUPLICADO->value)),
             'Licencia' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
+                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
                 ->badgeColor(BloqueosTipoEnum::LICENCIA->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::LICENCIA->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::LICENCIA->value)),
             'Fallecido' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
+                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
                 ->badgeColor(BloqueosTipoEnum::FALLECIDO->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::FALLECIDO->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::FALLECIDO->value)),
             'Renuncia' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
+                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
                 ->badgeColor(BloqueosTipoEnum::RENUNCIA->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('tipo', BloqueosTipoEnum::RENUNCIA->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::RENUNCIA->value)),
             'error_validacion' => Tab::make()
-                ->badge(fn () => $this->getModel()::where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
+                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::ERROR_VALIDACION->getColor())
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)),
         ];
     }
 
@@ -141,13 +141,13 @@ class ListImportData extends ListRecords
                         Notification::make()
                             ->title('Procesamiento completo')
                             ->body(
-                                'Bloqueos procesados:<br>' .
-                                'Total procesados: ' . ($resBloqueos['procesados'] ?? '-') . '<br>' .
-                                'Errores: ' . ($resBloqueos['errores'] ?? '0') . '<br>' .
-                                '<br>' .
-                                'Duplicados procesados:<br>' .
-                                'Grupos detectados: ' . ($resDuplicados['grupos'] ?? '-') . '<br>' .
-                                'Registros eliminados: ' . ($resDuplicados['eliminados'] ?? '-'),
+                                'Bloqueos procesados:<br>'
+                                . 'Total procesados: ' . ($resBloqueos['procesados'] ?? '-') . '<br>'
+                                . 'Errores: ' . ($resBloqueos['errores'] ?? '0') . '<br>'
+                                . '<br>'
+                                . 'Duplicados procesados:<br>'
+                                . 'Grupos detectados: ' . ($resDuplicados['grupos'] ?? '-') . '<br>'
+                                . 'Registros eliminados: ' . ($resDuplicados['eliminados'] ?? '-'),
                             )
                             ->success()
                             ->send();

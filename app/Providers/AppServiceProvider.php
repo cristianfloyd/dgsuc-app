@@ -122,10 +122,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Comportamiento tipo Filament v3 tras actualización a v4 (guía upgrade)
-        Table::configureUsing(fn (Table $table) => $table->deferFilters(false));
-        Section::configureUsing(fn (Section $section) => $section->liberatedFromContainerGrid());
-        Grid::configureUsing(fn (Grid $grid) => $grid->liberatedFromContainerGrid());
-        Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset->liberatedFromContainerGrid());
+        Table::configureUsing(fn(Table $table) => $table->deferFilters(false));
+        Section::configureUsing(fn(Section $section) => $section->liberatedFromContainerGrid());
+        Grid::configureUsing(fn(Grid $grid) => $grid->liberatedFromContainerGrid());
+        Fieldset::configureUsing(fn(Fieldset $fieldset) => $fieldset->liberatedFromContainerGrid());
 
         // Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
         //     $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);

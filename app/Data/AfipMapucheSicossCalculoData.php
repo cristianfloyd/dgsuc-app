@@ -19,6 +19,5 @@ class AfipMapucheSicossCalculoData extends Data
         public readonly float $aportesres33_41re,
         public readonly string $codc_uacad,
         public readonly string $caracter,
-    ) {
-    }
+    ) {}
 }

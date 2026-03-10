@@ -103,7 +103,7 @@ class ControlAportesDiferencia extends Model
     public function totalAportesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->aportesijpdh21 + $this->aporteinssjpdh21,
+            get: fn() => $this->aportesijpdh21 + $this->aporteinssjpdh21,
         );
     }
 
@@ -113,7 +113,7 @@ class ControlAportesDiferencia extends Model
     public function totalContribucionesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
+            get: fn() => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
         );
     }
 
@@ -123,7 +123,7 @@ class ControlAportesDiferencia extends Model
     public function totalAportesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->aportesijp + $this->aporteinssjp,
+            get: fn() => $this->aportesijp + $this->aporteinssjp,
         );
     }
 
@@ -133,7 +133,7 @@ class ControlAportesDiferencia extends Model
     public function totalContribucionesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->contribucionsijp + $this->contribucioninssjp,
+            get: fn() => $this->contribucionsijp + $this->contribucioninssjp,
         );
     }
 }

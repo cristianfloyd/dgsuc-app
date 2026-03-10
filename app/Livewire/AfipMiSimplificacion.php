@@ -372,6 +372,6 @@ class AfipMiSimplificacion extends Component
         if ($this->currentProcess->steps === null) {
             return false;
         }
-        return collect($this->currentProcess->steps)->every(fn ($step) => $step === 'completed');
+        return collect($this->currentProcess->steps)->every(fn($step) => $step === 'completed');
     }
 }

@@ -45,8 +45,7 @@ class SicossLegacy
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected SicossOrchestatorRepositoryInterface $sicossOrchestatorRepository,
         protected DatabaseOperationInterface $databaseOperation,
-    ) {
-    }
+    ) {}
 
     public function genera_sicoss($datos, $testeo_directorio_salida = '', $testeo_prefijo_archivos = '', $retornar_datos = false)
     {

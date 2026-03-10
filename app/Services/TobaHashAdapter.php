@@ -39,8 +39,7 @@ class TobaHashAdapter
     public function __construct(
         private readonly string $metodo = 'bcrypt',
         private int $rounds = self::MIN_ROUNDS,
-    ) {
-    }
+    ) {}
 
     /**
      * Establece el número de rondas para el hash.
@@ -109,7 +108,7 @@ class TobaHashAdapter
             'SHA256' => str_starts_with($hash, '$5$'),
             'SHA512' => str_starts_with($hash, '$6$'),
             'MD5' => str_starts_with($hash, '$1$'),
-            default => false
+            default => false,
         };
     }
 
@@ -195,7 +194,7 @@ class TobaHashAdapter
             'SHA512' => sprintf('$6$rounds=%d$', $this->calculateRounds()),
             'SHA256' => sprintf('$5$rounds=%d$', $this->calculateRounds()),
             'MD5' => '$1$',
-            default => throw new Exception("Algoritmo de hash no soportado: {$this->metodo}")
+            default => throw new Exception("Algoritmo de hash no soportado: {$this->metodo}"),
         };
 
         $bytes = $this->getSecureRandomBytes(16);

@@ -27,8 +27,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected Dh21RepositoryInterface $dh21Repository,
         protected DatabaseOperationInterface $databaseOperation,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta el proceso completo de generación SICOSS
@@ -317,8 +316,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
             $this->archivos[$periodo] = $path . $nombre_arch;
 
             // Obtener conceptos liquidados para el período específico
-            $where_periodo_retro = ' ano_retro = ' . $periodo_data['ano_retro'] .
-                                 ' AND mes_retro = ' . $periodo_data['mes_retro'];
+            $where_periodo_retro = ' ano_retro = ' . $periodo_data['ano_retro']
+                                 . ' AND mes_retro = ' . $periodo_data['mes_retro'];
 
             $this->dh21Repository->obtenerConceptosLiquidadosSicoss(
                 $periodo_data['ano_retro'],

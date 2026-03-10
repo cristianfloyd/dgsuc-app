@@ -33,14 +33,14 @@ class BloqueosValidationService
                 BloqueosEstadoEnum::VALIDADO => 'Registro validado correctamente',
                 BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => "Error: {$record->mensaje_error}",
                 BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => "Error: {$record->mensaje_error}",
-                default => "Error en la validación: {$record->mensaje_error}"
+                default => "Error en la validación: {$record->mensaje_error}",
             };
 
             $color = match ($record->estado) {
                 BloqueosEstadoEnum::VALIDADO => 'success',
                 BloqueosEstadoEnum::FECHAS_COINCIDENTES => 'warning',
                 BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA => 'warning',
-                default => 'danger'
+                default => 'danger',
             };
 
             return [
@@ -130,13 +130,13 @@ class BloqueosValidationService
      */
     public function generarMensajeResumen(array $estadisticas): string
     {
-        return "Total procesados: {$estadisticas['total']}\n" .
-            "Validados: {$estadisticas['validados']}\n" .
-            "Falta cargo asociado: {$estadisticas['faltaCargoAsociado']}\n" .
-            "Fecha cargo no coincide: {$estadisticas['fechaCargoNoCoincide']}\n" .
-            "Licencia ya bloqueada: {$estadisticas['licenciaYaBloqueada']}\n" .
-            "Fechas coincidentes: {$estadisticas['fechasCoincidentes']}\n" .
-            "Con error: {$estadisticas['conError']}";
+        return "Total procesados: {$estadisticas['total']}\n"
+            . "Validados: {$estadisticas['validados']}\n"
+            . "Falta cargo asociado: {$estadisticas['faltaCargoAsociado']}\n"
+            . "Fecha cargo no coincide: {$estadisticas['fechaCargoNoCoincide']}\n"
+            . "Licencia ya bloqueada: {$estadisticas['licenciaYaBloqueada']}\n"
+            . "Fechas coincidentes: {$estadisticas['fechasCoincidentes']}\n"
+            . "Con error: {$estadisticas['conError']}";
     }
 
     /**

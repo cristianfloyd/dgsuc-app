@@ -26,7 +26,7 @@ trait HasLaboralStatus
             self::STATUS_SCHOLARSHIP => 'Beca',
             self::STATUS_SUBSTITUTE => 'Suplente',
             self::STATUS_OTHER => 'Otro',
-            default => 'Desconocido'
+            default => 'Desconocido',
         };
     }
 

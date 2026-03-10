@@ -237,14 +237,14 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     private function mapearDatosRelacionesActivas(Collection $processedLines): Collection
     {
         $mappedData = $processedLines
-            ->map(fn ($linea) => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
+            ->map(fn($linea) => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
         return new Collection($mappedData);
     }
 
     private function mapearDatosMapucheSicoss(Collection $processedLines): Collection
     {
         $mappedData = $processedLines
-            ->map(fn ($linea) => $this->dataMapper->mapDataToModel($linea->toArray()));
+            ->map(fn($linea) => $this->dataMapper->mapDataToModel($linea->toArray()));
         return new Collection($mappedData);
     }
 
@@ -302,7 +302,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     {
         $data = collect($lines)
             ->filter()
-            ->map(fn ($line) => $this->processLine($line, $columnWidths));
+            ->map(fn($line) => $this->processLine($line, $columnWidths));
         Log::info('Datos procesados en ProcessLines : ' . $data->count());
         return new Collection($data->all());
     }

@@ -156,8 +156,8 @@ class Dh03 extends Model
 
             // Validar fechas coherentes
             if (
-                $model->fec_baja && $model->fec_alta &&
-                $model->fec_baja < $model->fec_alta
+                $model->fec_baja && $model->fec_alta
+                && $model->fec_baja < $model->fec_alta
             ) {
                 throw new Exception('La fecha de baja no puede ser anterior a la fecha de alta');
             }
@@ -347,7 +347,7 @@ class Dh03 extends Model
     protected function legajoCargo(): Attribute
     {
         return Attribute::make(
-            get: fn () => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
+            get: fn() => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
 }

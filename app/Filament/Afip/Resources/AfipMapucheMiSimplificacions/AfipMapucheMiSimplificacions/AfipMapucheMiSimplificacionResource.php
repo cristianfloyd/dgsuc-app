@@ -89,10 +89,10 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->badge()
                     ->label('Puesto')
                     ->colors([
-                        'primary' => fn ($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
-                        'secondary' => fn ($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
-                        'warning' => fn ($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
-                        'success' => fn ($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
+                        'primary' => fn($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
+                        'secondary' => fn($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
+                        'warning' => fn($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
+                        'success' => fn($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
                     ]),
             ])
             ->filters([
@@ -126,7 +126,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(fn (AfipMapucheSicossService $afipMapucheSicossService) => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
+                            ->options(fn(AfipMapucheSicossService $afipMapucheSicossService) => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
                             ->required()
                             ->searchable(),
                         Select::make('nro_liqui')

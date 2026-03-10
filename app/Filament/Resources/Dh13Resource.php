@@ -29,11 +29,11 @@ class Dh13Resource extends Resource
 
     protected static ?string $modelLabel = 'Formulas';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Conceptos';
+    protected static string|UnitEnum|null $navigationGroup = 'Conceptos';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $activeNavigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $recordTitleAttribute = 'id';
 
@@ -74,7 +74,7 @@ class Dh13Resource extends Resource
                 TextColumn::make('codn_conce')->sortable()->searchable(),
                 TextColumn::make('dh12.desc_conce')
                     ->label('Concepto')
-                    ->formatStateUsing(fn ($state) => EncodingService::toUtf8($state))
+                    ->formatStateUsing(fn($state) => EncodingService::toUtf8($state))
                     ->searchable()
                     ->wrap(),
                 TextColumn::make('nro_orden_formula')->label('Orden')->sortable(),

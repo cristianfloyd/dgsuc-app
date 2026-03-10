@@ -18,7 +18,7 @@ class GenerarSicossBDPrueba extends Command
      *
      * @var string
      */
-    protected $signature = 'sicoss:bd-prueba 
+    protected $signature = 'sicoss:bd-prueba
                             {periodo : Período fiscal en formato YYYYMM}
                             {--legajo= : Procesar solo un legajo específico}
                             {--incluir-inactivos : Incluir empleados inactivos}';

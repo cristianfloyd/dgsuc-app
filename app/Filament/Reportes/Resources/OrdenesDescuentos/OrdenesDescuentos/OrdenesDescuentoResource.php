@@ -28,7 +28,7 @@ class OrdenesDescuentoResource extends Resource
 {
     protected static ?string $model = OrdenesDescuento::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
     protected static ?int $navigationSort = 2;
 
@@ -69,7 +69,7 @@ class OrdenesDescuentoResource extends Resource
                             ->options(Dh22::getPeriodosFiscales())
                             ->searchable()
                             ->live()
-                            ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+                            ->afterStateUpdated(fn(callable $set) => $set('nro_liqui', null)),
 
                         Select::make('nro_liqui')
                             ->label('Liquidación')
@@ -87,13 +87,13 @@ class OrdenesDescuentoResource extends Resource
                             })
                             ->searchable()
                             ->live()
-                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                            ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['nro_liqui'],
-                                fn (Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             );
                     }),
                 SelectFilter::make('codc_uacad')
@@ -113,7 +113,7 @@ class OrdenesDescuentoResource extends Resource
                     ->preload(),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
-                    ->options(fn () => OrdenesDescuento::distinct()
+                    ->options(fn() => OrdenesDescuento::distinct()
                         ->orderBy('codn_conce')
                         ->pluck('desc_conce', 'codn_conce')
                         ->toArray())

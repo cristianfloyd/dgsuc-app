@@ -27,7 +27,7 @@ class OrdenDePagoResource extends Resource
 
     protected static ?string $navigationLabel = 'Orden de Pago';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
     public static function form(Schema $schema): Schema
     {

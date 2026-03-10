@@ -36,7 +36,7 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
     public function collection()
     {
         $collection = $this->records;
-        $collection = $collection->filter(fn ($row) => $row !== null);
+        $collection = $collection->filter(fn($row) => $row !== null);
 
         return $collection;
     }

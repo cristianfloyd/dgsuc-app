@@ -71,7 +71,7 @@ class LiquidacionControlResource extends Resource
                     ->sortable(),
                 TextColumn::make('estado')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pendiente' => 'warning',
                         'error' => 'danger',
                         'completado' => 'success',
@@ -87,13 +87,13 @@ class LiquidacionControlResource extends Resource
             ])
             ->recordActions([
                 Action::make('ejecutar')
-                    ->action(fn ($record) => static::ejecutarControl($record))
+                    ->action(fn($record) => static::ejecutarControl($record))
                     ->icon('heroicon-o-play'),
                 Action::make('ver_detalles')
-                    ->action(fn ($record) => static::verDetallesControl($record))
+                    ->action(fn($record) => static::verDetallesControl($record))
                     ->icon('heroicon-o-eye')
                     ->modalHeading('Detalles del Control')
-                    ->modalContent(fn ($record) => view('filament.liquidaciones.detalles-control', ['control' => $record])),
+                    ->modalContent(fn($record) => view('filament.liquidaciones.detalles-control', ['control' => $record])),
                 EditAction::make(),
             ])
             ->filters([
@@ -112,7 +112,7 @@ class LiquidacionControlResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['nro_liqui'],
-                            fn (Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui),
+                            fn(Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui),
                         );
                     }),
             ]);

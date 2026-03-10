@@ -29,9 +29,9 @@ class MapucheGrupoResource extends Resource
 {
     protected static ?string $model = MapucheGrupo::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Liquidaciones';
+    protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
     protected static ?string $modelLabel = 'Grupo';
 
@@ -90,7 +90,7 @@ class MapucheGrupoResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('tipo')
-                    ->options(fn () => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
+                    ->options(fn() => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
                     ->label('Filtrar por Tipo'),
             ])
             ->recordActions([
@@ -100,7 +100,7 @@ class MapucheGrupoResource extends Resource
                 Action::make('administrar_legajos')
                     ->label('Administrar Legajos')
                     ->icon('heroicon-o-users')
-                    ->url(fn (MapucheGrupo $record): string => static::getUrl('manage-legajos', ['record' => $record])),
+                    ->url(fn(MapucheGrupo $record): string => static::getUrl('manage-legajos', ['record' => $record])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

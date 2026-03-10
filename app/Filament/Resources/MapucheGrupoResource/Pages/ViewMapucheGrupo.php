@@ -18,7 +18,7 @@ class ViewMapucheGrupo extends ViewRecord
             Action::make('administrar_legajos')
                 ->label('Administrar Legajos')
                 ->icon('heroicon-o-users')
-                ->url(fn () => static::getResource()::getUrl('manage-legajos', ['record' => $this->record])),
+                ->url(fn() => static::getResource()::getUrl('manage-legajos', ['record' => $this->record])),
         ];
     }
 }

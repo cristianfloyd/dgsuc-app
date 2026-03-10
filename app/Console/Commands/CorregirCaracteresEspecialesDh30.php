@@ -114,8 +114,8 @@ class CorregirCaracteresEspecialesDh30 extends Command
             }
 
             if (!empty($cambios)) {
-                $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: " .
-                             json_encode($cambios, JSON_UNESCAPED_UNICODE));
+                $this->info("Registro Tabla #{$registro->nro_tabla}, Abrev: {$registro->desc_abrev}: "
+                             . json_encode($cambios, JSON_UNESCAPED_UNICODE));
 
                 if (!$dryRun) {
                     DB::connection($registro->getConnectionName())->beginTransaction();

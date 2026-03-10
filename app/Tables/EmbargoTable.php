@@ -33,7 +33,7 @@ class EmbargoTable
     public function table(Table $table): Table
     {
         if ($this->nroComplementarias === null || $this->nroLiquiDefinitiva === null || $this->nroLiquiProxima === null) {
-            return $table->query(fn () => new Collection());
+            return $table->query(fn() => new Collection());
         }
         return $table
             ->query(function (): Builder {

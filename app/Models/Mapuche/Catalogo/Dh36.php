@@ -101,8 +101,8 @@ class Dh36 extends Model
     protected function descdependesemp(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value): ?string => EncodingService::toUtf8($value),
-            set: fn (string $value): ?string => EncodingService::toLatin1($value),
+            get: fn(string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(string $value): ?string => EncodingService::toLatin1($value),
         );
     }
 

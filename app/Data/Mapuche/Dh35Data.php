@@ -17,8 +17,7 @@ class Dh35Data extends Data
         public readonly ?int $controlhoras,
         public readonly ?int $controlpuntos,
         public readonly bool $caracter_concursado = false,
-    ) {
-    }
+    ) {}
 
     public static function rules($context = null): array
     {

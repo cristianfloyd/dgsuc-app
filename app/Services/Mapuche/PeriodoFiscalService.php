@@ -212,7 +212,7 @@ class PeriodoFiscalService
             ->toArray();
     }
 
-    public function getLiquidacionDefinitiva(string $year, string $month): Dh22|null
+    public function getLiquidacionDefinitiva(string $year, string $month): ?Dh22
     {
         return Dh22::query()
             ->where('per_liano', $year)

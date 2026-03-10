@@ -30,7 +30,7 @@ class Dh03Resource extends Resource
 
     protected static ?string $navigationLabel = 'Cargos';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {
@@ -97,7 +97,7 @@ class Dh03Resource extends Resource
                 Filter::make('chkstopliq')
                     ->label('Stop Liquidacion')
                     ->toggle()
-                    ->query(fn ($query) => $query->where('chkstopliq', false))
+                    ->query(fn($query) => $query->where('chkstopliq', false))
                     ->default(true), // Aplicar el filtro por defecto
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(5)

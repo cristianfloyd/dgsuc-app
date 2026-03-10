@@ -28,8 +28,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         }
 
         if (
-            $input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail
+            $input['email'] !== $user->email
+            && $user instanceof MustVerifyEmail
         ) {
             $this->updateVerifiedUser($user, $input);
         } else {

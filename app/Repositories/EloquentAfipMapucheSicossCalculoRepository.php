@@ -22,8 +22,7 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
 
     public function __construct(
         private readonly AfipMapucheSicossCalculo $model,
-    ) {
-    }
+    ) {}
 
     public function find(string $cuil): ?AfipMapucheSicossCalculoData
     {
@@ -113,9 +112,9 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
 
             // Lanzar una excepción más informativa
             throw new RuntimeException(
-                'Error al truncar la tabla: ' . $e->getMessage() .
-                '. Conexión utilizada: ' . ($connectionName ?? 'desconocida') .
-                '. Conexión en sesión: ' . ($sessionConnection ?? 'desconocida'),
+                'Error al truncar la tabla: ' . $e->getMessage()
+                . '. Conexión utilizada: ' . ($connectionName ?? 'desconocida')
+                . '. Conexión en sesión: ' . ($sessionConnection ?? 'desconocida'),
                 0,
                 $e,
             );

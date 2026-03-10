@@ -533,17 +533,17 @@ class sicoss
         if ($check_sin_activo) {
             $where_no_liquidado = '
 								NOT EXISTS (SELECT 1
-											FROM 
+											FROM
 												' . MAP_ESQUEMA . ".dh21
-											WHERE 
+											WHERE
 												dh21.nro_legaj = dh01.nro_legaj
 											)
 								AND
-								dh01.tipo_estad = 'A' AND NOT EXISTS 	(  	SELECT 
+								dh01.tipo_estad = 'A' AND NOT EXISTS 	(  	SELECT
 																		1
-																FROM 
+																FROM
 																		" . MAP_ESQUEMA . '.dh03 car
-																WHERE 
+																WHERE
 																		car.nro_legaj = dh01.nro_legaj AND  ' . MAP_ESQUEMA . '.map_es_cargo_activo(car.nro_cargo) )
 			';
 
@@ -899,9 +899,9 @@ class sicoss
             if ($check_sin_activo) {
                 $where_not_dh21 = '
 								NOT EXISTS (SELECT 1
-														FROM 
+														FROM
 															' . MAP_ESQUEMA . ".dh21
-														WHERE 
+														WHERE
 															dh21.nro_legaj = l.nro_legaj
 														)
 								AND l.nro_legaj = $legajo
@@ -1231,13 +1231,13 @@ class sicoss
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
                 }
                 // Calcular Sueldo más Adicionales
-                $legajos[$i]['ImporteSueldoMasAdicionales'] = $legajos[$i]['ImporteImponiblePatronal'] -
-                                                                $legajos[$i]['ImporteSAC'] -
-                                                                $legajos[$i]['ImporteHorasExtras'] -
-                                                                $legajos[$i]['ImporteZonaDesfavorable'] -
-                                                                $legajos[$i]['ImporteVacaciones'] -
-                                                                $legajos[$i]['ImportePremios'] -
-                                                                $legajos[$i]['ImporteAdicionales'];
+                $legajos[$i]['ImporteSueldoMasAdicionales'] = $legajos[$i]['ImporteImponiblePatronal']
+                                                                - $legajos[$i]['ImporteSAC']
+                                                                - $legajos[$i]['ImporteHorasExtras']
+                                                                - $legajos[$i]['ImporteZonaDesfavorable']
+                                                                - $legajos[$i]['ImporteVacaciones']
+                                                                - $legajos[$i]['ImportePremios']
+                                                                - $legajos[$i]['ImporteAdicionales'];
                 if ($legajos[$i]['ImporteSueldoMasAdicionales'] > 0) {
                     $legajos[$i]['ImporteSueldoMasAdicionales'] -= $legajos[$i]['IncrementoSolidario'];
                 }
@@ -1323,69 +1323,69 @@ class sicoss
         for ($i = 0;$i < \count($legajos);$i++) {
             fwrite(
                 $fh,
-                $legajos[$i]['cuit'] .                                                                // Campo 1
-                sicoss::llena_blancos_mod($legajos[$i]['apyno'], 30) .                                             // Campo 2
-                $legajos[$i]['conyugue'] .                                                                        // Campo 3
-                sicoss::llena_importes($legajos[$i]['hijos'], 2) .                                                 // Campo 4
-                sicoss::llena_importes($legajos[$i]['codigosituacion'], 2) .                                       // Campo 5 TODO: Preguntar ¿es el que viene de dha8?
-                sicoss::llena_importes($legajos[$i]['codigocondicion'], 2) .                                       // Campo 6
-                sicoss::llena_importes($legajos[$i]['TipoDeActividad'], 3) .                                       // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
-                sicoss::llena_importes($legajos[$i]['codigozona'], 2) .                                            // Campo 8
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5) .            // Campo 9 - Porcentaje de Aporte Adicional Obra Social
-                sicoss::llena_importes($legajos[$i]['codigocontratacion'], 3) .                                    // Campo 10
-                sicoss::llena_importes($legajos[$i]['codigo_os'], 6) .
-                sicoss::llena_importes($legajos[$i]['adherentes'], 2) .                                            // Campo 12 - Según este chequeado en configuración informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12) .             // Campo 13
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12) .             // Campo 14
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) . // Campo 15
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9) .              // Campo 16
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9) .              // Campo 17
-                sicoss::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9) .      //exedAportesSS
-                '     0,00' .                                                                                     //exedAportesOS
-                sicoss::llena_blancos($legajos[$i]['provincialocalidad'], 50) .                                    //Campo 20
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 21 - Imponible 2
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12) .  // Campo 22 - Imponible 3
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12) .        // Campo 23 - Imponible 4
-                '00' .                                                                                            // campo 24 - codigo siniestrado
-                '0' .                                                                                             // Campo 25 - marca de corresponde reduccion
-                '000000,00' .                                                                                     // Campo 26 -  capital de recomposicion
-                self::$tipoEmpresa .
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9) .                                                                                     // Campo 28 - aporte adicional obra social
-                $legajos[$i]['regimen'] .
-                sicoss::llena_importes($legajos[$i]['codigorevista1'], 2) .                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
-                sicoss::llena_importes($legajos[$i]['fecharevista1'], 2) .                                        // campo 31 - Dia inicio Situación de Revista 1
-                sicoss::llena_importes($legajos[$i]['codigorevista2'], 2) .                                       // Situación de Revista 2
-                sicoss::llena_importes($legajos[$i]['fecharevista2'], 2) .                                        // Dia inicio Situación de Revista 2
-                sicoss::llena_importes($legajos[$i]['codigorevista3'], 2) .                                       // Situación de Revista 3
-                sicoss::llena_importes($legajos[$i]['fecharevista3'], 2) .                                        // Dia inicio Situación de Revista 3
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12) .		// Campo 36
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12) .                // Campo 37
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12) .        // Campo 38
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12) .   // Campo 39
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12) .         // Campo 40
-                '0000000' . sicoss::llena_importes($legajos[$i]['dias_trabajados'], 2) .                            // Campo 41 - Días trabajados
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12) .        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
-                $legajos[$i]['trabajadorconvencionado'] .
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 44 - Imponible 6
-                $legajos[$i]['TipoDeOperacion'] .                                                                 // Campo 45 - Segun se redondee o no importe imponible 6
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12) .        // Campo 46
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12) .            // Campo 47
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12) .              // Campo 48
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12) .        // Campo 49 - Imponible7 = Imponible6
+                $legajos[$i]['cuit']                                                                // Campo 1
+                . sicoss::llena_blancos_mod($legajos[$i]['apyno'], 30)                                             // Campo 2
+                . $legajos[$i]['conyugue']                                                                        // Campo 3
+                . sicoss::llena_importes($legajos[$i]['hijos'], 2)                                                 // Campo 4
+                . sicoss::llena_importes($legajos[$i]['codigosituacion'], 2)                                       // Campo 5 TODO: Preguntar ¿es el que viene de dha8?
+                . sicoss::llena_importes($legajos[$i]['codigocondicion'], 2)                                       // Campo 6
+                . sicoss::llena_importes($legajos[$i]['TipoDeActividad'], 3)                                       // Campo 7 - Segun prioridad es codigoactividad de dha8 u otro valor, ver funcion sumarizar_conceptos_por_tipos_grupos
+                . sicoss::llena_importes($legajos[$i]['codigozona'], 2)                                            // Campo 8
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['aporteadicional'] ?? 0.0, 2, ',', ''), 5)            // Campo 9 - Porcentaje de Aporte Adicional Obra Social
+                . sicoss::llena_importes($legajos[$i]['codigocontratacion'], 3)                                    // Campo 10
+                . sicoss::llena_importes($legajos[$i]['codigo_os'], 6)
+                . sicoss::llena_importes($legajos[$i]['adherentes'], 2)                                            // Campo 12 - Según este chequeado en configuración informo 0 o uno (sumarizar_conceptos_por_tipos_grupos) o cantidad de adherentes (dh09)
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_BRUTO'] ?? 0.0, 2, ',', ''), 12)             // Campo 13
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_IMPON'] ?? 0.0, 2, ',', ''), 12)             // Campo 14
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) // Campo 15
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9)              // Campo 16
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9)              // Campo 17
+                . sicoss::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9)      //exedAportesSS
+                . '     0,00'                                                                                     //exedAportesOS
+                . sicoss::llena_blancos($legajos[$i]['provincialocalidad'], 50)                                    //Campo 20
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12)  // Campo 21 - Imponible 2
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12)  // Campo 22 - Imponible 3
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12)        // Campo 23 - Imponible 4
+                . '00'                                                                                            // campo 24 - codigo siniestrado
+                . '0'                                                                                             // Campo 25 - marca de corresponde reduccion
+                . '000000,00'                                                                                     // Campo 26 -  capital de recomposicion
+                . self::$tipoEmpresa
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['AporteAdicionalObraSocial'] ?? 0.0, 2, ',', ''), 9)                                                                                     // Campo 28 - aporte adicional obra social
+                . $legajos[$i]['regimen']
+                . sicoss::llena_importes($legajos[$i]['codigorevista1'], 2)                                       // campo 30 - codigo de revista 1 se informa igual que codigosituacion
+                . sicoss::llena_importes($legajos[$i]['fecharevista1'], 2)                                        // campo 31 - Dia inicio Situación de Revista 1
+                . sicoss::llena_importes($legajos[$i]['codigorevista2'], 2)                                       // Situación de Revista 2
+                . sicoss::llena_importes($legajos[$i]['fecharevista2'], 2)                                        // Dia inicio Situación de Revista 2
+                . sicoss::llena_importes($legajos[$i]['codigorevista3'], 2)                                       // Situación de Revista 3
+                . sicoss::llena_importes($legajos[$i]['fecharevista3'], 2)                                        // Dia inicio Situación de Revista 3
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSueldoMasAdicionales'] ?? 0.0, 2, ',', ''), 12)		// Campo 36
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSAC'] ?? 0.0, 2, ',', ''), 12)                // Campo 37
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteHorasExtras'] ?? 0.0, 2, ',', ''), 12)        // Campo 38
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteZonaDesfavorable'] ?? 0.0, 2, ',', ''), 12)   // Campo 39
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteVacaciones'] ?? 0.0, 2, ',', ''), 12)         // Campo 40
+                . '0000000' . sicoss::llena_importes($legajos[$i]['dias_trabajados'], 2)                            // Campo 41 - Días trabajados
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteTipo91'], 2, ',', ''), 12)        // Campo 42 - Imponible5 = Imponible4 - ImporteTipo91
+                . $legajos[$i]['trabajadorconvencionado']
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12)        // Campo 44 - Imponible 6
+                . $legajos[$i]['TipoDeOperacion']                                                                 // Campo 45 - Segun se redondee o no importe imponible 6
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteAdicionales'] ?? 0.0, 2, ',', ''), 12)        // Campo 46
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12)            // Campo 47
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12)              // Campo 48
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12)        // Campo 49 - Imponible7 = Imponible6
                 //redondeo las HS extras, si vienen por ejemplo 10.5 en sicoss informo 11. Esto es porque el
                 //campo de sicoss es de 3 caracteres y los 10.5 los informaria como 0.5
-                sicoss::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3) .                                   // Campo 50
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12) .            // Campo 51
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12) .         // Campo 52
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9) .  // Campo 53
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12) .        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9) .   		 // Campo 55 - Contribución Tarea Diferencial
-                '000' .		                                                                                     // Campo 56 - Horas Trabajadas
-                $legajos[$i]['SeguroVidaObligatorio'] .                                                           // Campo 57 - Seguro  de Vida Obligatorio
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12) .    	 // Campo 58 - Importe a detraer Ley 27430
-                sicoss::llena_blancos_izq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) . // Campo 59 - Incremento Solidario para empresas del sector privado y público (D. 14/2020 y 56/2020)
-                sicoss::llena_blancos_izq(number_format(0, 2, ',', ''), 12) .        							 	 // Campo 60 - Remuneración 11
-                "\r\n",
+                . sicoss::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3)                                   // Campo 50
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12)            // Campo 51
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12)         // Campo 52
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteRectificacionRemun'] ?? 0.0, 2, ',', ''), 9)  // Campo 53
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['importeimponible_9'] ?? 0.0, 2, ',', ''), 12)        // Campo 54 = Imponible8 (Campo 48) + Conceptos No remunerativos (Campo 51)
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ContribTareaDif'] ?? 0.0, 2, ',', ''), 9)   		 // Campo 55 - Contribución Tarea Diferencial
+                . '000'		                                                                                     // Campo 56 - Horas Trabajadas
+                . $legajos[$i]['SeguroVidaObligatorio']                                                           // Campo 57 - Seguro  de Vida Obligatorio
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['ImporteSICOSS27430'] ?? 0.0, 2, ',', ''), 12)    	 // Campo 58 - Importe a detraer Ley 27430
+                . sicoss::llena_blancos_izq(number_format($legajos[$i]['IncrementoSolidario'] ?? 0.0, 2, ',', ''), 12) // Campo 59 - Incremento Solidario para empresas del sector privado y público (D. 14/2020 y 56/2020)
+                . sicoss::llena_blancos_izq(number_format(0, 2, ',', ''), 12)        							 	 // Campo 60 - Remuneración 11
+                . "\r\n",
             );
         }
         fclose($fh);
@@ -1642,8 +1642,8 @@ class sicoss
         // Segun prioridad selecciono el valor de dha8 o no; se informa TipoDeActividad como codigo de actividad
         if ($leg['PrioridadTipoDeActividad'] == 38 || $leg['PrioridadTipoDeActividad'] == 0) {
             $leg['TipoDeActividad'] = $leg['codigoactividad'];
-        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37) ||
-                $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
+        } elseif (($leg['PrioridadTipoDeActividad'] >= 34 && $leg['PrioridadTipoDeActividad'] <= 37)
+                || $leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
             $leg['TipoDeActividad'] = $leg['PrioridadTipoDeActividad'];
         }
 
@@ -1671,8 +1671,8 @@ class sicoss
     // Obtengo los conceptos liquidados para el legajo, su importe y los tipos de grupo asociados al concepto
     public static function consultar_conceptos_liquidados($nro_leg, $where)
     {
-        $sql_conceptos_fltrados =
-                                "
+        $sql_conceptos_fltrados
+                                = "
                                         SELECT
                                         		impp_conce,
                                                 nov1_conce,
@@ -1731,8 +1731,8 @@ class sicoss
     // Se podia hacer en la funcion sumarizar_conceptos_por_tipos_grupos pero queda mas claro separado
     public static function calcular_remuner_grupo($nro_legajo, $tipo, $where)
     {
-        $sql =
-            "
+        $sql
+            = "
 				SELECT
 					SUM(conceptos_liquidados.impp_conce::numeric(10,2)) AS suma
 				FROM

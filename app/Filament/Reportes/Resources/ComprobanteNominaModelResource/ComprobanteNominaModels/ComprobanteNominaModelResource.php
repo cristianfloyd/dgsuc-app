@@ -125,11 +125,11 @@ class ComprobanteNominaModelResource extends Resource
                     ->label('Importacion Avanzada')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('warning')
-                    ->url(fn () => static::getUrl('import')),
+                    ->url(fn() => static::getUrl('import')),
                 Action::make('generate')
                     ->label('Generar Comprobantes')
                     ->icon('heroicon-o-document-check')
-                    ->url(fn (): string => static::getUrl('generate')),
+                    ->url(fn(): string => static::getUrl('generate')),
             ])
             ->columns([
                 TextColumn::make('anio_periodo')
@@ -137,14 +137,14 @@ class ComprobanteNominaModelResource extends Resource
                     ->searchable(),
                 TextColumn::make('mes_periodo')
                     ->label('Mes')
-                    ->formatStateUsing(fn ($state) => nombreMes($state)),
+                    ->formatStateUsing(fn($state) => nombreMes($state)),
                 TextColumn::make('nro_liqui')
                     ->label('Nro Liqui')
                     ->searchable(),
                 TextColumn::make('desc_liqui')
                     ->label('Desc. Liquidación')
                     ->limit(20)
-                    ->tooltip(fn ($record) => $record->desc_liqui)
+                    ->tooltip(fn($record) => $record->desc_liqui)
                     ->searchable(),
                 TextColumn::make('importe')
                     ->label('Importe')
@@ -162,14 +162,14 @@ class ComprobanteNominaModelResource extends Resource
             ->filters([
                 SelectFilter::make('anio_periodo')
                     ->label('Año')
-                    ->options(fn () => ComprobanteNominaModel::distinct()
+                    ->options(fn() => ComprobanteNominaModel::distinct()
                         ->pluck('anio_periodo', 'anio_periodo')
                         ->toArray()),
                 SelectFilter::make('mes_periodo')
                     ->label('Mes')
-                    ->options(fn () => collect(range(1, 12))->mapWithKeys(
-                        fn ($mes) =>
-                            [$mes => nombreMes($mes)],
+                    ->options(fn() => collect(range(1, 12))->mapWithKeys(
+                        fn($mes)
+                            => [$mes => nombreMes($mes)],
                     )->toArray()),
             ])
             ->recordActions([])

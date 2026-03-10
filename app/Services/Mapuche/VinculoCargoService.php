@@ -11,8 +11,7 @@ class VinculoCargoService
 {
     public function __construct(
         private Dh03Repository $dh03Repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Procesa la cadena completa de vínculos para un cargo.

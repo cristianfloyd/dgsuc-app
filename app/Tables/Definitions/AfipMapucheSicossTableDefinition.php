@@ -330,7 +330,7 @@ class AfipMapucheSicossTableDefinition implements AbstractTableDefinitionInterfa
 
 
     // Índices necesarios para optimizar consultas
-    public const  INDEXES = [
+    public const INDEXES = [
         'periodo_fiscal_cuil_idx' => ['periodo_fiscal', 'cuil'],
         'cuil_idx' => ['cuil'],
         'periodo_fiscal_idx' => ['periodo_fiscal'],

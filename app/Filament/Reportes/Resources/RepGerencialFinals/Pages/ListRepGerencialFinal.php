@@ -83,7 +83,7 @@ class ListRepGerencialFinal extends ListRecords
                         ->label('Liquidaciones')
                         ->multiple()
                         ->required()
-                        ->options(fn () => Dh22::getLiquidacionesForWidget()
+                        ->options(fn() => Dh22::getLiquidacionesForWidget()
                             ->pluck('desc_liqui', 'nro_liqui'))
                         ->searchable()
                         ->preload()
@@ -92,14 +92,14 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro regional
                     Select::make('codc_regio')
                         ->label('Regional')
-                        ->options(fn () => Dh30::where('nro_tabla', 2)
+                        ->options(fn() => Dh30::where('nro_tabla', 2)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
                     // Filtro unidad académica
                     Select::make('codc_uacad')
                         ->label('Unidad Académica')
-                        ->options(fn () => Dh30::where('nro_tabla', 13)
+                        ->options(fn() => Dh30::where('nro_tabla', 13)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
@@ -115,7 +115,7 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro carácter
                     Select::make('codc_carac')
                         ->label('Carácter')
-                        ->options(fn () => Dh30::where('nro_tabla', 3)
+                        ->options(fn() => Dh30::where('nro_tabla', 3)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
@@ -127,7 +127,7 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro fuente financiamiento
                     Select::make('codn_fuent')
                         ->label('Fuente Financiamiento')
-                        ->options(fn () => Dh30::where('nro_tabla', 4)
+                        ->options(fn() => Dh30::where('nro_tabla', 4)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
                 ])

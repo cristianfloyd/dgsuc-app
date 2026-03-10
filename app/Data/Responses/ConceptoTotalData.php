@@ -14,8 +14,7 @@ class ConceptoTotalData extends Data
         public readonly int $codigoConcepto,
         #[MapName('total_impp')]
         public readonly float $importeTotal,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia de ConceptoTotalData desde un array de datos.

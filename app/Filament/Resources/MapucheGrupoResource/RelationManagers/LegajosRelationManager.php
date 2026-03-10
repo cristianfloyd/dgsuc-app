@@ -79,9 +79,9 @@ class LegajosRelationManager extends RelationManager
                         });
                     })
                     ->formatStateUsing(
-                        fn ($state) =>
+                        fn($state)
                         // Formatear el CUIL con guiones (XX-XXXXXXXX-X)
-                        preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $state),
+                        => preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $state),
                     ),
             ])
             ->filters([
@@ -92,8 +92,8 @@ class LegajosRelationManager extends RelationManager
                     ->label('Administrar Legajos')
                     ->icon('heroicon-m-users')
                     ->url(
-                        fn (RelationManager $livewire): string =>
-                        route('filament.dashboard.resources.mapuche-grupos.manage-legajos', [
+                        fn(RelationManager $livewire): string
+                        => route('filament.dashboard.resources.mapuche-grupos.manage-legajos', [
                             'record' => $livewire->getOwnerRecord(),
                         ]),
                     ),

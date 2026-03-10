@@ -159,7 +159,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
             ['Liquidación', 'DOSUBA', 'Contribuciones', 'Seguro', 'ART', 'Aportes', 'Sub Totales'],
 
             // Datos por liquidación
-            ...$datosMatriz->map(fn ($row) => [
+            ...$datosMatriz->map(fn($row) => [
                 $row['desc_liqui'],
                 $row['dosuba'],
                 $row['contribuciones'],

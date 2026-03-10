@@ -13,8 +13,7 @@ class SacRepository
 {
     public function __construct(
         private PeriodoFiscalService $periodoService,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.
@@ -24,10 +23,10 @@ class SacRepository
         $periodo = $this->periodoService->getPeriodoActual();
 
         return Dh10::with(['cargoVinculado'])
-            ->whereHas('cargo.empleado', fn ($q) => $q->where('nro_legaj', $legajo))
+            ->whereHas('cargo.empleado', fn($q) => $q->where('nro_legaj', $legajo))
             ->where('nro_cargo', $nroCargo)
             ->first()
-            ?->pipe(fn ($model) => SacCargoData::from($model));
+            ?->pipe(fn($model) => SacCargoData::from($model));
     }
 
     /**

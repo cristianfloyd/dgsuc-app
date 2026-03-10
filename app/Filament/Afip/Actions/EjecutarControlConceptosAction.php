@@ -49,7 +49,7 @@ class EjecutarControlConceptosAction extends Action
                     ->label('Conceptos a controlar')
                     ->options(
                         collect(ConceptosSicossEnum::cases())
-                            ->mapWithKeys(fn ($case) => [$case->value => (string) $case->value])
+                            ->mapWithKeys(fn($case) => [$case->value => (string) $case->value])
                             ->toArray(),
                     )
                     ->default(array_merge(
@@ -166,7 +166,7 @@ class EjecutarControlConceptosAction extends Action
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn () => $livewire->activeTab = 'conceptos'),
+                        ->action(fn() => $livewire->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();

@@ -173,9 +173,7 @@ class CheFileGenerator
         return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
-    public function set_progreso($porcentaje): void
-    {
-    }
+    public function set_progreso($porcentaje): void {}
 
     public function setNroLiqui(int $nroLiqui): self
     {

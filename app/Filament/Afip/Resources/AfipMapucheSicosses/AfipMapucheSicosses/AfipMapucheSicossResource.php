@@ -73,7 +73,7 @@ class AfipMapucheSicossResource extends Resource
                 TextColumn::make('apnom')
                     ->label('Apellido y Nombre')
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
+                    ->formatStateUsing(fn(string $state): string => strtoupper($state))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cod_act')
                     ->label('Cod. Act.')
@@ -198,12 +198,12 @@ class AfipMapucheSicossResource extends Resource
                         ->color('success'),
                     Action::make('exportarAvanzado')
                         ->label('Exportación Avanzada')
-                        ->url(fn (): string => self::getUrl('export'))
+                        ->url(fn(): string => self::getUrl('export'))
                         ->color('success')
                         ->icon('heroicon-o-adjustments-horizontal'),
                     Action::make('importar')
                         ->label('Importar')
-                        ->url(fn (): string => self::getUrl('import'))
+                        ->url(fn(): string => self::getUrl('import'))
                         ->color('success')
                         ->icon('heroicon-o-arrow-up-tray'),
                     PoblarAfipArtAction::make('poblar_art')
@@ -225,12 +225,12 @@ class AfipMapucheSicossResource extends Resource
                     Action::make('exportarFiltradosTxt')
                         ->label('Exportar Filtrados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
+                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
                         ->color('success'),
                     Action::make('exportarFiltradosExcel')
                         ->label('Exportar Filtrados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn ($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
+                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
                         ->color('success'),
                 ])
                     ->icon('heroicon-o-cog-8-tooth')
@@ -245,12 +245,12 @@ class AfipMapucheSicossResource extends Resource
                     BulkAction::make('exportarSeleccionadosTxt')
                         ->label('Exportar Seleccionados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn (Collection $records) => static::exportarRegistros($records, 'txt'))
+                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'txt'))
                         ->color('success'),
                     BulkAction::make('exportarSeleccionadosExcel')
                         ->label('Exportar Seleccionados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn (Collection $records) => static::exportarRegistros($records, 'excel'))
+                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'excel'))
                         ->color('success'),
                 ]),
             ])
@@ -260,7 +260,7 @@ class AfipMapucheSicossResource extends Resource
             ->emptyStateActions([
                 Action::make('importar')
                     ->label('Importar')
-                    ->url(fn (): string => self::getUrl('import'))
+                    ->url(fn(): string => self::getUrl('import'))
                     ->color('success')
                     ->icon('heroicon-o-arrow-up-tray'),
             ]);

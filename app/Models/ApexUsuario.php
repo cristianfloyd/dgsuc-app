@@ -67,56 +67,56 @@ class ApexUsuario extends Model
     public function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function email(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function parametroA(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function parametroB(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function parametroC(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function solicitudObservacion(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     public function pUid(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 

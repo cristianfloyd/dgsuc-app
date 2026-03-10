@@ -19,8 +19,7 @@ class FallecidoData extends Data
         public readonly string $codc_uacad,
         #[WithCast(DateTimeInterfaceCast::class)]
         public readonly ?Carbon $fec_defun,
-    ) {
-    }
+    ) {}
 
     public static function rules($context = null): array
     {

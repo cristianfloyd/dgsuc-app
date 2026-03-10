@@ -284,8 +284,8 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descItem(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->handleEncodedField($value),
-            set: fn ($value) => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $value),
+            get: fn($value) => $this->handleEncodedField($value),
+            set: fn($value) => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $value),
         );
     }
 
@@ -344,7 +344,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->handleEncodedField($value),
+            get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) {
                     return $value;
@@ -357,7 +357,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descConce(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->handleEncodedField($value),
+            get: fn($value) => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) {
                     return $value;

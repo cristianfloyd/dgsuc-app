@@ -66,8 +66,7 @@ class AfipMapucheSicossDTO
         public ?string $ley27430 = null,
         public ?string $incsalarial = null,
         public ?string $remimp11 = null,
-    ) {
-    }
+    ) {}
 
     public function toArray(): array
     {

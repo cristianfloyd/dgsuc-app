@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
                 'panel-selector' => MenuItem::make()
                     ->label('Cambiar Panel')
                     ->icon('heroicon-o-arrows-right-left')
-                    ->url(fn (): string => '/selector-panel'),
+                    ->url(fn(): string => '/selector-panel'),
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([

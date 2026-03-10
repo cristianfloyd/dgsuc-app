@@ -26,7 +26,7 @@ class ListAfipMapucheSicosses extends BaseListRecords
             'todos' => Tab::make('Todos'),
             'diferencia_negativa' => Tab::make('Diferencia Negativa')
                 ->icon('heroicon-m-arrow-trending-down')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereRaw('rem_total - rem_impo6 < 0')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereRaw('rem_total - rem_impo6 < 0')),
         ];
     }
 

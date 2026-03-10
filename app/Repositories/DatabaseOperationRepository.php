@@ -23,8 +23,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
      */
     public function __construct(
         protected ?string $connectionName = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta una consulta SQL directa con manejo de errores.

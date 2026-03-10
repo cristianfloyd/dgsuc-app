@@ -82,7 +82,7 @@ class EmployeeService implements EmployeeServiceInterface
     {
 
         return collect($processedLines)
-            ->map(fn ($linea) => $this->databaseService->mapearDatosAlModelo($linea))
+            ->map(fn($linea) => $this->databaseService->mapearDatosAlModelo($linea))
             ->all();
     }
 

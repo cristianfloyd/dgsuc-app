@@ -25,14 +25,14 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->instance(LoginResponse::class, new class () implements LoginResponse {
+        $this->app->instance(LoginResponse::class, new class implements LoginResponse {
             public function toResponse($request)
             {
                 return redirect('/selector-panel');
             }
         });
 
-        $this->app->instance(LogoutResponse::class, new class () implements LogoutResponse {
+        $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
             public function toResponse($request)
             {
                 return redirect('/');
@@ -55,8 +55,8 @@ class FortifyServiceProvider extends ServiceProvider
                 ->first();
 
             if (
-                $user &&
-                Hash::check($request->password, $user->password)
+                $user
+                && Hash::check($request->password, $user->password)
             ) {
                 return $user;
             }

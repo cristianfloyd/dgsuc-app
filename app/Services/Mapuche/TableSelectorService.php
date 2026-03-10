@@ -16,9 +16,7 @@ class TableSelectorService
     /**
      * Constructor del servicio.
      */
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService)
-    {
-    }
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService) {}
 
     /**
      * Determina qué tabla usar (dh21 o dh21h) según el período fiscal de la liquidación.
@@ -52,8 +50,8 @@ class TableSelectorService
 
             // Comparar períodos fiscales
             if (
-                $yearLiquidacion < $yearActual ||
-                ($yearLiquidacion == $yearActual && $mesLiquidacion < $mesActual)
+                $yearLiquidacion < $yearActual
+                || ($yearLiquidacion == $yearActual && $mesLiquidacion < $mesActual)
             ) {
                 Log::info("Usando tabla histórica dh21h para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
                 return 'dh21h';

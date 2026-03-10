@@ -20,9 +20,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
     use MapucheConnectionTrait;
 
-    public function __construct(protected RepOrdenPagoModel $model)
-    {
-    }
+    public function __construct(protected RepOrdenPagoModel $model) {}
 
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.
@@ -241,7 +239,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     BEGIN
         -- Limpiamos los datos existentes para las liquidaciones específicas
         DELETE FROM suc.rep_orden_pago WHERE nro_liqui = ANY(p_nro_liqui);
-        
+
         -- Insertamos los nuevos datos
     INSERT INTO suc.rep_orden_pago(
         nro_liqui, banco, codn_funci, codn_fuent, codc_uacad, caracter, codn_progr, sueldo,
@@ -266,7 +264,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END )::NUMERIC(15,2)                           AS med_resid,
             SUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2)                                                       AS aportes,
             SUM( CASE WHEN h21.tipo_conce = 'D' AND h21.nro_orimp != 0 AND h21.codn_conce/100=2 THEN impp_conce ELSE 0 END )::NUMERIC(15,2)                              AS descuentos,
-        
+
             SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
             SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
             SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
@@ -274,10 +272,10 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND h21.codn_conce IN (173) THEN impp_conce ELSE 0 END ) +
             SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END ) -
             SUM( CASE WHEN h21.tipo_conce = 'D' AND h21.nro_orimp != 0 AND h21.codn_conce/100=2 THEN impp_conce ELSE 0 END )                                               AS neto,
-        
+
             0::NUMERIC(10, 2)                                                                                                          AS productividad,
             0::NUMERIC(10, 2)                                                                                                          AS sal_fam,
-        
+
             SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
     		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
     		SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
@@ -287,7 +285,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     		0 +
     		0 +
     		SUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS total,
-        
+
     		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
     		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
     		SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
@@ -297,7 +295,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     		0 +
     		0 +
     		SUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS imp_gasto
-        
+
     FROM (
         SELECT * FROM mapuche.dh21
         UNION ALL

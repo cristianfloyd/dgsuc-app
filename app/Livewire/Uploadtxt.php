@@ -252,9 +252,7 @@ class Uploadtxt extends Component implements HasForms, HasActions
         }
     }
 
-    public function updatedImportaciones(): void
-    {
-    }
+    public function updatedImportaciones(): void {}
 
     public function render()
     {
@@ -279,7 +277,7 @@ class Uploadtxt extends Component implements HasForms, HasActions
 
         Log::debug('Liquidaciones encontradas:', [
             'count' => $options->count(),
-            'liquidaciones' => $options->map(fn ($liq) => [
+            'liquidaciones' => $options->map(fn($liq) => [
                 'nro_liqui' => $liq->nro_liqui,
                 'desc_liqui' => $liq->desc_liqui,
             ])->toArray(),

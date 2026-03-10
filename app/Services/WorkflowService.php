@@ -104,7 +104,7 @@ class WorkflowService implements WorkflowServiceInterface
      *
      * @return string|null El paso actual en el proceso de flujo de trabajo, o "null" si todos los pasos están completados.
      */
-    public function getCurrentStep(ProcessLog $processLog): string|null
+    public function getCurrentStep(ProcessLog $processLog): ?string
     {
         $steps = $processLog->steps;
         foreach ($steps as $step => $status) {

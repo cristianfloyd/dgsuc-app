@@ -18,9 +18,7 @@ class Dh21Service
     /**
      * Crea una nueva instancia de la clase Dh21Service.
      */
-    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository)
-    {
-    }
+    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository) {}
 
     /**
      * Obtiene la suma total del concepto 101 en la tabla.
@@ -99,7 +97,7 @@ class Dh21Service
             ConceptoTotalData::class,
             $this->conceptosTotales($nro_liqui, $codn_fuent)
                 ->get()
-                ->map(fn ($item) => ConceptoTotalData::fromArray($item->toArray())),
+                ->map(fn($item) => ConceptoTotalData::fromArray($item->toArray())),
         );
     }
 

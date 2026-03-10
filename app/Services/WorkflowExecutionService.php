@@ -20,7 +20,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
 {
     use MapucheConnectionTrait;
 
-    public const  string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
+    public const string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
 
 
     //constantes

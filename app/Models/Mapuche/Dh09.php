@@ -417,8 +417,8 @@ class Dh09 extends Model
 
             // Validar obra social con mejor manejo de valores nulos/vacíos
             if (
-                $this->codc_obsoc !== null && trim($this->codc_obsoc) !== '' &&
-                ($this->nro_afili === null || trim($this->nro_afili) === '')
+                $this->codc_obsoc !== null && trim($this->codc_obsoc) !== ''
+                && ($this->nro_afili === null || trim($this->nro_afili) === '')
             ) {
                 $errores[] = 'Si tiene código de obra social, debe tener número de afiliado';
             }
@@ -687,7 +687,7 @@ class Dh09 extends Model
      */
     protected function esJubilado(): Attribute
     {
-        return Attribute::make(get: fn (): bool => $this->sino_jubil === 'S');
+        return Attribute::make(get: fn(): bool => $this->sino_jubil === 'S');
     }
 
     /**
@@ -695,7 +695,7 @@ class Dh09 extends Model
      */
     protected function tieneSalarioFamiliarExterno(): Attribute
     {
-        return Attribute::make(get: fn (): bool => $this->sino_otsal === 'S');
+        return Attribute::make(get: fn(): bool => $this->sino_otsal === 'S');
     }
 
     /**
@@ -723,7 +723,7 @@ class Dh09 extends Model
      */
     protected function estaFallecido(): Attribute
     {
-        return Attribute::make(get: fn (): bool => $this->fec_defun !== null);
+        return Attribute::make(get: fn(): bool => $this->fec_defun !== null);
     }
 
     // ========================================

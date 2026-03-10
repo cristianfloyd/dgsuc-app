@@ -13,7 +13,5 @@ class DataMapperProvider extends ServiceProvider
         $this->app->bind(DataMapperInterface::class, DataMapperService::class);
     }
 
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 }

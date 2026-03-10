@@ -126,7 +126,7 @@ class Embargo extends Model
     public function detallenovedad(): Attribute
     {
         return new Attribute(
-            get: fn (): string => "{$this->codn_conce}-{$this->nro_oficio}",
+            get: fn(): string => "{$this->codn_conce}-{$this->nro_oficio}",
         );
     }
 
@@ -252,12 +252,12 @@ class Embargo extends Model
 
     protected function caratula(): Attribute
     {
-        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8($value));
+        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8($value));
     }
 
     protected function nomDemandado(): Attribute
     {
-        return Attribute::make(get: fn (): ?string => EncodingService::toUtf8($this->nom_demandado));
+        return Attribute::make(get: fn(): ?string => EncodingService::toUtf8($this->nom_demandado));
     }
 
     /**

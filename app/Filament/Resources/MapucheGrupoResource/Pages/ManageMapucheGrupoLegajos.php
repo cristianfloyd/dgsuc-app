@@ -87,28 +87,28 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                             'sin_grupo' => $query->whereDoesntHave('grupos', function ($q): void {
                                 $q->where('mapuche.grupo.id_grupo', $this->record->id_grupo);
                             }),
-                            default => $query
+                            default => $query,
                         };
                     }),
             ])
             ->recordActions([
                 Action::make('toggle_grupo')
                     ->label(
-                        fn (Dh01 $record): string => $record->grupos()
+                        fn(Dh01 $record): string => $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'Quitar del Grupo'
                             : 'Agregar al Grupo',
                     )
                     ->icon(
-                        fn (Dh01 $record): string => $record->grupos()
+                        fn(Dh01 $record): string => $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'heroicon-o-x-mark'
                             : 'heroicon-o-plus',
                     )
                     ->color(
-                        fn (Dh01 $record): string => $record->grupos()
+                        fn(Dh01 $record): string => $record->grupos()
                             ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
                             ->exists()
                             ? 'danger'
@@ -165,7 +165,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
-                    ->visible(fn (): bool => !request()->boolean('filters.en_grupo')),
+                    ->visible(fn(): bool => !request()->boolean('filters.en_grupo')),
 
                 BulkAction::make('quitar_del_grupo')
                     ->label('Quitar del Grupo')
@@ -186,7 +186,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     })
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
-                    ->visible(fn (): bool => request()->boolean('filters.en_grupo')),
+                    ->visible(fn(): bool => request()->boolean('filters.en_grupo')),
             ])
             ->headerActions([
                 Action::make('asignar_todos')

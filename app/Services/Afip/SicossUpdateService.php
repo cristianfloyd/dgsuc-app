@@ -615,13 +615,13 @@ class SicossUpdateService
     public function updateBasicSicossData(): array
     {
         $affected = DB::connection($this->getConnectionName())
-            ->update('UPDATE mapuche.dha8 
-                    SET codigosituacion = ' . SicossCodigoSituacion::ACTIVO->value . ', 
-                        codigocondicion = ' . SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value . ', 
-                        codigoactividad = null, 
-                        codigozona = 1, 
+            ->update('UPDATE mapuche.dha8
+                    SET codigosituacion = ' . SicossCodigoSituacion::ACTIVO->value . ',
+                        codigocondicion = ' . SicossCodigoCondicion::SERVICIOS_COMUNES_MAYOR_18->value . ',
+                        codigoactividad = null,
+                        codigozona = 1,
                         codigomodalcontrat = ' . SicossCodigoModalContrat::TIEMPO_COMPLETO_INDETERMINADO->value . '
-                    FROM suc.tcargosliq 
+                    FROM suc.tcargosliq
                     WHERE suc.tcargosliq.nro_legaj = mapuche.dha8.nro_legajo');
 
         return [

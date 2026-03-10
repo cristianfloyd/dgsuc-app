@@ -83,7 +83,7 @@ class DuplicateValidationService
         $cargos = $rows->pluck('n_de_cargo')->toArray();
         $duplicates = array_filter(
             array_count_values($cargos),
-            fn ($count) => $count > 1,
+            fn($count) => $count > 1,
         );
 
         if (!empty($duplicates)) {

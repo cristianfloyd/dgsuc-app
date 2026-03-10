@@ -96,12 +96,12 @@ class Dh61 extends Model
     // Método para obtener el total de remuneraciones
     public function getTotalRemuneraciones(): float
     {
-        return (float) $this->impp_basic +
-               (float) $this->remunbonif +
-               (float) $this->noremunbonif +
-               (float) $this->remunnobonif +
-               (float) $this->noremunnobonif +
-               (float) $this->otrasrem;
+        return (float) $this->impp_basic
+               + (float) $this->remunbonif
+               + (float) $this->noremunbonif
+               + (float) $this->remunnobonif
+               + (float) $this->noremunnobonif
+               + (float) $this->otrasrem;
     }
 
     // Método para verificar si requiere declaración jurada patrimonial
@@ -258,8 +258,8 @@ class Dh61 extends Model
     protected function codcCateg(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => str_pad(trim($value), 4),
-            set: fn (string $value) => str_pad(trim($value), 4),
+            get: fn(string $value) => str_pad(trim($value), 4),
+            set: fn(string $value) => str_pad(trim($value), 4),
         );
     }
 }

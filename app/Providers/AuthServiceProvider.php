@@ -13,10 +13,7 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register(): void
-    {
-
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap services.

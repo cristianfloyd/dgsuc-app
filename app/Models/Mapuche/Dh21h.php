@@ -146,8 +146,8 @@ class Dh21h extends Model
     protected function importeConcepto(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->impp_conce,
-            set: fn ($value): float => round($value, 2),
+            get: fn() => $this->impp_conce,
+            set: fn($value): float => round($value, 2),
         );
     }
 

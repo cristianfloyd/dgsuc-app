@@ -55,8 +55,8 @@ trait HasFixedWithImportes
     protected function fixedWidthImporteFixed(string $field): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) =>
-            str_pad(rtrim($attributes[$field] ?? ''), 12, ' ', STR_PAD_LEFT),
+            get: fn($value, $attributes)
+            => str_pad(rtrim($attributes[$field] ?? ''), 12, ' ', STR_PAD_LEFT),
         );
     }
 }

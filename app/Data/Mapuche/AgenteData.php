@@ -21,8 +21,7 @@ class AgenteData extends Data
         public string $dni,
         #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public ?Carbon $fechaInicio,
-    ) {
-    }
+    ) {}
 
     /**
      * Define las reglas de validación para los datos del agente.
@@ -70,7 +69,7 @@ class AgenteData extends Data
      */
     public static function collection(Collection $employees): Collection
     {
-        return $employees->map(fn (Dh01 $employee): AgenteData => self::fromModel($employee));
+        return $employees->map(fn(Dh01 $employee): AgenteData => self::fromModel($employee));
     }
 
     /**

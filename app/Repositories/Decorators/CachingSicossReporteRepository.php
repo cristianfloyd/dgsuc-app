@@ -27,9 +27,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
      *
      * @param SicossReporteRepositoryInterface $decoratedRepository El repositorio a decorar.
      */
-    public function __construct(protected SicossReporteRepositoryInterface $decoratedRepository)
-    {
-    }
+    public function __construct(protected SicossReporteRepositoryInterface $decoratedRepository) {}
 
     /**
      * {@inheritdoc}
@@ -44,7 +42,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn () => $this->decoratedRepository->getReporte($anio, $mes),
+            fn() => $this->decoratedRepository->getReporte($anio, $mes),
             self::CACHE_TTL,
         );
     }
@@ -62,7 +60,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn () => $this->decoratedRepository->getTotales($anio, $mes),
+            fn() => $this->decoratedRepository->getTotales($anio, $mes),
             self::CACHE_TTL,
         );
     }
@@ -80,7 +78,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn () => $this->decoratedRepository->existenDatosParaPeriodo($anio, $mes),
+            fn() => $this->decoratedRepository->existenDatosParaPeriodo($anio, $mes),
             self::CACHE_TTL,
         );
     }
@@ -101,7 +99,7 @@ class CachingSicossReporteRepository implements SicossReporteRepositoryInterface
             self::REPORT_NAME,
             $cacheType,
             $cacheKeyParams,
-            fn () => $this->decoratedRepository->getPeriodosFiscalesDisponibles(),
+            fn() => $this->decoratedRepository->getPeriodosFiscalesDisponibles(),
             $longTtl,
         );
     }

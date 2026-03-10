@@ -13,8 +13,7 @@ class ExampleUsageController extends Controller
      */
     public function __construct(
         private readonly ConceptosTotalesService $conceptosTotalesService,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejemplo de uso del servicio de conceptos totales.

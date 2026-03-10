@@ -33,8 +33,8 @@ trait HasUnidadAcademica
     public function getUnidadAcademica(): ?UnidadAcademicaData
     {
         // Intentamos obtener la unidad a partir del código original
-        return $this->original['domicilio'] ?
-            UnidadAcademicaData::fromCodigo($this->original['domicilio']) :
-            null;
+        return $this->original['domicilio']
+            ? UnidadAcademicaData::fromCodigo($this->original['domicilio'])
+            : null;
     }
 }

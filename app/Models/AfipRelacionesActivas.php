@@ -220,8 +220,8 @@ class AfipRelacionesActivas extends Model
     protected function retribucionPactada(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => (float) (trim($value)),
-            set: fn (float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT),
+            get: fn(string $value) => (float) (trim($value)),
+            set: fn(float $value) => str_pad(number_format($value, 2, '', ''), 15, '0', STR_PAD_LEFT),
         );
     }
 

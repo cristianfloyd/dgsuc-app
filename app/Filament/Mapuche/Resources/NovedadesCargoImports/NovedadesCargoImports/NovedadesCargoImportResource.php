@@ -68,7 +68,7 @@ class NovedadesCargoImportResource extends Resource
                     ->label('Tipo Nov.'),
                 TextColumn::make('errors')
                     ->label('Errores de Validación')
-                    ->formatStateUsing(fn ($state) => implode(', ', (array) $state)),
+                    ->formatStateUsing(fn($state) => implode(', ', (array) $state)),
             ])
             ->filters([])
             ->defaultSort('id', 'desc');

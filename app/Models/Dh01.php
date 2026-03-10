@@ -211,14 +211,14 @@ class Dh01 extends Model
     public function getCuil(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
+            get: fn(): string => "{$this->nro_cuil1}{$this->nro_cuil}{$this->nro_cuil2}",
         );
     }
 
     public function NombreCompleto(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => "{$this->desc_appat}, {$this->desc_nombr}",
+            get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
         );
     }
 
@@ -271,12 +271,12 @@ class Dh01 extends Model
 
     protected function descNombr(): Attribute
     {
-        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn ($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
+        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)), set: fn($value): array => ['desc_nombr' => EncodingService::toLatin1($value)]);
     }
 
     protected function descAppat(): Attribute
     {
-        return Attribute::make(get: fn ($value): ?string => EncodingService::toUtf8(trim((string) $value)));
+        return Attribute::make(get: fn($value): ?string => EncodingService::toUtf8(trim((string) $value)));
     }
 
     protected function cuil(): Attribute

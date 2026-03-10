@@ -74,7 +74,7 @@ class ControlConceptosPeriodo extends Model
         return match (substr($this->codn_conce, 0, 1)) {
             '2' => 'Aportes',
             '3' => 'Contribuciones',
-            default => 'Otro'
+            default => 'Otro',
         };
     }
 

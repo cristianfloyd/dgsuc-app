@@ -89,15 +89,15 @@ class SicossOptimizadoTests
 
         // Tests progresivos
         $tests = [
-            'rapido_100' => fn () => self::test_rapido_100_legajos(),
-            'estandar_1000' => fn () => self::test_estandar_1000_legajos(),
-            'intensivo_3000' => fn () => self::test_intensivo_3000_legajos(),
-            'masivo_5000' => fn () => self::test_masivo_5000_legajos(),
+            'rapido_100' => fn() => self::test_rapido_100_legajos(),
+            'estandar_1000' => fn() => self::test_estandar_1000_legajos(),
+            'intensivo_3000' => fn() => self::test_intensivo_3000_legajos(),
+            'masivo_5000' => fn() => self::test_masivo_5000_legajos(),
         ];
 
         // Incluir test de producción solo si se solicita
         if ($incluir_produccion) {
-            $tests['produccion_completa'] = fn () => self::test_produccion_completa();
+            $tests['produccion_completa'] = fn() => self::test_produccion_completa();
         }
 
         foreach ($tests as $nombre => $test) {
@@ -679,7 +679,7 @@ class SicossOptimizadoTests
             // Legajos con liquidaciones en el período
             $periodo = MapucheConfig::getPeriodoCorriente();
             $legajos_con_liquidacion = DB::connection($conexion)->select('
-                SELECT COUNT(DISTINCT dh21.nro_legaj) as total 
+                SELECT COUNT(DISTINCT dh21.nro_legaj) as total
                 FROM mapuche.dh21
                 INNER JOIN mapuche.dh22 ON dh22.nro_liqui = dh21.nro_liqui
                 WHERE dh22.per_liano = ? AND dh22.per_limes = ? AND dh22.sino_genimp = true

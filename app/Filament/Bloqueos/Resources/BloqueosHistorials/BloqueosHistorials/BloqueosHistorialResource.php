@@ -42,19 +42,19 @@ class BloqueosHistorialResource extends Resource
                 TextColumn::make('estado')->label('Estado')->badge()->sortable(),
                 TextColumn::make('fecha_procesamiento')->label('Fecha Archivado')->dateTime('Y-m-d H:i')->sortable(),
                 TextColumn::make('procesado_por')->label('Archivado por')->sortable(),
-                TextColumn::make('observaciones')->label('Obs.')->limit(20)->tooltip(fn ($record) => $record->observaciones),
+                TextColumn::make('observaciones')->label('Obs.')->limit(20)->tooltip(fn($record) => $record->observaciones),
                 IconColumn::make('chkstopliq')->label('Stop')->boolean(),
             ])
             ->filters([
                 Filter::make('periodo_fiscal')
                     ->label('Período Fiscal')
-                    ->query(fn ($query, $value) => $query->where('nro_liqui', $value)),
+                    ->query(fn($query, $value) => $query->where('nro_liqui', $value)),
                 Filter::make('tipo')
                     ->label('Tipo')
-                    ->query(fn ($query, $value) => $query->where('tipo', $value)),
+                    ->query(fn($query, $value) => $query->where('tipo', $value)),
                 Filter::make('estado')
                     ->label('Estado')
-                    ->query(fn ($query, $value) => $query->where('estado', $value)),
+                    ->query(fn($query, $value) => $query->where('estado', $value)),
                 Filter::make('fecha_procesamiento')
                     ->label('Fecha Archivado')
                     ->schema([

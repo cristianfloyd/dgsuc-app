@@ -81,8 +81,7 @@ class RepOrdenPagoDtoData extends Data
         public readonly float $total,
         #[Required, Min(0)]
         public readonly float $impGasto,
-    ) {
-    }
+    ) {}
 
     /**
      * Convierte el DTO a un array con las claves en snake_case

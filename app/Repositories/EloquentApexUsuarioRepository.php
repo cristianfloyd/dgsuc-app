@@ -18,8 +18,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
 {
     public function __construct(
         private readonly ApexUsuario $model,
-    ) {
-    }
+    ) {}
 
     public function findByUsuario(string $usuario): ?ApexUsuario
     {

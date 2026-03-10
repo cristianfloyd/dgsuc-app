@@ -70,7 +70,7 @@ class GenerateComprobanteNomina extends Page
                             ->searchable()
                             ->preload()
                             ->options(
-                                fn () => Dh22::getLiquidacionesForWidget()
+                                fn() => Dh22::getLiquidacionesForWidget()
                                     ->get()
                                     ->pluck('desc_liqui', 'nro_liqui'),
                             )
@@ -95,7 +95,7 @@ class GenerateComprobanteNomina extends Page
                             ->label('Año')
                             ->required()
                             ->disabled()
-                            ->options(fn () => array_combine(
+                            ->options(fn() => array_combine(
                                 range(date('Y') - 5, date('Y')),
                                 range(date('Y') - 5, date('Y')),
                             )),
@@ -103,8 +103,8 @@ class GenerateComprobanteNomina extends Page
                             ->label('Mes')
                             ->required()
                             ->disabled()
-                            ->options(fn () => collect(range(1, 12))->mapWithKeys(
-                                fn ($mes) => [$mes => nombreMes($mes)],
+                            ->options(fn() => collect(range(1, 12))->mapWithKeys(
+                                fn($mes) => [$mes => nombreMes($mes)],
                             )->toArray()),
                     ]),
             ]);

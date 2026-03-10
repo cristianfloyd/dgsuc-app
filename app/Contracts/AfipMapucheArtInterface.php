@@ -2,6 +2,4 @@
 
 namespace App\Contracts;
 
-interface AfipMapucheArtInterface
-{
-}
+interface AfipMapucheArtInterface {}

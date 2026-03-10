@@ -34,8 +34,7 @@ class ArchiveProcessData extends Data
         public readonly array $detalles = [],
         /** @var float Duración del proceso en segundos */
         public readonly float $duracionSegundos = 0.0,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia exitosa.
@@ -136,9 +135,9 @@ class ArchiveProcessData extends Data
      */
     public function esProcesoCompleto(): bool
     {
-        return $this->success &&
-               $this->transferResult->success &&
-               $this->cleanupResult->success;
+        return $this->success
+               && $this->transferResult->success
+               && $this->cleanupResult->success;
     }
 
     /**
@@ -155,8 +154,8 @@ class ArchiveProcessData extends Data
         $eliminados = $this->cleanupResult->eliminados;
         $duracion = number_format($this->duracionSegundos, 2);
 
-        return "Período {$periodoString} archivado exitosamente en {$duracion}s. " .
-               "Transferidos al historial: {$transferidos}, Eliminados de trabajo: {$eliminados}";
+        return "Período {$periodoString} archivado exitosamente en {$duracion}s. "
+               . "Transferidos al historial: {$transferidos}, Eliminados de trabajo: {$eliminados}";
     }
 
     /**

@@ -23,9 +23,9 @@ class DatabaseConnectionService
 
         // Filtrar solo las conexiones que comienzan con pgsql-
         return collect($connections)
-            ->filter(fn ($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
             ->keys()
-            ->mapWithKeys(fn ($name) => [$name => $this->formatConnectionName($name)])
+            ->mapWithKeys(fn($name) => [$name => $this->formatConnectionName($name)])
             ->toArray();
     }
 

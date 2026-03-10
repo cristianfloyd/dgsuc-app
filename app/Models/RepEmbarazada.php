@@ -133,16 +133,16 @@ class RepEmbarazada extends Model
     protected function apellido(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn (string $value) => str_pad(substr($value, 0, 20), 20),
+            get: fn(string $value) => EncodingService::toUtf8(trim($value)),
+            set: fn(string $value) => str_pad(substr($value, 0, 20), 20),
         );
     }
 
     protected function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => EncodingService::toUtf8(trim($value)),
-            set: fn (string $value) => str_pad(substr($value, 0, 20), 20),
+            get: fn(string $value) => EncodingService::toUtf8(trim($value)),
+            set: fn(string $value) => str_pad(substr($value, 0, 20), 20),
         );
     }
 }

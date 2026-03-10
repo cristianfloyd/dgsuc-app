@@ -11,49 +11,35 @@ class RetTablaBasicosConcespController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): void
-    {
-    }
+    public function index(): void {}
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): void
-    {
-    }
+    public function create(): void {}
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRetTablaBasicosConcespRequest $request): void
-    {
-    }
+    public function store(StoreRetTablaBasicosConcespRequest $request): void {}
 
     /**
      * Display the specified resource.
      */
-    public function show(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
-    {
-    }
+    public function show(RetTablaBasicosConcesp $retTablaBasicosConcesp): void {}
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
-    {
-    }
+    public function edit(RetTablaBasicosConcesp $retTablaBasicosConcesp): void {}
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRetTablaBasicosConcespRequest $request, RetTablaBasicosConcesp $retTablaBasicosConcesp): void
-    {
-    }
+    public function update(UpdateRetTablaBasicosConcespRequest $request, RetTablaBasicosConcesp $retTablaBasicosConcesp): void {}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RetTablaBasicosConcesp $retTablaBasicosConcesp): void
-    {
-    }
+    public function destroy(RetTablaBasicosConcesp $retTablaBasicosConcesp): void {}
 }

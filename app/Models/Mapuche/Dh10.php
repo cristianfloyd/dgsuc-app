@@ -351,7 +351,7 @@ class Dh10 extends Model
     public function getResumenEstadistico(): array
     {
         $importes = $this->importes_brutos_mensuales;
-        $importesConValor = array_filter($importes, fn ($importe): bool => $importe > 0);
+        $importesConValor = array_filter($importes, fn($importe): bool => $importe > 0);
 
         return [
             'total_anual' => $this->total_importes_brutos,
@@ -376,7 +376,7 @@ class Dh10 extends Model
     protected function importesBrutosMensuales(): Attribute
     {
         return Attribute::make(
-            get: fn (): array => [
+            get: fn(): array => [
                 1 => $this->imp_bruto_1 ?? 0,
                 2 => $this->imp_bruto_2 ?? 0,
                 3 => $this->imp_bruto_3 ?? 0,
@@ -399,7 +399,7 @@ class Dh10 extends Model
     protected function importesRetroactivosMensuales(): Attribute
     {
         return Attribute::make(
-            get: fn (): array => [
+            get: fn(): array => [
                 1 => $this->importes_retro_1 ?? 0,
                 2 => $this->importes_retro_2 ?? 0,
                 3 => $this->importes_retro_3 ?? 0,
@@ -422,7 +422,7 @@ class Dh10 extends Model
     protected function importesHaberPromedio(): Attribute
     {
         return Attribute::make(
-            get: fn (): array => [
+            get: fn(): array => [
                 1 => $this->impbrhbrprom_1 ?? 0, 2 => $this->impbrhbrprom_2 ?? 0,
                 3 => $this->impbrhbrprom_3 ?? 0, 4 => $this->impbrhbrprom_4 ?? 0,
                 5 => $this->impbrhbrprom_5 ?? 0, 6 => $this->impbrhbrprom_6 ?? 0,
@@ -442,7 +442,7 @@ class Dh10 extends Model
     protected function retroHaberPromedio(): Attribute
     {
         return Attribute::make(
-            get: fn (): array => [
+            get: fn(): array => [
                 1 => $this->retroimpbrhbrpr_1 ?? 0, 2 => $this->retroimpbrhbrpr_2 ?? 0,
                 3 => $this->retroimpbrhbrpr_3 ?? 0, 4 => $this->retroimpbrhbrpr_4 ?? 0,
                 5 => $this->retroimpbrhbrpr_5 ?? 0, 6 => $this->retroimpbrhbrpr_6 ?? 0,
@@ -462,7 +462,7 @@ class Dh10 extends Model
     protected function totalImportesBrutos(): Attribute
     {
         return Attribute::make(
-            get: fn (): float|int => array_sum($this->importes_brutos_mensuales),
+            get: fn(): float|int => array_sum($this->importes_brutos_mensuales),
         );
     }
 
@@ -472,7 +472,7 @@ class Dh10 extends Model
     protected function totalImportesRetroactivos(): Attribute
     {
         return Attribute::make(
-            get: fn (): float|int => array_sum($this->importes_retroactivos_mensuales),
+            get: fn(): float|int => array_sum($this->importes_retroactivos_mensuales),
         );
     }
 
@@ -482,7 +482,7 @@ class Dh10 extends Model
     protected function tieneVinculo(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->nro_cargo !== $this->vcl_cargo,
+            get: fn(): bool => $this->nro_cargo !== $this->vcl_cargo,
         );
     }
 
@@ -493,7 +493,7 @@ class Dh10 extends Model
     {
         return Attribute::make(
             get: function (): int|float {
-                $importes = array_filter($this->importes_brutos_mensuales, fn ($importe): bool => $importe > 0);
+                $importes = array_filter($this->importes_brutos_mensuales, fn($importe): bool => $importe > 0);
                 return count($importes) > 0 ? array_sum($importes) / count($importes) : 0;
             },
         );

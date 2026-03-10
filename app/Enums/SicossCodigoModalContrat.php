@@ -120,7 +120,7 @@ enum SicossCodigoModalContrat: int
             23 => self::PERSONAL_NO_PERMANENTE,
             24 => self::PERSONAL_CONSTRUCCION,
             25 => self::EMPLEO_PUBLICO_PROVINCIAL,
-            default => null
+            default => null,
         };
     }
 }

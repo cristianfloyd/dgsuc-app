@@ -98,7 +98,7 @@ class ControlResultData extends Data
             'completado' => 'success',
             'error' => 'danger',
             'pendiente' => 'warning',
-            default => 'gray'
+            default => 'gray',
         };
     }
 }

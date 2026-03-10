@@ -58,7 +58,7 @@ class AsignacionPresupuestariaResource extends Resource
 
                 Placeholder::make('total_allocated')
                     ->label('Total Asignado')
-                    ->content(fn ($state): string => number_format($state, 2) . '%'),
+                    ->content(fn($state): string => number_format($state, 2) . '%'),
             ]);
     }
 
@@ -77,7 +77,7 @@ class AsignacionPresupuestariaResource extends Resource
                 SelectFilter::make('codn_area')
                     ->label('Unidad'),
                 Filter::make('active')
-                    ->query(fn (Builder $query): Builder => $query->activo()),
+                    ->query(fn(Builder $query): Builder => $query->activo()),
             ])
             ->recordActions([
                 EditAction::make(),

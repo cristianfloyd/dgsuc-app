@@ -19,8 +19,7 @@ class ConceptoTotalAgrupacionData extends Data
         public readonly float $totalDescuentos,
         #[MapName('neto')]
         public readonly float $neto,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia desde el resultado del repositorio.
@@ -41,13 +40,13 @@ class ConceptoTotalAgrupacionData extends Data
      */
     public function toExportArray(): array
     {
-        $haberesArray = $this->haberes->map(fn ($item): array => [
+        $haberesArray = $this->haberes->map(fn($item): array => [
             'Código' => $item->codn_conce,
             'Concepto' => $item->desc_conce,
             'Importe' => number_format($item->importe, 2, ',', '.'),
         ])->toArray();
 
-        $descuentosArray = $this->descuentos->map(fn ($item): array => [
+        $descuentosArray = $this->descuentos->map(fn($item): array => [
             'Código' => $item->codn_conce,
             'Concepto' => $item->desc_conce,
             'Importe' => number_format($item->importe, 2, ',', '.'),

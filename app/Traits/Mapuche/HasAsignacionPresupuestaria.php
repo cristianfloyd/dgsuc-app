@@ -53,10 +53,10 @@ trait HasAsignacionPresupuestaria
      */
     public function validateBudgetStructure(): bool
     {
-        return !empty($this->codn_progr) &&
-               !empty($this->codn_subpr) &&
-               !empty($this->codn_proye) &&
-               !empty($this->codn_activ) &&
-               !empty($this->codn_obra);
+        return !empty($this->codn_progr)
+               && !empty($this->codn_subpr)
+               && !empty($this->codn_proye)
+               && !empty($this->codn_activ)
+               && !empty($this->codn_obra);
     }
 }

@@ -230,10 +230,10 @@ class Dh03Repository implements Dh03RepositoryInterface
             // Construcción de la consulta SQL con parámetros seguros
             $placeholders = str_repeat('?,', count($categorias) - 1) . '?';
 
-            $sql = "SELECT COUNT(*) as total 
-                    FROM mapuche.dh03 
-                    WHERE codc_categ IN ($placeholders) 
-                    AND nro_legaj = ? 
+            $sql = "SELECT COUNT(*) as total
+                    FROM mapuche.dh03
+                    WHERE codc_categ IN ($placeholders)
+                    AND nro_legaj = ?
                     AND map_es_cargo_activo(nro_cargo)";
 
             // Preparación de parámetros para la consulta

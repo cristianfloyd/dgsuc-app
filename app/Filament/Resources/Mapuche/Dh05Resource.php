@@ -26,7 +26,7 @@ class Dh05Resource extends Resource
 
     protected static ?string $navigationLabel = 'Licencias';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {

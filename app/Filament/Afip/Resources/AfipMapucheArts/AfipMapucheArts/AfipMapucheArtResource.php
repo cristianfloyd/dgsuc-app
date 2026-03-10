@@ -56,7 +56,7 @@ class AfipMapucheArtResource extends Resource
                                 ->orWhere('cuil', 'ilike', '%' . $search . '%');
                         });
                     })
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state)),
+                    ->formatStateUsing(fn(string $state): string => strtoupper($state)),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
                 TextColumn::make('sueldo')->label('Sueldo'),
@@ -82,7 +82,7 @@ class AfipMapucheArtResource extends Resource
                         return $query
                             ->when(
                                 $data['monto'],
-                                fn (Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
+                                fn(Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
                             );
                     }),
             ])

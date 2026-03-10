@@ -22,13 +22,13 @@ class FilamentServiceProvider extends ServiceProvider
         // Registrar el selector de conexión de BD en todos los paneles
         FilamentView::registerRenderHook(
             PanelsRenderHook::TOPBAR_END,
-            fn (): string => Blade::render('@livewire(\'database-connection-selector-badge\')'),
+            fn(): string => Blade::render('@livewire(\'database-connection-selector-badge\')'),
         );
 
         // Registrar el renderHook para el footer
         FilamentView::registerRenderHook(
             PanelsRenderHook::FOOTER,
-            fn (): string => Blade::render('@livewire(\'components.filament-footer\')'),
+            fn(): string => Blade::render('@livewire(\'components.filament-footer\')'),
         );
     }
 }

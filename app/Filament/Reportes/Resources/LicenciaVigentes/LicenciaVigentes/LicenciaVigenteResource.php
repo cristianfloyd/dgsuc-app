@@ -99,15 +99,15 @@ class LicenciaVigenteResource extends Resource
                 TextColumn::make('descripcion_licencia')
                     ->label('Descripción')
                     ->limit(50)
-                    ->tooltip(fn (?LicenciaVigente $record) => $record?->descripcion_licencia ?? '')
+                    ->tooltip(fn(?LicenciaVigente $record) => $record?->descripcion_licencia ?? '')
                     ->sortable(),
 
                 TextColumn::make('condicion')
                     ->label('Código')
                     ->sortable()
                     ->badge()
-                    ->formatStateUsing(fn (?LicenciaVigente $record) => $record?->descripcion_condicion ?? '')
-                    ->color(fn (?LicenciaVigente $record): string => $record ? match ($record->condicion) {
+                    ->formatStateUsing(fn(?LicenciaVigente $record) => $record?->descripcion_condicion ?? '')
+                    ->color(fn(?LicenciaVigente $record): string => $record ? match ($record->condicion) {
                         5, 11 => 'info', // Maternidad
                         10 => 'warning', // Excedencia
                         12 => 'success', // Vacaciones
@@ -136,19 +136,19 @@ class LicenciaVigenteResource extends Resource
                 TextColumn::make('fecha_hasta')
                     ->label('Fecha Hasta')
                     ->date('d/m/Y')
-                    ->formatStateUsing(fn ($state) => DateFormatterService::formatOrDefault($state))
+                    ->formatStateUsing(fn($state) => DateFormatterService::formatOrDefault($state))
                     ->sortable(),
 
                 TextColumn::make('es_legajo')
                     ->label('Tipo')
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Legajo' : 'Cargo')
+                    ->formatStateUsing(fn(bool $state): string => $state ? 'Legajo' : 'Cargo')
                     ->badge()
-                    ->color(fn (bool $state): string => $state ? 'success' : 'warning')
+                    ->color(fn(bool $state): string => $state ? 'success' : 'warning')
                     ->sortable(),
 
                 TextColumn::make('nro_cargo')
                     ->label('Cargo')
-                    ->visible(fn (?LicenciaVigente $record): bool => $record ? !$record->es_legajo : false)
+                    ->visible(fn(?LicenciaVigente $record): bool => $record ? !$record->es_legajo : false)
                     ->sortable(),
             ])
             ->filters([

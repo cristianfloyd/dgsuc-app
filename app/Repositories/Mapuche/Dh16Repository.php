@@ -12,15 +12,14 @@ class Dh16Repository implements Dh16RepositoryInterface
 {
     public function __construct(
         private readonly Dh16 $model,
-    ) {
-    }
+    ) {}
 
     public function getConceptosByGrupo(int $codn_grupo): Collection
     {
         return $this->model
             ->where('codn_grupo', $codn_grupo)
             ->get()
-            ->map(fn (Dh16 $dh16) => Dh16Data::from($dh16));
+            ->map(fn(Dh16 $dh16) => Dh16Data::from($dh16));
     }
 
     public function create(Dh16Data $data): Dh16Data

@@ -14,7 +14,7 @@ class RepGerencialFinalStats extends BaseWidget
 
     protected ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public static function canView(): bool
     {

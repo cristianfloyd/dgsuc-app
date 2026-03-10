@@ -30,8 +30,7 @@ class AfipRelacionesActivasData extends Data
         public readonly ?string $categoriaProfesional,
         public readonly ?string $ccct,
         public readonly ?string $noHayDatos,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(AfipRelacionesActivas $model): self
     {

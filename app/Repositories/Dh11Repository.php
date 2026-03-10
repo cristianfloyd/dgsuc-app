@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model)
-    {
-    }
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model) {}
 
     /**
      * Actualiza el campo impp_basic de un registro Dh11 con un nuevo valor, y actualiza los campos vig_caano y vig_cames con los valores proporcionados.

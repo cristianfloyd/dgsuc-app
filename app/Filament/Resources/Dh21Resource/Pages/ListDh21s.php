@@ -30,7 +30,7 @@ class ListDh21s extends ListRecords
                 ->modalFooterActions([
                     Action::make('descargarPDF')
                         ->label('Descargar PDF')
-                        ->action(fn () => static::descargarReportePDF(1)),
+                        ->action(fn() => static::descargarReportePDF(1)),
                 ])
                 ->modalDescription('Orden de pago') // Contenido vacío
                 ->modalWidth('7xl'), // Ancho del modal

@@ -27,10 +27,10 @@ class ListAfipMapucheArt extends ListRecords
             'sin_legajo' => Tab::make('Sin Legajo')
                 ->icon('heroicon-o-exclamation-circle')
                 ->badge(AfipMapucheArt::whereNull('nro_legaj')->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('nro_legaj')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('nro_legaj')),
             'con_legajo' => Tab::make('Con Legajo')
                 ->icon('heroicon-o-check-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('nro_legaj')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('nro_legaj')),
         ];
     }
 

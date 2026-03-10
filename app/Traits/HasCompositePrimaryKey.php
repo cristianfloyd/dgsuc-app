@@ -93,7 +93,7 @@ trait HasCompositePrimaryKey
             public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $foreignValues = array_map(fn ($key) => $this->child->{$key}, $this->localKeys);
+                    $foreignValues = array_map(fn($key) => $this->child->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),
@@ -187,7 +187,7 @@ trait HasCompositePrimaryKey
             public function addConstraints(): void
             {
                 if (static::$constraints) {
-                    $parentValues = array_map(fn ($key) => $this->parent->{$key}, $this->localKeys);
+                    $parentValues = array_map(fn($key) => $this->parent->{$key}, $this->localKeys);
 
                     $this->query->whereIn(
                         $this->qualifySubSelectColumn($this->foreignKeys),

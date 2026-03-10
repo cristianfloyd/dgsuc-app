@@ -92,10 +92,10 @@ class ComprobantesNominaExport implements FromCollection, ShouldAutoSize, WithCo
                 $event->sheet->mergeCells('A8:B8');
                 $event->sheet->setCellValue(
                     'A8',
-                    'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, ' .
-                        'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe ' .
-                        'gerencial que se adjuntan a la presente, totalizando un importe de descuentos de PESOS ' .
-                        $this->getImporteEnLetras() . ' ($' . number_format($this->totalImporte, 2, ',', '.') . ')',
+                    'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, '
+                        . 'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe '
+                        . 'gerencial que se adjuntan a la presente, totalizando un importe de descuentos de PESOS '
+                        . $this->getImporteEnLetras() . ' ($' . number_format($this->totalImporte, 2, ',', '.') . ')',
                 );
 
                 // Texto final

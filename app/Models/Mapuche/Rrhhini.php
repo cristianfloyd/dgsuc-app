@@ -146,24 +146,24 @@ class Rrhhini extends Model
     protected function nombreSeccion(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function nombreParametro(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 
     protected function datoParametro(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => EncodingService::toLatin1($value),
         );
     }
 }

@@ -179,7 +179,7 @@ class BloqueosResource extends Resource
         return [
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn ($grupo) => $grupo->count()),
+                ->map(fn($grupo) => $grupo->count()),
             'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count(),
             'total_procesados_historico' => $repository->getTotalProcesados(),
             'total_pendientes' => $repository->getTotalPendientes(),
@@ -199,7 +199,7 @@ class BloqueosResource extends Resource
         return [
             TextColumn::make('estado')
                 ->badge()
-                ->color(fn (BloqueosEstadoEnum $state): string => $state->getColor()),
+                ->color(fn(BloqueosEstadoEnum $state): string => $state->getColor()),
             TextColumn::make('nro_liqui')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('fecha_registro')->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('nombre')->toggleable(isToggledHiddenByDefault: true)->copyable(),
@@ -245,7 +245,7 @@ class BloqueosResource extends Resource
             TextColumn::make('cargoAsociado.tipoasociacion')
                 ->label('Tipo Asociación')
                 ->badge()
-                ->color(fn ($state) => match ($state) {
+                ->color(fn($state) => match ($state) {
                     'S' => 'success',
                     'R' => 'warning',
                     default => 'gray',
@@ -254,7 +254,7 @@ class BloqueosResource extends Resource
             TextColumn::make('cargoAsociado.nro_cargoasociado')
                 ->label('Info Cargo Asociado')
                 ->formatStateUsing(
-                    fn ($record) => $record->cargoAsociado
+                    fn($record) => $record->cargoAsociado
                         ? "Cargo: {$record->cargoAsociado->nro_cargoasociado}
                            (Tipo: {$record->cargoAsociado->tipoasociacion})"
                         : 'Sin cargo asociado',
@@ -270,32 +270,32 @@ class BloqueosResource extends Resource
         return [
             Filter::make('con_cargo_asociado')
                 ->label('Con Cargo Asociado')
-                ->query(fn ($query) => $query->whereHas('cargoAsociado'))
+                ->query(fn($query) => $query->whereHas('cargoAsociado'))
                 ->toggle(),
             Filter::make('fechas_coincidentes')
                 ->label('Fechas Coincidentes')
-                ->query(fn ($query) => $query->whereRaw('fecha_baja = (SELECT fec_baja FROM dh03 WHERE dh03.nro_legaj = rep_bloqueos_import.nro_legaj AND dh03.nro_cargo = rep_bloqueos_import.nro_cargo)'))
+                ->query(fn($query) => $query->whereRaw('fecha_baja = (SELECT fec_baja FROM dh03 WHERE dh03.nro_legaj = rep_bloqueos_import.nro_legaj AND dh03.nro_cargo = rep_bloqueos_import.nro_cargo)'))
                 ->toggle(),
             Filter::make('licencia_bloqueada')
                 ->label('Licencia Bloqueada')
-                ->query(fn ($query) => $query->where('tipo', 'licencia')->where('estado', BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA))
+                ->query(fn($query) => $query->where('tipo', 'licencia')->where('estado', BloqueosEstadoEnum::LICENCIA_YA_BLOQUEADA))
                 ->toggle(),
             Filter::make('falta_cargo_asociado')
                 ->label('Falta Cargo Asociado')
-                ->query(fn ($query) => $query->where('estado', BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO))
+                ->query(fn($query) => $query->where('estado', BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO))
                 ->toggle(),
             Filter::make('fecha_cargo_no_coincide')
                 ->label('Fecha Cargo No Coincide')
-                ->query(fn ($query) => $query->where('estado', BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE))
+                ->query(fn($query) => $query->where('estado', BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE))
                 ->toggle(),
             Filter::make('ocultar_procesados')
                 ->label('Ocultar Procesados')
-                ->query(fn ($query) => $query->where('esta_procesado', false))
+                ->query(fn($query) => $query->where('esta_procesado', false))
                 ->toggle()
                 ->default(true),
             Filter::make('solo_procesados')
                 ->label('Solo Procesados')
-                ->query(fn ($query) => $query->where('esta_procesado', true))
+                ->query(fn($query) => $query->where('esta_procesado', true))
                 ->toggle(),
         ];
     }
@@ -303,13 +303,13 @@ class BloqueosResource extends Resource
     private static function getRecordClasses(): callable
     {
 
-        $clase = fn (BloqueosDataModel $record): string => match (true) {
+        $clase = fn(BloqueosDataModel $record): string => match (true) {
             $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
             $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
             $record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'bg-orange-50 dark:bg-orange-900/50 !border-l-4 !border-l-orange-900 !dark:border-l-orange-900',
             $record->estado === BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE => 'bg-red-50 dark:bg-red-900/50 !border-l-4 !border-l-red-900 !dark:border-l-red-900',
             $record->esta_procesado => 'bg-gray-50 dark:bg-gray-900/50 !border-l-4 !border-l-gray-900 !dark:border-l-gray-900',
-            default => ''
+            default => '',
         };
 
         return $clase;
@@ -321,7 +321,7 @@ class BloqueosResource extends Resource
             Action::make('edit')
                 ->label('Editar')
                 ->icon('heroicon-o-pencil-square')
-                ->url(fn (BloqueosDataModel $record): string => static::getUrl('edit', ['record' => $record]))
+                ->url(fn(BloqueosDataModel $record): string => static::getUrl('edit', ['record' => $record]))
                 ->color('warning'),
             Action::make('validar')
                 ->label('Validar')
@@ -368,7 +368,7 @@ class BloqueosResource extends Resource
             BulkAction::make('procesarBloqueos')
                 ->label('Procesar Seleccionados')
                 ->icon('heroicon-o-arrow-path')
-                ->modalContent(fn ($records): View => view('filament.resources.bloqueos-resource.process-modal', [
+                ->modalContent(fn($records): View => view('filament.resources.bloqueos-resource.process-modal', [
                     'registros' => $records,
                 ]))
                 ->modalWidth(Width::FiveExtraLarge)

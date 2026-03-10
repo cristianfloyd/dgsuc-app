@@ -33,11 +33,11 @@ class EditImportData extends EditRecord
                 Section::make('Estado del Registro')
                     ->schema([
                         Placeholder::make('estado')
-                            ->content(fn ($record) => $record->estado->getLabel()),
+                            ->content(fn($record) => $record->estado->getLabel()),
 
                         Placeholder::make('fecha_registro')
                             ->label('Registrado el')
-                            ->content(fn ($record) => $record->created_at->format('d/m/Y H:i')),
+                            ->content(fn($record) => $record->created_at->format('d/m/Y H:i')),
                     ])
                     ->columnSpan(1),
                 Section::make('Datos principales del bloqueo')
@@ -73,11 +73,11 @@ class EditImportData extends EditRecord
                 Section::make('')
                     ->schema([
                         Placeholder::make('')
-                            ->content(fn ($record) => view('filament.components.cargo-info', [
+                            ->content(fn($record) => view('filament.components.cargo-info', [
                                 'cargo' => $record->cargo,
                             ])),
                     ])
-                    ->visible(fn ($record) => $record->cargo()->exists())
+                    ->visible(fn($record) => $record->cargo()->exists())
                     ->columnSpan(1),
                 Grid::make(3)
                     ->schema([
@@ -85,7 +85,7 @@ class EditImportData extends EditRecord
                             ->schema([
                                 DatePicker::make('fecha_baja')
                                     ->label('Fecha de Baja')
-                                    ->required(fn (Get $get): bool => $get('tipo') !== 'Licencia')
+                                    ->required(fn(Get $get): bool => $get('tipo') !== 'Licencia')
                                     ->beforeOrEqual('today'),
 
                                 Select::make('tipo')
@@ -123,14 +123,14 @@ class EditImportData extends EditRecord
             Action::make('revalidar')
                 ->label('Revalidar Registro')
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn () => $this->record->validarEstado())
-                ->visible(fn () => $this->record->estado === 'error_validacion'),
+                ->action(fn() => $this->record->validarEstado())
+                ->visible(fn() => $this->record->estado === 'error_validacion'),
             Action::make('marcar_procesado')
                 ->label('Marcar como Procesado')
                 ->icon('heroicon-o-check')
                 ->requiresConfirmation()
-                ->action(fn () => $this->record->marcarProcesado())
-                ->visible(fn () => !$this->record->chkstopliq),
+                ->action(fn() => $this->record->marcarProcesado())
+                ->visible(fn() => !$this->record->chkstopliq),
             Action::make('verificar_mapuche')
                 ->label('Verificar en Mapuche')
                 ->icon('heroicon-o-check-circle')
@@ -169,8 +169,8 @@ class EditImportData extends EditRecord
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
                 ->url(
-                    fn ($record) => BloqueosHistorialResource::getUrl('index') .
-                    '?filters[nro_legaj][value]=' . $record->nro_legaj,
+                    fn($record) => BloqueosHistorialResource::getUrl('index')
+                    . '?filters[nro_legaj][value]=' . $record->nro_legaj,
                 ),
         ];
     }

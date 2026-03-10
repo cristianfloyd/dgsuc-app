@@ -53,7 +53,7 @@ class ReportesPanelProvider extends PanelProvider
                 'panel-selector' => MenuItem::make()
                     ->label('Cambiar Panel')
                     ->icon('heroicon-o-arrows-right-left')
-                    ->url(fn (): string => '/selector-panel'),
+                    ->url(fn(): string => '/selector-panel'),
             ])
             ->brandName('Panel de Reportes')
             ->discoverResources(in: app_path('Filament/Reportes/Resources'), for: 'App\\Filament\\Reportes\\Resources')

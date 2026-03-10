@@ -35,14 +35,14 @@ trait HasSicossControlTables
                 ->copyMessageDuration(1500),
             TextColumn::make('origen')
                 ->badge()
-                ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                     'DH21' => 'warning',
                     'SICOSS' => 'danger',
                 })
-                ->description(fn (string $state): string => match ($state) {
+                ->description(fn(string $state): string => match ($state) {
                     'DH21' => 'Existe en DH21 pero no en SICOSS',
                     'SICOSS' => 'Existe en SICOSS pero no en DH21',
-                    default => ''
+                    default => '',
                 }),
         ];
     }
@@ -92,20 +92,20 @@ trait HasSicossControlTables
                 ->label('Total Aportes DH21')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
-                ->state(fn ($record) => $record->aportesijpdh21 + $record->aporteinssjpdh21)
+                ->state(fn($record) => $record->aportesijpdh21 + $record->aporteinssjpdh21)
                 ->sortable(),
             TextColumn::make('total_aportes_sicoss')
                 ->label('Total Aportes SICOSS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
                 ->money('ARS')
-                ->state(fn ($record) => $record->aportesijp + $record->aporteinssjp + $record->sicossCalculo->aportediferencialsijp + $record->sicossCalculo->aportesres33_41re)
+                ->state(fn($record) => $record->aportesijp + $record->aporteinssjp + $record->sicossCalculo->aportediferencialsijp + $record->sicossCalculo->aportesres33_41re)
                 ->sortable(),
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
                 ->sortable()
-                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
-                ->tooltip(fn ($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
+                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
+                ->tooltip(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
         ];
     }
 
@@ -143,8 +143,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn ($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
+                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
+                ->description(fn($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
         ];
     }
 
@@ -168,8 +168,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn ($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn ($state) => abs($state)),
+                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
+                ->description(fn($state) => abs($state)),
         ];
     }
 
@@ -186,7 +186,7 @@ trait HasSicossControlTables
             TextColumn::make('origen')
                 ->label('Origen')
                 ->badge()
-                ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                     'DH21' => 'warning',
                     'SICOSS' => 'danger',
                     default => '',

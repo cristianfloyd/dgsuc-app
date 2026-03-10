@@ -32,9 +32,9 @@ class Dh11Resource extends Resource
 
     protected static ?string $navigationLabel = 'Básicos (dh11)';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Personal';
+    protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
     public static function form(Schema $schema): Schema
     {
@@ -86,16 +86,16 @@ class Dh11Resource extends Resource
                         'max:1000000000',
                     ]),
                 TextColumn::make('impp_asign')->label('Importe Asignación')->numeric()->disabled(),
-                TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault:true),
+                TextColumn::make('estadolaboral')->label('est lab')->toggleable(isToggledHiddenByDefault: true),
                 //llamar a la tabla dh31
-                ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault:true),
+                ToggleColumn::make('sino_mensu')->label('Mensualizado')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('vig_caano')->label('Vigencia Año')->toggleable(),
                 TextColumn::make('vig_cames')->label('Vigencia Mes')->toggleable(),
-                ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(isToggledHiddenByDefault:true),
-                ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(isToggledHiddenByDefault:true),
-                TextColumn::make('nivel')->label('Nivel')->toggleable(isToggledHiddenByDefault:true),
+                ToggleColumn::make('controlcargos')->label('Control Cargos')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlhoras')->label('Control Horas')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlpuntos')->label('Control Puntos')->toggleable(isToggledHiddenByDefault: true),
+                ToggleColumn::make('controlpresup')->label('Control Presupuesto')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('nivel')->label('Nivel')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('escalafon')

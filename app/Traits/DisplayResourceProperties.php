@@ -17,7 +17,7 @@ trait DisplayResourceProperties
      */
     public function getPropertiesToDisplay(): array
     {
-        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn () => $this->getDefaultProperties());
+        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn() => $this->getDefaultProperties());
     }
 
     public function resetPropertiesToDefault(): void
@@ -118,6 +118,6 @@ trait DisplayResourceProperties
      */
     protected function getCachedProperties(): array
     {
-        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn () => $this->getDefaultProperties());
+        return Cache::remember($this->getCacheKey(), now()->addMinutes(30), fn() => $this->getDefaultProperties());
     }
 }

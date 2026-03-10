@@ -829,32 +829,32 @@ class AfipMapucheSicoss extends Model
     protected function apnom(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value),
         );
     }
 
     protected function remTotal(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
         );
     }
 
     protected function remImpo6(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
         );
     }
 
     protected function remImpo9(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => trim($value),
-            set: fn ($value) => trim($value),
+            get: fn($value) => trim($value),
+            set: fn($value) => trim($value),
         );
     }
 
@@ -864,8 +864,8 @@ class AfipMapucheSicoss extends Model
     protected function prov(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value),
         );
     }
 

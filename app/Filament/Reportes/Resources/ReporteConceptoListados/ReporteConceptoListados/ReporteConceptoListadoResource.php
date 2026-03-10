@@ -50,7 +50,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->label('Periodo')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->getStateUsing(fn ($record) => $record->periodo_fiscal),
+                    ->getStateUsing(fn($record) => $record->periodo_fiscal),
                 TextColumn::make('codn_conce')->label('Concepto'),
                 TextColumn::make('impp_conce')->label('Importe')->searchable()->sortable(),
             ])
@@ -59,10 +59,10 @@ class ReporteConceptoListadoResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Periodo')
-                            ->options(fn () => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->options(fn() => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                             ->searchable()
                             ->live()
-                            ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+                            ->afterStateUpdated(fn(callable $set) => $set('nro_liqui', null)),
 
                         Select::make('nro_liqui')
                             ->label('Liquidación')
@@ -78,21 +78,21 @@ class ReporteConceptoListadoResource extends Resource
                             })
                             ->searchable()
                             ->live()
-                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                            ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
                         Select::make('codc_uacad')
                             ->label('Dependencia')
-                            ->options(fn () => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
+                            ->options(fn() => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
                             ->searchable(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
                                 $data['nro_liqui'],
-                                fn (Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
                             )
                             ->when(
                                 $data['codc_uacad'],
-                                fn (Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad),
+                                fn(Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad),
                             );
                     }),
                 SelectFilter::make('codn_conce')
@@ -102,7 +102,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->searchable(),
             ])
             ->filtersTriggerAction(
-                fn (Action $action) => $action
+                fn(Action $action) => $action
                     ->button()
                     ->label('Filtro'),
             )
@@ -120,11 +120,11 @@ class ReporteConceptoListadoResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(fn () => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->options(fn() => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                             ->searchable()
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn (callable $set) => $set('nro_liqui', null)),
+                            ->afterStateUpdated(fn(callable $set) => $set('nro_liqui', null)),
 
                         Select::make('nro_liqui')
                             ->label('Liquidación (opcional)')
@@ -140,7 +140,7 @@ class ReporteConceptoListadoResource extends Resource
                             })
                             ->searchable()
                             ->placeholder('Todas las liquidaciones')
-                            ->disabled(fn (callable $get): bool => !$get('periodo_fiscal')),
+                            ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
                     ])
                     ->requiresConfirmation()
                     ->modalHeading('Regenerar datos del reporte')
@@ -155,8 +155,8 @@ class ReporteConceptoListadoResource extends Resource
                             // Mostrar notificación de inicio
                             Notification::make()
                                 ->title('Sincronización iniciada')
-                                ->body("Regenerando reporte para el período {$periodoFiscal}" .
-                                      ($nroLiqui ? " y liquidación #{$nroLiqui}" : ''))
+                                ->body("Regenerando reporte para el período {$periodoFiscal}"
+                                      . ($nroLiqui ? " y liquidación #{$nroLiqui}" : ''))
                                 ->info()
                                 ->persistent()
                                 ->send();

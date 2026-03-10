@@ -267,16 +267,16 @@ class Dh13 extends Model
     protected function descCalcu(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value),
         );
     }
 
     protected function descCondi(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value),
         );
     }
 }

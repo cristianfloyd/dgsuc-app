@@ -228,7 +228,7 @@ class RepGerencialFinalService
 
         if (!empty($filters['conceptos'])) {
             $conceptosConditions = array_map(
-                fn ($concepto) => "dh21.codn_conce = :concepto_{$concepto}",
+                fn($concepto) => "dh21.codn_conce = :concepto_{$concepto}",
                 $filters['conceptos'],
             );
             $conditions[] = '(' . implode(' OR ', $conceptosConditions) . ')';
@@ -307,7 +307,7 @@ class RepGerencialFinalService
         }
     }
 
-    protected function processBasicData(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processBasicData(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $isPeriodoActual = $this->periodoFiscalService->isPeriodoActual($liquidaciones);
         $tabla = $isPeriodoActual ? 'mapuche.dh21' : 'mapuche.dh21h';
@@ -407,7 +407,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeC(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeC(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -470,7 +470,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeS(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeS(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -527,7 +527,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeO(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeO(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -584,7 +584,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processNetAmountsTypeF(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeF(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -652,7 +652,7 @@ class RepGerencialFinalService
      *
      * @return void
      */
-    protected function processNetAmountsTypeD(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeD(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -722,7 +722,7 @@ class RepGerencialFinalService
      *
      * @return void
      */
-    protected function processNetAmountsTypeA(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processNetAmountsTypeA(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -861,7 +861,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($sql);
     }
 
-    protected function processAntiguedad(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processAntiguedad(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT
@@ -913,7 +913,7 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    protected function processHorasTrabajadas(?int $liquidaciones, ?string $whereClause = null, array $filters): void
+    protected function processHorasTrabajadas(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
         $sql = "
         SELECT DISTINCT

@@ -59,8 +59,8 @@ class BloqueosProcessor extends Component
             } elseif ($this->registros instanceof Collection) {
                 // Procesamiento masivo de registros seleccionados
                 $this->resultados = $this->registros
-                    ->filter(fn ($reg) => $reg instanceof BloqueosDataModel)
-                    ->map(fn ($registro) => $service->procesarRegistro($registro));
+                    ->filter(fn($reg) => $reg instanceof BloqueosDataModel)
+                    ->map(fn($registro) => $service->procesarRegistro($registro));
             } else {
                 // Procesamiento de todos los registros pendientes
                 $this->resultados = $service->procesarBloqueos();
@@ -86,7 +86,7 @@ class BloqueosProcessor extends Component
         return Cache::remember(
             $this->getCacheKey(),
             now()->addHour(),
-            fn () => $this->resultados ?? collect(),
+            fn() => $this->resultados ?? collect(),
         );
     }
 
@@ -104,7 +104,7 @@ class BloqueosProcessor extends Component
             'exitosos' => $resultados->where('success', true)->count(),
             'fallidos' => $resultados->where('success', false)->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn ($grupo) => $grupo->count()),
+                ->map(fn($grupo) => $grupo->count()),
         ];
     }
 

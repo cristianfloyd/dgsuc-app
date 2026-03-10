@@ -23,7 +23,7 @@ class EmbargoReportModelExporter extends Exporter
             // ExportColumn::make('importe_descontado')->label('Importe'),
             ExportColumn::make('importe_descontado')
                 ->label('Importe')
-                ->formatStateUsing(fn ($state) => str_replace('.', ',', $state)),
+                ->formatStateUsing(fn($state) => str_replace('.', ',', $state)),
             ExportColumn::make('caratula')->label('Caratula'),
         ];
     }

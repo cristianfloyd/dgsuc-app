@@ -14,7 +14,7 @@ class GenerarSicossBD extends Command
      *
      * @var string
      */
-    protected $signature = 'sicoss:generar-bd 
+    protected $signature = 'sicoss:generar-bd
                             {periodo : Período fiscal en formato YYYYMM}
                             {--incluir-inactivos : Incluir empleados inactivos}';
 

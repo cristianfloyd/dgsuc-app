@@ -73,7 +73,7 @@ class ImportAfipMapucheSicossCalculo extends Page
             $result = $service->streamImport(
                 $filePath,
                 $periodoFiscal,
-                fn ($progress) => $this->updateImportProgress($progress),
+                fn($progress) => $this->updateImportProgress($progress),
             );
 
             if ($result['imported'] > 0) {

@@ -78,7 +78,7 @@ class Dh14 extends Model
     protected function descAcumu(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? trim($value) : null,
+            get: fn($value) => $value ? trim($value) : null,
         );
     }
 }

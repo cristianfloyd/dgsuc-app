@@ -112,7 +112,7 @@ class ListReportes extends ListRecords
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn () => $this->reporteGenerado),
+                ->visible(fn() => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-document-currency-dollar')

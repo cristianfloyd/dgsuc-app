@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class SelectLiquidacionDefinitiva extends Component
 {
-    public Collection | array $liquidaciones = [];
+    public Collection|array $liquidaciones = [];
 
     public ?int $liquidacionSeleccionada = null;
 

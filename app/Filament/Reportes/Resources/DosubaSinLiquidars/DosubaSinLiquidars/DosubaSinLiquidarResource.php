@@ -63,7 +63,7 @@ class DosubaSinLiquidarResource extends Resource
         $hasData = DosubaSinLiquidarModel::where('session_id', session()->getId())->exists();
 
         return $table
-            ->query(fn () => $hasData ? static::getModel()::query() : static::getModel()::query()->whereRaw('1 = 0'))
+            ->query(fn() => $hasData ? static::getModel()::query() : static::getModel()::query()->whereRaw('1 = 0'))
             ->columns([
                 TextColumn::make('nro_legaj')
                     ->label('Legajo')
@@ -110,7 +110,7 @@ class DosubaSinLiquidarResource extends Resource
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($records) {
                         try {
-                            $filteredRecords = $records->filter(fn ($record) => $record !== null);
+                            $filteredRecords = $records->filter(fn($record) => $record !== null);
 
                             return Excel::download(
                                 new DosubaSinLiquidarExport($filteredRecords, $filteredRecords->first()?->periodo_fiscal ?? ''),
@@ -145,11 +145,11 @@ class DosubaSinLiquidarResource extends Resource
 
                                     return $options;
                                 })
-                                ->default(fn () => Carbon::now()->subMonth()->format('Ym'))
+                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
                                 ->required(),
                         ])
                         ->action(function (array $data) {
-                            $records = DosubaSinLiquidarModel::all()->filter(fn ($record) => $record !== null);
+                            $records = DosubaSinLiquidarModel::all()->filter(fn($record) => $record !== null);
 
                             return Excel::download(
                                 new DosubaSinLiquidarExport(

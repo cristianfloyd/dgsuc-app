@@ -9,8 +9,7 @@ class DosubaReportController extends Controller
 {
     public function __construct(
         private DosubaReportService $reportService,
-    ) {
-    }
+    ) {}
 
     public function generate(string $year, string $month): JsonResponse
     {

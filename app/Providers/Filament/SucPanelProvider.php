@@ -36,7 +36,7 @@ class SucPanelProvider extends PanelProvider
                 'panel-selector' => MenuItem::make()
                     ->label('Cambiar Panel')
                     ->icon('heroicon-o-arrows-right-left')
-                    ->url(fn (): string => '/selector-panel'),
+                    ->url(fn(): string => '/selector-panel'),
             ])
             ->colors([
                 'primary' => Color::Amber,
@@ -74,7 +74,7 @@ class SucPanelProvider extends PanelProvider
                     ->label('Reportes')
                     ->icon('heroicon-o-pencil'),
                 NavigationGroup::make()
-                    ->label(fn (): string => __('navigation.settings'))
+                    ->label(fn(): string => __('navigation.settings'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
                 NavigationGroup::make('Usuarios'),

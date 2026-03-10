@@ -57,7 +57,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * @var string|null
      */
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-duplicate';
 
     /**
      * Título de la página.
@@ -104,7 +104,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                                 ->limit(50)
                                 ->get(['nro_liqui', 'desc_liqui'])
                                 ->mapWithKeys(
-                                    fn ($liq) => [
+                                    fn($liq) => [
                                         $liq->nro_liqui => "{$liq->nro_liqui} - {$liq->desc_liqui}",
                                     ],
                                 ),

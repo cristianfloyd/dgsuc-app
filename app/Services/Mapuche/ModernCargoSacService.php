@@ -17,8 +17,7 @@ class ModernCargoSacService
         private SacRepository $sacRepository,
         private PeriodoFiscalService $periodoService,
         private VinculoCargoService $vinculoService,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.
@@ -42,7 +41,7 @@ class ModernCargoSacService
         $datosRaw = $this->sacRepository->getBrutosParaSac($filtros, $orderBy);
 
         return $this->agruparPorLegajo($datosRaw)
-            ->map(fn ($grupo) => $this->procesarLegajo($grupo))
+            ->map(fn($grupo) => $this->procesarLegajo($grupo))
             ->values();
     }
 

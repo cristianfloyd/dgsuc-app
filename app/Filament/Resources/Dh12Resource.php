@@ -26,11 +26,11 @@ class Dh12Resource extends Resource
 
     protected static ?string $navigationLabel = 'Conceptos';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | BackedEnum | null $activeNavigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $activeNavigationIcon = 'heroicon-o-document-text';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Conceptos';
+    protected static string|UnitEnum|null $navigationGroup = 'Conceptos';
 
     public static function form(Schema $schema): Schema
     {

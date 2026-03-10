@@ -148,7 +148,7 @@ enum SicossCodigoSituacion: int
             49 => self::SUSPENSION_PARCIAL,
             50 => self::DECRETO_792_GRUPO_RIESGO,
             51 => self::LICENCIA_LEY_27674,
-            default => null
+            default => null,
         };
     }
 }

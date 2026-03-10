@@ -19,8 +19,7 @@ class ImportResultDTO
         public string $message = '',
         public array $processedData = [],
         public ?Throwable $error = null,
-    ) {
-    }
+    ) {}
 
     public function incrementProcessedCount(): void
     {

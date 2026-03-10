@@ -264,8 +264,8 @@ class Dh12 extends Model
     {
 
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8($value),
-            set: fn ($value) => EncodingService::toLatin1($value),
+            get: fn($value) => EncodingService::toUtf8($value),
+            set: fn($value) => EncodingService::toLatin1($value),
         );
     }
 }

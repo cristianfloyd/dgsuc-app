@@ -221,15 +221,15 @@ class Dh22 extends Model
     public function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn ($value): ?string => EncodingService::toUtf8($value),
-            set: fn ($value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
+            get: fn($value): ?string => EncodingService::toUtf8($value),
+            set: fn($value): ?string => $this->attributes['desc_liqui'] = EncodingService::toLatin1($value),
         );
     }
 
     public function descripcionCompleta(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => $this->nro_liqui . ' - ' . EncodingService::toUtf8($this->desc_liqui),
+            get: fn(): string => $this->nro_liqui . ' - ' . EncodingService::toUtf8($this->desc_liqui),
         );
     }
 

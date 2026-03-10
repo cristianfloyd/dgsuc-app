@@ -46,17 +46,17 @@ class PanelSelector extends Component
         return PanelRegistry::getAllPanels()
             ->when(
                 $this->search,
-                fn ($panels) =>
-                $panels->filter(
-                    fn ($panel) =>
-                    str_contains(strtolower($panel['name']), strtolower($this->search)) ||
-                    str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search)),
+                fn($panels)
+                => $panels->filter(
+                    fn($panel)
+                    => str_contains(strtolower($panel['name']), strtolower($this->search))
+                    || str_contains(strtolower($panel['description'] ?? ''), strtolower($this->search)),
                 ),
             )
             ->when(
                 $this->selectedCategory !== 'all',
-                fn ($panels) =>
-                $panels->where('category', $this->selectedCategory),
+                fn($panels)
+                => $panels->where('category', $this->selectedCategory),
             );
     }
 }

@@ -73,8 +73,8 @@ class Office365Controller extends Controller
 
                 // Verificar si el usuario pertenece a los grupos permitidos
                 $allowedGroups = collect($groups)->filter(function ($group) {
-                    return $group['displayName'] === 'SUC' ||
-                        ($group['mail'] ?? '') === 'SUC1@uba.ar';
+                    return $group['displayName'] === 'SUC'
+                        || ($group['mail'] ?? '') === 'SUC1@uba.ar';
                 })->toArray();
 
                 if (empty($allowedGroups)) {

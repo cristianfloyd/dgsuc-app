@@ -76,7 +76,7 @@ enum SicossCodigoCondicion: int
             12 => self::ART_8_LEY_27426,
             13 => self::SERVICIOS_DIFERENCIADOS_NO_ALCANZADOS,
             14 => self::JUBILADO_DOCENTES_UNIVERSITARIOS,
-            default => null
+            default => null,
         };
     }
 }

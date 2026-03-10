@@ -17,9 +17,9 @@ class ListDh13s extends ListRecords
         return [
             'all' => Tab::make('Todos'),
             'active' => Tab::make('Activos')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('desc_condi', '!=', null)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('desc_condi', '!=', null)),
             'inactive' => Tab::make('Inactivos')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('desc_condi')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('desc_condi')),
         ];
     }
 

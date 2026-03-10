@@ -109,12 +109,12 @@ class CombinacionesService
     {
         // Optimización: para 50 registros, podemos usar un enfoque más eficiente
         // Separamos los conceptos positivos y negativos para optimizar la búsqueda
-        $positivos = array_filter($items, fn ($item) => $item['impp_conce'] > 0);
-        $negativos = array_filter($items, fn ($item) => $item['impp_conce'] < 0);
+        $positivos = array_filter($items, fn($item) => $item['impp_conce'] > 0);
+        $negativos = array_filter($items, fn($item) => $item['impp_conce'] < 0);
 
         // Ordenamos de mayor a menor valor absoluto para mejorar la eficiencia
-        usort($positivos, fn ($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
-        usort($negativos, fn ($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($positivos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
+        usort($negativos, fn($a, $b) => abs($b['impp_conce']) <=> abs($a['impp_conce']));
 
         $resultados = [];
 

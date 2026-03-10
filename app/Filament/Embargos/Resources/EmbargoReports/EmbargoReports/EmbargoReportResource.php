@@ -29,7 +29,7 @@ class EmbargoReportResource extends Resource
                 TextColumn::make('datosPersonales.nombre_completo')
                     ->label('Nombre Completo')
                     ->limit(10)
-                    ->tooltip(fn (TextColumn $column): string => $column->getState())
+                    ->tooltip(fn(TextColumn $column): string => $column->getState())
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         $searchTerm = strtoupper($search);
@@ -75,10 +75,10 @@ class EmbargoReportResource extends Resource
                 TextColumn::make('beneficiario.nom_beneficiario')->label('beneficiario')->sortable(),
                 TextColumn::make('juzgado.nom_juzgado')->sortable()
                     ->limit(15)
-                    ->tooltip(fn (TextColumn $column): string => $column->getState()),
+                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
                 TextColumn::make('tipoEmbargo.desc_tipo_embargo')->sortable()
                     ->limit(10)
-                    ->tooltip(fn (TextColumn $column): string => $column->getState()),
+                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
                 TextColumn::make('tipoJuicio.desc_tipo_juicio')->label('Tipo Juicio'),
                 TextColumn::make('imp_embargo')
                     ->money('ARS')

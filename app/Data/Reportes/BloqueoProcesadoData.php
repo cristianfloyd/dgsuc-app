@@ -30,8 +30,7 @@ class BloqueoProcesadoData extends Data
         public readonly ?array $metadata = [],
         public bool $cambiosRealizados = false,
         public array $datosOriginales = [],
-    ) {
-    }
+    ) {}
 
     public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {

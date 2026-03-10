@@ -29,7 +29,7 @@ class RepGerencialFinalResource extends Resource
 
     protected static ?string $pluralLabel = 'Reporte Gerencial';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Informes';
+    protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
     protected static ?string $navigationLabel = 'Reporte Gerencial';
 
@@ -78,7 +78,7 @@ class RepGerencialFinalResource extends Resource
                     ->preload(10)
                     ->optionsLimit(50)
                     ->getSearchResultsUsing(
-                        fn (string $search): array => Dh36::query()
+                        fn(string $search): array => Dh36::query()
                             ->select('coddependesemp', 'descdependesemp')
                             ->where('descdependesemp', 'like', "%{$search}%")
                             ->orderBy('descdependesemp')
@@ -86,12 +86,12 @@ class RepGerencialFinalResource extends Resource
                             ->pluck('descdependesemp', 'coddependesemp')
                             ->toArray(),
                     )
-                    ->getOptionLabelUsing(fn ($value): ?string => Dh36::find($value)?->descdependesemp),
+                    ->getOptionLabelUsing(fn($value): ?string => Dh36::find($value)?->descdependesemp),
 
                 SelectFilter::make('codc_uacad')
                     ->label('Unidad Académica')
                     ->options(
-                        fn () => Dh30::query()
+                        fn() => Dh30::query()
                             ->where('nro_tabla', 13)
                             ->select('desc_abrev', 'desc_item')
                             ->orderBy('desc_item')
@@ -128,24 +128,24 @@ class RepGerencialFinalResource extends Resource
                             ->label('Número de Legajo'),
                     ])
                     ->query(
-                        fn (Builder $query, array $data): Builder =>
-                        $query->when(
+                        fn(Builder $query, array $data): Builder
+                        => $query->when(
                             isset($data['legajo']) && $data['legajo'],
-                            fn (Builder $query, $value): Builder => $query->where('nro_legaj', $data['legajo']),
+                            fn(Builder $query, $value): Builder => $query->where('nro_legaj', $data['legajo']),
                         ),
                     ),
 
                 Filter::make('en_banco')
                     ->label('Cobra por Banco')
                     ->toggle()
-                    ->query(fn (Builder $query): Builder => $query
+                    ->query(fn(Builder $query): Builder => $query
                         ->where('en_banco', 'S')),
 
                 SelectFilter::make('nro_liqui')
                     ->label('Liquidación')
                     ->multiple()
                     ->preload()
-                    ->options(fn () => DB::connection(self::getMapucheConnection()->getName())
+                    ->options(fn() => DB::connection(self::getMapucheConnection()->getName())
                         ->table('mapuche.dh22')
                         ->orderBy('nro_liqui', 'desc')
                         ->pluck('desc_liqui', 'nro_liqui')

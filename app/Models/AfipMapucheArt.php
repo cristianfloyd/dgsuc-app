@@ -115,8 +115,8 @@ class AfipMapucheArt extends Model
     protected function establecimiento(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? trim($value) : null,
-            set: fn ($value) => $value ? trim($value) : null,
+            get: fn($value) => $value ? trim($value) : null,
+            set: fn($value) => $value ? trim($value) : null,
         );
     }
 

@@ -64,7 +64,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
     {
         return new PageRegistration(
             static::class,
-            fn () => Route::get($path, static::class)
+            fn() => Route::get($path, static::class)
                 ->name(static::getSlug()),
         );
     }
@@ -214,7 +214,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
                 TextColumn::make('nov1_conce')->label('Nov1')->sortable()->numeric(),
                 TextColumn::make('codc_uacad')->label('Unidad Acad')->sortable(),
                 TextColumn::make('caratula')->label('Caratula')->limit(15)
-                    ->tooltip(fn (TextColumn $column): string => $column->getState()),
+                    ->tooltip(fn(TextColumn $column): string => $column->getState()),
                 TextColumn::make('nro_embargo')->label('Nro. Embargo')->numeric(),
                 TextColumn::make('codn_conce')->label('Concepto')->numeric(),
                 TextColumn::make('importe_descontado')->label('Importe')->money('ARS'),

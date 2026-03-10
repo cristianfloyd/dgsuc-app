@@ -14,9 +14,7 @@ class SicossActividadUpdateService
     /**
      * Create a new class instance.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Actualiza el código de actividad (cod_act) en la tabla afip_mapuche_sicoss.

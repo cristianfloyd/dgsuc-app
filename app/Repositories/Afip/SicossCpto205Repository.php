@@ -236,7 +236,7 @@ class SicossCpto205Repository
             FROM tcpto205 b
             WHERE b.cuil = suc.afip_mapuche_sicoss.cuil
             and rem_impo1 <
-            (select importe * 1 from mapuche.constante_unica where id_constante in 
+            (select importe * 1 from mapuche.constante_unica where id_constante in
             (select max(id_constante) from mapuche.constante where nombre = \'TOPAMAX\'))
         ');
 
@@ -298,12 +298,12 @@ class SicossCpto205Repository
             AND mapuche.dh21.nro_legaj = c.nro_legaj
             AND codn_conce = 790
             AND mapuche.dh21.nro_legaj IN (
-                SELECT DISTINCT nro_legaj 
+                SELECT DISTINCT nro_legaj
                 FROM mapuche.dh21
-                WHERE nro_liqui IN ({$liquidacionesStr}) 
+                WHERE nro_liqui IN ({$liquidacionesStr})
                 AND codn_conce = '204'
             )
-            GROUP BY mapuche.dh21.nro_legaj, c.cuil 
+            GROUP BY mapuche.dh21.nro_legaj, c.cuil
             ORDER BY nro_legaj
         ");
     }
@@ -315,10 +315,10 @@ class SicossCpto205Repository
             SET cpto_no_remun = cpto_no_remun - cpto_no_remun,
                 sueldo_adicc  = sueldo_adicc + cpto_no_remun,
                 rem_impo2     = rem_impo2 + cpto_no_remun
-            WHERE cuil IN (SELECT cuil FROM tcpto205sinaut) 
+            WHERE cuil IN (SELECT cuil FROM tcpto205sinaut)
             AND cuil NOT IN (
-                SELECT b.cuil 
-                FROM tcptouno a, mapuche.vdh01 b 
+                SELECT b.cuil
+                FROM tcptouno a, mapuche.vdh01 b
                 WHERE a.nro_legaj = b.nro_legaj
             )
         ');

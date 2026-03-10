@@ -112,7 +112,7 @@ class ConceptoListado extends Model
         return Cache::tags(['rep_concepto_listado'])->remember(
             $cacheKey,
             now()->addHours(24),
-            fn () => $query->get(),
+            fn() => $query->get(),
         );
     }
 
@@ -135,16 +135,16 @@ class ConceptoListado extends Model
     public function apellido(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn ($value) => strtoupper($value),
+            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn($value) => strtoupper($value),
         );
     }
 
     public function nombre(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => EncodingService::toUtf8(strtoupper($value)),
-            set: fn ($value) => strtoupper($value),
+            get: fn($value) => EncodingService::toUtf8(strtoupper($value)),
+            set: fn($value) => strtoupper($value),
         );
     }
 
