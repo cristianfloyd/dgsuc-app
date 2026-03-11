@@ -2,6 +2,7 @@
 
 namespace App\Data\Responses;
 
+use Override;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 
@@ -20,8 +21,7 @@ class SicossTotalesData extends Data
         public readonly float $totalC305,
         #[MapName('total_c306')]
         public readonly float $totalC306,
-    ) {
-    }
+    ) {}
 
     /**
      * Summary of fromArray.
@@ -43,6 +43,7 @@ class SicossTotalesData extends Data
      *
      * @return array<string, float> La representacion del objeto de datos en forma de array.
      */
+    #[Override]
     public function toArray(): array
     {
         return [

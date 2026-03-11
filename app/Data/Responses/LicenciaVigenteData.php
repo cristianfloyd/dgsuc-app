@@ -113,8 +113,8 @@ class LicenciaVigenteData extends Data
             es_legajo: $row->es_legajo,
             condicion: $row->condicion,
             descripcion_licencia: $row->descripcion_licencia ?? null,
-            fecha_desde: isset($row->fec_desde) ? Carbon::parse($row->fec_desde) : null,
-            fecha_hasta: isset($row->fec_hasta) ? Carbon::parse($row->fec_hasta) : null,
+            fecha_desde: isset($row->fec_desde) ? \Illuminate\Support\Facades\Date::parse($row->fec_desde) : null,
+            fecha_hasta: isset($row->fec_hasta) ? \Illuminate\Support\Facades\Date::parse($row->fec_hasta) : null,
             nro_cargo: $row->nro_cargo ?? null,
         );
     }

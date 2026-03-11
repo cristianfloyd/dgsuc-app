@@ -15,6 +15,5 @@ class TipoEmbargoData extends Data
         public readonly int $mov_inicial_cta_cte = 0,
         public readonly ?int $codn_conce = null,
         public readonly ?int $id_tipo_embargo = null,
-    ) {
-    }
+    ) {}
 }

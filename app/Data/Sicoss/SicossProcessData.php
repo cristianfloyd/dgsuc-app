@@ -2,6 +2,7 @@
 
 namespace App\Data\Sicoss;
 
+use Override;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Required;
@@ -31,8 +32,7 @@ class SicossProcessData extends Data
         public readonly ?float $TopeOtrosAportesPersonal = null,
         public readonly bool $truncaTope = false,
         public readonly ?int $nro_liqui = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia desde un array de datos.
@@ -85,6 +85,7 @@ class SicossProcessData extends Data
     /**
      * Convierte a array para compatibilidad con código legacy.
      */
+    #[Override]
     public function toArray(): array
     {
         return [

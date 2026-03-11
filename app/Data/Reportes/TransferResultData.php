@@ -34,8 +34,7 @@ class TransferResultData extends Data
         public readonly array $idsTransferidos = [],
         /** @var array IDs de registros que fallaron con sus errores */
         public readonly array $idsFallidos = [],
-    ) {
-    }
+    ) {}
 
     /**
      * Crea una instancia exitosa.

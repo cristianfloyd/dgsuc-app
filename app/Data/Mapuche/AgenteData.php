@@ -21,8 +21,7 @@ class AgenteData extends Data
         public string $dni,
         #[WithCast(DateTimeInterfaceCast::class, format: 'Y-m-d')]
         public ?Carbon $fechaInicio,
-    ) {
-    }
+    ) {}
 
     /**
      * Define las reglas de validación para los datos del agente.
@@ -54,10 +53,10 @@ class AgenteData extends Data
     {
         return new self(
             nombre: $employee->desc_nombr,
-            apellido: trim((string) $employee->desc_appat . ' ' . $employee->desc_apmat),
+            apellido: trim($employee->desc_appat . ' ' . $employee->desc_apmat),
             nroLegaj: $employee->nro_legaj,
             dni: $employee->nro_docum,
-            fechaInicio: Carbon::parse($employee->dh03()->orderBy('fec_alta', 'asc')->value('fec_alta')),
+            fechaInicio: \Illuminate\Support\Facades\Date::parse($employee->dh03()->orderBy('fec_alta', 'asc')->value('fec_alta')),
         );
     }
 

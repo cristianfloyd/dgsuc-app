@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use Override;
 use Spatie\LaravelData\Attributes\Validation\Min;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Data;
@@ -81,13 +82,13 @@ class RepOrdenPagoDtoData extends Data
         public readonly float $total,
         #[Required, Min(0)]
         public readonly float $impGasto,
-    ) {
-    }
+    ) {}
 
     /**
      * Convierte el DTO a un array con las claves en snake_case
      * para que coincidan con los nombres de columnas en la base de datos.
      */
+    #[Override]
     public function toArray(): array
     {
         return [

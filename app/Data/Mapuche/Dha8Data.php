@@ -17,6 +17,5 @@ class Dha8Data extends Data
         public readonly ?float $porcaporteadicss,
         public readonly ?int $codigomodalcontrat,
         public readonly ?string $provincialocalidad,
-    ) {
-    }
+    ) {}
 }

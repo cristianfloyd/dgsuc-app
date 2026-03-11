@@ -11,8 +11,7 @@ class UnidadAcademicaData extends Data
         public readonly string $codigo,
         public readonly string $sucursal,
         public readonly TipoActividad $actividad,
-    ) {
-    }
+    ) {}
 
     public static function fromCodigo(string $codigo): ?self
     {

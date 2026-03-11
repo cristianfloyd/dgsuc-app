@@ -14,8 +14,7 @@ class GrupoPermisoData extends Data
         public readonly string $usuario,
         #[MapName('tipo_permiso')]
         public readonly string $tipoPermiso,
-    ) {
-    }
+    ) {}
 
     public static function rules(?ValidationContext $context = null): array
     {

@@ -6,7 +6,9 @@ use App\Models\Dh03;
 use App\Models\Reportes\BloqueosDataModel;
 use App\Rules\LegajoCargoExistsRule;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Validation\ValidationException;
+use Override;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Attributes\WithCast;
@@ -30,8 +32,7 @@ class BloqueoProcesadoData extends Data
         public readonly ?array $metadata = [],
         public bool $cambiosRealizados = false,
         public array $datosOriginales = [],
-    ) {
-    }
+    ) {}
 
     public static function fromError(string $message, BloqueosDataModel $bloqueo, array $metadata = []): self
     {
@@ -52,7 +53,7 @@ class BloqueoProcesadoData extends Data
     public static function fromSuccess(BloqueosDataModel $bloqueo): self
     {
         if (!Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
-            throw ValidationException::withMessages([ 'legajo_cargo' => 'Combinación legajo-cargo inválida', ]);
+            throw ValidationException::withMessages(['legajo_cargo' => 'Combinación legajo-cargo inválida']);
         }
 
         return new self(
@@ -75,7 +76,7 @@ class BloqueoProcesadoData extends Data
             'bloqueo.nro_cargo' => [
                 'required',
                 'integer',
-                function ($attribute, $value, $fail) use ($context): void {
+                function (string $attribute, $value, Closure $fail) use ($context): void {
                     $nroLegaj = $context->payload['bloqueo']['nro_legaj'] ?? null;
                     if ($nroLegaj) {
                         $rule = new LegajoCargoExistsRule($nroLegaj, $value);
@@ -89,6 +90,7 @@ class BloqueoProcesadoData extends Data
         ];
     }
 
+    #[Override]
     public function transform(TransformationContext|TransformationContextFactory|null $transformationContext = null): array
     {
         return [
@@ -102,9 +104,17 @@ class BloqueoProcesadoData extends Data
         ];
     }
 
-    public function toResponse($request)
+    /**
+     * Genera la respuesta del procesamiento del bloqueo.
+     *
+     * @param \Illuminate\Http\Request|mixed $request Solicitud HTTP entrante (no se utiliza en el método).
+     *
+     * @return \Illuminate\Http\JsonResponse Respuesta JSON con los datos del procesamiento.
+     */
+    #[Override]
+    public function toResponse($request): \Illuminate\Http\JsonResponse
     {
-        return [
+        return response()->json([
             'success' => $this->success,
             'message' => $this->message,
             'cargo_id' => $this->bloqueo?->nro_cargo,
@@ -113,7 +123,7 @@ class BloqueoProcesadoData extends Data
             'fecha_baja' => $this->bloqueo?->fecha_baja,
             'fecha_proceso' => $this->processed_at?->format('Y-m-d H:i:s'),
             'metadata' => $this->metadata,
-        ];
+        ]);
     }
 
     public static function fromModel(BloqueosDataModel $bloqueo): self

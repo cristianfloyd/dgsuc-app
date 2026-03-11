@@ -33,8 +33,7 @@ class BloqueosData extends Data
         public readonly int $nro_liqui,
         public readonly BloqueosEstadoEnum $estado = BloqueosEstadoEnum::PENDIENTE,
         public readonly ?string $mensaje_error = null,
-    ) {
-    }
+    ) {}
 
     public static function rules(?ValidationContext $context = null): array
     {
@@ -70,7 +69,7 @@ class BloqueosData extends Data
         $tipoMovimiento = strtolower((string) $row['tipo_de_movimiento']);
 
         return new self(
-            fecha_registro: Carbon::instance(Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
+            fecha_registro: \Illuminate\Support\Facades\Date::instance(Date::excelToDateTimeObject($row['hora_de_finalizacion'])),
             email: strtolower(trim((string) $row['correo_electronico'])),
             nombre: ucwords(strtolower(trim((string) $row['nombre']))),
             usuario_mapuche: strtolower(trim((string) $row['usuario_mapuche_solicitante'])),
@@ -136,8 +135,8 @@ class BloqueosData extends Data
 
         // Procesamiento de la fecha según el formato
         $fecha = is_numeric($row['fecha_de_baja'])
-            ? Carbon::instance(Date::excelToDateTimeObject($row['fecha_de_baja']))
-            : Carbon::parse($row['fecha_de_baja']);
+            ? \Illuminate\Support\Facades\Date::instance(Date::excelToDateTimeObject($row['fecha_de_baja']))
+            : \Illuminate\Support\Facades\Date::parse($row['fecha_de_baja']);
 
         // Aplicamos la lógica de negocio para ajustar la fecha
         return $fecha->day === 1
