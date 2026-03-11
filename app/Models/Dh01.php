@@ -140,6 +140,57 @@ class Dh01 extends Model
         );
     }
 
+    /**
+     * Verifica si un legajo específico está jubilado.
+     *
+     * @param string $nro_legajo Número de legajo a verificar.
+     *
+     * @return bool Retorna verdadero si el legajo está jubilado, falso de lo contrario.
+     */
+    public static function esJubilado($nro_legajo): bool
+    {
+        return static::query()
+            ->where('nro_legaj', $nro_legajo)
+            ->where('tipo_estad', 'J')
+            ->exists();
+    }
+
+    // ####################################################################################
+    // ######################################  FUNCIONES  ####################################
+
+    /**
+     * Obtiene legajos activos sin cargos vigentes como array.
+     *
+     * @param string $where Condición adicional WHERE
+     *
+     * @return array
+     */
+    public static function getLegajosActivosSinCargosVigentes($where)
+    {
+        return self::query()->legajosActivosSinCargosVigentes($where)->get()->toArray();
+    }
+
+    /**
+     * Obtiene un legajo activo sin cargos vigentes y sin registros en dh21.
+     *
+     * @param int $nro_legajo Número de legajo a buscar
+     *
+     * @return array|null Retorna el legajo si cumple las condiciones o null si no existe
+     */
+    public static function getLegajoSinLiquidarSinDh21(int $nro_legajo): ?array
+    {
+        $where_not_dh21 = "
+        NOT EXISTS (SELECT 1
+                    FROM mapuche.dh21
+                    WHERE dh21.nro_legaj = dh01.nro_legaj)
+        AND dh01.nro_legaj = $nro_legajo
+    ";
+
+        $resultado = static::query()->legajosActivosSinCargosVigentes($where_not_dh21)->first();
+
+        return $resultado?->toArray();
+    }
+
     // ####################################################################################
     // ######################################  SCOPES  ####################################
 
@@ -202,21 +253,6 @@ class Dh01 extends Model
         ) = ?", [$cuil]);
     }
 
-    /**
-     * Verifica si un legajo específico está jubilado.
-     *
-     * @param string $nro_legajo Número de legajo a verificar.
-     *
-     * @return bool Retorna verdadero si el legajo está jubilado, falso de lo contrario.
-     */
-    public static function esJubilado($nro_legajo): bool
-    {
-        return static::query()
-            ->where('nro_legaj', $nro_legajo)
-            ->where('tipo_estad', 'J')
-            ->exists();
-    }
-
     protected function getCuil(): Attribute
     {
         return Attribute::make(
@@ -229,42 +265,6 @@ class Dh01 extends Model
         return Attribute::make(
             get: fn(): string => "{$this->desc_appat}, {$this->desc_nombr}",
         );
-    }
-
-    // ####################################################################################
-    // ######################################  FUNCIONES  ####################################
-
-    /**
-     * Obtiene legajos activos sin cargos vigentes como array.
-     *
-     * @param string $where Condición adicional WHERE
-     *
-     * @return array
-     */
-    public static function getLegajosActivosSinCargosVigentes($where)
-    {
-        return self::query()->legajosActivosSinCargosVigentes($where)->get()->toArray();
-    }
-
-    /**
-     * Obtiene un legajo activo sin cargos vigentes y sin registros en dh21.
-     *
-     * @param int $nro_legajo Número de legajo a buscar
-     *
-     * @return array|null Retorna el legajo si cumple las condiciones o null si no existe
-     */
-    public static function getLegajoSinLiquidarYSinDh21(int $nro_legajo): ?array
-    {
-        $where_not_dh21 = "
-        NOT EXISTS (SELECT 1
-                    FROM mapuche.dh21
-                    WHERE dh21.nro_legaj = dh01.nro_legaj)
-        AND dh01.nro_legaj = $nro_legajo
-    ";
-
-        $resultado = static::query()->legajosActivosSinCargosVigentes($where_not_dh21)->first();
-
-        return $resultado ? $resultado->toArray() : null;
     }
 
     protected function cuilCompleto(): Attribute

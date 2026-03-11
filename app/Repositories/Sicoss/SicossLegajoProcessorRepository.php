@@ -111,7 +111,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
             //#44909 Incorporar a la salida de SICOSS el código de situación Reserva de Puesto (14)
             if ($check_sin_activo) {
-                $legajo_sin_liquidar = Dh01::getLegajoSinLiquidarYSinDh21($legajo);
+                $legajo_sin_liquidar = Dh01::getLegajoSinLiquidarSinDh21($legajo);
 
                 if ($legajo_sin_liquidar) {
                     $legajos[$i]['codigosituacion'] = 14;
