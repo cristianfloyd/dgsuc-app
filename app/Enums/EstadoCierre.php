@@ -24,7 +24,7 @@ enum EstadoCierre: string
     public static function asSelectArray(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-            ->toArray();
+            ->mapWithKeys(fn($case): array => [$case->value => $case->getLabel()])
+            ->all();
     }
 }

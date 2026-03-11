@@ -72,7 +72,7 @@ enum PuestoDesempenado: string
      */
     public static function toArray(): array
     {
-        return array_reduce(self::cases(), function (array $carry, $enum) {
+        return array_reduce(self::cases(), function (array $carry, \App\Enums\PuestoDesempenado $enum): array {
             $carry[$enum->value] = [
                 'codigo' => $enum->value,
                 'descripcion' => $enum->descripcion(),

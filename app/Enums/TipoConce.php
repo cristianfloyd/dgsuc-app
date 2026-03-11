@@ -94,7 +94,7 @@ enum TipoConce: string
     /**
      * Determina si el concepto es un descuento o aporte patronal.
      */
-    public function esDescuentoOAporte(): bool
+    public function esDescuentoAporte(): bool
     {
         return in_array($this, [
             self::DESCUENTO,

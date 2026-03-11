@@ -36,8 +36,8 @@ enum EstadoLaboral: string
      */
     public static function toArray(): array
     {
-        return collect(self::cases())->mapWithKeys(fn($estado) => [
+        return collect(self::cases())->mapWithKeys(fn($estado): array => [
             $estado->value => $estado->descripcion(),
-        ])->toArray();
+        ])->all();
     }
 }
