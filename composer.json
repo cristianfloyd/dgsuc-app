@@ -105,6 +105,8 @@
             "@rector:dry",
             "@analyse"
         ],
+        "quality:path": "bash scripts/quality-path.sh",
+        "quality:path:check": "bash scripts/quality-path.sh --check",
         "quality:ci": [
             "@cs-fix:dry",
             "@lint:summary",

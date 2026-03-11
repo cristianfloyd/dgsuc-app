@@ -123,6 +123,7 @@ return (new PhpCsFixer\Config())
         'logical_operators' => true,  // and/or -> &&/||
         'single_line_throw' => true,
         'single_line_empty_body' => true,
+        'control_structure_continuation_position' => ['position' => 'same_line'],
     ])
     ->setParallelConfig(new PhpCsFixer\Runner\Parallel\ParallelConfig(12, 20))
     ->setRiskyAllowed(true)

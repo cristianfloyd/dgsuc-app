@@ -69,7 +69,24 @@
     
     <!-- Reglas de naming conventions -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
-    <rule ref="Generic.NamingConventions.CamelCapsFunctionName"/>
+    <rule ref="Generic.NamingConventions.CamelCapsFunctionName">
+        <!-- Excluir archivos con métodos en español que usan "Y" como conjunción -->
+        <exclude-pattern>app/Models/OrigenesModel.php</exclude-pattern>
+        <exclude-pattern>app/Models/Dh01.php</exclude-pattern>
+    </rule>
+    
+    <!-- Desactivar SpaceAfterCloseBrace - PER-CS permite else/elseif en nueva línea -->
+    <rule ref="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace">
+        <severity>0</severity>
+    </rule>
+    
+    <!-- Permitir single_line_empty_body (conflicto con PHP CS Fixer) -->
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore">
+        <severity>0</severity>
+    </rule>
     
     <!-- Reglas específicas para PHP moderno -->
     <rule ref="Generic.PHP.LowerCaseKeyword"/>
