@@ -8,6 +8,7 @@ use App\Data\AfipMapucheSicossCalculoData;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para cálculos AFIP SICOSS Mapuche.
@@ -69,10 +70,11 @@ class AfipMapucheSicossCalculo extends Model
     {
         return AfipMapucheSicossCalculoData::from($this);
     }
+
     /**
      * Cast de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

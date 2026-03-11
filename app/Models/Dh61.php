@@ -8,16 +8,17 @@ use App\ValueObjects\CategoryIdentifier;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 use function count;
 
 /*
  * (D) HISTORICO-Tabla de Categorias de Empleados
- * */
+ */
 class Dh61 extends Model
 {
-    use MapucheConnectionTrait;
     use HasCompositePrimaryKey;
+    use MapucheConnectionTrait;
 
     public $timestamps = false;
 
@@ -32,31 +33,49 @@ class Dh61 extends Model
      */
     protected $primaryKey = ['codc_categ', 'vig_caano', 'vig_cames'];
 
-    protected $fillable = ['codc_categ', 'equivalencia', 'tipo_escal', 'nro_escal', 'impp_basic', 'codc_dedic', 'sino_mensu', 'sino_djpat', 'vig_caano', 'vig_cames', 'desc_categ', 'sino_jefat', 'impp_asign', 'computaantig', 'controlcargos', 'controlhoras', 'controlpuntos', 'controlpresup', 'horasmenanual', 'cantpuntos', 'estadolaboral', 'nivel', 'tipocargo', 'remunbonif', 'noremunbonif', 'remunnobonif', 'noremunnobonif', 'otrasrem', 'dto1610', 'reflaboral', 'refadm95', 'critico', 'jefatura', 'gastosrepre', 'codigoescalafon', 'noinformasipuver', 'noinformasirhu', 'imppnooblig', 'aportalao'];
+    protected $fillable = [
+        'codc_categ',
+        'equivalencia',
+        'tipo_escal',
+        'nro_escal',
+        'impp_basic',
+        'codc_dedic',
+        'sino_mensu',
+        'sino_djpat',
+        'vig_caano',
+        'vig_cames',
+        'desc_categ',
+        'sino_jefat',
+        'impp_asign',
+        'computaantig',
+        'controlcargos',
+        'controlhoras',
+        'controlpuntos',
+        'controlpresup',
+        'horasmenanual',
+        'cantpuntos',
+        'estadolaboral',
+        'nivel',
+        'tipocargo',
+        'remunbonif',
+        'noremunbonif',
+        'remunnobonif',
+        'noremunnobonif',
+        'otrasrem',
+        'dto1610',
+        'reflaboral',
+        'refadm95',
+        'critico',
+        'jefatura',
+        'gastosrepre',
+        'codigoescalafon',
+        'noinformasipuver',
+        'noinformasirhu',
+        'imppnooblig',
+        'aportalao',
+    ];
 
     private ?string $virtualId = null;
-
-    // Scope para filtrar por categoría
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function categoria($query, $categoria)
-    {
-        return $query->where('codc_categ', str_pad(trim((string) $categoria), 4));
-    }
-
-    // Scope para filtrar por vigencia
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function vigencia($query, $ano, $mes)
-    {
-        return $query->where('vig_caano', $ano)
-            ->where('vig_cames', $mes);
-    }
-
-    // Método para obtener categorías activas
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function activas($query)
-    {
-        return $query->where('estadolaboral', 'A');
-    }
 
     // Método para verificar si es jefatura
     public function esJefatura(): bool
@@ -74,11 +93,11 @@ class Dh61 extends Model
     public function getTotalRemuneraciones(): float
     {
         return (float) $this->impp_basic
-               + (float) $this->remunbonif
-               + (float) $this->noremunbonif
-               + (float) $this->remunnobonif
-               + (float) $this->noremunnobonif
-               + (float) $this->otrasrem;
+            + (float) $this->remunbonif
+            + (float) $this->noremunbonif
+            + (float) $this->remunnobonif
+            + (float) $this->noremunnobonif
+            + (float) $this->otrasrem;
     }
 
     // Método para verificar si requiere declaración jurada patrimonial
@@ -87,14 +106,7 @@ class Dh61 extends Model
         return $this->sino_djpat === 'S';
     }
 
-    // Método para obtener categorías por escalafón
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porEscalafon($query, $codigoEscalafon)
-    {
-        return $query->where('codigoescalafon', $codigoEscalafon);
-    }
-
-    #[\Override]
+    #[Override]
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
@@ -104,6 +116,7 @@ class Dh61 extends Model
     }
 
     // ########################## Métodos para Filamentphp ##################################
+
     /**
      * Método para buscar por ID virtual.
      */
@@ -111,7 +124,8 @@ class Dh61 extends Model
     {
         $parts = explode('-', $virtualId);
 
-        return static::query()->where('codc_categ', $parts[0])
+        return static::query()
+            ->where('codc_categ', $parts[0])
             ->where('vig_caano', $parts[1])
             ->where('vig_cames', $parts[2])
             ->first();
@@ -134,23 +148,21 @@ class Dh61 extends Model
             ->where('vig_cames', (int) $parts[2])
             ->first();
     }
+
     /**
      * Método para búsqueda por ID virtual.
      */
     // public static function find($id): Dh61|null
     // {
     //     if (!$id) return null;
-
     //     $identifier = CategoryIdentifier::fromString($id);
-
     //     return static::query()
     //         ->where('codc_categ', $identifier->getCategory())
     //         ->where('vig_caano', (int)$identifier->getYear())
     //         ->where('vig_cames', (int)$identifier->getMonth())
     //         ->first();
     // }
-
-    #[\Override]
+    #[Override]
     public function getKeyName(): string
     {
         return 'id';
@@ -160,7 +172,7 @@ class Dh61 extends Model
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
      */
-    #[\Override]
+    #[Override]
     public function getKey(): string
     {
         return $this->id;
@@ -171,40 +183,73 @@ class Dh61 extends Model
      *
      * @param string $key El valor de la clave a establecer.
      */
-    #[\Override]
+    #[Override]
     public function setKeyName($key): void
     {
         $this->id = $key;
     }
 
-    #[\Override]
+    #[Override]
     public function getRouteKeyName(): string
     {
         return 'id';
     }
 
-    #[\Override]
+    #[Override]
     public function getRouteKey(): string
     {
         return $this->id;
     }
 
-    #[\Override]
+    #[Override]
     public function resolveRouteBinding($value, $field = null)
     {
         if ($field === null) {
             $identifier = CategoryIdentifier::fromString($value);
-            return $this->where('codc_categ', $identifier->getCategory())
+
+            return $this
+                ->where('codc_categ', $identifier->getCategory())
                 ->where('vig_caano', $identifier->getYear())
                 ->where('vig_cames', $identifier->getMonth())
                 ->firstOrFail();
         }
+
         return parent::resolveRouteBinding($value, $field);
     }
 
     public static function resolveRecordRouteBinding(string $key): ?Model
     {
         return static::query()->getModel()::find($key);
+    }
+
+    // Scope para filtrar por categoría
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function categoria($query, $categoria)
+    {
+        return $query->where('codc_categ', str_pad(trim((string) $categoria), 4));
+    }
+
+    // Scope para filtrar por vigencia
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function vigencia($query, $ano, $mes)
+    {
+        return $query
+            ->where('vig_caano', $ano)
+            ->where('vig_cames', $mes);
+    }
+
+    // Método para obtener categorías activas
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activas($query)
+    {
+        return $query->where('estadolaboral', 'A');
+    }
+
+    // Método para obtener categorías por escalafón
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porEscalafon($query, $codigoEscalafon)
+    {
+        return $query->where('codigoescalafon', $codigoEscalafon);
     }
 
     // public function newQuery()
@@ -221,7 +266,7 @@ class Dh61 extends Model
     protected function id(): Attribute
     {
         return Attribute::make(
-            get: fn() => (string) new CategoryIdentifier(
+            get: fn(): string => (string) new CategoryIdentifier(
                 $this->codc_categ,
                 $this->vig_caano,
                 $this->vig_cames,
@@ -231,6 +276,7 @@ class Dh61 extends Model
                 $this->codc_categ = $categoryIdentifier->getCategory();
                 $this->vig_caano = $categoryIdentifier->getYear();
                 $this->vig_cames = $categoryIdentifier->getMonth();
+
                 return $value;
             },
         );
@@ -243,7 +289,8 @@ class Dh61 extends Model
             set: fn(string $value): string => str_pad(trim($value), 4),
         );
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

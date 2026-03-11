@@ -8,6 +8,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para la tabla de Grupos de Conceptos del schema Mapuche.
@@ -53,7 +54,7 @@ class Dh15 extends Model
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

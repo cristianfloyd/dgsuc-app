@@ -174,65 +174,6 @@ class Dh09 extends Model
     ];
 
     // ========================================
-    // SCOPES PARA CONSULTAS COMUNES
-    // ========================================
-
-    /**
-     * Scope para filtrar por empleados activos (no fallecidos).
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function activos(Builder $query): Builder
-    {
-        return $query->whereNull('fec_defun');
-    }
-
-    /**
-     * Scope para filtrar por empleados jubilados.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function jubilados(Builder $query): Builder
-    {
-        return $query->where('sino_jubil', 'S');
-    }
-
-    /**
-     * Scope para filtrar por empleados con embargo.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function conEmbargo(Builder $query): Builder
-    {
-        return $query->where('sino_embargo', true);
-    }
-
-    /**
-     * Scope para filtrar por período de vigencia.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porPeriodo(Builder $query, int $ano, int $mes): Builder
-    {
-        return $query->where('vig_otano', $ano)
-            ->where('vig_otmes', $mes);
-    }
-
-    /**
-     * Scope para filtrar por obra social.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porObraSocial(Builder $query, string $codigoObraSocial): Builder
-    {
-        return $query->where('codc_obsoc', $codigoObraSocial);
-    }
-
-    /**
-     * Scope para filtrar por dependencia.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porDependencia(Builder $query, string $codigoDependencia): Builder
-    {
-        return $query->where('codc_uacad', $codigoDependencia);
-    }
-
-    // ========================================
     // MÉTODOS DE UTILIDAD
     // ========================================
 
@@ -358,6 +299,7 @@ class Dh09 extends Model
     /**
      * Relación con la tabla de empleados (DH01)
      * Un empleado tiene un registro de otros datos.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
      */
     public function empleado(): BelongsTo
@@ -367,6 +309,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab02).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple02(): BelongsTo
@@ -376,6 +319,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab08).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple08(): BelongsTo
@@ -385,6 +329,7 @@ class Dh09 extends Model
 
     /**
      * Relación con tabla múltiple DH30 (nro_tab09).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh30, $this>
      */
     public function tablaMultiple09(): BelongsTo
@@ -689,6 +634,65 @@ class Dh09 extends Model
         }
     }
 
+    // ========================================
+    // SCOPES PARA CONSULTAS COMUNES
+    // ========================================
+
+    /**
+     * Scope para filtrar por empleados activos (no fallecidos).
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function activos(Builder $query): Builder
+    {
+        return $query->whereNull('fec_defun');
+    }
+
+    /**
+     * Scope para filtrar por empleados jubilados.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function jubilados(Builder $query): Builder
+    {
+        return $query->where('sino_jubil', 'S');
+    }
+
+    /**
+     * Scope para filtrar por empleados con embargo.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function conEmbargo(Builder $query): Builder
+    {
+        return $query->where('sino_embargo', true);
+    }
+
+    /**
+     * Scope para filtrar por período de vigencia.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porPeriodo(Builder $query, int $ano, int $mes): Builder
+    {
+        return $query->where('vig_otano', $ano)
+            ->where('vig_otmes', $mes);
+    }
+
+    /**
+     * Scope para filtrar por obra social.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porObraSocial(Builder $query, string $codigoObraSocial): Builder
+    {
+        return $query->where('codc_obsoc', $codigoObraSocial);
+    }
+
+    /**
+     * Scope para filtrar por dependencia.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porDependencia(Builder $query, string $codigoDependencia): Builder
+    {
+        return $query->where('codc_uacad', $codigoDependencia);
+    }
+
     /**
      * Summary of esJubilado.
      */
@@ -799,7 +803,7 @@ class Dh09 extends Model
      * Configuración de casting de tipos de datos
      * Organizado por tipos para mejor mantenimiento.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

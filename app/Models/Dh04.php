@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh04.
@@ -101,10 +102,11 @@ class Dh04 extends Model
     {
         return $query->whereNull('fec_egres');
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

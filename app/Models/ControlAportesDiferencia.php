@@ -6,6 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class ControlAportesDiferencia extends Model
 {
@@ -35,20 +36,6 @@ class ControlAportesDiferencia extends Model
     protected $appends = [
         'nro_cuil',
     ];
-
-    protected function nroCuil(): Attribute
-    {
-        return Attribute::make(
-            get: function (): ?int {
-                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
-                if ($this->cuil) {
-                    // Extrae los 8 dígitos del medio de `cuil`
-                    return (int) (substr($this->cuil, 2, 8));
-                }
-                return null;
-            },
-        );
-    }
 
     // ###############################################################
     // ######################## RELACIONES ###########################
@@ -97,6 +84,20 @@ class ControlAportesDiferencia extends Model
         );
     }
 
+    protected function nroCuil(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?int {
+                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
+                if ($this->cuil) {
+                    // Extrae los 8 dígitos del medio de `cuil`
+                    return (int) (substr($this->cuil, 2, 8));
+                }
+                return null;
+            },
+        );
+    }
+
     /**
      * Obtiene el total de aportes DH21.
      */
@@ -136,7 +137,8 @@ class ControlAportesDiferencia extends Model
             get: fn(): float|int|array => $this->contribucionsijp + $this->contribucioninssjp,
         );
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

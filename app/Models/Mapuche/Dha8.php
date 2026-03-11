@@ -9,6 +9,7 @@ use App\Traits\Mapuche\Dha8Queries;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para la tabla de datos personales DGI.
@@ -67,7 +68,7 @@ class Dha8 extends Model
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

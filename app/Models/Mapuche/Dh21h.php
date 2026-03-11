@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Override;
 use Spatie\LaravelData\WithData;
 
 /**
@@ -84,6 +85,15 @@ class Dh21h extends Model
         'codn_subsubar',
     ];
 
+    // ############################### Relaciones #######################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
+     */
+    public function dh22(): BelongsTo
+    {
+        return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
+    }
+
 
 
     /**####################### SCOPES ################################### **/
@@ -142,15 +152,6 @@ class Dh21h extends Model
             ->whereRaw("LOWER(dh22.desc_liqui) LIKE '%definitiva%'");
     }
 
-    // ############################### Relaciones #######################################
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
-     */
-    public function dh22(): BelongsTo
-    {
-        return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
-    }
-
     /** ############################### Accesors & Mutators ############################### */
     protected function importeConcepto(): Attribute
     {
@@ -163,7 +164,7 @@ class Dh21h extends Model
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

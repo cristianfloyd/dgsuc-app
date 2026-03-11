@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Override;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
@@ -59,13 +60,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'profile_photo_url',
     ];
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function search($query, string $val)
-    {
-        return $query->where('name', 'like', '%' . $val . '%')
-            ->orWhere('email', 'like', '%' . $val . '%');
-    }
-
     /**
      * @inheritDoc
      */
@@ -82,12 +76,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->profile_photo_path;
     }
 
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, string $val)
+    {
+        return $query->where('name', 'like', '%' . $val . '%')
+            ->orWhere('email', 'like', '%' . $val . '%');
+    }
+
     /**
      * Obtener los atributos que deben ser convertidos.
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

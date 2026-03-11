@@ -5,6 +5,7 @@ namespace App\Models\Suc;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class RetUda extends Model
 {
@@ -79,7 +80,7 @@ class RetUda extends Model
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

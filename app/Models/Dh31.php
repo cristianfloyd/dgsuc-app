@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class Dh31 extends Model
 {
@@ -26,7 +27,7 @@ class Dh31 extends Model
         'tipo_horas',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

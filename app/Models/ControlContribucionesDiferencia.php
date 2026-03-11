@@ -6,6 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class ControlContribucionesDiferencia extends Model
 {
@@ -32,20 +33,6 @@ class ControlContribucionesDiferencia extends Model
     protected $appends = [
         'nro_cuil',
     ];
-
-    protected function nroCuil(): Attribute
-    {
-        return Attribute::make(
-            get: function (): ?int {
-                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
-                if ($this->cuil) {
-                    // Extrae los 8 dígitos del medio de `cuil`
-                    return (int) (substr($this->cuil, 2, 8));
-                }
-                return null;
-            },
-        );
-    }
 
     // ################################################
     // ################## RELACIONES ##################
@@ -74,6 +61,20 @@ class ControlContribucionesDiferencia extends Model
         return $this->belongsTo(Dh01::class, 'nro_cuil', 'nro_cuil');
     }
 
+    protected function nroCuil(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?int {
+                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
+                if ($this->cuil) {
+                    // Extrae los 8 dígitos del medio de `cuil`
+                    return (int) (substr($this->cuil, 2, 8));
+                }
+                return null;
+            },
+        );
+    }
+
     // ################################################
     // ################## ACCESORES ##################
     // ################################################
@@ -86,10 +87,11 @@ class ControlContribucionesDiferencia extends Model
     protected function totalContribuciones(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp,
+            get: fn(): float|int|array => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp,
         );
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

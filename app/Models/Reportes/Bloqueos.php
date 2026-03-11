@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Override;
 
 class Bloqueos extends Model
 {
@@ -45,6 +46,17 @@ class Bloqueos extends Model
         'fecha_procesamiento',
         'procesado_por',
     ];
+
+    // ############################################################
+    // ###################### RELACIONES ##########################
+    // ############################################################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
+    public function legajo(): BelongsTo
+    {
+        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
 
     /**
      * Scope para filtrar por número de liquidación.
@@ -118,22 +130,12 @@ class Bloqueos extends Model
         return $query->where('chkstopliq', true);
     }
 
-    // ############################################################
-    // ###################### RELACIONES ##########################
-    // ############################################################
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
-     */
-    public function legajo(): BelongsTo
-    {
-        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
-    }
     /**
      * The attributes that should be cast.
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

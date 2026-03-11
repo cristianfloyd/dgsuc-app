@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Override;
 use Reedware\LaravelCompositeRelations\HasCompositeRelations;
 use Throwable;
 
@@ -111,20 +112,6 @@ class AfipMapucheSicoss extends Model
         'diferencia_rem',
     ];
 
-    protected function nroCuil(): Attribute
-    {
-        return Attribute::make(
-            get: function (): ?int {
-                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
-                if ($this->cuil) {
-                    // Extrae los 8 dígitos del medio de `cuil`
-                    return (int) (substr($this->cuil, 2, 8));
-                }
-                return null;
-            },
-        );
-    }
-
     /**
      * Formatea un valor decimal para el archivo SICOSS
      * Elimina el punto decimal y rellena con ceros a la izquierda.
@@ -150,21 +137,12 @@ class AfipMapucheSicoss extends Model
 
     /**
      * Obtiene el registro por período fiscal y CUIL.
-     *
-     *
      */
     public static function findByPeriodoAndCuil(string $periodoFiscal, string $cuil): ?AfipMapucheSicoss
     {
         return static::query()->where('periodo_fiscal', $periodoFiscal)
             ->where('cuil', $cuil)
             ->first();
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function search($query, string $search)
-    {
-        return $query->where('cuil', 'ilike', '%' . $search . '%')
-            ->orWhere('apnom', 'ilike', "%$search%");
     }
 
     // Agregar un nuevo método para obtener el periodo fiscal formateado si es necesario
@@ -442,8 +420,6 @@ class AfipMapucheSicoss extends Model
 
     /**
      * Procesar datos de SICOSS para el período actual.
-     *
-     *
      */
     public static function procesarDatosSicoss(string $periodoFiscal): void
     {
@@ -482,6 +458,27 @@ class AfipMapucheSicoss extends Model
                 'codc_reparto' => $config['codc_reparto'],
             ]);
         }
+    }
+
+    protected function nroCuil(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?int {
+                // Asegúrate de que `cuil` no sea null antes de intentar extraer `nro_cuil`
+                if ($this->cuil) {
+                    // Extrae los 8 dígitos del medio de `cuil`
+                    return (int) (substr($this->cuil, 2, 8));
+                }
+                return null;
+            },
+        );
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search($query, string $search)
+    {
+        return $query->where('cuil', 'ilike', '%' . $search . '%')
+            ->orWhere('apnom', 'ilike', "%$search%");
     }
 
     // ###########################################################################################
@@ -820,7 +817,7 @@ class AfipMapucheSicoss extends Model
         );
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -848,8 +845,6 @@ class AfipMapucheSicoss extends Model
 
     /**
      * Calcular importes para un legajo.
-     *
-     *
      */
     protected static function calculateImportes(int $nroLegaj, int $mes, int $anio): array
     {
@@ -893,10 +888,11 @@ class AfipMapucheSicoss extends Model
             'premios' => $result->importe_premios ?? 0,
         ];
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

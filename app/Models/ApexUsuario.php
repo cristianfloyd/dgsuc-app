@@ -6,6 +6,7 @@ use App\Services\EncodingService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
+use Override;
 
 use function in_array;
 
@@ -52,6 +53,42 @@ class ApexUsuario extends Model
         'uid',
         'p_uid',
     ];
+
+    public function estaBloqueado(): bool
+    {
+        return $this->bloqueado == 1;
+    }
+
+    public function requiereSegundoFactor(): bool
+    {
+        return $this->requiere_segundo_factor == 1;
+    }
+
+    public function debeForzarCambioPwd(): bool
+    {
+        return $this->forzar_cambio_pwd == 1;
+    }
+
+    public function getParametro($parametro)
+    {
+        $parametro = strtolower(trim((string) $parametro));
+        if (!in_array($parametro, ['a', 'b', 'c'])) {
+            throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
+        }
+
+        $campo = 'parametro_' . $parametro;
+        return $this->getAttribute($campo);
+    }
+
+    public function tieneVencimiento(): bool
+    {
+        return $this->vencimiento !== null && $this->vencimiento->isFuture();
+    }
+
+    public function estaVencido(): bool
+    {
+        return $this->vencimiento !== null && $this->vencimiento->isPast();
+    }
 
     protected function nombre(): Attribute
     {
@@ -127,42 +164,7 @@ class ApexUsuario extends Model
         return $query->whereNotNull('email')->where('email', '!=', '');
     }
 
-    public function estaBloqueado(): bool
-    {
-        return $this->bloqueado == 1;
-    }
-
-    public function requiereSegundoFactor(): bool
-    {
-        return $this->requiere_segundo_factor == 1;
-    }
-
-    public function debeForzarCambioPwd(): bool
-    {
-        return $this->forzar_cambio_pwd == 1;
-    }
-
-    public function getParametro($parametro)
-    {
-        $parametro = strtolower(trim((string) $parametro));
-        if (!in_array($parametro, ['a', 'b', 'c'])) {
-            throw new InvalidArgumentException("Parámetro '$parametro' es inválido. Debe ser 'a', 'b' o 'c'.");
-        }
-
-        $campo = 'parametro_' . $parametro;
-        return $this->getAttribute($campo);
-    }
-
-    public function tieneVencimiento(): bool
-    {
-        return $this->vencimiento !== null && $this->vencimiento->isFuture();
-    }
-
-    public function estaVencido(): bool
-    {
-        return $this->vencimiento !== null && $this->vencimiento->isPast();
-    }
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

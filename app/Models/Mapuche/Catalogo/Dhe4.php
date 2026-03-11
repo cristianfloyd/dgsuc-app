@@ -34,6 +34,7 @@ class Dhe4 extends Model
 
     /**
      * Relación con el modelo Dh36 (dependencias).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dh36, $this>
      */
     public function dependencias(): HasMany
@@ -43,6 +44,7 @@ class Dhe4 extends Model
 
     /**
      * Relación con el modelo Dh36 (dependencias evaluadas).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dh36, $this>
      */
     public function dependenciasEvaluadas(): HasMany
@@ -52,6 +54,7 @@ class Dhe4 extends Model
 
     /**
      * Relación consigo mismo para el organismo superior.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismoSuperior(): BelongsTo
@@ -61,6 +64,7 @@ class Dhe4 extends Model
 
     /**
      * Relación consigo mismo para los organismos subordinados.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismosSubordinados(): HasMany
@@ -78,6 +82,7 @@ class Dhe4 extends Model
 
     /**
      * Relación de uno a muchos entre el modelo Dhe4 y el modelo Dhe2, donde cada Dhe4 puede tener múltiples Dhe2.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Catalogo\Dhe2, $this>
      */
     public function dhe2(): HasMany
@@ -87,6 +92,7 @@ class Dhe4 extends Model
 
     /**
      * Relación de muchos a muchos entre el modelo Dhe4 y el modelo Dh30 a través de la tabla pivote dhe2.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Mapuche\Catalogo\Dh30, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function dh30Items(): BelongsToMany

@@ -9,6 +9,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla mapuche.dh90 que almacena información de cargos asociados.
@@ -116,7 +117,7 @@ class Dh90 extends Model
      *
      * @var array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -129,7 +130,7 @@ class Dh90 extends Model
     /**
      * Boot del modelo para configurar opciones específicas de PostgreSQL.
      */
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();

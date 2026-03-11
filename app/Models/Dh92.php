@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class Dh92 extends Model
 {
@@ -84,10 +85,11 @@ class Dh92 extends Model
         return $this->belongsTo(Dha9::class, 'codn_banco', 'codigo_entbancaria')
             ->where('codigo_sucursal', $this->codn_sucur);
     }
+
     /**
      * Los atributos que deben ser convertidos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

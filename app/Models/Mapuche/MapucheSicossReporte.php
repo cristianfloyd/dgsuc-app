@@ -40,19 +40,30 @@ class MapucheSicossReporte extends Model
         try {
             $tablaPeriodo = $this->determinarTablaPeriodo($anio, $mes);
             $subconsultaLiquidaciones = $this->generarSubconsultaLiquidaciones($anio, $mes);
+            $connectionName = $this->getConnectionName();
+            $dbConnection = DB::connection($connectionName);
 
-            return $query->from($tablaPeriodo)
+            return $query
+                ->from($tablaPeriodo)
                 ->select([
                     "$tablaPeriodo.nro_liqui",
                     'dh22.desc_liqui',
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (305) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c305'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (306,308) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c306'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS aportesijpdh21'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (247) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS aporteinssjpdh21'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucionsijpdh21'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucioninssjpdh21'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'C\' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS remunerativo'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS no_remunerativo'),
+                    $dbConnection->raw('SUM(CASE WHEN codn_conce IN (305) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS c305'),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (306,308) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS c306',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS aportesijpdh21',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (247) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS aporteinssjpdh21',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS contribucionsijpdh21',
+                    ),
+                    $dbConnection->raw('SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS contribucioninssjpdh21'),
+                    $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'C' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS remunerativo"),
+                    $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'S' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS no_remunerativo"),
                 ])
                 ->join('mapuche.dh01', "$tablaPeriodo.nro_legaj", '=', 'dh01.nro_legaj')
                 ->join('mapuche.dh22', "$tablaPeriodo.nro_liqui", '=', 'dh22.nro_liqui')
@@ -64,6 +75,7 @@ class MapucheSicossReporte extends Model
                 'anio' => $anio,
                 'mes' => $mes,
             ]);
+
             return $query->whereRaw('1 = 0');
         }
     }
@@ -79,17 +91,31 @@ class MapucheSicossReporte extends Model
         try {
             $tablaPeriodo = $this->determinarTablaPeriodo($anio, $mes);
             $subconsultaLiquidaciones = $this->generarSubconsultaLiquidaciones($anio, $mes);
-
-            $result = $query->from($tablaPeriodo)
+            $connectionName = $this->getConnectionName();
+            $dbConnection = DB::connection($connectionName);
+            $result = $query
+                ->from($tablaPeriodo)
                 ->select([
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (305) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS total_c305'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (306) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) AS total_c306'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_aportes_sijp'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (247) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_aportes_inssjp'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_contribuciones_sijp'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN codn_conce IN (347) THEN impp_conce * 1 ELSE impp_conce * 0 END)::NUMERIC(15,2) as total_contribuciones_inssjp'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'C\' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_remunerativo'),
-                    DB::connection($this->getConnectionName())->raw('SUM(CASE WHEN tipo_conce = \'S\' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_no_remunerativo'),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (305) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS total_c305',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (306) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) AS total_c306',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (201,202,203,205,204) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_aportes_sijp',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (247) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_aportes_inssjp',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (301,302,303,304,307) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_contribuciones_sijp',
+                    ),
+                    $dbConnection->raw(
+                        'SUM(CASE WHEN codn_conce IN (347) THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_contribuciones_inssjp',
+                    ),
+                    $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'C' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_remunerativo"),
+                    $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'S' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_no_remunerativo"),
                 ])
                 ->join('mapuche.dh01', $tablaPeriodo . '.nro_legaj', '=', 'dh01.nro_legaj')
                 ->join('mapuche.dh22', $tablaPeriodo . '.nro_liqui', '=', 'dh22.nro_liqui')
@@ -157,6 +183,7 @@ class MapucheSicossReporte extends Model
                 'anio' => $anio,
                 'mes' => $mes,
             ]);
+
             // En caso de error, usar la tabla histórica por defecto
             return 'mapuche.dh21h';
         }
@@ -173,7 +200,8 @@ class MapucheSicossReporte extends Model
     private function generarSubconsultaLiquidaciones(string $anio, string $mes): Closure
     {
         return function ($query) use ($anio, $mes): void {
-            $query->select('nro_liqui')
+            $query
+                ->select('nro_liqui')
                 ->from('mapuche.dh22')
                 ->where('sino_genimp', true)
                 ->where('per_liano', $anio)

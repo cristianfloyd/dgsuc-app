@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Override;
 
 class Documentation extends Model
 {
@@ -43,7 +44,7 @@ class Documentation extends Model
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -54,7 +55,8 @@ class Documentation extends Model
             }
         });
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

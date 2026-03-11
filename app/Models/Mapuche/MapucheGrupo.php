@@ -29,6 +29,7 @@ class MapucheGrupo extends Model
 
     /**
      * Los permisos asociados al grupo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\MapucheGrupoPermiso, $this>
      */
     public function permisos(): HasMany
@@ -38,6 +39,7 @@ class MapucheGrupo extends Model
 
     /**
      * Los legajos asociados al grupo a través de la tabla pivote.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Dh01, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
      */
     public function legajos(): BelongsToMany
@@ -52,11 +54,20 @@ class MapucheGrupo extends Model
 
     /**
      * Relación directa con la tabla pivote.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\MapucheGrupoLegajo, $this>
      */
     public function grupoLegajos(): HasMany
     {
         return $this->hasMany(MapucheGrupoLegajo::class, 'id_grupo', 'id_grupo');
+    }
+
+    /**
+     * Convertir el modelo a DTO.
+     */
+    public function toDto(): GrupoData
+    {
+        return GrupoData::from($this);
     }
 
     /**
@@ -78,14 +89,6 @@ class MapucheGrupo extends Model
     }
 
     /**
-     * Convertir el modelo a DTO.
-     */
-    public function toDto(): GrupoData
-    {
-        return GrupoData::from($this);
-    }
-
-    /**
      * Boot the model.
      */
     #[Override]
@@ -97,7 +100,7 @@ class MapucheGrupo extends Model
         });
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

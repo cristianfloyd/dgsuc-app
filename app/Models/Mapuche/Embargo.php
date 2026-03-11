@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla mapuche.emb_embargo.
@@ -123,13 +124,6 @@ class Embargo extends Model
         'id_tipo_expediente',
     ];
 
-    protected function detallenovedad(): Attribute
-    {
-        return new Attribute(
-            get: fn(): string => "{$this->codn_conce}-{$this->nro_oficio}",
-        );
-    }
-
     public function getImporteDescontado(int $nro_liqui): Collection
     {
         return  Dh21::query()
@@ -145,6 +139,7 @@ class Embargo extends Model
     // ############### RELACIONES ####################
     /**
      * Relación con el beneficiario.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\Beneficiario, $this>
      */
     public function beneficiario(): BelongsTo
@@ -154,6 +149,7 @@ class Embargo extends Model
 
     /**
      * Relación con el estado del embargo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\EstadoEmbargo, $this>
      */
     public function estado(): BelongsTo
@@ -163,6 +159,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de remuneración.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoRemuneracion, $this>
      */
     public function tipoRemuneracion(): BelongsTo
@@ -172,6 +169,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de embargo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoEmbargo, $this>
      */
     public function tipoEmbargo(): BelongsTo
@@ -181,6 +179,7 @@ class Embargo extends Model
 
     /**
      * Relación con el juzgado.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\Juzgado, $this>
      */
     public function juzgado(): BelongsTo
@@ -190,6 +189,7 @@ class Embargo extends Model
 
     /**
      * Relación con la cuenta judicial.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\CuentaJudicial, $this>
      */
     public function cuentaJudicial(): BelongsTo
@@ -202,6 +202,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de juicio.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoJuicio, $this>
      */
     public function tipoJuicio(): BelongsTo
@@ -211,6 +212,7 @@ class Embargo extends Model
 
     /**
      * Relación con el tipo de expediente.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoExpediente, $this>
      */
     public function tipoExpediente(): BelongsTo
@@ -231,6 +233,7 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de liquidaciones asociadas al embargo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh21, $this>
      */
     public function liquidaciones(): HasMany
@@ -240,6 +243,7 @@ class Embargo extends Model
 
     /**
      * Obtiene la relación de cargos asociados al embargo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
      */
     public function cargo(): HasMany
@@ -263,6 +267,13 @@ class Embargo extends Model
         ];
     }
 
+    protected function detallenovedad(): Attribute
+    {
+        return new Attribute(
+            get: fn(): string => "{$this->codn_conce}-{$this->nro_oficio}",
+        );
+    }
+
     protected function caratula(): Attribute
     {
         return Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value));
@@ -276,7 +287,7 @@ class Embargo extends Model
     /**
      * Casting de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

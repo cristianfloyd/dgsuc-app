@@ -117,12 +117,6 @@ class TablaTempCuils extends Model
         }
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function cuil($query, $cuil)
-    {
-        return $query->where('cuil', $cuil);
-    }
-
     public function getSchemaName(): string
     {
         return $this->schema;
@@ -131,6 +125,12 @@ class TablaTempCuils extends Model
     public function getFullTableName(): string
     {
         return "{$this->schema}.{$this->table}";
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function cuil($query, $cuil)
+    {
+        return $query->where('cuil', $cuil);
     }
 
     protected static function getConnectionNombre(): string

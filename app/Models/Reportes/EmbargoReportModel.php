@@ -11,6 +11,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Override;
 
 class EmbargoReportModel extends Model
 {
@@ -47,22 +48,10 @@ class EmbargoReportModel extends Model
         'nro_liqui',
         '861',
     ];
-    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
-    }
 
     public function geImporteDescontadoAttribute($value): string
     {
         return number_format($value, 2, ',', '.');
-    }
-    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value), set: fn(?string $value): array => ['caratula' => EncodingService::toLatin1($value)]);
-    }
-    protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value), set: fn(?string $value): array => ['nombre_completo' => EncodingService::toLatin1($value)]);
     }
 
     // ######################################################################
@@ -146,7 +135,7 @@ class EmbargoReportModel extends Model
 
 
             // Preparamos los datos para inserción
-            $dataToInsert = $data->map(fn($item) => [
+            $dataToInsert = $data->map(fn($item): array => [
                 'nro_legaj' => $item->nro_legaj,
                 'nombre_completo' => $item->nom_demandado,
                 'codn_conce' => $item->codn_conce,
@@ -210,8 +199,29 @@ class EmbargoReportModel extends Model
         }
     }
 
+    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
+    }
+
+    protected function caratula(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): array => ['caratula' => EncodingService::toLatin1($value)],
+        );
+    }
+
+    protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn(?string $value): ?string => EncodingService::toUtf8($value),
+            set: fn(?string $value): array => ['nombre_completo' => EncodingService::toLatin1($value)],
+        );
+    }
+
     // ##################################### RELACIONES ##########################################
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

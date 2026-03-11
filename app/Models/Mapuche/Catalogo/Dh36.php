@@ -66,14 +66,9 @@ class Dh36 extends Model
         });
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function withoutEncoding($query)
-    {
-        return $query->whereRaw("encode(descdependesemp::bytea, 'escape') IS NOT NULL");
-    }
-
     /**
      * Relación con el modelo Dhe4 (organismo).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismo(): BelongsTo
@@ -83,6 +78,7 @@ class Dh36 extends Model
 
     /**
      * Relación con el modelo Dhe4 (organismo evaluador).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
      */
     public function organismoEvaluador(): BelongsTo
@@ -106,6 +102,12 @@ class Dh36 extends Model
         return $this->belongsTo(Dhe4::class, 'cod_organismo', 'cod_organismo');
     }
 
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withoutEncoding($query)
+    {
+        return $query->whereRaw("encode(descdependesemp::bytea, 'escape') IS NOT NULL");
+    }
+
     /* ################### ACCESSORS Y MUTATORS ################### */
     protected function descdependesemp(): Attribute
     {
@@ -115,7 +117,7 @@ class Dh36 extends Model
         );
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

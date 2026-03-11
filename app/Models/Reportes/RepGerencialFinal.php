@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla rep_ger_final.
@@ -64,6 +65,23 @@ class RepGerencialFinal extends Model
         'cod_clasif_cargo', 'tipo_carac', 'rem_s_apor',
     ];
 
+    /* #################### RELACIONES #################### */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh36, $this>
+     */
+    public function dependencia(): BelongsTo
+    {
+        return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
+     */
+    public function unidadAcademica(): BelongsTo
+    {
+        return $this->belongsTo(Dhe4::class, 'codc_uacad', 'cod_organismo');
+    }
+
 
     /* #################### SCOPES #################### */
 
@@ -92,26 +110,10 @@ class RepGerencialFinal extends Model
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => "{$this->apellido_elegido}, {$this->nombre_elegido}");
     }
 
-    /* #################### RELACIONES #################### */
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dh36, $this>
-     */
-    public function dependencia(): BelongsTo
-    {
-        return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Catalogo\Dhe4, $this>
-     */
-    public function unidadAcademica(): BelongsTo
-    {
-        return $this->belongsTo(Dhe4::class, 'codc_uacad', 'cod_organismo');
-    }
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

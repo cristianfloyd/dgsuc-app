@@ -33,6 +33,7 @@ class Dl09 extends Model
 
     /**
      * Relación con el modelo Dh05.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Dh05, $this>
      */
     public function dh05s(): HasMany

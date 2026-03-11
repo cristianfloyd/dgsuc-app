@@ -7,6 +7,7 @@ namespace App\Models\Mapuche;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para la tabla de Objetos del Gasto x Concepto.
@@ -49,7 +50,7 @@ class Dh17 extends Model
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -7,6 +7,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /*
 * (D) Ganancias: Acum. de Empleados
@@ -201,7 +202,7 @@ class Dh41 extends Model
      *
      * @return array
      */
-    #[\Override]
+    #[Override]
     public function getKeyName()
     {
         return $this->compositePrimaryKey;

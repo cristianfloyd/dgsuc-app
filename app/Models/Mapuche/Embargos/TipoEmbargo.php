@@ -59,6 +59,7 @@ class TipoEmbargo extends Model
 
     /**
      * Relación con embargos.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Embargo, $this>
      */
     public function embargos(): HasMany
@@ -68,6 +69,7 @@ class TipoEmbargo extends Model
 
     /**
      * Relación con tipo de remuneración.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Embargos\TipoRemuneracion, $this>
      */
     public function tipoRemuneracion(): BelongsTo
@@ -77,6 +79,7 @@ class TipoEmbargo extends Model
 
     /**
      * Relación con concepto DH12.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function concepto(): BelongsTo
@@ -102,7 +105,7 @@ class TipoEmbargo extends Model
     /**
      * Casting de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class ControlCuilsDiferencia extends Model
 {
@@ -20,7 +21,7 @@ class ControlCuilsDiferencia extends Model
         'connection',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

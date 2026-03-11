@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Esta clase representa los datos parseados de un TXT
@@ -69,7 +70,7 @@ class NovedadesCargoImportModel extends Model
         'errors',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -97,11 +98,11 @@ class NovedadesCargoImportModel extends Model
             'obra' => 'integer',
             'finalidad' => 'integer',
             'funcion' => 'integer',
-    
+
             // Banderas booleanas
             'conActualizacion' => 'boolean',
             'nuevosIdentificadores' => 'boolean',
-    
+
             // Lista de errores en formato array
             'errors' => 'array',
         ];

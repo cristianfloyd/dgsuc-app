@@ -8,6 +8,7 @@ use App\Traits\MapucheConnectionTrait;
 use Database\Factories\Dh16Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Conceptos por Grupo en sistema Mapuche.
@@ -61,7 +62,7 @@ class Dh16 extends Model
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

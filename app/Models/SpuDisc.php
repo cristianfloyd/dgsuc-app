@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 use function is_array;
 
@@ -36,6 +37,7 @@ class SpuDisc extends Model
 
     /**
      * Relación con el modelo Dh03.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh03, $this>
      */
     public function dh03s(): HasMany
@@ -46,7 +48,7 @@ class SpuDisc extends Model
     }
 
     // Sobrescribir el método para manejar la clave primaria compuesta
-    #[\Override]
+    #[Override]
     protected function setKeysForSaveQuery($query)
     {
         $keys = $this->getKeyName();
@@ -68,7 +70,7 @@ class SpuDisc extends Model
      *
      * @return mixed El valor de la clave primaria compuesta.
      */
-    #[\Override]
+    #[Override]
     protected function getKeyForSaveQuery($keyName = null)
     {
         if ($keyName === null) {

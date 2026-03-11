@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class ComprobanteNominaModel extends Model
 {
@@ -28,7 +29,7 @@ class ComprobanteNominaModel extends Model
         'codigo_grupo',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

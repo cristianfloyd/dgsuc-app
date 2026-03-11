@@ -216,6 +216,22 @@ class Dh22 extends Model
         return static::query()->where('nro_liqui', $nroLiquiValue)->exists();
     }
 
+    /**
+     * Obtiene liquidaciones filtradas por periodo fiscal y formateadas para un select.
+     *
+     * @param array<string, int|string>|null $periodoFiscal Array con claves 'year' y 'month'
+     *
+     * @return SupportCollection<int, non-falsy-string>
+     */
+    public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null): SupportCollection
+    {
+        return static::getLiquidacionesForWidget()
+            ->filterByPeriodoFiscal($periodoFiscal)
+            ->formateadoParaSelect()
+            ->get()
+            ->pluck('descripcion_completa', 'nro_liqui');
+    }
+
     /* ################################ ACCESORES Y MUTADORES ################################ */
 
     protected function descLiqui(): Attribute
@@ -371,7 +387,7 @@ class Dh22 extends Model
         return $query->whereRaw(
             "CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?",
             [
-                $periodoFiscal['year'] . str_pad((string) $periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
+                $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
             ],
         );
     }
@@ -387,21 +403,5 @@ class Dh22 extends Model
     protected function formateadoParaSelect($query)
     {
         return $query->select('nro_liqui', 'desc_liqui');
-    }
-
-    /**
-     * Obtiene liquidaciones filtradas por periodo fiscal y formateadas para un select.
-     *
-     * @param array<string, int|string>|null $periodoFiscal Array con claves 'year' y 'month'
-     *
-     * @return SupportCollection<int, non-falsy-string>
-     */
-    public static function getLiquidacionesByPeriodoFiscal(?array $periodoFiscal = null): SupportCollection
-    {
-        return static::getLiquidacionesForWidget()
-            ->filterByPeriodoFiscal($periodoFiscal)
-            ->formateadoParaSelect()
-            ->get()
-            ->pluck('descripcion_completa', 'nro_liqui');
     }
 }

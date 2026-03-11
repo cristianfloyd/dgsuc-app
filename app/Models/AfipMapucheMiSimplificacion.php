@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
+use Override;
 
 use const STR_PAD_LEFT;
 
@@ -90,13 +91,6 @@ class AfipMapucheMiSimplificacion extends Model
         return "{$this->schema}.{$this->table}";
     }
 
-    // Método para consultas grandes
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function chunked($query, $callback, $count = 1000): void
-    {
-        $query->chunk($count, $callback);
-    }
-
     public function createTable(): bool
     {
         if (!Schema::connection($this->getConnectionName())->hasTable($this->table)) {
@@ -168,6 +162,57 @@ class AfipMapucheMiSimplificacion extends Model
         return static::getTable();
     }
 
+    public function getSchemaName(): string
+    {
+        return $this->schema;
+    }
+
+    // ##################### Funcion Almacencada #########################
+
+    /** Inserta datos en la tabla suc.afip_mapuche_mi_simplificacion utilizando la función suc.get_mi_simplificacion_tt.
+     *
+     * @param int|NroLiqui $nroLiqui Número de liquidación.
+     * @param int|string|PeriodoFiscal $periodoFiscal Período fiscal.
+     *
+     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
+     */
+    public static function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): bool
+    {
+        try {
+            // Convertir a valor primitivo si es un objeto NroLiqui
+            $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
+
+            // Convertir a string si es un objeto PeriodoFiscal
+            $periodoFiscalValue = $periodoFiscal;
+            if ($periodoFiscal instanceof PeriodoFiscal) {
+                $periodoFiscalValue = $periodoFiscal->toString();
+            }
+
+            // Obtener la conexión a la base de datos
+            $connection = new self()->getConnectionName();
+
+            // Ejecutar la consulta de inserción
+            DB::connection($connection)->statement(
+                'INSERT INTO suc.afip_mapuche_mi_simplificacion
+                SELECT * FROM suc.get_mi_simplificacion_tt(?, ?)',
+                [$nroLiquiValue, $periodoFiscalValue],
+            );
+            Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
+
+            return true;
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return false;
+        }
+    }
+
+    // Método para consultas grandes
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function chunked($query, $callback, $count = 1000): void
+    {
+        $query->chunk($count, $callback);
+    }
+
     /**
      * Scope para búsqueda por CUIL o número de legajo.
      *
@@ -181,11 +226,6 @@ class AfipMapucheMiSimplificacion extends Model
     {
         return empty($value) ? $query : $query->where('cuil', 'ilike', "%$value%")
             ->orWhere('nro_legaj', 'ilike', "%$value%");
-    }
-
-    public function getSchemaName(): string
-    {
-        return $this->schema;
     }
 
     /**
@@ -228,46 +268,7 @@ class AfipMapucheMiSimplificacion extends Model
         return $query->whereIn('puesto', array_map(strval(...), $categorias));
     }
 
-    // ##################### Funcion Almacencada #########################
-
-    /** Inserta datos en la tabla suc.afip_mapuche_mi_simplificacion utilizando la función suc.get_mi_simplificacion_tt.
-     *
-     * @param int|NroLiqui $nroLiqui Número de liquidación.
-     * @param int|string|PeriodoFiscal $periodoFiscal Período fiscal.
-     *
-     * @return bool Verdadero si la inserción se realizó correctamente, falso en caso contrario.
-     */
-    public static function mapucheMiSimplificacion($nroLiqui, $periodoFiscal): bool
-    {
-        try {
-            // Convertir a valor primitivo si es un objeto NroLiqui
-            $nroLiquiValue = $nroLiqui instanceof NroLiqui ? $nroLiqui->value() : $nroLiqui;
-
-            // Convertir a string si es un objeto PeriodoFiscal
-            $periodoFiscalValue = $periodoFiscal;
-            if ($periodoFiscal instanceof PeriodoFiscal) {
-                $periodoFiscalValue = $periodoFiscal->toString();
-            }
-
-            // Obtener la conexión a la base de datos
-            $connection = new self()->getConnectionName();
-
-            // Ejecutar la consulta de inserción
-            DB::connection($connection)->statement(
-                'INSERT INTO suc.afip_mapuche_mi_simplificacion
-                SELECT * FROM suc.get_mi_simplificacion_tt(?, ?)',
-                [$nroLiquiValue, $periodoFiscalValue],
-            );
-            Log::info('insert into suc.afip_mapuche_mi_simplificacion exitoso');
-
-            return true;
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            return false;
-        }
-    }
-
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -418,8 +419,8 @@ class AfipMapucheMiSimplificacion extends Model
     protected function inicioRelLaboral(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => str_replace('-', '/', $value),
-            set: fn($value) => str_replace('-', '/', $value),
+            get: fn($value): string|array => str_replace('-', '/', $value),
+            set: fn($value): string|array => str_replace('-', '/', $value),
         );
     }
 
@@ -431,8 +432,8 @@ class AfipMapucheMiSimplificacion extends Model
     protected function finRelLaboral(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => str_replace('-', '/', $value),
-            set: fn($value) => str_replace('-', '/', $value),
+            get: fn($value): string|array => str_replace('-', '/', $value),
+            set: fn($value): string|array => str_replace('-', '/', $value),
         );
     }
 }

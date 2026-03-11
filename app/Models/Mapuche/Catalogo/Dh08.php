@@ -78,7 +78,7 @@ class Dh08 extends Model
             ->where('codc_nacio', $this->getAttribute('codc_nacio'));
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

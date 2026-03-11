@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 class DosubaSinLiquidarModel extends Model
 {
@@ -119,7 +120,7 @@ class DosubaSinLiquidarModel extends Model
 
             $sessionId = session()->getId();
 
-            $dataToInsert = $data->map(fn($item) => [
+            $dataToInsert = $data->map(fn($item): array => [
                 'nro_legaj' => $item['nro_legaj'],
                 'apellido' => $item['apellido'],
                 'nombre' => $item['nombre'],
@@ -147,7 +148,8 @@ class DosubaSinLiquidarModel extends Model
     {
         return self::query()->where('session_id', session()->getId())->get();
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

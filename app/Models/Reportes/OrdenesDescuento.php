@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Override;
 
 use function ini_get;
 use function is_string;
@@ -54,7 +55,7 @@ class OrdenesDescuento extends Model implements HasLabel
 
     private static $connectionInstance;
 
-    #[\Override]
+    #[Override]
     public static function boot(): void
     {
         parent::boot();
@@ -136,19 +137,6 @@ class OrdenesDescuento extends Model implements HasLabel
         return false;
     }
 
-    // ######################  Scopes útiles para el reporte  ######################
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function periodo($query, $periodo)
-    {
-        return $query->where('periodo_fiscal', $periodo);
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porLiquidacion($query, $nroLiqui)
-    {
-        return $query->where('nro_liqui', $nroLiqui);
-    }
-
     // Método requerido por Filament para mostrar labels en forms y tablas
     public function getLabel(): ?string
     {
@@ -158,31 +146,6 @@ class OrdenesDescuento extends Model implements HasLabel
     public static function getPluralLabel(): string
     {
         return 'Órdenes de Descuento';
-    }
-
-    // #######################  Scopes útiles para Filament  ######################
-    // Scopes globales útiles para Filament
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function search(Builder $query, string $search): Builder
-    {
-        return $query->where(function ($query) use ($search): void {
-            $query->where('desc_liqui', 'like', "%{$search}%")
-                ->orWhere('codc_uacad', 'like', "%{$search}%")
-                ->orWhere('desc_conce', 'like', "%{$search}%");
-        });
-    }
-
-    // Relaciones que pueden ser útiles en Filament
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function ordenadoPorUacad($query)
-    {
-        return $query->orderBy('codc_uacad')->orderBy('codn_conce');
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function withLiquidacion(Builder $query, int $nroLiqui): Builder
-    {
-        return $query->where('nro_liqui', $nroLiqui);
     }
 
     // ############################# DIAGNOSTICOS #############################
@@ -260,6 +223,44 @@ class OrdenesDescuento extends Model implements HasLabel
         }
     }
 
+    // ######################  Scopes útiles para el reporte  ######################
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function periodo($query, $periodo)
+    {
+        return $query->where('periodo_fiscal', $periodo);
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porLiquidacion($query, $nroLiqui)
+    {
+        return $query->where('nro_liqui', $nroLiqui);
+    }
+
+    // #######################  Scopes útiles para Filament  ######################
+    // Scopes globales útiles para Filament
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function search(Builder $query, string $search): Builder
+    {
+        return $query->where(function ($query) use ($search): void {
+            $query->where('desc_liqui', 'like', "%{$search}%")
+                ->orWhere('codc_uacad', 'like', "%{$search}%")
+                ->orWhere('desc_conce', 'like', "%{$search}%");
+        });
+    }
+
+    // Relaciones que pueden ser útiles en Filament
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ordenadoPorUacad($query)
+    {
+        return $query->orderBy('codc_uacad')->orderBy('codn_conce');
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withLiquidacion(Builder $query, int $nroLiqui): Builder
+    {
+        return $query->where('nro_liqui', $nroLiqui);
+    }
+
     protected function sanitizeData(array $data): array
     {
         return array_map(function ($item) {
@@ -270,7 +271,7 @@ class OrdenesDescuento extends Model implements HasLabel
         }, $data);
     }
 
-    protected function handleEncodedField($value): array|null|int|float|false|string
+    protected function handleEncodedField($value): array|int|float|false|string|null
     {
         if (empty($value)) {
             return $value;
@@ -281,8 +282,8 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descItem(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->handleEncodedField($value),
-            set: fn($value): string|array|null|int|float|false => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', (string) $value),
+            get: fn($value): array|float|int|string|false|null => $this->handleEncodedField($value),
+            set: fn($value): string|array|int|float|false|null => empty($value) ? $value : iconv('UTF-8', 'ISO-8859-1//TRANSLIT', (string) $value),
         );
     }
 
@@ -341,7 +342,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descLiqui(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->handleEncodedField($value),
+            get: fn($value): array|float|int|string|false|null => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) {
                     return $value;
@@ -354,7 +355,7 @@ class OrdenesDescuento extends Model implements HasLabel
     protected function descConce(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $this->handleEncodedField($value),
+            get: fn($value): array|float|int|string|false|null => $this->handleEncodedField($value),
             set: function ($value) {
                 if (empty($value)) {
                     return $value;
@@ -363,10 +364,11 @@ class OrdenesDescuento extends Model implements HasLabel
             },
         );
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

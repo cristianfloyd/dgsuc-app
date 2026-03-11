@@ -9,6 +9,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /**
  * Modelo Eloquent para la tabla mapuche.emb_tipo_remuneracion.
@@ -45,6 +46,7 @@ class TipoRemuneracion extends Model
 
     /**
      * Relación con embargos.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Embargo, $this>
      */
     public function embargos(): HasMany
@@ -55,7 +57,7 @@ class TipoRemuneracion extends Model
     /**
      * Casting de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 /**
  * Modelo para la tabla de Variantes de Licencias (dl02).
@@ -132,11 +133,106 @@ class Dl02 extends Model
 
     /**
      * Relación con licencias (Dh05).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Mapuche\Dh05, $this>
      */
     public function licencias(): HasMany
     {
         return $this->hasMany(Dh05::class, 'nrovarlicencia', 'nrovarlicencia');
+    }
+
+    // ================================
+    // MÉTODOS DE NEGOCIO
+    // ================================
+
+    /**
+     * Verifica si la licencia es remunerada con porcentaje específico.
+     */
+    public function esRemuneradaConPorcentaje(float $porcentaje = 100.0): bool
+    {
+        return $this->es_remunerada
+               && $this->porcremuneracion !== null
+               && $this->porcremuneracion >= $porcentaje;
+    }
+
+    /**
+     * Verifica si la licencia es completamente no remunerada.
+     */
+    public function esCompletamenteNoRemunerada(): bool
+    {
+        return !$this->es_remunerada
+               || ($this->porcremuneracion !== null && $this->porcremuneracion == 0);
+    }
+
+    /**
+     * Verifica si aplica para cualquier carácter.
+     */
+    public function aplicaCualquierCaracter(): bool
+    {
+        return (bool) $this->seapacualcaracter;
+    }
+
+    /**
+     * Verifica si aplica para cualquier dedicación.
+     */
+    public function aplicaCualquierDedicacion(): bool
+    {
+        return (bool) $this->seapacualdedic;
+    }
+
+    /**
+     * Obtiene la descripción completa de la variante.
+     */
+    public function getDescripcionCompleta(): string
+    {
+        $descripcion = "Variante {$this->nrovarlicencia}";
+
+        if ($this->observacion) {
+            $descripcion .= " - {$this->observacion}";
+        }
+
+        if ($this->es_remunerada) {
+            $porcentaje = $this->porcremuneracion ?? 100;
+            $descripcion .= " (Remunerada {$porcentaje}%)";
+        } else {
+            $descripcion .= ' (No remunerada)';
+        }
+
+        if ($this->es_maternidad) {
+            $descripcion .= ' [Maternidad]';
+        }
+
+        return $descripcion;
+    }
+
+    /**
+     * Verifica si la variante es aplicable según los criterios.
+     */
+    public function esAplicable(array $criterios = []): bool
+    {
+        // Verificar sexo si está especificado
+        if (isset($criterios['sexo']) && $this->sexo && $this->sexo !== $criterios['sexo']) {
+            return false;
+        }
+
+        // Verificar escalafón si está especificado
+        return !(isset($criterios['escalafon']) && $this->escalafon && $this->escalafon !== $criterios['escalafon']);
+
+
+
+        // Agregar más validaciones según sea necesario
+    }
+
+    /**
+     * Calcula el importe a percibir basado en el sueldo base.
+     */
+    public function calcularImporteRemuneracion(float $sueldoBase): float
+    {
+        if (!$this->es_remunerada || $this->porcremuneracion === null) {
+            return 0.0;
+        }
+
+        return $sueldoBase * ($this->porcremuneracion / 100);
     }
 
     // ================================
@@ -242,104 +338,10 @@ class Dl02 extends Model
         return $query->orderBy('nroordenaplicacion');
     }
 
-    // ================================
-    // MÉTODOS DE NEGOCIO
-    // ================================
-
-    /**
-     * Verifica si la licencia es remunerada con porcentaje específico.
-     */
-    public function esRemuneradaConPorcentaje(float $porcentaje = 100.0): bool
-    {
-        return $this->es_remunerada
-               && $this->porcremuneracion !== null
-               && $this->porcremuneracion >= $porcentaje;
-    }
-
-    /**
-     * Verifica si la licencia es completamente no remunerada.
-     */
-    public function esCompletamenteNoRemunerada(): bool
-    {
-        return !$this->es_remunerada
-               || ($this->porcremuneracion !== null && $this->porcremuneracion == 0);
-    }
-
-    /**
-     * Verifica si aplica para cualquier carácter.
-     */
-    public function aplicaCualquierCaracter(): bool
-    {
-        return (bool) $this->seapacualcaracter;
-    }
-
-    /**
-     * Verifica si aplica para cualquier dedicación.
-     */
-    public function aplicaCualquierDedicacion(): bool
-    {
-        return (bool) $this->seapacualdedic;
-    }
-
-    /**
-     * Obtiene la descripción completa de la variante.
-     */
-    public function getDescripcionCompleta(): string
-    {
-        $descripcion = "Variante {$this->nrovarlicencia}";
-
-        if ($this->observacion) {
-            $descripcion .= " - {$this->observacion}";
-        }
-
-        if ($this->es_remunerada) {
-            $porcentaje = $this->porcremuneracion ?? 100;
-            $descripcion .= " (Remunerada {$porcentaje}%)";
-        } else {
-            $descripcion .= ' (No remunerada)';
-        }
-
-        if ($this->es_maternidad) {
-            $descripcion .= ' [Maternidad]';
-        }
-
-        return $descripcion;
-    }
-
-    /**
-     * Verifica si la variante es aplicable según los criterios.
-     */
-    public function esAplicable(array $criterios = []): bool
-    {
-        // Verificar sexo si está especificado
-        if (isset($criterios['sexo']) && $this->sexo && $this->sexo !== $criterios['sexo']) {
-            return false;
-        }
-
-        // Verificar escalafón si está especificado
-        return !(isset($criterios['escalafon']) && $this->escalafon && $this->escalafon !== $criterios['escalafon']);
-
-
-
-        // Agregar más validaciones según sea necesario
-    }
-
-    /**
-     * Calcula el importe a percibir basado en el sueldo base.
-     */
-    public function calcularImporteRemuneracion(float $sueldoBase): float
-    {
-        if (!$this->es_remunerada || $this->porcremuneracion === null) {
-            return 0.0;
-        }
-
-        return $sueldoBase * ($this->porcremuneracion / 100);
-    }
-
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

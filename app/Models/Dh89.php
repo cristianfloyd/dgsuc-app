@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 class Dh89 extends Model
 {
@@ -38,13 +39,15 @@ class Dh89 extends Model
 
     /**
      * Relación con el modelo Dh11.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh11, $this>
      */
     public function dh11(): HasMany
     {
         return $this->hasMany(Dh11::class, 'codigoescalafon', 'codigoescalafon');
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

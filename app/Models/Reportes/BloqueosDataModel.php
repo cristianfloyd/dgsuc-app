@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 use function in_array;
 
@@ -131,6 +132,34 @@ class BloqueosDataModel extends Model
         $this->save();
     }
 
+    /* ####################################################################################################
+       ###########################################  RELACIONES ############################################### */
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
+     */
+    public function cargo(): BelongsTo
+    {
+        return $this->belongsTo(Dh03::class, 'nro_cargo', 'nro_cargo');
+    }
+
+    /**
+     * Obtiene la información del cargo asociado desde la tabla dh90.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh90, $this>
+     */
+    public function cargoAsociado(): BelongsTo
+    {
+        return $this->belongsTo(Dh90::class, 'nro_cargo', 'nro_cargo');
+    }
+
     /* ######## ATTRIBUTES ########################################## */
     protected function legajoCargo(): Attribute
     {
@@ -158,33 +187,6 @@ class BloqueosDataModel extends Model
         });
     }
 
-    /* ####################################################################################################
-       ###########################################  RELACIONES ############################################### */
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
-     */
-    public function dh01(): BelongsTo
-    {
-        return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
-     */
-    public function cargo(): BelongsTo
-    {
-        return $this->belongsTo(Dh03::class, 'nro_cargo', 'nro_cargo');
-    }
-
-    /**
-     * Obtiene la información del cargo asociado desde la tabla dh90.
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh90, $this>
-     */
-    public function cargoAsociado(): BelongsTo
-    {
-        return $this->belongsTo(Dh90::class, 'nro_cargo', 'nro_cargo');
-    }
-
     /* ################## SCOPES ##################################### */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function fechasCoinciden($query)
@@ -198,7 +200,7 @@ class BloqueosDataModel extends Model
         return $query->where('tipo', strtolower((string) $tipo));
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -250,7 +252,8 @@ class BloqueosDataModel extends Model
             if (!$fechaBajaImportada->eq($fechaBajaCargoAsociado)) {
                 return [
                     'estado' => BloqueosEstadoEnum::FECHA_CARGO_NO_COINCIDE,
-                    'mensaje' => "La fecha de baja del cargo principal ({$fechaBajaImportada->format('Y-m-d')}) no coincide con la del cargo asociado #{$nroCargoAsociado} ({$fechaBajaCargoAsociado->format('Y-m-d')})",
+                    'mensaje' => "La fecha de baja del cargo principal ({$fechaBajaImportada->format('Y-m-d')}) "
+                        . "no coincide con la del cargo asociado #{$nroCargoAsociado} ({$fechaBajaCargoAsociado->format('Y-m-d')})",
                 ];
             }
         }
@@ -258,7 +261,8 @@ class BloqueosDataModel extends Model
         // Si pasa todas las validaciones
         return null;
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

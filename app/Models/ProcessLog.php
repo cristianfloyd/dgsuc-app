@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 class ProcessLog extends Model
 {
@@ -24,7 +25,8 @@ class ProcessLog extends Model
     {
         return $this->hasMany(ProcessLog::class, 'parent_id');
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

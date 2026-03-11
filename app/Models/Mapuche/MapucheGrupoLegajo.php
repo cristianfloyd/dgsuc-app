@@ -6,6 +6,7 @@ use App\Models\Dh01;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class MapucheGrupoLegajo extends Model
 {
@@ -26,6 +27,7 @@ class MapucheGrupoLegajo extends Model
 
     /**
      * El grupo al que pertenece este legajo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\MapucheGrupo, $this>
      */
     public function grupo(): BelongsTo
@@ -35,6 +37,7 @@ class MapucheGrupoLegajo extends Model
 
     /**
      * El legajo asociado.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
      */
     public function legajo(): BelongsTo
@@ -42,7 +45,7 @@ class MapucheGrupoLegajo extends Model
         return $this->belongsTo(Dh01::class, 'nro_legaj', 'nro_legaj');
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

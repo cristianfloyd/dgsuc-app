@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class ControlArtDiferencia extends Model
 {
@@ -17,7 +18,7 @@ class ControlArtDiferencia extends Model
         'diferencia',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -7,6 +7,7 @@ use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class RetTablaBasicosConcesp extends Model
 {
@@ -57,10 +58,11 @@ class RetTablaBasicosConcesp extends Model
             ->where('conc_liq_id', $concLiqId)
             ->where('anios', $anios);
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

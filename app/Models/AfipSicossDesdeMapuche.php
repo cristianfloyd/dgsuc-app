@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Override;
 
 use function is_array;
 
@@ -324,7 +325,7 @@ class AfipSicossDesdeMapuche extends Model
     /**
      * @return mixed
      */
-    #[\Override]
+    #[Override]
     public function getTable()
     {
         return $this->table;

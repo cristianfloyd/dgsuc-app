@@ -82,20 +82,6 @@ class Dh30 extends Model
         return $value;
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function withoutEncoding($query)
-    {
-        return $query->whereRaw("encode(desc_abrev::bytea, 'escape') IS NOT NULL");
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function byEncoding($query, $encoding)
-    {
-        return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
-            ->get()
-            ->filter(fn($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
-    }
-
     #[Override]
     public function getKeyName(): array
     {
@@ -160,6 +146,20 @@ class Dh30 extends Model
             ->withPivot('desc_abrev');
     }
 
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withoutEncoding($query)
+    {
+        return $query->whereRaw("encode(desc_abrev::bytea, 'escape') IS NOT NULL");
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byEncoding($query, $encoding)
+    {
+        return $query->whereRaw("encode(desc_item::bytea, 'escape') IS NOT NULL")
+            ->get()
+            ->filter(fn($item): bool => mb_detect_encoding((string) $item->desc_item) === $encoding);
+    }
+
     protected function descAbrev(): Attribute
     {
         return Attribute::make(
@@ -207,7 +207,7 @@ class Dh30 extends Model
             ->where('desc_abrev', $this->getAttribute('desc_abrev'));
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

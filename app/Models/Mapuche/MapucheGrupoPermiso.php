@@ -5,6 +5,7 @@ namespace App\Models\Mapuche;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class MapucheGrupoPermiso extends Model
 {
@@ -26,6 +27,7 @@ class MapucheGrupoPermiso extends Model
 
     /**
      * El grupo al que pertenece este permiso.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\MapucheGrupo, $this>
      */
     public function grupo(): BelongsTo
@@ -33,7 +35,7 @@ class MapucheGrupoPermiso extends Model
         return $this->belongsTo(MapucheGrupo::class, 'id_grupo', 'id_grupo');
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

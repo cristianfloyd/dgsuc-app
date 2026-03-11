@@ -88,8 +88,6 @@ class AfipRelacionesActivas extends Model
 
     /**
      * Inserta datos masivamente en la tabla AfipSicossDesdeMapuche.
-     *
-     *
      */
     public static function insertarDatosMasivos(array $datosMapeados, int $chunkSize = 1000): bool
     {
@@ -157,6 +155,16 @@ class AfipRelacionesActivas extends Model
         ];
     }
 
+    // #######################################################################
+    // ###########################  RELACIONES ###############################
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
+     */
+    public function dh01(): BelongsTo
+    {
+        return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
+    }
+
     /**
      * Busca los registros que coincidan con el término de búsqueda.
      *
@@ -175,16 +183,6 @@ class AfipRelacionesActivas extends Model
     protected function byCuil($query, $cuil)
     {
         return $query->where('cuil', $cuil);
-    }
-
-    // #######################################################################
-    // ###########################  RELACIONES ###############################
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh01, $this>
-     */
-    public function dh01(): BelongsTo
-    {
-        return $this->belongsTo(related: Dh01::class, foreignKey: 'nro_cuil', ownerKey: 'nro_cuil');
     }
 
     protected static function getConnectionSafely(): string

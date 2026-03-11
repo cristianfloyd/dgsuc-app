@@ -6,6 +6,7 @@ use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class CopyJob extends Model
 {
@@ -35,7 +36,8 @@ class CopyJob extends Model
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

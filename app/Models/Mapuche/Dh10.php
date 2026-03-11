@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use InvalidArgumentException;
+use Override;
 
 use function array_slice;
 use function count;
@@ -182,6 +183,7 @@ class Dh10 extends Model
     // ==============================================
     /**
      * Relación con el modelo Dh03 (cargo).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
      */
     public function cargo(): BelongsTo
@@ -191,68 +193,12 @@ class Dh10 extends Model
 
     /**
      * Relación con cargo vinculado (auto-relación).
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh10, $this>
      */
     public function cargoVinculado(): BelongsTo
     {
         return $this->belongsTo(self::class, 'vcl_cargo', 'nro_cargo');
-    }
-
-    // ==============================================
-    // SCOPES
-    // ==============================================
-
-    /**
-     * Scope para cargos con vínculos.
-     */
-    protected function scopeConVinculo(Builder $query): Builder
-    {
-        return $query->whereColumn('nro_cargo', '!=', 'vcl_cargo');
-    }
-
-    /**
-     * Scope para cargos sin vínculos.
-     */
-    protected function scopeSinVinculo(Builder $query): Builder
-    {
-        return $query->whereColumn('nro_cargo', '=', 'vcl_cargo');
-    }
-
-    /**
-     * Scope para cargos con importes en un mes específico.
-     */
-    protected function scopeConImportesMes(Builder $query, int $mes): Builder
-    {
-        if ($mes < 1 || $mes > 12) {
-            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
-        }
-
-        return $query->where("imp_bruto_{$mes}", '>', 0);
-    }
-
-    /**
-     * Scope para filtrar por período fiscal.
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function porPeriodoFiscal(Builder $query, int $anio, ?int $semestre = null): Builder
-    {
-        if ($semestre === 1) {
-            // Primer semestre: enero a junio
-            $query->where(function ($q): void {
-                for ($mes = 1; $mes <= 6; $mes++) {
-                    $q->orWhere("imp_bruto_{$mes}", '>', 0);
-                }
-            });
-        } elseif ($semestre === 2) {
-            // Segundo semestre: julio a diciembre
-            $query->where(function ($q): void {
-                for ($mes = 7; $mes <= 12; $mes++) {
-                    $q->orWhere("imp_bruto_{$mes}", '>', 0);
-                }
-            });
-        }
-
-        return $query;
     }
 
     // ==============================================
@@ -366,6 +312,63 @@ class Dh10 extends Model
             'primer_semestre_total' => array_sum(array_slice($importes, 0, 6)),
             'segundo_semestre_total' => array_sum(array_slice($importes, 6, 6)),
         ];
+    }
+
+    // ==============================================
+    // SCOPES
+    // ==============================================
+
+    /**
+     * Scope para cargos con vínculos.
+     */
+    protected function scopeConVinculo(Builder $query): Builder
+    {
+        return $query->whereColumn('nro_cargo', '!=', 'vcl_cargo');
+    }
+
+    /**
+     * Scope para cargos sin vínculos.
+     */
+    protected function scopeSinVinculo(Builder $query): Builder
+    {
+        return $query->whereColumn('nro_cargo', '=', 'vcl_cargo');
+    }
+
+    /**
+     * Scope para cargos con importes en un mes específico.
+     */
+    protected function scopeConImportesMes(Builder $query, int $mes): Builder
+    {
+        if ($mes < 1 || $mes > 12) {
+            throw new InvalidArgumentException("El mes debe estar entre 1 y 12. Recibido: {$mes}");
+        }
+
+        return $query->where("imp_bruto_{$mes}", '>', 0);
+    }
+
+    /**
+     * Scope para filtrar por período fiscal.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function porPeriodoFiscal(Builder $query, int $anio, ?int $semestre = null): Builder
+    {
+        if ($semestre === 1) {
+            // Primer semestre: enero a junio
+            $query->where(function ($q): void {
+                for ($mes = 1; $mes <= 6; $mes++) {
+                    $q->orWhere("imp_bruto_{$mes}", '>', 0);
+                }
+            });
+        } elseif ($semestre === 2) {
+            // Segundo semestre: julio a diciembre
+            $query->where(function ($q): void {
+                for ($mes = 7; $mes <= 12; $mes++) {
+                    $q->orWhere("imp_bruto_{$mes}", '>', 0);
+                }
+            });
+        }
+
+        return $query;
     }
 
     // ==============================================
@@ -504,7 +507,7 @@ class Dh10 extends Model
     /**
      * Casteos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

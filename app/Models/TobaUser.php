@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use InvalidArgumentException;
+use Override;
 
 use function in_array;
 
@@ -39,13 +40,13 @@ class TobaUser extends Authenticatable
     ];
 
     // Campos que Laravel espera para autenticación
-    #[\Override]
+    #[Override]
     public function getAuthIdentifierName()
     {
         return 'usuario';
     }
 
-    #[\Override]
+    #[Override]
     public function getAuthIdentifier()
     {
         // Generar ID numérico único basado en el username
@@ -54,7 +55,7 @@ class TobaUser extends Authenticatable
         return abs(crc32((string) $username));
     }
 
-    #[\Override]
+    #[Override]
     public function getAuthPassword()
     {
         return $this->getAttribute('clave');
@@ -100,7 +101,8 @@ class TobaUser extends Authenticatable
     {
         return $query->where('forzar_cambio_pwd', 0);
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

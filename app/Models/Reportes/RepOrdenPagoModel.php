@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use InvalidArgumentException;
+use Override;
 
 class RepOrdenPagoModel extends Model implements HasLabel
 {
@@ -72,6 +73,16 @@ class RepOrdenPagoModel extends Model implements HasLabel
             ->where('nro_tabla', self::TABLA_UNIDAD_ACADEMICA);
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
+
+    public function getPluralLabel(): string
+    {
+        return $this->label;
+    }
+
     /* ####################################################################### */
     /* ################ SCOPES PARA BUSQUEDA Y FILTRO ######################## */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
@@ -102,17 +113,7 @@ class RepOrdenPagoModel extends Model implements HasLabel
         return $query->orderBy('codc_uacad')->orderBy('nro_liqui');
     }
 
-    public function getLabel(): ?string
-    {
-        return $this->label;
-    }
-
-    public function getPluralLabel(): string
-    {
-        return $this->label;
-    }
-
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -144,10 +145,11 @@ class RepOrdenPagoModel extends Model implements HasLabel
             }
         });
     }
+
     /**
      * Indica los tipos de datos que deben ser convertidos automáticamente al acceder a los atributos del modelo.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /**
  * Modelo Dhr1 para gestión de liquidaciones Mapuche.
@@ -65,6 +66,7 @@ class Dhr1 extends Model
 
     /**
      * Relación con la tabla dh22.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Mapuche\Dh22, $this>
      */
     public function dh22(): BelongsTo
@@ -72,7 +74,7 @@ class Dhr1 extends Model
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
 
-    #[\Override]
+    #[Override]
     public function uniqueIds(): array
     {
         return ['plantilla'];
@@ -89,7 +91,7 @@ class Dhr1 extends Model
     /**
      * Casting de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

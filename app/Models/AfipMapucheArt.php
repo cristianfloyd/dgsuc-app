@@ -7,13 +7,15 @@ use App\Models\Mapuche\Dh22;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class AfipMapucheArt extends Model
 {
     use MapucheConnectionTrait;
-    use MapucheConnectionTrait;
+    use HasFactory;
 
     public $incrementing = true;
 
@@ -32,10 +34,10 @@ class AfipMapucheArt extends Model
         'cuil',
         'apellido_y_nombre',
         'nacimiento',
-        'sueldo', // rem_9
+        'sueldo',  // rem_9
         'sexo',
         'establecimiento',  // codc_uacad
-        'tarea',           // se mapeará desde Dh03 (campo tipo_escal)
+        'tarea',  // se mapeará desde Dh03 (campo tipo_escal)
     ];
 
     /**
@@ -62,7 +64,8 @@ class AfipMapucheArt extends Model
     public function actualizarAfipArt(string $periodoFiscal): bool
     {
         // Obtener datos desde AfipMapucheSicoss usando el periodo fiscal
-        $sicoss = AfipMapucheSicoss::query()->where('periodo_fiscal', $periodoFiscal)
+        $sicoss = AfipMapucheSicoss::query()
+            ->where('periodo_fiscal', $periodoFiscal)
             ->where('cuil', $this->cuil)
             ->first();
 
@@ -96,7 +99,8 @@ class AfipMapucheArt extends Model
      */
     public function dh22(): BelongsTo
     {
-        return $this->belongsTo(Dh30::class, 'establecimiento', 'desc_abrev')
+        return $this
+            ->belongsTo(Dh30::class, 'establecimiento', 'desc_abrev')
             ->where('nro_tabla', 13)
             ->withoutGlobalScopes()
             ->where(function ($query): void {
@@ -115,6 +119,14 @@ class AfipMapucheArt extends Model
         );
     }
 
+    #[Override]
+    protected function casts(): array
+    {
+        return [
+            'nacimiento' => 'date',
+        ];
+    }
+
     /**
      * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
      *
@@ -124,6 +136,7 @@ class AfipMapucheArt extends Model
     private function obtenerLegajoDesdeCuil(string $cuil): ?int
     {
         $dh01 = Dh01::query()->whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$cuil])->first();
+
         return $dh01 ? $dh01->nro_legaj : null;
     }
 
@@ -137,12 +150,5 @@ class AfipMapucheArt extends Model
     private function verificarNroLiqui($nroLiqui): bool
     {
         return Dh22::verificarNroLiqui($nroLiqui);
-    }
-    #[\Override]
-    protected function casts(): array
-    {
-        return [
-            'nacimiento' => 'date',
-        ];
     }
 }

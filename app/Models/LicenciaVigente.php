@@ -12,6 +12,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Override;
 
 use function count;
 
@@ -53,15 +54,10 @@ class LicenciaVigente extends Model
         'descripcion_licencia',
     ];
 
-    protected function descripcionLicencia(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value));
-    }
-
     /**
      * Constructor que asegura que la tabla temporal exista.
      */
-    #[\Override]
+    #[Override]
     public static function boot(array $attributes = []): void
     {
         parent::boot();
@@ -112,8 +108,6 @@ class LicenciaVigente extends Model
     /**
      * Pobla la tabla temporal con los resultados de la consulta
      * y devuelve una consulta builder para operar sobre esos datos.
-     *
-     *
      */
     public static function cargarLicenciasVigentes(array $legajos, string $sessionId): Builder
     {
@@ -206,6 +200,19 @@ class LicenciaVigente extends Model
     }
 
     /**
+     * Elimina la tabla temporal (útil para pruebas o limpiezas).
+     */
+    public static function eliminarTablaTemporal(): void
+    {
+        Schema::connection(self::getMapucheConnection())->dropIfExists('suc.temp_licencias_vigentes');
+    }
+
+    protected function descripcionLicencia(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(?string $value): ?string => EncodingService::toUtf8($value));
+    }
+
+    /**
      * Obtiene la descripción legible de la condición.
      *
      * @return string
@@ -225,14 +232,6 @@ class LicenciaVigente extends Model
         });
     }
 
-    /**
-     * Elimina la tabla temporal (útil para pruebas o limpiezas).
-     */
-    public static function eliminarTablaTemporal(): void
-    {
-        Schema::connection(self::getMapucheConnection())->dropIfExists('suc.temp_licencias_vigentes');
-    }
-
     // ########################################################
     /**
      * Obtener el nombre de la conexión de la base de datos estáticamente.
@@ -243,16 +242,9 @@ class LicenciaVigente extends Model
     }
 
     /**
-     * Verifica si la tabla temporal existe.
-     */
-    private static function tablaExiste(): bool
-    {
-        return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
-    }
-    /**
      * Casteos para las propiedades.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -266,5 +258,13 @@ class LicenciaVigente extends Model
             'es_legajo' => 'boolean',
             'nro_cargo' => 'integer',
         ];
+    }
+
+    /**
+     * Verifica si la tabla temporal existe.
+     */
+    private static function tablaExiste(): bool
+    {
+        return Schema::connection(self::getMapucheConnection())->hasTable('licencias_vigentes_temp');
     }
 }

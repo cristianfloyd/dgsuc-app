@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 use function array_slice;
 use function count;
@@ -314,6 +315,7 @@ class EmbargoProcesoResult extends Model
             throw new Exception("Error al guardar los resultados del proceso de embargo: {$e->getMessage()}", $e->getCode(), $e);
         }
     }
+
     protected function nrosLiquiJson(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): mixed => json_decode((string) $value, true), set: fn($value): array => ['nros_liqui_json' => json_encode($value)]);
@@ -361,7 +363,8 @@ class EmbargoProcesoResult extends Model
 
         return DB::connection($connectionName);
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

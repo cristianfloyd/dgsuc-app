@@ -6,6 +6,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class ControlConceptosPeriodo extends Model
 {
@@ -37,6 +38,7 @@ class ControlConceptosPeriodo extends Model
 
     /**
      * Obtiene el concepto relacionado de la tabla DH12.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function dh12(): BelongsTo
@@ -106,7 +108,8 @@ class ControlConceptosPeriodo extends Model
 
         return $query;
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

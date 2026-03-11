@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 class Dh03 extends Model
 {
@@ -115,7 +116,7 @@ class Dh03 extends Model
         'cargo_concursado' => false,
     ];
 
-    #[\Override]
+    #[Override]
     public static function boot(): void
     {
         parent::boot();
@@ -146,8 +147,6 @@ class Dh03 extends Model
 
     /**
      * Obtiene los detalles completos de la validación.
-     *
-     *
      */
     public static function getDetallesValidacion(int $nroLegaj, int $nroCargo): array
     {
@@ -166,55 +165,10 @@ class Dh03 extends Model
 
     /**
      * Obtiene los cargos activos de un legajo.
-     *
-     *
      */
     public static function getCargosActivos(int $nroLegajo): array
     {
         return static::query()->cargosActivos($nroLegajo)->get()->toArray();
-    }
-
-    /** ############################## SCOPES ############################## */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function empleadosActivos($query)
-    {
-        return $query->where('chkstopliq', '=', 0)
-            ->where('codc_uacad', '!=', '')
-            ->whereNull('fec_baja');
-    }
-
-    /**
-     * Scope para validar la combinación legajo-cargo.
-     *
-     * @param Builder $query
-     *
-     * @return Builder
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function validarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
-    {
-        return $query->where('nro_legaj', $nro_legaj)
-            ->where('nro_cargo', $nro_cargo);
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function cargosActivos($query, int $nroLegajo)
-    {
-        $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
-
-        return $query->select([
-            'nro_cargo',
-            DB::raw("CASE
-                WHEN (codc_categ = '' OR codc_categ IS NULL)
-                THEN nro_cargo::TEXT
-                ELSE codc_categ
-                END AS codc_categ"),
-        ])
-            ->where(function ($query) use ($fecha): void {
-                $query->whereNull('fec_baja')
-                    ->orWhere('fec_baja', '>=', $fecha);
-            })
-            ->where('nro_legaj', $nroLegajo);
     }
 
 
@@ -292,11 +246,6 @@ class Dh03 extends Model
         return $this->belongsTo(Dh36::class, 'coddependesemp', 'coddependesemp');
     }
 
-    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
-    }
-
     /*  ##################### HELPER ##################### */
     public static function validarParLegajoCargo(int $nroLegaj, int $nroCargo): bool
     {
@@ -313,6 +262,54 @@ class Dh03 extends Model
     {
         return static::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_cargo', $nroCargo);
+    }
+
+    /** ############################## SCOPES ############################## */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function empleadosActivos($query)
+    {
+        return $query->where('chkstopliq', '=', 0)
+            ->where('codc_uacad', '!=', '')
+            ->whereNull('fec_baja');
+    }
+
+    /**
+     * Scope para validar la combinación legajo-cargo.
+     *
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function validarLegajoCargo($query, int $nro_legaj, int $nro_cargo)
+    {
+        return $query->where('nro_legaj', $nro_legaj)
+            ->where('nro_cargo', $nro_cargo);
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function cargosActivos($query, int $nroLegajo)
+    {
+        $fecha = MapucheConfig::getFechaFinPeriodoCorriente();
+
+        return $query->select([
+            'nro_cargo',
+            DB::raw("CASE
+                WHEN (codc_categ = '' OR codc_categ IS NULL)
+                THEN nro_cargo::TEXT
+                ELSE codc_categ
+                END AS codc_categ"),
+        ])
+            ->where(function ($query) use ($fecha): void {
+                $query->whereNull('fec_baja')
+                    ->orWhere('fec_baja', '>=', $fecha);
+            })
+            ->where('nro_legaj', $nroLegajo);
+    }
+
+    protected function codcUacad(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn($value): string => trim((string) $value));
     }
 
     protected function codigocontrato(): \Illuminate\Database\Eloquent\Casts\Attribute
@@ -332,7 +329,8 @@ class Dh03 extends Model
             get: fn(): \App\Enums\LegajoCargo => LegajoCargo::from($this->nro_legaj, $this->nro_cargo),
         );
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

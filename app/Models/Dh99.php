@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Override;
 
 use function is_string;
 
@@ -104,13 +105,14 @@ class Dh99 extends Model
     protected function periodoFiscalObject(): Attribute
     {
         return Attribute::make(
-            get: fn() => new PeriodoFiscal($this->per_anoct, $this->per_mesct),
+            get: fn(): \App\ValueObjects\PeriodoFiscal => new PeriodoFiscal($this->per_anoct, $this->per_mesct),
         );
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

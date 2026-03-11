@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para la gestión de embarazadas.
@@ -102,7 +103,7 @@ class RepEmbarazada extends Model
         return RepEmbarazadaData::from($this);
     }
 
-    #[\Override]
+    #[Override]
     protected static function booted(): void
     {
         static::checktable();
@@ -131,12 +132,13 @@ class RepEmbarazada extends Model
             set: fn(string $value): string => str_pad(substr($value, 0, 20), 20),
         );
     }
+
     /**
      * Casteos de atributos.
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 use function ord;
 use function sprintf;
@@ -88,34 +89,12 @@ class Dh12 extends Model
     // ######################## RELACIONES ########################
     /**
      * Obtiene los Dh13 asociados con este Dh12.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Dh13, $this>
      */
     public function dh13s(): HasMany
     {
         return $this->hasMany(Dh13::class, 'codn_conce', 'codn_conce');
-    }
-
-    /**
-     * Obtiene los números de acumuladores activos basados en el campo flag_acumu.
-     *
-     * @return array<int> Array de números de acumuladores activos
-     */
-    protected function acumuladoresActivos(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): array {
-            if (empty($this->flag_acumu)) {
-                return [];
-            }
-            $acumuladores = [];
-            $flags = str_split($this->flag_acumu);
-            foreach ($flags as $posicion => $valor) {
-                if (strtoupper($valor) === 'S') {
-                    // La posición es 0-based, pero los acumuladores son 1-based
-                    $acumuladores[] = $posicion + 1;
-                }
-            }
-            return $acumuladores;
-        });
     }
 
     /**
@@ -126,27 +105,10 @@ class Dh12 extends Model
         return Dh14::query()->whereIn('nro_acumu', $this->getAcumuladoresActivosAttribute());
     }
 
-    /**
-     * Método para obtener el texto formateado para el select.
-     */
-    protected function selectLabel(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
-            try {
-                return sprintf(
-                    '%d - %s',
-                    $this->codn_conce,
-                    EncodingService::toUtf8($this->desc_conce),
-                );
-            } catch (Exception) {
-                return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
-            }
-        });
-    }
-
     // ############################# DIAGNOSTICOS #############################
     /**
      * Diagnóstico mejorado para caracteres especiales.
+     *
      * @return mixed[]
      */
     public static function diagnosticarCodificacion($codn_conce): array
@@ -175,7 +137,7 @@ class Dh12 extends Model
 
         // Análisis byte por byte
         $bytes = str_split((string) $registro->desc_conce);
-        $analisis_bytes = array_map(fn($byte) => [
+        $analisis_bytes = array_map(fn($byte): array => [
             'byte' => bin2hex($byte),
             'ascii' => ord($byte),
         ], $bytes);
@@ -196,7 +158,48 @@ class Dh12 extends Model
         ];
     }
 
-    #[\Override]
+    /**
+     * Obtiene los números de acumuladores activos basados en el campo flag_acumu.
+     *
+     * @return array<int> Array de números de acumuladores activos
+     */
+    protected function acumuladoresActivos(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): array {
+            if (empty($this->flag_acumu)) {
+                return [];
+            }
+            $acumuladores = [];
+            $flags = str_split($this->flag_acumu);
+            foreach ($flags as $posicion => $valor) {
+                if (strtoupper($valor) === 'S') {
+                    // La posición es 0-based, pero los acumuladores son 1-based
+                    $acumuladores[] = $posicion + 1;
+                }
+            }
+            return $acumuladores;
+        });
+    }
+
+    /**
+     * Método para obtener el texto formateado para el select.
+     */
+    protected function selectLabel(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): string {
+            try {
+                return sprintf(
+                    '%d - %s',
+                    $this->codn_conce,
+                    EncodingService::toUtf8($this->desc_conce),
+                );
+            } catch (Exception) {
+                return sprintf('%d - %s', $this->codn_conce, $this->cleanAndEncodeString($this->desc_conce));
+            }
+        });
+    }
+
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -246,10 +249,11 @@ class Dh12 extends Model
             set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

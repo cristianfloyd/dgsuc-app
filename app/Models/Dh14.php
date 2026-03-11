@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 /**
  * Modelo para la tabla de Acumuladores del sistema Mapuche.
@@ -70,12 +71,13 @@ class Dh14 extends Model
             get: fn($value): ?string => $value ? trim((string) $value) : null,
         );
     }
+
     /**
      * Los atributos que deben ser convertidos a tipos nativos.
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

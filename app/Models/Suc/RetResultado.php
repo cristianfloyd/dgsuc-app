@@ -6,8 +6,10 @@ use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\Periodo;
 use App\ValueObjects\TipoRetro;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class RetResultado extends Model
 {
@@ -155,57 +157,160 @@ class RetResultado extends Model
     protected $primaryKey = ['nro_legaj', 'nro_cargo_ant', 'fecha_ret_desde', 'periodo'];
 
     protected $fillable = [
-        'nro_legaj', 'nro_cargo_nuevo', 'nro_cargo_ant',
-        'categ_n', 'agrup_n', 'dedid_n', 'cat_basico_n', 'anios_n', 'titulo_n',
-        'anios_perm_n', 'porcentaje_n', 'hs_cat_n', 'codc_uacad_n', 'coddependesemp_n',
-        'categ_v', 'agrup_v', 'dedid_v', 'cat_basico_v', 'anios_v', 'titulo_v',
-        'anios_perm_v', 'porcentaje_v', 'hs_cat_v', 'codc_uacad_v', 'coddependesemp_v',
-        'x11_n', 'x11_v', 'zona_n', 'zona_v', 'riesgo_n', 'riesgo_v',
-        'falla_n', 'falla_v', 'dede_n', 'dede_v', 'adi_col_sec_n', 'adi_col_sec_v',
-        'sub_n', 'sub_basico_n', 'sub_v', 'sub_basico_v',
-        'porcehaber', 'dias_mes_trab', 'fecha_ret_desde', 'fecha_ret_hasta',
-        'periodo', 'liquida', 'periodo_mens', 'tipo_retro', 'porcentaje_dias_trab', 'tipo_escal',
-        'c101_n', 'c101_sub_n', 'c102_n', 'c103_n', 'c103_sub_n', 'c103_dias_cpto_trab',
-        'c106_n', 'c106_sub_n', 'c106_dias_cpto_trab', 'c107_n', 'c107_sub_n',
-        'c108_n', 'c108_dias_cpto_trab', 'c110_n', 'c110_sub_n', 'c110_dias_cpto_trab',
-        'c111_n', 'c111_dias_cpto_trab', 'c113_n', 'c113_sub_n', 'c114_n', 'c114_sub_n',
-        'c116_n', 'c116_sub_n', 'c116_dias_cpto_trab', 'c118_n', 'c118_sub_n', 'c118_dias_cpto_trab',
-        'c119_n', 'c119_sub_n', 'c119_dias_cpto_trab', 'c120_n', 'c138_n', 'c165_n', 'c173_n', 'c174_n',
-        'c101_v', 'c101_sub_v', 'c102_v', 'c103_v', 'c103_sub_v', 'c106_v', 'c106_sub_v',
-        'c107_v', 'c107_sub_v', 'c108_v', 'c110_v', 'c110_sub_v', 'c111_v',
-        'c113_v', 'c113_sub_v', 'c114_v', 'c114_sub_v', 'c116_v', 'c116_sub_v',
-        'c118_v', 'c118_sub_v', 'c119_v', 'c119_sub_v', 'c120_v', 'c138_v', 'c165_v', 'c173_v', 'c174_v',
-        'monto_180', 'monto_123', 'monto_168', 'cat_basico_7', 'cat_basico_n_perm', 'cat_basico_v_perm',
+        'nro_legaj',
+        'nro_cargo_nuevo',
+        'nro_cargo_ant',
+        'categ_n',
+        'agrup_n',
+        'dedid_n',
+        'cat_basico_n',
+        'anios_n',
+        'titulo_n',
+        'anios_perm_n',
+        'porcentaje_n',
+        'hs_cat_n',
+        'codc_uacad_n',
+        'coddependesemp_n',
+        'categ_v',
+        'agrup_v',
+        'dedid_v',
+        'cat_basico_v',
+        'anios_v',
+        'titulo_v',
+        'anios_perm_v',
+        'porcentaje_v',
+        'hs_cat_v',
+        'codc_uacad_v',
+        'coddependesemp_v',
+        'x11_n',
+        'x11_v',
+        'zona_n',
+        'zona_v',
+        'riesgo_n',
+        'riesgo_v',
+        'falla_n',
+        'falla_v',
+        'dede_n',
+        'dede_v',
+        'adi_col_sec_n',
+        'adi_col_sec_v',
+        'sub_n',
+        'sub_basico_n',
+        'sub_v',
+        'sub_basico_v',
+        'porcehaber',
+        'dias_mes_trab',
+        'fecha_ret_desde',
+        'fecha_ret_hasta',
+        'periodo',
+        'liquida',
+        'periodo_mens',
+        'tipo_retro',
+        'porcentaje_dias_trab',
+        'tipo_escal',
+        'c101_n',
+        'c101_sub_n',
+        'c102_n',
+        'c103_n',
+        'c103_sub_n',
+        'c103_dias_cpto_trab',
+        'c106_n',
+        'c106_sub_n',
+        'c106_dias_cpto_trab',
+        'c107_n',
+        'c107_sub_n',
+        'c108_n',
+        'c108_dias_cpto_trab',
+        'c110_n',
+        'c110_sub_n',
+        'c110_dias_cpto_trab',
+        'c111_n',
+        'c111_dias_cpto_trab',
+        'c113_n',
+        'c113_sub_n',
+        'c114_n',
+        'c114_sub_n',
+        'c116_n',
+        'c116_sub_n',
+        'c116_dias_cpto_trab',
+        'c118_n',
+        'c118_sub_n',
+        'c118_dias_cpto_trab',
+        'c119_n',
+        'c119_sub_n',
+        'c119_dias_cpto_trab',
+        'c120_n',
+        'c138_n',
+        'c165_n',
+        'c173_n',
+        'c174_n',
+        'c101_v',
+        'c101_sub_v',
+        'c102_v',
+        'c103_v',
+        'c103_sub_v',
+        'c106_v',
+        'c106_sub_v',
+        'c107_v',
+        'c107_sub_v',
+        'c108_v',
+        'c110_v',
+        'c110_sub_v',
+        'c111_v',
+        'c113_v',
+        'c113_sub_v',
+        'c114_v',
+        'c114_sub_v',
+        'c116_v',
+        'c116_sub_v',
+        'c118_v',
+        'c118_sub_v',
+        'c119_v',
+        'c119_sub_v',
+        'c120_v',
+        'c138_v',
+        'c165_v',
+        'c173_v',
+        'c174_v',
+        'monto_180',
+        'monto_123',
+        'monto_168',
+        'cat_basico_7',
+        'cat_basico_n_perm',
+        'cat_basico_v_perm',
     ];
 
     /**
      * Obtiene el resultado del retroactivo para un legajo específico.
-     *
-     *
      */
     public static function obtenerPorLegajo(int $nroLegaj): ?RetResultado
     {
         return self::query()->where('nro_legaj', $nroLegaj)->first();
     }
+
     /**
      * Obtiene el periodo como un ValueObject Periodo.
-     *
-     * @return Periodo
      */
-    protected function periodo(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function periodo(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): \App\ValueObjects\Periodo => new Periodo($this->attributes['periodo']), set: fn(Periodo $periodo): array => ['periodo' => $periodo->getValue()]);
+        return Attribute::make(
+            get: fn(): Periodo => new Periodo($this->attributes['periodo']),
+            set: fn(Periodo $periodo): array => ['periodo' => $periodo->getValue()],
+        );
     }
+
     /**
      * Obtiene el tipo_retro como un ValueObject TipoRetro.
-     *
-     * @return TipoRetro
      */
-    protected function tipoRetro(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function tipoRetro(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): \App\ValueObjects\TipoRetro => new TipoRetro($this->attributes['tipo_retro']), set: fn(TipoRetro $tipoRetro): array => ['tipo_retro' => $tipoRetro->getValue()]);
+        return Attribute::make(
+            get: fn(): TipoRetro => new TipoRetro($this->attributes['tipo_retro']),
+            set: fn(TipoRetro $tipoRetro): array => ['tipo_retro' => $tipoRetro->getValue()],
+        );
     }
-    #[\Override]
+
+    #[Override]
     protected function casts(): array
     {
         return [

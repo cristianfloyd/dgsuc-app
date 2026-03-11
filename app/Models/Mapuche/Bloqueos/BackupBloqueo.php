@@ -52,7 +52,7 @@ class BackupBloqueo extends Model
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

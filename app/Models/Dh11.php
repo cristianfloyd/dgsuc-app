@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
+use Override;
 
 /**
  * Modelo para la tabla de Categorías del sistema Mapuche.
@@ -144,52 +145,7 @@ class Dh11 extends Model
     }
 
     /**
-     * Scope para filtrar por tipo de escalafón.
-     *
-     * @param string $type
-     *
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function ofTipo(Builder $query, string $tipo): Builder
-    {
-        $categorias = self::getCategoriasPorTipo($tipo);
-        return $query->whereIn('codc_categ', $categorias);
-    }
-
-    /**
-     * Scope para filtrar categorías activas.
-     *
-     * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
-     * los registros donde las categorías están activas (es decir, no son nulas).
-     *
-     *
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function active(Builder $query): Builder
-    {
-        return $query->whereNotNull('vig_caano')
-            ->whereNotNull('vig_cames');
-    }
-
-    /**
-     * Scope para filtrar por tipo de escalafón.
-     *
-     * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
-     * los registros donde el campo `tipo_escal` coincide con el valor proporcionado.
-     *
-     * @param string $type El tipo de escalafón por el que se desea filtrar.
-     *
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function byScalafon(Builder $query, string $type): Builder
-    {
-        return $query->where('tipo_escal', $type);
-    }
-
-    /**
      * Obtiene los códigos de categoría para un tipo específico.
-     *
-     *
      */
     public static function getCategoriasPorTipo(string $tipo): array
     {
@@ -198,22 +154,6 @@ class Dh11 extends Model
             'AUTO' => array_merge(self::CATEGORIAS['AUTU'], self::CATEGORIAS['AUTS']),
             default => self::CATEGORIAS[$tipo] ?? [],
         };
-    }
-
-    /**
-     * Accessor para obtener el estado de mensualización.
-     */
-    protected function isMensualized(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_mensu === 'S');
-    }
-
-    /**
-     * Accessor para obtener el estado de jefatura.
-     */
-    protected function hasLeadership(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_jefat === 'S');
     }
 
     /**
@@ -236,6 +176,7 @@ class Dh11 extends Model
 
     /**
      * Relación con la tabla de escalafón.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\dh89, $this>
      */
     public function dh89(): BelongsTo
@@ -264,7 +205,62 @@ class Dh11 extends Model
         return $categoryUpdateService->updateCategoryWithHistory($this, $porcentaje);
     }
 
-    #[\Override]
+    /**
+     * Scope para filtrar por tipo de escalafón.
+     *
+     * @param string $type
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function ofTipo(Builder $query, string $tipo): Builder
+    {
+        $categorias = self::getCategoriasPorTipo($tipo);
+        return $query->whereIn('codc_categ', $categorias);
+    }
+
+    /**
+     * Scope para filtrar categorías activas.
+     *
+     * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
+     * los registros donde las categorías están activas (es decir, no son nulas).
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function active(Builder $query): Builder
+    {
+        return $query->whereNotNull('vig_caano')
+            ->whereNotNull('vig_cames');
+    }
+
+    /**
+     * Scope para filtrar por tipo de escalafón.
+     *
+     * Este scope se puede utilizar en consultas a la tabla `dh11` para filtrar
+     * los registros donde el campo `tipo_escal` coincide con el valor proporcionado.
+     *
+     * @param string $type El tipo de escalafón por el que se desea filtrar.
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function byScalafon(Builder $query, string $type): Builder
+    {
+        return $query->where('tipo_escal', $type);
+    }
+
+    /**
+     * Accessor para obtener el estado de mensualización.
+     */
+    protected function isMensualized(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_mensu === 'S');
+    }
+
+    /**
+     * Accessor para obtener el estado de jefatura.
+     */
+    protected function hasLeadership(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_jefat === 'S');
+    }
+
+    #[Override]
     protected function casts(): array
     {
         return [

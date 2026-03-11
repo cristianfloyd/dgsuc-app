@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 use function ini_get;
 
@@ -72,6 +73,7 @@ class Dh13 extends Model
 
     /**
      * Obtiene el Dh12 asociado con este Dh13.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh12, $this>
      */
     public function dh12(): BelongsTo
@@ -89,7 +91,7 @@ class Dh13 extends Model
      *
      * @return string
      */
-    #[\Override]
+    #[Override]
     public function getKeyName()
     {
         return 'id';
@@ -99,7 +101,7 @@ class Dh13 extends Model
      * Obtiene el valor de la clave única para el modelo.
      * devuelve una representación de cadena única de la clave primaria compuesta.
      */
-    #[\Override]
+    #[Override]
     public function getKey(): string
     {
         return "{$this->codn_conce}-{$this->nro_orden_formula}";
@@ -110,7 +112,7 @@ class Dh13 extends Model
      *
      * @param mixed $key
      */
-    #[\Override]
+    #[Override]
     public function setKeyName($key): void
     {
         $this->primaryKey = $key;
@@ -121,7 +123,7 @@ class Dh13 extends Model
      *
      * @return string
      */
-    #[\Override]
+    #[Override]
     public function getRouteKeyName()
     {
         return 'id';
@@ -135,7 +137,7 @@ class Dh13 extends Model
      *
      * @return Model|Collection|static[]|static|null
      */
-    #[\Override]
+    #[Override]
     public function resolveRouteBinding($key, $field = null)
     {
         if ($field === 'id') {
@@ -152,7 +154,7 @@ class Dh13 extends Model
      *
      * @return Builder
      */
-    #[\Override]
+    #[Override]
     public function newQuery()
     {
         return parent::newQuery()->addSelect(
@@ -177,12 +179,6 @@ class Dh13 extends Model
         return $this->where('codn_conce', $codn_conce)
             ->where('nro_orden_formula', $nro_orden_formula)
             ->first($columns);
-    }
-
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function defaultOrder($query)
-    {
-        return $query->orderBy('codn_conce')->orderBy('nro_orden_formula');
     }
 
     public static function diagnosticarCodificacionConConcepto($codn_conce = 520): void
@@ -224,6 +220,12 @@ class Dh13 extends Model
         ]);
     }
 
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function defaultOrder($query)
+    {
+        return $query->orderBy('codn_conce')->orderBy('nro_orden_formula');
+    }
+
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
@@ -233,7 +235,7 @@ class Dh13 extends Model
         return self::$connectionInstance;
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -274,10 +276,11 @@ class Dh13 extends Model
             set: fn(?string $value): ?string => EncodingService::toLatin1($value),
         );
     }
+
     /**
      * Casting de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

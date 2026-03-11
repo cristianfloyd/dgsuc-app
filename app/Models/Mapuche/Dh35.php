@@ -7,6 +7,7 @@ namespace App\Models\Mapuche;
 use App\Traits\Mapuche\Dh35Queries;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * Modelo para la tabla de Caracteres y Escalafones.
@@ -67,7 +68,7 @@ class Dh35 extends Model
         return $query->where('caracter_concursado', true);
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

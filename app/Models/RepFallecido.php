@@ -11,6 +11,7 @@ use App\Traits\MapucheConnectionTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * @property int $nro_legaj Número de legajo
@@ -66,12 +67,13 @@ class RepFallecido extends Model
     {
         return FallecidoData::from($this);
     }
+
     /**
      * The attributes that should be cast.
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

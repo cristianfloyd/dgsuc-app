@@ -10,6 +10,7 @@ use App\Traits\MapucheConnectionTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /**
  * Modelo para imputaciones presupuestarias por cargo.
@@ -84,6 +85,7 @@ class Dh24 extends Model
 
     /**
      * Relación con el cargo.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\Dh03, $this>
      */
     public function cargo(): BelongsTo
@@ -103,7 +105,7 @@ class Dh24 extends Model
     /**
      * Conversión de tipos de atributos.
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

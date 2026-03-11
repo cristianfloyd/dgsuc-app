@@ -12,6 +12,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Override;
 
 class ConceptoListado extends Model
 {
@@ -46,7 +47,7 @@ class ConceptoListado extends Model
 
     private static $connectionInstance;
 
-    #[\Override]
+    #[Override]
     public static function boot(): void
     {
         parent::boot();
