@@ -85,12 +85,14 @@ class ConceptoListado extends Model
                 });
 
                 Log::info('Tabla suc.rep_concepto_listado creada exitosamente');
+
                 return true;
             }
         } catch (Exception $e) {
             Log::error('Error al crear tabla suc.rep_concepto_listado: ' . $e->getMessage());
             throw $e;
         }
+
         return false;
     }
 
@@ -155,9 +157,10 @@ class ConceptoListado extends Model
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 }

@@ -17,10 +17,13 @@ use Override;
 
 use function in_array;
 
+/**
+ * @property BloqueosEstadoEnum|null $estado
+ */
 class BloqueosDataModel extends Model
 {
-    use MapucheConnectionTrait;
     use HasFactory;
+    use MapucheConnectionTrait;
 
     protected $table = 'suc.rep_bloqueos_import';
 
@@ -182,6 +185,7 @@ class BloqueosDataModel extends Model
             if (!$this->fecha_baja || !$this->cargo?->fec_baja) {
                 return false;
             }
+
             return \Illuminate\Support\Facades\Date::parse($this->fecha_baja)->format('Y-m-d')
                 === \Illuminate\Support\Facades\Date::parse($this->cargo->fec_baja)->format('Y-m-d');
         });

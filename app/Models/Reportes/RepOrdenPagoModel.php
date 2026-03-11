@@ -17,8 +17,8 @@ use Override;
 
 class RepOrdenPagoModel extends Model implements HasLabel
 {
-    use MapucheConnectionTrait;
     use HasFactory;
+    use MapucheConnectionTrait;
 
     public const TABLA_UNIDAD_ACADEMICA = 13;
 
@@ -75,12 +75,12 @@ class RepOrdenPagoModel extends Model implements HasLabel
 
     public function getLabel(): ?string
     {
-        return $this->label;
+        return static::$label;
     }
 
     public function getPluralLabel(): string
     {
-        return $this->label;
+        return static::$label ?? 'Órdenes de Pago';
     }
 
     /* ####################################################################### */

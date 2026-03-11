@@ -30,7 +30,7 @@ class OrigenesModel extends Model implements OrigenRepositoryInterface
 
     public static function connectionName(): string
     {
-        return new static()->getConnectionName();
+        return new self()->getConnectionName();
     }
 
     /**

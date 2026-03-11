@@ -60,7 +60,7 @@ class EmbargoReportModel extends Model
      */
     public static function createTableIfNotExists(): void
     {
-        $connection = new static()->getConnection();
+        $connection = new self()->getConnection();
 
         if (!$connection->getSchemaBuilder()->hasTable('suc.embargo_reports')) {
             $connection->statement('
@@ -98,7 +98,7 @@ class EmbargoReportModel extends Model
     public static function clearSessionData(): void
     {
         $sessionId = session()->getId();
-        $connection = new static()->getConnection();
+        $connection = new self()->getConnection();
 
         $connection->table('suc.embargo_reports')->where('session_id', $sessionId)->delete();
     }
@@ -109,8 +109,8 @@ class EmbargoReportModel extends Model
      */
     public static function cleanOldRecords(): void
     {
-        $sessionLifetime = config('session.lifetime') * 60; // Convertir minutos a segundos
-        $connection = new static()->getConnection();
+        $sessionLifetime = config('session.lifetime') * 60;
+        $connection = new self()->getConnection();
 
         $connection->statement("
             DELETE FROM suc.embargo_reports
@@ -133,9 +133,8 @@ class EmbargoReportModel extends Model
             // Limpiamos los datos previos de la sesión actual
             self::clearSessionData();
 
-
-            // Preparamos los datos para inserción
-            $dataToInsert = $data->map(fn($item): array => [
+            /** @phpstan-ignore argument.unresolvableType (Generic collection type) */
+            $dataToInsert = $data->map(fn(object $item): array => [
                 'nro_legaj' => $item->nro_legaj,
                 'nombre_completo' => $item->nom_demandado,
                 'codn_conce' => $item->codn_conce,
@@ -152,8 +151,6 @@ class EmbargoReportModel extends Model
                 'nro_liqui' => $nro_liqui,
                 '861' => $item->{'861'},
             ])->all();
-
-
 
             // Insertamos los datos en la tabla
             self::query()->insert($dataToInsert);
@@ -177,6 +174,7 @@ class EmbargoReportModel extends Model
     public static function getReportData()
     {
         $sessionId = session()->getId();
+
         return self::query()->where('session_id', $sessionId)->get();
     }
 
@@ -220,10 +218,13 @@ class EmbargoReportModel extends Model
         );
     }
 
-    // ##################################### RELACIONES ##########################################
+    /**
+     * @return array<string, string>
+     */
     #[Override]
     protected function casts(): array
     {
+        /** @phpstan-ignore-next-line return.type (Numeric string keys are intentional for column names) */
         return [
             'id' => 'integer',
             'nro_legaj' => 'integer',

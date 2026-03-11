@@ -83,13 +83,14 @@ class OrdenesDescuento extends Model implements HasLabel
     public function getDataForSelect(): array
     {
         $data = $this->pluck('desc_conce', 'codn_conce')->toArray();
+
         return $this->sanitizeData($data);
     }
 
     public static function createTableIfNotExists(): bool
     {
         try {
-            $connection = new static()->getConnectionName();
+            $connection = new self()->getConnectionName();
 
             if (!Schema::connection($connection)->hasTable('suc.rep_ordenes_descuento')) {
                 Schema::connection($connection)->create('suc.rep_ordenes_descuento', function (Blueprint $table): void {
@@ -128,12 +129,14 @@ class OrdenesDescuento extends Model implements HasLabel
                 });
 
                 Log::info('Tabla suc.rep_ordenes_descuento creada exitosamente');
+
                 return true;
             }
         } catch (Exception $e) {
             Log::error('Error al crear tabla suc.rep_ordenes_descuento: ' . $e->getMessage());
             throw $e;
         }
+
         return false;
     }
 
@@ -267,6 +270,7 @@ class OrdenesDescuento extends Model implements HasLabel
             if (is_string($item)) {
                 return mb_convert_encoding($item, 'UTF-8', 'auto');
             }
+
             return $item;
         }, $data);
     }
@@ -276,6 +280,7 @@ class OrdenesDescuento extends Model implements HasLabel
         if (empty($value)) {
             return $value;
         }
+
         return iconv('UTF-8', 'UTF-8//TRANSLIT', (string) $value);
     }
 
@@ -290,9 +295,10 @@ class OrdenesDescuento extends Model implements HasLabel
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 
@@ -347,6 +353,7 @@ class OrdenesDescuento extends Model implements HasLabel
                 if (empty($value)) {
                     return $value;
                 }
+
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
             },
         );
@@ -360,6 +367,7 @@ class OrdenesDescuento extends Model implements HasLabel
                 if (empty($value)) {
                     return $value;
                 }
+
                 return mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8');
             },
         );

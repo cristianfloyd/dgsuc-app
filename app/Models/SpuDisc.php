@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
-use function is_array;
-
 class SpuDisc extends Model
 {
     // Especificar la conexión de la base de datos si no es la predeterminada
@@ -19,13 +17,12 @@ class SpuDisc extends Model
     // Deshabilitar timestamps si no existen en la tabla
     public $timestamps = false;
 
-    // Especificar la tabla asociada al modelo
     protected $table = 'spu_disc';
 
-    // Especificar la clave primaria compuesta
+    /** @var list<string> */
     protected $primaryKey = ['rama', 'disciplina', 'area'];
 
-    protected $keyType = 'string'; // Indicar que la clave primaria es de tipo string
+    protected $keyType = 'string';
 
     // Especificar los campos que se pueden asignar masivamente
     protected $fillable = [
@@ -47,16 +44,21 @@ class SpuDisc extends Model
             ->where('area', $this->area);
     }
 
-    // Sobrescribir el método para manejar la clave primaria compuesta
+    /**
+     * @return list<string>
+     *
+     * @phpstan-ignore method.childReturnType (Composite primary key support)
+     */
+    #[Override]
+    public function getKeyName(): array
+    {
+        return ['rama', 'disciplina', 'area'];
+    }
+
     #[Override]
     protected function setKeysForSaveQuery($query)
     {
-        $keys = $this->getKeyName();
-        if (!is_array($keys)) {
-            return parent::setKeysForSaveQuery($query);
-        }
-
-        foreach ($keys as $keyName) {
+        foreach ($this->getKeyName() as $keyName) {
             $query->where($keyName, '=', $this->getKeyForSaveQuery($keyName));
         }
 

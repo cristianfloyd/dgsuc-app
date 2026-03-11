@@ -37,6 +37,7 @@ class Dh30 extends Model
 
     protected $table = 'dh30';
 
+    /** @var list<string> */
     protected $primaryKey = ['nro_tabla', 'desc_abrev'];
 
     protected $fillable = [
@@ -62,8 +63,6 @@ class Dh30 extends Model
             }
         });
 
-
-
         static::saving(function ($model): void {
             if (isset($model->attributes['desc_abrev'])) {
                 $model->attributes['desc_abrev'] = EncodingService::toLatin1($model->attributes['desc_abrev']);
@@ -79,9 +78,15 @@ class Dh30 extends Model
         if (mb_detect_encoding((string) $value) === 'ASCII') {
             return EncodingService::toUtf8($value);
         }
+
         return $value;
     }
 
+    /**
+     * @return list<string>
+     *
+     * @phpstan-ignore method.childReturnType (Composite primary key support)
+     */
     #[Override]
     public function getKeyName(): array
     {
@@ -168,6 +173,7 @@ class Dh30 extends Model
                     return null;
                 }
                 $value = $this->handleMixedEncoding($value);
+
                 return trim($value);
             },
             set: function ($value): ?string {
@@ -175,6 +181,7 @@ class Dh30 extends Model
                     return null;
                 }
                 $value = EncodingService::toLatin1($value);
+
                 return trim($value);
             },
         );
@@ -188,6 +195,7 @@ class Dh30 extends Model
                     return null;
                 }
                 $value = $this->handleMixedEncoding($value);
+
                 return trim($value);
             },
             set: function ($value): ?string {
@@ -195,6 +203,7 @@ class Dh30 extends Model
                     return null;
                 }
                 $value = EncodingService::toLatin1($value);
+
                 return trim($value);
             },
         );
