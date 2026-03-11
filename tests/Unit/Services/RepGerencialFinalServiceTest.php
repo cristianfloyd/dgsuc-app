@@ -96,4 +96,9 @@ class RepGerencialFinalServiceTest extends TestCase
             $result->imp_neto,
         );
     }
+
+    private function getMapucheTable(): string
+    {
+        return 'mapuche.dh21';
+    }
 }
