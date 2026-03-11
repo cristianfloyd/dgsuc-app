@@ -26,27 +26,8 @@ class UploadedFile extends Model
         'file_path',
         'user_id',
         'user_name',
-        'process_id', // Nuevo campo para el ID del proceso
+        'process_id',  // Nuevo campo para el ID del proceso
     ];
-
-    /**
-     * Crea un nuevo registro de archivo cargado en la base de datos.
-     *
-     * Este método crea una nueva instancia de UploadedFile con los datos proporcionados
-     * y la guarda en la base de datos.
-     *
-     * @param array $data Un array asociativo que contiene los atributos para el nuevo UploadedFile
-     *
-     * @return UploadedFile La instancia recién creada de UploadedFile
-     */
-    public static function create(array $data): UploadedFile
-    {
-        $uploadedFile = new static();
-        $uploadedFile->fill($data);
-        $uploadedFile->save();
-
-        return $uploadedFile;
-    }
 
     /**
      * Obtiene el nombre de la tabla asociada al modelo.
@@ -81,7 +62,8 @@ class UploadedFile extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function search($query, $search)
     {
-        return $query->where('filename', 'like', "%$search%")
+        return $query
+            ->where('filename', 'like', "%$search%")
             ->orWhere('original_name', 'like', "%$search%");
     }
 }
