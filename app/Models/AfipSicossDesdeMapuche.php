@@ -7,13 +7,10 @@ use App\Services\FileProcessorService;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Override;
-
-use function is_array;
 
 use const PHP_INT_MAX;
 use const PHP_INT_MIN;
@@ -28,7 +25,6 @@ class AfipSicossDesdeMapuche extends Model
 {
     use MapucheConnectionTrait;
 
-
     public const TABLE_NAME = 'suc.afip_mapuche_sicoss';
 
     // Asegurar que la clave primaria no es autoincremental
@@ -39,7 +35,7 @@ class AfipSicossDesdeMapuche extends Model
 
     protected $table = self::TABLE_NAME;
 
-    // Definir la clave primaria compuesta entre el perido_fiscal y el cuil
+    /** @var list<string> */
     protected $primaryKey = ['periodo_fiscal', 'cuil'];
 
     // Agregar las columnas que pueden ser asignadas masivamente
@@ -212,6 +208,7 @@ class AfipSicossDesdeMapuche extends Model
             $this->contador++;
             $tablaProcesada[$key] = $this->procesar($line, $this->columnWidths);
         }
+
         // Retorno de la tabla procesada
         return $tablaProcesada;
     }
@@ -277,6 +274,7 @@ class AfipSicossDesdeMapuche extends Model
     public function procesar(string $line, array $columnWidths): array
     {
         $processedLine = $this->processLine($line, $columnWidths);
+
         // dd($processedLine);
         // Retorno de la línea procesada.
         return $this->dataMapper->mapDataToModel($processedLine);
@@ -287,17 +285,13 @@ class AfipSicossDesdeMapuche extends Model
      *
      * Esta función recibe una línea del archivo y los anchos de las columnas, y devuelve los datos procesados.
      *
-     * @param Request $line La solicitud HTTP que contiene la línea y los anchos de las columnas.
+     * @param string $line La línea a procesar.
+     * @param array<int, int> $columnWidths Los anchos de las columnas.
      *
-     * @return [] Los datos procesados en formato Array.
+     * @return array<int, mixed> Los datos procesados en formato Array.
      */
     public function processLine(string $line, array $columnWidths): array
     {
-        // Validacion de entrada.
-        if (!is_array($columnWidths)) {
-            throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
-        }
-        // Retornar los datos procesados.
         return $this->procesarlineainterna($line, $columnWidths);
     }
 
@@ -306,11 +300,11 @@ class AfipSicossDesdeMapuche extends Model
      * Mapea los datos procesados a los campos del modelo AfipSicossDesdeMapucheModel y los guarda en la base de datos.
      * Establece el periodo_fiscal como una constante '202405' para todos los registros.
      *
-     * Este método crea una nueva instancia de la clase afipImportacionCrudaModel y recorre su tabla.
+     * Este método crea una nueva instancia de la clase AfipImportacionCrudaModel y recorre su tabla.
      */
     public function processTable(): void
     {
-        $AfipimportacionCruda = new afipImportacionCrudaModel();
+        $AfipimportacionCruda = new AfipImportacionCrudaModel();
         $this->iterarTabla($AfipimportacionCruda);
     }
 
@@ -343,7 +337,7 @@ class AfipSicossDesdeMapuche extends Model
      */
     private function procesarlineainterna(string $line, array $columnWidths): array
     {
-        //Validad la entrada
+        // Validad la entrada
         if ($line === '' || $line === '0' || $columnWidths === []) {
             throw new InvalidArgumentException('La linea de entrada y los Anchos de columna no pueden estar vacios.');
         }
@@ -358,7 +352,6 @@ class AfipSicossDesdeMapuche extends Model
         if ($anchoLinea !== $sumaAnchoColumnas) {
             throw new InvalidArgumentException('linea: ' . $this->contador . ' El ancho de línea ' . $anchoLinea . ' no coincide con la suma de los anchos de columna ' . $sumaAnchoColumnas);
         }
-
 
         $datosProcesados = [];
         $currentPosition = 0;
@@ -375,18 +368,20 @@ class AfipSicossDesdeMapuche extends Model
             if ($firstIteration) {
                 $firstIteration = false; // Marcar que la primera iteración ha pasado
                 $datosProcesados[$index] = $this->periodoFiscal;
+
                 continue; // Saltar a la siguiente iteración
             }
             $startPosition = $currentPosition; // el primer valor de $starPosition es 0
             $currentPosition += $columnWidth; // Avanzar el puntero para la siguiente iteración.
 
-            //Extraer el valor de la columna de la linea de entrada
+            // Extraer el valor de la columna de la linea de entrada
             $columnValue = mb_substr($line, $startPosition, $columnWidth);
             // dd($columnValue);
             $datosProcesados[$index] = $columnValue;
             // $currentPosition += $endPosition;
             // dd($currentPosition);
         }
+
         return $datosProcesados; // un Array con 61 posiciones.
     }
 
@@ -402,25 +397,24 @@ class AfipSicossDesdeMapuche extends Model
         return mb_strlen($line);
     }
 
-
-
-
     /* #################### FUNCIONES PARA IMPORTAR A LA BASE DE DATOS #################### */
 
+    /** @phpstan-ignore method.unused (Reserved for future use) */
     private function importFromFile(string $filePath, int $periodoFiscal): bool
     {
         $this->fileProcessor->setPeriodoFiscal($periodoFiscal);
         $processedLines = $this->fileProcessor->processFile($filePath, $this->columnWidths);
 
-
         return self::insertBulkData($processedLines->toArray());
     }
 
+    /** @phpstan-ignore method.unused (Reserved for future use) */
     private function procesarDatos(array $lineasExtraidas): array
     {
         return array_map(function (string $linea): array {
             $columnWidths = $this->columnWidths;
             $processedLine = $this->processLine($linea, $columnWidths);
+
             return $this->dataMapper->mapDataToModel($processedLine);
         }, $lineasExtraidas);
     }
@@ -428,9 +422,9 @@ class AfipSicossDesdeMapuche extends Model
     /**
      * Itera sobre una tabla de importación cruda de AFIP y procesa cada línea.
      *
-     * @param afipImportacionCrudaModel $request El modelo de importación cruda de AFIP.
+     * @param AfipImportacionCrudaModel $request El modelo de importación cruda de AFIP.
      */
-    private function iterartabla(afipImportacionCrudaModel $request): void
+    private function iterartabla(AfipImportacionCrudaModel $request): void
     {
         $AfipimportacionCruda = $request;
         foreach ($AfipimportacionCruda->all() as $lineaImportadaCruda) {
@@ -441,7 +435,7 @@ class AfipSicossDesdeMapuche extends Model
     /**
      * Procesa una línea de importación cruda y crea un nuevo registro en la tabla afip_sicoss_desde_mapuche.
      *
-     * @param string $lineaImportacionCruda La línea de importación cruda a procesar.
+     * @param string $lineaImportadaCruda La línea de importación cruda a procesar.
      */
     private function processRow(string $lineaImportadaCruda): void
     {
@@ -533,7 +527,7 @@ class AfipSicossDesdeMapuche extends Model
         DB::connection($conexion)->beginTransaction();
         $chunkSize = 1000; // Tamaño del chunk de la base de datos
 
-        //Eliminar la clave primaria temporalmente: afip_sicoss_desde_mapuche_pkey
+        // Eliminar la clave primaria temporalmente: afip_sicoss_desde_mapuche_pkey
         // DB::connection($conexion)->statement('ALTER TABLE afip_sicoss_desde_mapuche DROP CONSTRAINT afip_sicoss_desde_mapuche_pkey');
         foreach (array_chunk($mappedData, $chunkSize) as $chunk) {
             foreach ($chunk as &$data) {
@@ -552,6 +546,7 @@ class AfipSicossDesdeMapuche extends Model
         // DB::connection($conexion)->statement('ALTER TABLE afip_sicoss_desde_mapuche ADD CONSTRAINT afip_sicoss_desde_mapuche_pkey PRIMARY KEY (id)');
         // Confirmar la transaccion en la conexion especificada.
         DB::connection($conexion)->commit();
+
         return true;
     }
 }
