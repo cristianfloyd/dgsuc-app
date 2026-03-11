@@ -19,8 +19,8 @@ use function sprintf;
 
 class Dh12 extends Model
 {
-    use MapucheConnectionTrait;
     use CharacterEncodingTrait;
+    use MapucheConnectionTrait;
 
     /**
      * Indica si el modelo debe ser timestamped.
@@ -160,8 +160,6 @@ class Dh12 extends Model
 
     /**
      * Obtiene los números de acumuladores activos basados en el campo flag_acumu.
-     *
-     * @return array<int> Array de números de acumuladores activos
      */
     protected function acumuladoresActivos(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -177,6 +175,7 @@ class Dh12 extends Model
                     $acumuladores[] = $posicion + 1;
                 }
             }
+
             return $acumuladores;
         });
     }
@@ -230,7 +229,7 @@ class Dh12 extends Model
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
 

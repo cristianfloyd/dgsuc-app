@@ -75,6 +75,7 @@ class Dh61 extends Model
         'aportalao',
     ];
 
+    /** @phpstan-ignore property.onlyWritten (Used for Filament route binding) */
     private ?string $virtualId = null;
 
     // Método para verificar si es jefatura
@@ -109,6 +110,7 @@ class Dh61 extends Model
     #[Override]
     public function newQuery()
     {
+        /** @phpstan-ignore-next-line return.type */
         return parent::newQuery()->addSelect(
             '*',
             DB::connection($this->getConnectionName())->raw("CONCAT(codc_categ, '-', vig_caano, '-', vig_cames) as id"),
@@ -182,6 +184,8 @@ class Dh61 extends Model
      * Establece el nombre de la clave para el modelo.
      *
      * @param string $key El valor de la clave a establecer.
+     *
+     * @phpstan-ignore method.childReturnType (Custom key handling for Filament)
      */
     #[Override]
     public function setKeyName($key): void

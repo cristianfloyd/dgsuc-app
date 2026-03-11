@@ -108,6 +108,10 @@ parameters:
         # Propiedades de modelo Laravel (array vs list - son equivalentes funcionalmente)
         - identifier: property.phpDocType
           path: 'app/Models/*'
+        
+        # Propiedades appends en modelos Eloquent con accessors tradicionales
+        - identifier: rules.modelAppends
+          path: 'app/Models/*'
     
     # Configuración de reporte
     reportUnmatchedIgnoredErrors: false

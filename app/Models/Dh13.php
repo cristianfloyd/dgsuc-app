@@ -111,6 +111,8 @@ class Dh13 extends Model
      * Establece la clave única para el modelo.
      *
      * @param mixed $key
+     *
+     * @phpstan-ignore method.childReturnType (Custom composite key handling)
      */
     #[Override]
     public function setKeyName($key): void
@@ -142,10 +144,12 @@ class Dh13 extends Model
     {
         if ($field === 'id') {
             [$codn_conce, $nro_orden_formula] = explode('-', (string) $key);
+
             return $this->where('codn_conce', $codn_conce)
                 ->where('nro_orden_formula', $nro_orden_formula)
                 ->first();
         }
+
         return parent::resolveRouteBinding($key, $field);
     }
 
@@ -176,6 +180,7 @@ class Dh13 extends Model
     public function find($id, $columns = ['*'])
     {
         [$codn_conce, $nro_orden_formula] = explode('-', $id);
+
         return $this->where('codn_conce', $codn_conce)
             ->where('nro_orden_formula', $nro_orden_formula)
             ->first($columns);
@@ -183,7 +188,7 @@ class Dh13 extends Model
 
     public static function diagnosticarCodificacionConConcepto($codn_conce = 520): void
     {
-        $connection = static::getConnectionFromTrait();
+        $connection = new self()->getConnectionFromTrait();
         $connection->statement("SET client_encoding TO 'SQL_ASCII'");
 
         $registro = self::with('dh12')
@@ -229,9 +234,10 @@ class Dh13 extends Model
     protected static function getMapucheConnection()
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 

@@ -22,8 +22,8 @@ use function is_array;
  */
 class EmbargoProcesoResult extends Model
 {
-    use MapucheConnectionTrait;
     use EncodingTrait;
+    use MapucheConnectionTrait;
 
     public $incrementing = true;
 
@@ -136,7 +136,6 @@ class EmbargoProcesoResult extends Model
                 throw new Exception("La función 'suc.emb_proceso' no existe en la base de datos.");
             }
 
-
             // Ejecutar la función almacenada con la conexión obtenida
             $results = $connection->select(
                 'SELECT * FROM suc.emb_proceso(
@@ -203,6 +202,7 @@ class EmbargoProcesoResult extends Model
         $cantidadRegistros = count($results);
         if ($cantidadRegistros === 0) {
             Log::warning('No hay registros para insertar en la tabla de resultados de embargo');
+
             return 0;
         }
 
@@ -251,8 +251,6 @@ class EmbargoProcesoResult extends Model
                     $registroFiltrado['nros_liqui_json'] = [];
                 }
                 // --- FIN NUEVO ---
-
-
 
                 // Verificar que tengamos todos los campos requeridos
                 if (count($registroFiltrado) < count($fillable)) {
@@ -328,6 +326,8 @@ class EmbargoProcesoResult extends Model
      * en el trait MapucheConnectionTrait, haciéndola accesible para métodos
      * estáticos que necesitan ejecutar consultas directas a la base de datos.
      *
+     *
+     *
      * @throws Exception Si no se puede determinar la conexión
      *
      * @return Connection
@@ -338,7 +338,7 @@ class EmbargoProcesoResult extends Model
         $instance = new self();
 
         // Verificar si el trait implementa algún método específico para obtener la conexión
-        if (method_exists($instance, 'getMapucheConnection')) {
+        if (method_exists($instance, 'getMapucheConnection')) { // @phpstan-ignore function.alreadyNarrowedType
             return $instance->getMapucheConnection();
         }
 

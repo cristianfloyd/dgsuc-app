@@ -93,6 +93,7 @@ class ControlAportesDiferencia extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return (int) (substr($this->cuil, 2, 8));
                 }
+
                 return null;
             },
         );
@@ -104,7 +105,7 @@ class ControlAportesDiferencia extends Model
     protected function totalAportesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn(): float|int|array => $this->aportesijpdh21 + $this->aporteinssjpdh21,
+            get: fn(): float => $this->aportesijpdh21 + $this->aporteinssjpdh21,
         );
     }
 
@@ -114,7 +115,7 @@ class ControlAportesDiferencia extends Model
     protected function totalContribucionesDh21(): Attribute
     {
         return Attribute::make(
-            get: fn(): float|int|array => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
+            get: fn(): float => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21,
         );
     }
 
@@ -124,7 +125,7 @@ class ControlAportesDiferencia extends Model
     protected function totalAportesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn(): float|int|array => $this->aportesijp + $this->aporteinssjp,
+            get: fn(): float => $this->aportesijp + $this->aporteinssjp,
         );
     }
 
@@ -134,7 +135,7 @@ class ControlAportesDiferencia extends Model
     protected function totalContribucionesSicoss(): Attribute
     {
         return Attribute::make(
-            get: fn(): float|int|array => $this->contribucionsijp + $this->contribucioninssjp,
+            get: fn(): float => $this->contribucionsijp + $this->contribucioninssjp,
         );
     }
 

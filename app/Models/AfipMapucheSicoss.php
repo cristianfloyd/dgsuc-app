@@ -25,10 +25,10 @@ use const STR_PAD_LEFT;
  */
 class AfipMapucheSicoss extends Model
 {
-    use HasFactory;
     use HasCompositeRelations;
-    use MapucheConnectionTrait;
+    use HasFactory;
     use HasFixedWithImportes;
+    use MapucheConnectionTrait;
 
     public $incrementing = true;
 
@@ -126,8 +126,6 @@ class AfipMapucheSicoss extends Model
         );
     }
 
-
-
     // ####################################### RELACIONES ##############################################################
 
     public function dh01()
@@ -149,6 +147,7 @@ class AfipMapucheSicoss extends Model
     public function getPeriodoFiscalFormateado(): string
     {
         $periodo = $this->attributes['periodo_fiscal'];
+
         return substr((string) $periodo, 0, 4) . '-' . substr((string) $periodo, 4, 2);
     }
 
@@ -276,7 +275,7 @@ class AfipMapucheSicoss extends Model
 
             // Insertar los resultados en la tabla
             foreach ($results as $result) {
-                self::connection(self::getMapucheConnection())
+                self::query() // @phpstan-ignore staticMethod.notFound
                     ->create([
                         'periodo_fiscal' => $periodoFiscal,
                         'cuil' => $result->nro_cuil,
@@ -301,10 +300,11 @@ class AfipMapucheSicoss extends Model
             }
 
             $connection->commit();
+
             return ['status' => 'success', 'message' => 'Datos insertados correctamente.'];
         } catch (Exception $e) {
             Log::error('SICOSS: Error al poblar tabla: ' . $e->getMessage());
-            if (isset($connection)) {
+            if ($connection !== null) { // @phpstan-ignore isset.variable
                 $connection->rollBack();
             }
             throw new Exception('Error al poblar tabla SICOSS: ' . $e->getMessage(), $e->getCode(), $e);
@@ -469,6 +469,7 @@ class AfipMapucheSicoss extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return (int) (substr($this->cuil, 2, 8));
                 }
+
                 return null;
             },
         );
@@ -840,7 +841,7 @@ class AfipMapucheSicoss extends Model
      */
     protected static function getMapucheConnection(): string
     {
-        return new static()->getConnectionName();
+        return new self()->getConnectionName();
     }
 
     /**

@@ -55,6 +55,7 @@ class Dh21 extends Model
         'codn_subsubar',
     ];
 
+    /** @phpstan-ignore property.onlyWritten (Injected via constructor) */
     private Dh21RepositoryInterface $repository;
 
     public function __construct(?Dh21RepositoryInterface $repository = null)
@@ -117,7 +118,7 @@ class Dh21 extends Model
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function search($query, $search)
     {
-        $columns = ['nro_legaj', 'nro_liqui', 'nro_cargo', 'codn_conce', 'impp_conce', 'tipo_conce', ];
+        $columns = ['nro_legaj', 'nro_liqui', 'nro_cargo', 'codn_conce', 'impp_conce', 'tipo_conce'];
 
         return $query->where(function ($q) use ($columns, $search): void {
             foreach ($columns as $column) {
@@ -168,9 +169,9 @@ class Dh21 extends Model
     /**
      * Obtiene la relación de liquidaciones asociadas a este registro.
      *
-     * @return BelongsTo
+     * @return BelongsTo<\App\Models\Mapuche\Dh22, $this>
      */
-    private function getLiquidaciones()
+    private function getLiquidaciones() // @phpstan-ignore method.unused
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }

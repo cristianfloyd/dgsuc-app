@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +28,7 @@ class AfipImportacionCrudaModel extends Model
      * la tabla esté vacía y, si no lo está, se trunca para asegurar que solo se inserten los datos del
      * archivo actual.
      *
-     * @param Request $request Solicitud HTTP que contiene la ruta del archivo a importar.
+     * @param string $filePath Ruta del archivo a importar.
      *
      * @throws Exception Si no se puede abrir el archivo.
      *

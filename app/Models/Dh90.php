@@ -18,17 +18,16 @@ use Override;
  * @property int|null $nro_cargoasociado Número de cargo asociado (posible relación)
  * @property string|null $tipoasociacion Tipo de asociación (char de 1 caracter)
  *
- * @method static \Database\Factories\Dh90Factory factory()
  * @method static Builder|Dh90 porTipoAsociacion(string $tipo)
  * @method static Builder|Dh90 conCargosAsociados()
  */
 class Dh90 extends Model
 {
-    use HasFactory, DatabaseSchema {
-        DatabaseSchema::getTable insteadof MapucheConnectionTrait;
-    }
     use CargoQueries, MapucheConnectionTrait {
         MapucheConnectionTrait::getConnectionName insteadof DatabaseSchema;
+    }
+    use DatabaseSchema, HasFactory {
+        DatabaseSchema::getTable insteadof MapucheConnectionTrait;
     }
 
     /**
@@ -104,8 +103,6 @@ class Dh90 extends Model
 
     /**
      * Accessor para obtener el tipo de asociación sin espacios.
-     *
-     * @return string|null
      */
     protected function tipoAsociacion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -114,8 +111,6 @@ class Dh90 extends Model
 
     /**
      * Los atributos que deben convertirse a tipos nativos.
-     *
-     * @var array<string, string>
      */
     #[Override]
     protected function casts(): array

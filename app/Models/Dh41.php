@@ -200,7 +200,9 @@ class Dh41 extends Model
      * Sobreescribe el método para obtener la clave primaria
      * para manejar claves primarias compuestas.
      *
-     * @return array
+     * @return array<int, string>
+     *
+     * @phpstan-ignore method.childReturnType (Composite primary key support)
      */
     #[Override]
     public function getKeyName()

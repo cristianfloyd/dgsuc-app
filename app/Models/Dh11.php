@@ -7,10 +7,10 @@ use App\Traits\CategoriasConstantTrait;
 use App\Traits\HasLaboralStatus;
 use App\Traits\MapucheConnectionTrait;
 use App\Traits\PostgresqlTrait;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Override;
 
@@ -36,6 +36,7 @@ class Dh11 extends Model
     use PostgresqlTrait;
 
     public $timestamps = false;
+
     public $incrementing = false;
 
     /**
@@ -109,7 +110,7 @@ class Dh11 extends Model
      */
     public static function getCargosDoceSecundario(): int
     {
-        return Cache::remember('cargos_doce_secundario', 3600, fn () => self::query()
+        return Cache::remember('cargos_doce_secundario', 3600, fn() => self::query()
             ->whereIn('dh11.codc_categ', self::CATEGORIAS['DOCS'])
             ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
             ->count());
@@ -126,7 +127,7 @@ class Dh11 extends Model
      */
     public static function getCargosDoceUniversitario(): int
     {
-        return Cache::remember('cargos_doce_universitario', 3600, fn () => self::query()
+        return Cache::remember('cargos_doce_universitario', 3600, fn() => self::query()
             ->whereIn('dh11.codc_categ', self::CATEGORIAS['DOCU'])
             ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
             ->count());
@@ -143,7 +144,7 @@ class Dh11 extends Model
      */
     public static function getCargosAutoUniversitario(): int
     {
-        return Cache::remember('cargos_auto_universitario', 3600, fn () => self::query()
+        return Cache::remember('cargos_auto_universitario', 3600, fn() => self::query()
             ->whereIn('dh11.codc_categ', self::CATEGORIAS['AUTU'])
             ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
             ->count());
@@ -160,7 +161,7 @@ class Dh11 extends Model
      */
     public static function getCargosAutoSecundario(): int
     {
-        return Cache::remember('cargos_auto_secundario', 3600, fn () => self::query()
+        return Cache::remember('cargos_auto_secundario', 3600, fn() => self::query()
             ->whereIn('dh11.codc_categ', self::CATEGORIAS['AUTS'])
             ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
             ->count());
@@ -177,7 +178,7 @@ class Dh11 extends Model
      */
     public static function getCargosNoDocente(): int
     {
-        return Cache::remember('cargos_no_docente', 3600, fn () => self::query()
+        return Cache::remember('cargos_no_docente', 3600, fn() => self::query()
             ->whereIn('dh11.codc_categ', self::CATEGORIAS['NODO'])
             ->join('mapuche.dh03', 'dh11.codc_categ', '=', 'dh03.codc_categ')
             ->count());
@@ -292,7 +293,7 @@ class Dh11 extends Model
      */
     protected function isMensualized(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_mensu === 'S');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_mensu === 'S');
     }
 
     /**
@@ -300,7 +301,7 @@ class Dh11 extends Model
      */
     protected function hasLeadership(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn (): bool => $this->sino_jefat === 'S');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => $this->sino_jefat === 'S');
     }
 
     #[Override]
@@ -332,6 +333,6 @@ class Dh11 extends Model
      */
     protected function imppBasic(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(set: fn ($value): array => ['impp_basic' => $value, 'impp_asign' => $value]);
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(set: fn($value): array => ['impp_basic' => $value, 'impp_asign' => $value]);
     }
 }

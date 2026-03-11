@@ -70,6 +70,7 @@ class ControlContribucionesDiferencia extends Model
                     // Extrae los 8 dígitos del medio de `cuil`
                     return (int) (substr($this->cuil, 2, 8));
                 }
+
                 return null;
             },
         );
@@ -87,7 +88,7 @@ class ControlContribucionesDiferencia extends Model
     protected function totalContribuciones(): Attribute
     {
         return Attribute::make(
-            get: fn(): float|int|array => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp,
+            get: fn(): float => $this->contribucionsijpdh21 + $this->contribucioninssjpdh21 + $this->contribucionsijp + $this->contribucioninssjp,
         );
     }
 

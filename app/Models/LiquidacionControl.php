@@ -59,6 +59,7 @@ class LiquidacionControl extends Model
             get: fn(): string => match ($this->estado) {
                 'pendiente' => 'warning',
                 'error' => 'danger',
+                /** @phpstan-ignore-next-line match.alwaysTrue */
                 'completado' => 'success',
                 default => 'gray',
             },

@@ -16,7 +16,6 @@ use function is_string;
 
 // (D) Variable Global: Período Corriente
 
-
 class Dh99 extends Model
 {
     use MapucheConnectionTrait;
@@ -72,15 +71,17 @@ class Dh99 extends Model
                 $periodoFiscal = PeriodoFiscal::fromString($periodoFiscal);
             }
 
-            if (!($periodoFiscal instanceof PeriodoFiscal)) {
+            if (!$periodoFiscal instanceof PeriodoFiscal) { // @phpstan-ignore instanceof.alwaysTrue
                 throw new InvalidArgumentException('El periodo fiscal debe ser un string en formato YYYYMM o un objeto PeriodoFiscal');
             }
 
             $this->per_anoct = $periodoFiscal->year();
             $this->per_mesct = $periodoFiscal->month();
+
             return $this->save();
         } catch (Exception $e) {
             Log::error('Error al establecer el periodo fiscal: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -94,6 +95,7 @@ class Dh99 extends Model
             get: function (): string {
                 $periodoFiscalService = resolve(PeriodoFiscalService::class);
                 $periodo = $periodoFiscalService->getPeriodoFiscalFromDatabase();
+
                 return $periodo['year'] . $periodo['month'];
             },
         );

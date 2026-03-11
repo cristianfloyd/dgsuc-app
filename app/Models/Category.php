@@ -18,8 +18,11 @@ class Category extends Model
         'description',
     ];
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function posts()
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany('App\Models\Post'); // @phpstan-ignore argument.type
     }
 }

@@ -23,9 +23,9 @@ use const STR_PAD_LEFT;
 
 class AfipMapucheMiSimplificacion extends Model
 {
-    use MapucheConnectionTrait;
     use HasPuestoDesempenado;
     use HasUnidadAcademica;
+    use MapucheConnectionTrait;
 
     public $incrementing = true;
 
@@ -129,9 +129,11 @@ class AfipMapucheMiSimplificacion extends Model
                 $table->unique(['periodo_fiscal', 'cuil']);
             });
             Log::info("Tabla {$this->table} creada en la base de datos {$this->connection}, desde el modelo");
+
             return true; // Table created successfully
         }
         Log::info("Tabla {$this->table} ya existe en la base de datos {$this->connection}, desde el modelo");
+
         return false; // Table already exists
     }
 
@@ -140,7 +142,7 @@ class AfipMapucheMiSimplificacion extends Model
      */
     public static function truncate(): void
     {
-        $instance = new static();
+        $instance = new self();
         DB::connection($instance->getConnectionName())->statement('TRUNCATE TABLE ' . $instance->getSchemaName() . '.afip_mapuche_mi_simplificacion RESTART identity CASCADE');
     }
 
@@ -159,7 +161,7 @@ class AfipMapucheMiSimplificacion extends Model
      */
     public static function getDatabaseTableName(): string
     {
-        return static::getTable();
+        return new self()->getTable();
     }
 
     public function getSchemaName(): string
@@ -202,6 +204,7 @@ class AfipMapucheMiSimplificacion extends Model
             return true;
         } catch (Exception $e) {
             Log::error($e->getMessage());
+
             return false;
         }
     }
@@ -308,6 +311,7 @@ class AfipMapucheMiSimplificacion extends Model
                     return PeriodoFiscal::fromString($periodoStr);
                 } catch (InvalidArgumentException) {
                     Log::warning("Formato de periodo fiscal inválido: {$periodoStr}");
+
                     return null;
                 }
             },
@@ -366,6 +370,7 @@ class AfipMapucheMiSimplificacion extends Model
                 }
 
                 $puesto = $this->determinarPuestoDesempenado($categoria);
+
                 return $puesto?->descripcion();
             },
         );
@@ -385,6 +390,7 @@ class AfipMapucheMiSimplificacion extends Model
                 }
 
                 $puesto = $this->determinarPuestoDesempenado($categoria);
+
                 return $puesto?->escalafon();
             },
         );
@@ -402,10 +408,12 @@ class AfipMapucheMiSimplificacion extends Model
                 if ($this->attributes['actividad'] === null && $value) {
                     $this->determinarCodigosUnidadAcademica($value);
                 }
+
                 return str_pad($value, 5, '0', STR_PAD_LEFT);
             },
             set: function (?string $value): ?string {
                 $this->determinarCodigosUnidadAcademica($value);
+
                 return $value;
             },
         );

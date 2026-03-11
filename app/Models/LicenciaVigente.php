@@ -113,7 +113,7 @@ class LicenciaVigente extends Model
     {
         try {
             // Limpiar registros anteriores de esta sesión
-            //self::where('session_id', $sessionId)->delete();
+            // self::where('session_id', $sessionId)->delete();
 
             if ($legajos === []) {
                 return self::query()->where('session_id', $sessionId);
@@ -133,6 +133,7 @@ class LicenciaVigente extends Model
                         'session_id' => $sessionId,
                         'count' => $existingCount,
                     ]);
+
                     return self::query()->where('session_id', $sessionId);
                 }
 
@@ -154,6 +155,7 @@ class LicenciaVigente extends Model
                 Log::info('No se encontraron licencias vigentes para los legajos consultados', [
                     'legajos' => $legajos,
                 ]);
+
                 return self::query()->where('session_id', $sessionId);
             }
 
@@ -214,8 +216,6 @@ class LicenciaVigente extends Model
 
     /**
      * Obtiene la descripción legible de la condición.
-     *
-     * @return string
      */
     protected function descripcionCondicion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
@@ -238,7 +238,7 @@ class LicenciaVigente extends Model
      */
     protected static function getMapucheConnection(): string
     {
-        return new static()->getConnectionName();
+        return new self()->getConnectionName();
     }
 
     /**

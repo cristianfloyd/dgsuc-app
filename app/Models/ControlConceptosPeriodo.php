@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
+/**
+ * @property-read string $tipo_concepto
+ * @property-read bool $es_aporte
+ * @property-read bool $es_contribucion
+ */
 class ControlConceptosPeriodo extends Model
 {
     use HasFactory;
@@ -52,7 +57,7 @@ class ControlConceptosPeriodo extends Model
      */
     protected function esAporte(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with($this->codn_conce, '2'));
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with((string) $this->codn_conce, '2'));
     }
 
     /**
@@ -60,7 +65,7 @@ class ControlConceptosPeriodo extends Model
      */
     protected function esContribucion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with($this->codn_conce, '3'));
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): bool => str_starts_with((string) $this->codn_conce, '3'));
     }
 
     /**
@@ -68,7 +73,7 @@ class ControlConceptosPeriodo extends Model
      */
     protected function getTipoConceptoAttribute(): string
     {
-        return match (substr($this->codn_conce, 0, 1)) {
+        return match (substr((string) $this->codn_conce, 0, 1)) {
             '2' => 'Aportes',
             '3' => 'Contribuciones',
             default => 'Otro',

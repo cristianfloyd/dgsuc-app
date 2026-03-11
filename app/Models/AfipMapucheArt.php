@@ -14,8 +14,8 @@ use Override;
 
 class AfipMapucheArt extends Model
 {
-    use MapucheConnectionTrait;
     use HasFactory;
+    use MapucheConnectionTrait;
 
     public $incrementing = true;
 
@@ -47,7 +47,7 @@ class AfipMapucheArt extends Model
      */
     public static function getMapucheConnection()
     {
-        return new static()->getConnectionFromTrait();
+        return new self()->getConnectionFromTrait();
     }
 
     /**
@@ -72,7 +72,7 @@ class AfipMapucheArt extends Model
         if ($sicoss) {
             $this->cuil = $sicoss->cuil;
             $this->apellido_y_nombre = $sicoss->apnom;
-            $this->sueldo = $sicoss->rem_imp9;
+            $this->sueldo = (float) $sicoss->rem_imp9;
         }
 
         // Obtener datos desde Dh01 usando el CUIL (11 dígitos)
@@ -130,10 +130,9 @@ class AfipMapucheArt extends Model
     /**
      * Método privado para obtener el número de legajo desde un CUIL de 11 dígitos.
      *
-     *
      * @return int|null El número de legajo si se encuentra, o null en caso contrario.
      */
-    private function obtenerLegajoDesdeCuil(string $cuil): ?int
+    private function obtenerLegajoDesdeCuil(string $cuil): ?int // @phpstan-ignore method.unused
     {
         $dh01 = Dh01::query()->whereRaw('CONCAT(nro_cuil1, nro_cuil, nro_cuil2) = ?', [$cuil])->first();
 
@@ -147,7 +146,7 @@ class AfipMapucheArt extends Model
      *
      * @return bool True si nroLiqui existe, false en caso contrario.
      */
-    private function verificarNroLiqui($nroLiqui): bool
+    private function verificarNroLiqui($nroLiqui): bool // @phpstan-ignore method.unused
     {
         return Dh22::verificarNroLiqui($nroLiqui);
     }
