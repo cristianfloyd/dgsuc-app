@@ -113,7 +113,7 @@ class TablaTempCuils extends Model
         } catch (Exception $e) {
             // Manejo del error: puedes registrar el error si es necesario
             Log::error($e->getMessage());
-            return 0;
+            return false;
         }
     }
 
