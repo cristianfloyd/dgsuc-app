@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
+/**
+ * @property int $id
+ * @property string $process_name
+ * @property string $status
+ * @property array<string, string> $steps
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $completed_at
+ */
 class ProcessLog extends Model
 {
     protected $fillable = [
