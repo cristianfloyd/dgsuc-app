@@ -23,6 +23,8 @@ parameters:
         - node_modules/
         - public/
         - resources/
+        - app/Services/Afip/sicoss*.php
+        - app/Services/Afip/Sicoss*.php
         - '*/migrations/*_create_*_table.php'
         - *.blade.php
     
