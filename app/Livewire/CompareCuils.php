@@ -29,23 +29,32 @@ use function in_array;
 
 class CompareCuils extends Component
 {
-    use WithPagination;
     use MapucheConnectionTrait;
+    use WithPagination;
 
     // Constantes
     private const PER_PAGE = 10;
+
     private const IN_PROGRESS = 'in_progress';
+
     private const COMPLETED = 'completed';
 
     private const MSG_WORKFLOW_COMPLETED = 'Flujo de trabajo completado';
+
     private const MSG_DATA_INSERTED = 'Datos insertados en Mi Simplificacion';
+
     private const MSG_ERROR_INSERT = 'Error al insertar Mi Simplificacion';
+
     private const LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
 
     private const DEFAULT_PERIODO_FISCAL = 202312;
+
     private const EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+
     private const EVENT_SUCCESS_TABLA_TEMP_CUILS = 'success-tabla-temp-cuils';
+
     private const EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+
     private const EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
 
     public $cuilsNotInAfip;
@@ -136,6 +145,7 @@ class CompareCuils extends Component
             $this->currentStep = $this->workflowService->getCurrentStep($this->processLog);
             if ($this->currentStep === null) {
                 $this->showParaMiSimplificacionAndCuilsNoEncontrados();
+
                 return;
             }
         } else {
@@ -159,11 +169,11 @@ class CompareCuils extends Component
      */
     public function cuilsNoEncontrados(): array
     {
-        $afipModel = new AfipMapucheMiSimplificacion();
+        $afipModel = new AfipMapucheMiSimplificacion;
 
         $cuilsNoEncontrados = DB::connection($this->getConnectionName())
-            ->table($this->tempTableService->getFullTableName() . ' as ttc')
-            ->leftJoin($afipModel->getFullTableName() . ' as amms', 'ttc.cuil', 'amms.cuil')
+            ->table($this->tempTableService->getFullTableName().' as ttc')
+            ->leftJoin($afipModel->getFullTableName().' as amms', 'ttc.cuil', 'amms.cuil')
             ->whereNull('amms.cuil')
             ->pluck('ttc.cuil')
             ->toArray();
@@ -225,13 +235,14 @@ class CompareCuils extends Component
 
     public function updateShowMiSimplificacion(): void
     {
-        $this->ShowMiSimplificacion = !$this->ShowMiSimplificacion;
+        $this->ShowMiSimplificacion = ! $this->ShowMiSimplificacion;
     }
 
     #[Computed(persist: true)]
     public function stepsCompleted(): bool
     {
         $step = $this->currentStep;
+
         return (bool) ($step === self::COMPLETED);
     }
 
@@ -342,8 +353,7 @@ class CompareCuils extends Component
 
     /** Alterna el valor booleano de una variable.
      *
-     * @param bool|string $value El valor a alternar.
-     *
+     * @param  bool|string  $value  El valor a alternar.
      * @return bool El valor alternado.
      */
     public function toggleValue(bool|string $value): bool
@@ -370,35 +380,38 @@ class CompareCuils extends Component
             $lastProcess = $this->processLogService->getLatestProcess();
 
             // Obtener el siguiente paso del workflow
-            $nextStep = $this->workflowService->getNextStep($lastProcess?->current_step ?? 'start');
+            $currentStep = $lastProcess !== null ? $lastProcess->current_step : 'start';
+            $nextStep = $this->workflowService->getNextStep($currentStep ?? 'start');
 
-            if (!$nextStep) {
+            if (! $nextStep) {
                 Log::warning('No se pudo determinar el siguiente paso del workflow');
                 $this->dispatch('notify', [
                     'type' => 'warning',
                     'message' => 'No se pudo determinar el siguiente paso del proceso',
                 ]);
+
                 return;
             }
 
             // Obtener la URL del paso actual
             $stepUrl = $this->workflowService->getStepUrl($nextStep);
 
-            if (!$stepUrl) {
+            if (! $stepUrl) {
                 Log::error('No se pudo obtener la URL del paso actual');
                 $this->dispatch('notify', [
                     'type' => 'error',
                     'message' => 'Error al obtener la URL del paso actual',
                 ]);
+
                 return;
             }
 
             // Resto de la lógica...
         } catch (Exception $e) {
-            Log::error('Error en loadCuilsNotInAfip: ' . $e->getMessage());
+            Log::error('Error en loadCuilsNotInAfip: '.$e->getMessage());
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Error al cargar los CUILs: ' . $e->getMessage(),
+                'message' => 'Error al cargar los CUILs: '.$e->getMessage(),
             ]);
         }
     }
@@ -431,10 +444,11 @@ class CompareCuils extends Component
     public function compareCuils(): Collection
     {
         try {
-            $this->cuilsNotInAfip = $this->cuilCompareService->compareCuils($this->perPage);
+            $this->cuilsNotInAfip = $this->cuilCompareService->compareCuils((string) $this->periodoFiscal, $this->perPage);
+
             return $this->cuilsNotInAfip;
         } catch (QueryException $e) {
-            Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
+            Log::error('Error en la consulta de comparación de CUILs: '.$e->getMessage());
             throw new Exception('Error al procesar la comparación de CUILs. Por favor, inténtelo de nuevo más tarde.');
         }
     }
@@ -446,7 +460,7 @@ class CompareCuils extends Component
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::POBLAR_TABLA_TEMP_CUILS->value, self::IN_PROGRESS);
             if ($this->tempTableService->populateTempTable($this->cuilsToSearch)) {
                 $this->cuilsCount = $this->tempTableService->getTempTableCount();
-                Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE . "{$this->nroLiqui}" . "{$this->periodoFiscal} {$this->cuilsCount}");
+                Log::info(self::LOG_INIT_POPULATE_TEMP_TABLE."{$this->nroLiqui}"."{$this->periodoFiscal} {$this->cuilsCount}");
             }
         }
     }
@@ -523,7 +537,6 @@ class CompareCuils extends Component
 
     /** Carga los CUILs que no están en la tabla afip_relaciones_activas.
      *
-     * @return void
      */
     private function loadCuilsNotInserted(): void
     {
@@ -559,7 +572,7 @@ class CompareCuils extends Component
         $this->cuilsCount = $this->tempTableService->getTempTableCount();
         if ($this->cuilsCount == 0) {
             $this->workflowService->updateStep($this->processLog, WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, self::IN_PROGRESS);
-            $this->addMessage('Volviendo al paso anterior: ' . WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, 'info');
+            $this->addMessage('Volviendo al paso anterior: '.WorkflowStatus::OBTENER_CUILS_NOT_IN_AFIP->value, 'info');
         }
     }
 
