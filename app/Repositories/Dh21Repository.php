@@ -26,8 +26,6 @@ class Dh21Repository implements Dh21RepositoryInterface
 
     /**
      * Devuelve una instancia de Illuminate\Database\Eloquent\Builder que se puede usar para consultar el modelo Dh21.
-     *
-     * @return Builder
      */
     public function query(): Builder
     {
@@ -37,8 +35,7 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Devuelve la suma total del concepto 101 para un número de liquidación dado.
      *
-     * @param NroLiqui|null $nroLiqui El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
-     *
+     * @param  NroLiqui|null  $nroLiqui  El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
      * @return float La suma total del concepto 101.
      */
     public function getTotalConcepto101(?NroLiqui $nroLiqui = null): float
@@ -47,18 +44,17 @@ class Dh21Repository implements Dh21RepositoryInterface
         if ($nroLiqui) {
             $query->where('nro_liqui', $nroLiqui->getValue());
         }
+
         return $query->sum('impp_conce');
     }
 
     /**
      * Obtiene las horas y días trabajados para un legajo y cargo específico.
      *
-     * @param int $legajo
-     * @param int $cargo
      *
      * @return array{dias: int, horas: int}
      */
-    public function getHorasYDias(int $legajo, int $cargo): array
+    public function getHorasAndDias(int $legajo, int $cargo): array
     {
         return Dh21::query()
             ->where('nro_legaj', $legajo)
@@ -75,16 +71,14 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Obtiene las liquidaciones con sus importes y descripciones.
      *
-     * @param array $conditions Condiciones adicionales para filtrar
-     *
-     * @return Collection
+     * @param  array  $conditions  Condiciones adicionales para filtrar
      */
     public function getLiquidaciones(array $conditions = []): Collection
     {
         return Dh21::query()
             ->select('dh22.desc_liqui', 'dh21.codn_conce', 'dh21.impp_conce', 'dh21.desc_conce')
             ->with('dh22')
-            ->when(!empty($conditions), function ($query) use ($conditions): void {
+            ->when(! empty($conditions), function ($query) use ($conditions): void {
                 foreach ($conditions as $column => $value) {
                     $query->where($column, $value);
                 }
@@ -97,12 +91,6 @@ class Dh21Repository implements Dh21RepositoryInterface
 
     /**
      * Obtiene conceptos liquidados para procesamiento SICOSS.
-     *
-     * @param int $per_anoct
-     * @param int $per_mesct
-     * @param string $where
-     *
-     * @return array
      */
     public function obtenerConceptosLiquidadosSicoss(int $per_anoct, int $per_mesct, string $where): array
     {
@@ -192,11 +180,6 @@ class Dh21Repository implements Dh21RepositoryInterface
 
     /**
      * Obtiene períodos retro disponibles de la tabla temporal pre_conceptos_liquidados.
-     *
-     * @param bool $check_lic
-     * @param bool $check_retr
-     *
-     * @return array
      */
     public function obtenerPeriodosRetro(bool $check_lic = false, bool $check_retr = false): array
     {
@@ -216,7 +199,7 @@ class Dh21Repository implements Dh21RepositoryInterface
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
             array_push($rs_periodos_retro, $temp);
-        } elseif (!$check_lic) {
+        } elseif (! $check_lic) {
             $sql_periodos_retro = '
                                     SELECT
                                             DISTINCT(ano_retro),mes_retro
