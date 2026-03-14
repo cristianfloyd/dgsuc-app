@@ -10,8 +10,7 @@ class Dhr3Repository
 {
     public function __construct(
         private readonly Dhr3 $model,
-    ) {
-    }
+    ) {}
 
     public function find(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo): ?Dhr3
     {
@@ -24,7 +23,7 @@ class Dhr3Repository
         ])->first();
     }
 
-    public function findByPrimaryKey(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo)
+    public function findByPrimaryKey(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo): ?\App\Data\DataObjects\Dhr3Data
     {
         $record = $this->model->where('nro_liqui', $nro_liqui)
             ->where('nro_legaj', $nro_legaj)
@@ -48,13 +47,13 @@ class Dhr3Repository
     public function update(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo, Dhr3Data $data): bool
     {
         $record = $this->find($nro_liqui, $nro_legaj, $nro_cargo, $codc_hhdd, $nro_renglo);
-        return $record ? $record->update($data->toArray()) : false;
+        return $record instanceof \App\Models\Mapuche\Dhr3 && $record->update($data->toArray());
     }
 
     public function delete(int $nro_liqui, int $nro_legaj, int $nro_cargo, string $codc_hhdd, int $nro_renglo): bool
     {
         $record = $this->find($nro_liqui, $nro_legaj, $nro_cargo, $codc_hhdd, $nro_renglo);
-        return $record ? $record->delete() : false;
+        return $record instanceof \App\Models\Mapuche\Dhr3 ? $record->delete() : false;
     }
 
     public function findByLiquidacion(int $nro_liqui): Collection

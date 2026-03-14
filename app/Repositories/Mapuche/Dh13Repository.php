@@ -13,7 +13,7 @@ class Dh13Repository implements Dh13RepositoryInterface
 {
     public function findByConcepto(int $codn_conce): Collection
     {
-        return Dh13::where('codn_conce', $codn_conce)
+        return Dh13::query()->where('codn_conce', $codn_conce)
             ->orderBy('nro_orden_formula')
             ->get();
     }
@@ -22,25 +22,21 @@ class Dh13Repository implements Dh13RepositoryInterface
     {
         return DB::transaction(function () use ($data) {
             $validatedData = $data::validate($data);
-            return Dh13::create($validatedData);
+            return Dh13::query()->create($validatedData);
         });
     }
 
     public function update(UpdateDh13DTO $data, int $codn_conce, int $nro_orden_formula): bool
     {
-        return DB::transaction(function () use ($data, $codn_conce, $nro_orden_formula) {
-            return Dh13::where('codn_conce', $codn_conce)
-                ->where('nro_orden_formula', $nro_orden_formula)
-                ->update($data->getUpdateableFields());
-        });
+        return DB::transaction(fn() => Dh13::query()->where('codn_conce', $codn_conce)
+            ->where('nro_orden_formula', $nro_orden_formula)
+            ->update($data->getUpdateableFields()));
     }
 
     public function delete(int $codn_conce, int $nro_orden_formula): bool
     {
-        return DB::transaction(function () use ($codn_conce, $nro_orden_formula) {
-            return Dh13::where('codn_conce', $codn_conce)
-                ->where('nro_orden_formula', $nro_orden_formula)
-                ->delete();
-        });
+        return DB::transaction(fn() => Dh13::query()->where('codn_conce', $codn_conce)
+            ->where('nro_orden_formula', $nro_orden_formula)
+            ->delete());
     }
 }

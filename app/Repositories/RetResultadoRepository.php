@@ -15,7 +15,7 @@ class RetResultadoRepository
      */
     public function obtenerPorLlavePrimaria(int $nroLegaj, int $nroCargoAnt, DateTime $fechaRetDesde, Periodo $periodo): ?RetResultado
     {
-        return RetResultado::where('nro_legaj', $nroLegaj)
+        return RetResultado::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_cargo_ant', $nroCargoAnt)
             ->where('fecha_ret_desde', $fechaRetDesde)
             ->where('periodo', $periodo->getValue())
@@ -27,7 +27,7 @@ class RetResultadoRepository
      */
     public function crear(array $datos): RetResultado
     {
-        return RetResultado::create($datos);
+        return RetResultado::query()->create($datos);
     }
 
     /**
@@ -53,6 +53,6 @@ class RetResultadoRepository
      */
     public function obtenerPorTipoRetro(TipoRetro $tipoRetro): Collection
     {
-        return RetResultado::where('tipo_retro', $tipoRetro->getValue())->get();
+        return RetResultado::query()->where('tipo_retro', $tipoRetro->getValue())->get();
     }
 }

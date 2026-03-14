@@ -9,16 +9,16 @@ class Dh15Repository
 {
     public function findById(int $id): ?Dh15
     {
-        return Dh15::find($id);
+        return Dh15::query()->find($id);
     }
 
     public function getByTipoGrupo(int $tipoGrupo): Collection
     {
-        return Dh15::porTipoGrupo($tipoGrupo)->get();
+        return Dh15::query()->porTipoGrupo($tipoGrupo)->get();
     }
 
     public function create(array $data): Dh15
     {
-        return Dh15::create($data);
+        return Dh15::query()->create($data);
     }
 }

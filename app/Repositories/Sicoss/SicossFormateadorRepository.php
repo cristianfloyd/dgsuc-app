@@ -25,10 +25,10 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
             $valor = '';
         }
 
-        if (strlen(trim($valor)) > $longitud) {
-            return substr($valor, -($longitud));
+        if (strlen(trim((string) $valor)) > $longitud) {
+            return substr((string) $valor, -($longitud));
         }
-        return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
+        return str_pad((string) $valor, $longitud, '0', STR_PAD_LEFT);
     }
 
     /**

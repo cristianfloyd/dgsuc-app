@@ -23,8 +23,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
      */
     public function __construct(
         protected ?string $connectionName = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta una consulta SQL directa con manejo de errores.
@@ -38,7 +37,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
     {
         try {
             // Validar que la consulta no esté vacía
-            if (empty(trim($sql))) {
+            if (in_array(trim($sql), ['', '0'], true)) {
                 Log::warning('Intento de ejecutar consulta SQL vacía');
                 return false;
             }
@@ -160,12 +159,12 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
                 'query_count' => count($queries),
             ]);
 
-            $result = $this->getConnection()->transaction(function () use ($queries) {
+            $result = $this->getConnection()->transaction(function () use ($queries): true {
                 foreach ($queries as $query) {
                     $sql = $query['sql'] ?? '';
                     $bindings = $query['bindings'] ?? [];
 
-                    if (empty(trim($sql))) {
+                    if (in_array(trim($sql), ['', '0'], true)) {
                         throw new Exception('Consulta SQL vacía en transacción');
                     }
 
@@ -198,9 +197,9 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
             $connectionName = $this->getConnectionName();
 
             // Verificar que el nombre de conexión no sea null
-            if (empty($connectionName)) {
+            if ($connectionName === '' || $connectionName === '0') {
                 Log::warning('DatabaseOperationRepository: Nombre de conexión vacío, usando servicio de conexión');
-                $service = app(EnhancedDatabaseConnectionService::class);
+                $service = resolve(EnhancedDatabaseConnectionService::class);
                 $connectionName = $service->getCurrentConnection();
             }
 
@@ -242,7 +241,7 @@ class DatabaseOperationRepository implements DatabaseOperationInterface
     protected function isValidTableName(string $tableName): bool
     {
         // Permitir solo caracteres alfanuméricos y guiones bajos
-        return preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $tableName) === 1;
+        return preg_match('/^[a-zA-Z_]\w*$/', $tableName) === 1;
     }
 
     /**

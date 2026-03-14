@@ -12,15 +12,11 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     /**
      * Inicializa el estado de situación para un rango de días.
      *
-     * @param int $codigo
-     * @param int $min
-     * @param int $max
      *
-     * @return array
      */
     public function inicializarEstadoSituacion(int $codigo, int $min, int $max): array
     {
-        $periodo = MapucheConfig::getPeriodoFiscal();
+        MapucheConfig::getPeriodoFiscal();
         $estado_situacion = [];
         for ($i = $min; $i <= $max; $i++) {
             $estado_situacion[$i] = $codigo;
@@ -34,34 +30,32 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
      *
      * @param int $c1 condición actual
      * @param int $c2 condición tipo de licencia
-     *
-     * @return int
      */
     public function evaluarCondicionLicencia(int $c1, int $c2): int
     {
         // Maternidad primero
-        if ($c1 == 5 || $c2 == 5) {
+        if ($c1 === 5 || $c2 === 5) {
             return 5;
         }
-        if ($c1 == 11 || $c2 == 11) {
+        if ($c1 === 11 || $c2 === 11) {
             return 11;
         }
-        if ($c1 == 10 || $c2 == 10) {
+        if ($c1 === 10 || $c2 === 10) {
             return 10;
         }
-        if ($c1 == 18 || $c2 == 18) {
+        if ($c1 === 18 || $c2 === 18) {
             return 18;
         }
-        if ($c1 == 19 || $c2 == 19) {
+        if ($c1 === 19 || $c2 === 19) {
             return 19;
         }
-        if ($c1 == 13 || $c2 == 13) {
+        if ($c1 === 13 || $c2 === 13) {
             return 13;
         }
-        if ($c1 == 12 || $c2 == 12) {
+        if ($c1 === 12 || $c2 === 12) {
             return 12;
         }
-        if ($c1 == 51 || $c2 == 51) {
+        if ($c1 === 51 || $c2 === 51) {
             return 51;
         }
 
@@ -71,9 +65,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     /**
      * Calcula los cambios de estado en el período.
      *
-     * @param array $estado_situacion
      *
-     * @return array
      */
     public function calcularCambiosEstado(array $estado_situacion): array
     {
@@ -93,9 +85,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     /**
      * Calcula los días trabajados según códigos de situación.
      *
-     * @param array $estado_situacion
      *
-     * @return int
      */
     public function calcularDiasTrabajados(array $estado_situacion): int
     {
@@ -103,7 +93,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
         foreach ($estado_situacion as $codigo) {
             // Se suman solo los días trabajados, código 1
             // Los días de Licencia por Maternidad también cuentan como trabajados
-            if ($codigo === 1 || $codigo === 5 || $codigo === 12 || $codigo === 51) {
+            if (in_array($codigo, [1, 5, 12, 51], true)) {
                 $dias_trabajados += 1;
             }
         }
@@ -114,9 +104,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     /**
      * Calcula la revista del legajo basada en los cambios de estado.
      *
-     * @param array $cambios_estado
      *
-     * @return array
      */
     public function calcularRevistaLegajo(array $cambios_estado): array
     {
@@ -159,16 +147,13 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
     /**
      * Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss.
      *
-     * @param array $leg
      *
-     * @return int
      */
     public function verificarAgenteImportesCero(array $leg): int
     {
-        $VerificarAgenteImportesCERO = 1;
         if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0) {
-            $VerificarAgenteImportesCERO = 0;
+            return 0;
         }
-        return $VerificarAgenteImportesCERO;
+        return 1;
     }
 }

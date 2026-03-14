@@ -24,7 +24,7 @@ class NominaRepository
             $this->connection = $this->getConnectionFromTrait();
             $this->schema = Schema::connection($this->connection->getName());
         } catch (Exception $e) {
-            throw new RuntimeException('No se pudo establecer la conexión a la base de datos: ' . $e->getMessage());
+            throw new RuntimeException('No se pudo establecer la conexión a la base de datos: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 

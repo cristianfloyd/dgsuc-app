@@ -8,18 +8,10 @@ use Illuminate\Database\Eloquent\Collection;
 class Dh92Repository
 {
     /**
-     * @var Dh92
-     */
-    protected $model;
-
-    /**
      * Constructor del repositorio.
-     *
-     * @param Dh92 $model
      */
-    public function __construct(Dh92 $model)
+    public function __construct(protected \App\Models\Dh92 $model)
     {
-        $this->model = $model;
     }
 
     /**
@@ -47,7 +39,6 @@ class Dh92Repository
     /**
      * Crea un nuevo registro.
      *
-     * @param array $data
      *
      * @return Dh92
      */
@@ -60,7 +51,6 @@ class Dh92Repository
      * Actualiza un registro existente.
      *
      * @param int $id
-     * @param array $data
      *
      * @return bool
      */
@@ -77,10 +67,8 @@ class Dh92Repository
      * Elimina un registro.
      *
      * @param int $id
-     *
-     * @return bool
      */
-    public function delete($id)
+    public function delete($id): bool
     {
         return $this->model->destroy($id) > 0;
     }

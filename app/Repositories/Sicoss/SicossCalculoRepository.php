@@ -16,11 +16,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
      * Sumariza importes de conceptos que pertenecen a un determinado tipo de concepto
      * Se podía hacer en la función sumarizar_conceptos_por_tipos_grupos pero queda más claro separado.
      *
-     * @param int $nro_legajo
-     * @param string $tipo
-     * @param string $where
      *
-     * @return float
      */
     public function calcularRemunerGrupo(int $nro_legajo, string $tipo, string $where): float
     {
@@ -42,10 +38,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     /**
      * Calcula horas extras por concepto y cargo.
      *
-     * @param int $concepto
-     * @param int $cargo
      *
-     * @return array
      */
     public function calculoHorasExtras(int $concepto, int $cargo): array
     {
@@ -78,15 +71,13 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
                         cargo,concepto";
 
         $horas = DB::connection($this->getConnectionName())->select($sql);
-        return !empty($horas) ? (array) $horas[0] : [];
+        return empty($horas) ? [] : (array) $horas[0];
     }
 
     /**
      * Se obtienen los importes de otra actividad, cuando tiene varias tomo la del último periodo.
      *
-     * @param int $nro_legajo
      *
-     * @return array
      */
     public function otraActividad(int $nro_legajo): array
     {
@@ -118,9 +109,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     /**
      * Devuelve el código DGI de obra social correspondiente dado un legajo.
      *
-     * @param int $nro_legajo
      *
-     * @return string
      */
     public function codigoOs(int $nro_legajo): string
     {
@@ -144,7 +133,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         $sigla = '';
         if (empty($siglas[0]->codc_obsoc)) {
             // Si campo dh09 está vacío asigno la obra social por defecto
-            $sigla = app(MapucheConfig::class)::getDefaultsObraSocial();
+            $sigla = resolve(MapucheConfig::class)::getDefaultsObraSocial();
         } else {
             $sigla = $siglas[0]->codc_obsoc;
         }

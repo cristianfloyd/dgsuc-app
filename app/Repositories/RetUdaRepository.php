@@ -20,15 +20,11 @@ class RetUdaRepository
     /**
      * Obtiene un registro de RetUda por su clave primaria compuesta.
      *
-     * @param int $nroLegaj
-     * @param int $nroCargo
-     * @param string $periodo
      *
-     * @return RetUda|null
      */
     public function findByPrimaryKey(int $nroLegaj, int $nroCargo, string $periodo): ?RetUda
     {
-        return RetUda::where('nro_legaj', $nroLegaj)
+        return RetUda::query()->where('nro_legaj', $nroLegaj)
             ->where('nro_cargo', $nroCargo)
             ->where('periodo', $periodo)
             ->first();
@@ -37,22 +33,17 @@ class RetUdaRepository
     /**
      * Crea un nuevo registro de RetUda.
      *
-     * @param array $data
      *
-     * @return RetUda
      */
     public function create(array $data): RetUda
     {
-        return RetUda::create($data);
+        return RetUda::query()->create($data);
     }
 
     /**
      * Actualiza un registro de RetUda.
      *
-     * @param RetUda $retUda
-     * @param array $data
      *
-     * @return bool
      */
     public function update(RetUda $retUda, array $data): bool
     {
@@ -62,9 +53,7 @@ class RetUdaRepository
     /**
      * Elimina un registro de RetUda.
      *
-     * @param RetUda $retUda
      *
-     * @return bool
      */
     public function delete(RetUda $retUda): bool
     {

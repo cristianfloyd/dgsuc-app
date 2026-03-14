@@ -5,12 +5,12 @@ namespace App\Repositories;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Traits\MapucheConnectionTrait;
-use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Exception;
 use Throwable;
 
 use function is_array;
@@ -20,30 +20,28 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 {
     use MapucheConnectionTrait;
 
-    public function __construct(protected RepOrdenPagoModel $model)
-    {
-    }
+    public function __construct(
+        protected RepOrdenPagoModel $model
+    ) {}
 
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel.
-     *
-     * @return Collection
      */
     public function getAll(array|int|null $nroLiquis = null): Collection
     {
-        $query = RepOrdenPagoModel::query()
+        $builder = RepOrdenPagoModel::query()
             ->orderBy('banco', 'desc')
             ->orderBy('codn_funci', 'asc')
             ->orderBy('codn_fuent', 'asc')
             ->orderBy('codc_uacad', 'asc');
 
         if (is_array($nroLiquis)) {
-            $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
+            $builder->whereIn(column: 'nro_liqui', values: $nroLiquis);
         } elseif (is_int(value: $nroLiquis)) {
-            $query->where(column: 'nro_liqui', operator: $nroLiquis);
+            $builder->where(column: 'nro_liqui', operator: $nroLiquis);
         }
 
-        return $query->get();
+        return $builder->get();
     }
 
     /**
@@ -55,7 +53,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      */
     public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
     {
-        $query = RepOrdenPagoModel::with(relations: ['unidadAcademica' => function ($query): void {
+        RepOrdenPagoModel::with(relations: ['unidadAcademica' => function ($query): void {
             $query->select('nro_tabla', 'desc_abrev', 'desc_item');
         }])
             ->orderBy('banco', 'desc')
@@ -81,7 +79,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
     {
-        return RepOrdenPagoModel::where('nro_liqui', $nroLiqui)->first();
+        return RepOrdenPagoModel::query()->where('nro_liqui', $nroLiqui)->first();
     }
 
     /**
@@ -93,7 +91,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      */
     public function create(array $data): RepOrdenPagoModel
     {
-        return RepOrdenPagoModel::create($data);
+        return RepOrdenPagoModel::query()->create($data);
     }
 
     /**
@@ -121,8 +119,6 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Trunca la tabla rep_orden_pago.
      *
      * @throws Exception
-     *
-     * @return bool
      */
     public function truncate(): bool
     {
@@ -147,7 +143,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     public function createTableIfNotExists(): void
     {
         try {
-            if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_orden_pago')) {
+            if (! Schema::connection($this->getConnectionName())->hasTable('suc.rep_orden_pago')) {
                 Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table): void {
                     $table->id();
                     $table->integer('nro_liqui');
@@ -157,21 +153,21 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                     $table->char('codc_uacad', 4)->nullable();
                     $table->char('caracter', 4)->nullable();
                     $table->integer('codn_progr')->nullable();
-                    $table->decimal('remunerativo', 15, 2)->default(0.00);
-                    $table->decimal('no_remunerativo', 15, 2)->default(0.00);
-                    $table->decimal('otros_no_remunerativo', 15, 2)->default(0.00);
-                    $table->decimal('bruto', 15, 2)->default(0.00);
-                    $table->decimal('descuentos', 15, 2)->default(0.00);
-                    $table->decimal('aportes', 15, 2)->default(0.00);
-                    $table->decimal('sueldo', 15, 2)->default(0.00);
-                    $table->decimal('neto', 15, 2)->default(0.00);
-                    $table->decimal('estipendio', 15, 2)->default(0.00);
-                    $table->decimal('med_resid', 15, 2)->default(0.00);
-                    $table->decimal('productividad', 15, 2)->default(0.00);
-                    $table->decimal('sal_fam', 15, 2)->default(0.00);
-                    $table->decimal('hs_extras', 15, 2)->default(0.00);
-                    $table->decimal('total', 15, 2)->default(0.00);
-                    $table->decimal('imp_gasto', 15, 2)->default(0.00);
+                    $table->decimal('remunerativo', 15, 2)->default(0.0);
+                    $table->decimal('no_remunerativo', 15, 2)->default(0.0);
+                    $table->decimal('otros_no_remunerativo', 15, 2)->default(0.0);
+                    $table->decimal('bruto', 15, 2)->default(0.0);
+                    $table->decimal('descuentos', 15, 2)->default(0.0);
+                    $table->decimal('aportes', 15, 2)->default(0.0);
+                    $table->decimal('sueldo', 15, 2)->default(0.0);
+                    $table->decimal('neto', 15, 2)->default(0.0);
+                    $table->decimal('estipendio', 15, 2)->default(0.0);
+                    $table->decimal('med_resid', 15, 2)->default(0.0);
+                    $table->decimal('productividad', 15, 2)->default(0.0);
+                    $table->decimal('sal_fam', 15, 2)->default(0.0);
+                    $table->decimal('hs_extras', 15, 2)->default(0.0);
+                    $table->decimal('total', 15, 2)->default(0.0);
+                    $table->decimal('imp_gasto', 15, 2)->default(0.0);
                     $table->timestamps();
 
                     // Índices
@@ -181,7 +177,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                 Log::info('Tabla suc.rep_orden_pago creada exitosamente');
             }
         } catch (Throwable $e) {
-            Log::error('Error al crear tabla suc.rep_orden_pago: ' . $e->getMessage());
+            Log::error('Error al crear tabla suc.rep_orden_pago: '.$e->getMessage());
             throw $e;
         }
     }
@@ -190,8 +186,6 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
      * Verifica si existe el procedimiento almacenado rep_orden_pago y lo crea si no existe.
      *
      * @throws Exception
-     *
-     * @return void
      */
     public function ensureStoredProcedure(): void
     {
@@ -199,12 +193,12 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             $functionExists = DB::connection($this->model->getConnectionName())
                 ->select("SELECT EXISTS(SELECT 1 FROM pg_proc WHERE proname = 'rep_orden_pago')");
 
-            if (!$functionExists[0]->exists) {
+            if (! $functionExists[0]->exists) {
                 DB::connection($this->model->getConnectionName())->unprepared($this->getStoredProcedureDefinition());
                 Log::info('Función rep_orden_pago creada exitosamente');
             }
         } catch (Exception $e) {
-            Log::error('Error al verificar/crear función rep_orden_pago: ' . $e->getMessage());
+            Log::error('Error al verificar/crear función rep_orden_pago: '.$e->getMessage());
             throw $e;
         }
     }
@@ -220,11 +214,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 
             // Ejecutar el procedimiento almacenado
             DB::connection($this->model->getConnectionName())
-                ->statement('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $liquidaciones) . '}']);
+                ->statement('SELECT suc.rep_orden_pago(?)', ['{'.implode(',', $liquidaciones).'}']);
 
-            Log::info('Reporte generado exitosamente para liquidaciones: ' . implode(',', $liquidaciones));
+            Log::info('Reporte generado exitosamente para liquidaciones: '.implode(',', $liquidaciones));
         } catch (Exception $e) {
-            Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: ' . $e->getMessage());
+            Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: '.$e->getMessage());
             throw $e;
         }
     }
@@ -237,7 +231,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
         return "
     CREATE FUNCTION rep_orden_pago(p_nro_liqui integer[]) RETURNS void
     LANGUAGE plpgsql AS
-    $$
+    \$\$
     BEGIN
         -- Limpiamos los datos existentes para las liquidaciones específicas
         DELETE FROM suc.rep_orden_pago WHERE nro_liqui = ANY(p_nro_liqui);
@@ -279,39 +273,39 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             0::NUMERIC(10, 2)                                                                                                          AS sal_fam,
 
             SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
-    		SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 173, 186 ) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (173) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END ) +
-    		0 +
-    		0 +
-    		SUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS total,
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 173, 186 ) THEN impp_conce ELSE 0 END ) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (173) THEN impp_conce ELSE 0 END ) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END ) +
+    \t\t0 +
+    \t\t0 +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS total,
 
-    		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
-    		SUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 173, 186 ) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (173) THEN impp_conce ELSE 0 END ) +
-    		SUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END ) +
-    		0 +
-    		0 +
-    		SUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS imp_gasto
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END ) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'C' AND h21.codn_conce IN ( 121, 122, 124, 125 ) THEN impp_conce ELSE 0 END )  +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'O' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )::NUMERIC(15,2) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN ( 173, 186 ) THEN impp_conce ELSE 0 END ) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (173) THEN impp_conce ELSE 0 END ) +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'S' AND h21.codn_conce IN (186) THEN impp_conce ELSE 0 END ) +
+    \t\t0 +
+    \t\t0 +
+    \t\tSUM( CASE WHEN h21.tipo_conce = 'A' AND h21.nro_orimp != 0 THEN impp_conce ELSE 0 END )                                               AS imp_gasto
 
     FROM (
         SELECT * FROM mapuche.dh21
         UNION ALL
         SELECT * FROM mapuche.dh21h
     ) h21
-    	JOIN mapuche.dh22 h22 ON h21.nro_liqui = h22.nro_liqui
-    	JOIN mapuche.dh03 h03 ON h21.nro_cargo = h03.nro_cargo
-     	LEFT JOIN mapuche.dh17 ON (h21.codn_conce = dh17.codn_conce)
-    	JOIN mapuche.dh12 h12 ON h21.codn_conce = h12.codn_conce
-    	LEFT JOIN mapuche.dh92 h92 ON h21.nro_legaj = h92.nrolegajo
+    \tJOIN mapuche.dh22 h22 ON h21.nro_liqui = h22.nro_liqui
+    \tJOIN mapuche.dh03 h03 ON h21.nro_cargo = h03.nro_cargo
+     \tLEFT JOIN mapuche.dh17 ON (h21.codn_conce = dh17.codn_conce)
+    \tJOIN mapuche.dh12 h12 ON h21.codn_conce = h12.codn_conce
+    \tLEFT JOIN mapuche.dh92 h92 ON h21.nro_legaj = h92.nrolegajo
     WHERE h21.nro_liqui = ANY(p_nro_liqui)
     GROUP BY h22.nro_liqui, banco, h21.codn_funci, h21.codn_fuent, h21.codc_uacad, caracter, h21.codn_progr
     ORDER BY h22.nro_liqui, banco DESC, h21.codn_funci, h21.codn_fuent, h21.codc_uacad, caracter, h21.codn_progr;
     END;
-    $$;";
+    \$\$;";
     }
 }

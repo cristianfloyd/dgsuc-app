@@ -27,8 +27,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         protected SicossLegajoProcessorRepositoryInterface $sicossLegajoProcessorRepository,
         protected Dh21RepositoryInterface $dh21Repository,
         protected DatabaseOperationInterface $databaseOperation,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta el proceso completo de generación SICOSS
@@ -133,7 +132,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
             $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
 
-            if ($retornar_datos === true) {
+            if ($retornar_datos) {
                 return $this->sicossLegajoProcessorRepository->procesarSicoss(
                     $datos,
                     $per_anoct,
@@ -270,11 +269,11 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         }
     }
 
-    public function procesarResultadoFinal(array $totales, string $testeo_directorio_salida = '', string $testeo_prefijo_archivos = '')
+    public function procesarResultadoFinal(array $totales, string $testeo_directorio_salida = '', string $testeo_prefijo_archivos = ''): array
     {
         try {
             // Si se especifica directorio de testeo, mover archivos
-            if (!empty($testeo_directorio_salida)) {
+            if ($testeo_directorio_salida !== '' && $testeo_directorio_salida !== '0') {
                 $this->moverArchivosTesteo($testeo_directorio_salida, $testeo_prefijo_archivos);
             }
 
@@ -411,9 +410,9 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 mkdir($directorio_testeo, 0o755, true);
             }
 
-            foreach ($this->archivos as $periodo => $archivo_origen) {
+            foreach ($this->archivos as $archivo_origen) {
                 if (file_exists($archivo_origen . '.txt')) {
-                    $nombre_archivo = basename($archivo_origen);
+                    $nombre_archivo = basename((string) $archivo_origen);
                     $archivo_destino = $directorio_testeo . '/' . $prefijo . $nombre_archivo . '.txt';
 
                     copy($archivo_origen . '.txt', $archivo_destino);

@@ -39,8 +39,9 @@ interface Dh03RepositoryInterface
      * - La fecha proporcionada coincide con el día siguiente a la fecha de baja
      * - No existe más de un registro relacionado en la tabla dh10
      *
-     * @param  string  $fecha  Fecha a verificar en formato compatible con PostgreSQL
-     * @param  int  $vinculo  Número de vínculo a validar
+     * @param string $fecha Fecha a verificar en formato compatible con PostgreSQL
+     * @param int $vinculo Número de vínculo a validar
+     *
      * @return bool True si el vínculo es válido, False en caso contrario
      */
     public function esVinculoValido(string $fecha, int $vinculo): bool;

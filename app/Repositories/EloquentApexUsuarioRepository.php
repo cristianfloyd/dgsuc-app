@@ -18,8 +18,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
 {
     public function __construct(
         private readonly ApexUsuario $model,
-    ) {
-    }
+    ) {}
 
     public function findByUsuario(string $usuario): ?ApexUsuario
     {
@@ -159,7 +158,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
             }
 
             $usuarioModel = $this->findByUsuario($usuario);
-            if (!$usuarioModel) {
+            if (!$usuarioModel instanceof \App\Models\ApexUsuario) {
                 return false;
             }
 
@@ -236,7 +235,7 @@ class EloquentApexUsuarioRepository implements ApexUsuarioRepositoryInterface
     {
         try {
             $usuarioModel = $this->findByUsuario($usuario);
-            if (!$usuarioModel) {
+            if (!$usuarioModel instanceof \App\Models\ApexUsuario) {
                 return false;
             }
 

@@ -15,17 +15,11 @@ class Dh90Repository implements Dh90RepositoryInterface
 {
     /**
      * Constructor del repositorio.
-     *
-     * @param Dh90 $model
      */
-    public function __construct(protected Dh90 $model)
-    {
-    }
+    public function __construct(protected Dh90 $model) {}
 
     /**
      * Obtener todos los registros.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -35,9 +29,7 @@ class Dh90Repository implements Dh90RepositoryInterface
     /**
      * Buscar por número de cargo.
      *
-     * @param int $nroCargo
      *
-     * @return Dh90|null
      */
     public function findByNroCargo(int $nroCargo): ?Dh90
     {
@@ -47,9 +39,7 @@ class Dh90Repository implements Dh90RepositoryInterface
     /**
      * Crear un nuevo registro.
      *
-     * @param Dh90Data $data
      *
-     * @return Dh90
      */
     public function create(Dh90Data $data): Dh90
     {
@@ -58,24 +48,21 @@ class Dh90Repository implements Dh90RepositoryInterface
             $model->save();
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al crear el registro: ' . $e->getMessage());
+            throw new Exception('Error al crear el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Actualizar un registro existente.
      *
-     * @param int $nroCargo
-     * @param Dh90Data $data
      *
-     * @return Dh90|null
      */
     public function update(int $nroCargo, Dh90Data $data): ?Dh90
     {
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (!$model) {
+            if (!$model instanceof \App\Models\Dh90) {
                 return null;
             }
 
@@ -84,29 +71,27 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al actualizar el registro: ' . $e->getMessage());
+            throw new Exception('Error al actualizar el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Eliminar un registro.
      *
-     * @param int $nroCargo
      *
-     * @return bool
      */
     public function delete(int $nroCargo): bool
     {
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (!$model) {
+            if (!$model instanceof \App\Models\Dh90) {
                 return false;
             }
 
             return $model->delete();
         } catch (Exception $e) {
-            throw new Exception('Error al eliminar el registro: ' . $e->getMessage());
+            throw new Exception('Error al eliminar el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 

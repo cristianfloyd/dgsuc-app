@@ -14,8 +14,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
 
     public function __construct(
         protected Dh01RepositoryInterface $dh01Repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los legajos filtrados para el proceso SICOSS
@@ -48,7 +47,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         $sql_ix = 'CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);';
         $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
         $sql_ix = 'CREATE INDEX ix_conceptos_liquidados_2 ON conceptos_liquidados(nro_legaj,tipo_conce);';
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_ix);
+        DB::connection($this->getConnectionName())->select($sql_ix);
 
         // Se obtienen datos por legajo, de los numeros de legajos liquidados en la tabla anterior conceptos_liquidados
         // si en los datos del legajo licencia es igual a cero es que el legajo no tenia licencias o no algun concepto liquidado
@@ -57,7 +56,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         // Si tengo el check de licencias agrego a la cantidad de agentes a procesar a los agentes sin licencias sin goce
         // Si tengo el check de licencias y ademas tengo el check de retros, debo tener en cuenta las licencias solo en el archivo generado con mes y año 0 (son del periodo vigente)
         // tendre en cuenta licencias en el caso general (true) y cuando tenga retros y el where tenga 0-0 (vigente)
-        if ($check_lic && ($where_periodo_retro == ' true ' || $where_periodo_retro == 't.ano_retro=0 AND t.mes_retro=00')) {
+        if ($check_lic && ($where_periodo_retro === ' true ' || $where_periodo_retro === 't.ano_retro=0 AND t.mes_retro=00')) {
             // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
             $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
             // Preparo arreglo para usar en sql IN
@@ -66,7 +65,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
             // Agrego a la consulta anterior la union, para reutilizar el sql y como necesito los mismos datos parametrizo el string
             $tabla = 'dh01';
             $where = ' true ';
-            if (isset($legajos_lic) && !empty($legajos_lic)) {
+            if ($legajos_lic !== '' && $legajos_lic !== '0') {
                 $where = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
                 if (!$check_lic) {
                     $where .= ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
@@ -112,9 +111,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         }
 
         // Convertir objetos stdClass a arrays
-        $legajos = array_map(function ($legajo) {
-            return (array) $legajo;
-        }, $legajos);
+        $legajos = array_map(fn($legajo) => (array) $legajo, $legajos);
 
         // Elimino legajos repetidos
         $legajos_sin_repetidos = [];

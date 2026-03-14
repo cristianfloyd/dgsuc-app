@@ -12,8 +12,6 @@ interface ConceptosTotalesRepositoryInterface
      * @param array $conceptos Códigos de conceptos a incluir
      * @param int $year Año del período
      * @param int $month Mes del período
-     *
-     * @return Collection
      */
     public function getTotalesPorConcepto(array $conceptos, int $year, int $month): Collection;
 

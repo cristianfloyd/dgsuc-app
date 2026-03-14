@@ -20,7 +20,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
      */
     public function findByDni(string $dni): ?Dh01
     {
-        return Dh01::where('nro_docum', $dni)->first();
+        return Dh01::query()->where('nro_docum', $dni)->first();
     }
 
     /**
@@ -32,7 +32,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
      */
     public function getFirstEmploymentDate(string $nroLegaj): ?string
     {
-        return Dh03::where('nro_legaj', $nroLegaj)
+        return Dh03::query()->where('nro_legaj', $nroLegaj)
             ->orderBy('fec_alta', 'asc')
             ->value('fec_alta');
     }
@@ -46,7 +46,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
      */
     public function getCargos(string $nroLegaj): array
     {
-        return Dh03::where('nro_legaj', $nroLegaj)
+        return Dh03::query()->where('nro_legaj', $nroLegaj)
             ->orderBy('fec_alta', 'desc')
             ->get(['nro_cargo', 'codc_categ', 'fec_alta', 'fec_baja', 'vig_caano', 'vig_cames', 'chkstopliq'])
             ->toArray();

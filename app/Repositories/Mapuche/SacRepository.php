@@ -12,22 +12,21 @@ use Illuminate\Support\Collection;
 class SacRepository
 {
     public function __construct(
-        private PeriodoFiscalService $periodoService,
-    ) {
-    }
+        private readonly PeriodoFiscalService $periodoService,
+    ) {}
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.
      */
     public function getBrutosSacCargo(int $legajo, int $nroCargo): ?SacCargoData
     {
-        $periodo = $this->periodoService->getPeriodoActual();
+        $this->periodoService->getPeriodoActual();
 
         return Dh10::with(['cargoVinculado'])
             ->whereHas('cargo.empleado', fn($q) => $q->where('nro_legaj', $legajo))
             ->where('nro_cargo', $nroCargo)
             ->first()
-            ?->pipe(fn($model) => SacCargoData::from($model));
+            ?->pipe(fn($model): \App\Data\Mapuche\SacCargoData => SacCargoData::from($model));
     }
 
     /**
@@ -35,7 +34,7 @@ class SacRepository
      */
     public function getBrutosParaSac(array $filtros, string $orderBy = ''): Collection
     {
-        $query = Dh10::query()
+        $builder = Dh10::query()
             ->join('dh03', 'dh10.nro_cargo', '=', 'dh03.nro_cargo')
             ->join('dh01', 'dh01.nro_legaj', '=', 'dh03.nro_legaj')
             ->select([
@@ -51,10 +50,10 @@ class SacRepository
                 'dh10.*',
             ]);
 
-        $this->aplicarFiltros($query, $filtros);
-        $this->aplicarOrdenamiento($query, $orderBy);
+        $this->aplicarFiltros($builder, $filtros);
+        $this->aplicarOrdenamiento($builder, $orderBy);
 
-        return $query->get();
+        return $builder->get();
     }
 
     /**
@@ -62,7 +61,7 @@ class SacRepository
      */
     public function actualizarCargo(int $nroCargo, array $datos): bool
     {
-        return Dh10::where('nro_cargo', $nroCargo)->update($datos);
+        return Dh10::query()->where('nro_cargo', $nroCargo)->update($datos);
     }
 
     /**
@@ -117,7 +116,7 @@ class SacRepository
 
     private function aplicarOrdenamiento($query, string $orderBy): void
     {
-        if (!empty($orderBy)) {
+        if ($orderBy !== '' && $orderBy !== '0') {
             $query->orderByRaw("desc_appat || ', ' || desc_nombr {$orderBy}");
         } else {
             $query->orderBy('dh03.codc_uacad')

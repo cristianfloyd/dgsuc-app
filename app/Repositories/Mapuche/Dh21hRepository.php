@@ -51,7 +51,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
 
             return $deletedRows > 0;
         } catch (Exception $e) {
-            Log::error("Error deleting Dh21h with id {$id}: ".$e->getMessage());
+            Log::error("Error deleting Dh21h with id {$id}: " . $e->getMessage());
 
             return false;
         }

@@ -10,8 +10,7 @@ class Dh35Repository
 {
     public function __construct(
         private readonly Dh35 $model,
-    ) {
-    }
+    ) {}
 
     public function find(string $tipoEscal, string $codcCarac): ?Dh35
     {

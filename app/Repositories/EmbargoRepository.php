@@ -15,18 +15,10 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     use MapucheConnectionTrait;
 
     /**
-     * @var EmbargoProcesoResult
-     */
-    protected EmbargoProcesoResult $model;
-
-    /**
      * Constructor del repositorio.
-     *
-     * @param EmbargoProcesoResult $model
      */
-    public function __construct(EmbargoProcesoResult $model)
+    public function __construct(protected EmbargoProcesoResult $model)
     {
-        $this->model = $model;
     }
 
     /**
@@ -81,14 +73,12 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     /**
      * Prepara el array de complementarias para la consulta SQL.
      *
-     * @param array $nroComplementarias
      *
-     * @return string
      */
     private function prepareComplementariasArray(array $nroComplementarias): string
     {
-        return empty($nroComplementarias)
+        return $nroComplementarias === []
             ? 'ARRAY[]::integer[]'
-            : 'ARRAY[' . implode(',', array_map('intval', $nroComplementarias)) . ']';
+            : 'ARRAY[' . implode(',', array_map(intval(...), $nroComplementarias)) . ']';
     }
 }

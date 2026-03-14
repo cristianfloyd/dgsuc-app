@@ -14,12 +14,11 @@ class FallecidoRepository implements FallecidoRepositoryInterface
 {
     public function __construct(
         private readonly RepFallecido $model,
-    ) {
-    }
+    ) {}
 
     public function all(): Collection
     {
-        return $this->model->all()->map(fn($fallecido) => $fallecido->toData());
+        return $this->model->all()->map(fn($fallecido): \App\Data\Reportes\FallecidoData => $fallecido->toData());
     }
 
     public function paginate(int $perPage = 15): LengthAwarePaginator

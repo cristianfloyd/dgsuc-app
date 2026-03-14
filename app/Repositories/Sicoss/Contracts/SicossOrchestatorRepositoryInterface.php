@@ -16,8 +16,6 @@ interface SicossOrchestatorRepositoryInterface
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Si debe retornar datos
-     *
-     * @return array
      */
     public function ejecutarProcesoCompleto(
         SicossProcessData $datos,
@@ -65,8 +63,6 @@ interface SicossOrchestatorRepositoryInterface
      * @param string $path Ruta de archivos
      * @param array $licencias_agentes Licencias de agentes
      * @param bool $retornar_datos Si debe retornar datos
-     *
-     * @return array
      */
     public function procesarConRetro(
         SicossProcessData $datos,
@@ -98,8 +94,6 @@ interface SicossOrchestatorRepositoryInterface
      * Establece el código de reparto para el procesamiento SICOSS.
      *
      * @param string $codc_reparto Código de reparto
-     *
-     * @return void
      */
     public function setCodigoReparto(string $codc_reparto): void;
 

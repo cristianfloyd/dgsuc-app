@@ -20,20 +20,17 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      */
     public function findOrFail($id): UploadedFile
     {
-        $uploadedFile = UploadedFile::query()->findOrFail($id);
-        return $uploadedFile;
+        return UploadedFile::query()->findOrFail($id);
     }
 
     /**
      * Crea un nuevo registro de archivo cargado.
      *
-     * @param array $data
      *
-     * @return UploadedFile
      */
     public function create(array $data): UploadedFile
     {
-        return UploadedFile::create($data);
+        return UploadedFile::query()->create($data);
     }
 
     /**
@@ -67,19 +64,17 @@ class FileUploadRepository implements FileUploadRepositoryInterface
      */
     public function existsByOrigen(string $origen): bool
     {
-        return UploadedFile::where('origen', $origen)->exists();
+        return UploadedFile::query()->where('origen', $origen)->exists();
     }
 
     /**
      * Get the latest uploaded file by origen.
      *
-     * @param string $origen
      *
-     * @return UploadedFile|null
      */
     public function getLatestByOrigen(string $origen): ?UploadedFile
     {
-        return UploadedFile::where('origen', $origen)
+        return UploadedFile::query()->where('origen', $origen)
             ->latest()
             ->first();
     }

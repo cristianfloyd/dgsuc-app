@@ -40,32 +40,11 @@ class CuilRepository implements CuilRepositoryInterface
      */
     public function getCuilsNoEncontrados(): array
     {
-        $cuilsNoEncontrados = DB::connection($this->getConnectionName())
+        return DB::connection($this->getConnectionName())
             ->table('suc.tabla_temp_cuils as ttc')
             ->leftJoin('suc.afip_mapuche_mi_simplificacion as amms', 'ttc.cuil', 'amms.cuil')
             ->whereNull('amms.cuil')
             ->pluck('ttc.cuil')
             ->toArray();
-
-        return $cuilsNoEncontrados;
-    }
-
-    /**
-     * Pagina los resultados de una colección.
-     *
-     * @param Collection $collection La colección a paginar.
-     * @param int $perPage El número de resultados por página.
-     *
-     * @return LengthAwarePaginator El paginador de los resultados.
-     */
-    private function paginateResults($collection, $perPage): LengthAwarePaginator
-    {
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $currentPageItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        return new LengthAwarePaginator(
-            $currentPageItems,
-            $collection->count(),
-            $perPage,
-        );
     }
 }

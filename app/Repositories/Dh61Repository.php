@@ -12,8 +12,6 @@ class Dh61Repository implements Dh61RepositoryInterface
      * Crea un nuevo registro histórico en la tabla Dh61 para la categoría especificada.
      *
      * @param Dh11 $category La categoría para la que se creará el registro histórico.
-     *
-     * @return void
      */
     public function createHistoricalRecord(Dh11 $category): void
     {
@@ -32,14 +30,14 @@ class Dh61Repository implements Dh61RepositoryInterface
      */
     public function getRecordsByFiscalPeriod(int $year, int $month): Collection
     {
-        return Dh61::where('vig_caano', $year)
+        return Dh61::query()->where('vig_caano', $year)
             ->where('vig_cames', $month)
             ->get();
     }
 
     public function exists(string $codc_categ, int $vig_caano, int $vig_cames): bool
     {
-        return Dh61::where('codc_categ', $codc_categ)
+        return Dh61::query()->where('codc_categ', $codc_categ)
             ->where('vig_caano', $vig_caano)
             ->where('vig_cames', $vig_cames)
             ->exists();
@@ -47,7 +45,7 @@ class Dh61Repository implements Dh61RepositoryInterface
 
     public function create(array $attributes): Dh61
     {
-        return Dh61::create($attributes);
+        return Dh61::query()->create($attributes);
     }
 
     /**
@@ -60,7 +58,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      */
     public function getUniqueCategoriesByPeriod(int $year, int $month): Collection
     {
-        return Dh61::where('vig_caano', $year)
+        return Dh61::query()->where('vig_caano', $year)
             ->where('vig_cames', $month)
             ->distinct('codc_categ')
             ->get();
@@ -77,7 +75,7 @@ class Dh61Repository implements Dh61RepositoryInterface
      */
     public function getCategoryRecordsByPeriod(string $categoryId, int $year, int $month): Collection
     {
-        return Dh61::where('codc_categ', $categoryId)
+        return Dh61::query()->where('codc_categ', $categoryId)
             ->where('vig_caano', $year)
             ->where('vig_cames', $month)
             ->get();

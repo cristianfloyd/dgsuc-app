@@ -12,7 +12,6 @@ interface Dh16RepositoryInterface
     /**
      * Get all conceptos by grupo.
      *
-     * @param int $codn_grupo
      *
      * @return Collection<int, Dh16Data>
      */

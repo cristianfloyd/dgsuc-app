@@ -24,8 +24,6 @@ interface Dh61RepositoryInterface
      * Crea un registro histórico basado en una categoría Dh11.
      *
      * @param Dh11 $category La categoría para crear el registro histórico
-     *
-     * @return void
      */
     public function createHistoricalRecord(Dh11 $category): void;
 

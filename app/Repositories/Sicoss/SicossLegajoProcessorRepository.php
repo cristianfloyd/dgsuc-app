@@ -37,8 +37,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         protected SicossEstadoRepositoryInterface $sicossEstadoRepository,
         protected SicossFormateadorRepositoryInterface $sicossFormateadorRepository,
         protected SicossConfigurationRepositoryInterface $sicossConfigurationRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Procesa los legajos para el cálculo de SICOSS.
@@ -67,9 +66,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         bool $retornar_datos = false,
     ): array {
         // Convertir objetos stdClass a arrays si es necesario
-        $legajos = array_map(function ($legajo) {
-            return is_object($legajo) ? (array) $legajo : $legajo;
-        }, $legajos);
+        $legajos = array_map(fn($legajo) => is_object($legajo) ? (array) $legajo : $legajo, $legajos);
 
         // Usar los valores del DTO directamente
         $TopeJubilatorioPatronal = $datos->TopeJubilatorioPatronal;
@@ -94,9 +91,10 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $total['imponible_9'] = 0;
         $legajos_validos = [];
         $j = 0;
+        $counter = count(array_values($legajos));
 
         // En este for se completan los campos necesarios para cada uno de los legajos liquidados
-        for ($i = 0; $i < count(array_values($legajos)); $i++) {
+        for ($i = 0; $i < $counter; $i++) {
             $legajo = $legajos[$i]['nro_legaj'];
 
             $legajos[$i]['ImporteSACOtroAporte'] = 0;
@@ -119,18 +117,16 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             }
 
             if (!$retro) {
-                $dh03Repository = app(Dh03RepositoryInterface::class);
+                $dh03Repository = resolve(Dh03RepositoryInterface::class);
                 $limites = $dh03Repository->getLimitesCargos($legajo);
 
                 // Convertir objetos stdClass a arrays si es necesario
-                $limites = array_map(function ($limite) {
-                    return is_object($limite) ? (array) $limite : $limite;
-                }, $limites);
+                $limites = array_map(fn($limite) => is_object($limite) ? (array) $limite : $limite, $limites);
 
                 //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
                 if (!isset($limites[0]['maximo'])) {
                     $cargos_activos_agente = Dh03::getCargosActivos($legajo);
-                    if (empty($cargos_activos_agente)) {
+                    if ($cargos_activos_agente === []) {
                         $fecha_fin = MapucheConfig::getFechaFinPeriodoCorriente();
                         $limites[0]['maximo'] = substr($fecha_fin, 9, 2);
                     }
@@ -141,9 +137,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $cargos_legajo = array_merge($cargos_legajo, $cargos_legajo2);
 
                 // Convertir objetos stdClass a arrays si es necesario
-                $cargos_legajo = array_map(function ($cargo) {
-                    return is_object($cargo) ? (array) $cargo : $cargo;
-                }, $cargos_legajo);
+                $cargos_legajo = array_map(fn($cargo) => is_object($cargo) ? (array) $cargo : $cargo, $cargos_legajo);
                 // En el caso de las licencias de legajo, se mantiene el código de condición en esos días
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
                 // Se considera que no se puede superponer con otra licencia
@@ -186,10 +180,9 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
                     for ($dia = 1; $dia <= count($cargo); $dia++) {
-                        if (!in_array($dia, $dias_lic_legajo)) {
-                            if ((isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
-                                $estado_situacion[$dia] = $cargo[$dia]; // Si estaba trabajando en algún cargo se prioriza el código en dha8
-                            }
+                        if (!in_array($dia, $dias_lic_legajo) && (isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
+                            $estado_situacion[$dia] = $cargo[$dia];
+                            // Si estaba trabajando en algún cargo se prioriza el código en dha8
                         }
                     }
                 }
@@ -297,7 +290,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $legajos[$i]['Remuner78805'] += $legajos[$i]['ImporteImponibleBecario'];
             }
 
-            if ($this->sicossEstadoRepository->verificarAgenteImportesCero($legajos[$i]) == 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) { // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
+            if ($this->sicossEstadoRepository->verificarAgenteImportesCero($legajos[$i]) === 1 || $legajos[$i]['codigosituacion'] == 5 || $legajos[$i]['codigosituacion'] == 11) { // codigosituacion=5 y codigosituacion=11 quiere decir maternidad y debe infrormarse
                 $legajos[$i]['PorcAporteDiferencialJubilacion'] = $this->sicossConfigurationRepository->getPorcentajeAporteAdicionalJubilacion();
                 $legajos[$i]['ImporteImponible_4'] = $legajos[$i]['IMPORTE_IMPON'];
                 $legajos[$i]['ImporteSACNoDocente'] = 0;
@@ -306,12 +299,12 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $Imponible6_aux = $legajos[$i]['ImporteImponible_6'];
                 if ($Imponible6_aux != 0) {
                     if (
-                        (int) $Imponible6_aux != (int) $legajos[$i]['IMPORTE_IMPON']
+                        (int) $Imponible6_aux !== (int) $legajos[$i]['IMPORTE_IMPON']
                         && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 //redondear hasta + o - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajos[$i]['IMPORTE_IMPON']
                     ) {
                         $legajos[$i]['TipoDeOperacion'] = 2;
-                        $legajos[$i]['IMPORTE_IMPON'] = $legajos[$i]['IMPORTE_IMPON'] - $legajos[$i]['ImporteImponible_6'];
+                        $legajos[$i]['IMPORTE_IMPON'] -= $legajos[$i]['ImporteImponible_6'];
                         $legajos[$i]['ImporteSACNoDocente'] = $legajos[$i]['ImporteSAC'] - $legajos[$i]['SACInvestigador'];
                     } else {
                         if (
@@ -348,21 +341,14 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                         $legajos[$i]['IMPORTE_IMPON'] -= $legajos[$i]['DiferenciaSACImponibleConTope'];
                         $legajos[$i]['ImporteSACNoDocente'] = $TopeSACJubilatorioPers;
                     }
-                } else {
-                    if ($trunca_tope == 1) {
-                        $bruto_nodo_sin_sac = $legajos[$i]['IMPORTE_BRUTO'] - $legajos[$i]['ImporteImponible_6'] - $legajos[$i]['ImporteSACNoDocente'];
-
-                        $sac = $legajos[$i]['ImporteSACNoDocente'];
-
-                        $tope = min($bruto_nodo_sin_sac, $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
-                        $imp_1 = $legajos[$i]['IMPORTE_BRUTO'] - $legajos[$i]['ImporteImponible_6'];
-
-                        $tope_sueldo = min($bruto_nodo_sin_sac - $legajos[$i]['ImporteNoRemun'], $TopeJubilatorioPersonal);
-                        $tope_sac = min($sac, $TopeSACJubilatorioPers);
-
-
-                        $legajos[$i]['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajos[$i]['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
-                    }
+                } elseif ($trunca_tope == 1) {
+                    $bruto_nodo_sin_sac = $legajos[$i]['IMPORTE_BRUTO'] - $legajos[$i]['ImporteImponible_6'] - $legajos[$i]['ImporteSACNoDocente'];
+                    $sac = $legajos[$i]['ImporteSACNoDocente'];
+                    $tope = min($bruto_nodo_sin_sac, $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
+                    $imp_1 = $legajos[$i]['IMPORTE_BRUTO'] - $legajos[$i]['ImporteImponible_6'];
+                    $tope_sueldo = min($bruto_nodo_sin_sac - $legajos[$i]['ImporteNoRemun'], $TopeJubilatorioPersonal);
+                    $tope_sac = min($sac, $TopeSACJubilatorioPers);
+                    $legajos[$i]['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajos[$i]['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
                 }
 
                 $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
@@ -381,11 +367,9 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     $tope_jubil_personal = $TopeJubilatorioPersonal;
                 }
 
-                if ($legajos[$i]['ImporteImponibleSinSAC'] > $tope_jubil_personal) {
-                    if ($trunca_tope == 1) {
-                        $legajos[$i]['DiferenciaImponibleConTope'] = $legajos[$i]['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
-                        $legajos[$i]['IMPORTE_IMPON'] -= $legajos[$i]['DiferenciaImponibleConTope'];
-                    }
+                if ($legajos[$i]['ImporteImponibleSinSAC'] > $tope_jubil_personal && $trunca_tope == 1) {
+                    $legajos[$i]['DiferenciaImponibleConTope'] = $legajos[$i]['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
+                    $legajos[$i]['IMPORTE_IMPON'] -= $legajos[$i]['DiferenciaImponibleConTope'];
                 }
 
 
@@ -422,19 +406,15 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
                 $legajos[$i]['DifSACImponibleConOtroTope'] = 0;
                 $legajos[$i]['DifImponibleConOtroTope'] = 0;
-                if ($legajos[$i]['ImporteSACOtroAporte'] > $TopeSACJubilatorioOtroAp) {
-                    if ($trunca_tope == 1) {
-                        $legajos[$i]['DifSACImponibleConOtroTope'] = $legajos[$i]['ImporteSACOtroAporte'] - $TopeSACJubilatorioOtroAp;
-                        $legajos[$i]['ImporteImponible_4'] -= $legajos[$i]['DifSACImponibleConOtroTope'];
-                        $legajos[$i]['ImporteSACOtroAporte'] = $TopeSACJubilatorioOtroAp;
-                    }
+                if ($legajos[$i]['ImporteSACOtroAporte'] > $TopeSACJubilatorioOtroAp && $trunca_tope == 1) {
+                    $legajos[$i]['DifSACImponibleConOtroTope'] = $legajos[$i]['ImporteSACOtroAporte'] - $TopeSACJubilatorioOtroAp;
+                    $legajos[$i]['ImporteImponible_4'] -= $legajos[$i]['DifSACImponibleConOtroTope'];
+                    $legajos[$i]['ImporteSACOtroAporte'] = $TopeSACJubilatorioOtroAp;
                 }
                 $legajos[$i]['OtroImporteImponibleSinSAC'] = $legajos[$i]['ImporteImponible_4'] - $legajos[$i]['ImporteSACOtroAporte'];
-                if ($legajos[$i]['OtroImporteImponibleSinSAC'] > $TopeOtrosAportesPersonales) {
-                    if ($trunca_tope == 1) {
-                        $legajos[$i]['DifImponibleConOtroTope'] = $legajos[$i]['OtroImporteImponibleSinSAC'] - $TopeOtrosAportesPersonales;
-                        $legajos[$i]['ImporteImponible_4'] -= $legajos[$i]['DifImponibleConOtroTope'];
-                    }
+                if ($legajos[$i]['OtroImporteImponibleSinSAC'] > $TopeOtrosAportesPersonales && $trunca_tope == 1) {
+                    $legajos[$i]['DifImponibleConOtroTope'] = $legajos[$i]['OtroImporteImponibleSinSAC'] - $TopeOtrosAportesPersonales;
+                    $legajos[$i]['ImporteImponible_4'] -= $legajos[$i]['DifImponibleConOtroTope'];
                 }
                 if ($legajos[$i]['ImporteImponible_6'] != 0 && $legajos[$i]['TipoDeOperacion'] == 1) {
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
@@ -500,7 +480,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     $legajos[$i]['trabajadorconvencionado'] = $this->sicossConfigurationRepository->getTrabajadorConvencionado();
                 }
 
-                if ($datos->seguro_vida_patronal == 1 && $datos->check_lic == 1) {
+                if ($datos->seguro_vida_patronal === 1 && $datos->check_lic === 1) {
                     $legajos[$i]['SeguroVidaObligatorio'] = 1;
                 }
                 $legajos_validos[$j] = $legajos[$i];
@@ -511,8 +491,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             }
         }
 
-        if (!empty($legajos_validos)) {
-            if ($retornar_datos === true) {
+        if ($legajos_validos !== []) {
+            if ($retornar_datos) {
                 return $legajos_validos;
             }
             $this->grabarEnTxt($legajos_validos, $nombre_arch);
@@ -616,7 +596,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
         // En el caso de que en check 'Toma en cuenta Familiares a Cargo para informar SICOSS?' en configuración -> impositivos -> parametros sicoss sea false
         // voy a fijarme si se liquido un concepto igual al configurado como obra social familiar a cargo. Informo 0 o 1 (no se liquido o se liquido algun concepto igual al definido)
-        if ($this->sicossConfigurationRepository->getCantidadAdherentesSicoss() == 0) {
+        if ($this->sicossConfigurationRepository->getCantidadAdherentesSicoss() === 0) {
             $leg['adherentes'] = 0;
         }
 
@@ -625,8 +605,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         // Sumarizo donde corresponda para cada concepto liquidado
         // Cuando recorro guardo el numero de cargo si es investigador, para luego procesar en calcularSACInvestigador
         $conce_hs_extr = [];
-        $cont = 0;
-        for ($i = 0; $i < count($conceptos_liq_por_leg); $i++) {
+        $counter = count($conceptos_liq_por_leg);
+        for ($i = 0; $i < $counter; $i++) {
             $importe = $conceptos_liq_por_leg[$i]['impp_conce'];
             $importe_novedad = $conceptos_liq_por_leg[$i]['nov1_conce'];
             $grupos_concepto = $conceptos_liq_por_leg[$i]['tipos_grupos'];
@@ -635,10 +615,10 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             $codigo_obra_social = $leg['codigo_os'];
 
 
-            if (preg_match('/[^\d]+6[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+6[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
-                if ($this->sicossConfigurationRepository->getHorasExtrasPorNovedad() == 1) {
+                if ($this->sicossConfigurationRepository->getHorasExtrasPorNovedad() === 1) {
                     $horas = $this->sicossCalculoRepository->calculoHorasExtras($codn_concepto, $nro_cargo);
                     //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
                     if (!in_array($codn_concepto, $conce_hs_extr)) {
@@ -648,15 +628,15 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 }
             }
 
-            if (preg_match('/[^\d]+7[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+7[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteZonaDesfavorable'] += $importe;
             }
 
-            if (preg_match('/[^\d]+8[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+8[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteVacaciones'] += $importe;
             }
 
-            if (preg_match('/[^\d]+9[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+9[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSAC'] += $importe;
 
                 if ($conceptos_liq_por_leg[$i]['codigoescalafon'] == 'NODO') {
@@ -670,7 +650,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 }
             }
 
-            if (preg_match('/[^\d]+11[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+11[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 38) {
                     $leg['PrioridadTipoDeActividad'] = 38;
@@ -678,26 +658,26 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 if (($leg['PrioridadTipoDeActividad'] == 87) || ($leg['PrioridadTipoDeActividad'] == 88)) {
                     $leg['PrioridadTipoDeActividad'] = 38;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+12[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+12[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 34) {
                     $leg['PrioridadTipoDeActividad'] = 34;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+13[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+13[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 35) {
                     $leg['PrioridadTipoDeActividad'] = 35;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+14[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+14[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 36;
@@ -705,10 +685,10 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 36;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+15[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+15[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 37) {
                     $leg['PrioridadTipoDeActividad'] = 37;
@@ -716,50 +696,50 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 if ($leg['PrioridadTipoDeActividad'] == 87 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 37;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+16[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+16[^\d]+/', (string) $grupos_concepto)) {
                 $leg['AporteAdicionalObraSocial'] += $importe;
             }
 
-            if (preg_match('/[^\d]+21[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+21[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteAdicionales'] += $importe;
             }
 
-            if (preg_match('/[^\d]+22[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+22[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImportePremios'] += $importe;
             }
 
             // conceptos no remunerativos
-            if (preg_match('/[^\d]+45[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+45[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+46[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+46[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteRectificacionRemun'] += $importe;
             }
 
-            if (preg_match('/[^\d]+47[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+47[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteMaternidad'] += $importe;
             }
 
-            if (preg_match('/[^\d]+48[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+48[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36 || $leg['PrioridadTipoDeActividad'] == 88) {
                     $leg['PrioridadTipoDeActividad'] = 87;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
 
-            if (preg_match('/[^\d]+49[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+49[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteImponible_6'] += $importe;
                 if ($leg['PrioridadTipoDeActividad'] < 36) {
                     $leg['PrioridadTipoDeActividad'] = 88;
                 }
-                array_push($cargoInvestigador, $nro_cargo);
+                $cargoInvestigador[] = $nro_cargo;
             }
-            if (preg_match('/[^\d]+58[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+58[^\d]+/', (string) $grupos_concepto)) {
                 $leg['SeguroVidaObligatorio'] = 1;
             }
 
@@ -771,26 +751,26 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $leg['IMPORTE_VOLUN'] += $importe;
             }
 
-            if ($this->sicossConfigurationRepository->getCantidadAdherentesSicoss() == 0 && $this->sicossConfigurationRepository->getCodigoObraSocialFamiliarCargo() == $codn_concepto) {
+            if ($this->sicossConfigurationRepository->getCantidadAdherentesSicoss() === 0 && $this->sicossConfigurationRepository->getCodigoObraSocialFamiliarCargo() == $codn_concepto) {
                 $leg['adherentes'] = 1;
             }
 
-            if (preg_match('/[^\d]+24[^\d]+/', $grupos_concepto) && $this->sicossConfigurationRepository->getHorasExtrasPorNovedad() == 0) {
+            if (preg_match('/[^\d]+24[^\d]+/', (string) $grupos_concepto) && $this->sicossConfigurationRepository->getHorasExtrasPorNovedad() === 0) {
                 $leg['CantidadHorasExtras'] += $importe;
             }
 
-            if (preg_match('/[^\d]+67[^\d]+/', $grupos_concepto) && $informar_becarios == 1) {
+            if (preg_match('/[^\d]+67[^\d]+/', (string) $grupos_concepto) && $informar_becarios == 1) {
                 $leg['ImporteImponibleBecario'] += $importe;
             }
 
-            if (preg_match('/[^\d]+81[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+81[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSS27430'] += $importe;
             }
-            if (preg_match('/[^\d]+83[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+83[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteSICOSSDec56119'] += $importe;
             }
 
-            if (preg_match('/[^\d]+84[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+84[^\d]+/', (string) $grupos_concepto)) {
                 $leg['NoRemun4y8'] += $importe;
             }
 
@@ -801,17 +781,17 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 }*/
 
             // #6204 Nuevos campos SICOSS "Incremento Salarial" y "Remuneración 11"
-            if (preg_match('/[^\d]+86[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+86[^\d]+/', (string) $grupos_concepto)) {
                 $leg['IncrementoSolidario'] += $importe;
             }
 
             // Tipo 91- AFIP Base de Cálculo Diferencial Aportes OS y FSR
-            if (preg_match('/[^\d]+91[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+91[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteTipo91'] += $importe;
             }
 
             // nuevo tipo de grupo 96, conceptos NoRemun que solo impacten en la Remuneración bruta total
-            if (preg_match('/[^\d]+96[^\d]+/', $grupos_concepto)) {
+            if (preg_match('/[^\d]+96[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteNoRemun96'] += $importe;
             }
         }
@@ -854,9 +834,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $conceptos_filtrados = DB::connection($this->getConnectionName())->select($sql_conceptos_fltrados);
 
         // Convertir objetos stdClass a arrays
-        return array_map(function ($concepto) {
-            return (array) $concepto;
-        }, $conceptos_filtrados);
+        return array_map(fn($concepto) => (array) $concepto, $conceptos_filtrados);
     }
 
     /**
@@ -872,7 +850,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                            --filtro solo los que tienen tipo de concepto = 9 como es una lista uso exp. reg.
                            AND array_to_string(tipos_grupos,',') ~ '(:?^|,)+9(:?$|,)'";
             $conceptos_liq_por_leg = $this->consultarConceptosLiquidados($nro_leg, $where);
-            for ($j = 0; $j < count($conceptos_liq_por_leg); $j++) {
+            $counter = count($conceptos_liq_por_leg);
+            for ($j = 0; $j < $counter; $j++) {
                 $sacInvestigador += $conceptos_liq_por_leg[$j]['impp_conce'];
             }
         }

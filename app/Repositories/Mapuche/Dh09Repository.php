@@ -10,9 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class Dh09Repository
 {
-    public function __construct(private Dh09 $model)
-    {
-    }
+    public function __construct(private readonly Dh09 $model) {}
 
     public function findByLegajo(int $nroLegajo): ?Dh09Data
     {

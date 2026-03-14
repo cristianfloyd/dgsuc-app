@@ -11,7 +11,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
 {
     public function getByLiquidaciones(array $liquidaciones): Collection
     {
-        return RepGerencialFinal::whereIn('nro_liqui', $liquidaciones)
+        return RepGerencialFinal::query()->whereIn('nro_liqui', $liquidaciones)
             ->select([
                 'nro_legaj',
                 'desc_apyno',
@@ -27,7 +27,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
 
     public function getTotalesPorInciso(array $liquidaciones): Collection
     {
-        return RepGerencialFinal::whereIn('nro_liqui', $liquidaciones)
+        return RepGerencialFinal::query()->whereIn('nro_liqui', $liquidaciones)
             ->select([
                 'nro_inciso',
                 DB::raw('SUM(imp_bruto) as total_bruto'),
@@ -42,7 +42,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
 
     public function getTotalesPorDependencia(array $liquidaciones): Collection
     {
-        return RepGerencialFinal::whereIn('nro_liqui', $liquidaciones)
+        return RepGerencialFinal::query()->whereIn('nro_liqui', $liquidaciones)
             ->select([
                 'coddependesemp',
                 DB::raw('SUM(imp_bruto) as total_bruto'),
@@ -56,7 +56,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
 
     public function getTotalesPorEscalafon(array $liquidaciones): Collection
     {
-        return RepGerencialFinal::whereIn('nro_liqui', $liquidaciones)
+        return RepGerencialFinal::query()->whereIn('nro_liqui', $liquidaciones)
             ->select([
                 'tipo_escal',
                 DB::raw('SUM(imp_bruto) as total_bruto'),
@@ -70,7 +70,7 @@ class RepGerencialFinalRepository implements RepGerencialFinalRepositoryInterfac
 
     public function getResumenPorAgrupamiento(array $liquidaciones): Collection
     {
-        return RepGerencialFinal::whereIn('nro_liqui', $liquidaciones)
+        return RepGerencialFinal::query()->whereIn('nro_liqui', $liquidaciones)
             ->select([
                 'codc_agrup',
                 DB::raw('SUM(imp_bruto) as total_bruto'),

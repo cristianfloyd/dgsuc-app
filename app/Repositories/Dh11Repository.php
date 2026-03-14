@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class Dh11Repository implements Dh11RepositoryInterface
 {
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model)
-    {
-    }
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected Dh11 $model) {}
 
     /**
      * Actualiza el campo impp_basic de un registro Dh11 con un nuevo valor, y actualiza los campos vig_caano y vig_cames con los valores proporcionados.
@@ -77,12 +75,12 @@ class Dh11Repository implements Dh11RepositoryInterface
     {
         try {
             // Intenta actualizar o crear el registro en la tabla Dh11
-            return Dh11::updateOrCreate($attributes, $values);
+            return Dh11::query()->updateOrCreate($attributes, $values);
         } catch (QueryException $e) {
             // Manejo de excepción en caso de violación de unicidad
             if ($e->getCode() == '23505') {
                 // Si el registro ya existe, intenta actualizarlo
-                $dh11 = Dh11::where($attributes)->first();
+                $dh11 = Dh11::query()->where($attributes)->first();
                 if ($dh11) {
                     $dh11->update($values);
                     return $dh11;
@@ -98,12 +96,10 @@ class Dh11Repository implements Dh11RepositoryInterface
      *
      * @param array $attributes Atributos para identificar el registro.
      * @param DH61 $values Valores a actualizar.
-     *
-     * @return bool
      */
     public function update(array $attributes, Dh61 $values): bool
     {
-        $dh11 = Dh11::where('codc_categ', '=', $attributes['codc_categ'])->first();
+        $dh11 = Dh11::query()->where('codc_categ', '=', $attributes['codc_categ'])->first();
 
         if ($dh11) {
             return $dh11->update($values->toArray());
@@ -113,8 +109,6 @@ class Dh11Repository implements Dh11RepositoryInterface
 
     /**
      * Obtiene todos los registros actuales con un valor de impp_basic mayor a 0.
-     *
-     * @return Collection
      */
     public function getAllCurrentRecords(): Collection
     {
@@ -128,12 +122,10 @@ class Dh11Repository implements Dh11RepositoryInterface
 
     /**
      * Obtiene una lista de todas las codc_categ.
-     *
-     * @return array
      */
     public function getAllCodcCateg(): array
     {
-        return Dh11::pluck('codc_categ')->toArray();
+        return Dh11::query()->pluck('codc_categ')->toArray();
     }
 
     public function find(string $codcCateg): Dh11

@@ -14,8 +14,6 @@ class AfipArtRepository
 {
     /**
      * Obtiene todos los registros.
-     *
-     * @return Collection
      */
     public function getAll(): Collection
     {
@@ -25,51 +23,42 @@ class AfipArtRepository
     /**
      * Busca un registro por su CUIL original.
      *
-     * @param string $cuil
      *
-     * @return AfipMapucheArt|null
      */
     public function findByCuil(string $cuil): ?AfipMapucheArt
     {
-        return AfipMapucheArt::find($cuil);
+        return AfipMapucheArt::query()->find($cuil);
     }
 
     /**
      * Crea un nuevo registro.
      *
-     * @param array $data
      *
-     * @return AfipMapucheArt
      */
     public function create(array $data): AfipMapucheArt
     {
-        return AfipMapucheArt::create($data);
+        return AfipMapucheArt::query()->create($data);
     }
 
     /**
      * Actualiza un registro existente.
      *
-     * @param string $cuil
-     * @param array $data
      *
-     * @return bool
      */
     public function update(string $cuil, array $data): bool
     {
-        $afipArt = AfipMapucheArt::find($cuil);
+        $afipArt = AfipMapucheArt::query()->find($cuil);
         return $afipArt ? $afipArt->update($data) : false;
     }
 
     /**
      * Elimina un registro.
      *
-     * @param string $cuil
      *
-     * @return bool
      */
     public function delete(string $cuil): bool
     {
-        $afipArt = AfipMapucheArt::find($cuil);
+        $afipArt = AfipMapucheArt::query()->find($cuil);
         return $afipArt ? $afipArt->delete() : false;
     }
 }

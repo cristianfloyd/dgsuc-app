@@ -11,16 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class SicossReporteRepository implements SicossReporteRepositoryInterface
 {
-    protected PeriodoFiscalService $periodoFiscalService;
-
     /**
      * Constructor del repositorio.
      *
      * @param PeriodoFiscalService $periodoFiscalService Servicio de períodos fiscales
      */
-    public function __construct(PeriodoFiscalService $periodoFiscalService)
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService)
     {
-        $this->periodoFiscalService = $periodoFiscalService;
     }
 
     /**
@@ -60,10 +57,8 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
     public function getTotales(string $anio, string $mes): array
     {
         try {
-            $resultado = MapucheSicossReporte::query()->getTotales($anio, $mes);
-
             // Ya verificamos en el modelo que getTotales siempre retorna un array
-            return $resultado;
+            return MapucheSicossReporte::query()->getTotales($anio, $mes);
         } catch (Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS en el repositorio', [
                 'error' => $e->getMessage(),

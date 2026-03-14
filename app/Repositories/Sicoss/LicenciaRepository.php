@@ -14,9 +14,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
     /**
      * Obtiene licencias de protección integral y vacaciones.
      *
-     * @param string $where_legajos
      *
-     * @return array
      */
     public function getLicenciasProtecintegralVacaciones(string $where_legajos): array
     {
@@ -26,22 +24,20 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $variantes_vacaciones = MapucheConfig::getVarLicenciaVacaciones();
         $variantes_protecintegral = MapucheConfig::getVarLicenciaProtecIntegral();
 
-        if ($variantes_vacaciones == '' && $variantes_protecintegral == '') {
+        if ($variantes_vacaciones === '' && $variantes_protecintegral === '') {
             return [];
         }
-        if ($variantes_vacaciones != '' && $variantes_protecintegral != '') {
+        if ($variantes_vacaciones !== '' && $variantes_protecintegral !== '') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
             $variantes = $variantes_vacaciones . ',' . $variantes_protecintegral;
             $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes)";
-        } else {
-            if ($variantes_vacaciones != '') {
-                $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
-                $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_vacaciones)";
-            } elseif ($variantes_protecintegral != '') {
-                $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
-                $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_protecintegral)";
-            }
+        } elseif ($variantes_vacaciones !== '') {
+            $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
+            $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_vacaciones)";
+        } elseif ($variantes_protecintegral !== '') {
+            $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
+            $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes_protecintegral)";
         }
 
         $sql = "SELECT
@@ -111,9 +107,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
     /**
      * Obtiene licencias vigentes.
      *
-     * @param string $where_legajos
      *
-     * @return array
      */
     public function getLicenciasVigentes(string $where_legajos): array
     {
@@ -131,7 +125,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
 
         $variantes_protecintegral = MapucheConfig::getVarLicenciaProtecIntegral();
 
-        if (isset($variantes_ilt_primer_tramo) && !empty($variantes_ilt_primer_tramo)) {
+        if ($variantes_ilt_primer_tramo !== '' && $variantes_ilt_primer_tramo !== '0') {
             $sql_ilt = " OR ( dh05.nrovarlicencia IN ($variantes_ilt_primer_tramo)) ";
             $where_ilt = " WHEN dh05.nrovarlicencia IN ($variantes_ilt_primer_tramo) THEN '18'::integer ";
         } else {
@@ -144,24 +138,24 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $where_vacaciones = '';
         $where_protecintegral = '';
 
-        if (isset($variantes_ilt_segundo_tramo) && !empty($variantes_ilt_segundo_tramo)) {
+        if ($variantes_ilt_segundo_tramo !== '' && $variantes_ilt_segundo_tramo !== '0') {
             $sql_ilt .= " OR ( dh05.nrovarlicencia IN ($variantes_ilt_segundo_tramo)) ";
             $where_ilt .= " WHEN dh05.nrovarlicencia IN ($variantes_ilt_segundo_tramo) THEN '19'::integer ";
         }
 
-        if (isset($variantes_down) && !empty($variantes_down)) {
+        if ($variantes_down !== '' && $variantes_down !== '0') {
             $where_down = " WHEN dh05.nrovarlicencia IN ($variantes_down) THEN '11'::integer ";
         }
 
-        if (isset($variantes_excedencia) && !empty($variantes_excedencia)) {
+        if ($variantes_excedencia !== '' && $variantes_excedencia !== '0') {
             $where_excedencia = " WHEN dh05.nrovarlicencia IN ($variantes_excedencia) THEN '10'::integer ";
         }
 
-        if (isset($variantes_vacaciones) && !empty($variantes_vacaciones)) {
+        if ($variantes_vacaciones !== '' && $variantes_vacaciones !== '0') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
         }
 
-        if (isset($variantes_protecintegral) && !empty($variantes_protecintegral)) {
+        if ($variantes_protecintegral !== '' && $variantes_protecintegral !== '0') {
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
         }
 
@@ -242,14 +236,12 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $resultados = DB::connection($this->getConnectionName())->select($sql);
 
         // Convertir los resultados a array
-        return array_map(function ($item) {
-            return [
-                'nro_legaj' => $item->nro_legaj,
-                'inicio' => $item->inicio,
-                'final' => $item->final,
-                'es_legajo' => $item->es_legajo,
-                'condicion' => $item->condicion,
-            ];
-        }, $resultados);
+        return array_map(fn($item) => [
+            'nro_legaj' => $item->nro_legaj,
+            'inicio' => $item->inicio,
+            'final' => $item->final,
+            'es_legajo' => $item->es_legajo,
+            'condicion' => $item->condicion,
+        ], $resultados);
     }
 }

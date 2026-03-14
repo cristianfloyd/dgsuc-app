@@ -173,8 +173,9 @@ class Dh03Repository implements Dh03RepositoryInterface
      * - La fecha proporcionada coincide con el día siguiente a la fecha de baja
      * - No existe más de un registro relacionado en la tabla dh10
      *
-     * @param  string  $fecha  Fecha a verificar en formato compatible con PostgreSQL
-     * @param  int  $vinculo  Número de vínculo a validar
+     * @param string $fecha Fecha a verificar en formato compatible con PostgreSQL
+     * @param int $vinculo Número de vínculo a validar
+     *
      * @return bool True si el vínculo es válido, False en caso contrario
      */
     public function esVinculoValido(string $fecha, int $vinculo): bool
@@ -207,7 +208,7 @@ class Dh03Repository implements Dh03RepositoryInterface
 
             return $result->cantidad > 0;
         } catch (Exception $e) {
-            Log::error('Error al verificar vínculo válido: '.$e->getMessage(), [
+            Log::error('Error al verificar vínculo válido: ' . $e->getMessage(), [
                 'fecha' => $fecha,
                 'vinculo' => $vinculo,
             ]);
@@ -223,8 +224,9 @@ class Dh03Repository implements Dh03RepositoryInterface
      * categorías diferenciales especificadas y si el cargo está activo según la función
      * map_es_cargo_activo de PostgreSQL.
      *
-     * @param  int  $nroLegajo  Número de legajo a consultar
-     * @param  string|array  $catDiferencial  Categorías diferenciales (string separado por comas o array)
+     * @param int $nroLegajo Número de legajo a consultar
+     * @param string|array $catDiferencial Categorías diferenciales (string separado por comas o array)
+     *
      * @return bool True si existe al menos una categoría diferencial activa, false en caso contrario
      */
     public function existeCategoriaDiferencial(int $nroLegajo, string|array $catDiferencial): bool
@@ -232,13 +234,13 @@ class Dh03Repository implements Dh03RepositoryInterface
         try {
             // Procesamiento de categorías: convertir string a array si es necesario
             if (is_string($catDiferencial)) {
-                $categorias = array_map('trim', explode("','", trim($catDiferencial, "'")));
+                $categorias = array_map(trim(...), explode("','", trim($catDiferencial, "'")));
             } else {
                 $categorias = $catDiferencial;
             }
 
             // Construcción de la consulta SQL con parámetros seguros
-            $placeholders = str_repeat('?,', count($categorias) - 1).'?';
+            $placeholders = str_repeat('?,', count($categorias) - 1) . '?';
 
             $sql = "SELECT COUNT(*) as total
                     FROM mapuche.dh03
@@ -255,7 +257,7 @@ class Dh03Repository implements Dh03RepositoryInterface
 
             return $result->total > 0;
         } catch (Exception $e) {
-            Log::error('Error al verificar categoría diferencial: '.$e->getMessage(), [
+            Log::error('Error al verificar categoría diferencial: ' . $e->getMessage(), [
                 'legajo' => $nroLegajo,
                 'categorias' => $catDiferencial,
             ]);

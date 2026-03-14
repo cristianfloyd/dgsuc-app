@@ -13,7 +13,7 @@ class SicossCpto205Repository
 
     public function procesarConceptos(array $liquidaciones): int
     {
-        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
+        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones): int {
             // 0 Eliminar tabla temporal si existe
             $this->eliminarTablaTemporal();
 
@@ -67,8 +67,6 @@ class SicossCpto205Repository
      * Este método inicia una nueva transacción en la base de datos,
      * permitiendo realizar múltiples operaciones que serán confirmadas
      * o revertidas como una unidad atómica.
-     *
-     * @return void
      */
     public function iniciarTransaccion(): void
     {
@@ -80,8 +78,6 @@ class SicossCpto205Repository
      *
      * Este método confirma todos los cambios realizados dentro de la transacción actual
      * y los hace permanentes en la base de datos.
-     *
-     * @return void
      */
     public function confirmarTransaccion(): void
     {
@@ -93,8 +89,6 @@ class SicossCpto205Repository
      *
      * Este método deshace todos los cambios realizados dentro de la transacción actual
      * y restaura el estado de la base de datos al punto anterior al inicio de la transacción.
-     *
-     * @return void
      */
     public function revertirTransaccion(): void
     {
@@ -103,7 +97,7 @@ class SicossCpto205Repository
 
     public function procesarConcepto204(array $liquidaciones): int
     {
-        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones) {
+        return DB::connection($this->getConnectionName())->transaction(function () use ($liquidaciones): int {
             $this->eliminarTablasTemporalesConcepto204();
             $this->crearTablaDocentes($liquidaciones);
             $this->crearTablaAllCargos($liquidaciones);

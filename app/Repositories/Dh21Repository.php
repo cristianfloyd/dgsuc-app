@@ -35,17 +35,18 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Devuelve la suma total del concepto 101 para un número de liquidación dado.
      *
-     * @param  NroLiqui|null  $nroLiqui  El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
+     * @param NroLiqui|null $nroLiqui El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
+     *
      * @return float La suma total del concepto 101.
      */
     public function getTotalConcepto101(?NroLiqui $nroLiqui = null): float
     {
-        $query = Dh21::query()->where('codn_conce', '101');
-        if ($nroLiqui) {
-            $query->where('nro_liqui', $nroLiqui->getValue());
+        $builder = Dh21::query()->where('codn_conce', '101');
+        if ($nroLiqui instanceof \App\NroLiqui) {
+            $builder->where('nro_liqui', $nroLiqui->getValue());
         }
 
-        return $query->sum('impp_conce');
+        return $builder->sum('impp_conce');
     }
 
     /**
@@ -71,19 +72,19 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Obtiene las liquidaciones con sus importes y descripciones.
      *
-     * @param  array  $conditions  Condiciones adicionales para filtrar
+     * @param array $conditions Condiciones adicionales para filtrar
      */
     public function getLiquidaciones(array $conditions = []): Collection
     {
         return Dh21::query()
             ->select('dh22.desc_liqui', 'dh21.codn_conce', 'dh21.impp_conce', 'dh21.desc_conce')
             ->with('dh22')
-            ->when(! empty($conditions), function ($query) use ($conditions): void {
+            ->when($conditions !== [], function ($query) use ($conditions): void {
                 foreach ($conditions as $column => $value) {
                     $query->where($column, $value);
                 }
             })
-            ->when(empty($conditions), function ($query): void {
+            ->when($conditions === [], function ($query): void {
                 $query->where('nro_legaj', '=', 1);
             })
             ->get();
@@ -173,9 +174,7 @@ class Dh21Repository implements Dh21RepositoryInterface
             ->select('SELECT * FROM pre_conceptos_liquidados');
 
         // Convertir los resultados a array
-        return array_map(function ($item) {
-            return (array) $item;
-        }, $resultados);
+        return array_map(fn($item) => (array) $item, $resultados);
     }
 
     /**
@@ -198,8 +197,8 @@ class Dh21Repository implements Dh21RepositoryInterface
             $rs_periodos_retro = DB::connection($this->getConnectionName())->select($sql_periodos_retro);
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
-            array_push($rs_periodos_retro, $temp);
-        } elseif (! $check_lic) {
+            $rs_periodos_retro[] = $temp;
+        } elseif (!$check_lic) {
             $sql_periodos_retro = '
                                     SELECT
                                             DISTINCT(ano_retro),mes_retro
@@ -214,7 +213,7 @@ class Dh21Repository implements Dh21RepositoryInterface
         else {
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
-            array_push($rs_periodos_retro, $temp);
+            $rs_periodos_retro[] = $temp;
         }
 
         return $rs_periodos_retro;

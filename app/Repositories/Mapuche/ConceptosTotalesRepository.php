@@ -19,8 +19,6 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
      * @param array $conceptos Códigos de conceptos a incluir
      * @param int $year Año del período
      * @param int $month Mes del período
-     *
-     * @return Collection
      */
     public function getTotalesPorConcepto(array $conceptos, int $year, int $month): Collection
     {
@@ -66,12 +64,8 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
         $resultados = $this->getTotalesPorConcepto($conceptos, $year, $month);
 
         $agrupados = [
-            'haberes' => $resultados->filter(function ($item) {
-                return in_array(substr($item->codn_conce, 0, 1), ['2', '4', '6', '8']);
-            }),
-            'descuentos' => $resultados->filter(function ($item) {
-                return in_array(substr($item->codn_conce, 0, 1), ['3', '5', '7', '9']);
-            }),
+            'haberes' => $resultados->filter(fn($item) => in_array(substr((string) $item->codn_conce, 0, 1), ['2', '4', '6', '8'])),
+            'descuentos' => $resultados->filter(fn($item) => in_array(substr((string) $item->codn_conce, 0, 1), ['3', '5', '7', '9'])),
         ];
 
         return [
