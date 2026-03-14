@@ -11,7 +11,7 @@ class PeriodoLiquidacion
 
     public function __construct(string $year, string $month)
     {
-        $fecha = Carbon::createFromFormat('Y-m', "$year-$month");
+        $fecha = \Illuminate\Support\Facades\Date::createFromFormat('Y-m', "$year-$month");
         if (!$fecha instanceof Carbon) {
             throw new InvalidArgumentException("Invalid date format: $year-$month");
         }

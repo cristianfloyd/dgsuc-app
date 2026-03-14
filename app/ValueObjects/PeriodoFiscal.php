@@ -87,7 +87,8 @@ class PeriodoFiscal implements JsonSerializable, Stringable
      */
     public static function current(): self
     {
-        $now = Carbon::now();
+        $now = \Illuminate\Support\Facades\Date::now();
+
         return new self($now->year, $now->month);
     }
 
@@ -136,7 +137,7 @@ class PeriodoFiscal implements JsonSerializable, Stringable
      */
     public function toCarbon(): Carbon
     {
-        return Carbon::createFromDate($this->year, $this->month, 1)->startOfDay();
+        return \Illuminate\Support\Facades\Date::createFromDate($this->year, $this->month, 1)->startOfDay();
     }
 
     /**
@@ -145,6 +146,7 @@ class PeriodoFiscal implements JsonSerializable, Stringable
     public function previous(): self
     {
         $date = $this->toCarbon()->subMonth();
+
         return new self($date->year, $date->month);
     }
 
@@ -154,6 +156,7 @@ class PeriodoFiscal implements JsonSerializable, Stringable
     public function next(): self
     {
         $date = $this->toCarbon()->addMonth();
+
         return new self($date->year, $date->month);
     }
 
