@@ -107,7 +107,7 @@ abstract class BaseExcelSheet implements WithCustomStartCell, WithStyles
 
         // Alternar colores de fila para mejor legibilidad
         for ($row = 7; $row <= $sheet->getHighestRow(); $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $color = new Color('F8F9FA');
                 $sheet->getStyle('A' . $row . ':Z' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)

@@ -25,12 +25,7 @@ use const MB_CASE_TITLE;
 
 class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithProperties, WithStyles, WithTitle
 {
-    protected $records;
-
-    public function __construct($records)
-    {
-        $this->records = $records;
-    }
+    public function __construct(protected $records) {}
 
     // Propiedades del documento
     public function properties(): array
@@ -86,7 +81,7 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
 
         // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $styles["A$row:$lastColumn$row"] = [
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -114,10 +109,10 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
         ];
     }
 
-    public function query()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         // Convertir la colección a query
-        return DosubaSinLiquidarModel::whereIn('id', $this->records->pluck('id'));
+        return DosubaSinLiquidarModel::query()->whereIn('id', $this->records->pluck('id'));
     }
 
     public function headings(): array
@@ -137,8 +132,8 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
     {
         return [
             $row->nro_legaj,
-            mb_convert_case($row->apellido, MB_CASE_TITLE, 'UTF-8'),
-            mb_convert_case($row->nombre, MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case((string) $row->apellido, MB_CASE_TITLE, 'UTF-8'),
+            mb_convert_case((string) $row->nombre, MB_CASE_TITLE, 'UTF-8'),
             $this->formatCuil($row->cuil),
             $row->codc_uacad,
             $row->ultima_liquidacion,
@@ -173,8 +168,8 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
 
                     // Permitir selección de filas
                     $event->sheet->getStyle("A1:{$lastColumn}$lastRow")->getProtection()
-                        ->setLocked(false)
-                        ->setHidden(false);
+                        ->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED)
+                        ->setHidden(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
                 } catch (Exception $e) {
                     Log::error('Error en configuración Excel: ' . $e->getMessage());
                 }
@@ -182,8 +177,8 @@ class DosubaSinLiquidarDataSheet implements FromQuery, ShouldAutoSize, WithColum
         ];
     }
 
-    private function formatCuil($cuil)
+    private function formatCuil($cuil): ?string
     {
-        return preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $cuil);
+        return preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', (string) $cuil);
     }
 }

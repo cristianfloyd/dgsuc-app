@@ -18,15 +18,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class DosubaSinLiquidarSummarySheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithStyles, WithTitle
 {
-    protected $records;
-
-    protected string $periodo;
-
-    public function __construct(Collection $records, string $periodo)
-    {
-        $this->records = $records;
-        $this->periodo = $periodo;
-    }
+    public function __construct(protected \Illuminate\Support\Collection $records, protected string $periodo) {}
 
     public function collection()
     {
@@ -48,15 +40,15 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, ShouldAutoSize, W
             // Agrupación por Unidad Académica
             ['Distribución por Unidad Académica'],
             ...$this->records->groupBy('codc_uacad')
-                ->map(fn($group, $uacad) => [$uacad, $group->count()])
+                ->map(fn($group, $uacad): array => [$uacad, $group->count()])
                 ->values(),
             [''],
 
             // Última liquidación
             ['Distribución por Última Liquidación'],
             ...$this->records->groupBy('ultima_liquidacion')
-                ->map(fn($group, $liq) => [$liq, $group->count()])
-                ->sortByDesc(fn($item) => $item[0])
+                ->map(fn($group, $liq): array => [$liq, $group->count()])
+                ->sortByDesc(fn($item): int|string => $item[0])
                 ->take(5)
                 ->values(),
             [''],
@@ -64,13 +56,13 @@ class DosubaSinLiquidarSummarySheet implements FromCollection, ShouldAutoSize, W
             // Período Fiscal
             ['Distribución por Período'],
             ...$this->records->groupBy('periodo_fiscal')
-                ->map(fn($group, $periodo) => [$periodo, $group->count()])
-                ->sortByDesc(fn($item) => $item[0])
+                ->map(fn($group, $periodo): array => [$periodo, $group->count()])
+                ->sortByDesc(fn($item): int|string => $item[0])
                 ->values(),
 
             // Pie de página
             ['', ''],
-            ['Generado por:', auth()->guard('web')->user()?->name ?? 'Sistema'],
+            ['Generado por:', auth()->guard('web')->user()->name ?? 'Sistema'],
             ['Período:', $this->formatPeriodo()],
             ['Versión:', config('app.version', '1.0')],
         ]);

@@ -19,15 +19,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class RepFallecidosSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected string $periodo;
-
-    protected $records;
-
-    public function __construct($records, string $periodo)
-    {
-        $this->records = $records;
-        $this->periodo = $periodo;
-    }
+    public function __construct(protected $records, protected string $periodo) {}
 
     public function collection()
     {
@@ -61,8 +53,8 @@ class RepFallecidosSheet implements FromCollection, ShouldAutoSize, WithColumnFo
 
         return [
             $row->nro_legaj,
-            trim($row->apellido),
-            trim($row->nombre),
+            trim((string) $row->apellido),
+            trim((string) $row->nombre),
             $row->cuil,
             $row->codc_uacad,
             $row->feccha_baja?->format('d/m/Y'),
@@ -148,7 +140,7 @@ class RepFallecidosSheet implements FromCollection, ShouldAutoSize, WithColumnFo
 
                 // Filas alternadas para mejor legibilidad
                 for ($row = 4; $row <= $lastRow; $row++) {
-                    if ($row % 2 == 0) {
+                    if ($row % 2 === 0) {
                         $sheet->getStyle("A$row:F$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,

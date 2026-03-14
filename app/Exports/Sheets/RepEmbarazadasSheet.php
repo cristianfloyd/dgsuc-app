@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exports\Sheets;
 
 use App\Models\RepEmbarazada;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
@@ -22,14 +23,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected string $periodo;
+    public function __construct(protected string $periodo) {}
 
-    public function __construct(string $periodo)
-    {
-        $this->periodo = $periodo;
-    }
-
-    public function query()
+    public function query(): Builder
     {
         return RepEmbarazada::query()->orderBy('nro_legaj');
     }
@@ -38,8 +34,8 @@ class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormat
     {
         return [
             $embarazada->nro_legaj,
-            trim($embarazada->apellido),
-            trim($embarazada->nombre),
+            trim((string) $embarazada->apellido),
+            trim((string) $embarazada->nombre),
             $embarazada->cuil,
             $embarazada->codc_uacad,
         ];
@@ -144,7 +140,7 @@ class RepEmbarazadasSheet implements FromQuery, ShouldAutoSize, WithColumnFormat
 
                 // Filas alternadas para mejor legibilidad
                 for ($row = 4; $row <= $lastRow; $row++) {
-                    if ($row % 2 == 0) {
+                    if ($row % 2 === 0) {
                         $sheet->getStyle("A$row:E$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,

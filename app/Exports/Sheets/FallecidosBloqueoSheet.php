@@ -2,7 +2,6 @@
 
 namespace App\Exports\Sheets;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -23,22 +22,13 @@ use function is_string;
 
 class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected $records;
-
-    protected string $periodo;
-
-    public function __construct($records, string $periodo)
-    {
-        $this->records = $records;
-        $this->periodo = $periodo;
-    }
+    public function __construct(protected $records, protected string $periodo) {}
 
     public function collection()
     {
         $collection = $this->records;
-        $collection = $collection->filter(fn($row) => $row !== null);
 
-        return $collection;
+        return $collection->filter(fn($row): bool => $row !== null);
     }
 
     public function title(): string
@@ -71,10 +61,8 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
         // Manejo seguro de la fecha
         $fechaBaja = $row->fecha_baja;
         if (is_string($fechaBaja)) {
-            $fechaBaja = Carbon::parse($fechaBaja);
+            $fechaBaja = \Illuminate\Support\Facades\Date::parse($fechaBaja);
         }
-
-        $cuil = $row->dh01->nro_cuil1 . $row->dh01->nro_cuil . $row->dh01->nro_cuil2;
 
         if (!$row) {
             return [
@@ -91,12 +79,12 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
 
         return [
             $row->nro_legaj,
-            $row?->dh01?->nro_cuil1 ?? 'N/A',
+            $row->dh01->nro_cuil1 ?? 'N/A',
             $row->cargo->codc_uacad ?? '',
             $row->dependencia ?? '',
             $fechaBaja ? $fechaBaja->format('d/m/Y') : '',
-            $row->dh01?->desc_appat ?? '',
-            $row->dh01?->desc_nombr ?? '',
+            $row->dh01->desc_appat ?? '',
+            $row->dh01->desc_nombr ?? '',
             $row->observaciones ?? '',
         ];
     }
@@ -180,7 +168,7 @@ class FallecidosBloqueoSheet implements FromCollection, ShouldAutoSize, WithColu
 
                 // Filas alternadas para mejor legibilidad
                 for ($row = 4; $row <= $lastRow; $row++) {
-                    if ($row % 2 == 0) {
+                    if ($row % 2 === 0) {
                         $sheet->getStyle("A$row:G$row")->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,

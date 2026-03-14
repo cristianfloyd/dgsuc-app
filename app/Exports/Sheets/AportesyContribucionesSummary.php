@@ -21,8 +21,6 @@ use function array_slice;
 
 class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithCustomStartCell, WithDrawings, WithHeadings, WithStyles, WithTitle
 {
-    protected $query;
-
     protected $resumenDosuba;
 
     protected $resumenAfip;
@@ -35,9 +33,8 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
 
     protected $resumenAportesAfip;
 
-    public function __construct($query)
+    public function __construct(protected $query)
     {
-        $this->query = $query;
         $this->resumenDosuba = $this->getResumenByConceptoGrupo(ConceptoGrupo::DOSUBA);
 
         $this->resumenContribucionesAfip = $this->getResumenByConceptoGrupo(ConceptoGrupo::CONTRIBUCIONES_AFIP);
@@ -79,17 +76,15 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
             ->get();
 
         // Preparamos los datos por liquidación
-        $datosMatriz = $liquidaciones->map(function ($liquidacion) {
-            return [
-                'nro_liqui' => $liquidacion->nro_liqui,
-                'desc_liqui' => $liquidacion->desc_liqui,
-                'dosuba' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::DOSUBA),
-                'contribuciones' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::CONTRIBUCIONES_AFIP),
-                'seguro' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::SEGURO_CONTRIBUCION_AFIP),
-                'art' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::ART_AFIP),
-                'aportes' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::APORTES_AFIP),
-            ];
-        });
+        $datosMatriz = $liquidaciones->map(fn($liquidacion): array => [
+            'nro_liqui' => $liquidacion->nro_liqui,
+            'desc_liqui' => $liquidacion->desc_liqui,
+            'dosuba' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::DOSUBA),
+            'contribuciones' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::CONTRIBUCIONES_AFIP),
+            'seguro' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::SEGURO_CONTRIBUCION_AFIP),
+            'art' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::ART_AFIP),
+            'aportes' => $this->getTotalPorLiquidacion($liquidacion->nro_liqui, ConceptoGrupo::APORTES_AFIP),
+        ]);
 
         // Calculamos los totales
         $totales = [
@@ -131,7 +126,10 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
             [''], // libre
             [''], // Línea libre
             [
-                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de ' . $totalGeneralTexto . ' ($ ' . number_format($totalGeneral, 2, ',', '.') . '.-)',
+                'Visto las novedades informadas por las dependencias en el mes de noviembre del corriente, '
+                . 'se procedió a la liquidación de haberes arrojando la orden de pago presupuestaria y el informe gerencial '
+                . 'que se adjuntan a la presente, totalizando un importe de aportes y contribuciones de '
+                . $totalGeneralTexto . ' ($ ' . number_format($totalGeneral, 2, ',', '.') . '.-)',
             ],
             [''],
             ['Los mismo corresponden a los siguientes beneficiarios,'],
@@ -159,7 +157,7 @@ class AportesyContribucionesSummary implements FromCollection, ShouldAutoSize, W
             ['Liquidación', 'DOSUBA', 'Contribuciones', 'Seguro', 'ART', 'Aportes', 'Sub Totales'],
 
             // Datos por liquidación
-            ...$datosMatriz->map(fn($row) => [
+            ...$datosMatriz->map(fn($row): array => [
                 $row['desc_liqui'],
                 $row['dosuba'],
                 $row['contribuciones'],
