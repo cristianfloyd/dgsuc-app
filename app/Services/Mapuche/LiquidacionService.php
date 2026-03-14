@@ -26,8 +26,6 @@ class LiquidacionService
 
     /**
      * Obtiene la liquidación definitiva para un período fiscal.
-     *
-     *
      */
     public function getLiquidacionDefinitiva(string $year, string $month): ?Dh22
     {

@@ -12,8 +12,6 @@ class Dh22Service
 {
     /**
      * Obtener liquidaciones definitivas con período fiscal formateado y filtros opcionales.     *.
-     *
-     *
      */
     public function getLiquidacionesDefinitivas(?int $year = null, ?int $month = null): Collection
     {
@@ -33,12 +31,14 @@ class Dh22Service
             if ($month) {
                 $query->where('per_limes', $month);
             }
-            dd($query->toSql());
-            return $query->orderBy('per_liano', 'desc')
-                ->orderBy('per_limes', 'desc')
-                ->get();
+
+            $query->orderBy('per_liano', 'desc')
+                ->orderBy('per_limes', 'desc');
+
+            return $query->get();
         } catch (Exception $e) {
             Log::error('Error getting definitive settlements: ' . $e->getMessage());
+
             return collect();
         }
     }

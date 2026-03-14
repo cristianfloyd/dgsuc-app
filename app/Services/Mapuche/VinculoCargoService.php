@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Mapuche;
 
 use App\Data\Mapuche\SacCargoData;
+use App\Models\Mapuche\Dh10;
 use App\Repositories\Sicoss\Dh03Repository;
 
-class VinculoCargoService
+final readonly class VinculoCargoService
 {
     public function __construct(
-        private readonly Dh03Repository $dh03Repository,
-    ) {
-    }
+        private Dh03Repository $dh03Repository,
+    ) {}
 
     /**
      * Procesa la cadena completa de vínculos para un cargo.
@@ -34,7 +34,7 @@ class VinculoCargoService
             }
 
             // Obtener siguiente cargo en la cadena
-            $cargoActual = $this->obtenerSiguienteCargo();
+            $cargoActual = $this->obtenerSiguienteCargo($cargoActual);
             if (!$cargoActual instanceof \App\Data\Mapuche\SacCargoData) {
                 break;
             }
@@ -71,6 +71,12 @@ class VinculoCargoService
         );
     }
 
+    /**
+     * Acumula importes mensuales en el array de acumulados.
+     *
+     * @param array<int, float|int> &$acumulados Referencia al arreglo de importes acumulados por mes.
+     * @param array<int, float|int> $importes Arreglo de importes a sumar por mes (índices de 1 a 12).
+     */
     private function acumularImportes(array &$acumulados, array $importes): void
     {
         for ($i = 1; $i <= 12; $i++) {
@@ -78,6 +84,18 @@ class VinculoCargoService
         }
     }
 
+    /**
+     * Actualiza el arreglo de vínculos mensuales según los importes proporcionados.
+     *
+     * Recorre los meses (1 a 12) y, si el importe correspondiente al mes es mayor a cero,
+     * actualiza el valor de $vinculos para ese mes. Si el valor actual de $vinculos en ese
+     * mes está vacío, lo establece a $vinculoActual; de lo contrario, concatena el nuevo
+     * vínculo al existente usando '->'.
+     *
+     * @param array<int, string|int|null> &$vinculos Referencia al arreglo de vínculos mensuales (índices 1 a 12).
+     * @param array<int, float|int> $importes Arreglo de importes por mes (índices 1 a 12).
+     * @param int $vinculoActual Número del vínculo actual a registrar.
+     */
     private function actualizarVinculos(array &$vinculos, array $importes, int $vinculoActual): void
     {
         for ($i = 1; $i <= 12; $i++) {
@@ -89,10 +107,33 @@ class VinculoCargoService
         }
     }
 
-    private function obtenerSiguienteCargo(): ?SacCargoData
+    /**
+     * Obtiene el siguiente cargo vinculado a un cargo actual.
+     *
+     * Dado un objeto SacCargoData, verifica si existe un vínculo a otro cargo
+     * (a través de la propiedad vcl_cargo). Si el número de cargo vinculado
+     * coincide con el del cargo actual, retorna null (ya que no hay siguiente).
+     * Si existe un modelo Dh10 para ese número de cargo, lo devuelve transformado
+     * en SacCargoData, caso contrario retorna null.
+     *
+     * @param SacCargoData $cargoActual El cargo actual del cual buscar el siguiente.
+     *
+     * @return SacCargoData|null El siguiente cargo vinculado, o null si no existe.
+     */
+    private function obtenerSiguienteCargo(SacCargoData $cargoActual): ?SacCargoData
     {
-        // Implementar lógica para obtener el siguiente cargo en la cadena
-        // Esto requeriría acceso al repository o al modelo
-        return null;
+        $siguienteCargo = $cargoActual->vcl_cargo;
+
+        if ($siguienteCargo === $cargoActual->nro_cargo) {
+            return null;
+        }
+
+        $modelo = Dh10::query()->find($siguienteCargo);
+
+        if (!$modelo) {
+            return null;
+        }
+
+        return SacCargoData::fromModel($modelo);
     }
 }

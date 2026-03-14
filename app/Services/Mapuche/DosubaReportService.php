@@ -8,6 +8,7 @@ use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoLiquidacion;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,8 +27,7 @@ class DosubaReportService
      */
     public function __construct(
         private readonly PeriodoFiscalService $periodoFiscalService,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene el reporte DOSUBA para un período específico.
@@ -39,7 +39,7 @@ class DosubaReportService
      * @param string|null $year Año del período fiscal (formato: YYYY)
      * @param string|null $month Mes del período fiscal (formato: MM)
      *
-     * @throws Exception Si ocurre un error durante la generación del reporte
+     * @throws Exception Sí ocurre un error durante la generación del reporte
      *
      * @return Collection Colección con los datos del reporte
      */
@@ -52,9 +52,7 @@ class DosubaReportService
 
             // Obtención y procesamiento de legajos
             $legajosPorMes = $this->obtenerLegajosPorMes($fechas);
-            $legajosCombinados = $this->combinarLegajosPrimerYSegundoMes($legajosPorMes);
-
-
+            $legajosCombinados = $this->combinarLegajosPrimerConSegundoMes($legajosPorMes);
 
             // Realizamos el cruce de información entre los legajos combinados y los del tercer mes
             return $this->cruzarLegajos($legajosPorMes['tercerMes'], $legajosCombinados);
@@ -74,12 +72,12 @@ class DosubaReportService
      * @param Carbon $fecha Fecha del mes para obtener los legajos
      * @param bool $soloDefinitivas Si true, filtra solo liquidaciones definitivas
      */
-    public function legajosMes(Carbon $fecha, bool $soloDefinitivas = true): Collection
+    public function legajosMes(Carbon $fecha, bool $soloDefinitivas = true): EloquentCollection
     {
         $builder = Dh21h::query()
             ->join('mapuche.dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
-            ->where('dh22.per_liano', $fecha->year)
-            ->where('dh22.per_limes', $fecha->month)
+            ->whereRaw('dh22.per_liano = ?', [$fecha->year])
+            ->whereRaw('dh22.per_limes = ?', [$fecha->month])
             ->select([
                 'dh21h.nro_legaj',
                 'dh21h.nro_liqui',
@@ -123,7 +121,7 @@ class DosubaReportService
             'total_tercer_mes' => count($legajosTercerMesArray),
             'total_combinados' => count($legajosCombinados),
             'diferencia_encontrada' => count($legajosDiferencia),
-            'ejemplo_legajos_diferencia' => array_slice($legajosDiferencia, 0, 5), // Muestra los primeros 5 legajos de diferencia
+            'ejemplo_legajos_diferencia' => array_slice($legajosDiferencia, 0, 5),  // Muestra los primeros 5 legajos de diferencia
         ]);
 
         $resultados = collect();
@@ -136,9 +134,9 @@ class DosubaReportService
 
         if (!$anioTercerMes || !$mesTercerMes) {
             Log::error('No se pudo determinar el período del tercer mes');
+
             return collect();
         }
-
 
         // Procesamos solo los legajos que están en la diferencia
         foreach (array_chunk($legajosDiferencia, $chunkSize) as $chunk) {
@@ -168,8 +166,8 @@ class DosubaReportService
                 ->join('dh22', 'dh21h.nro_liqui', '=', 'dh22.nro_liqui')
                 ->leftJoin('dh09', 'dh03.nro_legaj', '=', 'dh09.nro_legaj')
                 ->whereIn('dh03.nro_legaj', $chunk)
-                ->where('dh22.per_liano', $anioTercerMes)
-                ->where('dh22.per_limes', $mesTercerMes)
+                ->whereRaw('dh22.per_liano = ?', [$anioTercerMes])
+                ->whereRaw('dh22.per_limes = ?', [$mesTercerMes])
                 ->orderBy('dh03.nro_legaj');
 
             Log::info('Query chunk procesado:', [
@@ -276,7 +274,7 @@ class DosubaReportService
      *
      * @return Collection Colección con los legajos combinados
      */
-    private function combinarLegajosPrimerYSegundoMes(array $legajosPorMes): Collection
+    private function combinarLegajosPrimerConSegundoMes(array $legajosPorMes): Collection
     {
         $legajosCombinados = $legajosPorMes['primerMes']
             ->concat($legajosPorMes['segundoMes'])

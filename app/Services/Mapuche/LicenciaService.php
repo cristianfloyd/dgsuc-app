@@ -56,6 +56,7 @@ class LicenciaService
             // Validar que existan legajos para consultar
             if ($legajos === []) {
                 Log::warning('Se intentó consultar licencias sin proporcionar legajos');
+
                 return new DataCollection(LicenciaVigenteData::class, []);
             }
 
@@ -64,7 +65,7 @@ class LicenciaService
 
             // Generar clave de caché única basada en los legajos y el período actual
             $periodoActual = MapucheConfig::getPeriodoFiscal();
-            $cacheKey = $this->cachePrefix . "vigentes:{$periodoActual}:" . md5(json_encode($legajos));
+            $cacheKey = $this->cachePrefix . "vigentes:$periodoActual:" . md5(json_encode($legajos));
 
             // Si no se debe usar caché o hay demasiados legajos, ejecutar consulta directamente
             if (!$useCache || count($legajos) > 100) {
@@ -91,6 +92,7 @@ class LicenciaService
                             'legajos' => $legajos,
                             'count' => $licenciasFrescas->count(),
                         ]);
+
                         return $licenciasFrescas;
                     }
                 }
@@ -149,6 +151,7 @@ class LicenciaService
         if (Redis::exists($cacheKey)) {
             Log::info('Obteniendo licencias para legajo individual desde caché Redis', ['legajo' => $legajo]);
             $cachedData = json_decode(Redis::get($cacheKey), true);
+
             return new DataCollection(LicenciaVigenteData::class, $cachedData);
         }
 
@@ -186,6 +189,7 @@ class LicenciaService
             // Verificar si los datos están en caché
             if (Redis::exists($cacheKey)) {
                 Log::info('Obteniendo legajos con licencias desde caché Redis');
+
                 return json_decode(Redis::get($cacheKey), true);
             }
 
@@ -256,13 +260,15 @@ class LicenciaService
      *
      * @return bool Verdadero si el legajo tiene una licencia de maternidad activa, falso de lo contrario.
      */
-    public static function tieneLicenciaMaternidadActiva($nro_legajo): bool
+    public static function tieneLicenciaMaternidadActiva(int $nro_legajo): bool
     {
-        $restultado = false;
-        //-- Armo la fecha inicial para la consulta.
+        $resultado = false;
+        // -- Armo la fecha inicial para la consulta.
         $fecha_inicio = MapucheConfig::getFechaInicioPeriodoCorriente();
-        //-- Armo la fecha tope para la consulta.
-        $mes_final = MapucheConfig::getMesFiscal() + 1;
+        // -- Armo la fecha tope para la consulta.
+        // Utilizar Carbon para avanzar al siguiente mes fiscal de forma más robusta
+        $fecha_inicio_periodo = \Illuminate\Support\Facades\Date::parse(MapucheConfig::getFechaInicioPeriodoCorriente());
+        $mes_final = $fecha_inicio_periodo->copy()->addMonth()->month;
         $anio_final = MapucheConfig::getAnioFiscal();
         if ($mes_final > 12) {
             $mes_final = 1;
@@ -270,12 +276,13 @@ class LicenciaService
         }
         $fecha_final = $anio_final . '-' . $mes_final . '-01';
         if (self::tieneLicenciaMaternidadEnLegajo($nro_legajo, $fecha_inicio, $fecha_final)) {
-            $restultado = true;
+            $resultado = true;
         }
         if (self::tieneLicenciaMaternidadEnCargo($nro_legajo, $fecha_inicio, $fecha_final)) {
             return true;
         }
-        return $restultado;
+
+        return $resultado;
     }
 
     /**
@@ -293,6 +300,7 @@ class LicenciaService
         $sql = "SELECT unnest(array({$subquery1} UNION {$subquery2})) AS nro_legaj";
 
         $resultados = DB::connection(self::getStaticConnectionName())->select($sql);
+
         return collect($resultados)->pluck('nro_legaj')->toArray();
     }
 
@@ -348,7 +356,9 @@ class LicenciaService
 
         foreach ($cargos_legajo as $cargo) {
             // Obtener el último día del mes fiscal actual
-            $fin_mes = date('d', mktime(0, 0, 0, MapucheConfig::getMesFiscal() + 1, 0, date('Y')));
+            $mesFiscal = (int) MapucheConfig::getMesFiscal();
+            $anioFiscal = (int) date('Y');
+            $fin_mes = date('d', mktime(0, 0, 0, $mesFiscal + 1, 0, $anioFiscal));
 
             // Recorrer todos los días del mes
             for ($ini_mes = 1; $ini_mes <= $fin_mes; $ini_mes++) {
@@ -717,7 +727,7 @@ class LicenciaService
         }
     }
 
-    private static function tieneLicenciaMaternidadEnLegajo($nro_legajo, string $fecha_inicio, string $fecha_final): bool
+    private static function tieneLicenciaMaternidadEnLegajo(int $nro_legajo, string $fecha_inicio, string $fecha_final): bool
     {
 
         $sql = "SELECT
@@ -738,9 +748,8 @@ class LicenciaService
         return $rs['cantidad'] > 0;
     }
 
-    private static function tieneLicenciaMaternidadEnCargo($nro_legajo, string $fecha_inicio, string $fecha_final): bool
+    private static function tieneLicenciaMaternidadEnCargo(int $nro_legajo, string $fecha_inicio, string $fecha_final): bool
     {
-
 
         $sql = "SELECT
 				COUNT(*) as cantidad
@@ -765,14 +774,13 @@ class LicenciaService
 
     private static function getStaticConnectionName(): string
     {
-        $instance = new static();
+        $instance = new self();
+
         return $instance->getConnectionName();
     }
 
     /**
      * Obtiene la subconsulta para licencias por legajo.
-     *
-     *
      */
     private static function getSubqueryLicenciasPorLegajo(string $whereLegajo): string
     {
@@ -789,8 +797,6 @@ class LicenciaService
 
     /**
      * Obtiene la subconsulta para licencias por cargo.
-     *
-     *
      */
     private static function getSubqueryLicenciasPorCargo(string $whereLegajo): string
     {

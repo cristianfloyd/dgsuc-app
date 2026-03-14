@@ -15,11 +15,10 @@ use function sprintf;
  *
  * Esta clase proporciona servicios relacionados con los períodos fiscales.
  *
- * @package App\Services\Mapuche
  *
  * @method void setPeriodoFiscal(int $year, int $month) Establece el período fiscal actual en la sesión.
- * @method array getPeriodoFiscal Obtiene el período fiscal actual almacenado en la sesión.
- * @method array getPeriodoFiscalFromDatabase Obtiene el período fiscal actual almacenado en la base de datos.
+ * @method array getPeriodoFiscal() Obtiene el período fiscal actual almacenado en la sesión.
+ * @method array getPeriodoFiscalFromDatabase() Obtiene el período fiscal actual almacenado en la base de datos.
  */
 class PeriodoFiscalService
 {
@@ -27,6 +26,7 @@ class PeriodoFiscalService
     {
         $sql = 'SELECT map_get_fecha_inicio_periodo();';
         $rs = DB::select($sql);
+
         return $rs[0]->map_get_fecha_inicio_periodo;
     }
 
@@ -42,6 +42,7 @@ class PeriodoFiscalService
     {
         $sql = 'SELECT map_get_fecha_fin_periodo();';
         $rs = DB::select($sql);
+
         return $rs['map_get_fecha_fin_periodo'];
     }
 
@@ -87,11 +88,13 @@ class PeriodoFiscalService
     {
         if (session()->has(['year', 'month'])) {
             log::debug('Período fiscal obtenido de la sesión: ' . session('year') . '-' . session('month'));
+
             return [
                 'year' => session('year'),
                 'month' => session('month'),
             ];
         }
+
         // Si no hay un período fiscal establecido en la sesión, devuelve el periodo almacenado en la base de datos dh99
         return $this->getPeriodoFiscalFromDatabase();
     }
@@ -106,6 +109,7 @@ class PeriodoFiscalService
     public function getPeriodoFiscalFromLiqui(int $nroLiqui): array
     {
         $liquidacion = Dh22::query()->where('nro_liqui', $nroLiqui)->first();
+
         return [
             'year' => $liquidacion->per_liano,
             'month' => $liquidacion->per_limes,
@@ -142,6 +146,7 @@ class PeriodoFiscalService
         $periodosFiscales = Dh22::query()->select('per_liano', 'per_limes')
             ->distinct()
             ->get();
+
         return [
             'periodosFiscales' => $periodosFiscales,
         ];
@@ -150,12 +155,14 @@ class PeriodoFiscalService
     public function getYear()
     {
         $periodoFiscal = $this->getPeriodoFiscal();
+
         return $periodoFiscal['year'];
     }
 
     public function getMonth()
     {
         $periodoFiscal = $this->getPeriodoFiscal();
+
         return $periodoFiscal['month'];
     }
 
@@ -163,9 +170,11 @@ class PeriodoFiscalService
     {
         if ($id === null) {
             Log::warning('No se proporcionó un ID para obtener el período fiscal');
+
             return $this->getPeriodoFiscalFromDatabase();
         }
         $periodoFiscal = Dh22::query()->find($id);
+
         return [
             'year' => $periodoFiscal->per_liano,
             'month' => $periodoFiscal->per_limes,
@@ -185,6 +194,7 @@ class PeriodoFiscalService
                 $month = sprintf('%02d', $periodo->per_limes);
                 $label = "$year-$month";
                 $value = "$year-$month";
+
                 return [$value => $label];
             })
             ->toArray();

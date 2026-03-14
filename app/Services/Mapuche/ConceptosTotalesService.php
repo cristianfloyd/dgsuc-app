@@ -2,7 +2,6 @@
 
 namespace App\Services\Mapuche;
 
-use App\Contracts\Dh21RepositoryInterface;
 use App\NroLiqui;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,9 +10,7 @@ use Illuminate\Support\Facades\Log;
 class ConceptosTotalesService
 {
     // Inyección de dependencias para el repositorio
-    public function __construct(protected \App\Contracts\Dh21RepositoryInterface $repository)
-    {
-    }
+    public function __construct(protected \App\Contracts\Dh21RepositoryInterface $repository) {}
 
     public function calcular(?NroLiqui $nroLiqui = null, ?int $codn_fuent = null): Builder
     {

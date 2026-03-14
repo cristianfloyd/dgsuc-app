@@ -16,9 +16,7 @@ class TableSelectorService
     /**
      * Constructor del servicio.
      */
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService)
-    {
-    }
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService) {}
 
     /**
      * Determina qué tabla usar (dh21 o dh21h) según el período fiscal de la liquidación.
@@ -38,6 +36,7 @@ class TableSelectorService
 
             if (!$liquidacionModel) {
                 Log::warning("Liquidación no encontrada: {$nroLiqui}. Usando tabla dh21 por defecto.");
+
                 return 'dh21';
             }
 
@@ -56,13 +55,16 @@ class TableSelectorService
                 || ($yearLiquidacion === $yearActual && $mesLiquidacion < $mesActual)
             ) {
                 Log::info("Usando tabla histórica dh21h para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
+
                 return 'dh21h';
             }
 
             Log::info("Usando tabla actual dh21 para liquidación {$nroLiqui} del período {$yearLiquidacion}-{$mesLiquidacion}");
+
             return 'dh21';
         } catch (Exception $e) {
             Log::error("Error al determinar la tabla para la liquidación {$nroLiqui}: " . $e->getMessage());
+
             return 'dh21'; // Por defecto, usamos la tabla actual
         }
     }
@@ -78,6 +80,7 @@ class TableSelectorService
     public function replaceTableInQuery(string $query, $liquidacion): string
     {
         $tableName = $this->getDh21TableName($liquidacion);
+
         return str_replace('{TABLE}', "mapuche.{$tableName}", $query);
     }
 }

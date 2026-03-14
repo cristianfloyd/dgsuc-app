@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Mapuche;
 
-use App\Data\Mapuche\{SacCargoData, SacLegajoData};
+use App\Data\Mapuche\SacCargoData;
+use App\Data\Mapuche\SacLegajoData;
 use App\Repositories\Mapuche\SacRepository;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
@@ -16,8 +16,7 @@ class ModernCargoSacService
     public function __construct(
         private readonly SacRepository $sacRepository,
         private readonly VinculoCargoService $vinculoService,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los datos de brutos SAC para un cargo específico.

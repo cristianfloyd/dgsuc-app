@@ -28,8 +28,8 @@ class VerificacionMapucheService
                 'legajo' => $cargo->nro_legaj,
                 'cargo' => $cargo->nro_cargo,
                 'nombre' => $cargo->dh01->nombre_completo,
-                'fecha_alta' => $cargo->fec_alta?->format('d/m/Y'),
-                'fecha_baja' => $cargo->fec_baja?->format('d/m/Y'),
+                'fecha_alta' => $cargo->fec_alta ? \Illuminate\Support\Facades\Date::parse($cargo->fec_alta)->format('d/m/Y') : null,
+                'fecha_baja' => $cargo->fec_baja ? \Illuminate\Support\Facades\Date::parse($cargo->fec_baja)->format('d/m/Y') : null,
                 'estado' => $cargo->chkstopliq ? 'Bloqueado' : 'Activo',
             ],
         ];
