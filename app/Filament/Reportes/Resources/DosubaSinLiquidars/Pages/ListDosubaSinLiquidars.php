@@ -16,6 +16,7 @@ class ListDosubaSinLiquidars extends ListRecords
 {
     protected static string $resource = DosubaSinLiquidarResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         parent::mount();
@@ -26,6 +27,7 @@ class ListDosubaSinLiquidars extends ListRecords
         DosubaSinLiquidarModel::cleanOldRecords();
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -36,7 +38,7 @@ class ListDosubaSinLiquidars extends ListRecords
                 ->icon('heroicon-o-document-text')
                 ->color('info')
                 ->modalHeading('Documentación del Reporte Dosuba Sin Liquidar')
-                ->modalContent(function () {
+                ->modalContent(function (): string|\Illuminate\Support\HtmlString {
                     $markdownPath = base_path('resources/docs/documentacion-dosuba-sin-liquidar.md');
 
                     if (!File::exists($markdownPath)) {
@@ -50,12 +52,12 @@ class ListDosubaSinLiquidars extends ListRecords
                         'allow_unsafe_links' => false,
                     ]);
 
-                    $html = $converter->convert($markdown);
+                    $renderedContent = $converter->convert($markdown);
 
                     // Agregar estilos para mejorar la presentación
                     $styledHtml = '
                         <div class="prose prose-sm md:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-primary-600 dark:prose-headings:text-primary-400 prose-img:rounded-xl prose-img:shadow-md">
-                            ' . $html . '
+                            ' . $renderedContent . '
                         </div>
                     ';
 

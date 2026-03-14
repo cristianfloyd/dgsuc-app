@@ -23,6 +23,7 @@ class DH21hResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -125,6 +126,7 @@ class DH21hResource extends Resource
             ->defaultPaginationPageOption(5);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -132,6 +134,7 @@ class DH21hResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

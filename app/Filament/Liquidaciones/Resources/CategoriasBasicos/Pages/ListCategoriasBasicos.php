@@ -11,6 +11,7 @@ class ListCategoriasBasicos extends ListRecords
 {
     protected static string $resource = CategoriasBasicosResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -18,6 +19,7 @@ class ListCategoriasBasicos extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

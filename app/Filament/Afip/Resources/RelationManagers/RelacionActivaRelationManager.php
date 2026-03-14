@@ -19,6 +19,7 @@ class RelacionActivaRelationManager extends RelationManager
 
     protected static ?string $pluralModelLabel = 'Relaciones Activas';
 
+    #[\Override]
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return true;

@@ -10,6 +10,7 @@ class ViewBloqueo extends ViewRecord
 {
     protected static string $resource = BloqueosResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

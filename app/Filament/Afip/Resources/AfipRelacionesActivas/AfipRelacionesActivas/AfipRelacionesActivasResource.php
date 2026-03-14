@@ -33,6 +33,7 @@ class AfipRelacionesActivasResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -117,6 +118,7 @@ class AfipRelacionesActivasResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -163,17 +165,15 @@ class AfipRelacionesActivasResource extends Resource
                         DatePicker::make('desde'),
                         DatePicker::make('hasta'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['desde'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
-                            )
-                            ->when(
-                                $data['hasta'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
-                            );
-                    }),
+                    ->query(fn(Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['desde'],
+                            fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '>=', $date),
+                        )
+                        ->when(
+                            $data['hasta'],
+                            fn(Builder $query, $date): Builder => $query->whereDate('fecha_inicio_relacion_laboral', '<=', $date),
+                        )),
             ])
             ->recordActions([
                 // Tables\Actions\EditAction::make(),
@@ -186,6 +186,7 @@ class AfipRelacionesActivasResource extends Resource
             ->defaultPaginationPageOption(5);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -193,6 +194,7 @@ class AfipRelacionesActivasResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -202,6 +204,7 @@ class AfipRelacionesActivasResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getGloballySearchableAttributes(): array
     {
         return ['cuil', 'periodo_fiscal'];

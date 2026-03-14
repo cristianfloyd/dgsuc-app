@@ -9,6 +9,7 @@ class EditDH21h extends EditRecord
 {
     protected static string $resource = DH21hResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

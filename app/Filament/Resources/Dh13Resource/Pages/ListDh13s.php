@@ -12,17 +12,19 @@ class ListDh13s extends ListRecords
 {
     protected static string $resource = Dh13Resource::class;
 
+    #[\Override]
     public function getTabs(): array
     {
         return [
             'all' => Tab::make('Todos'),
             'active' => Tab::make('Activos')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('desc_condi', '!=', null)),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('desc_condi', '!=')),
             'inactive' => Tab::make('Inactivos')
                 ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('desc_condi')),
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

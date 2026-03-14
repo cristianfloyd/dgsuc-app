@@ -10,6 +10,7 @@ class EditAfipMapucheMiSimplificacion extends EditRecord
 {
     protected static string $resource = AfipMapucheMiSimplificacionResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

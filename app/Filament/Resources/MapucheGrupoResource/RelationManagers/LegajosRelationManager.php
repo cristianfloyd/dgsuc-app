@@ -30,6 +30,7 @@ class LegajosRelationManager extends RelationManager
         return "{$record->nro_legaj} - {$record->desc_appat}, {$record->desc_nombr}";
     }
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema->components([]);
@@ -42,46 +43,32 @@ class LegajosRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('nro_legaj')
                     ->label('Legajo')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query->orderBy('dh01.nro_legaj', $direction);
-                    })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('dh01.nro_legaj', 'like', "%{$search}%");
-                    }),
+                    ->sortable(query: fn(Builder $query, string $direction): Builder => $query->orderBy('dh01.nro_legaj', $direction))
+                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->where('dh01.nro_legaj', 'like', "%{$search}%")),
 
                 TextColumn::make('desc_appat')
                     ->label('Apellido')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query->orderBy('dh01.desc_appat', $direction);
-                    })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('dh01.desc_appat', 'ilike', "%{$search}%");
-                    }),
+                    ->sortable(query: fn(Builder $query, string $direction): Builder => $query->orderBy('dh01.desc_appat', $direction))
+                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->where('dh01.desc_appat', 'ilike', "%{$search}%")),
 
                 TextColumn::make('desc_nombr')
                     ->label('Nombre')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query->orderBy('dh01.desc_nombr', $direction);
-                    })
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where('dh01.desc_nombr', 'ilike', "%{$search}%");
-                    }),
+                    ->sortable(query: fn(Builder $query, string $direction): Builder => $query->orderBy('dh01.desc_nombr', $direction))
+                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->where('dh01.desc_nombr', 'ilike', "%{$search}%")),
 
                 TextColumn::make('cuil')
                     ->label('CUIL')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where(function ($query) use ($search) {
-                            // Eliminar cualquier caracter no numérico del término de búsqueda
-                            $search = preg_replace('/[^0-9]/', '', $search);
+                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->where(function ($query) use ($search) {
+                        // Eliminar cualquier caracter no numérico del término de búsqueda
+                        $search = preg_replace('/[^0-9]/', '', $search);
 
-                            // Búsqueda por CUIL completo usando la concatenación de los campos
-                            return $query->whereRaw("LPAD(nro_cuil1::text, 2, '0') || LPAD(nro_cuil::text, 8, '0') || LPAD(nro_cuil2::text, 1, '0') LIKE ?", ["%{$search}%"]);
-                        });
-                    })
+                        // Búsqueda por CUIL completo usando la concatenación de los campos
+                        return $query->whereRaw("LPAD(nro_cuil1::text, 2, '0') || LPAD(nro_cuil::text, 8, '0') || LPAD(nro_cuil2::text, 1, '0') LIKE ?", ["%{$search}%"]);
+                    }))
                     ->formatStateUsing(
-                        fn($state)
+                        fn($state): ?string
                         // Formatear el CUIL con guiones (XX-XXXXXXXX-X)
-                        => preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', $state),
+                        => preg_replace('/^(\d{2})(\d{8})(\d{1})$/', '$1-$2-$3', (string) $state),
                     ),
             ])
             ->filters([

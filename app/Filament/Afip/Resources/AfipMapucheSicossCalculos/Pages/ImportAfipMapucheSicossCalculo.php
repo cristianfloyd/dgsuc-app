@@ -48,7 +48,7 @@ class ImportAfipMapucheSicossCalculo extends Page
 
     public function mount(): void
     {
-        $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        $this->periodoFiscalService = resolve(PeriodoFiscalService::class);
         $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
 
         $this->year = $periodoFiscal['year'];
@@ -67,17 +67,17 @@ class ImportAfipMapucheSicossCalculo extends Page
             $data = $this->form->getState();
             $filePath = Storage::disk('public')->path($data['file']);
 
-            $service = app(AfipMapucheSicossCalculoImportService::class);
+            $service = resolve(AfipMapucheSicossCalculoImportService::class);
             $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
 
             $result = $service->streamImport(
                 $filePath,
                 $periodoFiscal,
-                fn($progress) => $this->updateImportProgress($progress),
+                fn(array $progress) => $this->updateImportProgress($progress),
             );
 
             if ($result['imported'] > 0) {
-                $data = app(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
+                $data = resolve(AfipMapucheSicossCalculoUpdateService::class)->updateUacadAndCaracter();
             }
 
             $this->handleImportResult($result);
@@ -177,7 +177,7 @@ class ImportAfipMapucheSicossCalculo extends Page
 
     private function getYearOptions(): array
     {
-        $currentYear = Carbon::now()->year;
+        $currentYear = \Illuminate\Support\Facades\Date::now()->year;
 
         return array_combine(
             range($currentYear - 5, $currentYear + 1),

@@ -16,6 +16,7 @@ class OrdenPagoStatsWidget extends BaseWidget
 
     protected ?string $pollingInterval = null;
 
+    #[\Override]
     protected function getStats(): array
     {
         if (!$this->tieneTablaYDatos()) {

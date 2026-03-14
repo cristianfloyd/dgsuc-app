@@ -11,12 +11,14 @@ class ListRepEmbarazadas extends ListRecords
 {
     protected static string $resource = RepEmbarazadaResource::class;
 
+    #[\Override]
     public function mount(): void
     {
-        app(RepEmbarazadaService::class)->ensureTableExists();
+        resolve(RepEmbarazadaService::class)->ensureTableExists();
         parent::mount();
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

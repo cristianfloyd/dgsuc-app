@@ -28,44 +28,47 @@ class ListImportData extends ListRecords
 {
     protected static string $resource = BloqueosResource::class;
 
+    #[\Override]
     public function mount(): void
     {
-        app(ImportDataTableService::class)->ensureTableExists();
+        resolve(ImportDataTableService::class)->ensureTableExists();
         parent::mount();
     }
 
+    #[\Override]
     public function getTabs(): array
     {
         return [
             'Todo' => Tab::make()
-                ->badge(fn() => $this->getModel()::count()),
+                ->badge(fn() => $this->getModel()::query()->count()),
             'valido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('estado', BloqueosEstadoEnum::VALIDADO->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::VALIDADO->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::VALIDADO->value)),
             'Duplicados' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('estado', BloqueosEstadoEnum::DUPLICADO->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::DUPLICADO->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::DUPLICADO->value)),
             'Licencia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('tipo', BloqueosTipoEnum::LICENCIA->value)->count())
                 ->badgeColor(BloqueosTipoEnum::LICENCIA->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::LICENCIA->value)),
             'Fallecido' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('tipo', BloqueosTipoEnum::FALLECIDO->value)->count())
                 ->badgeColor(BloqueosTipoEnum::FALLECIDO->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::FALLECIDO->value)),
             'Renuncia' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('tipo', BloqueosTipoEnum::RENUNCIA->value)->count())
                 ->badgeColor(BloqueosTipoEnum::RENUNCIA->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('tipo', BloqueosTipoEnum::RENUNCIA->value)),
             'error_validacion' => Tab::make()
-                ->badge(fn() => $this->getModel()::where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
+                ->badge(fn() => $this->getModel()::query()->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)->count())
                 ->badgeColor(BloqueosEstadoEnum::ERROR_VALIDACION->getColor())
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('estado', BloqueosEstadoEnum::ERROR_VALIDACION->value)),
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -228,7 +231,7 @@ class ListImportData extends ListRecords
                 ->color('primary')
                 ->modalHeading('Documentación de Bloqueos')
                 ->modalWidth('7xl')
-                ->modalContent(function () {
+                ->modalContent(function (): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View {
                     $markdown = file_get_contents(resource_path('docs/documentacion_bloqueos_resource.md'));
 
                     $environment = new Environment();
@@ -288,6 +291,7 @@ class ListImportData extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

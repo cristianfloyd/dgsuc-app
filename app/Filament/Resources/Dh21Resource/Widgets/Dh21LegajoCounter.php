@@ -8,6 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class Dh21LegajoCounter extends BaseWidget
 {
+    #[\Override]
     protected function getStats(): array
     {
         return [

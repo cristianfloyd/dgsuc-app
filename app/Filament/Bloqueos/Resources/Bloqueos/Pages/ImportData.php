@@ -47,6 +47,7 @@ class ImportData extends Page
         $tableService->ensureTableExists();
     }
 
+    #[\Override]
     public function getSubheading(): string
     {
         return 'Este formulario permite importar bloqueos masivos desde un archivo Excel.
@@ -108,7 +109,7 @@ class ImportData extends Page
     {
         $filePath = collect($this->data['excel_file'])->first()->getRealPath();
         $nroLiqui = (int) $this->data['nro_liqui'];
-        $connection = $this->getConnectionFromTrait();
+        $this->getConnectionFromTrait();
 
         try {
             // Validación previa del archivo
@@ -124,14 +125,14 @@ class ImportData extends Page
             // Creamos una instancia del importador con sus dependencias
             $import = new BloqueosImport(
                 $nroLiqui,
-                app(DuplicateValidationService::class),
-                app(BloqueosServiceInterface::class, [
-                    'importService' => app(BloqueosImportService::class),
-                    'processService' => app(BloqueosProcessService::class),
+                resolve(DuplicateValidationService::class),
+                resolve(BloqueosServiceInterface::class, [
+                    'importService' => resolve(BloqueosImportService::class),
+                    'processService' => resolve(BloqueosProcessService::class),
                     'nroLiqui' => $nroLiqui,
                 ]),
-                app(ImportNotificationService::class),
-                app(ExcelRowValidationService::class),
+                resolve(ImportNotificationService::class),
+                resolve(ExcelRowValidationService::class),
             );
 
             // Importamos el archivo
@@ -143,7 +144,7 @@ class ImportData extends Page
             $importResult = $import->getImportResult();
 
             if ($importResult->success) {
-                app(ImportNotificationService::class)->notifyImportResults(
+                resolve(ImportNotificationService::class)->notifyImportResults(
                     $importResult->getProcessedCount(),
                     $importResult->getDuplicateCount(),
                 );
@@ -153,7 +154,7 @@ class ImportData extends Page
                 $procesarTodo = !empty($this->data['procesar_todo']);
                 $validarTodos = !empty($this->data['validar_todos']);
                 $validarCargosAsociados = !empty($this->data['validar_cargos_asociados']);
-                $orquestador = app(BloqueosImportOrchestratorService::class);
+                $orquestador = resolve(BloqueosImportOrchestratorService::class);
                 $resultados = $orquestador->ejecutarSecuenciaCompleta($procesarTodo, $validarTodos, $validarCargosAsociados);
 
                 if ($resultados['success']) {
@@ -192,10 +193,11 @@ class ImportData extends Page
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            app(ImportNotificationService::class)->sendErrorNotification($e->getMessage());
+            resolve(ImportNotificationService::class)->sendErrorNotification($e->getMessage());
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

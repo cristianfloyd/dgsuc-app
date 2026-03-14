@@ -10,6 +10,7 @@ class EditLiquidacionControl extends EditRecord
 {
     protected static string $resource = LiquidacionControlResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

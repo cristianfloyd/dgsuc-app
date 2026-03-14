@@ -17,6 +17,7 @@ class CreateDosubaSinLiquidar extends CreateRecord
 
     protected static string $resource = DosubaSinLiquidarResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         DosubaSinLiquidarModel::createTableIfNotExists();
@@ -32,13 +33,13 @@ class CreateDosubaSinLiquidar extends CreateRecord
 
         Log::info('liquidacion seleccionada:', ['liquidacion' => $liquidacionBase]);
         // Obtenemos el periodo fiscal de la liquidación base
-        $periodoFiscalService = app(PeriodoFiscalService::class);
+        $periodoFiscalService = resolve(PeriodoFiscalService::class);
         $periodoFiscal = $periodoFiscalService->getPeriodoFiscalFromId($liquidacionBase);
 
         Log::info('periodo fiscal:', ['periodo' => $periodoFiscal]);
         // Utilizamos el servicio existente
-        $dosubaService = app(DosubaReportService::class);
-        $legajosSinLiquidar = $dosubaService->getDosubaReport(
+        $dosubaReportService = resolve(DosubaReportService::class);
+        $legajosSinLiquidar = $dosubaReportService->getDosubaReport(
             $periodoFiscal['year'],
             $periodoFiscal['month'],
         );
@@ -47,6 +48,7 @@ class CreateDosubaSinLiquidar extends CreateRecord
         DosubaSinLiquidarModel::setReportData($legajosSinLiquidar);
     }
 
+    #[\Override]
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

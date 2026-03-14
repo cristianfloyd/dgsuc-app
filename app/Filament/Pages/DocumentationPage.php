@@ -35,6 +35,7 @@ class DocumentationPage extends Page
         'bloqueos' => 'Sistema de Bloqueos',
     ];
 
+    #[\Override]
     public static function shouldRegisterNavigation(): bool
     {
         return true;
@@ -64,7 +65,7 @@ class DocumentationPage extends Page
             return [];
         }
 
-        preg_match_all('/#+ (.*)/', $currentDoc['content'], $matches);
+        preg_match_all('/#+ (.*)/', (string) $currentDoc['content'], $matches);
 
         return $matches[1] ?? [];
     }
@@ -95,7 +96,7 @@ class DocumentationPage extends Page
             }
         }
 
-        if (empty($this->documentationData)) {
+        if ($this->documentationData === []) {
             Notification::make()
                 ->warning()
                 ->title('No se encontró documentación')
@@ -104,6 +105,7 @@ class DocumentationPage extends Page
         }
     }
 
+    #[\Override]
     protected function getViewData(): array
     {
         return [
@@ -115,12 +117,10 @@ class DocumentationPage extends Page
     protected function getSections(): array
     {
         return collect($this->markdownFiles)
-            ->map(function ($title, $key) {
-                return [
-                    'key' => $key,
-                    'title' => $title,
-                ];
-            })
-            ->toArray();
+            ->map(fn($title, $key) => [
+                'key' => $key,
+                'title' => $title,
+            ])
+            ->all();
     }
 }

@@ -19,7 +19,7 @@ use const STR_PAD_LEFT;
 /**
  * @property mixed $form
  */
-class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions, HasActions
+class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -39,9 +39,6 @@ class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions, Ha
         $this->form->fill();
     }
 
-    /**
-     * @return \Filament\Schemas\Schema
-     */
     #[Computed]
     public function form(): Schema
     {
@@ -54,11 +51,9 @@ class MultipleIdLiquiSelector extends Widget implements HasForms, HasActions, Ha
         // $periodoFiscal es un array con las claves 'year' y 'month'
         // Actualizar las opciones del select basadas en el periodo fiscal seleccionado
         $liquidaciones = Dh22::getLiquidacionesForWidget()
-            ->when($periodoFiscal, function ($query) use ($periodoFiscal) {
-                return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                    $periodoFiscal['year'] . str_pad($periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
-                ]);
-            })
+            ->when($periodoFiscal, fn($query) => $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
+                $periodoFiscal['year'] . str_pad((string) $periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
+            ]))
             ->pluck('desc_liqui', 'nro_liqui');
 
 

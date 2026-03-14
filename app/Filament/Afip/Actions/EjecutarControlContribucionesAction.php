@@ -22,7 +22,7 @@ class EjecutarControlContribucionesAction extends Action
             ->modalSubmitActionLabel('Sí, ejecutar')
             ->modalCancelActionLabel('Cancelar')
             ->action(function (): void {
-                app(SicossControlActionHandler::class)->ejecutarControl(
+                resolve(SicossControlActionHandler::class)->ejecutarControl(
                     'contribuciones',
                     $this->getLivewire(),
                 );
@@ -36,7 +36,7 @@ class EjecutarControlContribucionesAction extends Action
 
     public function withPeriodBadge(): static
     {
-        return $this->badge(function () {
+        return $this->badge(function (): string {
             $livewire = $this->getLivewire();
 
             return sprintf('%d-%02d', $livewire->year, $livewire->month);

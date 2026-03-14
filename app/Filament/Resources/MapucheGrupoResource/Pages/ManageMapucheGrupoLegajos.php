@@ -50,21 +50,17 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                 IconColumn::make('en_grupo_actual')
                     ->label('En Grupo Actual')
                     ->boolean()
-                    ->getStateUsing(function (Dh01 $record): bool {
-                        return $record->grupos()
-                            ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
-                            ->exists();
-                    }),
+                    ->getStateUsing(fn(Dh01 $record): bool => $record->grupos()
+                        ->where('mapuche.grupo.id_grupo', $this->record->id_grupo)
+                        ->exists()),
 
                 // Lista de otros grupos
                 TextColumn::make('otros_grupos')
                     ->label('Otros Grupos')
-                    ->getStateUsing(function (Dh01 $record): string {
-                        return $record->grupos()
-                            ->where('mapuche.grupo.id_grupo', '!=', $this->record->id_grupo)
-                            ->pluck('nombre')
-                            ->join(', ') ?: 'Sin otros grupos';
-                    })
+                    ->getStateUsing(fn(Dh01 $record): string => $record->grupos()
+                        ->where('mapuche.grupo.id_grupo', '!=', $this->record->id_grupo)
+                        ->pluck('nombre')
+                        ->join(', ') ?: 'Sin otros grupos')
                     ->wrap()
                     ->searchable(false),
             ])
@@ -130,7 +126,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                                 ->success()
                                 ->send();
                         } else {
-                            MapucheGrupoLegajo::create([
+                            MapucheGrupoLegajo::query()->create([
                                 'nro_legaj' => $record->nro_legaj,
                                 'id_grupo' => $this->record->id_grupo,
                             ]);
@@ -151,7 +147,7 @@ class ManageMapucheGrupoLegajos extends Page implements HasForms, HasTable
                     ->action(function ($records): void {
                         $records->each(function ($record): void {
                             if (!$record->grupos()->where('mapuche.grupo.id_grupo', $this->record->id_grupo)->exists()) {
-                                MapucheGrupoLegajo::create([
+                                MapucheGrupoLegajo::query()->create([
                                     'nro_legaj' => $record->nro_legaj,
                                     'id_grupo' => $this->record->id_grupo,
                                 ]);

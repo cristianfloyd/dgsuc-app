@@ -28,6 +28,7 @@ class PersonalResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +37,7 @@ class PersonalResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -83,6 +85,7 @@ class PersonalResource extends Resource
             ->searchable();
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -90,6 +93,7 @@ class PersonalResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

@@ -10,6 +10,7 @@ class EditControlDiferencias extends EditRecord
 {
     protected static string $resource = ControlDiferenciasResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

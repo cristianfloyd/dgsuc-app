@@ -10,6 +10,7 @@ class ListBloqueosHistorial extends ListRecords
     protected static string $resource = BloqueosHistorialResource::class;
 
     // Solo lectura: deshabilitar crear, editar, eliminar
+    #[\Override]
     protected function getActions(): array
     {
         return [];

@@ -13,11 +13,12 @@ class DisplayPropertiesWidget extends Widget
 
     protected array $properties = [];
 
-    public function mount($properties): void
+    public function mount(array $properties): void
     {
         $this->properties = $properties;
     }
 
+    #[\Override]
     public function render(): View
     {
 

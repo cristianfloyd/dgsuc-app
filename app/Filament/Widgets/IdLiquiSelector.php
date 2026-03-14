@@ -23,7 +23,7 @@ use const STR_PAD_LEFT;
  *
  * @property mixed $form
  */
-class IdLiquiSelector extends Widget implements HasForms, HasActions, HasActions
+class IdLiquiSelector extends Widget implements HasForms, HasActions
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -82,11 +82,9 @@ class IdLiquiSelector extends Widget implements HasForms, HasActions, HasActions
                     ->label('Seleccionar Liquidaciones')
                     ->options(
                         Dh22::getLiquidacionesForWidget()
-                            ->when($this->periodoFiscal, function ($query) {
-                                return $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
-                                    $this->periodoFiscal['year'] . str_pad($this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
-                                ]);
-                            })
+                            ->when($this->periodoFiscal, fn($query) => $query->whereRaw("CONCAT(per_liano, LPAD(per_limes::text, 2, '0')) = ?", [
+                                $this->periodoFiscal['year'] . str_pad((string) $this->periodoFiscal['month'], 2, '0', STR_PAD_LEFT),
+                            ]))
                             ->pluck('desc_liqui', 'nro_liqui'),
                     )
                     ->reactive()

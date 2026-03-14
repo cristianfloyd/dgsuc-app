@@ -37,6 +37,7 @@ class RepGerencialFinalResource extends Resource
 
     private static $connectionInstance;
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -86,7 +87,7 @@ class RepGerencialFinalResource extends Resource
                             ->pluck('descdependesemp', 'coddependesemp')
                             ->toArray(),
                     )
-                    ->getOptionLabelUsing(fn($value): ?string => Dh36::find($value)?->descdependesemp),
+                    ->getOptionLabelUsing(fn($value): ?string => Dh36::query()->find($value)?->descdependesemp),
 
                 SelectFilter::make('codc_uacad')
                     ->label('Unidad Académica')
@@ -162,6 +163,7 @@ class RepGerencialFinalResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -169,6 +171,7 @@ class RepGerencialFinalResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Log;
 
 class AfipRelacionesActivasStats extends BaseWidget
 {
+    #[\Override]
     protected function getStats(): array
     {
         try {
             return [
                 Stat::make(
                     'Total Relaciones Activas',
-                    AfipRelacionesActivas::count(),
+                    AfipRelacionesActivas::query()->count(),
                 )
                     ->description('Total de registros')
                     ->descriptionIcon('heroicon-m-arrow-trending-up')
@@ -24,7 +25,7 @@ class AfipRelacionesActivasStats extends BaseWidget
 
                 Stat::make(
                     'Altas del Mes',
-                    AfipRelacionesActivas::where('codigo_movimiento', '00')
+                    AfipRelacionesActivas::query()->where('codigo_movimiento', '00')
                         ->whereMonth('created_at', now()->month)
                         ->count(),
                 )
@@ -34,7 +35,7 @@ class AfipRelacionesActivasStats extends BaseWidget
 
                 Stat::make(
                     'Bajas del Mes',
-                    AfipRelacionesActivas::where('codigo_movimiento', '01')
+                    AfipRelacionesActivas::query()->where('codigo_movimiento', '01')
                         ->whereMonth('created_at', now()->month)
                         ->count(),
                 )

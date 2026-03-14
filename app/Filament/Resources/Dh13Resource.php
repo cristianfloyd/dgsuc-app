@@ -37,6 +37,7 @@ class Dh13Resource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -67,6 +68,7 @@ class Dh13Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -74,7 +76,7 @@ class Dh13Resource extends Resource
                 TextColumn::make('codn_conce')->sortable()->searchable(),
                 TextColumn::make('dh12.desc_conce')
                     ->label('Concepto')
-                    ->formatStateUsing(fn($state) => EncodingService::toUtf8($state))
+                    ->formatStateUsing(fn(?string $state): ?string => EncodingService::toUtf8($state))
                     ->searchable()
                     ->wrap(),
                 TextColumn::make('nro_orden_formula')->label('Orden')->sortable(),
@@ -104,6 +106,7 @@ class Dh13Resource extends Resource
             ->defaultSort('nro_orden_formula', 'asc');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -111,6 +114,7 @@ class Dh13Resource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

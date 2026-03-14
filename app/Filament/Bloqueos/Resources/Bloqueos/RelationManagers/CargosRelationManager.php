@@ -15,6 +15,7 @@ class CargosRelationManager extends RelationManager
 {
     protected static string $relationship = 'cargo';
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema

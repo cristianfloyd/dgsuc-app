@@ -12,6 +12,7 @@ class ListDh11s extends ListRecords
 {
     protected static string $resource = Dh11Resource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -19,6 +20,7 @@ class ListDh11s extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

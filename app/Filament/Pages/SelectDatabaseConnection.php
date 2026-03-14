@@ -27,8 +27,8 @@ class SelectDatabaseConnection extends Page implements HasForms
 
     public function mount(): void
     {
-        $service = app(DatabaseConnectionService::class);
-        $this->selectedConnection = $service->getCurrentConnection();
+        $databaseConnectionService = resolve(DatabaseConnectionService::class);
+        $this->selectedConnection = $databaseConnectionService->getCurrentConnection();
         $this->form->fill([
             'connection' => $this->selectedConnection,
         ]);
@@ -36,21 +36,21 @@ class SelectDatabaseConnection extends Page implements HasForms
 
     public function form(Schema $schema): Schema
     {
-        $service = app(DatabaseConnectionService::class);
+        $databaseConnectionService = resolve(DatabaseConnectionService::class);
 
         return $schema
             ->components([
                 Select::make('connection')
                     ->label('Conexión a Base de Datos')
-                    ->options($service->getAvailableConnections())
+                    ->options($databaseConnectionService->getAvailableConnections())
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function ($state) use ($service): void {
-                        $service->setConnection($state);
+                    ->afterStateUpdated(function (string $state) use ($databaseConnectionService): void {
+                        $databaseConnectionService->setConnection($state);
 
                         Notification::make()
                             ->title('Conexión cambiada')
-                            ->body('La conexión a la base de datos ha sido cambiada a ' . $service->getAvailableConnections()[$state])
+                            ->body('La conexión a la base de datos ha sido cambiada a ' . $databaseConnectionService->getAvailableConnections()[$state])
                             ->success()
                             ->send();
 
@@ -59,6 +59,7 @@ class SelectDatabaseConnection extends Page implements HasForms
             ]);
     }
 
+    #[\Override]
     public static function shouldRegisterNavigation(): bool
     {
         return true;

@@ -11,6 +11,7 @@ class ListAfipRelacionesActivas extends ListRecords
 {
     protected static string $resource = AfipRelacionesActivasResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

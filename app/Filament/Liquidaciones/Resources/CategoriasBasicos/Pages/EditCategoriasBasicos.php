@@ -10,6 +10,7 @@ class EditCategoriasBasicos extends EditRecord
 {
     protected static string $resource = CategoriasBasicosResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

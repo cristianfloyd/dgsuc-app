@@ -19,6 +19,7 @@ class ListAfipMapucheArt extends ListRecords
 {
     protected static string $resource = AfipMapucheArtResource::class;
 
+    #[\Override]
     public function getTabs(): array
     {
         return [
@@ -26,7 +27,7 @@ class ListAfipMapucheArt extends ListRecords
                 ->icon('heroicon-o-users'),
             'sin_legajo' => Tab::make('Sin Legajo')
                 ->icon('heroicon-o-exclamation-circle')
-                ->badge(AfipMapucheArt::whereNull('nro_legaj')->count())
+                ->badge(AfipMapucheArt::query()->whereNull('nro_legaj')->count())
                 ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('nro_legaj')),
             'con_legajo' => Tab::make('Con Legajo')
                 ->icon('heroicon-o-check-circle')
@@ -34,21 +35,20 @@ class ListAfipMapucheArt extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
             Action::make('export')
                 ->label('Exportar a Excel')
                 ->icon('heroicon-o-document-arrow-down')
-                ->action(function ($livewire) {
-                    return Excel::download(
-                        new AfipMapucheArtExport(
-                            session('periodo_fiscal', date('Ym')),
-                            $livewire->getFilteredTableQuery(),
-                        ),
-                        'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx',
-                    );
-                }),
+                ->action(fn($livewire) => Excel::download(
+                    new AfipMapucheArtExport(
+                        session('periodo_fiscal', date('Ym')),
+                        $livewire->getFilteredTableQuery(),
+                    ),
+                    'reporte-afip-art-' . session('periodo_fiscal', date('Ym')) . '.xlsx',
+                )),
             PoblarAfipArtAction::make()
                 ->label('Poblar ART')
                 ->modalHeading('Confirmación de Poblado ART')
@@ -84,12 +84,12 @@ class ListAfipMapucheArt extends ListRecords
                 ->requiresConfirmation()
                 ->action(function (): void {
                     try {
-                        AfipMapucheArt::truncate();
+                        AfipMapucheArt::query()->truncate();
                         Notification::make()
                             ->title('Tabla vaciada exitosamente')
                             ->success()
                             ->send();
-                    } catch (Exception $e) {
+                    } catch (Exception) {
                         Notification::make()
                             ->title('Error al vaciar la tabla')
                             ->body('No se pudo completar la operación')

@@ -10,6 +10,7 @@ class EditEmbargo extends EditRecord
 {
     protected static string $resource = EmbargoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

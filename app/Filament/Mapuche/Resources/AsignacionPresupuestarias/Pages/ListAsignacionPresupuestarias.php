@@ -10,6 +10,7 @@ class ListAsignacionPresupuestarias extends ListRecords
 {
     protected static string $resource = AsignacionPresupuestariaResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

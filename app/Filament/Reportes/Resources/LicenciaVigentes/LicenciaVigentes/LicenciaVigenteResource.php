@@ -41,6 +41,7 @@ class LicenciaVigenteResource extends Resource
     /**
      * Obtiene una query base de Eloquent.
      */
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
         $legajos = session('licencias_vigentes_legajos', []);
@@ -61,11 +62,13 @@ class LicenciaVigenteResource extends Resource
         return LicenciaVigente::cargarLicenciasVigentes($legajos, $sessionId);
     }
 
+    #[\Override]
     public static function getNavigationLabel(): string
     {
         return 'Licencias Vigentes';
     }
 
+    #[\Override]
     public static function getPluralLabel(): string
     {
         return 'Licencias Vigentes';
@@ -76,6 +79,7 @@ class LicenciaVigenteResource extends Resource
         return null;
     }
 
+    #[\Override]
     public static function getCreateAuthorizationResponse(): Response
     {
         return Response::deny();
@@ -85,6 +89,7 @@ class LicenciaVigenteResource extends Resource
      * Sobrescribe el método para proporcionar nuestra implementación personalizada
      * que no depende de un modelo Eloquent.
      */
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -107,7 +112,7 @@ class LicenciaVigenteResource extends Resource
                     ->sortable()
                     ->badge()
                     ->formatStateUsing(fn(?LicenciaVigente $record) => $record?->descripcion_condicion ?? '')
-                    ->color(fn(?LicenciaVigente $record): string => $record ? match ($record->condicion) {
+                    ->color(fn(?LicenciaVigente $record): string => $record instanceof \App\Models\LicenciaVigente ? match ($record->condicion) {
                         5, 11 => 'info', // Maternidad
                         10 => 'warning', // Excedencia
                         12 => 'success', // Vacaciones
@@ -136,7 +141,7 @@ class LicenciaVigenteResource extends Resource
                 TextColumn::make('fecha_hasta')
                     ->label('Fecha Hasta')
                     ->date('d/m/Y')
-                    ->formatStateUsing(fn($state) => DateFormatterService::formatOrDefault($state))
+                    ->formatStateUsing(fn($state): string => DateFormatterService::formatOrDefault($state))
                     ->sortable(),
 
                 TextColumn::make('es_legajo')
@@ -148,7 +153,7 @@ class LicenciaVigenteResource extends Resource
 
                 TextColumn::make('nro_cargo')
                     ->label('Cargo')
-                    ->visible(fn(?LicenciaVigente $record): bool => $record ? !$record->es_legajo : false)
+                    ->visible(fn(?LicenciaVigente $record): bool => $record instanceof \App\Models\LicenciaVigente && !$record->es_legajo)
                     ->sortable(),
             ])
             ->filters([
@@ -189,18 +194,18 @@ class LicenciaVigenteResource extends Resource
                             $forzarRecarga = $data['forzar_recarga'] ?? false;
 
                             // Obtener todos los legajos con licencias vigentes desde el servicio
-                            $licenciaService = app(LicenciaService::class);
+                            $licenciaService = resolve(LicenciaService::class);
 
                             // Si se solicitó forzar recarga, invalidamos la caché primero
                             if ($forzarRecarga) {
-                                $licenciaService->invalidateCache(null); // Invalida toda la caché
+                                $licenciaService->invalidateCache(); // Invalida toda la caché
                                 Log::info('Forzando recarga de todas las licencias desde base de datos');
                             }
 
                             $legajos = $licenciaService->getLegajosConLicenciasVigentes(!$forzarRecarga);
 
                             if (empty($legajos)) {
-                                $action->failure('No se encontraron licencias vigentes en el período actual');
+                                $action->failure();
 
                                 return;
                             }
@@ -213,7 +218,7 @@ class LicenciaVigenteResource extends Resource
                                 'count' => count($legajos),
                             ]);
 
-                            $action->success('Se han cargado ' . count($legajos) . ' legajos con licencias vigentes');
+                            $action->success();
 
                             // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
                             // No es necesario llamar a refreshTable manualmente
@@ -221,7 +226,7 @@ class LicenciaVigenteResource extends Resource
                             Log::error('Error al consultar todas las licencias', [
                                 'error' => $e->getMessage(),
                             ]);
-                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
+                            $action->failure();
                         }
                     }),
 
@@ -240,13 +245,13 @@ class LicenciaVigenteResource extends Resource
                     ])
                     ->action(function (array $data, Action $action): void {
                         try {
-                            $legajos = array_map('trim', explode(',', $data['legajos']));
+                            $legajos = array_map(trim(...), explode(',', (string) $data['legajos']));
                             $forzarRecarga = $data['forzar_recarga'] ?? false;
 
                             // Validar que los legajos sean numéricos
                             foreach ($legajos as $legajo) {
                                 if (!is_numeric($legajo)) {
-                                    $action->failure('El legajo "' . $legajo . '" no es válido. Todos los legajos deben ser numéricos.');
+                                    $action->failure();
 
                                     return;
                                 }
@@ -261,7 +266,7 @@ class LicenciaVigenteResource extends Resource
                             ]);
 
                             // Verificar si hay licencias para estos legajos
-                            $licenciaService = app(LicenciaService::class);
+                            $licenciaService = resolve(LicenciaService::class);
 
                             // Si se solicitó forzar recarga, invalidamos la caché primero
                             if ($forzarRecarga) {
@@ -281,7 +286,7 @@ class LicenciaVigenteResource extends Resource
                                     ->body('No se encontraron licencias vigentes para los legajos consultados.')
                                     ->send();
                             } else {
-                                $action->success('Se encontraron ' . $licencias->count() . ' licencias para los legajos consultados');
+                                $action->success();
                             }
 
                             // Filament 3 actualiza la tabla automáticamente cuando cambian los datos
@@ -291,7 +296,7 @@ class LicenciaVigenteResource extends Resource
                                 'error' => $e->getMessage(),
                                 'legajos' => $data['legajos'] ?? 'no proporcionados',
                             ]);
-                            $action->failure('Error al consultar licencias: ' . $e->getMessage());
+                            $action->failure();
                         }
                     }),
 
@@ -302,19 +307,19 @@ class LicenciaVigenteResource extends Resource
                         $legajos = session('licencias_vigentes_legajos', []);
 
                         if (empty($legajos)) {
-                            $action->failure('No hay legajos seleccionados para exportar');
+                            $action->failure();
 
                             return;
                         }
 
-                        $licenciaService = app(LicenciaService::class);
-                        $licencias = $licenciaService->getLicenciasVigentes($legajos);
+                        $licenciaService = resolve(LicenciaService::class);
+                        $dataCollection = $licenciaService->getLicenciasVigentes($legajos);
 
                         $periodo = MapucheConfig::getAnioFiscal() . '-' . MapucheConfig::getMesFiscal();
                         $nombreArchivo = 'licencias_vigentes_' . $periodo . '.xlsx';
 
                         return Excel::download(
-                            new LicenciasVigentesExport($licencias, $periodo),
+                            new LicenciasVigentesExport($dataCollection, $periodo),
                             $nombreArchivo,
                         );
                     }),
@@ -332,6 +337,7 @@ class LicenciaVigenteResource extends Resource
             ->deferLoading();
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -339,6 +345,7 @@ class LicenciaVigenteResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         // Usamos las páginas generadas automáticamente por Filament pero personalizamos el comportamiento

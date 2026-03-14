@@ -40,15 +40,11 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
 
     /**
      * ID del trabajo de copia actual.
-     *
-     * @var int|null
      */
     public ?int $copyJobId = null;
 
     /**
      * Instancia de seguimiento del trabajo de copia.
-     *
-     * @var CopyJob|null
      */
     public ?CopyJob $tracking = null;
 
@@ -61,22 +57,16 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
 
     /**
      * Título de la página.
-     *
-     * @var string|null
      */
     protected static ?string $title = 'Copia Masiva DH21';
 
     /**
      * Plantilla de vista para la página.
-     *
-     * @var string
      */
     protected string $view = 'filament.procesos-panel.pages.copia-masiva-dh21';
 
     /**
      * Inicializa el componente de página.
-     *
-     * @return void
      */
     public function mount(): void
     {
@@ -104,7 +94,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
                                 ->limit(50)
                                 ->get(['nro_liqui', 'desc_liqui'])
                                 ->mapWithKeys(
-                                    fn($liq) => [
+                                    fn($liq): array => [
                                         $liq->nro_liqui => "{$liq->nro_liqui} - {$liq->desc_liqui}",
                                     ],
                                 ),
@@ -127,8 +117,6 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * Crea un nuevo trabajo de copia y despacha el trabajo en segundo plano para realizar
      * la copia masiva de registros DH21 desde la liquidación seleccionada.
-     *
-     * @return void
      */
     public function startCopy(): void
     {
@@ -150,10 +138,7 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
         $this->copyJobId = $copyJob->getKey();
         $this->tracking = $copyJob;
 
-        CopyDh21ToConsultaJob::dispatch(
-            $copyJob->getKey(),
-            $data['nro_liqui'],
-        );
+        dispatch(new \App\Jobs\CopyDh21ToConsultaJob($copyJob->getKey(), $data['nro_liqui']));
 
         Notification::make()
             ->title('Copia iniciada')
@@ -167,14 +152,12 @@ class CopiaMasivaDh21 extends Page implements HasForms, HasActions
      *
      * Refresca la información de seguimiento para el trabajo de copia actual
      * para mostrar actualizaciones de progreso en tiempo real al usuario.
-     *
-     * @return void
      */
     #[On('poll')]
     public function pollTracking(): void
     {
         if ($this->copyJobId) {
-            $this->tracking = CopyJob::find($this->copyJobId);
+            $this->tracking = CopyJob::query()->find($this->copyJobId);
         }
     }
 

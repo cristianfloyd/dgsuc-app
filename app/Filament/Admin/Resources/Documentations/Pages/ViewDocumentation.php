@@ -13,6 +13,7 @@ class ViewDocumentation extends Page
 
     protected string $view = 'filament.resources.documentation.view';
 
+    #[\Override]
     public function getViewData(): array
     {
         $converter = new CommonMarkConverter();
@@ -21,10 +22,10 @@ class ViewDocumentation extends Page
         $markdown = File::get(resource_path('docs/index.md'));
 
         // Convierte a HTML
-        $html = $converter->convert($markdown);
+        $renderedContent = $converter->convert($markdown);
 
         return [
-            'documentation' => $html,
+            'documentation' => $renderedContent,
         ];
     }
 }

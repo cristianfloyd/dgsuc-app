@@ -26,6 +26,7 @@ class EditImportData extends EditRecord
 {
     protected static string $resource = BloqueosResource::class;
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -52,7 +53,7 @@ class EditImportData extends EditRecord
                                 ->live()
                                 ->afterStateUpdated(function ($state, Set $set): void {
                                     if ($state) {
-                                        $legajo = Dh01::find($state);
+                                        $legajo = Dh01::query()->find($state);
                                         if ($legajo) {
                                             $set('nombre_legajo', $legajo->nombre_completo);
                                         }
@@ -73,7 +74,7 @@ class EditImportData extends EditRecord
                 Section::make('')
                     ->schema([
                         Placeholder::make('')
-                            ->content(fn($record) => view('filament.components.cargo-info', [
+                            ->content(fn($record): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('filament.components.cargo-info', [
                                 'cargo' => $record->cargo,
                             ])),
                     ])
@@ -117,6 +118,7 @@ class EditImportData extends EditRecord
             ->columns(3);
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -124,13 +126,13 @@ class EditImportData extends EditRecord
                 ->label('Revalidar Registro')
                 ->icon('heroicon-o-arrow-path')
                 ->action(fn() => $this->record->validarEstado())
-                ->visible(fn() => $this->record->estado === 'error_validacion'),
+                ->visible(fn(): bool => $this->record->estado === 'error_validacion'),
             Action::make('marcar_procesado')
                 ->label('Marcar como Procesado')
                 ->icon('heroicon-o-check')
                 ->requiresConfirmation()
                 ->action(fn() => $this->record->marcarProcesado())
-                ->visible(fn() => !$this->record->chkstopliq),
+                ->visible(fn(): bool => !$this->record->chkstopliq),
             Action::make('verificar_mapuche')
                 ->label('Verificar en Mapuche')
                 ->icon('heroicon-o-check-circle')
@@ -138,9 +140,9 @@ class EditImportData extends EditRecord
                 ->modalHeading('Verificar datos en Mapuche')
                 ->modalDescription('¿Desea verificar el legajo y cargo en el sistema Mapuche?')
                 ->action(function (): void {
-                    $service = app(VerificacionMapucheService::class);
+                    $verificacionMapucheService = resolve(VerificacionMapucheService::class);
 
-                    $resultado = $service->verificarLegajoCargo(
+                    $resultado = $verificacionMapucheService->verificarLegajoCargo(
                         $this->record->nro_legaj,
                         $this->record->nro_cargo,
                     );
@@ -169,7 +171,7 @@ class EditImportData extends EditRecord
                 ->label('Ver Historial')
                 ->icon('heroicon-o-clock')
                 ->url(
-                    fn($record) => BloqueosHistorialResource::getUrl('index')
+                    fn($record): string => BloqueosHistorialResource::getUrl('index')
                     . '?filters[nro_legaj][value]=' . $record->nro_legaj,
                 ),
         ];
@@ -183,6 +185,7 @@ class EditImportData extends EditRecord
             ->send();
     }
 
+    #[\Override]
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['usuario_modificacion'] = auth()->guard('web')->user()->name;
@@ -198,7 +201,7 @@ class EditImportData extends EditRecord
                 ->label('Siguiente Registro con Error')
                 ->icon('heroicon-o-arrow-right')
                 ->action(function (): void {
-                    $siguiente = BloqueosDataModel::where('id', '>', $this->record->id)
+                    $siguiente = BloqueosDataModel::query()->where('id', '>', $this->record->id)
                         ->where('estado', 'error')
                         ->first();
 

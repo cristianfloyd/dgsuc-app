@@ -9,6 +9,7 @@ class ListDH21hs extends ListRecords
 {
     protected static string $resource = DH21hResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

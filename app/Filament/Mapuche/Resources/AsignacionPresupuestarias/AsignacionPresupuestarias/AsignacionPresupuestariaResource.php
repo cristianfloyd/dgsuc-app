@@ -26,6 +26,7 @@ class AsignacionPresupuestariaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -34,7 +35,7 @@ class AsignacionPresupuestariaResource extends Resource
                     ->label('Unidad')
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set): void {
+                    ->afterStateUpdated(function (int $state, callable $set): void {
                         $dh24 = new Dh24();
                         $total = $dh24->getTotalAllocationByUnit($state);
                         $set('total_allocated', $total);
@@ -62,6 +63,7 @@ class AsignacionPresupuestariaResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -85,6 +87,7 @@ class AsignacionPresupuestariaResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -92,6 +95,7 @@ class AsignacionPresupuestariaResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

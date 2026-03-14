@@ -10,6 +10,7 @@ class EditReporte extends EditRecord
 {
     protected static string $resource = OrdenDePagoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

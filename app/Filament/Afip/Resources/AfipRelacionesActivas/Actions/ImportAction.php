@@ -38,18 +38,14 @@ class ImportAction extends Action
                     ->helperText('Formato: YYYYMM (ejemplo: 202401)'),
                 Select::make('nro_liqui')
                     ->label('Liquidación')
-                    ->options(function () {
-                        return Dh22::query()
-                            ->definitiva()
-                            ->orderBy('nro_liqui', 'desc')
-                            ->limit(12)
-                            ->get()
-                            ->mapWithKeys(function ($liquidacion) {
-                                return [
-                                    $liquidacion->nro_liqui => "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}",
-                                ];
-                            });
-                    })
+                    ->options(fn() => Dh22::query()
+                        ->definitiva()
+                        ->orderBy('nro_liqui', 'desc')
+                        ->limit(12)
+                        ->get()
+                        ->mapWithKeys(fn($liquidacion) => [
+                            $liquidacion->nro_liqui => "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}",
+                        ]))
                     ->searchable()
                     ->preload()
                     ->required()
@@ -98,15 +94,15 @@ class ImportAction extends Action
                     $fileProcessor = new FileProcessorService(
                         new DatabaseService(),
                         new ColumnMetadata(),
-                        app()->make('App\Contracts\DataMapperInterface'),
+                        app()->make(\App\Contracts\DataMapperInterface::class),
                         $periodoFiscal,
                     );
 
                     // Procesar el archivo usando el servicio FileProcessor
-                    $fileProcessor = app(FileProcessorService::class);
+                    $fileProcessor = resolve(FileProcessorService::class);
                     $processedData = $fileProcessor->handleFileImport($uploadedFile, 'afip');
 
-                    $databaseService = app(DatabaseService::class);
+                    $databaseService = resolve(DatabaseService::class);
                     $result = $databaseService->insertBulkData($processedData, 'afip_relaciones_activas');
 
                     if ($result['success']) {

@@ -14,7 +14,7 @@ class CargoCountWidget extends Widget
     protected function getData(): array
     {
         return [
-            'cargoCount' => Dh03::count(),
+            'cargoCount' => Dh03::query()->count(),
         ];
     }
 }

@@ -117,7 +117,7 @@ class SicossUpdates extends Page
         $liquidaciones = Dh22::FilterByYearMonth($this->year, $this->month)
             ->generaImpositivo()
             ->pluck('nro_liqui', 'desc_liqui')
-            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
+            ->map(fn($nro, $desc): string => "#{$nro} - {$desc}")
             ->toArray();
 
         // Actualizar la propiedad selectedIdLiqui
@@ -128,7 +128,7 @@ class SicossUpdates extends Page
             ->generaImpositivo()
             ->definitiva()
             ->pluck('nro_liqui', 'desc_liqui')
-            ->map(fn($nro, $desc) => "#{$nro} - {$desc}")
+            ->map(fn($nro, $desc): string => "#{$nro} - {$desc}")
             ->toArray();
 
         // Notificar al usuario
@@ -392,6 +392,7 @@ class SicossUpdates extends Page
         }
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [
@@ -437,12 +438,13 @@ class SicossUpdates extends Page
         }
     }
 
+    #[\Override]
     protected function getActions(): array
     {
         return [
             Action::make('show_help')
-                ->label(fn() => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
-                ->icon(fn() => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                ->label(fn(): string => $this->isHelpVisible ? 'Ocultar Ayuda' : 'Mostrar Ayuda')
+                ->icon(fn(): string => $this->isHelpVisible ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                 ->action(
                     function (): void {
                         $this->isHelpVisible = !$this->isHelpVisible;

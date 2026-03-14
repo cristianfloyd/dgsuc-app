@@ -31,21 +31,22 @@ class ListReportes extends ListRecords
         $this->ordenPagoService = $ordenPagoService;
     }
 
+    #[\Override]
     public function mount(): void
     {
         $this->ordenPagoService->ensureTableAndFunction();
         // Verificar si existen registros en la tabla
-        $this->reporteGenerado = RepOrdenPagoModel::whereNotNull('nro_liqui')->exists();
+        $this->reporteGenerado = RepOrdenPagoModel::query()->whereNotNull('nro_liqui')->exists();
         parent::mount();
     }
 
     public static function getEloquentQuery()
     {
-        $repOrdenPagoService = app(RepOrdenPagoService::class);
-        $repOrdenPagoRecords = $repOrdenPagoService->getAllRepOrdenPago();
+        $repOrdenPagoService = resolve(RepOrdenPagoService::class);
+        $allRepOrdenPago = $repOrdenPagoService->getAllRepOrdenPago();
 
 
-        return $repOrdenPagoRecords->toQuery();
+        return $allRepOrdenPago->toQuery();
     }
 
     #[On('idsLiquiSelected')]
@@ -60,7 +61,7 @@ class ListReportes extends ListRecords
      *
      * @return $this
      */
-    public function setReporteGenerado($reporteGenerado): static
+    public function setReporteGenerado(bool $reporteGenerado): static
     {
         $this->reporteGenerado = $reporteGenerado;
         return $this;
@@ -71,7 +72,7 @@ class ListReportes extends ListRecords
         $selectedLiquidaciones = $this->getLiquidacionesSeleccionadas();
 
 
-        if (empty($selectedLiquidaciones)) {
+        if ($selectedLiquidaciones === []) {
             Notification::make()
                 ->title('Seleccione una liquidación')
                 ->warning()
@@ -99,6 +100,7 @@ class ListReportes extends ListRecords
         return $data;
     }
 
+    #[\Override]
     public function getHeaderWidgets(): array
     {
         return [
@@ -106,13 +108,14 @@ class ListReportes extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn() => $this->reporteGenerado),
+                ->visible(fn(): bool => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar Reporte')
                 ->icon('heroicon-o-document-currency-dollar')

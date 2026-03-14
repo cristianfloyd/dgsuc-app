@@ -18,6 +18,7 @@ class ListLicenciaVigentes extends ListRecords
     /**
      * Hook que se ejecuta cuando el componente se monta.
      */
+    #[\Override]
     public function mount(): void
     {
         parent::mount();
@@ -62,16 +63,19 @@ class ListLicenciaVigentes extends ListRecords
         $this->resetTable();
     }
 
+    #[\Override]
     public function getTitle(): string|Htmlable
     {
         return 'Consulta de Licencias Vigentes';
     }
 
+    #[\Override]
     public function getSubheading(): string|Htmlable|null
     {
         return 'Ingrese legajos para consultar sus licencias vigentes en el periodo fiscal actual';
     }
 
+    #[\Override]
     public function getTabs(): array
     {
         return [
@@ -89,6 +93,7 @@ class ListLicenciaVigentes extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

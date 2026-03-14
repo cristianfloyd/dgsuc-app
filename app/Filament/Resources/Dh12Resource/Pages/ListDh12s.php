@@ -10,6 +10,7 @@ class ListDh12s extends ListRecords
 {
     protected static string $resource = Dh12Resource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

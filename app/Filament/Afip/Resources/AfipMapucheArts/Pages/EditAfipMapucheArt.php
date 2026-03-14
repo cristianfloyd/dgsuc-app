@@ -10,6 +10,7 @@ class EditAfipMapucheArt extends EditRecord
 {
     protected static string $resource = AfipMapucheArtResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

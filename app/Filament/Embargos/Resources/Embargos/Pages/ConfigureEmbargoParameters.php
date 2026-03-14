@@ -79,13 +79,13 @@ class ConfigureEmbargoParameters extends Page implements HasForms
                     ->required()
                     ->searchable()
                     ->options(
-                        Dh22::getLiquidacionesByPeriodoFiscal(null),
+                        Dh22::getLiquidacionesByPeriodoFiscal(),
                     ),
                 Select::make('nroComplementarias')
                     ->label('Liquidaciones Complementarias')
                     ->multiple()
                     ->options(
-                        Dh22::getLiquidacionesByPeriodoFiscal(null),
+                        Dh22::getLiquidacionesByPeriodoFiscal(),
                     ),
                 Toggle::make('insertIntoDh25')
                     ->label('Insertar en DH20'),
@@ -109,7 +109,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         } else {
             Log::warning('No se encontró periodo fiscal para agregar a los datos, obteniendo de la sesion');
             // Obtener el periodo fiscal de la sesión
-            $periodoFiscalSesion = app(PeriodoFiscalService::class)->getPeriodoFiscal();
+            $periodoFiscalSesion = resolve(PeriodoFiscalService::class)->getPeriodoFiscal();
             // $periodoFiscalSesion = session('periodo_fiscal');
             Log::debug('Período fiscal obtenido de la sesión: ', $periodoFiscalSesion);
 
@@ -140,6 +140,7 @@ class ConfigureEmbargoParameters extends Page implements HasForms
         $this->dispatch('propertiesUpdated', $updatedProperties);
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

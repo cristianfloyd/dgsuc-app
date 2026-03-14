@@ -32,6 +32,7 @@ class ControlDiferenciasResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -40,6 +41,7 @@ class ControlDiferenciasResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -69,9 +71,9 @@ class ControlDiferenciasResource extends Resource
                     ->icon('heroicon-o-magnifying-glass')
                     ->color('primary')
                     ->modalWidth('6xl')
-                    ->modalHeading(fn($record) => "Combinaciones para Legajo {$record->dh01->nro_legaj}")
-                    ->modalDescription(fn($record) => 'Buscando combinaciones que sumen aproximadamente $ ' . number_format($record->diferencia, 2, ',', '.'))
-                    ->modalContent(function ($record, CombinacionesService $combinacionesService) {
+                    ->modalHeading(fn($record): string => "Combinaciones para Legajo {$record->dh01->nro_legaj}")
+                    ->modalDescription(fn($record): string => 'Buscando combinaciones que sumen aproximadamente $ ' . number_format($record->diferencia, 2, ',', '.'))
+                    ->modalContent(function ($record, CombinacionesService $combinacionesService): \Illuminate\Support\HtmlString {
                         // Obtener el número de liquidación (asumiendo que está en el modelo o en sesión)
                         $nroLiqui = new NroLiqui(session('nro_liqui', 10)); // Ajusta según tu implementación
 
@@ -123,7 +125,7 @@ class ControlDiferenciasResource extends Resource
                         $html .= '<tbody class="bg-white divide-y divide-gray-200">';
 
                         foreach ($resultado['combinaciones'] as $index => $combinacion) {
-                            $html .= '<tr' . ($index % 2 ? ' class="bg-gray-50"' : '') . '>';
+                            $html .= '<tr' . ($index % 2 !== 0 ? ' class="bg-gray-50"' : '') . '>';
                             $html .= '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . ($index + 1) . '</td>';
 
                             // Conceptos
@@ -213,6 +215,7 @@ class ControlDiferenciasResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -220,6 +223,7 @@ class ControlDiferenciasResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

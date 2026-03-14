@@ -33,6 +33,7 @@ class DocumentationResource extends Resource
 
     protected static ?string $pluralLabel = 'Documentacion';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -67,6 +68,7 @@ class DocumentationResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -104,10 +106,11 @@ class DocumentationResource extends Resource
                             ->danger()
                             ->send();
                     })
-                    ->visible(fn(Documentation $record) => file_exists(base_path("docs/filament/{$record->slug}.md"))),
+                    ->visible(fn(Documentation $record): bool => file_exists(base_path("docs/filament/{$record->slug}.md"))),
             ]);
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -130,21 +133,18 @@ class DocumentationResource extends Resource
             preg_match('/^#\s*(.+)$/m', $content, $matches);
             $title = $matches[1] ?? $filename;
 
-            Documentation::updateOrCreate(
-                ['slug' => $filename],
-                [
-                    'title' => $title,
-                    'content' => $content,
-                    'section' => 'filament', // You might want to adjust this
-                    'is_published' => true,
-                    'order' => 0, // You might want to adjust this
-                ],
-            );
+            Documentation::query()->updateOrCreate(['slug' => $filename], [
+                'title' => $title,
+                'content' => $content,
+                'section' => 'filament', // You might want to adjust this
+                'is_published' => true,
+                'order' => 0, // You might want to adjust this
+            ]);
         }
 
         // Optionally remove records that don't have corresponding files
-        $existingSlugs = collect($markdownFiles)->map(fn($file) => basename($file, '.md'));
-        Documentation::where('section', 'filament')
+        $existingSlugs = collect($markdownFiles)->map(fn($file): string => basename((string) $file, '.md'));
+        Documentation::query()->where('section', 'filament')
             ->whereNotIn('slug', $existingSlugs)
             ->delete();
     }

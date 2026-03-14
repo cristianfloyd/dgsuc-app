@@ -54,7 +54,7 @@ class ReporteOrdenPago extends Page implements HasTable
         session()->forget('idsLiquiSelected');
 
         // Verificar si existen registros en la tabla
-        $this->reporteGenerado = RepOrdenPagoModel::whereNotNull('nro_liqui')->exists();
+        $this->reporteGenerado = RepOrdenPagoModel::query()->whereNotNull('nro_liqui')->exists();
 
         Log::debug('Estado inicial del reporte', [
             'reporteGenerado' => $this->reporteGenerado,
@@ -103,7 +103,7 @@ class ReporteOrdenPago extends Page implements HasTable
     }
 
     #[On('idsLiquiSelected')]
-    public function actualizarLiquidacionesSeleccionadas($liquidaciones): void
+    public function actualizarLiquidacionesSeleccionadas(?array $liquidaciones): void
     {
         session(['idsLiquiSelected' => $liquidaciones]);
         $this->idLiquiSelected = $liquidaciones;
@@ -123,7 +123,7 @@ class ReporteOrdenPago extends Page implements HasTable
         }
 
         try {
-            app(RepOrdenPagoService::class)->generateReport($selectedLiquidaciones);
+            resolve(RepOrdenPagoService::class)->generateReport($selectedLiquidaciones);
             $this->reporteGenerado = true;
             return true;
         } catch (Exception $e) {
@@ -136,13 +136,14 @@ class ReporteOrdenPago extends Page implements HasTable
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
             Action::make('verOP')
                 ->label('Ver OP')
                 ->url(route('reporte-orden-pago-pdf'), shouldOpenInNewTab: true)
-                ->visible(fn() => $this->reporteGenerado),
+                ->visible(fn(): bool => $this->reporteGenerado),
             Action::make('generarReporte')
                 ->label('Generar OP')
                 ->action(function (): void {
@@ -164,6 +165,7 @@ class ReporteOrdenPago extends Page implements HasTable
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

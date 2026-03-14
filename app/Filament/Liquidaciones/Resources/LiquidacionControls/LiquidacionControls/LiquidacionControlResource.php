@@ -34,6 +34,7 @@ class LiquidacionControlResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Controles Post-Liquidación';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,6 +59,7 @@ class LiquidacionControlResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -93,7 +95,7 @@ class LiquidacionControlResource extends Resource
                     ->action(fn($record) => static::verDetallesControl($record))
                     ->icon('heroicon-o-eye')
                     ->modalHeading('Detalles del Control')
-                    ->modalContent(fn($record) => view('filament.liquidaciones.detalles-control', ['control' => $record])),
+                    ->modalContent(fn($record): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('filament.liquidaciones.detalles-control', ['control' => $record])),
                 EditAction::make(),
             ])
             ->filters([
@@ -109,12 +111,10 @@ class LiquidacionControlResource extends Resource
                             ->label('Número de Liquidación')
                             ->numeric(),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['nro_liqui'],
-                            fn(Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui),
-                        );
-                    }),
+                    ->query(fn(Builder $query, array $data): Builder => $query->when(
+                        $data['nro_liqui'],
+                        fn(Builder $query, $nroLiqui): Builder => $query->where('nro_liqui', $nroLiqui),
+                    )),
             ]);
     }
 
@@ -144,6 +144,7 @@ class LiquidacionControlResource extends Resource
         }
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -151,6 +152,7 @@ class LiquidacionControlResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

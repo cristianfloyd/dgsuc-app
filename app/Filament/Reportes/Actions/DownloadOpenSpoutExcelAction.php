@@ -21,7 +21,7 @@ class DownloadOpenSpoutExcelAction extends Action
                 $query = $livewire->getFilteredSortedTableQuery();
 
                 if ($query->count() == 0) {
-                    return redirect()->route('filament.reportes.resources.reporte-concepto-listado.index')
+                    return to_route('filament.reportes.resources.reporte-concepto-listado.index')
                         ->with('error', 'No se encontraron registros con los filtros seleccionados.');
                 }
 
@@ -38,7 +38,7 @@ class DownloadOpenSpoutExcelAction extends Action
                     'impp_conce',
                 ]);
 
-                return (new OpenSpoutReportExport($query))
+                return new OpenSpoutReportExport($query)
                     ->download('reporte_concepto_listado_openspout.xlsx');
             })
             ->requiresConfirmation()
@@ -47,6 +47,7 @@ class DownloadOpenSpoutExcelAction extends Action
             ->modalSubmitActionLabel('Descargar con OpenSpout');
     }
 
+    #[\Override]
     public static function make(?string $name = null): static
     {
         $name ??= 'downloadOpenSpout';

@@ -59,7 +59,7 @@ class EmbargoResource extends Resource
     public function __construct()
     {
         // Inicializar el servicio de periodo fiscal en el constructor
-        $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        $this->periodoFiscalService = resolve(PeriodoFiscalService::class);
     }
 
     public function boot(EmbargoTableService $tableService): void
@@ -77,6 +77,7 @@ class EmbargoResource extends Resource
         $this->insertIntoDh25 = false; // Lógica para determinar este booleano
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -86,7 +87,7 @@ class EmbargoResource extends Resource
                 TextColumn::make('nro_legaj')->label('Nro. Legajo'),
                 TextColumn::make('remunerativo')->money('ARS'),
                 TextColumn::make('no_remunerativo')->money('ARS'),
-                TextColumn::make('total')->money('ARS')->formatStateUsing(fn($state) => $state / 100),
+                TextColumn::make('total')->money('ARS')->formatStateUsing(fn($state): int|float => $state / 100),
                 TextColumn::make('codn_conce')->label('Código Concepto'),
             ])
             ->defaultSort('nro_legaj')
@@ -121,7 +122,7 @@ class EmbargoResource extends Resource
             $periodoFiscal = (int) "{$year}{$month}";
         } else {
             // Obtener el período fiscal del servicio como fallback
-            $periodoFiscalData = app(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
+            $periodoFiscalData = resolve(PeriodoFiscalService::class)->getPeriodoFiscalFromDatabase();
             $year = $periodoFiscalData['year'] ?? date('Y');
             $month = $periodoFiscalData['month'] ?? date('m');
             $periodoFiscal = (int) ("{$year}" . str_pad($month, 2, '0', STR_PAD_LEFT));
@@ -157,6 +158,7 @@ class EmbargoResource extends Resource
         }
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -199,7 +201,7 @@ class EmbargoResource extends Resource
      */
     public function getPeriodoFiscalAttribute(): bool
     {
-        return isset($this->periodoFiscal['year'], $this->periodoFiscal['month']) ? true : false;
+        return isset($this->periodoFiscal['year'], $this->periodoFiscal['month']);
     }
 
     protected function getListeners(): array
@@ -216,8 +218,8 @@ class EmbargoResource extends Resource
     protected function getDefaultProperties(): array
     {
         // Asegurarse de que periodoFiscalService esté disponible
-        if ($this->periodoFiscalService === null) {
-            $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        if (!$this->periodoFiscalService instanceof \App\Services\Mapuche\PeriodoFiscalService) {
+            $this->periodoFiscalService = resolve(PeriodoFiscalService::class);
         }
 
         return [

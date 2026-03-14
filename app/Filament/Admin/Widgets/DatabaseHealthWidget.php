@@ -21,7 +21,7 @@ class DatabaseHealthWidget extends Widget
 
     protected static bool $isLazy = true;
 
-    public function getMetrics()
+    public function getMetrics(): array
     {
         // return Cache::remember('database_metrics', 300, function () {
         return [
@@ -35,7 +35,6 @@ class DatabaseHealthWidget extends Widget
 
     private function getDatabaseSize(): array
     {
-        $dbName = 'desa';
         $size = DB::connection($this->getConnectionName())->select("
             SELECT schema_name,
                 pg_size_pretty(sum(table_size)::bigint) as formatted_size,

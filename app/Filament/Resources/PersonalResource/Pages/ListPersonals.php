@@ -10,6 +10,7 @@ class ListPersonals extends ListRecords
 {
     protected static string $resource = PersonalResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

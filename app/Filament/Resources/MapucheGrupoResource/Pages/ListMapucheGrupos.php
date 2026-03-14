@@ -10,6 +10,7 @@ class ListMapucheGrupos extends ListRecords
 {
     protected static string $resource = MapucheGrupoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

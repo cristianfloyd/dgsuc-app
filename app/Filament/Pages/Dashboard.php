@@ -33,16 +33,14 @@ class Dashboard extends \Filament\Pages\Dashboard
                 DatePicker::make('endDate')->label('Fin'),
                 Select::make('codigoescalafon')
                     ->label('Escalafon')
-                    ->options(function () {
-                        return collect(['TODO' => 'Todos'])
-                            ->merge($this->escalafonService->getEscalafones())
-                            ->merge([
-                                'DOCU' => 'Docente Universitario',
-                                'AUTU' => 'Autoridad Universitario',
-                                'AUTS' => 'Autoridad Secundario',
-                                'DOC2' => 'Preuniversitario',
-                            ]);
-                    })
+                    ->options(fn() => collect(['TODO' => 'Todos'])
+                        ->merge($this->escalafonService->getEscalafones())
+                        ->merge([
+                            'DOCU' => 'Docente Universitario',
+                            'AUTU' => 'Autoridad Universitario',
+                            'AUTS' => 'Autoridad Secundario',
+                            'DOC2' => 'Preuniversitario',
+                        ]))
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set): void {
                         /**
@@ -55,7 +53,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                          * @param string $state El código de escalafón seleccionado.
                          * @param callable $set Función para establecer el estado del campo de selección.
                          */
-                        $codc_categs = Dh11::where('codigoescalafon', $state)
+                        $codc_categs = Dh11::query()->where('codigoescalafon', $state)
                             ->pluck('codc_categ')
                             ->toArray();
                         session(['selected_codc_categs' => $codc_categs]);

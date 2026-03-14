@@ -33,8 +33,8 @@ class CargosOverTime extends ChartWidget
     public function boot(CargoFilterServiceInterface $filterService): void
     {
         $this->filterService = $filterService;
-        $this->startDate = Carbon::now()->subYear()->format('Y-m-d');
-        $this->endDate = Carbon::now()->format('Y-m-d');
+        $this->startDate = \Illuminate\Support\Facades\Date::now()->subYear()->format('Y-m-d');
+        $this->endDate = \Illuminate\Support\Facades\Date::now()->format('Y-m-d');
     }
 
     protected function getFormSchema(): array
@@ -44,13 +44,13 @@ class CargosOverTime extends ChartWidget
                 ->label('Inicio')
                 ->default(now()->subYear()->format('Y-m-d'))
                 ->reactive()
-                ->afterStateUpdated(fn(Set $set) => $set('endDate', null)),
+                ->afterStateUpdated(fn(Set $set): mixed => $set('endDate', null)),
             DatePicker::make('endDate')
                 ->label('Fin')
                 ->default(now()->format('Y-m-d'))
                 ->reactive()
-                ->afterStateUpdated(fn(Get $get, Set $set) => $set('startDate', $get('startDate')))
-                ->minDate(fn(Get $get) => $get('startDate')),
+                ->afterStateUpdated(fn(Get $get, Set $set): mixed => $set('startDate', $get('startDate')))
+                ->minDate(fn(Get $get): mixed => $get('startDate')),
         ];
     }
 
@@ -61,6 +61,7 @@ class CargosOverTime extends ChartWidget
     }
 
     // Obtener los datos para el gráfico
+    #[\Override]
     protected function getData(): array
     {
         $start = $this->pageFilters['startDate'] ?? $this->startDate;
@@ -70,8 +71,8 @@ class CargosOverTime extends ChartWidget
         try {
             if (empty($start) || empty($end)) {
                 // Establece valores predeterminados o maneja el error
-                $start = Carbon::now()->subYear()->format('Y-m-d');
-                $end = Carbon::now()->format('Y-m-d');
+                $start = \Illuminate\Support\Facades\Date::now()->subYear()->format('Y-m-d');
+                $end = \Illuminate\Support\Facades\Date::now()->format('Y-m-d');
             }
             $query = Dh03::query();
             $query = $this->filterService->aplicarFiltroEscalafon($query, $codigoescalafon);
@@ -91,7 +92,7 @@ class CargosOverTime extends ChartWidget
             // Obtener los datos de cargos permanentes (fec_baja es NULL)
             $permanentes = $this->getPermanentesData($query->clone(), $start, $end);
 
-            $data = compact('altas', 'bajas', 'permanentes');
+            $data = ['altas' => $altas, 'bajas' => $bajas, 'permanentes' => $permanentes];
 
 
             // Verificar que las claves 'altas', 'bajas' y 'permanentes' existen en el array
@@ -169,7 +170,7 @@ class CargosOverTime extends ChartWidget
             ->get();
     }
 
-    private function getLabels($data)
+    private function getLabels(array $data)
     {
         return $data['altas']->pluck('month')
             ->merge($data['bajas']->pluck('month'))
@@ -181,7 +182,10 @@ class CargosOverTime extends ChartWidget
     }
 
     // Formatear los datos para el gráfico
-    private function formatData(array $labels, $data)
+    /**
+     * @return mixed[]
+     */
+    private function formatData(array $labels, $data): array
     {
         $formattedData = array_fill(0, count($labels), 0);
         foreach ($data as $item) {
@@ -202,7 +206,7 @@ class CargosOverTime extends ChartWidget
      *
      * @return array Arreglo con la información del conjunto de datos.
      */
-    private function createDataset($label, $data, $color)
+    private function createDataset(string $label, $data, string $color): array
     {
         return [
             'label' => $label,
@@ -220,7 +224,7 @@ class CargosOverTime extends ChartWidget
      *
      * @return string El color con la opacidad ajustada en formato RGBA.
      */
-    private function adjustColorOpacity($color, $opacity)
+    private function adjustColorOpacity($color, float $opacity): string
     {
         [$r, $g, $b] = sscanf($color, '#%02x%02x%02x');
         return "rgba($r, $g, $b, $opacity)";

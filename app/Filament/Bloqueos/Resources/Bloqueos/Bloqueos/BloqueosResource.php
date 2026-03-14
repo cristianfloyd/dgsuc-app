@@ -55,6 +55,7 @@ class BloqueosResource extends Resource
 
     protected static ?Collection $resultadosProcesamiento = null;
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -75,6 +76,7 @@ class BloqueosResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -87,6 +89,7 @@ class BloqueosResource extends Resource
             ->deferLoading();
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -94,6 +97,7 @@ class BloqueosResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -125,9 +129,9 @@ class BloqueosResource extends Resource
         }
 
         return Cache::remember($cacheKey, 3600, function () {
-            $service = app(BloqueosProcessService::class);
+            $bloqueosProcessService = resolve(BloqueosProcessService::class);
 
-            return $service->procesarBloqueos();
+            return $bloqueosProcessService->procesarBloqueos();
         });
     }
 
@@ -136,11 +140,11 @@ class BloqueosResource extends Resource
      *
      * @return \Illuminate\View\View
      */
-    protected static function procesarYMostrarResultados()
+    protected static function procesarYMostrarResultados(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         try {
-            $service = app(BloqueosProcessService::class);
-            $repository = app(BloqueosRepositoryInterface::class);
+            $service = resolve(BloqueosProcessService::class);
+            $repository = resolve(BloqueosRepositoryInterface::class);
             $resultados = $service->procesarBloqueos();
 
             return view('filament.resources.bloqueos.bulk-results', [
@@ -174,15 +178,15 @@ class BloqueosResource extends Resource
      */
     protected static function generarResumenProcesamiento($resultados): array
     {
-        $repository = app(BloqueosRepositoryInterface::class);
+        $bloqueosRepository = resolve(BloqueosRepositoryInterface::class);
 
         return [
             'total' => $resultados->count(),
             'por_tipo' => $resultados->groupBy('tipo_bloqueo')
-                ->map(fn($grupo) => $grupo->count()),
+                ->map(fn($grupo): int => $grupo->count()),
             'porcentaje_exito' => $resultados->where('estado', 'Procesado')->count() * 100 / $resultados->count(),
-            'total_procesados_historico' => $repository->getTotalProcesados(),
-            'total_pendientes' => $repository->getTotalPendientes(),
+            'total_procesados_historico' => $bloqueosRepository->getTotalProcesados(),
+            'total_pendientes' => $bloqueosRepository->getTotalPendientes(),
         ];
     }
 
@@ -214,15 +218,11 @@ class BloqueosResource extends Resource
             TextColumn::make('tipo')->searchable(),
             TextColumn::make('observaciones')
                 ->limit(20)
-                ->tooltip(function (TextColumn $column): ?string {
-                    return $column->getState();
-                })->toggleable(isToggledHiddenByDefault: true),
+                ->tooltip(fn(TextColumn $column): ?string => $column->getState())->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('chkstopliq')->boolean(),
             TextColumn::make('mensaje_error')
                 ->limit(20)
-                ->tooltip(function (TextColumn $column): ?string {
-                    return $column->getState();
-                })->toggleable(),
+                ->tooltip(fn(TextColumn $column): ?string => $column->getState())->toggleable(),
             IconColumn::make('tiene_cargo_asociado')
                 ->label('Asociado')
                 ->boolean()
@@ -245,7 +245,7 @@ class BloqueosResource extends Resource
             TextColumn::make('cargoAsociado.tipoasociacion')
                 ->label('Tipo Asociación')
                 ->badge()
-                ->color(fn($state) => match ($state) {
+                ->color(fn($state): string => match ($state) {
                     'S' => 'success',
                     'R' => 'warning',
                     default => 'gray',
@@ -254,7 +254,7 @@ class BloqueosResource extends Resource
             TextColumn::make('cargoAsociado.nro_cargoasociado')
                 ->label('Info Cargo Asociado')
                 ->formatStateUsing(
-                    fn($record) => $record->cargoAsociado
+                    fn($record): string => $record->cargoAsociado
                         ? "Cargo: {$record->cargoAsociado->nro_cargoasociado}
                            (Tipo: {$record->cargoAsociado->tipoasociacion})"
                         : 'Sin cargo asociado',
@@ -303,7 +303,7 @@ class BloqueosResource extends Resource
     private static function getRecordClasses(): callable
     {
 
-        $clase = fn(BloqueosDataModel $record): string => match (true) {
+        return fn(BloqueosDataModel $record): string => match (true) {
             $record->fechas_coincidentes => 'bg-green-50 dark:bg-green-900/50 !border-l-4 !border-l-green-900 !dark:border-l-green-900',
             $record->tipo === 'licencia' => 'bg-blue-50 dark:bg-blue-900/50 !border-l-4 !border-l-blue-900 !dark:border-l-blue-900',
             $record->estado === BloqueosEstadoEnum::FALTA_CARGO_ASOCIADO => 'bg-orange-50 dark:bg-orange-900/50 !border-l-4 !border-l-orange-900 !dark:border-l-orange-900',
@@ -311,8 +311,6 @@ class BloqueosResource extends Resource
             $record->esta_procesado => 'bg-gray-50 dark:bg-gray-900/50 !border-l-4 !border-l-gray-900 !dark:border-l-gray-900',
             default => '',
         };
-
-        return $clase;
     }
 
     private static function getTableActions(): array
@@ -329,10 +327,10 @@ class BloqueosResource extends Resource
                 ->requiresConfirmation()
                 ->modalHeading('¿Validar registro?')
                 ->modalDescription('Se validará el par legajo-cargo contra Mapuche y se verificarán los cargos asociados.')
-                ->action(function ($record): void {
+                ->action(function (\App\Models\Reportes\BloqueosDataModel $record): void {
                     try {
                         // Usamos el servicio de validación
-                        $validationService = app(BloqueosValidationService::class);
+                        $validationService = resolve(BloqueosValidationService::class);
                         $resultado = $validationService->validarRegistro($record);
 
                         // Mostramos la notificación con el resultado
@@ -412,7 +410,7 @@ class BloqueosResource extends Resource
                 ->action(function (Collection $records): void {
                     try {
                         // Usamos el servicio de validación para procesar múltiples registros
-                        $validationService = app(BloqueosValidationService::class);
+                        $validationService = resolve(BloqueosValidationService::class);
                         $estadisticas = $validationService->validarMultiplesRegistros($records);
 
                         // Generamos el mensaje de resumen
@@ -455,7 +453,7 @@ class BloqueosResource extends Resource
                 ->schema([
                     Select::make('periodo_fiscal')
                         ->label('Periodo Fiscal')
-                        ->options(app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                        ->options(resolve(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                         ->required()
                         ->default(now()->format('Ym'))
                         ->reactive()
@@ -505,7 +503,7 @@ class BloqueosResource extends Resource
                 ->schema([
                     Select::make('periodo_fiscal')
                         ->label('Período Fiscal')
-                        ->options(app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                        ->options(resolve(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                         ->required(),
                     Checkbox::make('confirmar_archivado')
                         ->label('Confirmo que deseo archivar este período')
@@ -526,7 +524,7 @@ class BloqueosResource extends Resource
                         return;
                     }
                     try {
-                        $orchestrator = app(BloqueosArchiveOrchestratorInterface::class);
+                        $orchestrator = resolve(BloqueosArchiveOrchestratorInterface::class);
                         $periodoFiscalArray = [
                             'year' => (int) substr($periodoFiscal, 0, 4),
                             'month' => (int) substr($periodoFiscal, 5, 2),

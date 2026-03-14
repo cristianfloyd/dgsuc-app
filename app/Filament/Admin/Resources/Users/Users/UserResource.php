@@ -27,6 +27,7 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,6 +59,7 @@ class UserResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -100,6 +102,7 @@ class UserResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

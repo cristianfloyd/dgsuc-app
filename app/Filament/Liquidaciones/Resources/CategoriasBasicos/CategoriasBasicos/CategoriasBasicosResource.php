@@ -35,6 +35,7 @@ class CategoriasBasicosResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,6 +59,7 @@ class CategoriasBasicosResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -140,6 +142,7 @@ class CategoriasBasicosResource extends Resource
             ->defaultPaginationPageOption(5);
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

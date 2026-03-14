@@ -10,6 +10,7 @@ class EditReporteConceptoListado extends EditRecord
 {
     protected static string $resource = ReporteConceptoListadoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

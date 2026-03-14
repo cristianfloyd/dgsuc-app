@@ -10,6 +10,7 @@ class ListControlDiferencias extends ListRecords
 {
     protected static string $resource = ControlDiferenciasResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

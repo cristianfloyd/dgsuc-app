@@ -37,10 +37,9 @@ class EjecutarControlesPostLiquidacion extends Page
             Select::make('nroLiqui')
                 ->label('Número de Liquidación')
                 ->required()
-                ->options(function () {
+                ->options(
                     // Obtener liquidaciones disponibles
-                    return [/* ... */];
-                }),
+                    fn() => [/* ... */]),
             CheckboxList::make('controles')
                 ->label('Controles a Ejecutar')
                 ->options([

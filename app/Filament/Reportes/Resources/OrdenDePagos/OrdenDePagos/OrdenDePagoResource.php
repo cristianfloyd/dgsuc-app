@@ -29,11 +29,13 @@ class OrdenDePagoResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema;
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -79,6 +81,7 @@ class OrdenDePagoResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -108,6 +111,7 @@ class OrdenDePagoResource extends Resource
         return $data;
     }
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
         // Devuelve una consulta Eloquent modificada para el modelo Reporte
@@ -122,8 +126,6 @@ class OrdenDePagoResource extends Resource
      * Actualiza las liquidaciones seleccionadas en la sesión.
      *
      * @param array $liquidaciones Las liquidaciones seleccionadas.
-     *
-     * @return void
      */
     #[On('liquidaciones-seleccionadas')]
     public function actualizarLiquidacionesSeleccionadas(array $liquidaciones): void

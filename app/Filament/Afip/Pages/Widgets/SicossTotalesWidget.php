@@ -28,7 +28,7 @@ class SicossTotalesWidget extends Widget
     public function shouldLoad(): bool
     {
         try {
-            return !empty($this->totales);
+            return $this->totales !== [];
         } catch (Exception $e) {
             // En caso de error, registramos la excepción y evitamos bloquear la vista del widget.
             logger()->error('Error en shouldLoad de SicossTotalesWidget: ' . $e->getMessage());

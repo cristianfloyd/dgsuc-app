@@ -13,6 +13,7 @@ class Login extends \Filament\Auth\Pages\Login
 {
     protected string $view = 'filament.toba.auth.login';
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -34,6 +35,7 @@ class Login extends \Filament\Auth\Pages\Login
             ->statePath('data');
     }
 
+    #[\Override]
     public function authenticate(): ?LoginResponse
     {
         $data = $this->form->getState();
@@ -53,17 +55,19 @@ class Login extends \Filament\Auth\Pages\Login
             session()->regenerate();
 
             // Usar respuesta personalizada que redirige a selector-panel
-            return app(TobaLoginResponse::class);
+            return resolve(TobaLoginResponse::class);
         }
 
         throw ValidationException::withMessages([ 'data.usuario' => 'Las credenciales no coinciden con nuestros registros.', ]);
     }
 
+    #[\Override]
     public function getHeading(): string
     {
         return 'Iniciar Sesión - Sistema Mapuche';
     }
 
+    #[\Override]
     public function getSubheading(): ?string
     {
         return 'Accede con tus credenciales del sistema Mapuche';

@@ -15,6 +15,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
      *
      * @return array Array de objetos Stat para mostrar en el widget
      */
+    #[\Override]
     protected function getStats(): array
     {
         try {
@@ -57,7 +58,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     protected function getControlesPendientes(): int
     {
         try {
-            return LiquidacionControl::where('estado', 'pendiente')->count();
+            return LiquidacionControl::query()->where('estado', 'pendiente')->count();
         } catch (Exception $e) {
             Log::error('Error al obtener controles pendientes', [
                 'error' => $e->getMessage(),
@@ -75,7 +76,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     protected function getControlesConError(): int
     {
         try {
-            return LiquidacionControl::where('estado', 'error')->count();
+            return LiquidacionControl::query()->where('estado', 'error')->count();
         } catch (Exception $e) {
             Log::error('Error al obtener controles con error', [
                 'error' => $e->getMessage(),
@@ -93,7 +94,7 @@ class ControlesPostLiquidacionWidget extends BaseWidget
     protected function getControlesCompletados(): int
     {
         try {
-            return LiquidacionControl::where('estado', 'completado')->count();
+            return LiquidacionControl::query()->where('estado', 'completado')->count();
         } catch (Exception $e) {
             Log::error('Error al obtener controles completados', [
                 'error' => $e->getMessage(),

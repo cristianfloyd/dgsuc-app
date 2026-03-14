@@ -10,6 +10,7 @@ class EditRepGerencialFinal extends EditRecord
 {
     protected static string $resource = RepGerencialFinalResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

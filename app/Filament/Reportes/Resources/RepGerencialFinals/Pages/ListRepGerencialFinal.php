@@ -36,6 +36,7 @@ class ListRepGerencialFinal extends ListRecords
         Log::info('ListRepGerencialfinal: Se ha inicializado la página');
     }
 
+    #[\Override]
     public function mount(): void
     {
         $this->checkAndCreateBaseStructure();
@@ -44,7 +45,7 @@ class ListRepGerencialFinal extends ListRecords
     }
 
     #[On('idsLiquiSelected')]
-    public function actualizarLiquidacionesSeleccionadas($liquidaciones): void
+    public function actualizarLiquidacionesSeleccionadas(?array $liquidaciones): void
     {
         session(['idsLiquiSelected' => $liquidaciones]);
         $this->idLiquiSelected = $liquidaciones;
@@ -71,6 +72,7 @@ class ListRepGerencialFinal extends ListRecords
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -92,14 +94,14 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro regional
                     Select::make('codc_regio')
                         ->label('Regional')
-                        ->options(fn() => Dh30::where('nro_tabla', 2)
+                        ->options(fn() => Dh30::query()->where('nro_tabla', 2)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
                     // Filtro unidad académica
                     Select::make('codc_uacad')
                         ->label('Unidad Académica')
-                        ->options(fn() => Dh30::where('nro_tabla', 13)
+                        ->options(fn() => Dh30::query()->where('nro_tabla', 13)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
@@ -115,7 +117,7 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro carácter
                     Select::make('codc_carac')
                         ->label('Carácter')
-                        ->options(fn() => Dh30::where('nro_tabla', 3)
+                        ->options(fn() => Dh30::query()->where('nro_tabla', 3)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
 
@@ -127,7 +129,7 @@ class ListRepGerencialFinal extends ListRecords
                     // Filtro fuente financiamiento
                     Select::make('codn_fuent')
                         ->label('Fuente Financiamiento')
-                        ->options(fn() => Dh30::where('nro_tabla', 4)
+                        ->options(fn() => Dh30::query()->where('nro_tabla', 4)
                             ->pluck('desc_item', 'desc_abrev'))
                         ->searchable(),
                 ])
@@ -144,7 +146,7 @@ class ListRepGerencialFinal extends ListRecords
                 ->action(function (): void {
                     try {
                         $this->repGerencialFinalService->dropPreviousTables();
-                        RepGerencialFinal::truncate();
+                        RepGerencialFinal::query()->truncate();
 
                         Notification::make()
                             ->title('Datos limpiados exitosamente')
@@ -162,6 +164,7 @@ class ListRepGerencialFinal extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [
@@ -175,7 +178,7 @@ class ListRepGerencialFinal extends ListRecords
             $selectedLiquidaciones = $this->idLiquiSelected;
 
 
-            if (empty($selectedLiquidaciones)) {
+            if ($selectedLiquidaciones === null || $selectedLiquidaciones === []) {
                 Notification::make()
                     ->title('Seleccione al menos una liquidación')
                     ->warning()

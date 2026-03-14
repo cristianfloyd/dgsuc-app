@@ -39,6 +39,7 @@ class MapucheGrupoResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -60,6 +61,7 @@ class MapucheGrupoResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -90,7 +92,7 @@ class MapucheGrupoResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('tipo')
-                    ->options(fn() => MapucheGrupo::distinct()->pluck('tipo', 'tipo')->toArray())
+                    ->options(fn() => MapucheGrupo::query()->distinct()->pluck('tipo', 'tipo')->toArray())
                     ->label('Filtrar por Tipo'),
             ])
             ->recordActions([
@@ -109,6 +111,7 @@ class MapucheGrupoResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -116,6 +119,7 @@ class MapucheGrupoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

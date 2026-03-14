@@ -55,6 +55,7 @@ class AfipMapucheSicossResource extends Resource
 
     protected static ?int $navigationSort = 0;
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -119,11 +120,9 @@ class AfipMapucheSicossResource extends Resource
             ->filters([
                 SelectFilter::make('periodo_fiscal')
                     ->label('Período Fiscal')
-                    ->options(function () {
-                        return AfipMapucheSicoss::distinct()
-                            ->pluck('periodo_fiscal', 'periodo_fiscal')
-                            ->toArray();
-                    })
+                    ->options(fn() => AfipMapucheSicoss::query()->distinct()
+                        ->pluck('periodo_fiscal', 'periodo_fiscal')
+                        ->toArray())
                     ->searchable(),
             ])
             ->headerActions([
@@ -190,8 +189,8 @@ class AfipMapucheSicossResource extends Resource
                         ->label('Exportar Excel')
                         ->icon('heroicon-o-table-cells')
                         ->action(function () {
-                            $exportService = Container::getInstance()->make(SicossExportService::class);
-                            $path = $exportService->generarArchivoExcel(static::getModel()::all());
+                            $sicossExportService = Container::getInstance()->make(SicossExportService::class);
+                            $path = $sicossExportService->generarArchivoExcel(static::getModel()::all());
 
                             return response()->download($path)->deleteFileAfterSend();
                         })
@@ -225,12 +224,12 @@ class AfipMapucheSicossResource extends Resource
                     Action::make('exportarFiltradosTxt')
                         ->label('Exportar Filtrados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'txt'))
+                        ->action(fn($livewire): \Symfony\Component\HttpFoundation\Response => static::exportarRegistrosFiltrados($livewire, 'txt'))
                         ->color('success'),
                     Action::make('exportarFiltradosExcel')
                         ->label('Exportar Filtrados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn($livewire) => static::exportarRegistrosFiltrados($livewire, 'excel'))
+                        ->action(fn($livewire): \Symfony\Component\HttpFoundation\Response => static::exportarRegistrosFiltrados($livewire, 'excel'))
                         ->color('success'),
                 ])
                     ->icon('heroicon-o-cog-8-tooth')
@@ -245,12 +244,12 @@ class AfipMapucheSicossResource extends Resource
                     BulkAction::make('exportarSeleccionadosTxt')
                         ->label('Exportar Seleccionados (TXT)')
                         ->icon('heroicon-o-document-arrow-down')
-                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'txt'))
+                        ->action(fn(Collection $records): \Symfony\Component\HttpFoundation\Response => static::exportarRegistros($records, 'txt'))
                         ->color('success'),
                     BulkAction::make('exportarSeleccionadosExcel')
                         ->label('Exportar Seleccionados (Excel)')
                         ->icon('heroicon-o-table-cells')
-                        ->action(fn(Collection $records) => static::exportarRegistros($records, 'excel'))
+                        ->action(fn(Collection $records): \Symfony\Component\HttpFoundation\Response => static::exportarRegistros($records, 'excel'))
                         ->color('success'),
                 ]),
             ])
@@ -266,6 +265,7 @@ class AfipMapucheSicossResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -283,6 +283,7 @@ class AfipMapucheSicossResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -311,7 +312,7 @@ class AfipMapucheSicossResource extends Resource
         $contenido = '';
 
         // Función auxiliar para formatear decimales con 2 decimales
-        $formatearDecimal = function ($valor, $longitud) {
+        $formatearDecimal = function ($valor, $longitud): string {
             $valor ??= 0;
             // Formatea el número con 2 decimales y punto como separador
             $numeroFormateado = number_format($valor, 2, '.', '');
@@ -321,7 +322,7 @@ class AfipMapucheSicossResource extends Resource
         };
 
         // Nueva función para manejar strings con caracteres especiales
-        $formatearString = function ($valor, $longitud) {
+        $formatearString = function ($valor, $longitud): string {
             $valor ??= '';
             // Convertir a ISO-8859-1 (Latin1) para manejar acentos
             $valor = mb_convert_encoding($valor, 'ISO-8859-1', 'UTF-8');
@@ -423,11 +424,7 @@ class AfipMapucheSicossResource extends Resource
             $linea .= $formatearDecimal($registro->remimp11, 12);
 
             // Asegurar que la línea tenga exactamente 500 caracteres
-            if (strlen($linea) > 500) {
-                $linea = substr($linea, 0, 500);
-            } else {
-                $linea = str_pad($linea, 500, ' ', STR_PAD_RIGHT);
-            }
+            $linea = strlen($linea) > 500 ? substr($linea, 0, 500) : str_pad($linea, 500, ' ', STR_PAD_RIGHT);
 
             $contenido .= $linea . PHP_EOL;
         }
@@ -467,7 +464,7 @@ class AfipMapucheSicossResource extends Resource
     protected static function exportarRegistros(Collection $registros, string $formato = 'txt'): Response
     {
         // Obtener la instancia del servicio desde el contenedor
-        $exportService = Container::getInstance()->make(SicossExportService::class);
+        $sicossExportService = Container::getInstance()->make(SicossExportService::class);
 
         // Obtener el período fiscal del primer registro o usar el actual
         $periodoFiscal = $registros->isNotEmpty()
@@ -475,7 +472,7 @@ class AfipMapucheSicossResource extends Resource
             : date('Ym');
 
         // Generar el archivo en el formato especificado
-        $path = $exportService->generarArchivo($registros, $formato, $periodoFiscal);
+        $path = $sicossExportService->generarArchivo($registros, $formato, $periodoFiscal);
 
         return response()->download($path)->deleteFileAfterSend();
     }

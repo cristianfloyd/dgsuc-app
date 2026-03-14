@@ -33,6 +33,7 @@ class ReporteConceptoListadoResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -59,7 +60,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Periodo')
-                            ->options(fn() => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->options(fn() => resolve(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                             ->searchable()
                             ->live()
                             ->afterStateUpdated(fn(callable $set) => $set('nro_liqui', null)),
@@ -74,27 +75,25 @@ class ReporteConceptoListadoResource extends Resource
 
                                 [$year, $month] = explode('-', $periodoString);
 
-                                return app(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
+                                return resolve(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
                             })
                             ->searchable()
                             ->live()
                             ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
                         Select::make('codc_uacad')
                             ->label('Dependencia')
-                            ->options(fn() => Dh03::distinct()->pluck('codc_uacad', 'codc_uacad'))
+                            ->options(fn() => Dh03::query()->distinct()->pluck('codc_uacad', 'codc_uacad'))
                             ->searchable(),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['nro_liqui'],
-                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
-                            )
-                            ->when(
-                                $data['codc_uacad'],
-                                fn(Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad),
-                            );
-                    }),
+                    ->query(fn(Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['nro_liqui'],
+                            fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                        )
+                        ->when(
+                            $data['codc_uacad'],
+                            fn(Builder $query, string $codcUacad) => $query->where('codc_uacad', $codcUacad),
+                        )),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
                     ->multiple()
@@ -102,7 +101,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->searchable(),
             ])
             ->filtersTriggerAction(
-                fn(Action $action) => $action
+                fn(Action $action): \Filament\Actions\Action => $action
                     ->button()
                     ->label('Filtro'),
             )
@@ -120,7 +119,7 @@ class ReporteConceptoListadoResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(fn() => app(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
+                            ->options(fn() => resolve(PeriodoFiscalService::class)->getPeriodosFiscalesForSelect())
                             ->searchable()
                             ->required()
                             ->live()
@@ -136,7 +135,7 @@ class ReporteConceptoListadoResource extends Resource
 
                                 [$year, $month] = explode('-', $periodoString);
 
-                                return app(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
+                                return resolve(PeriodoFiscalService::class)->getLiquidacionesByPeriodo($year, $month);
                             })
                             ->searchable()
                             ->placeholder('Todas las liquidaciones')
@@ -162,7 +161,7 @@ class ReporteConceptoListadoResource extends Resource
                                 ->send();
 
                             // Ejecutar sincronización
-                            $syncService = app(ConceptoListadoSyncService::class);
+                            $syncService = resolve(ConceptoListadoSyncService::class);
                             $registrosInsertados = $syncService->sync($periodoFiscal, $nroLiqui);
 
                             // Mostrar notificación de éxito
@@ -234,6 +233,7 @@ class ReporteConceptoListadoResource extends Resource
             ->emptyStateIcon('heroicon-o-funnel');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -241,6 +241,7 @@ class ReporteConceptoListadoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -250,9 +251,10 @@ class ReporteConceptoListadoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
-        return app(ConceptoListadoResourceService::class)
+        return resolve(ConceptoListadoResourceService::class)
             ->getFilteredQuery(request()->get('filters', []));
     }
 }

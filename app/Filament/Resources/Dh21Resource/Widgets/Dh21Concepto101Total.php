@@ -34,6 +34,7 @@ class Dh21Concepto101Total extends Widget
         $this->totalConcepto101 = $this->dh21->totalConcepto101($nroLiqui);
     }
 
+    #[\Override]
     public function render(): View
     {
         return view(static::$vista, [

@@ -95,7 +95,7 @@ class GenerateComprobanteNomina extends Page
                             ->label('Año')
                             ->required()
                             ->disabled()
-                            ->options(fn() => array_combine(
+                            ->options(fn(): array => array_combine(
                                 range(date('Y') - 5, date('Y')),
                                 range(date('Y') - 5, date('Y')),
                             )),
@@ -104,8 +104,8 @@ class GenerateComprobanteNomina extends Page
                             ->required()
                             ->disabled()
                             ->options(fn() => collect(range(1, 12))->mapWithKeys(
-                                fn($mes) => [$mes => nombreMes($mes)],
-                            )->toArray()),
+                                fn(int $mes): array => [$mes => nombreMes($mes)],
+                            )->all()),
                     ]),
             ]);
     }

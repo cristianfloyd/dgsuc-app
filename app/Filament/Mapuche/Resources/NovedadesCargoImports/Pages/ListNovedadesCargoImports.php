@@ -19,6 +19,7 @@ class ListNovedadesCargoImports extends ListRecords
 
     protected static string $resource = NovedadesCargoImportResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         parent::mount();
@@ -42,9 +43,10 @@ class ListNovedadesCargoImports extends ListRecords
     #[Computed]
     public function getService(): NovedadesCargoImportTableService
     {
-        return app(NovedadesCargoImportTableService::class);
+        return resolve(NovedadesCargoImportTableService::class);
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

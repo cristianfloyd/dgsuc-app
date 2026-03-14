@@ -13,7 +13,7 @@ class ConceptosSeleccionadosWidget extends Widget
 
     public function mount(): void
     {
-        if (empty($this->conceptosSeleccionados)) {
+        if ($this->conceptosSeleccionados === []) {
             $this->conceptosSeleccionados = array_merge(
                 ConceptosSicossEnum::getAllAportesCodes(),
                 ConceptosSicossEnum::getAllContribucionesCodes(),

@@ -61,8 +61,8 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms, HasActions
             Log::error('Error al montar el widget PeriodoFiscal: ' . $e->getMessage());
 
             // Valores predeterminados en caso de error
-            $this->year = Carbon::now()->year;
-            $this->month = Carbon::now()->month;
+            $this->year = \Illuminate\Support\Facades\Date::now()->year;
+            $this->month = \Illuminate\Support\Facades\Date::now()->month;
         }
     }
 
@@ -73,6 +73,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms, HasActions
         $this->dispatch('fiscalPeriodUpdated');
     }
 
+    #[\Override]
     public static function canView(): bool
     {
         return true;
@@ -111,7 +112,7 @@ class PeriodoFiscalSelectorWidget extends Widget implements HasForms, HasActions
 
     private function getYearOptions(): array
     {
-        $currentYear = Carbon::now()->year;
+        $currentYear = \Illuminate\Support\Facades\Date::now()->year;
         return array_combine(keys: range($currentYear - 5, $currentYear + 1), values: range($currentYear - 5, $currentYear + 1));
     }
 

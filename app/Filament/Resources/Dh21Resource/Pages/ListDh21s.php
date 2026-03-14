@@ -14,6 +14,7 @@ class ListDh21s extends ListRecords
 {
     protected static string $resource = Dh21Resource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -24,9 +25,7 @@ class ListDh21s extends ListRecords
             Action::make('abrirModal')
                 ->label('Orden de Pago')
                 ->icon('heroicon-o-plus')
-                ->modalContent(function () {
-                    return view('modals.orden-pago-reporte', ['liquidacionId' => 1]);
-                })
+                ->modalContent(fn() => view('modals.orden-pago-reporte', ['liquidacionId' => 1]))
                 ->modalFooterActions([
                     Action::make('descargarPDF')
                         ->label('Descargar PDF')
@@ -37,6 +36,7 @@ class ListDh21s extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [
@@ -48,7 +48,7 @@ class ListDh21s extends ListRecords
 
     protected static function descargarReportePDF($liquidacionId)
     {
-        $component = Livewire::test(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
-        return $component->call('descargarPDF');
+        $testable = Livewire::test(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
+        return $testable->call('descargarPDF');
     }
 }

@@ -19,6 +19,7 @@ class SicossCalculoRelationManager extends RelationManager
 
     protected static ?string $pluralModelLabel = 'Cálculos SICOSS';
 
+    #[\Override]
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return true;

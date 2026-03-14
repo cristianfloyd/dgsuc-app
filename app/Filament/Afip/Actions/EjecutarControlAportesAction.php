@@ -42,7 +42,7 @@ class EjecutarControlAportesAction extends Action
      */
     public function withPeriodBadge(): static
     {
-        return $this->badge(function () {
+        return $this->badge(function (): string {
             $livewire = $this->getLivewire();
 
             return sprintf('%d-%02d', $livewire->year, $livewire->month);
@@ -61,7 +61,7 @@ class EjecutarControlAportesAction extends Action
             $livewire->loading = true;
 
             // Obtener período fiscal
-            $periodoFiscalService = app(PeriodoFiscalService::class);
+            $periodoFiscalService = resolve(PeriodoFiscalService::class);
             $periodoFiscal = $periodoFiscalService->getPeriodoFiscal();
             $year = $periodoFiscal['year'];
             $month = $periodoFiscal['month'];
@@ -73,7 +73,7 @@ class EjecutarControlAportesAction extends Action
             ]);
 
             // Ejecutar control
-            $service = app(SicossControlService::class);
+            $service = resolve(SicossControlService::class);
             $service->setConnection($livewire->getConnectionName());
             $resultados = $service->ejecutarControlAportes($year, $month);
 
@@ -85,7 +85,7 @@ class EjecutarControlAportesAction extends Action
             Notification::make()
                 ->success()
                 ->title('Control de Aportes Ejecutado')
-                ->body("Se completó el control de aportes para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
+                ->body("Se completó el control de aportes para el período {$year}-" . str_pad((string) $month, 2, '0', STR_PAD_LEFT))
                 ->send();
         } catch (Exception $e) {
             Log::error('Error en control de aportes', [

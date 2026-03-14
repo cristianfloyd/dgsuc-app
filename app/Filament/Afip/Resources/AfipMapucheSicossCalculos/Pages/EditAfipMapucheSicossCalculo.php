@@ -10,6 +10,7 @@ class EditAfipMapucheSicossCalculo extends EditRecord
 {
     protected static string $resource = AfipMapucheSicossCalculoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

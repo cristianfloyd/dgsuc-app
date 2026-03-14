@@ -15,10 +15,11 @@ class AdminStatsOverview extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    #[\Override]
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Usuarios', User::count())
+            Stat::make('Total Usuarios', User::query()->count())
                 ->description('Incremento del 20%')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('success'),
@@ -29,7 +30,7 @@ class AdminStatsOverview extends BaseWidget
                 ->color('warning'),
 
             // Estadísticas de Cargos
-            Stat::make('Total Cargos', Dh03::count())
+            Stat::make('Total Cargos', Dh03::query()->count())
                 ->description('Total de cargos en el sistema')
                 ->descriptionIcon('heroicon-m-academic-cap')
                 ->chart($this->getCargosTrend())
@@ -43,7 +44,7 @@ class AdminStatsOverview extends BaseWidget
                 ->color('info'),
 
             // Estadísticas de Categorías
-            Stat::make('Categorías', Dh11::count())
+            Stat::make('Categorías', Dh11::query()->count())
                 ->description('Distribución por categoría')
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->chart($this->getCategoriasTrend())
@@ -53,14 +54,14 @@ class AdminStatsOverview extends BaseWidget
 
     private function getActiveCargos(): int
     {
-        return Dh03::where('chkstopliq', false)
+        return Dh03::query()->where('chkstopliq', false)
             ->whereNull('fec_baja')
             ->count();
     }
 
     private function getActivePercentage(): float
     {
-        $total = Dh03::count();
+        $total = Dh03::query()->count();
         $activos = $this->getActiveCargos();
 
         return $total > 0 ? round(($activos / $total) * 100, 2) : 0;
@@ -68,7 +69,7 @@ class AdminStatsOverview extends BaseWidget
 
     private function getCargosTrend(): array
     {
-        return Dh03::select(DB::raw('COUNT(*) as count'))
+        return Dh03::query()->select(DB::raw('COUNT(*) as count'))
             ->groupBy(DB::raw('DATE(fec_alta)'))
             ->orderBy('fec_alta', 'DESC')
             ->limit(7)
@@ -78,7 +79,7 @@ class AdminStatsOverview extends BaseWidget
 
     private function getActivosTrend(): array
     {
-        return Dh03::where('chkstopliq', false)
+        return Dh03::query()->where('chkstopliq', false)
             ->whereNull('fec_baja')
             ->select(DB::raw('COUNT(*) as count'))
             ->groupBy(DB::raw('DATE(fec_alta)'))
@@ -90,7 +91,7 @@ class AdminStatsOverview extends BaseWidget
 
     private function getCategoriasTrend(): array
     {
-        return Dh11::withCount('dh03')
+        return Dh11::query()->withCount('dh03')
             ->orderBy('dh03_count', 'DESC')
             ->limit(7)
             ->pluck('dh03_count')

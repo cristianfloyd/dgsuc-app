@@ -16,9 +16,10 @@ class RepGerencialFinalStats extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    #[\Override]
     public static function canView(): bool
     {
-        $connection = (new static())->getConnectionName();
+        $connection = new static()->getConnectionName();
 
         return Schema::connection($connection)->hasTable('suc.rep_ger_final')
             && DB::connection($connection)
@@ -26,6 +27,7 @@ class RepGerencialFinalStats extends BaseWidget
                 ->exists();
     }
 
+    #[\Override]
     protected function getStats(): array
     {
         $connection = $this->getConnectionName();

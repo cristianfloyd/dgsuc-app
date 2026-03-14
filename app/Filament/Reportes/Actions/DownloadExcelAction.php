@@ -20,7 +20,7 @@ class DownloadExcelAction extends Action
                 $query = $livewire->getFilteredSortedTableQuery();
 
                 if ($query->count() == 0) {
-                    return redirect()->route('filament.reportes.resources.reporte-concepto-listado.index')
+                    return to_route('filament.reportes.resources.reporte-concepto-listado.index')
                         ->with('error', 'No se encontraron registros con los filtros seleccionados.');
                 }
 
@@ -45,6 +45,7 @@ class DownloadExcelAction extends Action
             ->modalSubmitActionLabel('Descargar');
     }
 
+    #[\Override]
     public static function make(?string $name = null): static
     {
         $name ??= 'download';

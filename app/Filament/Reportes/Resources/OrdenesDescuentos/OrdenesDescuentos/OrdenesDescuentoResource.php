@@ -32,6 +32,7 @@ class OrdenesDescuentoResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -89,31 +90,27 @@ class OrdenesDescuentoResource extends Resource
                             ->live()
                             ->disabled(fn(callable $get): bool => !$get('periodo_fiscal')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['nro_liqui'],
-                                fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
-                            );
-                    }),
+                    ->query(fn(Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['nro_liqui'],
+                            fn(Builder $query, int $nroLiqui) => $query->withLiquidacion($nroLiqui),
+                        )),
                 SelectFilter::make('codc_uacad')
                     ->label('Unidad Académica')
-                    ->options(function () {
-                        $data = OrdenesDescuento::distinct()
+                    ->options(function (): array {
+                        $data = OrdenesDescuento::query()->distinct()
                             ->orderBy('codc_uacad')
                             ->pluck('desc_item', 'codc_uacad')
                             ->toArray();
 
                         // Sanitizar los datos para asegurar que estén en UTF-8 válido
-                        return array_map(function ($item) {
-                            return mb_convert_encoding($item, 'UTF-8', 'auto');
-                        }, $data);
+                        return array_map(fn($item) => mb_convert_encoding($item, 'UTF-8', 'auto'), $data);
                     })
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('codn_conce')
                     ->label('Concepto')
-                    ->options(fn() => OrdenesDescuento::distinct()
+                    ->options(fn() => OrdenesDescuento::query()->distinct()
                         ->orderBy('codn_conce')
                         ->pluck('desc_conce', 'codn_conce')
                         ->toArray())
@@ -147,29 +144,23 @@ class OrdenesDescuentoResource extends Resource
                     ->label('Exportar Todo')
                     ->tooltip('Exportar todos los registros a un archivo Excel en dos hojas')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($livewire) {
-                        return (new OrdenesDescuentoMultipleExport($livewire->getFilteredTableQuery()))
-                            ->download('descuentos-y-aportes-' . now()->format('d-m-Y') . '.xlsx');
-                    }),
+                    ->action(fn($livewire) => new OrdenesDescuentoMultipleExport($livewire->getFilteredTableQuery())
+                        ->download('descuentos-y-aportes-' . now()->format('d-m-Y') . '.xlsx')),
                 Action::make('export200')
                     ->label('Ordenes Descuento')
                     ->tooltip('Exportar los conceptos de ordenes de descuento a un archivo Excel')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($livewire) {
-                        return (new OrdenesDescuentoSheet200($livewire->getFilteredTableQuery()->whereBetween('codn_conce', [200, 299])))
-                            ->download('ordenes-descuento-' . now()->format('d-m-Y') . '.xlsx');
-                    }),
+                    ->action(fn($livewire) => new OrdenesDescuentoSheet200($livewire->getFilteredTableQuery()->whereBetween('codn_conce', [200, 299]))
+                        ->download('ordenes-descuento-' . now()->format('d-m-Y') . '.xlsx')),
                 Action::make('export300')
                     ->label('Aportes y Contrib.')
                     ->tooltip('Exportar Aportes y Contribuciones a un archivo Excel')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($livewire) {
-                        return (new OrdenAportesyContribuciones(
-                            $livewire->getFilteredTableQuery()
-                                ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos()),
-                        ))
-                            ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx');
-                    }),
+                    ->action(fn($livewire) => new OrdenAportesyContribuciones(
+                        $livewire->getFilteredTableQuery()
+                            ->whereIn('codn_conce', ConceptoGrupo::APORTES_Y_CONTRIBUCIONES->getConceptos()),
+                    )
+                        ->download('aportes-y-contribuciones-' . now()->format('d-m-Y') . '.xlsx')),
                 Action::make('truncate')
                     ->label('Limpiar Tabla')
                     ->tooltip('Eliminar todos los registros de la tabla')
@@ -180,7 +171,7 @@ class OrdenesDescuentoResource extends Resource
                     ->modalDescription('Esta acción eliminará todos los registros de la tabla y no se puede deshacer.')
                     ->modalSubmitActionLabel('Sí, eliminar todo')
                     ->action(function (): void {
-                        OrdenesDescuento::truncate();
+                        OrdenesDescuento::query()->truncate();
                         Notification::make()
                             ->success()
                             ->title('Tabla limpiada exitosamente')
@@ -204,6 +195,7 @@ class OrdenesDescuentoResource extends Resource
             ->poll('60s');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -211,6 +203,7 @@ class OrdenesDescuentoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -219,12 +212,13 @@ class OrdenesDescuentoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
-        $service = app()->make(OrdenesDescuentoTableService::class);
+        $ordenesDescuentoTableService = app()->make(OrdenesDescuentoTableService::class);
 
-        if (!$service->exists()) {
-            $service->createAndPopulate();
+        if (!$ordenesDescuentoTableService->exists()) {
+            $ordenesDescuentoTableService->createAndPopulate();
         }
 
         return parent::getEloquentQuery();

@@ -30,16 +30,19 @@ class ListEmbargos extends ListRecords
         $this->tableService->ensureTableExists();
     }
 
+    #[\Override]
     public function mount(): void
     {
         $this->embargoResource = new EmbargoResource();
     }
 
+    #[\Override]
     public function getHeaderWidgetsColumns(): int|array
     {
         return 2;
     }
 
+    #[\Override]
     public function getMaxContentWidth(): Width
     {
         return Width::ScreenExtraLarge;
@@ -58,6 +61,7 @@ class ListEmbargos extends ListRecords
         $this->dispatch('propertiesUpdated', $updatedProperties);
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         $embargoResource = new EmbargoResource();
@@ -69,6 +73,7 @@ class ListEmbargos extends ListRecords
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

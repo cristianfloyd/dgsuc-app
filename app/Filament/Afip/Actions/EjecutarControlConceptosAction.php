@@ -49,8 +49,8 @@ class EjecutarControlConceptosAction extends Action
                     ->label('Conceptos a controlar')
                     ->options(
                         collect(ConceptosSicossEnum::cases())
-                            ->mapWithKeys(fn($case) => [$case->value => (string) $case->value])
-                            ->toArray(),
+                            ->mapWithKeys(fn($case): array => [$case->value => (string) $case->value])
+                            ->all(),
                     )
                     ->default(array_merge(
                         ConceptosSicossEnum::getAllAportesCodes(),
@@ -87,7 +87,7 @@ class EjecutarControlConceptosAction extends Action
      */
     public function withPeriodBadge(): static
     {
-        return $this->badge(function () {
+        return $this->badge(function (): string {
             $livewire = $this->getLivewire();
 
             return sprintf('%d-%02d', $livewire->year, $livewire->month);
@@ -116,7 +116,7 @@ class EjecutarControlConceptosAction extends Action
     {
         $livewire = $this->getLivewire();
 
-        $conceptos = $data['conceptos'] ?? array_merge(
+        $data['conceptos'] ?? array_merge(
             ConceptosSicossEnum::getAllAportesCodes(),
             ConceptosSicossEnum::getAllContribucionesCodes(),
             ConceptosSicossEnum::getContribucionesArtCodes(),
@@ -127,7 +127,7 @@ class EjecutarControlConceptosAction extends Action
             $livewire->loading = true;
 
             // Obtener período fiscal
-            $periodoFiscalService = app(PeriodoFiscalService::class);
+            $periodoFiscalService = resolve(PeriodoFiscalService::class);
             $periodoFiscal = $periodoFiscalService->getPeriodoFiscal();
             $year = $periodoFiscal['year'];
             $month = $periodoFiscal['month'];
@@ -139,7 +139,7 @@ class EjecutarControlConceptosAction extends Action
             ]);
 
             // Ejecutar control
-            $service = app(SicossControlService::class);
+            $service = resolve(SicossControlService::class);
             $service->setConnection($livewire->getConnectionName());
             $resultados = $service->ejecutarControlConceptos($year, $month);
 
@@ -166,7 +166,7 @@ class EjecutarControlConceptosAction extends Action
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $livewire->activeTab = 'conceptos'),
+                        ->action(fn(): string => $livewire->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();

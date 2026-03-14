@@ -10,6 +10,7 @@ class EditMapucheGrupo extends EditRecord
 {
     protected static string $resource = MapucheGrupoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

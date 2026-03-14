@@ -25,7 +25,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 
-class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, HasActions
+class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -41,17 +41,17 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
 
     protected string $view = 'filament.resources.dh11-resource.widgets.actualizar-impp-basic-widget';
 
-    private $categoryUpdateService;
+    private ?\App\Contracts\CategoryUpdateServiceInterface $categoryUpdateService = null;
 
-    private $periodoFiscalService;
+    private ?\App\Services\Mapuche\PeriodoFiscalService $periodoFiscalService = null;
 
     private $periodoFiscal;
 
-    private $Dh11RestoreService;
+    private ?\App\Services\Dh11RestoreService $Dh11RestoreService = null;
 
-    private $dh11Service;
+    private ?\App\Services\Dh11Service $dh11Service = null;
 
-    private $escalafonService;
+    private ?\App\Services\Mapuche\EscalafonService $escalafonService = null;
 
     public function boot(
         PeriodoFiscalService $periodoFiscalService,
@@ -79,16 +79,13 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
         return $schema
             ->components([
                 Select::make('codigoescalafon')->label('Escalafon')
-                    ->options(function () {
-                        $codc_categs = collect(['TODO' => 'Todos'])
-                            ->merge([
-                                'DOC2' => 'Preuniversitario',
-                                'DOCU' => 'Docente Universitario',
-                                'AUTU' => 'Autoridad Universitaria',
-                                'NODO' => 'Nodocente',
-                            ]);
-                        return $codc_categs;
-                    })
+                    ->options(fn() => collect(['TODO' => 'Todos'])
+                        ->merge([
+                            'DOC2' => 'Preuniversitario',
+                            'DOCU' => 'Docente Universitario',
+                            'AUTU' => 'Autoridad Universitaria',
+                            'NODO' => 'Nodocente',
+                        ]))
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set): void {
                         $codc_categs = match ($state) {
@@ -97,7 +94,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
                             'AUTU' => self::CATEGORIAS['AUTU'],
                             'NODO' => self::CATEGORIAS['NODO'],
                             'TODO' => $this->dh11Service->getAllCodcCateg(),
-                            default => Dh11::where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
+                            default => Dh11::query()->where('codigoescalafon', $state)->pluck('codc_categ')->toArray(),
                         };
                         session(['selected_codc_categs' => $codc_categs]);
                     }),
@@ -119,7 +116,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
                 Actions::make([
                     Action::make('restore')->label('Restaurar')->icon('heroicon-m-arrow-path')
                         ->color('info')
-                        ->badge(function () {
+                        ->badge(function (): string {
                             // Verificar si $this->periodoFiscal es válido antes de acceder a sus índices
                             if (isset($this->periodoFiscal['year'], $this->periodoFiscal['month'])) {
                                 $year = $this->periodoFiscal['year'];
@@ -148,12 +145,12 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
 
         $factor = 1 + $this->porcentaje / 100;
 
-        $this->previewData = Dh11::select('codc_categ', 'impp_basic')
+        $this->previewData = Dh11::query()->select('codc_categ', 'impp_basic')
             ->where('impp_basic', '>', 0)
             ->whereIn('codc_categ', $selectedCategs)
             ->orderBy('codc_categ')
             ->get()
-            ->map(function ($item) use ($factor) {
+            ->map(function ($item) use ($factor): array {
                 $newImppBasic = $this->round_up($item->impp_basic * $factor, 3);
                 return [
                     'codc_categ' => $item->codc_categ,
@@ -178,8 +175,8 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
 
         try {
             foreach ($this->previewData as $data) {
-                $codc_categ = trim($data['codc_categ']);
-                $categoria = Dh11::where('codc_categ', $codc_categ)->first();
+                $codc_categ = trim((string) $data['codc_categ']);
+                $categoria = Dh11::query()->where('codc_categ', $codc_categ)->first();
 
                 if ($categoria) {
                     $this->categoryUpdateService->updateCategoryWithHistory(
@@ -249,13 +246,14 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
         $this->resetForm();
     }
 
+    #[\Override]
     public static function canView(): bool
     {
         // return auth()->user()->can('manage_dh11');
         return true;
     }
 
-    private function addNotification($message): void
+    private function addNotification(string $message): void
     {
         Notification::make()
             ->title($message)
@@ -280,7 +278,7 @@ class ActualizarImppBasicWidget extends Widget implements HasForms, HasActions, 
      *
      * @return float El número redondeado hacia arriba.
      */
-    private function round_up($number, $precision = 2)
+    private function round_up(int|float $number, int $precision = 2): float
     {
         $fig = (int) str_pad('1', $precision, '0');
         return ceil($number * $fig) / $fig;

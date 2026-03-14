@@ -15,6 +15,7 @@ class ListOrdenesDescuentos extends ListRecords
 
     protected static string $resource = OrdenesDescuentoResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         parent::mount();
@@ -51,6 +52,7 @@ class ListOrdenesDescuentos extends ListRecords
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [];

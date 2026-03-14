@@ -34,6 +34,7 @@ class RepEmbarazadaResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -49,6 +50,7 @@ class RepEmbarazadaResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -70,8 +72,8 @@ class RepEmbarazadaResource extends Resource
                         ->icon('heroicon-o-arrow-path')
                         ->requiresConfirmation()
                         ->action(function (): void {
-                            $service = app(RepEmbarazadaService::class);
-                            $service->populateTable();
+                            $repEmbarazadaService = resolve(RepEmbarazadaService::class);
+                            $repEmbarazadaService->populateTable();
 
                             Notification::make()
                                 ->title('Datos actualizados correctamente')
@@ -84,8 +86,8 @@ class RepEmbarazadaResource extends Resource
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(function (): void {
-                            $service = app(RepEmbarazadaService::class);
-                            $service->truncateTable();
+                            $repEmbarazadaService = resolve(RepEmbarazadaService::class);
+                            $repEmbarazadaService->truncateTable();
 
                             Notification::make()
                                 ->title('Tabla vaciada correctamente')
@@ -95,12 +97,10 @@ class RepEmbarazadaResource extends Resource
                     Action::make('export')
                         ->label('Exportar a Excel')
                         ->icon('heroicon-o-arrow-down-tray')
-                        ->action(function () {
-                            return Excel::download(
-                                new RepEmbarazadasExport(),
-                                'personal-embarazado-' . now()->format('Y-m-d') . '.xlsx',
-                            );
-                        }),
+                        ->action(fn() => Excel::download(
+                            new RepEmbarazadasExport(),
+                            'personal-embarazado-' . now()->format('Y-m-d') . '.xlsx',
+                        )),
                 ])->label('Acciones de Tabla')
                     ->icon('heroicon-o-cog'),
             ])
@@ -117,6 +117,7 @@ class RepEmbarazadaResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -124,6 +125,7 @@ class RepEmbarazadaResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

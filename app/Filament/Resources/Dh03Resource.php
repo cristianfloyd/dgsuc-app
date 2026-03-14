@@ -32,6 +32,7 @@ class Dh03Resource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -40,6 +41,7 @@ class Dh03Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -83,12 +85,10 @@ class Dh03Resource extends Resource
                             ])
                             ->default('todos'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return match ($data['estado']) {
-                            'activo' => $query->whereNull('fec_baja')->orWhere('fec_baja', '>=', now()),
-                            'inactivo' => $query->whereNotNull('fec_baja')->where('fec_baja', '<', now()),
-                            default => $query,
-                        };
+                    ->query(fn(Builder $query, array $data): Builder => match ($data['estado']) {
+                        'activo' => $query->whereNull('fec_baja')->orWhere('fec_baja', '>=', now()),
+                        'inactivo' => $query->whereNotNull('fec_baja')->where('fec_baja', '<', now()),
+                        default => $query,
                     }),
                 SelectFilter::make('codc_uacad')->label('Dependencia')
                     ->relationship('dh30', 'desc_item')
@@ -139,6 +139,7 @@ class Dh03Resource extends Resource
     /**
      * Define the relations for the resource.
      */
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -149,6 +150,7 @@ class Dh03Resource extends Resource
     /**
      * Define the pages for the resource.
      */
+    #[\Override]
     public static function getPages(): array
     {
         return [

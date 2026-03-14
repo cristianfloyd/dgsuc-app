@@ -28,6 +28,7 @@ class BloqueosHistorialResource extends Resource
 
     protected static ?int $navigationSort = 90;
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -61,7 +62,7 @@ class BloqueosHistorialResource extends Resource
                         DatePicker::make('from')->label('Desde'),
                         DatePicker::make('to')->label('Hasta'),
                     ])
-                    ->query(function ($query, $data): void {
+                    ->query(function ($query, array $data): void {
                         if ($data['from']) {
                             $query->whereDate('fecha_procesamiento', '>=', $data['from']);
                         }
@@ -74,6 +75,7 @@ class BloqueosHistorialResource extends Resource
             ->paginated();
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

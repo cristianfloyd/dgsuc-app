@@ -18,6 +18,7 @@ class EditDh13 extends EditRecord
      *
      * @return array Las acciones de encabezado para la página de edición.
      */
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -35,13 +36,14 @@ class EditDh13 extends EditRecord
      *
      * @return Model El registro Dh13 encontrado.
      */
+    #[\Override]
     protected function resolveRecord(int|string $key): Model
     {
         $resource = static::getResource();
         $model = $resource::getModel();
 
         // Dividir la clave compuesta
-        [$codn_conce, $nro_orden_formula] = explode('-', $key);
+        [$codn_conce, $nro_orden_formula] = explode('-', (string) $key);
 
         // Buscar el registro usando ambas partes de la clave primaria
         $record = $model::query()
@@ -64,6 +66,7 @@ class EditDh13 extends EditRecord
      *
      * @return Model El registro actualizado.
      */
+    #[\Override]
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         // Asegurarse de que no se modifiquen las claves primarias
@@ -79,6 +82,7 @@ class EditDh13 extends EditRecord
      *
      * @return string La URL de redireccionamiento.
      */
+    #[\Override]
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

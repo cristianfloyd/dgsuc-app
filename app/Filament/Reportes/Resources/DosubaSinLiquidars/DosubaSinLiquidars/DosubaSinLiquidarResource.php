@@ -37,6 +37,7 @@ class DosubaSinLiquidarResource extends Resource
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -57,10 +58,11 @@ class DosubaSinLiquidarResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         // Verificamos si hay datos para la sesión actual
-        $hasData = DosubaSinLiquidarModel::where('session_id', session()->getId())->exists();
+        $hasData = DosubaSinLiquidarModel::query()->where('session_id', session()->getId())->exists();
 
         return $table
             ->query(fn() => $hasData ? static::getModel()::query() : static::getModel()::query()->whereRaw('1 = 0'))
@@ -110,13 +112,13 @@ class DosubaSinLiquidarResource extends Resource
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($records) {
                         try {
-                            $filteredRecords = $records->filter(fn($record) => $record !== null);
+                            $filteredRecords = $records->filter(fn($record): bool => $record !== null);
 
                             return Excel::download(
                                 new DosubaSinLiquidarExport($filteredRecords, $filteredRecords->first()?->periodo_fiscal ?? ''),
                                 'dosuba-sin-liquidar-' . now()->format('Y-m-d') . '.xlsx',
                             );
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                             Notification::make()
                                 ->title('Error al exportar')
                                 ->danger()
@@ -133,9 +135,9 @@ class DosubaSinLiquidarResource extends Resource
                         ->schema([
                             Select::make('periodo')
                                 ->label('Período')
-                                ->options(function () {
+                                ->options(function (): array {
                                     $options = [];
-                                    $date = Carbon::now();
+                                    $date = \Illuminate\Support\Facades\Date::now();
 
                                     for ($i = 0; $i < 12; $i++) {
                                         $periodo = $date->format('Ym');
@@ -145,11 +147,11 @@ class DosubaSinLiquidarResource extends Resource
 
                                     return $options;
                                 })
-                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
+                                ->default(fn() => \Illuminate\Support\Facades\Date::now()->subMonth()->format('Ym'))
                                 ->required(),
                         ])
                         ->action(function (array $data) {
-                            $records = DosubaSinLiquidarModel::all()->filter(fn($record) => $record !== null);
+                            $records = DosubaSinLiquidarModel::all()->filter(fn($record): true => $record !== null);
 
                             return Excel::download(
                                 new DosubaSinLiquidarExport(
@@ -167,6 +169,7 @@ class DosubaSinLiquidarResource extends Resource
             ->emptyStateIcon('heroicon-o-document-chart-bar');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -174,6 +177,7 @@ class DosubaSinLiquidarResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

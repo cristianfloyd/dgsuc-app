@@ -16,6 +16,7 @@ class ManageNovedadesCargoImportTemp extends ManageRecords
 
     protected static string $resource = NovedadesCargoImportResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         parent::mount();

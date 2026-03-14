@@ -10,6 +10,7 @@ class EditOrdenesDescuento extends EditRecord
 {
     protected static string $resource = OrdenesDescuentoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

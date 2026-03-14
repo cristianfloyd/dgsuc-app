@@ -39,7 +39,8 @@ class SystemStatusWidget extends Widget
 
         return [
             'activas' => $connections[0]->total_connections,
-            'max' => $this->getMaxConnections(),
+            'max' => DB::connection($this->getConnectionName())
+                ->select('SHOW max_connections')[0]->max_connections,
         ];
     }
 

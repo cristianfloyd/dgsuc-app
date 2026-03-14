@@ -14,13 +14,14 @@ class CargoCountWidget extends BaseWidget
 
     protected static ?int $sort = 3;
 
+    #[\Override]
     protected function getStats(): array
     {
         $codigoescalafon = $this->pageFilters['codigoescalafon'] ?? 'TODOS';
 
         switch ($codigoescalafon) {
             case 'TODOS':
-                $cargoCount = Dh03::count();
+                $cargoCount = Dh03::query()->count();
                 break;
             case 'DOCS':
                 $cargoCount = Dh11::getCargosDoceSecundario();
@@ -29,17 +30,15 @@ class CargoCountWidget extends BaseWidget
                 $cargoCount = Dh11::getCargosDoceUniversitario();
                 break;
             case 'AUTU':
+            case 'AUTO':
                 $cargoCount = Dh11::getCargosAutoUniversitario();
                 break;
             case 'AUTS':
                 $cargoCount = Dh11::getCargosAutoSecundario();
                 break;
-            case 'AUTO':
-                $cargoCount = Dh11::getCargosAutoUniversitario();
-                break;
             default:
                 $codc_categs = session('selected_codc_categs', []);
-                $cargoCount = Dh03::whereIn('codc_categ', $codc_categs)->count();
+                $cargoCount = Dh03::query()->whereIn('codc_categ', $codc_categs)->count();
                 break;
         }
 

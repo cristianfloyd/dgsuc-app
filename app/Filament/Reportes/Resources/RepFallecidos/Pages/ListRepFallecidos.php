@@ -12,21 +12,23 @@ class ListRepFallecidos extends ListRecords
 {
     protected static string $resource = RepFallecidoResource::class;
 
+    #[\Override]
     public function mount(): void
     {
-        $manager = app(TableInitializationManager::class);
+        $tableInitializationManager = resolve(TableInitializationManager::class);
         $modelClass = static::$resource::getModel();
-        $service = app($modelClass::getTableServiceClass());
+        $service = resolve($modelClass::getTableServiceClass());
 
         try {
-            if (!$manager->isTableInitialized($service)) {
-                $manager->initializeTable($service);
+            if (!$tableInitializationManager->isTableInitialized($service)) {
+                $tableInitializationManager->initializeTable($service);
             }
         } catch (Exception $e) {
             report($e);
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

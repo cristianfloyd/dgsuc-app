@@ -28,6 +28,7 @@ class RepFallecidoResource extends Resource
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static string|UnitEnum|null $navigationGroup = 'Dosuba';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +37,7 @@ class RepFallecidoResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -69,13 +71,13 @@ class RepFallecidoResource extends Resource
                             DatePicker::make('fecha_desde')
                                 ->label('Fecha Desde')
                                 ->required()
-                                ->default(now()->subMonth(2))
+                                ->default(now()->subMonth())
                                 ->format('Y-m-d')
                                 ->maxDate(now()),
                         ])
                         ->action(function (array $data): void {
-                            $service = app(FallecidosTableService::class);
-                            $service->populateFromDate($data['fecha_desde']);
+                            $fallecidosTableService = resolve(FallecidosTableService::class);
+                            $fallecidosTableService->populateFromDate($data['fecha_desde']);
                             Notification::make()
                                 ->title('Tabla poblada exitosamente')
                                 ->success()
@@ -90,8 +92,8 @@ class RepFallecidoResource extends Resource
                         ->modalDescription('Esta acción eliminará todos los registros de la tabla.')
                         ->modalSubmitActionLabel('Sí, limpiar tabla')
                         ->action(function (): void {
-                            $service = app(FallecidosTableService::class);
-                            $service->truncateTable();
+                            $fallecidosTableService = resolve(FallecidosTableService::class);
+                            $fallecidosTableService->truncateTable();
                             Notification::make()
                                 ->title('Tabla limpiada exitosamente')
                                 ->success()
@@ -103,9 +105,9 @@ class RepFallecidoResource extends Resource
                         ->schema([
                             Select::make('periodo')
                                 ->label('Período')
-                                ->options(function () {
+                                ->options(function (): array {
                                     $options = [];
-                                    $date = Carbon::now();
+                                    $date = \Illuminate\Support\Facades\Date::now();
                                     for ($i = 0; $i < 12; $i++) {
                                         $periodo = $date->format('Ym');
                                         $options[$periodo] = $date->format('Y/m');
@@ -113,18 +115,16 @@ class RepFallecidoResource extends Resource
                                     }
                                     return $options;
                                 })
-                                ->default(fn() => Carbon::now()->subMonth()->format('Ym'))
+                                ->default(fn() => \Illuminate\Support\Facades\Date::now()->subMonth()->format('Ym'))
                                 ->required(),
                         ])
-                        ->action(function (array $data) {
-                            return Excel::download(
-                                new FallecidosExport(
-                                    records: RepFallecido::all(),
-                                    periodo: $data['periodo'],
-                                ),
-                                'fallecidos-' . $data['periodo'] . '.xlsx',
-                            );
-                        }),
+                        ->action(fn(array $data) => Excel::download(
+                            new FallecidosExport(
+                                records: RepFallecido::all(),
+                                periodo: $data['periodo'],
+                            ),
+                            'fallecidos-' . $data['periodo'] . '.xlsx',
+                        )),
                 ])
                     ->label('Acciones')
                     ->icon('heroicon-m-cog-6-tooth'),
@@ -132,6 +132,7 @@ class RepFallecidoResource extends Resource
             ->defaultSort('nro_legaj', 'desc');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -139,6 +140,7 @@ class RepFallecidoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

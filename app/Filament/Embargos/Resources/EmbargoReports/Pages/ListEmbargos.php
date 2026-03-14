@@ -10,6 +10,7 @@ class ListEmbargos extends ListRecords
 {
     protected static string $resource = EmbargoReportResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

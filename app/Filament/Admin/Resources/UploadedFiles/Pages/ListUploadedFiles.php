@@ -10,6 +10,7 @@ class ListUploadedFiles extends ListRecords
 {
     protected static string $resource = UploadedFileResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

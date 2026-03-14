@@ -16,20 +16,22 @@ class ListAfipMapucheSicossCalculos extends ListRecords
 {
     protected static string $resource = AfipMapucheSicossCalculoResource::class;
 
+    #[\Override]
     public function mount(): void
     {
-        $manager = app(TableInitializationManager::class);
-        $service = app(AfipMapucheSicossCalculoTableService::class);
+        $tableInitializationManager = resolve(TableInitializationManager::class);
+        $afipMapucheSicossCalculoTableService = resolve(AfipMapucheSicossCalculoTableService::class);
 
         try {
-            if (!$manager->isTableInitialized($service)) {
-                $manager->initializeTable($service);
+            if (!$tableInitializationManager->isTableInitialized($afipMapucheSicossCalculoTableService)) {
+                $tableInitializationManager->initializeTable($afipMapucheSicossCalculoTableService);
             }
         } catch (Exception $e) {
             report($e);
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -63,7 +65,7 @@ class ListAfipMapucheSicossCalculos extends ListRecords
                 ->color('danger')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                    resolve(AfipMapucheSicossCalculoRepository::class)->truncate();
                     Notification::make()
                         ->success()
                         ->title('Tabla vaciada')

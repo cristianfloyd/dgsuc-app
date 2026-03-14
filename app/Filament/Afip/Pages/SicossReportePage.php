@@ -61,7 +61,7 @@ class SicossReportePage extends Page implements HasTable
 
     public function boot(): void
     {
-        $this->sicossReporteService = app(SicossReporteService::class);
+        $this->sicossReporteService = resolve(SicossReporteService::class);
     }
 
     public function mount(): void
@@ -191,6 +191,7 @@ class SicossReportePage extends Page implements HasTable
         return $this->sicossReporteService->getTotales($this->anio, $this->mes)->toArray();
     }
 
+    #[\Override]
     public function getWidgetData(): array
     {
         return [
@@ -236,17 +237,13 @@ class SicossReportePage extends Page implements HasTable
                 Action::make('export')
                     ->label('Exportar Todo')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(function () {
-                        return Excel::download(new SicossReporteExport($this->anio, $this->mes, null, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}.xlsx");
-                    }),
+                    ->action(fn() => Excel::download(new SicossReporteExport($this->anio, $this->mes, null, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}.xlsx")),
             ])
             ->toolbarActions([
                 BulkAction::make('export')
                     ->label('Exportar Seleccionados')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(function ($records) {
-                        return Excel::download(new SicossReporteExport($this->anio, $this->mes, $records, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}_seleccionados.xlsx");
-                    }),
+                    ->action(fn($records) => Excel::download(new SicossReporteExport($this->anio, $this->mes, $records, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}_seleccionados.xlsx")),
             ])
             ->persistFiltersInSession()
             ->persistSortInSession();
@@ -263,11 +260,13 @@ class SicossReportePage extends Page implements HasTable
         Notification::make()->title('Datos actualizados')->success()->send();
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [SicossTotalesWidget::class];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [];

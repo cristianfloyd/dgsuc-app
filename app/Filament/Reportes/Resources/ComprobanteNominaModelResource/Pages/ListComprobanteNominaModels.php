@@ -22,6 +22,7 @@ class ListComprobanteNominaModels extends ListRecords
         Log::debug('LisComprobantesNomina iniciada (booted)');
     }
 
+    #[\Override]
     public function mount(): void
     {
         if (!$this->comprobanteNominaService->checkTableExists()) {
@@ -29,6 +30,7 @@ class ListComprobanteNominaModels extends ListRecords
         }
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

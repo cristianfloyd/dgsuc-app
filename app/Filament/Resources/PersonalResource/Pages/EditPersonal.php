@@ -10,6 +10,7 @@ class EditPersonal extends EditRecord
 {
     protected static string $resource = PersonalResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

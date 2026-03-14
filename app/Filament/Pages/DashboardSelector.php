@@ -20,17 +20,19 @@ class DashboardSelector extends Page
 
     public function mount(): void
     {
-        $panels = PanelRegistry::getAllPanels();
-        if ($panels->count() === 1) {
-            $this->redirect($panels->first()['url']);
+        $allPanels = PanelRegistry::getAllPanels();
+        if ($allPanels->count() === 1) {
+            $this->redirect($allPanels->first()['url']);
         }
     }
 
+    #[\Override]
     public function getHeading(): string
     {
         return 'Bienvenido al Sistema';
     }
 
+    #[\Override]
     public function getSubheading(): string
     {
         return 'Seleccione el panel al que desea acceder';

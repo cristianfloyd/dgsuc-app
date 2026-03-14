@@ -10,6 +10,7 @@ class EditRepEmbarazada extends EditRecord
 {
     protected static string $resource = RepEmbarazadaResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

@@ -15,11 +15,13 @@ class ListAfipMapucheSicosses extends BaseListRecords
 {
     protected static string $resource = AfipMapucheSicossResource::class;
 
+    #[\Override]
     public function mount(): void
     {
         parent::mount();
     }
 
+    #[\Override]
     public function getTabs(): array
     {
         return [
@@ -35,6 +37,7 @@ class ListAfipMapucheSicosses extends BaseListRecords
         return AfipMapucheSicossTableService::class;
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

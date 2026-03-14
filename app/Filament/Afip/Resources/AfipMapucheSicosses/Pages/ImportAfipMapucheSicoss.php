@@ -51,7 +51,7 @@ class ImportAfipMapucheSicoss extends Page
 
     public function boot(): void
     {
-        $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        $this->periodoFiscalService = resolve(PeriodoFiscalService::class);
     }
 
     public function mount(): void
@@ -80,14 +80,14 @@ class ImportAfipMapucheSicoss extends Page
                 return;
             }
 
-            $service = app(AfipMapucheSicossImportService::class);
+            $service = resolve(AfipMapucheSicossImportService::class);
             $periodoFiscal = $data['year'] . sprintf('%02d', $data['month']);
 
             // Usar streams para procesar el archivo
             $result = $service->streamImport(
                 $filePath,
                 $periodoFiscal,
-                fn($progress) => $this->updateImportProgress($progress),
+                fn(array $progress) => $this->updateImportProgress($progress),
             );
 
             $this->handleImportResult($result);
@@ -148,6 +148,7 @@ class ImportAfipMapucheSicoss extends Page
         ];
     }
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -264,7 +265,7 @@ class ImportAfipMapucheSicoss extends Page
      */
     private function getYearOptions(): array
     {
-        $currentYear = Carbon::now()->year;
+        $currentYear = \Illuminate\Support\Facades\Date::now()->year;
 
         return array_combine(
             range($currentYear - 5, $currentYear + 1),

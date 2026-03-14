@@ -10,6 +10,7 @@ class EditNovedadesCargoImport extends EditRecord
 {
     protected static string $resource = NovedadesCargoImportResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

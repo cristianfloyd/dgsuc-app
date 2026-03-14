@@ -49,6 +49,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -57,6 +58,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -89,10 +91,10 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->badge()
                     ->label('Puesto')
                     ->colors([
-                        'primary' => fn($state) => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
-                        'secondary' => fn($state) => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
-                        'warning' => fn($state) => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
-                        'success' => fn($state) => $state === PuestoDesempenado::NODOCENTE->descripcion(),
+                        'primary' => fn($state): bool => $state === PuestoDesempenado::PROFESOR_UNIVERSITARIO->descripcion(),
+                        'secondary' => fn($state): bool => $state === PuestoDesempenado::PROFESOR_SECUNDARIO->descripcion(),
+                        'warning' => fn($state): bool => $state === PuestoDesempenado::DIRECTIVO->descripcion(),
+                        'success' => fn($state): bool => $state === PuestoDesempenado::NODOCENTE->descripcion(),
                     ]),
             ])
             ->filters([
@@ -126,7 +128,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->schema([
                         Select::make('periodo_fiscal')
                             ->label('Período Fiscal')
-                            ->options(fn(AfipMapucheSicossService $afipMapucheSicossService) => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
+                            ->options(fn(AfipMapucheSicossService $afipMapucheSicossService): array => $afipMapucheSicossService->getPeriodosFiscalesForSelect())
                             ->required()
                             ->searchable(),
                         Select::make('nro_liqui')
@@ -141,9 +143,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 $liquidaciones = $liquidacionService->getLiquidacionesForSelect($year, $month);
 
                                 // Formatear el array para la vista
-                                return collect($liquidaciones)->mapWithKeys(function ($descripcion, $nro_liqui) {
-                                    return [$nro_liqui => "# {$nro_liqui} - {$descripcion}"];
-                                })->toArray();
+                                return collect($liquidaciones)->mapWithKeys(fn($descripcion, $nro_liqui) => [$nro_liqui => "# {$nro_liqui} - {$descripcion}"])->all();
                             })
                             ->required()
                             ->searchable()
@@ -198,6 +198,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ->defaultSort('periodo_fiscal', 'desc');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -205,6 +206,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

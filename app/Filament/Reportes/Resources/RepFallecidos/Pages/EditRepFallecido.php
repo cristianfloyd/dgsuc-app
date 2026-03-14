@@ -10,6 +10,7 @@ class EditRepFallecido extends EditRecord
 {
     protected static string $resource = RepFallecidoResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

@@ -49,7 +49,7 @@ class ExportAfipMapucheSicoss extends Page
 
     public function boot(): void
     {
-        $this->periodoFiscalService = app(PeriodoFiscalService::class);
+        $this->periodoFiscalService = resolve(PeriodoFiscalService::class);
     }
 
     public function mount(): void
@@ -183,7 +183,7 @@ class ExportAfipMapucheSicoss extends Page
      */
     private function getYearOptions(): array
     {
-        $currentYear = Carbon::now()->year;
+        $currentYear = \Illuminate\Support\Facades\Date::now()->year;
 
         return array_combine(
             range($currentYear - 5, $currentYear + 1),

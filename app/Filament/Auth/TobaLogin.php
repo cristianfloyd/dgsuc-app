@@ -13,6 +13,7 @@ class TobaLogin extends Login
 {
     protected string $view = 'filament.auth.toba-login';
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -33,6 +34,7 @@ class TobaLogin extends Login
             ->statePath('data');
     }
 
+    #[\Override]
     public function authenticate(): ?LoginResponse
     {
         $data = $this->form->getState();
@@ -51,22 +53,25 @@ class TobaLogin extends Login
 
             session()->regenerate();
 
-            return app(LoginResponse::class);
+            return resolve(LoginResponse::class);
         }
 
         throw ValidationException::withMessages([ 'data.usuario' => 'Las credenciales no coinciden con nuestros registros.', ]);
     }
 
+    #[\Override]
     public function getHeading(): string
     {
         return 'Iniciar Sesión - Sistema Toba';
     }
 
+    #[\Override]
     public function getSubheading(): ?string
     {
         return 'Accede con tus credenciales del sistema Toba';
     }
 
+    #[\Override]
     protected function getViewData(): array
     {
         return [

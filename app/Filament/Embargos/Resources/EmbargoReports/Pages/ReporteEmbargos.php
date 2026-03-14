@@ -69,6 +69,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
         );
     }
 
+    #[\Override]
     public function getHeaderActions(): array
     {
         return [
@@ -77,7 +78,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->action(function () {
-                    $query = EmbargoReportModel::query()
+                    $builder = EmbargoReportModel::query()
                         ->select([
                             'nro_legaj',
                             'nro_cargo',
@@ -96,7 +97,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
                         ->where('session_id', session()->getId());
 
                     return Excel::download(
-                        new EmbargoReportExport($query),
+                        new EmbargoReportExport($builder),
                         'embargos-' . now()->format('Y-m-d') . '.xlsx',
                     );
                 }),
@@ -147,7 +148,7 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
 
         try {
 
-            $reportService = app(EmbargoReportService::class);
+            $reportService = resolve(EmbargoReportService::class);
             $reportData = $reportService->generateReport($this->nro_liqui);
             EmbargoReportModel::setReportData($reportData);
             $this->refreshTable();
@@ -177,12 +178,10 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
         return [
             Select::make('nro_liqui')
                 ->label('Liquidación')
-                ->options(function () {
-                    return Dh22::query()->select('nro_liqui', 'desc_liqui')
-                        ->distinct()
-                        ->orderByDesc('nro_liqui')
-                        ->pluck('desc_liqui', 'nro_liqui');
-                })
+                ->options(fn() => Dh22::query()->select('nro_liqui', 'desc_liqui')
+                    ->distinct()
+                    ->orderByDesc('nro_liqui')
+                    ->pluck('desc_liqui', 'nro_liqui'))
                 ->required(),
         ];
     }
@@ -235,12 +234,12 @@ class ReporteEmbargos extends Page implements HasForms, HasTable
     {
         $sessionId = session()->getId();
 
-        return EmbargoReportModel::where('session_id', $sessionId)
+        return EmbargoReportModel::query()->where('session_id', $sessionId)
             ->where('nro_liqui', $this->nro_liqui)
             ->exists();
     }
 
-    private function getExportAction()
+    private function getExportAction(): \Filament\Actions\Action
     {
         return Action::make('export')
             ->label('Exportar')

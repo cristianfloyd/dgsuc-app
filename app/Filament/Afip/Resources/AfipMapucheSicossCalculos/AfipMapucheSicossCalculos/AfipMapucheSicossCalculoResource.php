@@ -34,6 +34,7 @@ class AfipMapucheSicossCalculoResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -43,6 +44,7 @@ class AfipMapucheSicossCalculoResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -110,7 +112,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                         ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
                         ->modalSubmitActionLabel('Sí, vaciar tabla')
                         ->action(function (): void {
-                            app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                            resolve(AfipMapucheSicossCalculoRepository::class)->truncate();
                             Notification::make()
                                 ->success()
                                 ->title('Tabla vaciada')
@@ -141,7 +143,7 @@ class AfipMapucheSicossCalculoResource extends Resource
                     ->modalDescription('Esta acción eliminará todos los registros de la tabla. Esta operación no se puede deshacer.')
                     ->modalSubmitActionLabel('Sí, vaciar tabla')
                     ->action(function (): void {
-                        app(AfipMapucheSicossCalculoRepository::class)->truncate();
+                        resolve(AfipMapucheSicossCalculoRepository::class)->truncate();
                         Notification::make()
                             ->success()
                             ->title('Tabla vaciada')
@@ -151,6 +153,7 @@ class AfipMapucheSicossCalculoResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema

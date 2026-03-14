@@ -12,6 +12,7 @@ class ListDocumentation extends ListRecords
 {
     protected static string $resource = DocumentationResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

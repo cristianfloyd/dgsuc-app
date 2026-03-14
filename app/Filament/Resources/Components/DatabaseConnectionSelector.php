@@ -22,8 +22,8 @@ class DatabaseConnectionSelector extends Component implements HasForms, HasActio
 
     public function mount(): void
     {
-        $service = app(DatabaseConnectionService::class);
-        $currentConnection = $service->getCurrentConnection();
+        $databaseConnectionService = resolve(DatabaseConnectionService::class);
+        $currentConnection = $databaseConnectionService->getCurrentConnection();
         dd($currentConnection);
         $this->form->fill([
             'connection' => $this->connection,
@@ -32,16 +32,16 @@ class DatabaseConnectionSelector extends Component implements HasForms, HasActio
 
     public function form(Schema $schema): Schema
     {
-        $service = app(DatabaseConnectionService::class);
+        $databaseConnectionService = resolve(DatabaseConnectionService::class);
 
         return $schema
             ->components([
                 Select::make('connection')
                     ->label('Base de Datos')
-                    ->options($service->getAvailableConnections())
+                    ->options($databaseConnectionService->getAvailableConnections())
                     ->live()
-                    ->afterStateUpdated(function ($state) use ($service): void {
-                        $service->setConnection($state);
+                    ->afterStateUpdated(function (string $state) use ($databaseConnectionService): void {
+                        $databaseConnectionService->setConnection($state);
 
                         Notification::make()
                             ->title('Conexión cambiada')

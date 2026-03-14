@@ -10,6 +10,7 @@ class EditDh11 extends EditRecord
 {
     protected static string $resource = Dh11Resource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [
@@ -17,6 +18,7 @@ class EditDh11 extends EditRecord
         ];
     }
 
+    #[\Override]
     protected function getRedirectUrl(): string
     {
         return $this->previousUrl ?? $this->getResource()::getUrl('index');

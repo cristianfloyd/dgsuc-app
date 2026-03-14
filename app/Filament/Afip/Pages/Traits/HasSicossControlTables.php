@@ -92,20 +92,20 @@ trait HasSicossControlTables
                 ->label('Total Aportes DH21')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
-                ->state(fn($record) => $record->aportesijpdh21 + $record->aporteinssjpdh21)
+                ->state(fn($record): float|int|array => $record->aportesijpdh21 + $record->aporteinssjpdh21)
                 ->sortable(),
             TextColumn::make('total_aportes_sicoss')
                 ->label('Total Aportes SICOSS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
                 ->money('ARS')
-                ->state(fn($record) => $record->aportesijp + $record->aporteinssjp + $record->sicossCalculo->aportediferencialsijp + $record->sicossCalculo->aportesres33_41re)
+                ->state(fn($record): float|int|array => $record->aportesijp + $record->aporteinssjp + $record->sicossCalculo->aportediferencialsijp + $record->sicossCalculo->aportesres33_41re)
                 ->sortable(),
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->alignment(Alignment::End)->size(TextSize::ExtraSmall)
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->tooltip(fn($state) => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
+                ->color(fn($state): string => $state < 0 ? 'danger' : 'warning')
+                ->tooltip(fn($state): string => $state < 0 ? 'Falta aportar' : 'Exceso de aportes'),
         ];
     }
 
@@ -143,8 +143,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn($state) => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
+                ->color(fn($state): string => $state < 0 ? 'danger' : 'warning')
+                ->description(fn($state): string => $state < 0 ? 'Falta contribuir' : 'Exceso de contribuciones'),
         ];
     }
 
@@ -168,8 +168,8 @@ trait HasSicossControlTables
             TextColumn::make('diferencia')
                 ->money('ARS')
                 ->sortable()
-                ->color(fn($state) => $state < 0 ? 'danger' : 'warning')
-                ->description(fn($state) => abs($state)),
+                ->color(fn($state): string => $state < 0 ? 'danger' : 'warning')
+                ->description(fn($state): float|int => abs($state)),
         ];
     }
 
@@ -231,8 +231,8 @@ trait HasSicossControlTables
             'contribuciones' => DB::table('suc.control_contribuciones_diferencias'),
             'art' => DB::table('suc.control_art_diferencias'),
             'conceptos' => DB::table('suc.control_conceptos_periodos')
-                ->where('year', $this->year ?? Carbon::now()->year)
-                ->where('month', $this->month ?? Carbon::now()->month),
+                ->where('year', $this->year ?? \Illuminate\Support\Facades\Date::now()->year)
+                ->where('month', $this->month ?? \Illuminate\Support\Facades\Date::now()->month),
             default => DB::table('suc.control_cuils_diferencias')->whereRaw('1=0'),
         };
     }

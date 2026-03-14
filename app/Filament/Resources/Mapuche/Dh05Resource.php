@@ -28,6 +28,7 @@ class Dh05Resource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Personal';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -75,6 +76,7 @@ class Dh05Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -160,6 +162,7 @@ class Dh05Resource extends Resource
             ->searchable();
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -167,6 +170,7 @@ class Dh05Resource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

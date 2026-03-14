@@ -10,6 +10,7 @@ class CreateDh13 extends CreateRecord
 {
     protected static string $resource = Dh13Resource::class;
 
+    #[\Override]
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

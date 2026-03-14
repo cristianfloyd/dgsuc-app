@@ -32,6 +32,7 @@ class NovedadesCargoImportResource extends Resource
     // -------------------------------------------------------------------------
     // Definición del formulario inicial para subir el archivo
     // -------------------------------------------------------------------------
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -51,6 +52,7 @@ class NovedadesCargoImportResource extends Resource
     // -------------------------------------------------------------------------
     // Definición de la tabla que muestra los resultados de la primera validación
     // -------------------------------------------------------------------------
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -68,12 +70,13 @@ class NovedadesCargoImportResource extends Resource
                     ->label('Tipo Nov.'),
                 TextColumn::make('errors')
                     ->label('Errores de Validación')
-                    ->formatStateUsing(fn($state) => implode(', ', (array) $state)),
+                    ->formatStateUsing(fn($state): string => implode(', ', (array) $state)),
             ])
             ->filters([])
             ->defaultSort('id', 'desc');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -84,6 +87,7 @@ class NovedadesCargoImportResource extends Resource
     // -------------------------------------------------------------------------
     // Páginas (acciones) que se crean para el Resource
     // -------------------------------------------------------------------------
+    #[\Override]
     public static function getPages(): array
     {
         return [

@@ -16,8 +16,7 @@ class SicossControlActionHandler
     public function __construct(
         protected SicossControlService $controlService,
         protected PeriodoFiscalService $periodoFiscalService,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta un control específico siguiendo el patrón común.

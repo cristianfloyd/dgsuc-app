@@ -20,6 +20,7 @@ class EmbargoReportResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Informes';
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -57,9 +58,7 @@ class EmbargoReportResource extends Resource
                     ->tooltip(function (Embargo $record): string {
                         $importes = $record->getImporteDescontado(3);
 
-                        return $importes->map(function ($importe) {
-                            return "Cargo {$importe->nro_cargo}: $ " . number_format($importe->impp_conce, 2);
-                        })->join("\n");
+                        return $importes->map(fn($importe) => "Cargo {$importe->nro_cargo}: $ " . number_format($importe->impp_conce, 2))->join("\n");
                     })
                     ->sortable(),
                 TextColumn::make('tipoEmbargo.codn_conce')->label('concepto')->sortable(),
@@ -105,6 +104,7 @@ class EmbargoReportResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -112,6 +112,7 @@ class EmbargoReportResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

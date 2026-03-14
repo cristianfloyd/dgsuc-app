@@ -17,12 +17,12 @@ abstract class BaseListRecords extends ListRecords
 
     protected function initializeTableIfNeeded(): void
     {
-        $manager = app(TableInitializationManager::class);
-        $service = app($this->getTableServiceClass());
+        $tableInitializationManager = resolve(TableInitializationManager::class);
+        $service = resolve($this->getTableServiceClass());
 
         try {
-            if (!$manager->isTableInitialized($service)) {
-                $manager->initializeTable($service);
+            if (!$tableInitializationManager->isTableInitialized($service)) {
+                $tableInitializationManager->initializeTable($service);
             }
         } catch (Exception $e) {
             report($e);

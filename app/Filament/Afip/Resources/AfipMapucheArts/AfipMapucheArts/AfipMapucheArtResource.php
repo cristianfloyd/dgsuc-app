@@ -30,6 +30,7 @@ class AfipMapucheArtResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -38,6 +39,7 @@ class AfipMapucheArtResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -50,12 +52,10 @@ class AfipMapucheArtResource extends Resource
                     ->tooltip('Haz clic para copiar'),
                 TextColumn::make('apellido_y_nombre')
                     ->label('Apellido y Nombre')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->where(function ($query) use ($search): void {
-                            $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
-                                ->orWhere('cuil', 'ilike', '%' . $search . '%');
-                        });
-                    })
+                    ->searchable(query: fn(Builder $query, string $search): Builder => $query->where(function ($query) use ($search): void {
+                        $query->where('apellido_y_nombre', 'ilike', '%' . strtoupper($search) . '%')
+                            ->orWhere('cuil', 'ilike', '%' . $search . '%');
+                    }))
                     ->formatStateUsing(fn(string $state): string => strtoupper($state)),
                 TextColumn::make('nro_legaj'),
                 TextColumn::make('nacimiento')->label('Nacimiento')->date('d/m/Y'),
@@ -78,13 +78,11 @@ class AfipMapucheArtResource extends Resource
                             ->numeric()
                             ->label('Sueldo mayor a'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['monto'],
-                                fn(Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
-                            );
-                    }),
+                    ->query(fn(Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['monto'],
+                            fn(Builder $query, $monto): Builder => $query->where('sueldo', '>', $monto),
+                        )),
             ])
             ->recordActions([
             ])
@@ -108,6 +106,7 @@ class AfipMapucheArtResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

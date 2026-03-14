@@ -49,9 +49,7 @@ class ConceptosTotales extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('total_impp')
                     ->label(
-                        function (Get $get) {
-                            return $this->total;
-                        },
+                        fn(Get $get) => $this->total,
                     )
                     ->money('ARS')
                     ->sortable(),
@@ -65,23 +63,23 @@ class ConceptosTotales extends Page implements HasTable
      *
      * @return Builder La consulta de Dh21 filtrada por el número de liquidación.
      */
-    public function updateQuery($nro_liqui = null): Builder
+    public function updateQuery(?int $nro_liqui = null): Builder
     {
         try {
             if ($this->lastNroLiqui == null) {
                 $this->lastNroLiqui = Dh22::getLastIdLiquidacion();
                 $this->nro_liqui = $this->lastNroLiqui;
-                return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
+                return resolve(Dh21Service::class)->conceptosTotales($this->nro_liqui);
             }
-            return app(Dh21Service::class)->conceptosTotales($nro_liqui);
+            return resolve(Dh21Service::class)->conceptosTotales($nro_liqui);
         } catch (Throwable $th) {
             Log::error($th->getMessage());
-            return app(Dh21Service::class)->conceptosTotales($this->nro_liqui);
+            return resolve(Dh21Service::class)->conceptosTotales($this->nro_liqui);
         }
     }
 
     #[On('idLiquiSelected')]
-    public function updateTable($nro_liqui = null, $desc_liqui = null): void
+    public function updateTable(?int $nro_liqui = null, $desc_liqui = null): void
     {
         $this->nro_liqui = $nro_liqui;
         $this->total = Dh22::getDescripcionLiquidacion($nro_liqui);
@@ -94,8 +92,6 @@ class ConceptosTotales extends Page implements HasTable
      * Método para actualizar el query con el filtro de codigoEscalafon.
      *
      * @param int $codigoEscalafon El código de escalafón para filtrar.
-     *
-     * @return void
      */
     public function filterByCodigoEscalafon(?string $codigoEscalafon = null): void
     {
@@ -106,16 +102,19 @@ class ConceptosTotales extends Page implements HasTable
         );
     }
 
+    #[\Override]
     public function getMaxContentWidth(): Width
     {
         return Width::Full;
     }
 
+    #[\Override]
     public function getHeaderWidgetsColumns(): int|array
     {
         return 3;
     }
 
+    #[\Override]
     protected function getHeaderWidgets(): array
     {
         return [

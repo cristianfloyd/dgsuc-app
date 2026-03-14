@@ -32,6 +32,7 @@ class Dh12Resource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Conceptos';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -101,6 +102,7 @@ class Dh12Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -191,6 +193,7 @@ class Dh12Resource extends Resource
             ->defaultSort('codn_conce', 'asc');
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -198,6 +201,7 @@ class Dh12Resource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

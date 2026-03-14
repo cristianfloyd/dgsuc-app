@@ -29,6 +29,7 @@ class Dh41Resource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -37,6 +38,7 @@ class Dh41Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -82,6 +84,7 @@ class Dh41Resource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -89,6 +92,7 @@ class Dh41Resource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

@@ -35,6 +35,7 @@ class ComprobanteNominaModelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'CHE';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -52,6 +53,7 @@ class ComprobanteNominaModelResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -61,7 +63,7 @@ class ComprobanteNominaModelResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
                     ->action(function (array $data): StreamedResponse {
-                        $liquidacion = ComprobanteNominaModel::first();
+                        $liquidacion = ComprobanteNominaModel::query()->first();
 
                         return response()->streamDownload(
                             function () use ($liquidacion): void {
@@ -75,7 +77,7 @@ class ComprobanteNominaModelResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
                     ->action(function (array $data): BinaryFileResponse {
-                        $liquidacion = ComprobanteNominaModel::first();
+                        $liquidacion = ComprobanteNominaModel::query()->first();
 
                         return Excel::download(
                             new ComprobantesNominaExport(
@@ -125,7 +127,7 @@ class ComprobanteNominaModelResource extends Resource
                     ->label('Importacion Avanzada')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->color('warning')
-                    ->url(fn() => static::getUrl('import')),
+                    ->url(fn(): string => static::getUrl('import')),
                 Action::make('generate')
                     ->label('Generar Comprobantes')
                     ->icon('heroicon-o-document-check')
@@ -137,7 +139,7 @@ class ComprobanteNominaModelResource extends Resource
                     ->searchable(),
                 TextColumn::make('mes_periodo')
                     ->label('Mes')
-                    ->formatStateUsing(fn($state) => nombreMes($state)),
+                    ->formatStateUsing(fn(int $state): string => nombreMes($state)),
                 TextColumn::make('nro_liqui')
                     ->label('Nro Liqui')
                     ->searchable(),
@@ -162,15 +164,15 @@ class ComprobanteNominaModelResource extends Resource
             ->filters([
                 SelectFilter::make('anio_periodo')
                     ->label('Año')
-                    ->options(fn() => ComprobanteNominaModel::distinct()
+                    ->options(fn() => ComprobanteNominaModel::query()->distinct()
                         ->pluck('anio_periodo', 'anio_periodo')
                         ->toArray()),
                 SelectFilter::make('mes_periodo')
                     ->label('Mes')
                     ->options(fn() => collect(range(1, 12))->mapWithKeys(
-                        fn($mes)
+                        fn(int $mes): array
                             => [$mes => nombreMes($mes)],
-                    )->toArray()),
+                    )->all()),
             ])
             ->recordActions([])
             ->toolbarActions([
@@ -180,11 +182,13 @@ class ComprobanteNominaModelResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

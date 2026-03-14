@@ -11,6 +11,7 @@ class Dashboard extends Page
 
     protected string $view = 'filament.reportes.pages.dashboard';
 
+    #[\Override]
     public function getTitle(): string
     {
         return 'Panel de Reportes';

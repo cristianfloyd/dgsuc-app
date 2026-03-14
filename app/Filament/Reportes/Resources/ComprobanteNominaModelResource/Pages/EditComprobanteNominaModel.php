@@ -10,6 +10,7 @@ class EditComprobanteNominaModel extends EditRecord
 {
     protected static string $resource = ComprobanteNominaModelResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

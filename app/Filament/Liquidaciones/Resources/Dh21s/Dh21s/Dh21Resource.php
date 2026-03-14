@@ -32,6 +32,7 @@ class Dh21Resource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Liquidaciones';
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -133,6 +134,7 @@ class Dh21Resource extends Resource
             ->deferLoading();
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -142,7 +144,7 @@ class Dh21Resource extends Resource
         ];
     }
 
-    public static function generarReporte($record)
+    public static function generarReporte($record): ?\Filament\Actions\Action
     {
         // Verificamos que el registro tenga un ID válido
         if (!$record->nro_liqui) {
@@ -152,7 +154,7 @@ class Dh21Resource extends Resource
                 ->danger()
                 ->send();
 
-            return;
+            return null;
         }
 
         // Renderizamos el componente Livewire en un modal
@@ -170,7 +172,7 @@ class Dh21Resource extends Resource
             ->modalWidth('7xl');
     }
 
-    protected static function descargarReportePDF($liquidacionId)
+    protected static function descargarReportePDF(string $liquidacionId)
     {
         $reporteHtml = Livewire::mount(OrdenPagoReporte::class, ['liquidacionId' => $liquidacionId]);
         $nombreArchivo = 'orden_pago_' . $liquidacionId . '_' . now()->format('YmdHis') . '.pdf';

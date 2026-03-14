@@ -10,6 +10,7 @@ class EditDosubaSinLiquidar extends EditRecord
 {
     protected static string $resource = DosubaSinLiquidarResource::class;
 
+    #[\Override]
     protected function getHeaderActions(): array
     {
         return [

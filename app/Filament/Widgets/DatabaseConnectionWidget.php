@@ -46,7 +46,7 @@ class DatabaseConnectionWidget extends Widget
             'schema' => config("database.connections.$connection.search_path", 'public'),
             'driver' => config("database.connections$connection.driver"),
             'status' => $this->getConnectionStatus($connection),
-        ], fn($value) => $value !== null);
+        ], fn($value): bool => $value !== null);
     }
 
     private function getConnectionStatus(string $connection): string
@@ -54,7 +54,7 @@ class DatabaseConnectionWidget extends Widget
         try {
             DB::connection($connection)->getPdo();
             return 'Conectado';
-        } catch (Exception $e) {
+        } catch (Exception) {
             return 'Desconectado';
         }
     }
