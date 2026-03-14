@@ -179,7 +179,7 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Resumen')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $this->activeTab = 'resumen'),
+                        ->action(fn () => $this->activeTab = 'resumen'),
                 ])
                 ->persistent()
                 ->send();
@@ -222,7 +222,7 @@ class SicossControles extends Page implements HasTable
     public function getDiferenciaConteos(): int
     {
         $conteos = $this->getConteosData();
-        if (!$conteos) {
+        if (! $conteos) {
             return 0;
         }
 
@@ -231,7 +231,7 @@ class SicossControles extends Page implements HasTable
 
     public function formatMoney($value): string
     {
-        return '$ ' . number_format($value, 2, ',', '.');
+        return '$ '.number_format($value, 2, ',', '.');
     }
 
     public function getDiferenciasCount(): int
@@ -241,7 +241,7 @@ class SicossControles extends Page implements HasTable
 
     public function getDependenciasCount(): int
     {
-        if (!$this->hasResults()) {
+        if (! $this->hasResults()) {
             return 0;
         }
 
@@ -277,11 +277,11 @@ class SicossControles extends Page implements HasTable
             ->columns($this->getColumnsForActiveTab())
             ->when(
                 $this->activeTab !== 'diferencias_cuils' && $this->activeTab !== 'conceptos',
-                fn(Table $table) => $table->defaultSort('diferencia', 'desc'),
+                fn (Table $table) => $table->defaultSort('diferencia', 'desc'),
             )
             ->when(
                 $this->activeTab === 'conceptos',
-                fn(Table $table) => $table->defaultSort('codn_conce', 'asc'),
+                fn (Table $table) => $table->defaultSort('codn_conce', 'asc'),
             )
             ->striped()
             ->defaultPaginationPageOption(5)
@@ -403,7 +403,7 @@ class SicossControles extends Page implements HasTable
             // Crear tabla temporal dh21aporte
             $service = app(SicossControlService::class);
             $service->setConnection($connection);
-            $service->crearTablaDH21Aportes($this->year, $this->month);
+            $service->crearTablaDh21Aportes($this->year, $this->month);
 
             // Realizar las consultas de conteo
             $conteos = [
@@ -543,7 +543,7 @@ class SicossControles extends Page implements HasTable
                         ->label('Ver Detalles')
                         ->color('primary')
                         ->icon('heroicon-o-document-text')
-                        ->action(fn() => $this->activeTab = 'conceptos'),
+                        ->action(fn () => $this->activeTab = 'conceptos'),
                 ])
                 ->persistent()
                 ->send();
@@ -631,7 +631,7 @@ class SicossControles extends Page implements HasTable
                 $periodoFiscal = $this->periodoFiscalService->getPeriodoFiscal();
                 $this->year = $periodoFiscal['year'];
                 $this->month = $periodoFiscal['month'];
-                $service->crearTablaDH21Aportes($this->year, $this->month);
+                $service->crearTablaDh21Aportes($this->year, $this->month);
 
                 $data = [
                     'totales' => [
@@ -706,7 +706,7 @@ class SicossControles extends Page implements HasTable
                             'dh01' => $record->dh01,
                         ]);
                     })
-                    ->modalHeading(fn($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
+                    ->modalHeading(fn ($record) => "Detalles de Aportes - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_contribuciones' => [
@@ -721,7 +721,7 @@ class SicossControles extends Page implements HasTable
                             'dh01' => $record->dh01,
                         ]);
                     })
-                    ->modalHeading(fn($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
+                    ->modalHeading(fn ($record) => "Detalles de Contribuciones - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'diferencias_cuils' => [
@@ -733,7 +733,7 @@ class SicossControles extends Page implements HasTable
                             'record' => $record,
                         ]);
                     })
-                    ->modalHeading(fn($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
+                    ->modalHeading(fn ($record) => "Detalles de CUILs - CUIL: {$record->cuil}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             'conceptos' => [
@@ -745,7 +745,7 @@ class SicossControles extends Page implements HasTable
                             'record' => $record,
                         ]);
                     })
-                    ->modalHeading(fn($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
+                    ->modalHeading(fn ($record) => "Detalles de Conceptos - Código: {$record->codn_conce}")
                     ->modalWidth(Width::SevenExtraLarge),
             ],
             default => [],
@@ -798,7 +798,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('ejecutarControles')
                     ->label('Ejecutar los Controles')
                     ->icon('heroicon-o-play')
-                    ->badge(fn() => sprintf('%d-%02d', $this->year, $this->month))
+                    ->badge(fn () => sprintf('%d-%02d', $this->year, $this->month))
                     ->action(function (): void {
                         $this->ejecutarControles();
                     }),
@@ -832,7 +832,7 @@ class SicossControles extends Page implements HasTable
             ->action(function () {
                 return $this->exportActiveTable();
             })
-            ->disabled(fn() => false);
+            ->disabled(fn () => false);
 
         return $actions;
     }
@@ -920,7 +920,7 @@ class SicossControles extends Page implements HasTable
             default => null,
         };
 
-        if (!$data) {
+        if (! $data) {
             Notification::make()
                 ->warning()
                 ->title('No se puede exportar')
@@ -957,8 +957,8 @@ class SicossControles extends Page implements HasTable
     private function conexionesDisponibles(): array
     {
         return collect(config('database.connections'))
-            ->filter(fn($config, $name) => str_starts_with($name, 'pgsql-'))
-            ->mapWithKeys(fn($config, $name) => [$name => $name])
+            ->filter(fn ($config, $name) => str_starts_with($name, 'pgsql-'))
+            ->mapWithKeys(fn ($config, $name) => [$name => $name])
             ->all();
     }
 }
