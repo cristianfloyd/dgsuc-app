@@ -18,11 +18,12 @@ class ExcelRowValidationService
 {
     public function __construct(
         private readonly DateParserService $dateParserService,
-    ) {
-    }
+    ) {}
 
     /**
      * Valida y normaliza una fila completa del Excel.
+     *
+     * @throws ValidationException
      */
     public function validateRow(array $row): array
     {
@@ -37,6 +38,7 @@ class ExcelRowValidationService
         // Si el registro ya fue marcado como duplicado, mantenemos ese estado
         if (isset($row['estado']) && $row['estado'] === BloqueosEstadoEnum::DUPLICADO) {
             Log::debug('Registro duplicado, manteniendo estado', ['row' => $row]);
+
             return [
                 'correo_electronico' => $row['correo_electronico'],
                 'nombre' => $row['nombre'],
@@ -45,7 +47,7 @@ class ExcelRowValidationService
                 'legajo' => $row['legajo'],
                 'n_de_cargo' => $row['n_de_cargo'],
                 'tipo_de_movimiento' => $row['tipo_de_movimiento'],
-                'fecha_de_baja' => $fechaBaja ?? null,
+                'fecha_de_baja' => $fechaBaja,
                 'observaciones' => $row['observaciones'] ?? '',
                 'estado' => BloqueosEstadoEnum::DUPLICADO,
                 'mensaje_error' => "Cargo duplicado: {$row['n_de_cargo']}",
@@ -58,7 +60,6 @@ class ExcelRowValidationService
         $tipoValidation = $this->validateTipoMovimiento($row['tipo_de_movimiento']);
         $fechaValidation = $this->validateFechaBaja($row['fecha_de_baja'] ?? null, $row['tipo_de_movimiento']);
         $usuarioMapucheValidation = $this->validateUsuarioMapuche($row['usuario_mapuche_solicitante']);
-
 
         $validatedData = [
             'correo_electronico' => $this->validateEmail($row['correo_electronico']),
@@ -87,6 +88,7 @@ class ExcelRowValidationService
             if ($validation['estado'] === BloqueosEstadoEnum::ERROR_VALIDACION) {
                 $validatedData['estado'] = BloqueosEstadoEnum::ERROR_VALIDACION;
                 $validatedData['mensaje_error'] = $validation['mensaje_error'];
+
                 return $validatedData;
             }
         }
