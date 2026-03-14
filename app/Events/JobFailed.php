@@ -15,13 +15,6 @@ class JobFailed
     use SerializesModels;
 
     /**
-     * Create a new event instance.
-     */
-    public function __construct(string $exception)
-    {
-    }
-
-    /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, Channel>

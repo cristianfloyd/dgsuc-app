@@ -16,13 +16,6 @@ class JobProcessed
     use SerializesModels;
 
     /**
-     * Create a new event instance.
-     */
-    public function __construct(UploadedFile $uploadedFile)
-    {
-    }
-
-    /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, Channel>

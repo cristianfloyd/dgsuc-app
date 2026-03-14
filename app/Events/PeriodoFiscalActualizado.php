@@ -14,6 +14,9 @@ class PeriodoFiscalActualizado
     use InteractsWithSockets;
     use SerializesModels;
 
+    /**
+     * @var mixed[]
+     */
     public $periodoFiscal;
 
     /**
