@@ -37,6 +37,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 ### Code Quality & Architecture
 
+- `code-quality-by-folder` — Run quality:path on a path, create a plan (one step per file with issues), iterate until zero errors, run Pint; document recurring fixes in `docs/workflows/quality-path-by-folder.md`. Activate when improving code quality by folder, running quality:path to zero errors, or continuing the quality workflow.
 - `php-modernization` — PHP 8.x (constructor promotion, readonly, enums, DTOs, type safety). Activate when upgrading PHP, implementing type safety, or running PHPStan/Rector.
 - `refactoring-expert` — Code smells, systematic refactoring, structural optimization. Activate when encountering duplicated code, long methods, complex conditionals, or any code quality issues.
 - `clean-code` — Principles from Robert C. Martin. Activate when writing, reviewing, or refactoring code for readability and maintainability.
