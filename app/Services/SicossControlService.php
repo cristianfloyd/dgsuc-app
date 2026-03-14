@@ -627,7 +627,9 @@ class SicossControlService
      *   conceptos_contribuciones: int,
      *   total_aportes: float,
      *   total_contribuciones: float,
-     *   fecha_proceso: string
+     *   fecha_proceso: string,
+     *   periodo: array{anio: int|null, mes: int|null},
+     *   resultados: \Illuminate\Support\Collection
      * }
      */
     public function ejecutarControlConceptos(?int $anio = null, ?int $mes = null): array
