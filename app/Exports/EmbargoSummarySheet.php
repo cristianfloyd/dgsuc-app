@@ -11,14 +11,13 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Override;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmbargoSummarySheet extends BaseExcelSheet implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
-    public function __construct(protected Builder $query)
-    {
-    }
+    public function __construct(protected Builder $query) {}
 
     /**
      * @return Collection
@@ -45,7 +44,8 @@ class EmbargoSummarySheet extends BaseExcelSheet implements FromCollection, Shou
         return 'Totales por Concepto';
     }
 
-    public function styles(Worksheet $sheet)
+    #[Override]
+    public function styles(Worksheet $sheet): static
     {
         parent::styles($sheet);
 

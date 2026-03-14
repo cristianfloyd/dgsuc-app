@@ -13,11 +13,6 @@ use Maatwebsite\Excel\Concerns\WithProperties;
 class EmbargoReportExport implements WithMultipleSheets, WithProperties
 {
     /**
-     * @var Builder Consulta base para obtener los datos de embargos
-     */
-    protected Builder $query;
-
-    /**
      * @var string Período de liquidación del reporte
      */
     protected string $periodoLiquidacion;
@@ -28,9 +23,8 @@ class EmbargoReportExport implements WithMultipleSheets, WithProperties
      * @param Builder $query Consulta para obtener los datos
      * @param string $periodoLiquidacion Período de liquidación (opcional)
      */
-    public function __construct(Builder $query, string $periodoLiquidacion = '')
+    public function __construct(protected Builder $query, string $periodoLiquidacion = '')
     {
-        $this->query = $query;
         $this->periodoLiquidacion = $periodoLiquidacion ?: date('Y-m');
     }
 

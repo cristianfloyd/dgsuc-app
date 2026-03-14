@@ -20,15 +20,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class AfipMapucheArtExport implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected $periodo_fiscal;
-
-    protected $query;
-
-    public function __construct(string $periodo_fiscal, Builder $query)
-    {
-        $this->periodo_fiscal = $periodo_fiscal;
-        $this->query = $query;
-    }
+    public function __construct(protected string $periodo_fiscal, protected \Illuminate\Database\Eloquent\Builder $query) {}
 
     public function query(): Builder
     {

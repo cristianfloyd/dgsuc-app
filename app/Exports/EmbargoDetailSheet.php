@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Override;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Conditional;
@@ -23,13 +24,17 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 use function strlen;
 
-class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, ShouldAutoSize, WithBackgroundColor, WithColumnFormatting, WithColumnWidths, WithCustomStartCell, WithHeadings, WithMapping, WithTitle
+class EmbargoDetailSheet extends BaseExcelSheet implements
+    FromCollection,
+    ShouldAutoSize,
+    WithBackgroundColor,
+    WithColumnFormatting,
+    WithColumnWidths,
+    WithCustomStartCell,
+    WithHeadings,
+    WithMapping,
+    WithTitle
 {
-    /**
-     * @var Builder Consulta para obtener los datos
-     */
-    protected Builder $query;
-
     /**
      * @var string Período de liquidación del reporte
      */
@@ -41,15 +46,15 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
      * @param Builder $query Consulta para obtener los datos
      * @param string $periodoLiquidacion Período de liquidación (opcional)
      */
-    public function __construct(Builder $query, string $periodoLiquidacion = '')
+    public function __construct(protected Builder $query, string $periodoLiquidacion = '')
     {
-        $this->query = $query;
         $this->periodoLiquidacion = $periodoLiquidacion ?: date('Y-m');
     }
 
     /**
      * Define la celda de inicio para los datos.
      */
+    #[Override]
     public function startCell(): string
     {
         return 'A6';
@@ -144,8 +149,8 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
     {
         // Limitar el texto de la caratula a 30 caracteres
         $caratula = $row->caratula;
-        if (strlen($caratula) > 30) {
-            $caratula = substr($caratula, 0, 27) . '...';
+        if (strlen((string) $caratula) > 30) {
+            $caratula = substr((string) $caratula, 0, 27) . '...';
         }
 
         return [
@@ -179,7 +184,8 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
      *
      * @return $this
      */
-    public function styles(Worksheet $sheet)
+    #[Override]
+    public function styles(Worksheet $sheet): static
     {
         parent::styles($sheet);
 
@@ -224,7 +230,7 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
 
         // Aplicar colores alternados a las filas para mejorar la legibilidad (desde la fila 7)
         for ($row = 7; $row <= $lastRow; $row++) {
-            if (($row - 6) % 2 == 0) {
+            if (($row - 6) % 2 === 0) {
                 $sheet->getStyle('A' . $row . ':N' . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -235,10 +241,10 @@ class EmbargoDetailSheet extends BaseExcelSheet implements FromCollection, Shoul
         }
 
         // FORMATO CONDICIONAL: Resaltar embargos con montos altos (más de 50000)
-        $conditionalStyles = [
+        [
             new Conditional(),
-            new Conditional(),
-            new Conditional(),
+        new Conditional(),
+        new Conditional(),
         ];
 
         // IMPLEMENTACIÓN DE FILTROS AUTOMÁTICOS (solo para la fila de encabezados)

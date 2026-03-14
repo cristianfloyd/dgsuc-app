@@ -18,28 +18,23 @@ use function strlen;
 
 class LazyReportDetailSheet implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected $query;
-
     protected $lazyCollection;
 
-    protected $columns;
+    protected $columns = [
+        'nro_liqui' => 'Número',
+        'desc_liqui' => 'Liquidación',
+        'apellido' => 'Apellido',
+        'nombre' => 'Nombre',
+        'cuil' => 'DNI',
+        'nro_legaj' => 'Legajo',
+        'nro_cargo' => 'Secuencia',
+        'codc_uacad' => 'Dependencia',
+        'codn_conce' => 'Concepto',
+        'impp_conce' => 'Importe',
+    ];
 
-    public function __construct($query)
+    public function __construct(protected $query)
     {
-        $this->query = $query;
-        $this->columns = [
-            'nro_liqui' => 'Número',
-            'desc_liqui' => 'Liquidación',
-            'apellido' => 'Apellido',
-            'nombre' => 'Nombre',
-            'cuil' => 'DNI',
-            'nro_legaj' => 'Legajo',
-            'nro_cargo' => 'Secuencia',
-            'codc_uacad' => 'Dependencia',
-            'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe',
-        ];
-
         $this->lazyCollection = LazyCollection::make(function () {
             foreach ($this->query->cursor() as $record) {
                 yield $record;
@@ -139,7 +134,7 @@ class LazyReportDetailSheet implements FromCollection, ShouldAutoSize, WithHeadi
 
         // Filas alternadas
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,

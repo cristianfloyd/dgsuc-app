@@ -14,12 +14,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LazyReportSummarySheet implements FromCollection, ShouldAutoSize, WithStyles, WithTitle
 {
-    protected $summaryData;
-
-    public function __construct($summaryData)
-    {
-        $this->summaryData = $summaryData;
-    }
+    public function __construct(protected $summaryData) {}
 
     public function collection()
     {
@@ -110,7 +105,7 @@ class LazyReportSummarySheet implements FromCollection, ShouldAutoSize, WithStyl
 
             // Filas alternadas
             for ($row = $tableStart + 1; $row <= $lastRow; $row++) {
-                if ($row % 2 == 0) {
+                if ($row % 2 === 0) {
                     $sheet->getStyle("A{$row}:C{$row}")->applyFromArray([
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,

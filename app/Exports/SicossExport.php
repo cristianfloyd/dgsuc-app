@@ -14,8 +14,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected Collection $registros;
-
     protected string $periodoFiscal;
 
     /**
@@ -24,9 +22,8 @@ class SicossExport implements FromCollection, ShouldAutoSize, WithHeadings, With
      * @param Collection $registros Registros a exportar
      * @param string|null $periodoFiscal Periodo fiscal (formato YYYYMM)
      */
-    public function __construct(Collection $registros, ?string $periodoFiscal = null)
+    public function __construct(protected Collection $registros, ?string $periodoFiscal = null)
     {
-        $this->registros = $registros;
         $this->periodoFiscal = $periodoFiscal ?? date('Ym');
     }
 

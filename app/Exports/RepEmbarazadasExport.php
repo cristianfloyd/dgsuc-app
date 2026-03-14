@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exports;
 
 use App\Models\RepEmbarazada;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -18,7 +19,7 @@ class RepEmbarazadasExport implements FromQuery, ShouldAutoSize, WithHeadings, W
     /**
      * Retorna la query para la exportación.
      */
-    public function query()
+    public function query(): Builder
     {
         return RepEmbarazada::query()
             ->orderBy('nro_legaj');

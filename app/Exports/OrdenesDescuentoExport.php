@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -20,14 +21,9 @@ class OrdenesDescuentoExport implements FromQuery, ShouldAutoSize, WithBackgroun
 {
     use Exportable;
 
-    protected $query;
+    public function __construct(protected Builder $query) {}
 
-    public function __construct($query)
-    {
-        $this->query = $query;
-    }
-
-    public function query()
+    public function query(): Builder
     {
         return $this->query;
     }

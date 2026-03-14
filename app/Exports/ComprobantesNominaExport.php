@@ -23,17 +23,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ComprobantesNominaExport implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithDrawings, WithEvents, WithHeadings, WithStyles, WithTitle
 {
-    protected $nroLiqui;
-
-    protected $descLiqui;
-
     protected $totalImporte;
 
-    public function __construct(int $nroLiqui, string $descLiqui)
+    public function __construct(protected int $nroLiqui, protected string $descLiqui)
     {
-        $this->nroLiqui = $nroLiqui;
-        $this->descLiqui = $descLiqui;
-        $this->totalImporte = ComprobanteNominaModel::where('nro_liqui', $nroLiqui)->sum('importe');
+        $this->totalImporte = ComprobanteNominaModel::query()->where('nro_liqui', $this->nroLiqui)->sum('importe');
     }
 
     public function drawings()
@@ -52,7 +46,7 @@ class ComprobantesNominaExport implements FromCollection, ShouldAutoSize, WithCo
         $offsetX = ($pageWidth - $logoWidth) / 2;
 
         // Centramos el logo
-        $drawing->setOffsetX($offsetX);
+        $drawing->setOffsetX((int) $offsetX);
 
         return $drawing;
     }
@@ -112,7 +106,7 @@ class ComprobantesNominaExport implements FromCollection, ShouldAutoSize, WithCo
 
     public function collection()
     {
-        return ComprobanteNominaModel::where('nro_liqui', $this->nroLiqui)
+        return ComprobanteNominaModel::query()->where('nro_liqui', $this->nroLiqui)
             ->select(
                 'descripcion_retencion as Descripción',
                 'importe as Importe',

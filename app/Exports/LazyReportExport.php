@@ -24,30 +24,25 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
 {
     use Exportable;
 
-    protected $query;
-
     protected $lazyCollection;
 
-    protected $columns;
+    protected $columns = [
+        'nro_liqui' => 'Número',
+        'desc_liqui' => 'Liquidación',
+        'apellido' => 'Apellido',
+        'nombre' => 'Nombre',
+        'cuil' => 'DNI',
+        'nro_legaj' => 'Legajo',
+        'nro_cargo' => 'Secuencia',
+        'codc_uacad' => 'Dependencia',
+        'codn_conce' => 'Concepto',
+        'impp_conce' => 'Importe',
+    ];
 
     protected $summaryData;
 
-    public function __construct($query)
+    public function __construct(protected $query)
     {
-        $this->query = $query;
-        $this->columns = [
-            'nro_liqui' => 'Número',
-            'desc_liqui' => 'Liquidación',
-            'apellido' => 'Apellido',
-            'nombre' => 'Nombre',
-            'cuil' => 'DNI',
-            'nro_legaj' => 'Legajo',
-            'nro_cargo' => 'Secuencia',
-            'codc_uacad' => 'Dependencia',
-            'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe',
-        ];
-
         // Convertimos el query a una LazyCollection usando cursor
         $this->lazyCollection = LazyCollection::make(function () {
             foreach ($this->query->cursor() as $record) {
@@ -156,7 +151,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
 
         // Filas alternadas
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -209,9 +204,7 @@ class LazyReportExport implements FromCollection, ShouldAutoSize, WithChunkReadi
         }
 
         // Ordenar por total descendente
-        uasort($dependencyTotals, function ($a, $b) {
-            return $b['total'] <=> $a['total'];
-        });
+        uasort($dependencyTotals, fn($a, $b): int => $b['total'] <=> $a['total']);
 
         $this->summaryData = [
             'totalGeneral' => $totalGeneral,

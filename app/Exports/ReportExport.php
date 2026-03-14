@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -23,28 +22,23 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
 {
     use Exportable;
 
-    protected $query;
-
-    protected $columns;
+    protected $columns = [
+        'nro_liqui' => 'Número',
+        'desc_liqui' => 'Liquidación',
+        'apellido' => 'Apellido',
+        'nombre' => 'Nombre',
+        'cuil' => 'DNI',
+        'nro_legaj' => 'Legajo',
+        'nro_cargo' => 'Secuencia',
+        'codc_uacad' => 'Dependencia',
+        'codn_conce' => 'Concepto',
+        'impp_conce' => 'Importe',
+    ];
 
     protected $summaryData;
 
-    public function __construct(Builder $query)
+    public function __construct(protected \Illuminate\Database\Eloquent\Builder $query)
     {
-        $this->query = $query;
-        $this->columns = [
-            'nro_liqui' => 'Número',
-            'desc_liqui' => 'Liquidación',
-            'apellido' => 'Apellido',
-            'nombre' => 'Nombre',
-            'cuil' => 'DNI',
-            'nro_legaj' => 'Legajo',
-            'nro_cargo' => 'Secuencia',
-            'codc_uacad' => 'Dependencia',
-            'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe',
-        ];
-
         // Preparar los datos de resumen
         $this->prepareSummaryData();
     }
@@ -87,7 +81,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
         return $mappedRow;
     }
 
-    public function query()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         return $this->query;
     }
@@ -145,7 +139,7 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
 
         // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -184,14 +178,12 @@ class ReportExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMappi
 
         // Calcular totales por dependencia
         $totalsByDependency = $data->groupBy('codc_uacad')
-            ->map(function ($group) {
-                return [
-                    'dependencia' => $group->first()->codc_uacad,
-                    'total' => $group->sum('impp_conce'),
-                    'registros' => $group->count(),
-                ];
-            })
-            ->sortByDesc('total')
+            ->map(fn($group): array => [ // @phpstan-ignore argument.unresolvableType
+                'dependencia' => $group->first()->codc_uacad,
+                'total' => $group->sum('impp_conce'),
+                'registros' => $group->count(),
+            ])
+            ->sortByDesc('total') // @phpstan-ignore argument.unresolvableType
             ->values();
 
         $this->summaryData = [

@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Border;
@@ -19,29 +18,25 @@ use function strlen;
 
 class OpenSpoutReportExport
 {
-    protected $query;
+    protected $columns = [
+        'nro_liqui' => 'Número',
+        'desc_liqui' => 'Liquidación',
+        'apellido' => 'Apellido',
+        'nombre' => 'Nombre',
+        'cuil' => 'DNI',
+        'nro_legaj' => 'Legajo',
+        'nro_cargo' => 'Secuencia',
+        'codc_uacad' => 'Dependencia',
+        'codn_conce' => 'Concepto',
+        'impp_conce' => 'Importe',
+    ];
 
-    protected $columns;
-
-    protected $tempFile;
+    protected string $tempFile;
 
     protected $summaryData;
 
-    public function __construct(Builder $query)
+    public function __construct(protected \Illuminate\Database\Eloquent\Builder $query)
     {
-        $this->query = $query;
-        $this->columns = [
-            'nro_liqui' => 'Número',
-            'desc_liqui' => 'Liquidación',
-            'apellido' => 'Apellido',
-            'nombre' => 'Nombre',
-            'cuil' => 'DNI',
-            'nro_legaj' => 'Legajo',
-            'nro_cargo' => 'Secuencia',
-            'codc_uacad' => 'Dependencia',
-            'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe',
-        ];
         $this->tempFile = 'temp/export_' . uniqid() . '.xlsx';
 
         // Preparar los datos para la hoja de resumen
@@ -83,8 +78,8 @@ class OpenSpoutReportExport
             subject: 'Informe de Conceptos',
             creator: 'Informes App',
             lastModifiedBy: 'Informes App',
-            description: 'Reporte generado a través de OpenSpout para manejo de archivos de gran volumen',
             keywords: 'conceptos, liquidación, reportes',
+            description: 'Reporte generado a través de OpenSpout para manejo de archivos de gran volumen',
             category: 'Reportes',
         );
 
@@ -144,7 +139,7 @@ class OpenSpoutReportExport
             $dataStyle->setCellAlignment(CellAlignment::CENTER);
 
             // Alternar color de fondo para filas pares
-            if ($rowIndex % 2 == 0) {
+            if ($rowIndex % 2 === 0) {
                 $dataStyle->setBackgroundColor('F2F2F2');
             }
 
@@ -152,7 +147,7 @@ class OpenSpoutReportExport
             $numericStyle = clone $dataStyle;
             $numericStyle->setCellAlignment(CellAlignment::RIGHT);
 
-            foreach (array_keys($this->columns) as $columnIndex => $column) {
+            foreach (array_keys($this->columns) as $column) {
                 $value = $record->{$column} ?? '';
 
                 switch ($column) {
@@ -164,12 +159,7 @@ class OpenSpoutReportExport
 
                     case 'impp_conce':
                         $value = is_numeric($value) ? $value : 0;
-                        // Este es el estilo especial para números
-                        // OpenSpout no tiene formato de número directo, pero podríamos formatear
-                        // el valor como string si queremos mayor control
-                        if (is_numeric($value)) {
-                            $value = number_format($value, 2, ',', '.');
-                        }
+                        $value = number_format((float) $value, 2, ',', '.');
                         break;
 
                     case 'nro_liqui':
@@ -214,16 +204,16 @@ class OpenSpoutReportExport
 
         // Título de la hoja
         $writer->addRow(Row::fromValues(['RESUMEN DE REPORTE'], $titleStyle));
-        $writer->addRow(Row::fromValues([''], null)); // Fila en blanco
+        $writer->addRow(Row::fromValues([''])); // Fila en blanco
 
         // Información general
         $writer->addRow(Row::fromValues(['Total de registros:', $this->summaryData['totalRegistros']], $dataStyle));
         $writer->addRow(Row::fromValues(['Importe total:', number_format($this->summaryData['totalGeneral'], 2, ',', '.')], $dataStyle));
-        $writer->addRow(Row::fromValues([''], null)); // Fila en blanco
+        $writer->addRow(Row::fromValues([''])); // Fila en blanco
 
         // Tabla de resumen por dependencia
         $writer->addRow(Row::fromValues(['Resumen por Dependencia'], $subtitleStyle));
-        $writer->addRow(Row::fromValues([''], null)); // Fila en blanco
+        $writer->addRow(Row::fromValues([''])); // Fila en blanco
 
         // Cabecera de la tabla
         $writer->addRow(Row::fromValues(['Dependencia', 'Registros', 'Importe'], $headerStyle));
@@ -231,7 +221,7 @@ class OpenSpoutReportExport
         // Datos de la tabla
         foreach ($this->summaryData['totalsByDependency'] as $index => $dep) {
             $rowStyle = new Style();
-            if ($index % 2 == 0) {
+            if ($index % 2 === 0) {
                 $rowStyle->setBackgroundColor('F2F2F2');
             }
 
@@ -246,34 +236,37 @@ class OpenSpoutReportExport
     protected function prepareSummaryData(): void
     {
         // Calcular resumen de manera optimizada usando cursor
-        $totalGeneral = 0;
+        $totalGeneral = 0.0;
+        /** @var array<string, array{dependencia: string, total: float, registros: int}> $dependencyTotals */
         $dependencyTotals = [];
         $totalRegistros = 0;
 
-        foreach ($this->query->cursor() as $record) {
-            $totalGeneral += $record->impp_conce;
+        foreach ($this->query->cursor() as $lazyCollection) {
+            $totalGeneral += $lazyCollection->impp_conce;
             $totalRegistros++;
 
-            if (!isset($dependencyTotals[$record->codc_uacad])) {
-                $dependencyTotals[$record->codc_uacad] = [
-                    'dependencia' => $record->codc_uacad,
+            if (!isset($dependencyTotals[$lazyCollection->codc_uacad])) {
+                $dependencyTotals[$lazyCollection->codc_uacad] = [
+                    'dependencia' => $lazyCollection->codc_uacad,
                     'total' => 0,
                     'registros' => 0,
                 ];
             }
 
-            $dependencyTotals[$record->codc_uacad]['total'] += $record->impp_conce;
-            $dependencyTotals[$record->codc_uacad]['registros']++;
+            $dependencyTotals[$lazyCollection->codc_uacad]['total'] += $lazyCollection->impp_conce;
+            $dependencyTotals[$lazyCollection->codc_uacad]['registros']++;
         }
 
         // Ordenar por total descendente
-        uasort($dependencyTotals, function ($a, $b) {
-            return $b['total'] <=> $a['total'];
-        });
+        /** @phpstan-ignore-next-line argument.unresolvableType */
+        uasort($dependencyTotals, fn(array $a, array $b): int => $b['total'] <=> $a['total']);
 
+        /** @var list<array{dependencia: string, total: float, registros: int}> $totalsList */
+        /** @phpstan-ignore argument.unresolvableType */
+        $totalsList = array_values($dependencyTotals);
         $this->summaryData = [
             'totalGeneral' => $totalGeneral,
-            'totalsByDependency' => array_values($dependencyTotals),
+            'totalsByDependency' => $totalsList,
             'totalRegistros' => $totalRegistros,
         ];
     }

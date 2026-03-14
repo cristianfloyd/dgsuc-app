@@ -4,12 +4,14 @@ namespace App\Exports;
 
 use App\Exports\Sheets\AportesyContribucionesSummary;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Override;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class OrdenAportesyContribuciones extends OrdenesDescuentoExport implements WithMultipleSheets
 {
-    public function styles(Worksheet $sheet)
+    #[Override]
+    public function styles(Worksheet $sheet): array
     {
         parent::styles($sheet);
 
@@ -32,6 +34,7 @@ class OrdenAportesyContribuciones extends OrdenesDescuentoExport implements With
         ];
     }
 
+    #[Override]
     public function title(): string
     {
         return 'Aportes y Contribuciones';

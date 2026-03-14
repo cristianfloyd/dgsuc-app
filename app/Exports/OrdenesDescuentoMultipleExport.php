@@ -9,12 +9,7 @@ class OrdenesDescuentoMultipleExport implements WithMultipleSheets
 {
     use Exportable;
 
-    protected $query;
-
-    public function __construct($query)
-    {
-        $this->query = $query;
-    }
+    public function __construct(protected $query) {}
 
     public function sheets(): array
     {

@@ -16,12 +16,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ReportSummarySheet implements FromCollection, ShouldAutoSize, WithCustomStartCell, WithStrictNullComparison, WithStyles, WithTitle
 {
-    protected $summaryData;
-
-    public function __construct(array $summaryData)
-    {
-        $this->summaryData = $summaryData;
-    }
+    public function __construct(protected array $summaryData) {}
 
     public function collection()
     {
@@ -130,7 +125,7 @@ class ReportSummarySheet implements FromCollection, ShouldAutoSize, WithCustomSt
 
             // Filas alternadas para mejor legibilidad
             for ($row = 7; $row <= $lastRow; $row++) {
-                if ($row % 2 == 0) {
+                if ($row % 2 === 0) {
                     $sheet->getStyle('A' . $row . ':C' . $row)->applyFromArray([
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,

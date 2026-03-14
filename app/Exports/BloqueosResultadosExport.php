@@ -4,7 +4,6 @@ namespace App\Exports;
 
 use Carbon\Carbon;
 use DateTime;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -13,12 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class BloqueosResultadosExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    protected $records;
-
-    public function __construct(Collection $records)
-    {
-        $this->records = $records;
-    }
+    public function __construct(protected \Illuminate\Support\Collection $records) {}
 
     public function collection()
     {

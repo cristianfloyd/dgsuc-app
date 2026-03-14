@@ -7,15 +7,7 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class FallecidosExport implements WithMultipleSheets
 {
-    protected $records;
-
-    protected string $periodo;
-
-    public function __construct($records, string $periodo)
-    {
-        $this->records = $records;
-        $this->periodo = $periodo;
-    }
+    public function __construct(protected $records, protected string $periodo) {}
 
     public function sheets(): array
     {

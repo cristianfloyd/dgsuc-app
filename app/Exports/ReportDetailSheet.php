@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -19,26 +18,20 @@ use function strlen;
 
 class ReportDetailSheet implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStrictNullComparison, WithStyles, WithTitle
 {
-    protected $query;
+    protected $columns = [
+        'nro_liqui' => 'Número',
+        'desc_liqui' => 'Liquidación',
+        'apellido' => 'Apellido',
+        'nombre' => 'Nombre',
+        'cuil' => 'DNI',
+        'nro_legaj' => 'Legajo',
+        'nro_cargo' => 'Secuencia',
+        'codc_uacad' => 'Dependencia',
+        'codn_conce' => 'Concepto',
+        'impp_conce' => 'Importe',
+    ];
 
-    protected $columns;
-
-    public function __construct(Builder $query)
-    {
-        $this->query = $query;
-        $this->columns = [
-            'nro_liqui' => 'Número',
-            'desc_liqui' => 'Liquidación',
-            'apellido' => 'Apellido',
-            'nombre' => 'Nombre',
-            'cuil' => 'DNI',
-            'nro_legaj' => 'Legajo',
-            'nro_cargo' => 'Secuencia',
-            'codc_uacad' => 'Dependencia',
-            'codn_conce' => 'Concepto',
-            'impp_conce' => 'Importe',
-        ];
-    }
+    public function __construct(protected \Illuminate\Database\Eloquent\Builder $query) {}
 
     public function headings(): array
     {
@@ -66,7 +59,7 @@ class ReportDetailSheet implements FromQuery, ShouldAutoSize, WithHeadings, With
         return $mappedRow;
     }
 
-    public function query()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         return $this->query;
     }
@@ -124,7 +117,7 @@ class ReportDetailSheet implements FromQuery, ShouldAutoSize, WithHeadings, With
 
         // Filas alternadas para mejor legibilidad
         for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+            if ($row % 2 === 0) {
                 $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,

@@ -12,14 +12,13 @@ use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Override;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EmbargoUacadSummary extends BaseExcelSheet implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
 {
-    public function __construct(protected Builder $query)
-    {
-    }
+    public function __construct(protected Builder $query) {}
 
     /**
      * @return Collection
@@ -55,7 +54,8 @@ class EmbargoUacadSummary extends BaseExcelSheet implements FromCollection, Shou
         return 'Totales por Uacad';
     }
 
-    public function styles(Worksheet $sheet)
+    #[Override]
+    public function styles(Worksheet $sheet): static
     {
         parent::styles($sheet);
 
