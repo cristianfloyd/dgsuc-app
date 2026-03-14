@@ -1,6 +1,6 @@
-# Sistema DGSUC - Universidad de Buenos Aires
+# Sistema DGSUC - Universidad
 
-Sistema integral de gestión de informes de recursos humanos y complementacion de nóminas desarrollado para la Universidad de Buenos Aires, construido con Laravel 12 y FilamentPHP.
+Sistema integral de gestión de informes de recursos humanos y complementacion de nóminas desarrollado para la Universidad, construido con Laravel 12 y FilamentPHP.
 
 ## 🚀 Características Principales
 
@@ -591,7 +591,7 @@ php artisan test --testsuite=Unit
 
 ## 📝 Licencia
 
-Este proyecto es propiedad de la Universidad de Buenos Aires y está bajo licencia MIT.
+Este proyecto es propiedad de la Universidad y está bajo licencia MIT.
 
 ## 🆘 Soporte
 
@@ -604,7 +604,7 @@ Para reportar issues o solicitar features:
 
 ## 👥 Créditos
 
-Desarrollado para la **Universidad de Buenos Aires** como parte del sistema integral de gestión de recursos humanos y liquidaciones.
+Desarrollado para la **Universidad** como parte del sistema integral de gestión de recursos humanos y liquidaciones.
 
 ---
 

@@ -29,7 +29,8 @@
         "robsontenorio/mary": "^2.4.2",
         "socialiteproviders/microsoft": "^4.6",
         "socialiteproviders/microsoft-azure": "^5.2",
-        "spatie/laravel-data": "^4.11"
+        "spatie/laravel-data": "^4.11",
+        "spatie/laravel-permission": "*"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.0",
