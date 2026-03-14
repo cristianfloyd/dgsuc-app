@@ -10,6 +10,7 @@ use App\Services\EncodingService;
 use App\Services\Mapuche\LicenciaService;
 use App\Traits\MapucheConnectionTrait;
 use App\ValueObjects\PeriodoFiscal;
+use Deprecated;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -80,13 +81,10 @@ class SicossOptimizado
         $path = storage_path('comunicacion/sicoss/');
         self::$archivos = [];
 
-
         // Si no filtro por numero de legajo => obtengo todos los legajos
         if (!empty($filtro_legajo)) {
             $where = "dh01.nro_legaj= $filtro_legajo ";
         }
-
-
 
         // Seteo valores de rrhhini
         self::$codigo_obra_social_default = self::quote(MapucheConfig::getDefaultsObraSocial());
@@ -100,25 +98,15 @@ class SicossOptimizado
         self::$codc_reparto = self::quote(MapucheConfig::getDatosCodcReparto());
         self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
         self::$hs_extras_por_novedad = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
-        self::$categoria_diferencial = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
+        self::$categoria_diferencial = MapucheConfig::getCategoriasDiferencial(); // obtengo las categorias seleccionadas en configuracion
         self::$codc_reparto = self::quote(MapucheConfig::getDatosCodcReparto());
 
-
-
-
-
-
-
         self::obtener_conceptos_liquidados($per_anoct, $per_mesct, $where);
-
 
         // LICENCIAS
         $licencias_agentes_no_remunem = self::get_licencias_vigentes($where);
         $licencias_agentes_remunem = self::get_licencias_protecintegral_vacaciones($where);
         $licencias_agentes = array_merge($licencias_agentes_no_remunem, $licencias_agentes_remunem);
-
-
-
 
         // Si no tengo tildado el check el proceso genera un unico archivo sin tener en cuenta año y mes retro
         switch ($opcion_retro) {
@@ -126,9 +114,7 @@ class SicossOptimizado
                 $periodo = 'Vigente_sin_retro';
                 self::$archivos[$periodo] = "$path$nombre_arch";
 
-
                 $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
-
 
                 $periodo = $per_mesct . '/' . $per_anoct . ' (Vigente)';
                 if ($retornar_datos) {
@@ -169,7 +155,7 @@ class SicossOptimizado
                 for ($i = 0; $i < $counter; $i++) {
                     $p = $periodos_retro[$i];
                     $mes = str_pad((string) $p['mes_retro'], 2, '0', STR_PAD_LEFT);
-                    //agrego cero adelante a meses
+                    // agrego cero adelante a meses
                     $where_periodo = 't.ano_retro=' . $p['ano_retro'] . ' AND t.mes_retro=' . $mes;
                     $legajos = self::obtener_legajos(self::$codc_reparto, $where_periodo, $where, $datos['check_lic'], $datos['check_sin_activo']);
 
@@ -189,7 +175,6 @@ class SicossOptimizado
                     }
 
                     self::$archivos[$periodo] = $path . $nombre_arch;
-
 
                     $totales[$item] = $subtotal;
                 }
@@ -646,6 +631,7 @@ class SicossOptimizado
             $temp['mes_retro'] = '0';
             $rs_periodos_retro[] = $temp;
         }
+
         return $rs_periodos_retro;
     }
 
@@ -680,11 +666,7 @@ class SicossOptimizado
 
         DB::connection(self::getStaticConnectionName())->select($sql_crear_vista);
 
-
-
-
         $sql_datos_legajo = self::get_sql_legajos('conceptos_liquidados', 0);
-
 
         // Si tengo el check de licencias agrego a la cantidad de agentes a procesar a los agentes sin licencias sin goce
         // Si tengo el check de licencias y ademas tengo el check de retros, debo tener en cuenta las licencias solo en el archivo generado con mes y a�o 0 (son del periodo vigente)
@@ -692,7 +674,6 @@ class SicossOptimizado
         if ($check_lic && ($where_periodo_retro == ' true ' || $where_periodo_retro == 't.ano_retro=0 AND t.mes_retro=00')) {
             // Me fijo cuales son todos los agentes con licencias sin goce (de cargo o de legajo, liquidados o no). Si habia seleccionado legajo tambien filtro
             $legajos_lic = LicenciaService::getLegajosLicenciasSinGoce($where_legajo);
-
 
             // Preparo arreglo para usar en sql IN
             $legajos_lic = implode(',', $legajos_lic);
@@ -727,7 +708,7 @@ class SicossOptimizado
             $legajos = array_map(fn($item) => (array) $item, $legajos);
         }
 
-        //Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidación para Reserva de Puesto"
+        // Si esta chequeado "Generar Agentes Activos sin Cargo Activo y sin Liquidación para Reserva de Puesto"
         if ($check_sin_activo) {
             $where_no_liquidado = "
 								NOT EXISTS (SELECT 1
@@ -846,6 +827,7 @@ class SicossOptimizado
         for ($i = $min; $i <= $max; $i++) {
             $estado_situacion[$i] = $codigo;
         }
+
         return $estado_situacion;
     }
 
@@ -853,10 +835,10 @@ class SicossOptimizado
      * Se le pasa la condici�n actual y se compara con la condici�n
      * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT).
      *
-     * @param integer $c1 : condici�n actual
-     * @param integer $c2 : condici�n tipo de licencia
+     * @param int $c1 : condici�n actual
+     * @param int $c2 : condici�n tipo de licencia
      *
-     * @return integer $c1
+     * @return int $c1
      */
     public static function evaluar_condicion_licencia($c1, $c2)
     {
@@ -1017,8 +999,6 @@ class SicossOptimizado
         Log::debug("TopeJubilatorioPersonal: $TopeJubilatorioPersonal");
         Log::debug("TopeOtrosAportesPersonales: $TopeOtrosAportesPersonales");
 
-
-
         $artContTope = MapucheConfig::getParametroRrhh('Sicoss', 'ARTconTope', '1');
 
         // Inicializo para guardar el total de cada tipo de importe para luego mostrar en informe de control
@@ -1028,7 +1008,7 @@ class SicossOptimizado
         $total['imponible_2'] = 0;
         $total['imponible_4'] = 0;
         $total['imponible_5'] = 0;
-        $total['imponible_6'] = 0; //bruto + sac docente
+        $total['imponible_6'] = 0; // bruto + sac docente
         $total['imponible_8'] = 0;
         $total['imponible_9'] = 0;
         $legajos_validos = [];
@@ -1038,7 +1018,6 @@ class SicossOptimizado
         // ✅ PASO 1: Pre-carga masiva de conceptos (ya optimizado)
         $todos_conceptos = self::precargar_conceptos_todos_legajos($legajos);
         $conceptos_por_legajo = self::agrupar_conceptos_por_legajo($todos_conceptos);
-
 
         // ✅ PASO 2: Pre-carga masiva de cargos (ya optimizado)
         $datos_cargos_por_legajo = self::precargar_todos_datos_cargos($legajos);
@@ -1050,8 +1029,6 @@ class SicossOptimizado
         $inicio_codigo_os = microtime(true);
         $codigos_dgi_por_legajo = self::precargar_codigos_obra_social_todos_legajos($legajos);
         $fin_codigo_os = microtime(true);
-
-
 
         Log::info('=== 🏁 ÚLTIMA OPTIMIZACIÓN COMPLETADA - CÓDIGOS OBRA SOCIAL ===', [
             'tiempo_precarga_codigo_os_ms' => round(($fin_codigo_os - $inicio_codigo_os) * 1000, 2),
@@ -1079,8 +1056,7 @@ class SicossOptimizado
 
             $legajoActual['codigo_os'] = self::codigo_os_optimizado($legajo, $codigos_dgi_por_legajo);
 
-
-            //#44909 Incorporar a la salida de SICOSS el cdigo de situacin Reserva de Puesto (14)
+            // #44909 Incorporar a la salida de SICOSS el cdigo de situacin Reserva de Puesto (14)
             if ($check_sin_activo) {
                 $where_not_dh21 = "
 								NOT EXISTS (SELECT 1
@@ -1111,8 +1087,6 @@ class SicossOptimizado
                     'cargos_activos_sin_licencia' => $cargos_legajo,
                     'limites' => $limites,
                 ]);
-
-
 
                 // En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
                 if (!isset($limites['maximo'])) {
@@ -1150,9 +1124,7 @@ class SicossOptimizado
                     }
                 }
 
-
                 $licencias_cargos = LicenciaService::procesarLicenciasCargos($cargos_legajo);
-
 
                 Log::debug('Licencias Cargos: ', $licencias_cargos);
                 // Se evaluan los cargos
@@ -1224,7 +1196,6 @@ class SicossOptimizado
             $conceptos_legajo = $conceptos_por_legajo[$legajo] ?? [];
             Log::debug('Conceptos legajo: ', $conceptos_legajo);
 
-
             self::sumarizar_conceptos_optimizado($conceptos_legajo, $legajos[$i]);
 
             // --- Otros datos remunerativos - OPTIMIZADO ---
@@ -1256,7 +1227,6 @@ class SicossOptimizado
             $legajoActual['ImporteSACPatronal'] = $legajoActual['ImporteSAC'];
             $legajoActual['ImporteImponibleSinSAC'] = $legajoActual['ImporteImponiblePatronal'] - $legajoActual['ImporteSACPatronal'];
 
-
             if ($legajoActual['ImporteSAC'] > $TopeSACJubilatorioPatr && $trunca_tope == 1) {
                 Log::debug('✅ Trunca el tope de SAC');
                 $legajoActual['DiferenciaSACImponibleConTope'] = $legajoActual['ImporteSAC'] - $TopeSACJubilatorioPatr;
@@ -1264,7 +1234,6 @@ class SicossOptimizado
                 $legajoActual['ImporteSACPatronal'] = $TopeSACJubilatorioPatr;
                 Log::debug('✅ Importe Imponible Sin SAC: ', [$legajoActual['ImporteImponibleSinSAC']]);
             }
-
 
             if ($legajoActual['ImporteImponibleSinSAC'] > $TopeJubilatorioPatronal && $trunca_tope == 1) {
                 Log::debug('✅ Trunca el tope de Imponible', [
@@ -1301,7 +1270,7 @@ class SicossOptimizado
                 $legajoActual['PorcAporteDiferencialJubilacion'] = self::$porc_aporte_adicional_jubilacion;
                 $legajoActual['ImporteImponible_4'] = $legajoActual['IMPORTE_IMPON'];
                 $legajoActual['ImporteSACNoDocente'] = 0;
-                //ImporteImponible_6 viene con valor de funcion sumarizar_conceptos_por_tipos_grupos
+                // ImporteImponible_6 viene con valor de funcion sumarizar_conceptos_por_tipos_grupos
                 $legajoActua['ImporteImponible_6'] = round(($legajoActual['ImporteImponible_6'] * 100) / $legajoActual['PorcAporteDiferencialJubilacion'], 2);
                 $Imponible6_aux = $legajoActua['ImporteImponible_6'];
                 Log::debug('✅ Importes Imponibles', [
@@ -1312,19 +1281,11 @@ class SicossOptimizado
                     'Imponible6_aux' => $Imponible6_aux,
                 ]);
 
-
-
-
-
-
-
-
-
                 if ($Imponible6_aux != 0) {
                     Log::debug('✅ Importe Imponible 6 es distinto de 0');
                     if (
                         (int) $Imponible6_aux !== (int) $legajoActual['IMPORTE_IMPON']
-                        && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 //redondear hasta +  - $5
+                        && (abs($Imponible6_aux - $legajoActual['IMPORTE_IMPON'])) > 5 // redondear hasta +  - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajoActual['IMPORTE_IMPON']
                     ) {
                         $legajoActual['TipoDeOperacion'] = 2;
@@ -1366,8 +1327,6 @@ class SicossOptimizado
                 $legajoActual['ImporteSACOtroAporte'] = $legajoActual['ImporteSAC'];
                 $legajoActual['DiferenciaSACImponibleConTope'] = 0;
                 $legajoActual['DiferenciaImponibleConTope'] = 0;
-
-
 
                 $tope_jubil_personal = $TopeJubilatorioPersonal;
 
@@ -1416,8 +1375,8 @@ class SicossOptimizado
                     ]);
                 }
 
-                $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
-                $implode = implode("','", $explode); //vulve a String y agrega comillas
+                $explode = explode(',', self::$categoria_diferencial ?? ''); // arma el array
+                $implode = implode("','", $explode); // vulve a String y agrega comillas
                 $dh03Repository = new Dh03Repository();
                 if ($dh03Repository->existeCategoriaDiferencial($legajoActual['nro_legaj'], $implode)) {
                     $legajoActual['IMPORTE_IMPON'] = 0;
@@ -1436,7 +1395,6 @@ class SicossOptimizado
                 $tope_jubil_personal = ($legajoActual['ImporteSAC'] > 0) ? $TopeJubilatorioPersonal + $TopeSACJubilatorioPers : $TopeJubilatorioPersonal;
                 Log::debug('Tope Jubilatorio personal', ['tope_jubil_personal' => $tope_jubil_personal]);
 
-
                 if ($legajoActual['ImporteImponibleSinSAC'] > $tope_jubil_personal && $trunca_tope == 1) {
                     $legajoActual['DiferenciaImponibleConTope'] = $legajoActual['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
                     $legajoActual['IMPORTE_IMPON'] -= $legajoActual['DiferenciaImponibleConTope'];
@@ -1447,7 +1405,6 @@ class SicossOptimizado
                         'ImporteImponibleSinSAC' => $legajoActual['ImporteImponibleSinSAC'],
                     ]);
                 }
-
 
                 $otra_actividad = self::otra_actividad_optimizado($legajo, $datos_otra_actividad_por_legajo);
                 $legajoActual['ImporteBrutoOtraActividad'] = $otra_actividad['importebrutootraactividad'];
@@ -1543,7 +1500,6 @@ class SicossOptimizado
                     'ImporteSueldoMasAdicionales' => $legajoActual['ImporteSueldoMasAdicionales'],
                 ]);
 
-
                 if ($legajoActual['trabajadorconvencionado'] === null) {
                     $legajoActual['trabajadorconvencionado'] = self::$trabajadorConvencionado;
                 }
@@ -1638,6 +1594,7 @@ class SicossOptimizado
         if ($legajos_validos !== []) {
             if ($retornar_datos) {
                 dd($legajos_validos);
+
                 return $legajos_validos;
             }
 
@@ -1657,7 +1614,7 @@ class SicossOptimizado
     // Dado un arreglo, doy formato y agrego a archivo
     public static function grabar_en_txt($legajos, string $nombre_arch): void
     {
-        //Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
+        // Para todos los datos obtenidos habra q calcular lo que no esta en la consulta
         $directorio = storage_path('comunicacion/sicoss');
         // Crea el directorio si no existe
         if (!File::exists($directorio)) {
@@ -1693,9 +1650,9 @@ class SicossOptimizado
                     . self::llena_blancos_izq(number_format($legajos[$i]['AsignacionesFliaresPagadas'] ?? 0.0, 2, ',', ''), 9) // Campo 15
                     . self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_VOLUN'] ?? 0.0, 2, ',', ''), 9)              // Campo 16
                     . self::llena_blancos_izq(number_format($legajos[$i]['IMPORTE_ADICI'] ?? 0.0, 2, ',', ''), 9)              // Campo 17
-                    . self::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9)      //exedAportesSS
-                    . '     0,00'                                                                                     //exedAportesOS
-                    . self::llena_blancos($legajos[$i]['provincialocalidad'], 50)                                    //Campo 20
+                    . self::llena_blancos_izq(number_format(abs($legajos[$i]['ImporteSICOSSDec56119'] ?? 0.0), 2, ',', ''), 9)      // exedAportesSS
+                    . '     0,00'                                                                                     // exedAportesOS
+                    . self::llena_blancos($legajos[$i]['provincialocalidad'], 50)                                    // Campo 20
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12)  // Campo 21 - Imponible 2
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponiblePatronal'] ?? 0.0, 2, ',', ''), 12)  // Campo 22 - Imponible 3
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_4'] ?? 0.0, 2, ',', ''), 12)        // Campo 23 - Imponible 4
@@ -1725,8 +1682,8 @@ class SicossOptimizado
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImportePremios'] ?? 0.0, 2, ',', ''), 12)            // Campo 47
                     . self::llena_blancos_izq(number_format($legajos[$i]['Remuner78805'] ?? 0.0, 2, ',', ''), 12)              // Campo 48
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteImponible_6'] ?? 0.0, 2, ',', ''), 12)        // Campo 49 - Imponible7 = Imponible6
-                    //redondeo las HS extras, si vienen por ejemplo 10.5 en sicoss informo 11. Esto es porque el
-                    //campo de sicoss es de 3 caracteres y los 10.5 los informaria como 0.5
+                    // redondeo las HS extras, si vienen por ejemplo 10.5 en sicoss informo 11. Esto es porque el
+                    // campo de sicoss es de 3 caracteres y los 10.5 los informaria como 0.5
                     . self::llena_importes(ceil($legajos[$i]['CantidadHorasExtras']), 3)                                   // Campo 50
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteNoRemun'] ?? 0.0, 2, ',', ''), 12)            // Campo 51
                     . self::llena_blancos_izq(number_format($legajos[$i]['ImporteMaternidad'] ?? 0.0, 2, ',', ''), 12)         // Campo 52
@@ -1752,7 +1709,7 @@ class SicossOptimizado
      * Este método fue reemplazado por sumarizar_conceptos_optimizado()
      * Se mantiene solo para referencia y posible rollback.
      */
-    #[\Deprecated(message: 'Usar sumarizar_conceptos_optimizado() en su lugar')]
+    #[Deprecated(message: 'Usar sumarizar_conceptos_optimizado() en su lugar')]
     public static function sumarizar_conceptos_por_tipos_grupos($nro_leg, array &$leg): void
     {
         Log::warning('⚠️ USANDO MÉTODO DEPRECADO: sumarizar_conceptos_por_tipos_grupos', [
@@ -1802,7 +1759,6 @@ class SicossOptimizado
         $leg['ImporteNoRemun96'] = 0;
         $leg['ImporteTipo91'] = 0;
 
-
         $informar_becarios = MapucheConfig::getSicossInformarBecarios();
 
         // Voy a guardar en esta variable los numeros de cargos que son investigador
@@ -1827,13 +1783,12 @@ class SicossOptimizado
             $nro_cargo = $conceptos_liq_por_leg[$i]['nro_cargo'];
             $codigo_obra_social = $leg['codigo_os'];
 
-
             if (preg_match('/[^\d]+6[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
                 if (self::$hs_extras_por_novedad == 1) {
                     $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
-                    //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
+                    // verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
                     if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
@@ -2171,6 +2126,7 @@ class SicossOptimizado
 					AND $where";
 
         $suma = DB::connection(self::getStaticConnectionName())->select($sql);
+
         // Manejo seguro del resultado
         return !empty($suma) && isset($suma[0]->suma) ? (float) $suma[0]->suma : 0.0;
     }
@@ -2214,6 +2170,7 @@ class SicossOptimizado
         if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0) {
             return 0;
         }
+
         return 1;
     }
 
@@ -2282,6 +2239,7 @@ class SicossOptimizado
         if (strlen(trim($valor)) > $longitud) {
             return substr($valor, -($longitud));
         }
+
         return str_pad($valor, $longitud, '0', STR_PAD_LEFT);
     }
 
@@ -2290,6 +2248,7 @@ class SicossOptimizado
         if (strlen(trim((string) $texto)) > $longitud) {
             return substr((string) $texto, -($longitud));
         }
+
         return str_pad((string) $texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
@@ -2299,6 +2258,7 @@ class SicossOptimizado
         if (strlen(trim((string) $texto)) > $longitud) {
             return substr((string) $texto, 0, ($longitud));
         }
+
         return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
@@ -2307,6 +2267,7 @@ class SicossOptimizado
         if (strlen(trim((string) $texto)) > $longitud) {
             return substr((string) $texto, -($longitud));
         }
+
         return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
@@ -2330,12 +2291,13 @@ class SicossOptimizado
             $totales[$i++] = ['variable' => 'IMPONIBLE 8',    'valor' => $valor['imponible_8'], 'periodo' => $clave];
             $totales[$i++] = ['variable' => 'IMPONIBLE 9',    'valor' => $valor['imponible_9'], 'periodo' => $clave];
         }
+
         return $totales;
     }
 
     public static function armar_zip(): void
     {
-        //-- Generar el archivo ZIP para descargarlo
+        // -- Generar el archivo ZIP para descargarlo
 
         $nombre = 'sicoss';
         $path = storage_path('comunicacion/sicoss/');
@@ -2396,6 +2358,7 @@ class SicossOptimizado
         foreach (array_keys($dato) as $clave) {
             $salida[$clave] = self::quote($dato[$clave]);
         }
+
         return $salida;
     }
 
@@ -2409,6 +2372,7 @@ class SicossOptimizado
     public static function getStaticConnectionName(): string
     {
         $instance = new static();
+
         return $instance->getConnectionName();
     }
 
@@ -2430,6 +2394,7 @@ class SicossOptimizado
         // Validar que tengamos legajos para procesar
         if ($nros_legajos === []) {
             Log::warning('precargar_conceptos_todos_legajos: No hay legajos para procesar');
+
             return [];
         }
 
@@ -2640,7 +2605,7 @@ class SicossOptimizado
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
                 if (self::$hs_extras_por_novedad == 1) {
                     $horas = self::calculo_horas_extras($codn_concepto, $nro_cargo);
-                    //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
+                    // verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
                     if (!in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
@@ -3089,6 +3054,7 @@ class SicossOptimizado
 
         if ($nros_legajos === []) {
             Log::warning('precargar_todos_datos_cargos: No hay legajos para procesar');
+
             return [];
         }
 
@@ -3275,6 +3241,7 @@ class SicossOptimizado
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => count($nros_legajos),
             ]);
+
             return [];
         }
     }
@@ -3350,6 +3317,7 @@ class SicossOptimizado
         if (!$datos_legajo || !$datos_legajo['limites']) {
             // Fallback para legajos sin cargos
             $fecha_fin = self::quote(MapucheConfig::getFechaFinPeriodoCorriente());
+
             return [
                 'minimo' => 1,
                 'maximo' => (int) substr($fecha_fin, 9, 2),
@@ -3403,6 +3371,7 @@ class SicossOptimizado
 
         if ($nros_legajos === []) {
             Log::warning('precargar_otra_actividad_todos_legajos: No hay legajos para procesar');
+
             return [];
         }
 
@@ -3463,6 +3432,7 @@ class SicossOptimizado
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => count($nros_legajos),
             ]);
+
             return [];
         }
     }
@@ -3532,6 +3502,7 @@ class SicossOptimizado
                 'importesacotraactividad' => $datos['importesacotraactividad'],
             ];
         }
+
         // Igual que la función original cuando no hay datos
         return [
             'importesacotraactividad' => 0,
@@ -3555,6 +3526,7 @@ class SicossOptimizado
 
         if ($nros_legajos === []) {
             Log::warning('precargar_codigos_obra_social_todos_legajos: No hay legajos para procesar');
+
             return [];
         }
 
@@ -3648,6 +3620,7 @@ class SicossOptimizado
                 'error' => $e->getMessage(),
                 'cantidad_legajos' => count($nros_legajos),
             ]);
+
             return [];
         }
     }
@@ -3827,7 +3800,6 @@ class SicossOptimizado
 
             // Obtener legajos con el WHERE apropiado
             $where_periodo = " dh22.per_liano = {$anio} and dh22.per_limes = {$mes} ";
-
 
             $legajos = self::obtener_legajos(
                 $datos_completos['codc_reparto'],
@@ -4128,6 +4100,7 @@ class SicossOptimizado
         $mes = substr($periodo_fiscal, -2);
         $anio = substr($periodo_fiscal, 0, 4);
         $periodoFiscal = new PeriodoFiscal($anio, $mes);
+
         return self::genera_sicoss(
             datos: $datos,
             testeo_directorio_salida: '',
@@ -4173,6 +4146,7 @@ class SicossOptimizado
             if ($total_legajos > 50000) {
                 return 'chunks_grandes'; // Chunks de 2000-5000
             }
+
             return 'chunks_medianos'; // Chunks de 1000
         }
 
@@ -4180,6 +4154,7 @@ class SicossOptimizado
         if ($memoria_estimada < ($memoria_disponible * 0.5)) {
             return 'masivo_seguro'; // Usar pre-carga masiva
         }
+
         return 'masivo_monitoreado'; // Pre-carga con monitoreo intensivo
     }
 
@@ -4199,6 +4174,7 @@ class SicossOptimizado
         if ($porcentaje_muestra >= 2) {
             return 'media';
         }
+
         return 'baja';
     }
 

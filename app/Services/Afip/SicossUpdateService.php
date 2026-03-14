@@ -20,9 +20,7 @@ class SicossUpdateService
 {
     use MapucheConnectionTrait;
 
-    public function __construct(protected TableSelectorService $tableSelectorService)
-    {
-    }
+    public function __construct(protected TableSelectorService $tableSelectorService) {}
 
     public function executeUpdates(?array $liquidaciones = null): array
     {
@@ -38,7 +36,6 @@ class SicossUpdateService
 
             // Paso 1: Crear tabla temporal base
             $results['create_temp_table'] = $this->createTemporaryTables($liquidaciones);
-
 
             // Update 1: Actualizar codsit
             $results['update_1_codsit'] = $this->updateCodsit($liquidaciones);
@@ -519,6 +516,46 @@ class SicossUpdateService
      *
      * Este método actualiza el campo r21 a 'S' para los registros que tienen un tipo adicional 18
      * en la tabla dhd2 y no tienen fecha de finalización (fechahasta ISNULL).
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      *
      * @throws Exception Si ocurre un error durante la actualización.
      *

@@ -16,9 +16,7 @@ class SicossEmbarazadasService
 {
     use MapucheConnectionTrait;
 
-    public function __construct(protected TableSelectorService $tableSelectorService, protected PeriodoFiscalService $periodoFiscalService)
-    {
-    }
+    public function __construct(protected TableSelectorService $tableSelectorService, protected PeriodoFiscalService $periodoFiscalService) {}
 
     /**
      * Actualiza los datos de embarazadas en SICOSS.
@@ -147,6 +145,7 @@ class SicossEmbarazadasService
                 'year' => $year,
                 'month' => $month,
             ]);
+
             return [];
         }
     }

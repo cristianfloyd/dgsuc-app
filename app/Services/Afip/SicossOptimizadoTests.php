@@ -228,6 +228,7 @@ class SicossOptimizadoTests
     public static function pre_test_diagnostico()
     {
         Log::info('🚀 Ejecutando diagnóstico pre-test...');
+
         return self::diagnosticar_sistema_y_conexiones();
     }
 
@@ -237,6 +238,46 @@ class SicossOptimizadoTests
      * Este método realiza un análisis de la memoria requerida para procesar todos los legajos
      * disponibles en el sistema. Inicializa las variables estáticas necesarias, obtiene
      * una muestra de legajos y calcula la memoria necesaria para su procesamiento.
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      *
      *
      * @throws Exception Si falla la inicialización de variables estáticas
@@ -276,6 +317,7 @@ class SicossOptimizadoTests
 
     /**
      * Método base para ejecutar pruebas con diferentes cantidades de legajos - VERSIÓN MEJORADA.
+     *
      * @return mixed[]
      */
     private static function ejecutar_prueba_con_legajos(?int $limite_legajos, string $nombre_test, $datos = null): array
@@ -475,6 +517,7 @@ class SicossOptimizadoTests
         if ($ms_por_legajo < 200) {
             return 'ACEPTABLE ⚠️';
         }
+
         return 'NECESITA MEJORA ❌';
     }
 
@@ -494,6 +537,7 @@ class SicossOptimizadoTests
         if ($memoria_mb < 2000) {
             return 'ACEPTABLE ⚠️';
         }
+
         return 'ALTO CONSUMO ❌';
     }
 
@@ -514,11 +558,13 @@ class SicossOptimizadoTests
         if ($ms_por_legajo < 200 && $memoria_mb < 2000) {
             return 'BUENO 🔶';
         }
+
         return 'NECESITA OPTIMIZACIÓN ⚠️';
     }
 
     /**
      * Genera recomendaciones basadas en los resultados.
+     *
      * @return list<('⚠️  Considerar optimizaciones adicionales - tiempo por legajo alto' | '✅ Rendimiento óptimo - listo para producción' | '💾 Considerar procesamiento en lotes - uso de memoria alto' | '🔍 Investigar legajos fallidos - tasa de éxito baja' | '🚀 Considerar paralelización para cargas completas')>
      */
     private static function generar_recomendaciones(array $estadisticas): array
@@ -550,6 +596,7 @@ class SicossOptimizadoTests
 
     /**
      * Análisis comparativo de múltiples tests.
+     *
      * @return float[]|int[]|non-falsy-string[]|null[]
      */
     private static function analizar_suite_comparativa(array $resultados, $tiempo_total_suite): array
@@ -727,6 +774,7 @@ class SicossOptimizadoTests
     {
         try {
             $periodo = MapucheConfig::getPeriodoCorriente();
+
             return [
                 'año_actual' => $periodo['year'],
                 'mes_actual' => $periodo['month'],

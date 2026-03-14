@@ -15,9 +15,7 @@ class SicossCpto205Service
      *
      * @param SicossCpto205Repository $repository Repositorio para operaciones de datos
      */
-    public function __construct(protected SicossCpto205Repository $repository)
-    {
-    }
+    public function __construct(protected SicossCpto205Repository $repository) {}
 
     /**
      * Actualiza datos relacionados con el concepto 205 en SICOSS.
