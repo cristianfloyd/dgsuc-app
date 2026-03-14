@@ -4,9 +4,7 @@ namespace App\Services\Imports;
 
 use App\Exceptions\Imports\ImportException;
 use App\Exceptions\ImportValidationException;
-use App\Imports\BloqueosImport;
 use App\Traits\MapucheConnectionTrait;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -18,19 +16,15 @@ class BloqueosImportService
 {
     use MapucheConnectionTrait;
 
-    private $connection;
-
     public function __construct(
-        private ImportValidationService $validationService,
-        private ImportNotificationService $notificationService,
-    ) {
-        $this->connection = $this->getConnectionFromTrait();
-    }
+        private readonly ImportValidationService $validationService,
+        private readonly ImportNotificationService $notificationService,
+    ) {}
 
     public function processImport(array $row, int $nroLiqui): array
     {
+        $this->validationService->validateFile('');
         $startTime = now();
-
 
         try {
             // Procesar la fila individual
@@ -48,6 +42,7 @@ class BloqueosImportService
                 'row' => $row,
                 'error' => $e->getMessage(),
             ]);
+            $this->notificationService->sendErrorNotification($e->getMessage());
 
             throw new ImportException('Error procesando fila: ' . $e->getMessage(), $e->getCode(), previous: $e);
         }
@@ -81,8 +76,11 @@ class BloqueosImportService
         try {
             // Intentar diferentes formatos de fecha
             $formats = [
-                'd/m/Y', 'Y-m-d', 'd-m-Y',
-                'd/m/y', 'Y/m/d',
+                'd/m/Y',
+                'Y-m-d',
+                'd-m-Y',
+                'd/m/y',
+                'Y/m/d',
                 // Formato Excel (número de días desde 1900)
                 fn($value) => \Illuminate\Support\Facades\Date::instance(Date::excelToDateTimeObject($value)),
             ];
@@ -115,6 +113,7 @@ class BloqueosImportService
         if (!is_numeric($legajo) || $legajo < 1) {
             throw new ImportValidationException("Legajo inválido: {$legajo}");
         }
+
         return (int) $legajo;
     }
 
@@ -128,6 +127,7 @@ class BloqueosImportService
         if (!is_numeric($cargo) || $cargo < 1) {
             throw new ImportValidationException("Cargo inválido: {$cargo}");
         }
+
         return (int) $cargo;
     }
 }

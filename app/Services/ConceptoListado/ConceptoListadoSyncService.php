@@ -14,9 +14,7 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
 {
     use MapucheConnectionTrait;
 
-    public function __construct(private ConceptoListado $conceptoListado, private PeriodoFiscalService $periodoFiscalService)
-    {
-    }
+    public function __construct(private ConceptoListado $conceptoListado, private PeriodoFiscalService $periodoFiscalService) {}
 
     /**
      * Sincroniza los datos desde Mapuche a la tabla de reportes.
@@ -109,6 +107,7 @@ class ConceptoListadoSyncService implements ConceptoListadoServiceInterface
         if ($periodoFiscal === $periodoActualStr) {
             return 'mapuche.dh21'; // Tabla actual
         }
+
         return 'mapuche.dh21h'; // Tabla histórica
     }
 

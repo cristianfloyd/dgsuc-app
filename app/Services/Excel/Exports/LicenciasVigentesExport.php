@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Spatie\LaravelData\DataCollection;
 
-class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle, ShouldAutoSize
+class LicenciasVigentesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected string $periodo;
 
@@ -73,8 +73,6 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
 
     /**
      * Aplica estilos a la hoja de Excel.
-     *
-     *
      */
     public function styles(Worksheet $sheet): void
     {
@@ -111,8 +109,6 @@ class LicenciasVigentesExport implements FromCollection, WithHeadings, WithMappi
 
     /**
      * Obtiene la descripción legible de la condición.
-     *
-     *
      */
     protected function getDescripcionCondicion(int $condicion): string
     {

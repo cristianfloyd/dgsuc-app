@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 use function count;
+use function in_array;
 
 class SicossFileProcessor
 {
