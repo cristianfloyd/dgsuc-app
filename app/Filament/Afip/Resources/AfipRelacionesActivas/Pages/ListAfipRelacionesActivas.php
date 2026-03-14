@@ -6,12 +6,13 @@ use App\Filament\Afip\Resources\AfipRelacionesActivas\Actions\ImportAction;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\Actions\TruncateAction;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListAfipRelacionesActivas extends ListRecords
 {
     protected static string $resource = AfipRelacionesActivasResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

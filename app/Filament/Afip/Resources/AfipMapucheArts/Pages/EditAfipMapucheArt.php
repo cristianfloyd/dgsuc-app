@@ -5,12 +5,13 @@ namespace App\Filament\Afip\Resources\AfipMapucheArts\Pages;
 use App\Filament\Afip\Resources\AfipMapucheArts\AfipMapucheArts\AfipMapucheArtResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditAfipMapucheArt extends EditRecord
 {
     protected static string $resource = AfipMapucheArtResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

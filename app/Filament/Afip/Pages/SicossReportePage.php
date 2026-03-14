@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
+use Override;
 use UnitEnum;
 
 class SicossReportePage extends Page implements HasTable
@@ -191,7 +192,7 @@ class SicossReportePage extends Page implements HasTable
         return $this->sicossReporteService->getTotales($this->anio, $this->mes)->toArray();
     }
 
-    #[\Override]
+    #[Override]
     public function getWidgetData(): array
     {
         return [
@@ -243,7 +244,10 @@ class SicossReportePage extends Page implements HasTable
                 BulkAction::make('export')
                     ->label('Exportar Seleccionados')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->action(fn($records) => Excel::download(new SicossReporteExport($this->anio, $this->mes, $records, $this->getTotales()), "reporte_sicoss_{$this->anio}_{$this->mes}_seleccionados.xlsx")),
+                    ->action(fn($records) => Excel::download(
+                        new SicossReporteExport($this->anio, $this->mes, $records, $this->getTotales()),
+                        "reporte_sicoss_{$this->anio}_{$this->mes}_seleccionados.xlsx",
+                    )),
             ])
             ->persistFiltersInSession()
             ->persistSortInSession();
@@ -260,13 +264,13 @@ class SicossReportePage extends Page implements HasTable
         Notification::make()->title('Datos actualizados')->success()->send();
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderWidgets(): array
     {
         return [SicossTotalesWidget::class];
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [];

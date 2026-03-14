@@ -5,12 +5,13 @@ namespace App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\Pages;
 use App\Filament\Afip\Resources\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacions\AfipMapucheMiSimplificacionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditAfipMapucheMiSimplificacion extends EditRecord
 {
     protected static string $resource = AfipMapucheMiSimplificacionResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

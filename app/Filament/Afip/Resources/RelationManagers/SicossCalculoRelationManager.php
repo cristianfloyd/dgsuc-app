@@ -6,6 +6,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class SicossCalculoRelationManager extends RelationManager
 {
@@ -19,7 +20,7 @@ class SicossCalculoRelationManager extends RelationManager
 
     protected static ?string $pluralModelLabel = 'Cálculos SICOSS';
 
-    #[\Override]
+    #[Override]
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
         return true;

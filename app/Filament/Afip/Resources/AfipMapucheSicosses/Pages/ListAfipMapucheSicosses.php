@@ -10,18 +10,19 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 
 class ListAfipMapucheSicosses extends BaseListRecords
 {
     protected static string $resource = AfipMapucheSicossResource::class;
 
-    #[\Override]
+    #[Override]
     public function mount(): void
     {
         parent::mount();
     }
 
-    #[\Override]
+    #[Override]
     public function getTabs(): array
     {
         return [
@@ -37,7 +38,7 @@ class ListAfipMapucheSicosses extends BaseListRecords
         return AfipMapucheSicossTableService::class;
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

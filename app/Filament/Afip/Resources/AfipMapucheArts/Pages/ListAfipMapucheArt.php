@@ -14,12 +14,13 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\Size;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
+use Override;
 
 class ListAfipMapucheArt extends ListRecords
 {
     protected static string $resource = AfipMapucheArtResource::class;
 
-    #[\Override]
+    #[Override]
     public function getTabs(): array
     {
         return [
@@ -35,7 +36,7 @@ class ListAfipMapucheArt extends ListRecords
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

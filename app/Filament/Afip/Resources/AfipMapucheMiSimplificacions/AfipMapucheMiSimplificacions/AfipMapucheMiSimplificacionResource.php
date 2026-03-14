@@ -29,6 +29,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Log;
+use Override;
 use UnitEnum;
 
 class AfipMapucheMiSimplificacionResource extends Resource
@@ -49,7 +50,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,7 +59,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ]);
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -143,7 +144,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                                 $liquidaciones = $liquidacionService->getLiquidacionesForSelect($year, $month);
 
                                 // Formatear el array para la vista
-                                return collect($liquidaciones)->mapWithKeys(fn($descripcion, $nro_liqui) => [$nro_liqui => "# {$nro_liqui} - {$descripcion}"])->all();
+                                return collect($liquidaciones)->mapWithKeys(fn($descripcion, $nro_liqui): array => [$nro_liqui => "# {$nro_liqui} - {$descripcion}"])->all();
                             })
                             ->required()
                             ->searchable()
@@ -152,7 +153,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
                     ->action(function (array $data, MapucheMiSimplificacionService $mapucheMiSimplificacionService): void {
                         try {
                             $processedCount = $mapucheMiSimplificacionService->poblarMiSimplificacion(
-                                (int) $data['periodo_fiscal'],
+                                (string) $data['periodo_fiscal'],
                                 (int) $data['nro_liqui'],
                             );
 
@@ -198,7 +199,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
             ->defaultSort('periodo_fiscal', 'desc');
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -206,7 +207,7 @@ class AfipMapucheMiSimplificacionResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

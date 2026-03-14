@@ -19,6 +19,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Override;
 use Throwable;
 use UnitEnum;
 
@@ -392,7 +393,7 @@ class SicossUpdates extends Page
         }
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderWidgets(): array
     {
         return [
@@ -438,7 +439,7 @@ class SicossUpdates extends Page
         }
     }
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [
@@ -494,7 +495,10 @@ class SicossUpdates extends Page
                 ->disabled($this->isProcessing)
                 ->requiresConfirmation()
                 ->modalHeading('Actualizar Conceptos 204 y 205')
-                ->modalDescription('¿Está seguro que desea actualizar los conceptos 204 (aportes mínimos) y 205? Este proceso ejecutará ambas actualizaciones secuencialmente y puede tomar varios minutos.'),
+                ->modalDescription(
+                    '¿Está seguro que desea actualizar los conceptos 204 (aportes mínimos) y 205? '
+                    . 'Este proceso ejecutará ambas actualizaciones secuencialmente y puede tomar varios minutos.',
+                ),
         ];
     }
 }

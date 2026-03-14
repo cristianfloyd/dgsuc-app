@@ -30,6 +30,7 @@ use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Override;
 use Symfony\Component\HttpFoundation\Response;
 use UnitEnum;
 
@@ -55,7 +56,7 @@ class AfipMapucheSicossResource extends Resource
 
     protected static ?int $navigationSort = 0;
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -265,7 +266,7 @@ class AfipMapucheSicossResource extends Resource
             ]);
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -283,7 +284,7 @@ class AfipMapucheSicossResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

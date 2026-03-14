@@ -2,7 +2,6 @@
 
 namespace App\Filament\Afip\Pages\Traits;
 
-use Carbon\Carbon;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
@@ -38,6 +37,7 @@ trait HasSicossControlTables
                 ->color(fn(string $state): string => match ($state) {
                     'DH21' => 'warning',
                     'SICOSS' => 'danger',
+                    default => 'gray',
                 })
                 ->description(fn(string $state): string => match ($state) {
                     'DH21' => 'Existe en DH21 pero no en SICOSS',

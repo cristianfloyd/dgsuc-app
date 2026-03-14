@@ -11,12 +11,13 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListAfipMapucheSicossCalculos extends ListRecords
 {
     protected static string $resource = AfipMapucheSicossCalculoResource::class;
 
-    #[\Override]
+    #[Override]
     public function mount(): void
     {
         $tableInitializationManager = resolve(TableInitializationManager::class);
@@ -31,7 +32,7 @@ class ListAfipMapucheSicossCalculos extends ListRecords
         }
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

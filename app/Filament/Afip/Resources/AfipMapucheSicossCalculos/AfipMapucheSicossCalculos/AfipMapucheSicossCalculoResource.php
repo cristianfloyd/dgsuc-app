@@ -20,6 +20,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Override;
 use UnitEnum;
 
 class AfipMapucheSicossCalculoResource extends Resource
@@ -34,7 +35,7 @@ class AfipMapucheSicossCalculoResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [
@@ -44,7 +45,7 @@ class AfipMapucheSicossCalculoResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -153,7 +154,7 @@ class AfipMapucheSicossCalculoResource extends Resource
             ]);
     }
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema

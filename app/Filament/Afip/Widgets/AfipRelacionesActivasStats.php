@@ -7,10 +7,11 @@ use Exception;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 class AfipRelacionesActivasStats extends BaseWidget
 {
-    #[\Override]
+    #[Override]
     protected function getStats(): array
     {
         try {

@@ -2,11 +2,10 @@
 
 namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Actions;
 
-use app\Models\Mapuche\Dh22;
-use app\Models\UploadedFile;
-use app\Services\ColumnMetadata;
-use app\Services\DatabaseService;
-use app\Services\FileProcessorService;
+use App\Models\Mapuche\Dh22;
+use App\Models\UploadedFile;
+use App\Services\DatabaseService;
+use App\Services\FileProcessorService;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -43,7 +42,7 @@ class ImportAction extends Action
                         ->orderBy('nro_liqui', 'desc')
                         ->limit(12)
                         ->get()
-                        ->mapWithKeys(fn($liquidacion) => [
+                        ->mapWithKeys(fn($liquidacion): array => [
                             $liquidacion->nro_liqui => "#{$liquidacion->nro_liqui} - {$liquidacion->desc_liqui}",
                         ]))
                     ->searchable()
@@ -79,7 +78,7 @@ class ImportAction extends Action
                     $periodoFiscal = $data['periodo_fiscal'];
                     $nro_liqui = $data['nro_liqui'];
 
-                    $uploadedFile = UploadedFile::create([
+                    $uploadedFile = UploadedFile::query()->create([
                         'periodo_fiscal' => $data['periodo_fiscal'],
                         'origen' => 'afip',
                         'filename' => $newFilename,
@@ -89,14 +88,6 @@ class ImportAction extends Action
                         'user_id' => 1, // auth()->user()->id,
                         'nro_liqui' => $nro_liqui,
                     ]);
-
-                    // Instanciamos los servicios necesarios
-                    $fileProcessor = new FileProcessorService(
-                        new DatabaseService(),
-                        new ColumnMetadata(),
-                        app()->make(\App\Contracts\DataMapperInterface::class),
-                        $periodoFiscal,
-                    );
 
                     // Procesar el archivo usando el servicio FileProcessor
                     $fileProcessor = resolve(FileProcessorService::class);

@@ -108,7 +108,7 @@ class SicossControlActionHandler
         Notification::make()
             ->success()
             ->title(ucfirst($tipoControl) . ' Control Ejecutado')
-            ->body("Se completó el control de {$tipoControl} para el período {$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT))
+            ->body("Se completó el control de {$tipoControl} para el período {$year}-" . str_pad((string) $month, 2, '0', STR_PAD_LEFT))
             ->send();
     }
 

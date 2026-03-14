@@ -16,6 +16,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 use UnitEnum;
 
 class AfipMapucheArtResource extends Resource
@@ -30,7 +31,7 @@ class AfipMapucheArtResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -39,7 +40,7 @@ class AfipMapucheArtResource extends Resource
             ]);
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -106,7 +107,7 @@ class AfipMapucheArtResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

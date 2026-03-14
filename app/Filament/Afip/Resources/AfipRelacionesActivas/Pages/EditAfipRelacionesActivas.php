@@ -5,12 +5,13 @@ namespace App\Filament\Afip\Resources\AfipRelacionesActivas\Pages;
 use App\Filament\Afip\Resources\AfipRelacionesActivas\AfipRelacionesActivas\AfipRelacionesActivasResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditAfipRelacionesActivas extends EditRecord
 {
     protected static string $resource = AfipRelacionesActivasResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

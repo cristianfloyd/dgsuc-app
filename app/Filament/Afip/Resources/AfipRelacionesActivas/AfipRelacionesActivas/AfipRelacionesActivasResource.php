@@ -21,6 +21,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Override;
 use UnitEnum;
 
 class AfipRelacionesActivasResource extends Resource
@@ -33,7 +34,7 @@ class AfipRelacionesActivasResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -118,7 +119,7 @@ class AfipRelacionesActivasResource extends Resource
             ]);
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -186,7 +187,7 @@ class AfipRelacionesActivasResource extends Resource
             ->defaultPaginationPageOption(5);
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -194,7 +195,7 @@ class AfipRelacionesActivasResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [
@@ -204,7 +205,7 @@ class AfipRelacionesActivasResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getGloballySearchableAttributes(): array
     {
         return ['cuil', 'periodo_fiscal'];

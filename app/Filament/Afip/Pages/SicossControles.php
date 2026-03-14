@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View as ViewFacade;
 use Livewire\Attributes\On;
 use Maatwebsite\Excel\Facades\Excel;
+use Override;
 use UnitEnum;
 
 use function count;
@@ -594,7 +595,7 @@ class SicossControles extends Page implements HasTable
     /**
      * Obtiene los datos para la vista de resumen.
      */
-    #[\Override]
+    #[Override]
     protected function getViewData(): array
     {
         $data = [
@@ -723,6 +724,7 @@ class SicossControles extends Page implements HasTable
                 Action::make('view_cuils')
                     ->label('Ver detalles')
                     ->icon('heroicon-m-eye')
+                    /** @phpstan-ignore-next-line argument.type */
                     ->modalContent(fn($record): View => view('filament.afip.pages.partials.sicoss-detalle-cuils-modal', [
                         'record' => $record,
                     ]))
@@ -768,7 +770,7 @@ class SicossControles extends Page implements HasTable
         return [];
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         // Acciones base según la pestaña activa
@@ -827,7 +829,7 @@ class SicossControles extends Page implements HasTable
         return $actions;
     }
 
-    #[\Override]
+    #[Override]
     protected function getHeaderWidgets(): array
     {
         $widgets = [
