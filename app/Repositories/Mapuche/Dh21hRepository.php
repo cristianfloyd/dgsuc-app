@@ -15,9 +15,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     /**
      * Create a new class instance.
      */
-    public function __construct(private readonly Dh21h $model)
-    {
-    }
+    public function __construct(private readonly Dh21h $model) {}
 
     /**
      * Obtener liquidación por ID.
@@ -36,7 +34,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function all(): Collection
     {
@@ -44,7 +42,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function delete($id): bool
     {
@@ -53,13 +51,14 @@ class Dh21hRepository implements Dh21hRepositoryInterface
 
             return $deletedRows > 0;
         } catch (Exception $e) {
-            Log::error("Error deleting Dh21h with id {$id}: " . $e->getMessage());
+            Log::error("Error deleting Dh21h with id {$id}: ".$e->getMessage());
+
             return false;
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function find($id): Dh21h
     {
@@ -67,15 +66,15 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * Obtiene los registros Dh21h por número de legajo.
      */
     public function findByLegajo(int $legajo): Collection
     {
-        return $this->model->byLegajo($legajo)->get();
+        return $this->model->query()->byLegajo($legajo)->get();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -83,7 +82,7 @@ class Dh21hRepository implements Dh21hRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function update($id, Dh21hData $data): bool
     {
