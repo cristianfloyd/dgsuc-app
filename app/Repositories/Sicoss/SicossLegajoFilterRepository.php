@@ -41,7 +41,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
                                             $where_periodo_retro
             ";
 
-        $rs_filtrado = DB::connection($this->getConnectionName())->select($sql_conceptos_liq_filtrados);
+        DB::connection($this->getConnectionName())->select($sql_conceptos_liq_filtrados);
 
         $sql_ix = 'CREATE INDEX ix_conceptos_liquidados_1 ON conceptos_liquidados(nro_legaj,tipos_grupos);';
         DB::connection($this->getConnectionName())->select($sql_ix);
@@ -65,16 +65,12 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
             $tabla = 'dh01';
             $where = ' true ';
             if ($legajos_lic !== '' && $legajos_lic !== '0') {
-                $where = ' dh01.nro_legaj IN ('.$legajos_lic.')';
-                if (! $check_lic) {
-                    $where .= ' AND dh01.nro_legaj NOT IN (SELECT nro_legaj FROM conceptos_liquidados))';
-                } else {
-                    $where .= ' )';
-                }
+                $where = ' dh01.nro_legaj IN (' . $legajos_lic . ')';
+                $where .= ' )';
                 // si tengo licencias consulto la union de legajos. Ordeno por agente, luego de obtener todos los legajos
-                $sql_datos_lic = ' UNION ('.$this->dh01Repository->getSqlLegajos('mapuche.dh01', 1, $where, $codc_reparto).' ORDER BY apyno';
+                $sql_datos_lic = ' UNION (' . $this->dh01Repository->getSqlLegajos('mapuche.dh01', 1, $where, $codc_reparto) . ' ORDER BY apyno';
 
-                $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo.$sql_datos_lic);
+                $legajos = DB::connection($this->getConnectionName())->select($sql_datos_legajo . $sql_datos_lic);
             } else {
                 $sql_datos_legajo .= ' ORDER BY apyno';
                 // Si no hay licencias sin goce que cumpaln con las restricciones hago el proceso comun
@@ -110,7 +106,7 @@ class SicossLegajoFilterRepository implements SicossLegajoFilterRepositoryInterf
         }
 
         // Convertir objetos stdClass a arrays
-        $legajos = array_map(fn ($legajo): array => (array) $legajo, $legajos);
+        $legajos = array_map(fn($legajo): array => (array) $legajo, $legajos);
 
         // Elimino legajos repetidos
         $legajos_sin_repetidos = [];

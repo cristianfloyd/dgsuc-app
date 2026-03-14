@@ -83,8 +83,8 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
 
         // Si no filtro por número de legajo => obtengo todos los legajos
         $where = ' true ';
-        if (! empty($filtro_legajo)) {
-            $where = 'dh01.nro_legaj= '.$filtro_legajo.' ';
+        if (!empty($filtro_legajo)) {
+            $where = 'dh01.nro_legaj= ' . $filtro_legajo . ' ';
         }
 
         $where_periodo = ' true ';
@@ -211,5 +211,10 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
             'TopeOtrosAportesPersonal' => (float) ($topeOtrosAportesPersonal ?? $defaults['TopeOtrosAportesPersonal']),
             'truncaTope' => (bool) ($truncaTope ?? $defaults['truncaTope']),
         ];
+    }
+
+    public function getCategoriaDiferencial(): string
+    {
+        return (string) (self::$categoria_diferencial ?? '');
     }
 }

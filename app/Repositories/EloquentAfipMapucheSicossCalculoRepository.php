@@ -27,18 +27,20 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
     public function find(string $cuil): ?AfipMapucheSicossCalculoData
     {
         $model = $this->model->where('cuil', $cuil)->first();
+
         return $model ? $model->toData() : null;
     }
 
     public function create(AfipMapucheSicossCalculoData $data): AfipMapucheSicossCalculoData
     {
         $model = $this->model->create($data->toArray());
+
         return $model->toData();
     }
 
     public function update(string $cuil, AfipMapucheSicossCalculoData $data): bool
     {
-        return $this->model->where('cuil', $cuil)->update($data->toArray());
+        return (bool) $this->model->where('cuil', $cuil)->update($data->toArray());
     }
 
     public function delete(string $cuil): bool
@@ -53,11 +55,14 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
 
     public function truncate(): void
     {
+        $connectionName = 'desconocida';
+        $sessionConnection = 'no_establecida';
+        $defaultConnection = DatabaseConnectionService::DEFAULT_CONNECTION;
+
         try {
             // Debug: Registrar información sobre la conexión que se está utilizando
             $connectionName = $this->getConnectionName();
             $sessionConnection = Session::get(DatabaseConnectionService::SESSION_KEY, 'no_establecida');
-            $defaultConnection = DatabaseConnectionService::DEFAULT_CONNECTION ?? 'no_definida';
             $secondaryExists = Config::has('database.connections.secondary') ? 'sí' : 'no';
 
             // Registrar en el log para debugging
@@ -70,17 +75,6 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
                 'todas_las_conexiones' => array_keys(Config::get('database.connections')),
             ]);
 
-            // Dump para visualización en la interfaz (si está en modo debug)
-            if (config('app.debug')) {
-                // dump([
-                // 'conexión_obtenida' => $connectionName,
-                // 'conexión_en_sesión' => $sessionConnection,
-                // 'conexión_predeterminada' => $defaultConnection,
-                // 'existe_secondary' => $secondaryExists,
-                // 'tabla' => $this->model->getTable(),
-                // ]);
-            }
-
             // Ejecutar el truncate
             $this->getConnection()->table($this->model->getTable())->truncate();
 
@@ -92,9 +86,9 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
         } catch (Exception $e) {
             // Registrar el error detallado
             Log::error('Error al truncar la tabla: ' . $e->getMessage(), [
-                'conexión_obtenida' => $connectionName ?? 'desconocida',
-                'conexión_en_sesión' => $sessionConnection ?? 'desconocida',
-                'conexión_predeterminada' => $defaultConnection ?? 'desconocida',
+                'conexión_obtenida' => $connectionName,
+                'conexión_en_sesión' => $sessionConnection,
+                'conexión_predeterminada' => $defaultConnection,
                 'tabla' => $this->model->getTable(),
                 'excepción' => $e::class,
                 'traza' => $e->getTraceAsString(),
@@ -104,14 +98,17 @@ class EloquentAfipMapucheSicossCalculoRepository implements AfipMapucheSicossCal
             if (config('app.debug')) {
                 dump([
                     'error' => $e->getMessage(),
-                    'conexión_obtenida' => $connectionName ?? 'desconocida',
-                    'conexión_en_sesión' => $sessionConnection ?? 'desconocida',
-                    'conexión_predeterminada' => $defaultConnection ?? 'desconocida',
+                    'conexión_obtenida' => $connectionName,
+                    'conexión_en_sesión' => $sessionConnection,
+                    'conexión_predeterminada' => $defaultConnection,
                 ]);
             }
 
             // Lanzar una excepción más informativa
-            throw new RuntimeException('Error al truncar la tabla: ' . $e->getMessage() . '. Conexión utilizada: ' . ($connectionName ?? 'desconocida') . '. Conexión en sesión: ' . ($sessionConnection ?? 'desconocida'), 0, $e, );
+            $mensaje = 'Error al truncar la tabla: ' . $e->getMessage()
+                . '. Conexión utilizada: ' . $connectionName
+                . '. Conexión en sesión: ' . $sessionConnection;
+            throw new RuntimeException($mensaje, 0, $e);
         }
     }
 

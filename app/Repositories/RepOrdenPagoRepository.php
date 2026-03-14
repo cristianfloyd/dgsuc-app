@@ -47,7 +47,8 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel junto con su unidad académica.
      *
-     * @param  array|int|null  $nroLiquis  Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
+     * @param array|int|null $nroLiquis Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
+     *
      * @return Collection La colección de instancias de RepOrdenPagoModel con su unidad académica.
      */
     public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
@@ -73,7 +74,8 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Obtiene la primera instancia de RepOrdenPagoModel que coincida con el número de liquidación proporcionado.
      *
-     * @param  int  $nroLiqui  El número de liquidación a buscar.
+     * @param int $nroLiqui El número de liquidación a buscar.
+     *
      * @return RepOrdenPagoModel|null La primera instancia de RepOrdenPagoModel que coincida con el número de liquidación, o null si no se encuentra ninguna.
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
@@ -84,7 +86,8 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Crea una nueva instancia de RepOrdenPagoModel con los datos proporcionados.
      *
-     * @param  array  $data  Los datos para crear la nueva instancia.
+     * @param array $data Los datos para crear la nueva instancia.
+     *
      * @return RepOrdenPagoModel La nueva instancia creada.
      */
     public function create(array $data): RepOrdenPagoModel
@@ -95,8 +98,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Actualiza los datos de una instancia de RepOrdenPagoModel.
      *
-     * @param  RepOrdenPagoModel  $repOrdenPago  La instancia de RepOrdenPagoModel a actualizar.
-     * @param  array  $data  Los nuevos datos para actualizar la instancia.
+     * @param RepOrdenPagoModel $repOrdenPago La instancia de RepOrdenPagoModel a actualizar.
+     * @param array $data Los nuevos datos para actualizar la instancia.
+     *
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */
     public function update(RepOrdenPagoModel $repOrdenPago, array $data): bool
@@ -140,7 +144,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     public function createTableIfNotExists(): void
     {
         try {
-            if (! Schema::connection($this->getConnectionName())->hasTable('suc.rep_orden_pago')) {
+            if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_orden_pago')) {
                 Schema::connection($this->getConnectionName())->create('suc.rep_orden_pago', function (Blueprint $table): void {
                     $table->id();
                     $table->integer('nro_liqui');
@@ -174,7 +178,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
                 Log::info('Tabla suc.rep_orden_pago creada exitosamente');
             }
         } catch (Throwable $e) {
-            Log::error('Error al crear tabla suc.rep_orden_pago: '.$e->getMessage());
+            Log::error('Error al crear tabla suc.rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -190,12 +194,12 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             $functionExists = DB::connection($this->model->getConnectionName())
                 ->select("SELECT EXISTS(SELECT 1 FROM pg_proc WHERE proname = 'rep_orden_pago')");
 
-            if (! $functionExists[0]->exists) {
+            if (!$functionExists[0]->exists) {
                 DB::connection($this->model->getConnectionName())->unprepared($this->getStoredProcedureDefinition());
                 Log::info('Función rep_orden_pago creada exitosamente');
             }
         } catch (Exception $e) {
-            Log::error('Error al verificar/crear función rep_orden_pago: '.$e->getMessage());
+            Log::error('Error al verificar/crear función rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -211,11 +215,11 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
 
             // Ejecutar el procedimiento almacenado
             DB::connection($this->model->getConnectionName())
-                ->statement('SELECT suc.rep_orden_pago(?)', ['{'.implode(',', $liquidaciones).'}']);
+                ->statement('SELECT suc.rep_orden_pago(?)', ['{' . implode(',', $liquidaciones) . '}']);
 
-            Log::info('Reporte generado exitosamente para liquidaciones: '.implode(',', $liquidaciones));
+            Log::info('Reporte generado exitosamente para liquidaciones: ' . implode(',', $liquidaciones));
         } catch (Exception $e) {
-            Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: '.$e->getMessage());
+            Log::error('Error al ejecutar procedimiento almacenado rep_orden_pago: ' . $e->getMessage());
             throw $e;
         }
     }

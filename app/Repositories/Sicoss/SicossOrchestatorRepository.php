@@ -72,6 +72,7 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $retornar_datos,
                 );
             }
+
             return $this->procesarConRetro(
                 $datos,
                 $per_anoct,
@@ -126,8 +127,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 $where_periodo,
                 $where,
-                $datos->check_lic,
-                $datos->check_sin_activo,
+                (bool) $datos->check_lic,
+                (bool) $datos->check_sin_activo,
             );
 
             $periodo_display = $per_mesct . '/' . $per_anoct . ' (Vigente)';
@@ -140,8 +141,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                     $legajos,
                     $nombre_arch,
                     $licencias_agentes,
-                    $datos->check_retro,
-                    $datos->check_sin_activo,
+                    (bool) $datos->check_retro,
+                    (bool) $datos->check_sin_activo,
                     $retornar_datos,
                 );
             }
@@ -153,8 +154,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 $licencias_agentes,
-                $datos->check_retro,
-                $datos->check_sin_activo,
+                (bool) $datos->check_retro,
+                (bool) $datos->check_sin_activo,
                 $retornar_datos,
             );
 
@@ -206,8 +207,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
 
             // Obtener períodos retroactivos
             $periodos_retro = $this->dh21Repository->obtenerPeriodosRetro(
-                $datos->check_lic,
-                $datos->check_retro,
+                (bool) $datos->check_lic,
+                (bool) $datos->check_retro,
             );
 
             Log::info('Iniciando procesamiento con retro', [
@@ -220,8 +221,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 ' true ',
                 $where,
-                $datos->check_lic,
-                $datos->check_sin_activo,
+                (bool) $datos->check_lic,
+                (bool) $datos->check_sin_activo,
             );
 
             // Procesar período vigente
@@ -306,8 +307,16 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
         return $this->archivos;
     }
 
-    protected function procesarPeriodoRetro(array $periodo_data, SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where, string $path, array $licencias_agentes, bool $retornar_datos): array
-    {
+    protected function procesarPeriodoRetro(
+        array $periodo_data,
+        SicossProcessData $datos,
+        int $per_anoct,
+        int $per_mesct,
+        string $where,
+        string $path,
+        array $licencias_agentes,
+        bool $retornar_datos,
+    ): array {
         try {
             $nombre_arch = 'sicoss_retro_' . $periodo_data['ano_retro'] . '_' . $periodo_data['mes_retro'];
             $periodo = $periodo_data['ano_retro'] . $periodo_data['mes_retro'];
@@ -330,8 +339,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $this->codc_reparto,
                 $where_periodo_retro,
                 $where,
-                $datos->check_lic,
-                $datos->check_sin_activo,
+                (bool) $datos->check_lic,
+                (bool) $datos->check_sin_activo,
             );
 
             Log::info('Procesando período retro', [
@@ -347,8 +356,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 null,
-                $datos->check_retro,
-                $datos->check_sin_activo,
+                (bool) $datos->check_retro,
+                (bool) $datos->check_sin_activo,
                 $retornar_datos,
             );
 
@@ -384,8 +393,8 @@ class SicossOrchestatorRepository implements SicossOrchestatorRepositoryInterfac
                 $legajos,
                 $nombre_arch,
                 $licencias_agentes,
-                $datos->check_retro,
-                $datos->check_sin_activo,
+                (bool) $datos->check_retro,
+                (bool) $datos->check_sin_activo,
                 $retornar_datos,
             );
 

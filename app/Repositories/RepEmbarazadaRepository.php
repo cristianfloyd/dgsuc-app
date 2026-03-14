@@ -48,7 +48,7 @@ class RepEmbarazadaRepository
      */
     public function update(int $nroLegajo, RepEmbarazadaData $data): bool
     {
-        return $this->model->where('nro_legaj', $nroLegajo)
+        return (bool) $this->model->where('nro_legaj', $nroLegajo)
             ->update($data->toArray());
     }
 }

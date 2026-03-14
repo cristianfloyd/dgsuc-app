@@ -23,6 +23,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
             ->where('nro_legaj', $nro_legaj)
             ->where('nro_cargo', $nro_cargo)
             ->first();
+
         return $record ? Dhr2Data::from($record) : null;
     }
 
@@ -36,7 +37,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function create(Dhr2Data $data): Dhr2Data
     {
@@ -45,6 +46,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
         }
 
         $record = $this->model->create($data->toArray());
+
         return Dhr2Data::from($record);
     }
 
@@ -54,7 +56,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function delete(int $nro_liqui, int $nro_legaj, int $nro_cargo): bool
     {
@@ -65,7 +67,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function findByLegajo(int $nro_legaj): Collection
     {
@@ -75,7 +77,7 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
@@ -83,11 +85,11 @@ class Dhr2Repository implements Dhr2RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function update(Dhr2Data $data): bool
     {
-        return $this->model
+        return (bool) $this->model
             ->where('nro_liqui', $data->nro_liqui)
             ->where('nro_legaj', $data->nro_legaj)
             ->where('nro_cargo', $data->nro_cargo)

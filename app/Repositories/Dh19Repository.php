@@ -3,13 +3,13 @@
 namespace App\Repositories;
 
 use App\Contracts\Dh19RepositoryInterface;
-use App\Models\Dh19;
+use App\Models\Mapuche\Dh19;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh19Repository implements Dh19RepositoryInterface
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getAll(): Collection
     {
@@ -17,11 +17,11 @@ class Dh19Repository implements Dh19RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function findByPrimaryKey(int $nroLegaj, int $codnConce, string $tipoDocum, int $nroDocum): ?Dh19
     {
-        return Dh19::where('nro_legaj', $nroLegaj)
+        return Dh19::query()->where('nro_legaj', $nroLegaj)
             ->where('codn_conce', $codnConce)
             ->where('tipo_docum', $tipoDocum)
             ->where('nro_docum', $nroDocum)
@@ -29,15 +29,15 @@ class Dh19Repository implements Dh19RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function create(array $data): Dh19
     {
-        return Dh19::create($data);
+        return Dh19::query()->create($data);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function update(Dh19 $dh19, array $data): bool
     {
@@ -45,7 +45,7 @@ class Dh19Repository implements Dh19RepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function delete(Dh19 $dh19): bool
     {

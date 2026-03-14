@@ -28,8 +28,8 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
      * Se le pasa la condición actual y se compara con la condición
      * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT).
      *
-     * @param  int  $c1  condición actual
-     * @param  int  $c2  condición tipo de licencia
+     * @param int $c1 condición actual
+     * @param int $c2 condición tipo de licencia
      */
     public function evaluarCondicionLicencia(int $c1, int $c2): int
     {
@@ -71,7 +71,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
         $anterior = null;
 
         foreach ($estado_situacion as $dia => $codigo) {
-            if (! isset($anterior) || $anterior != $codigo) {
+            if (!isset($anterior) || $anterior != $codigo) {
                 $cambios[$dia] = $codigo;
             }
             $anterior = $codigo;
@@ -143,7 +143,13 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
      */
     public function verificarAgenteImportesCero(array $leg): int
     {
-        if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0) {
+        $todosCero = $leg['IMPORTE_BRUTO'] == 0
+            && $leg['IMPORTE_IMPON'] == 0
+            && $leg['AsignacionesFliaresPagadas'] == 0
+            && $leg['ImporteNoRemun'] == 0
+            && $leg['IMPORTE_ADICI'] == 0
+            && $leg['IMPORTE_VOLUN'] == 0;
+        if ($todosCero) {
             return 0;
         }
 

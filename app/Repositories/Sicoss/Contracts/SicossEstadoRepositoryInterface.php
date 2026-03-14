@@ -12,8 +12,8 @@ interface SicossEstadoRepositoryInterface
     /**
      * Evalúa la condición de licencia según prioridades.
      *
-     * @param  int  $c1  condición actual
-     * @param  int  $c2  condición tipo de licencia
+     * @param int $c1 condición actual
+     * @param int $c2 condición tipo de licencia
      */
     public function evaluarCondicionLicencia(int $c1, int $c2): int;
 

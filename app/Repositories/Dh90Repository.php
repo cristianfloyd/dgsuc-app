@@ -45,7 +45,7 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al crear el registro: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al crear el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -57,7 +57,7 @@ class Dh90Repository implements Dh90RepositoryInterface
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (! $model instanceof \App\Models\Dh90) {
+            if (!$model instanceof \App\Models\Dh90) {
                 return null;
             }
 
@@ -66,7 +66,7 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al actualizar el registro: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al actualizar el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -78,13 +78,13 @@ class Dh90Repository implements Dh90RepositoryInterface
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (! $model instanceof \App\Models\Dh90) {
+            if (!$model instanceof \App\Models\Dh90) {
                 return false;
             }
 
             return $model->delete();
         } catch (Exception $e) {
-            throw new Exception('Error al eliminar el registro: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al eliminar el registro: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 

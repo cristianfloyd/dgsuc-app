@@ -22,13 +22,14 @@ class Dh13Repository implements Dh13RepositoryInterface
     {
         return DB::transaction(function () use ($data) {
             $validatedData = $data::validate($data);
+
             return Dh13::query()->create($validatedData);
         });
     }
 
     public function update(UpdateDh13DTO $data, int $codn_conce, int $nro_orden_formula): bool
     {
-        return DB::transaction(fn() => Dh13::query()->where('codn_conce', $codn_conce)
+        return (bool) DB::transaction(fn() => Dh13::query()->where('codn_conce', $codn_conce)
             ->where('nro_orden_formula', $nro_orden_formula)
             ->update($data->getUpdateableFields()));
     }

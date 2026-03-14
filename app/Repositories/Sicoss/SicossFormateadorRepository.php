@@ -28,6 +28,7 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
         if (strlen(trim((string) $valor)) > $longitud) {
             return substr((string) $valor, -($longitud));
         }
+
         return str_pad((string) $valor, $longitud, '0', STR_PAD_LEFT);
     }
 
@@ -44,6 +45,7 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
         if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
+
         return str_pad($texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
@@ -61,6 +63,7 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
         if (strlen(trim($texto)) > $longitud) {
             return substr($texto, 0, $longitud);
         }
+
         return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
@@ -77,6 +80,7 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
         if (strlen(trim($texto)) > $longitud) {
             return substr($texto, -($longitud));
         }
+
         return str_pad($texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
@@ -88,7 +92,7 @@ class SicossFormateadorRepository implements SicossFormateadorRepositoryInterfac
      *
      * @return array Recordset formateado
      */
-    public function transformarARecordset(array $totalesPeriodo): array
+    public function transformarToRecordset(array $totalesPeriodo): array
     {
         $totales = [];
         $i = 0;

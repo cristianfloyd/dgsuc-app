@@ -79,4 +79,9 @@ interface SicossConfigurationRepositoryInterface
      * @return array Array con los topes jubilatorios y otros aportes
      */
     public function getTopes(): array;
+
+    /**
+     * Obtiene las categorías diferenciales configuradas.
+     */
+    public function getCategoriaDiferencial(): string;
 }

@@ -25,7 +25,8 @@ class Dh92Repository
     /**
      * Encuentra un registro por su ID.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return Dh92|null
      */
     public function find($id)
@@ -47,7 +48,8 @@ class Dh92Repository
     /**
      * Actualiza un registro existente.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return bool
      */
     public function update($id, array $data)
@@ -63,7 +65,7 @@ class Dh92Repository
     /**
      * Elimina un registro.
      *
-     * @param  int  $id
+     * @param int $id
      */
     public function delete($id): bool
     {

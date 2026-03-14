@@ -108,7 +108,7 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     public function codigoOs(int $nro_legajo): string
     {
         // Si es jubilado directamente retorno 000000.
-        if (Dh01::esJubilado($nro_legajo)) {
+        if (Dh01::esJubilado((string) $nro_legajo)) {
             return '000000';
         }
 

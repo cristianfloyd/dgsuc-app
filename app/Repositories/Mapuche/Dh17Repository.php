@@ -31,7 +31,7 @@ class Dh17Repository
 
     public function update(int $id, Dh17Data $data): bool
     {
-        return $this->model->where('codn_conce', $id)
+        return (bool) $this->model->where('codn_conce', $id)
             ->update($data->toArray());
     }
 

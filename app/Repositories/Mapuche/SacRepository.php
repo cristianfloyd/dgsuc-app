@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Mapuche;
 
 use App\Data\Mapuche\SacCargoData;
-use App\Models\Mapuche\{Dh10};
+use App\Models\Mapuche\Dh10;
 use App\Services\Mapuche\PeriodoFiscalService;
 use Illuminate\Support\Collection;
 
@@ -23,7 +23,7 @@ class SacRepository
         $this->periodoService->getPeriodoActual();
 
         return Dh10::with(['cargoVinculado'])
-            ->whereHas('cargo.empleado', fn($q) => $q->where('nro_legaj', $legajo))
+            ->whereHas('cargo.dh01', fn($q) => $q->where('nro_legaj', $legajo))
             ->where('nro_cargo', $nroCargo)
             ->first()
             ?->pipe(fn($model): \App\Data\Mapuche\SacCargoData => SacCargoData::from($model));
@@ -61,7 +61,7 @@ class SacRepository
      */
     public function actualizarCargo(int $nroCargo, array $datos): bool
     {
-        return Dh10::query()->where('nro_cargo', $nroCargo)->update($datos);
+        return (bool) Dh10::query()->where('nro_cargo', $nroCargo)->update($datos);
     }
 
     /**

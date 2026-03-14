@@ -14,7 +14,7 @@ class Dh35Repository
 
     public function find(string $tipoEscal, string $codcCarac): ?Dh35
     {
-        return $this->model->find([$tipoEscal, $codcCarac]);
+        return $this->model->find([$tipoEscal, $codcCarac])->first();
     }
 
     public function create(Dh35Data $data): Dh35
@@ -24,7 +24,7 @@ class Dh35Repository
 
     public function update(string $tipoEscal, string $codcCarac, Dh35Data $data): bool
     {
-        return $this->model
+        return (bool) $this->model
             ->where('tipo_escal', $tipoEscal)
             ->where('codc_carac', $codcCarac)
             ->update($data->toArray());

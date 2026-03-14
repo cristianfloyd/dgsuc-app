@@ -30,7 +30,7 @@ class SicossCpto205Repository
             $this->crearTablaResultados();
 
             // 5. Calcular montos y actualizar tabla final
-            $this->calcularMontosYActualizar($liquidaciones);
+            $this->calcularMontosYactualizar($liquidaciones);
 
             return $this->contarRegistros();
         });
@@ -58,6 +58,7 @@ class SicossCpto205Repository
     public function contarRegistros(): int
     {
         $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto205');
+
         return (int) $resultado->total;
     }
 
@@ -102,6 +103,7 @@ class SicossCpto205Repository
             $this->crearTablaDocentes($liquidaciones);
             $this->crearTablaAllCargos($liquidaciones);
             $this->actualizarConcepto204();
+
             return $this->contarRegistrosConcepto204();
         });
     }
@@ -177,7 +179,7 @@ class SicossCpto205Repository
         ');
     }
 
-    private function calcularMontosYActualizar(array $liquidaciones): void
+    private function calcularMontosYactualizar(array $liquidaciones): void
     {
         $liquidacionesStr = implode(',', $liquidaciones);
 
@@ -202,7 +204,7 @@ class SicossCpto205Repository
             ORDER BY nro_legaj
         ");
 
-        //-- obtenemos los montos para todos los agentes que no estan en el archivo anterior
+        // -- obtenemos los montos para todos los agentes que no estan en el archivo anterior
         DB::connection($this->getConnectionName())->statement("
             SELECT mapuche.dh21.nro_legaj, c.cuil, ((SUM( impp_conce ) * 100) / 2)::NUMERIC(10, 2) AS monto
             INTO TEMP tcpto205sinaut
@@ -216,7 +218,6 @@ class SicossCpto205Repository
             GROUP BY mapuche.dh21.nro_legaj, c.cuil
             ORDER BY nro_legaj;
         ");
-
 
         // Luego actualizamos la tabla final
         DB::connection($this->getConnectionName())->statement('
@@ -332,6 +333,7 @@ class SicossCpto205Repository
     private function contarRegistrosConcepto204(): int
     {
         $resultado = DB::connection($this->getConnectionName())->selectOne('SELECT COUNT(*) as total FROM tcpto204');
+
         return (int) $resultado->total;
     }
 }

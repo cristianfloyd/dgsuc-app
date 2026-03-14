@@ -51,5 +51,5 @@ interface SicossFormateadorRepositoryInterface
      *
      * @return array Recordset formateado
      */
-    public function transformarARecordset(array $totalesPeriodo): array;
+    public function transformarToRecordset(array $totalesPeriodo): array;
 }
