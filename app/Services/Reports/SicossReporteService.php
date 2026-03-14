@@ -2,7 +2,6 @@
 
 namespace App\Services\Reports;
 
-// use App\Traits\ReportCacheTrait;
 use App\Data\Responses\SicossReporteData;
 use App\Data\Responses\SicossTotalesData;
 use App\Repositories\Decorators\CachingSicossReporteRepository;
@@ -21,11 +20,12 @@ class SicossReporteService
      * Constructor del servicio.
      *
      * @param PeriodoFiscalService $periodoFiscalService Servicio de períodos fiscales.
-     * @param SicossReporteRepositoryInterface $repository Repositorio de reportes SICOSS (posiblemente decorado).
+     * @param SicossReporteRepositoryInterface $sicossReporteRepository Repositorio de reportes SICOSS (posiblemente decorado).
      */
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService, protected SicossReporteRepositoryInterface $sicossReporteRepository)
-    {
-    }
+    public function __construct(
+        protected PeriodoFiscalService $periodoFiscalService,
+        protected SicossReporteRepositoryInterface $sicossReporteRepository,
+    ) {}
 
     /**
      * Obtiene los datos del reporte SICOSS.
@@ -36,7 +36,9 @@ class SicossReporteService
     public function getReporteData(string $anio, string $mes): Collection
     {
         try {
-            return $this->sicossReporteRepository->getReporte($anio, $mes)
+            return $this
+                ->sicossReporteRepository
+                ->getReporte($anio, $mes)
                 ->map(fn($item): \App\Data\Responses\SicossReporteData => SicossReporteData::fromModel($item));
         } catch (Throwable $th) {
             Log::error('Error al obtener datos del reporte SICOSS desde el servicio:', [
@@ -45,19 +47,19 @@ class SicossReporteService
                 'mes' => $mes,
                 'trace' => $th->getTraceAsString(),
             ]);
+
             return collect();
         }
     }
 
     /**
      * Obtiene los totales del reporte SICOSS.
-     *
-     *
      */
     public function getTotales(string $anio, string $mes): SicossTotalesData
     {
         try {
             $totales = $this->sicossReporteRepository->getTotales($anio, $mes);
+
             return SicossTotalesData::fromArray($totales);
         } catch (Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS', [
@@ -82,8 +84,6 @@ class SicossReporteService
     /**
      * Verifica si existen datos para un período fiscal específico.
      * El caché es manejado por el repositorio decorado.
-     *
-     *
      */
     public function existenDatosParaPeriodo(string $anio, string $mes): bool
     {
@@ -97,6 +97,7 @@ class SicossReporteService
                 'mes' => $mes,
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -104,8 +105,6 @@ class SicossReporteService
     /**
      * Invalida el caché del reporte para un período específico.
      * Delega al repositorio si este tiene métodos de invalidación.
-     *
-     *
      */
     public function invalidateCache(string $anio, string $mes): void
     {
@@ -164,6 +163,7 @@ class SicossReporteService
                 Log::warning('La clave periodosFiscales no existe o no es una colección en la respuesta de PeriodoFiscalService', [
                     'respuesta' => $periodosFiscalesRespuesta,
                 ]);
+
                 return [];
             }
 
@@ -183,6 +183,7 @@ class SicossReporteService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return [];
         }
     }
@@ -195,7 +196,9 @@ class SicossReporteService
     {
         try {
             // El parámetro $useCache ya no es necesario aquí
-            return $this->sicossReporteRepository->getPeriodosFiscalesDisponibles()
+            return $this
+                ->sicossReporteRepository
+                ->getPeriodosFiscalesDisponibles()
                 ->mapWithKeys(function ($periodo): array {
                     $anio = $periodo->per_liano;
                     $mes = sprintf('%02d', $periodo->per_limes);
@@ -211,6 +214,7 @@ class SicossReporteService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return [];
         }
     }
@@ -225,11 +229,20 @@ class SicossReporteService
     private function getNombreMes(int $mes): string
     {
         $meses = [
-            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre',
+            1 => 'Enero',
+            2 => 'Febrero',
+            3 => 'Marzo',
+            4 => 'Abril',
+            5 => 'Mayo',
+            6 => 'Junio',
+            7 => 'Julio',
+            8 => 'Agosto',
+            9 => 'Septiembre',
+            10 => 'Octubre',
+            11 => 'Noviembre',
+            12 => 'Diciembre',
         ];
 
-        return $meses[$mes] ?? "Mes {$mes} inválido"; // Mejor manejo para mes inválido
+        return $meses[$mes] ?? "Mes {$mes} inválido";  // Mejor manejo para mes inválido
     }
 }
