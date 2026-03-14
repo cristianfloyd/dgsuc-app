@@ -67,9 +67,12 @@ class Dh21hRepository implements Dh21hRepositoryInterface
 
     /**
      * Obtiene los registros Dh21h por número de legajo.
+     *
+     * @return Collection<int, Dh21h>
      */
     public function findByLegajo(int $legajo): Collection
     {
+        /** @var Collection<int, Dh21h> */
         return $this->model->query()->byLegajo($legajo)->get();
     }
 
