@@ -70,7 +70,7 @@ class SicossLegacy
             $per_anoct = $periodo_fiscal['ano'];
 
             // 5. Si los topes no están definidos, obtenerlos de la configuración
-            if (!$datosProcess->TopeJubilatorioPatronal) {
+            if (! $datosProcess->TopeJubilatorioPatronal) {
                 $topes = $this->sicossConfigurationRepository->getTopes();
                 $datosProcess = $datosProcess->withDefaultTopes($topes);
             }
@@ -87,7 +87,6 @@ class SicossLegacy
 
             // 8.si se envia nro_liqui desde la generacion de libro de sueldo
             $this->procesarConceptosLiquidados($datosProcess, $per_anoct, $per_mesct, $where);
-
 
             // 9. Inicializar configuración de archivos usando el nuevo repositorio
             $config_archivos = $this->sicossConfigurationRepository->inicializarConfiguracionArchivos();
@@ -139,17 +138,17 @@ class SicossLegacy
     /**
      * Procesa los conceptos liquidados según los parámetros.
      *
-     * @param SicossProcessData $datos Datos de configuración
-     * @param int $per_anoct Año del período
-     * @param int $per_mesct Mes del período
-     * @param string $where Condición WHERE base
+     * @param  SicossProcessData  $datos  Datos de configuración
+     * @param  int  $per_anoct  Año del período
+     * @param  int  $per_mesct  Mes del período
+     * @param  string  $where  Condición WHERE base
      */
     protected function procesarConceptosLiquidados(SicossProcessData $datos, int $per_anoct, int $per_mesct, string $where): void
     {
         try {
             // Si se envía nro_liqui desde la generación de libro de sueldo
             if ($datos->nro_liqui) {
-                $where_liqui = $where . ' AND dh21.nro_liqui = ' . $datos->nro_liqui;
+                $where_liqui = $where.' AND dh21.nro_liqui = '.$datos->nro_liqui;
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where_liqui);
             } else {
                 $this->dh21Repository->obtenerConceptosLiquidadosSicoss($per_anoct, $per_mesct, $where);
@@ -169,8 +168,7 @@ class SicossLegacy
     /**
      * Obtiene las licencias de agentes remuneradas y no remuneradas.
      *
-     * @param string $where Condición WHERE
-     *
+     * @param  string  $where  Condición WHERE
      * @return array Array combinado de licencias
      */
     protected function obtenerLicenciasAgentes(string $where): array
@@ -232,9 +230,9 @@ class SicossLegacy
     /**
      * Procesa el resultado final según los parámetros de testing.
      *
-     * @param array $totales Totales calculados
-     * @param string $testeo_directorio_salida Directorio de salida para testing
-     * @param string $testeo_prefijo_archivos Prefijo de archivos para testing
+     * @param  array  $totales  Totales calculados
+     * @param  string  $testeo_directorio_salida  Directorio de salida para testing
+     * @param  string  $testeo_prefijo_archivos  Prefijo de archivos para testing
      */
     protected function procesarResultadoFinal(
         array $totales,
@@ -245,24 +243,24 @@ class SicossLegacy
             // Si estamos en modo de testeo, copiar el archivo al directorio especificado
             if ($testeo_directorio_salida !== '' && $testeo_prefijo_archivos !== '') {
                 $nombre_arch = array_key_last($this->archivos);
-                $origen = storage_path('app/comunicacion/sicoss/' . $nombre_arch . '.txt');
-                $destino = $testeo_directorio_salida . '/' . $testeo_prefijo_archivos;
+                $origen = storage_path('app/comunicacion/sicoss/'.$nombre_arch.'.txt');
+                $destino = $testeo_directorio_salida.'/'.$testeo_prefijo_archivos;
 
-                if (!file_exists($origen)) {
+                if (! file_exists($origen)) {
                     Log::error('Archivo de origen no encontrado', [
                         'origen' => $origen,
                     ]);
                     throw new Exception("Archivo de origen no encontrado: {$origen}");
                 }
 
-                if (!is_dir($testeo_directorio_salida)) {
+                if (! is_dir($testeo_directorio_salida)) {
                     Log::error('Directorio de destino no encontrado', [
                         'destino' => $testeo_directorio_salida,
                     ]);
                     throw new Exception("Directorio de destino no encontrado: {$testeo_directorio_salida}");
                 }
 
-                if (!copy($origen, $destino)) {
+                if (! copy($origen, $destino)) {
                     Log::error('Error al copiar archivo', [
                         'origen' => $origen,
                         'destino' => $destino,
@@ -282,7 +280,7 @@ class SicossLegacy
                 'cantidad_totales' => count($totales),
             ]);
 
-            return $this->sicossFormateadorRepository->transformarARecordset($totales);
+            return $this->sicossFormateadorRepository->transformarToRecordset($totales);
         } catch (Exception $e) {
             Log::error('Error al procesar resultado final', [
                 'error' => $e->getMessage(),
