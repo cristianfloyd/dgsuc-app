@@ -14,7 +14,7 @@ class UppercaseString implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return $value === null ? $value : mb_strtoupper($value);
+        return $value === null ? $value : mb_strtoupper((string) $value);
     }
 
     /**
@@ -24,6 +24,6 @@ class UppercaseString implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return $value === null ? $value : mb_strtoupper($value);
+        return $value === null ? $value : mb_strtoupper((string) $value);
     }
 }
