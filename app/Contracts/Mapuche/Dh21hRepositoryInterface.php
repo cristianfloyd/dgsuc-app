@@ -19,7 +19,7 @@ interface Dh21hRepositoryInterface
     /**
      * Obtiene un registro DH21H por su ID.
      *
-     * @param int $id
+     * @param  int  $id
      */
     public function find($id): Dh21h;
 
@@ -31,23 +31,21 @@ interface Dh21hRepositoryInterface
     /**
      * Actualiza un registro DH21H existente.
      *
-     * @param int $id
+     * @param  int  $id
      */
     public function update($id, Dh21hData $data): bool;
 
     /**
      * Elimina un registro DH21H.
      *
-     * @param int $id
+     * @param  int  $id
      */
     public function delete($id): bool;
 
     /**
-     * Busca registros DH21H por criterios específicos.
+     * Busca registros Dh21h por criterios específicos.
      *
-     * @param array $criteria
-     *
-     * @return mixed
+     * @param  int  $legajo  El legajo del empleado.
      */
     public function findByLegajo(int $legajo): Collection;
 
