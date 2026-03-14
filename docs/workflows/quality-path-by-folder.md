@@ -32,6 +32,7 @@ El script ejecuta en orden: **PHP CS Fixer** (aplica) → **PHP CodeSniffer** (r
 | `app/Repositories/` | Hecho | Incluye subcarpetas Afip, Sicoss, Mapuche, etc. |
 | `app/ValueObjects/` | Hecho | 6 archivos. |
 | `app/Exceptions/` | Hecho | 10 archivos. |
+| `app/Exports/` | Hecho | Incluye Sheets/, Sicoss/. |
 | `app/Services/` | Pendiente | |
 | `app/Models/` | Pendiente | |
 | `app/Http/` | Pendiente | |
@@ -124,6 +125,10 @@ Así las próximas conversaciones pueden reutilizar el patrón sin redescubrirlo
 - **Clase con llave en la misma línea** (`PSR2.Classes.ClassDeclaration.OpenBraceNewLine`)  
   - **Solución:** Poner la `{` en la línea siguiente. Si PHP CS Fixer colapsa de nuevo la clase vacía (`single_line_empty_body`), añadir algo en el cuerpo (p. ej. constructor que llame a `parent::__construct()`).
 
+- **Clase anónima con llave en misma línea** (`PSR12.Classes.AnonClassDeclaration.OpenBraceSameLine`)  
+  - CS Fixer puede forzar la llave en la misma línea que `implements`.  
+  - **Solución:** Añadir `// phpcs:ignore PSR12.Classes.AnonClassDeclaration.OpenBraceSameLine` en esa línea y partir la declaración (p. ej. `implements` en líneas siguientes) para no superar 200 caracteres.
+
 - **IF vacío** (`Generic.CodeAnalysis.EmptyStatement.DetectedIf`)  
   - **Solución:** Eliminar el `if` y su cuerpo si solo había comentarios; o sustituir por código real si aplica.
 
@@ -160,6 +165,22 @@ Así las próximas conversaciones pueden reutilizar el patrón sin redescubrirlo
 - **Clase no encontrada (modelo en otro namespace)**  
   - p. ej. `App\Models\Dh19` vs `App\Models\Mapuche\Dh19`.  
   - **Solución:** Corregir el `use` y los type hints al namespace correcto.
+
+- **`query()` en exports FromQuery debe retornar `Builder`**  
+  - Laravel Excel: `query()` en clases que implementan `FromQuery` debe tiparse como `\Illuminate\Database\Eloquent\Builder`.  
+  - **Solución:** Añadir `use Illuminate\Database\Eloquent\Builder` y declarar `public function query(): Builder`.
+
+- **PhpSpreadsheet `setLocked`/`setHidden` esperan valor de constante**  
+  - PHPStan infiere que el parámetro debe ser de tipo int (constantes de `Protection`), no `bool`.  
+  - **Solución:** Usar `\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED` en lugar de `false`.
+
+- **`str_pad` segundo parámetro: string**  
+  - En PHP 8.4 `str_pad` espera string para el contenido.  
+  - **Solución:** Cast: `str_pad((string) $valor, $length, '0')`.
+
+- **Callbacks con tipo no resoluble (uasort, map, sortBy)**  
+  - PHPStan no resuelve el tipo del closure en colecciones/arrays.  
+  - **Solución:** Añadir `/** @phpstan-ignore-next-line argument.unresolvableType */` encima de la llamada.
 
 ### Rector
 
