@@ -43,15 +43,15 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
         self::$codigo_obra_social_default = MapucheConfig::getDefaultsObraSocial();
         self::$aportes_voluntarios = MapucheConfig::getTopesJubilacionVoluntario();
         self::$codigo_os_aporte_adicional = MapucheConfig::getConceptosObraSocialAporteAdicional();
-        self::$codigo_obrasocial_fc = MapucheConfig::getConceptosObraSocialFliarAdherente();                   // concepto seteado en rrhhini bajo el cual se liquida el familiar a cargo
+        self::$codigo_obrasocial_fc = MapucheConfig::getConceptosObraSocialFliarAdherente();
         self::$tipoEmpresa = MapucheConfig::getDatosUniversidadTipoEmpresa();
-        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();                   // Según sea cero o uno informa datos de dh09 o se fija si existe un cpncepto liquidado bajo el concepto de codigo_obrasocial_fc
-        self::$asignacion_familiar = MapucheConfig::getConceptosAcumularAsigFamiliar();                 // Si es uno se acumulan las asiganciones familiares en Asignacion Familiar en Remuneración Total (importe Bruto no imponible)
+        self::$cantidad_adherentes_sicoss = MapucheConfig::getConceptosInformarAdherentesSicoss();
+        self::$asignacion_familiar = MapucheConfig::getConceptosAcumularAsigFamiliar();
         self::$trabajadorConvencionado = MapucheConfig::getDatosUniversidadTrabajadorConvencionado();
-        self::$codc_reparto = MapucheConfig::getDatosCodcReparto() ?? '1'; // Valor por defecto
+        self::$codc_reparto = MapucheConfig::getDatosCodcReparto() ?? '1';
         self::$porc_aporte_adicional_jubilacion = MapucheConfig::getPorcentajeAporteDiferencialJubilacion();
-        self::$hs_extras_por_novedad = MapucheConfig::getSicossHorasExtrasNovedades();   // Lee el valor HorasExtrasNovedades de RHHINI que determina si es verdadero se suman los valores de las novedades y no el importe.
-        self::$categoria_diferencial = MapucheConfig::getCategoriasDiferencial(); //obtengo las categorias seleccionadas en configuracion
+        self::$hs_extras_por_novedad = MapucheConfig::getSicossHorasExtrasNovedades();
+        self::$categoria_diferencial = MapucheConfig::getCategoriasDiferencial();
     }
 
     /**
@@ -83,8 +83,8 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
 
         // Si no filtro por número de legajo => obtengo todos los legajos
         $where = ' true ';
-        if (!empty($filtro_legajo)) {
-            $where = 'dh01.nro_legaj= ' . $filtro_legajo . ' ';
+        if (! empty($filtro_legajo)) {
+            $where = 'dh01.nro_legaj= '.$filtro_legajo.' ';
         }
 
         $where_periodo = ' true ';
@@ -183,7 +183,7 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getCodigoReparto(): string
     {
-        return self::$codc_reparto ?? '1'; // Valor por defecto '1' si no está configurado
+        return self::$codc_reparto ?? '1';
     }
 
     /**
@@ -193,17 +193,15 @@ class SicossConfigurationRepository implements SicossConfigurationRepositoryInte
      */
     public function getTopes(): array
     {
-        // Intentar obtener los topes desde la configuración de MapucheConfig
         $topeJubilatorioPatronal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeJubilatorioPatronal');
         $topeJubilatorioPersonal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeJubilatorioPersonal');
         $topeOtrosAportesPersonal = MapucheConfig::getParametroRrhh('Sicoss', 'TopeOtrosAportesPersonal');
         $truncaTope = MapucheConfig::getParametroRrhh('Sicoss', 'TruncaTope', false);
 
-        // Valores por defecto basados en normativa AFIP vigente (estos valores deberían actualizarse según la normativa)
         $defaults = [
-            'TopeJubilatorioPatronal' => 849120.00,  // Valor aproximado para 2025 (debe actualizarse)
-            'TopeJubilatorioPersonal' => 849120.00,  // Valor aproximado para 2025 (debe actualizarse)
-            'TopeOtrosAportesPersonal' => 849120.00, // Valor aproximado para 2025 (debe actualizarse)
+            'TopeJubilatorioPatronal' => 849120.0,
+            'TopeJubilatorioPersonal' => 849120.0,
+            'TopeOtrosAportesPersonal' => 849120.0,
             'truncaTope' => false,
         ];
 

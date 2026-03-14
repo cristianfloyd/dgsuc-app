@@ -28,8 +28,6 @@ class Dh90Repository implements Dh90RepositoryInterface
 
     /**
      * Buscar por número de cargo.
-     *
-     *
      */
     public function findByNroCargo(int $nroCargo): ?Dh90
     {
@@ -38,31 +36,28 @@ class Dh90Repository implements Dh90RepositoryInterface
 
     /**
      * Crear un nuevo registro.
-     *
-     *
      */
     public function create(Dh90Data $data): Dh90
     {
         try {
             $model = $data->toModel();
             $model->save();
+
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al crear el registro: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al crear el registro: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Actualizar un registro existente.
-     *
-     *
      */
     public function update(int $nroCargo, Dh90Data $data): ?Dh90
     {
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (!$model instanceof \App\Models\Dh90) {
+            if (! $model instanceof \App\Models\Dh90) {
                 return null;
             }
 
@@ -71,32 +66,30 @@ class Dh90Repository implements Dh90RepositoryInterface
 
             return $model;
         } catch (Exception $e) {
-            throw new Exception('Error al actualizar el registro: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al actualizar el registro: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Eliminar un registro.
-     *
-     *
      */
     public function delete(int $nroCargo): bool
     {
         try {
             $model = $this->findByNroCargo($nroCargo);
 
-            if (!$model instanceof \App\Models\Dh90) {
+            if (! $model instanceof \App\Models\Dh90) {
                 return false;
             }
 
             return $model->delete();
         } catch (Exception $e) {
-            throw new Exception('Error al eliminar el registro: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Error al eliminar el registro: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function findByTipoAsociacion(string $tipo): Collection
     {

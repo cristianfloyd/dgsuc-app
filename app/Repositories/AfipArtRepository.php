@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class AfipArtRepository.
- *
- * @package App\Repositories
  */
 class AfipArtRepository
 {
@@ -22,8 +20,6 @@ class AfipArtRepository
 
     /**
      * Busca un registro por su CUIL original.
-     *
-     *
      */
     public function findByCuil(string $cuil): ?AfipMapucheArt
     {
@@ -32,8 +28,6 @@ class AfipArtRepository
 
     /**
      * Crea un nuevo registro.
-     *
-     *
      */
     public function create(array $data): AfipMapucheArt
     {
@@ -42,23 +36,21 @@ class AfipArtRepository
 
     /**
      * Actualiza un registro existente.
-     *
-     *
      */
     public function update(string $cuil, array $data): bool
     {
         $afipArt = AfipMapucheArt::query()->find($cuil);
-        return $afipArt ? $afipArt->update($data) : false;
+
+        return $afipArt && $afipArt->update($data);
     }
 
     /**
      * Elimina un registro.
-     *
-     *
      */
     public function delete(string $cuil): bool
     {
         $afipArt = AfipMapucheArt::query()->find($cuil);
+
         return $afipArt ? $afipArt->delete() : false;
     }
 }

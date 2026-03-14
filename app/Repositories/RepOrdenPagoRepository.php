@@ -5,12 +5,12 @@ namespace App\Repositories;
 use App\Contracts\RepOrdenPagoRepositoryInterface;
 use App\Models\Reportes\RepOrdenPagoModel;
 use App\Traits\MapucheConnectionTrait;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Exception;
 use Throwable;
 
 use function is_array;
@@ -21,7 +21,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     use MapucheConnectionTrait;
 
     public function __construct(
-        protected RepOrdenPagoModel $model
+        protected RepOrdenPagoModel $model,
     ) {}
 
     /**
@@ -36,9 +36,9 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             ->orderBy('codc_uacad', 'asc');
 
         if (is_array($nroLiquis)) {
-            $builder->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (is_int(value: $nroLiquis)) {
-            $builder->where(column: 'nro_liqui', operator: $nroLiquis);
+            $builder->whereIn('nro_liqui', $nroLiquis);
+        } elseif (is_int($nroLiquis)) {
+            $builder->where('nro_liqui', $nroLiquis);
         }
 
         return $builder->get();
@@ -47,34 +47,33 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Obtiene todas las instancias de RepOrdenPagoModel junto con su unidad académica.
      *
-     * @param array|int|null $nroLiquis Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
-     *
+     * @param  array|int|null  $nroLiquis  Un arreglo de números de liquidación o un número de liquidación individual para filtrar los resultados. Si se omite, se devolverán todos los registros.
      * @return Collection La colección de instancias de RepOrdenPagoModel con su unidad académica.
      */
     public function getAllWithUnidadAcademica(array|int|null $nroLiquis = null): Collection
     {
-        RepOrdenPagoModel::with(relations: ['unidadAcademica' => function ($query): void {
-            $query->select('nro_tabla', 'desc_abrev', 'desc_item');
-        }])
+        $builder = RepOrdenPagoModel::query()
+            ->with(['unidadAcademica' => function ($q): void {
+                $q->select('nro_tabla', 'desc_abrev', 'desc_item');
+            }])
             ->orderBy('banco', 'desc')
             ->orderBy('codn_funci', 'asc')
             ->orderBy('codn_fuent', 'asc')
             ->orderBy('codc_uacad', 'asc');
 
         if (is_array($nroLiquis)) {
-            $query->whereIn(column: 'nro_liqui', values: $nroLiquis);
-        } elseif (is_int(value: $nroLiquis)) {
-            $query->where(column: 'nro_liqui', operator: $nroLiquis);
+            $builder->whereIn('nro_liqui', $nroLiquis);
+        } elseif (is_int($nroLiquis)) {
+            $builder->where('nro_liqui', $nroLiquis);
         }
 
-        return $query->get();
+        return $builder->get();
     }
 
     /**
      * Obtiene la primera instancia de RepOrdenPagoModel que coincida con el número de liquidación proporcionado.
      *
-     * @param int $nroLiqui El número de liquidación a buscar.
-     *
+     * @param  int  $nroLiqui  El número de liquidación a buscar.
      * @return RepOrdenPagoModel|null La primera instancia de RepOrdenPagoModel que coincida con el número de liquidación, o null si no se encuentra ninguna.
      */
     public function getByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
@@ -85,8 +84,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Crea una nueva instancia de RepOrdenPagoModel con los datos proporcionados.
      *
-     * @param array $data Los datos para crear la nueva instancia.
-     *
+     * @param  array  $data  Los datos para crear la nueva instancia.
      * @return RepOrdenPagoModel La nueva instancia creada.
      */
     public function create(array $data): RepOrdenPagoModel
@@ -97,9 +95,8 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     /**
      * Actualiza los datos de una instancia de RepOrdenPagoModel.
      *
-     * @param RepOrdenPagoModel $repOrdenPago La instancia de RepOrdenPagoModel a actualizar.
-     * @param array $data Los nuevos datos para actualizar la instancia.
-     *
+     * @param  RepOrdenPagoModel  $repOrdenPago  La instancia de RepOrdenPagoModel a actualizar.
+     * @param  array  $data  Los nuevos datos para actualizar la instancia.
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */
     public function update(RepOrdenPagoModel $repOrdenPago, array $data): bool
@@ -108,7 +105,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function delete(RepOrdenPagoModel $repOrdenPago): bool
     {
@@ -138,7 +135,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function createTableIfNotExists(): void
     {
@@ -204,7 +201,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function executeStoredProcedure(array $liquidaciones): void
     {
@@ -224,7 +221,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getStoredProcedureDefinition(): string
     {
@@ -247,7 +244,7 @@ class RepOrdenPagoRepository implements RepOrdenPagoRepositoryInterface
             h21.codn_funci,
             h21.codn_fuent,
             h21.codc_uacad,
-            CASE WHEN h03.codc_carac IN ( 'PERM', 'PLEN', 'REGU' ) THEN 'PERM' ELSE 'CONT' END                                                                            AS caracter, -- personal contratado o permamente
+            CASE WHEN h03.codc_carac IN ( 'PERM', 'PLEN', 'REGU' ) THEN 'PERM' ELSE 'CONT' END                                                                            AS caracter,
             h21.codn_progr,
             (SUM(CASE WHEN h21.tipo_conce= 'C' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN (121, 122, 124, 125) THEN impp_conce ELSE 0 END) +
             SUM(CASE WHEN h21.tipo_conce= 'S' AND h21.nro_orimp != 0 AND NOT h21.codn_conce IN (173, 186) THEN impp_conce ELSE 0 END) -

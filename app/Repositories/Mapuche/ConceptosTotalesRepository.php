@@ -16,9 +16,9 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
     /**
      * Obtiene los totales por concepto para un período específico.
      *
-     * @param array $conceptos Códigos de conceptos a incluir
-     * @param int $year Año del período
-     * @param int $month Mes del período
+     * @param  array  $conceptos  Códigos de conceptos a incluir
+     * @param  int  $year  Año del período
+     * @param  int  $month  Mes del período
      */
     public function getTotalesPorConcepto(array $conceptos, int $year, int $month): Collection
     {
@@ -53,10 +53,9 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
     /**
      * Obtiene los totales por concepto agrupados por tipo (debe/haber).
      *
-     * @param array $conceptos Códigos de conceptos a incluir
-     * @param int $year Año del período
-     * @param int $month Mes del período
-     *
+     * @param  array  $conceptos  Códigos de conceptos a incluir
+     * @param  int  $year  Año del período
+     * @param  int  $month  Mes del período
      * @return array Resultados agrupados por tipo de concepto
      */
     public function getTotalesPorConceptoAgrupados(array $conceptos, int $year, int $month): array
@@ -64,8 +63,8 @@ class ConceptosTotalesRepository implements ConceptosTotalesRepositoryInterface
         $resultados = $this->getTotalesPorConcepto($conceptos, $year, $month);
 
         $agrupados = [
-            'haberes' => $resultados->filter(fn($item) => in_array(substr((string) $item->codn_conce, 0, 1), ['2', '4', '6', '8'])),
-            'descuentos' => $resultados->filter(fn($item) => in_array(substr((string) $item->codn_conce, 0, 1), ['3', '5', '7', '9'])),
+            'haberes' => $resultados->filter(fn ($item): bool => in_array(substr((string) $item->codn_conce, 0, 1), ['2', '4', '6', '8'])),
+            'descuentos' => $resultados->filter(fn ($item): bool => in_array(substr((string) $item->codn_conce, 0, 1), ['3', '5', '7', '9'])),
         ];
 
         return [

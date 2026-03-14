@@ -29,13 +29,15 @@ class Dhe7Repository
     public function update(string $codigo, array $data): bool
     {
         $dhe7 = Dhe7::query()->find($codigo);
-        return $dhe7 ? $dhe7->update($data) : false;
+
+        return $dhe7 && $dhe7->update($data);
     }
 
     // Elimina un registro
     public function delete(string $codigo): bool
     {
         $dhe7 = Dhe7::query()->find($codigo);
+
         return $dhe7 ? $dhe7->delete() : false;
     }
 }

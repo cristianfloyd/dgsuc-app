@@ -15,8 +15,6 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
     /**
      * Sumariza importes de conceptos que pertenecen a un determinado tipo de concepto
      * Se podía hacer en la función sumarizar_conceptos_por_tipos_grupos pero queda más claro separado.
-     *
-     *
      */
     public function calcularRemunerGrupo(int $nro_legajo, string $tipo, string $where): float
     {
@@ -32,13 +30,12 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
         ";
 
         $suma = DB::connection($this->getConnectionName())->select($sql);
+
         return (float) ($suma[0]->suma ?? 0);
     }
 
     /**
      * Calcula horas extras por concepto y cargo.
-     *
-     *
      */
     public function calculoHorasExtras(int $concepto, int $cargo): array
     {
@@ -71,13 +68,12 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
                         cargo,concepto";
 
         $horas = DB::connection($this->getConnectionName())->select($sql);
+
         return empty($horas) ? [] : (array) $horas[0];
     }
 
     /**
      * Se obtienen los importes de otra actividad, cuando tiene varias tomo la del último periodo.
-     *
-     *
      */
     public function otraActividad(int $nro_legajo): array
     {
@@ -108,8 +104,6 @@ class SicossCalculoRepository implements SicossCalculoRepositoryInterface
 
     /**
      * Devuelve el código DGI de obra social correspondiente dado un legajo.
-     *
-     *
      */
     public function codigoOs(int $nro_legajo): string
     {

@@ -35,8 +35,7 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Devuelve la suma total del concepto 101 para un número de liquidación dado.
      *
-     * @param NroLiqui|null $nroLiqui El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
-     *
+     * @param  NroLiqui|null  $nroLiqui  El número de liquidación para filtrar los registros. Si se omite, se devuelve la suma total de todos los registros.
      * @return float La suma total del concepto 101.
      */
     public function getTotalConcepto101(?NroLiqui $nroLiqui = null): float
@@ -72,7 +71,7 @@ class Dh21Repository implements Dh21RepositoryInterface
     /**
      * Obtiene las liquidaciones con sus importes y descripciones.
      *
-     * @param array $conditions Condiciones adicionales para filtrar
+     * @param  array  $conditions  Condiciones adicionales para filtrar
      */
     public function getLiquidaciones(array $conditions = []): Collection
     {
@@ -174,7 +173,7 @@ class Dh21Repository implements Dh21RepositoryInterface
             ->select('SELECT * FROM pre_conceptos_liquidados');
 
         // Convertir los resultados a array
-        return array_map(fn($item) => (array) $item, $resultados);
+        return array_map(fn ($item): array => (array) $item, $resultados);
     }
 
     /**
@@ -198,7 +197,7 @@ class Dh21Repository implements Dh21RepositoryInterface
             $temp['ano_retro'] = '0';
             $temp['mes_retro'] = '0';
             $rs_periodos_retro[] = $temp;
-        } elseif (!$check_lic) {
+        } elseif (! $check_lic) {
             $sql_periodos_retro = '
                                     SELECT
                                             DISTINCT(ano_retro),mes_retro

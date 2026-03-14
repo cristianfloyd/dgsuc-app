@@ -2,6 +2,9 @@
 
 namespace App\Repositories\Sicoss;
 
+use const PHP_EOL;
+use const STR_PAD_RIGHT;
+
 use App\Data\Sicoss\SicossProcessData;
 use App\Models\Dh01;
 use App\Models\Dh03;
@@ -24,9 +27,6 @@ use function in_array;
 use function is_object;
 use function strlen;
 
-use const PHP_EOL;
-use const STR_PAD_RIGHT;
-
 class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepositoryInterface
 {
     use MapucheConnectionTrait;
@@ -42,16 +42,15 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     /**
      * Procesa los legajos para el cálculo de SICOSS.
      *
-     * @param SicossProcessData $datos Datos de configuración para el procesamiento
-     * @param int $per_anoct Año de la liquidación
-     * @param int $per_mesct Mes de la liquidación
-     * @param array $legajos Array con los legajos a procesar
-     * @param string $nombre_arch Nombre del archivo de salida
-     * @param array|null $licencias Array de licencias (opcional)
-     * @param bool $retro Indica si es una liquidación retroactiva
-     * @param bool $check_sin_activo Verifica legajos sin activos
-     * @param bool $retornar_datos Indica si debe retornar los datos procesados
-     *
+     * @param  SicossProcessData  $datos  Datos de configuración para el procesamiento
+     * @param  int  $per_anoct  Año de la liquidación
+     * @param  int  $per_mesct  Mes de la liquidación
+     * @param  array  $legajos  Array con los legajos a procesar
+     * @param  string  $nombre_arch  Nombre del archivo de salida
+     * @param  array|null  $licencias  Array de licencias (opcional)
+     * @param  bool  $retro  Indica si es una liquidación retroactiva
+     * @param  bool  $check_sin_activo  Verifica legajos sin activos
+     * @param  bool  $retornar_datos  Indica si debe retornar los datos procesados
      * @return array Array con los resultados del procesamiento
      */
     public function procesarSicoss(
@@ -66,7 +65,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         bool $retornar_datos = false,
     ): array {
         // Convertir objetos stdClass a arrays si es necesario
-        $legajos = array_map(fn($legajo) => is_object($legajo) ? (array) $legajo : $legajo, $legajos);
+        $legajos = array_map(fn ($legajo) => is_object($legajo) ? (array) $legajo : $legajo, $legajos);
 
         // Usar los valores del DTO directamente
         $TopeJubilatorioPatronal = $datos->TopeJubilatorioPatronal;
@@ -86,7 +85,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $total['imponible_2'] = 0;
         $total['imponible_4'] = 0;
         $total['imponible_5'] = 0;
-        $total['imponible_6'] = 0; //bruto + sac docente
+        $total['imponible_6'] = 0; // bruto + sac docente
         $total['imponible_8'] = 0;
         $total['imponible_9'] = 0;
         $legajos_validos = [];
@@ -107,7 +106,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
             $legajos[$i]['codigo_os'] = $this->sicossCalculoRepository->codigoOs($legajo);
 
-            //#44909 Incorporar a la salida de SICOSS el código de situación Reserva de Puesto (14)
+            // #44909 Incorporar a la salida de SICOSS el código de situación Reserva de Puesto (14)
             if ($check_sin_activo) {
                 $legajo_sin_liquidar = Dh01::getLegajoSinLiquidarSinDh21($legajo);
 
@@ -116,15 +115,15 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 }
             }
 
-            if (!$retro) {
+            if (! $retro) {
                 $dh03Repository = resolve(Dh03RepositoryInterface::class);
                 $limites = $dh03Repository->getLimitesCargos($legajo);
 
                 // Convertir objetos stdClass a arrays si es necesario
-                $limites = array_map(fn($limite) => is_object($limite) ? (array) $limite : $limite, $limites);
+                $limites = array_map(fn ($limite) => is_object($limite) ? (array) $limite : $limite, $limites);
 
-                //En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
-                if (!isset($limites[0]['maximo'])) {
+                // En caso de que el agente no tenga cargos activos, pero aparezca liquidado.
+                if (! isset($limites[0]['maximo'])) {
                     $cargos_activos_agente = Dh03::getCargosActivos($legajo);
                     if ($cargos_activos_agente === []) {
                         $fecha_fin = MapucheConfig::getFechaFinPeriodoCorriente();
@@ -137,7 +136,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $cargos_legajo = array_merge($cargos_legajo, $cargos_legajo2);
 
                 // Convertir objetos stdClass a arrays si es necesario
-                $cargos_legajo = array_map(fn($cargo) => is_object($cargo) ? (array) $cargo : $cargo, $cargos_legajo);
+                $cargos_legajo = array_map(fn ($cargo) => is_object($cargo) ? (array) $cargo : $cargo, $cargos_legajo);
                 // En el caso de las licencias de legajo, se mantiene el código de condición en esos días
                 // que corresponde al tipo de licencia (5 => maternidad o 13 => no remunerada)
                 // Se considera que no se puede superponer con otra licencia
@@ -148,7 +147,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     foreach ($licencias as $licencia) {
                         if ($licencia['nro_legaj'] == $legajo) {
                             for ($dia = $licencia['inicio']; $dia <= $licencia['final']; $dia++) {
-                                if (!in_array($dia, $dias_lic_legajo)) { // Los días con licencia de legajo no se tocan
+                                if (! in_array($dia, $dias_lic_legajo)) { // Los días con licencia de legajo no se tocan
                                     if ($limites[0]['maximo'] >= $dia) {
                                         $estado_situacion[$dia] = $this->sicossEstadoRepository->evaluarCondicionLicencia($estado_situacion[$dia], $licencia['condicion']);
                                     }
@@ -165,7 +164,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 foreach ($cargos_legajo as $cargo) {
                     $fin_mes = $day = date('d', mktime(0, 0, 0, MapucheConfig::getMesFiscal() + 1, 0, date('Y')));
                     for ($ini_mes = 1; $ini_mes <= $fin_mes; $ini_mes++) {
-                        if (!isset($licencias_cargos[$cargo['nro_cargo']][$i])) {
+                        if (! isset($licencias_cargos[$cargo['nro_cargo']][$i])) {
                             $licencias_cargos[$cargo['nro_cargo']][$ini_mes] = 1;
                         }
 
@@ -180,7 +179,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 // Se evaluan los cargos
                 foreach ($licencias_cargos as $cargo) {
                     for ($dia = 1; $dia <= count($cargo); $dia++) {
-                        if (!in_array($dia, $dias_lic_legajo) && (isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
+                        if (! in_array($dia, $dias_lic_legajo) && (isset($estado_situacion[$dia]) && $estado_situacion[$dia] == 13)) {
                             $estado_situacion[$dia] = $cargo[$dia];
                             // Si estaba trabajando en algún cargo se prioriza el código en dha8
                         }
@@ -190,7 +189,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $cambios_estado = $this->sicossEstadoRepository->calcularCambiosEstado($estado_situacion);
                 $dias_trabajados = $this->sicossEstadoRepository->calcularDiasTrabajados($estado_situacion);
                 $revista_legajo = $this->sicossEstadoRepository->calcularRevistaLegajo($cambios_estado);
-
 
                 // Como código de situación general se toma el último (?)
                 $legajos[$i]['codigosituacion'] = $estado_situacion[$limites[0]['maximo']];
@@ -244,7 +242,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $legajos[$i]['conyugue'] = 1;
             }
 
-
             // --- Obtengo la sumarización según concepto o tipo de grupo de un concepto ---
             $this->sumarizarConceptosPorTiposGrupos($legajo, $legajos[$i]);
 
@@ -294,13 +291,13 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $legajos[$i]['PorcAporteDiferencialJubilacion'] = $this->sicossConfigurationRepository->getPorcentajeAporteAdicionalJubilacion();
                 $legajos[$i]['ImporteImponible_4'] = $legajos[$i]['IMPORTE_IMPON'];
                 $legajos[$i]['ImporteSACNoDocente'] = 0;
-                //ImporteImponible_6 viene con valor de funcion sumarizar_conceptos_por_tipos_grupos
+                // ImporteImponible_6 viene con valor de funcion sumarizar_conceptos_por_tipos_grupos
                 $legajos[$i]['ImporteImponible_6'] = round((($legajos[$i]['ImporteImponible_6'] * 100) / $legajos[$i]['PorcAporteDiferencialJubilacion']), 2);
                 $Imponible6_aux = $legajos[$i]['ImporteImponible_6'];
                 if ($Imponible6_aux != 0) {
                     if (
                         (int) $Imponible6_aux !== (int) $legajos[$i]['IMPORTE_IMPON']
-                        && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 //redondear hasta + o - $5
+                        && (abs($Imponible6_aux - $legajos[$i]['IMPORTE_IMPON'])) > 5 // redondear hasta + o - $5
                         && $legajos[$i]['ImporteImponible_6'] < $legajos[$i]['IMPORTE_IMPON']
                     ) {
                         $legajos[$i]['TipoDeOperacion'] = 2;
@@ -327,13 +324,10 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                 $legajos[$i]['DiferenciaSACImponibleConTope'] = 0;
                 $legajos[$i]['DiferenciaImponibleConTope'] = 0;
 
-
-
                 $tope_jubil_personal = $TopeJubilatorioPersonal;
                 if ($legajos[$i]['ImporteSAC'] > 0) {
                     $tope_jubil_personal = $TopeJubilatorioPersonal + $TopeSACJubilatorioPers;
                 }
-
 
                 if ($legajos[$i]['ImporteSACNoDocente'] > $tope_jubil_personal) {
                     if ($trunca_tope == 1) {
@@ -351,14 +345,13 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     $legajos[$i]['IMPORTE_IMPON'] = min($bruto_nodo_sin_sac - $legajos[$i]['ImporteNoRemun'], $TopeJubilatorioPersonal) + min($sac, $TopeSACJubilatorioPers);
                 }
 
-                $explode = explode(',', self::$categoria_diferencial ?? ''); //arma el array
-                $implode = implode("','", $explode); //vulve a String y agrega comillas
+                $explode = explode(',', self::$categoria_diferencial ?? ''); // arma el array
+                $implode = implode("','", $explode); // vulve a String y agrega comillas
                 if (Dh11::existeCategoriaDiferencial($legajos[$i]['nro_legaj'], $implode)) {
                     $legajos[$i]['IMPORTE_IMPON'] = 0;
                 }
 
                 $legajos[$i]['ImporteImponibleSinSAC'] = $legajos[$i]['IMPORTE_IMPON'] - $legajos[$i]['ImporteSACNoDocente'];
-
 
                 $tope_jubil_personal = $TopeJubilatorioPersonal;
                 if ($legajos[$i]['ImporteSAC'] > 0) {
@@ -371,7 +364,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
                     $legajos[$i]['DiferenciaImponibleConTope'] = $legajos[$i]['ImporteImponibleSinSAC'] - $TopeJubilatorioPersonal;
                     $legajos[$i]['IMPORTE_IMPON'] -= $legajos[$i]['DiferenciaImponibleConTope'];
                 }
-
 
                 $otra_actividad = $this->sicossCalculoRepository->otraActividad($legajo);
                 $legajos[$i]['ImporteBrutoOtraActividad'] = $otra_actividad['importebrutootraactividad'];
@@ -499,6 +491,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         }
 
         dd($total);
+
         return $total;
     }
 
@@ -520,7 +513,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
             foreach ($legajos as $legajo) {
                 $linea = $this->generarLineaSicoss($legajo);
-                $contenido .= $linea . PHP_EOL;
+                $contenido .= $linea.PHP_EOL;
                 $procesados++;
 
                 // Loguear progreso cada 100 registros
@@ -531,18 +524,18 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
 
             // Crear directorio si no existe
             $directorio = storage_path('app/comunicacion/sicoss/');
-            if (!is_dir($directorio)) {
+            if (! is_dir($directorio)) {
                 mkdir($directorio, 0o755, true);
             }
 
             // Guardar archivo
-            $rutaCompleta = $directorio . $nombre_arch . '.txt';
+            $rutaCompleta = $directorio.$nombre_arch.'.txt';
             file_put_contents($rutaCompleta, $contenido);
 
             Log::info('Archivo SICOSS grabado exitosamente', [
                 'archivo' => $rutaCompleta,
                 'legajos_procesados' => $procesados,
-                'tamaño_archivo' => filesize($rutaCompleta) . ' bytes',
+                'tamaño_archivo' => filesize($rutaCompleta).' bytes',
             ]);
         } catch (Exception $e) {
             Log::error('Error al grabar archivo SICOSS TXT', [
@@ -590,7 +583,6 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $leg['ImporteNoRemun96'] = 0;
         $leg['ImporteTipo91'] = 0;
 
-
         $informar_becarios = MapucheConfig::getSicossInformarBecarios();
         $cargoInvestigador = []; // Voy a guardar en esta variable los numeros de cargos que son investigador
 
@@ -614,14 +606,13 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
             $nro_cargo = $conceptos_liq_por_leg[$i]['nro_cargo'];
             $codigo_obra_social = $leg['codigo_os'];
 
-
             if (preg_match('/[^\d]+6[^\d]+/', (string) $grupos_concepto)) {
                 $leg['ImporteHorasExtras'] += $importe;
                 // Si tiene el check de sumar horas extras por novedad ademas sumo en horas extras novedad1
                 if ($this->sicossConfigurationRepository->getHorasExtrasPorNovedad() === 1) {
                     $horas = $this->sicossCalculoRepository->calculoHorasExtras($codn_concepto, $nro_cargo);
-                    //verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
-                    if (!in_array($codn_concepto, $conce_hs_extr)) {
+                    // verifico que las hs extras para el concepto determinado no se hayan sumado para sumarlas e informarlas en sicoss
+                    if (! in_array($codn_concepto, $conce_hs_extr)) {
                         $conce_hs_extr[] = $codn_concepto;
                         $leg['CantidadHorasExtras'] += $horas['sum_nov1'];
                     }
@@ -834,7 +825,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         $conceptos_filtrados = DB::connection($this->getConnectionName())->select($sql_conceptos_fltrados);
 
         // Convertir objetos stdClass a arrays
-        return array_map(fn($concepto) => (array) $concepto, $conceptos_filtrados);
+        return array_map(fn ($concepto): array => (array) $concepto, $conceptos_filtrados);
     }
 
     /**
@@ -862,8 +853,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     /**
      * Genera una línea de texto SICOSS formateada según las especificaciones AFIP.
      *
-     * @param array $legajo Datos del legajo procesado
-     *
+     * @param  array  $legajo  Datos del legajo procesado
      * @return string Línea formateada de 500 caracteres
      */
     protected function generarLineaSicoss(array $legajo): string
@@ -1059,9 +1049,8 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
     /**
      * Ajusta la longitud de una línea a exactamente 500 caracteres.
      *
-     * @param string $linea Línea a ajustar
-     * @param int $longitud Longitud objetivo (500)
-     *
+     * @param  string  $linea  Línea a ajustar
+     * @param  int  $longitud  Longitud objetivo (500)
      * @return string Línea ajustada
      */
     protected function ajustarLongitud(string $linea, int $longitud): string
@@ -1069,6 +1058,7 @@ class SicossLegajoProcessorRepository implements SicossLegajoProcessorRepository
         if (strlen($linea) > $longitud) {
             return substr($linea, 0, $longitud);
         }
+
         return str_pad($linea, $longitud, ' ', STR_PAD_RIGHT);
     }
 }

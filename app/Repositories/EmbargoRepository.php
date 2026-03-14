@@ -17,12 +17,10 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     /**
      * Constructor del repositorio.
      */
-    public function __construct(protected EmbargoProcesoResult $model)
-    {
-    }
+    public function __construct(protected EmbargoProcesoResult $model) {}
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function executeEmbargoProcess(
         array $nroComplementarias,
@@ -49,13 +47,14 @@ class EmbargoRepository implements EmbargoRepositoryInterface
                 $this->model->newInstance()->hydrate($results),
             );
         } catch (Exception $e) {
-            Log::error('Error en proceso de embargo: ' . $e->getMessage());
+            Log::error('Error en proceso de embargo: '.$e->getMessage());
+
             return $this->model->getEmptyQuery();
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getAllEmbargos(): Collection
     {
@@ -63,7 +62,7 @@ class EmbargoRepository implements EmbargoRepositoryInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getEmbargosByType(int $tipoEmbargo): Collection
     {
@@ -72,13 +71,11 @@ class EmbargoRepository implements EmbargoRepositoryInterface
 
     /**
      * Prepara el array de complementarias para la consulta SQL.
-     *
-     *
      */
     private function prepareComplementariasArray(array $nroComplementarias): string
     {
         return $nroComplementarias === []
             ? 'ARRAY[]::integer[]'
-            : 'ARRAY[' . implode(',', array_map(intval(...), $nroComplementarias)) . ']';
+            : 'ARRAY['.implode(',', array_map(intval(...), $nroComplementarias)).']';
     }
 }

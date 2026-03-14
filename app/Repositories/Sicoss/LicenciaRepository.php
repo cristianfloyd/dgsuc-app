@@ -13,8 +13,6 @@ class LicenciaRepository implements LicenciaRepositoryInterface
 
     /**
      * Obtiene licencias de protección integral y vacaciones.
-     *
-     *
      */
     public function getLicenciasProtecintegralVacaciones(string $where_legajos): array
     {
@@ -30,7 +28,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         if ($variantes_vacaciones !== '' && $variantes_protecintegral !== '') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
             $where_protecintegral = " WHEN dh05.nrovarlicencia IN ($variantes_protecintegral) THEN '51'::integer ";
-            $variantes = $variantes_vacaciones . ',' . $variantes_protecintegral;
+            $variantes = $variantes_vacaciones.','.$variantes_protecintegral;
             $where_legajos .= "AND dh05.nrovarlicencia IN ($variantes)";
         } elseif ($variantes_vacaciones !== '') {
             $where_vacaciones = " WHEN dh05.nrovarlicencia IN ($variantes_vacaciones) THEN '12'::integer ";
@@ -106,8 +104,6 @@ class LicenciaRepository implements LicenciaRepositoryInterface
 
     /**
      * Obtiene licencias vigentes.
-     *
-     *
      */
     public function getLicenciasVigentes(string $where_legajos): array
     {
@@ -236,7 +232,7 @@ class LicenciaRepository implements LicenciaRepositoryInterface
         $resultados = DB::connection($this->getConnectionName())->select($sql);
 
         // Convertir los resultados a array
-        return array_map(fn($item) => [
+        return array_map(fn ($item): array => [
             'nro_legaj' => $item->nro_legaj,
             'inicio' => $item->inicio,
             'final' => $item->final,

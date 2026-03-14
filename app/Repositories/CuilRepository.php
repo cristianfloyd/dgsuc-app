@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Contracts\CuilRepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -16,8 +15,7 @@ class CuilRepository implements CuilRepositoryInterface
      * Recupera los CUILs que están en afip_mapuche_sicoss pero no en afip_relaciones_activas
      * para un período fiscal específico.
      *
-     * @param string $periodoFiscal Período fiscal en formato YYYYMM
-     *
+     * @param  string  $periodoFiscal  Período fiscal en formato YYYYMM
      * @return Collection Colección de CUILs
      */
     public function getCuilsNotInAfip(string $periodoFiscal): Collection

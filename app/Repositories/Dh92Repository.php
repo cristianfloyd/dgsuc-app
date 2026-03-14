@@ -10,9 +10,7 @@ class Dh92Repository
     /**
      * Constructor del repositorio.
      */
-    public function __construct(protected \App\Models\Dh92 $model)
-    {
-    }
+    public function __construct(protected \App\Models\Dh92 $model) {}
 
     /**
      * Obtiene todos los registros.
@@ -27,8 +25,7 @@ class Dh92Repository
     /**
      * Encuentra un registro por su ID.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return Dh92|null
      */
     public function find($id)
@@ -50,8 +47,7 @@ class Dh92Repository
     /**
      * Actualiza un registro existente.
      *
-     * @param int $id
-     *
+     * @param  int  $id
      * @return bool
      */
     public function update($id, array $data)
@@ -60,13 +56,14 @@ class Dh92Repository
         if ($record) {
             return $record->update($data);
         }
+
         return false;
     }
 
     /**
      * Elimina un registro.
      *
-     * @param int $id
+     * @param  int  $id
      */
     public function delete($id): bool
     {

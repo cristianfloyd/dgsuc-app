@@ -14,18 +14,15 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
     /**
      * Constructor del repositorio.
      *
-     * @param PeriodoFiscalService $periodoFiscalService Servicio de períodos fiscales
+     * @param  PeriodoFiscalService  $periodoFiscalService  Servicio de períodos fiscales
      */
-    public function __construct(protected PeriodoFiscalService $periodoFiscalService)
-    {
-    }
+    public function __construct(protected PeriodoFiscalService $periodoFiscalService) {}
 
     /**
      * Obtiene los datos del reporte SICOSS para el período especificado.
      *
-     * @param string $anio Año del período fiscal
-     * @param string $mes Mes del período fiscal
-     *
+     * @param  string  $anio  Año del período fiscal
+     * @param  string  $mes  Mes del período fiscal
      * @return Collection Colección de registros del reporte
      */
     public function getReporte(string $anio, string $mes): Collection
@@ -49,16 +46,14 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
     /**
      * Obtiene los totales del reporte SICOSS para el período especificado.
      *
-     * @param string $anio Año del período fiscal
-     * @param string $mes Mes del período fiscal
-     *
+     * @param  string  $anio  Año del período fiscal
+     * @param  string  $mes  Mes del período fiscal
      * @return array Totales del reporte
      */
     public function getTotales(string $anio, string $mes): array
     {
         try {
-            // Ya verificamos en el modelo que getTotales siempre retorna un array
-            return MapucheSicossReporte::query()->getTotales($anio, $mes);
+            return MapucheSicossReporte::obtenerTotalesParaPeriodo($anio, $mes);
         } catch (Exception $e) {
             Log::error('Error al obtener totales del reporte SICOSS en el repositorio', [
                 'error' => $e->getMessage(),
@@ -81,9 +76,8 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
     /**
      * Verifica si existen datos para un período fiscal específico.
      *
-     * @param string $anio Año del período fiscal
-     * @param string $mes Mes del período fiscal
-     *
+     * @param  string  $anio  Año del período fiscal
+     * @param  string  $mes  Mes del período fiscal
      * @return bool True si existen datos para el período, false en caso contrario
      */
     public function existenDatosParaPeriodo(string $anio, string $mes): bool
@@ -123,7 +117,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
             return MapucheSicossReporte::query()
                 ->select('dh22.per_liano', 'dh22.per_limes')
                 ->from('mapuche.dh22')
-                ->where('dh22.sino_genimp', true)
+                ->whereRaw('dh22.sino_genimp = ?', [true])
                 ->groupBy('dh22.per_liano', 'dh22.per_limes')
                 ->orderBy('dh22.per_liano', 'desc')
                 ->orderBy('dh22.per_limes', 'desc')
@@ -140,9 +134,8 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
     /**
      * Determina la tabla de período a utilizar basada en el año y mes proporcionados.
      *
-     * @param string $anio Año del período fiscal
-     * @param string $mes Mes del período fiscal
-     *
+     * @param  string  $anio  Año del período fiscal
+     * @param  string  $mes  Mes del período fiscal
      * @return string Nombre de la tabla a utilizar
      */
     private function determinarTablaPeriodo(string $anio, string $mes): string
@@ -159,6 +152,7 @@ class SicossReporteRepository implements SicossReporteRepositoryInterface
                 'anio' => $anio,
                 'mes' => $mes,
             ]);
+
             // En caso de error, usar la tabla histórica por defecto
             return 'mapuche.dh21h';
         }

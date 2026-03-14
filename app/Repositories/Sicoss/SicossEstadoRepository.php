@@ -6,13 +6,12 @@ use App\Models\Mapuche\MapucheConfig;
 use App\Repositories\Sicoss\Contracts\SicossEstadoRepositoryInterface;
 
 use function count;
+use function in_array;
 
 class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 {
     /**
      * Inicializa el estado de situación para un rango de días.
-     *
-     *
      */
     public function inicializarEstadoSituacion(int $codigo, int $min, int $max): array
     {
@@ -21,6 +20,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
         for ($i = $min; $i <= $max; $i++) {
             $estado_situacion[$i] = $codigo;
         }
+
         return $estado_situacion;
     }
 
@@ -28,8 +28,8 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
      * Se le pasa la condición actual y se compara con la condición
      * obtenida a partir del tipo de licencia (5 => maternidad o 13 => no remunerada o 18/19 => ILT).
      *
-     * @param int $c1 condición actual
-     * @param int $c2 condición tipo de licencia
+     * @param  int  $c1  condición actual
+     * @param  int  $c2  condición tipo de licencia
      */
     public function evaluarCondicionLicencia(int $c1, int $c2): int
     {
@@ -64,8 +64,6 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 
     /**
      * Calcula los cambios de estado en el período.
-     *
-     *
      */
     public function calcularCambiosEstado(array $estado_situacion): array
     {
@@ -73,7 +71,7 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
         $anterior = null;
 
         foreach ($estado_situacion as $dia => $codigo) {
-            if (!isset($anterior) || $anterior != $codigo) {
+            if (! isset($anterior) || $anterior != $codigo) {
                 $cambios[$dia] = $codigo;
             }
             $anterior = $codigo;
@@ -84,8 +82,6 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 
     /**
      * Calcula los días trabajados según códigos de situación.
-     *
-     *
      */
     public function calcularDiasTrabajados(array $estado_situacion): int
     {
@@ -103,8 +99,6 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 
     /**
      * Calcula la revista del legajo basada en los cambios de estado.
-     *
-     *
      */
     public function calcularRevistaLegajo(array $cambios_estado): array
     {
@@ -146,14 +140,13 @@ class SicossEstadoRepository implements SicossEstadoRepositoryInterface
 
     /**
      * Verifica los importes dado un legajo, si todos son ceros entonces no debe tenerse en cuenta en el informe sicoss.
-     *
-     *
      */
     public function verificarAgenteImportesCero(array $leg): int
     {
         if ($leg['IMPORTE_BRUTO'] == 0 && $leg['IMPORTE_IMPON'] == 0 && $leg['AsignacionesFliaresPagadas'] == 0 && $leg['ImporteNoRemun'] == 0 && $leg['IMPORTE_ADICI'] == 0 && $leg['IMPORTE_VOLUN'] == 0) {
             return 0;
         }
+
         return 1;
     }
 }

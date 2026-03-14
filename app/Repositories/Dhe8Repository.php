@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class Dhe8Repository.
- *
- * @package App\Repositories
  */
 class Dhe8Repository
 {
@@ -22,8 +20,6 @@ class Dhe8Repository
 
     /**
      * Busca un registro por su código.
-     *
-     *
      */
     public function findByCodigo(string $codigo): ?Dhe8
     {
@@ -32,8 +28,6 @@ class Dhe8Repository
 
     /**
      * Crea un nuevo registro.
-     *
-     *
      */
     public function create(array $data): Dhe8
     {
@@ -42,23 +36,21 @@ class Dhe8Repository
 
     /**
      * Actualiza un registro existente.
-     *
-     *
      */
     public function update(string $codigo, array $data): bool
     {
         $dhe8 = Dhe8::query()->find($codigo);
-        return $dhe8 ? $dhe8->update($data) : false;
+
+        return $dhe8 && $dhe8->update($data);
     }
 
     /**
      * Elimina un registro.
-     *
-     *
      */
     public function delete(string $codigo): bool
     {
         $dhe8 = Dhe8::query()->find($codigo);
+
         return $dhe8 ? $dhe8->delete() : false;
     }
 }

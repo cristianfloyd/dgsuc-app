@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 class Dhr1Repository implements Dhr1RepositoryInterface
 {
     public $model;
+
     protected $property;
 
     public function find(int $nro_liqui): ?Dhr1

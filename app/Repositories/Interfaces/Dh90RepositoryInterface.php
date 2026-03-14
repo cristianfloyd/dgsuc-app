@@ -18,36 +18,26 @@ interface Dh90RepositoryInterface
 
     /**
      * Buscar por número de cargo.
-     *
-     *
      */
     public function findByNroCargo(int $nroCargo): ?Dh90;
 
     /**
      * Crear un nuevo registro.
-     *
-     *
      */
     public function create(Dh90Data $data): Dh90;
 
     /**
      * Actualizar un registro existente.
-     *
-     *
      */
     public function update(int $nroCargo, Dh90Data $data): ?Dh90;
 
     /**
      * Eliminar un registro.
-     *
-     *
      */
     public function delete(int $nroCargo): bool;
 
     /**
      * Encontrar por tipo de asociación.
-     *
-     *
      */
     public function findByTipoAsociacion(string $tipo): Collection;
 }
