@@ -2,6 +2,7 @@
 
 namespace App\Services\Reportes;
 
+use App\Data\Reportes\BloqueoProcesadoData;
 use App\Data\Reportes\BloqueosData;
 use App\Services\Imports\BloqueosImportService;
 use App\Services\Reportes\Interfaces\BloqueosServiceInterface;
@@ -23,7 +24,7 @@ class BloqueosService implements BloqueosServiceInterface
      *
      * @param array $row Fila de datos de bloqueos importados desde Excel.
      *
-     * @return Collection<BloqueosData> Colección de datos de bloqueos procesados.
+     * @return Collection<int, BloqueoProcesadoData> Colección de resultados del procesamiento de bloqueos.
      */
     public function processImport(array|BloqueosData $row): Collection
     {
@@ -42,7 +43,7 @@ class BloqueosService implements BloqueosServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function validateData(array $data): bool
     {

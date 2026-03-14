@@ -30,8 +30,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
     public function __construct(
         private readonly BloqueosHistorialServiceInterface $historialService,
         private readonly BloqueosCleanupServiceInterface $cleanupService,
-    ) {
-    }
+    ) {}
 
     /**
      * Archiva un período fiscal completo (transferencia + limpieza).
@@ -168,6 +167,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 Log::info('No existen registros para archivar', [
                     'periodo_fiscal' => $periodoFiscal,
                 ]);
+
                 return true; // No hay nada que archivar, es válido
             }
 
@@ -176,6 +176,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 Log::warning('El período ya fue archivado previamente', [
                     'periodo_fiscal' => $periodoFiscal,
                 ]);
+
                 return false;
             }
 
@@ -189,6 +190,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                     'periodo_fiscal' => $periodoFiscal,
                     'total_registros' => $totalRegistros,
                 ]);
+
                 return false;
             }
 
@@ -199,6 +201,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 Log::error('Validación de transferencia falló', [
                     'periodo_fiscal' => $periodoFiscal,
                 ]);
+
                 return false;
             }
 
@@ -206,6 +209,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 Log::error('Validación de limpieza falló', [
                     'periodo_fiscal' => $periodoFiscal,
                 ]);
+
                 return false;
             }
 
@@ -220,6 +224,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -290,6 +295,7 @@ class BloqueosArchiveOrchestratorService implements BloqueosArchiveOrchestratorI
                 'periodo_fiscal' => $periodoFiscal,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

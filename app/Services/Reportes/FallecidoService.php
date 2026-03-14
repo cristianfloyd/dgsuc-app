@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Reportes;
 
-use App\Repositories\Interfaces\FallecidoRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 

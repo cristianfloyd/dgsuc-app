@@ -7,8 +7,8 @@ use App\Data\Reportes\BloqueosData;
 use App\Enums\BloqueosEstadoEnum;
 use App\Models\Dh03;
 use App\Models\Reportes\BloqueosDataModel;
+use App\Repositories\Sicoss\Contracts\Dh03RepositoryInterface;
 use App\Traits\MapucheConnectionTrait;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Schema;
 class BloqueosProcessService
 {
     use MapucheConnectionTrait;
+
+    public function __construct(
+        private readonly Dh03RepositoryInterface $dh03Repository,
+    ) {}
 
     /**
      * Crea la tabla de backup para bloqueos si no existe.
@@ -76,7 +80,7 @@ class BloqueosProcessService
             $query = BloqueosDataModel::query()
                 ->where('estado', BloqueosEstadoEnum::VALIDADO)
                 ->whereNull('mensaje_error')
-                ->where('esta_procesado', false); // Solo procesamos los que no están procesados
+                ->where('esta_procesado', false);  // Solo procesamos los que no están procesados
 
             if ($bloqueosData instanceof \App\Data\Reportes\BloqueosData) {
                 // Validar que todos los registros estén en estado correcto
@@ -85,7 +89,7 @@ class BloqueosProcessService
                     || $bloqueo->esta_procesado === true);
 
                 if ($registrosInvalidos->isNotEmpty()) {
-                    throw new Exception('Existen registros no validados, con errores o ya procesados. ' . 'Por favor, valide todos los registros antes de procesar.',);
+                    throw new Exception('Existen registros no validados, con errores o ya procesados. ' . 'Por favor, valide todos los registros antes de procesar.');
                 }
 
                 $query->whereIn('id', collect($bloqueosData)->pluck('id'));
@@ -102,9 +106,9 @@ class BloqueosProcessService
                 foreach ($lote as $bloqueo) {
                     try {
                         // Obtenemos el cargo antes de cualquier modificación
-                        $cargo = Dh03::validarLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+                        $cargo = $this->dh03Repository->findCargoPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo);
 
-                        if ($cargo) {
+                        if ($cargo instanceof \App\Models\Dh03) {
                             // Procesamos el registro y verificamos si se realizaron cambios
                             $resultado = $this->procesarRegistro($bloqueo, $cargo);
 
@@ -183,7 +187,7 @@ class BloqueosProcessService
         try {
             // Validamos la existencia del par legajo-cargo
             Log::info('Validando existencia del par legajo-cargo');
-            if (!$cargo && !Dh03::validarParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
+            if (!$cargo && !$this->dh03Repository->existeParLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)) {
                 return BloqueoProcesadoData::fromError(
                     'Combinacion de legajo y cargo no encontrada',
                     $bloqueo,
@@ -191,8 +195,16 @@ class BloqueosProcessService
                 );
             }
 
+            if (!$cargo instanceof Dh03) {
+                $cargo = $this->dh03Repository->findCargoPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo);
+            }
+
             if (!$cargo instanceof \App\Models\Dh03) {
-                $cargo = Dh03::buscarPorLegajoCargo($bloqueo->nro_legaj, $bloqueo->nro_cargo)->first();
+                return BloqueoProcesadoData::fromError(
+                    'Combinacion de legajo y cargo no encontrada',
+                    $bloqueo,
+                    ['error_tipo0' => 'validacion'],
+                );
             }
 
             // Guardar datos originales antes de cualquier modificación
@@ -215,6 +227,7 @@ class BloqueosProcessService
             $resultado->datosOriginales = $datosOriginales;
 
             Log::info('Proceso exitoso:', array_merge($resultado->toArray(), ['cambios_realizados' => $cambiosRealizados]));
+
             return $resultado;
         } catch (Exception $e) {
             // En caso de error, el registro permanece en la tabla
@@ -265,7 +278,8 @@ class BloqueosProcessService
             DB::connection($this->getConnectionName())->beginTransaction();
 
             // Obtener registros de backup para la sesión actual
-            $backup = DB::connection($this->getConnectionName())->table('suc.dh03_backup_bloqueos')
+            $backup = DB::connection($this->getConnectionName())
+                ->table('suc.dh03_backup_bloqueos')
                 ->where('session_id', session()->getId())
                 ->orderBy('fecha_backup', 'desc')
                 ->get();
@@ -273,7 +287,8 @@ class BloqueosProcessService
             // Restaurar cada registro y almacenar los IDs procesados
             $idsRestaurados = [];
             foreach ($backup as $registro) {
-                Dh03::query()->where('nro_cargo', $registro->nro_cargo)
+                Dh03::query()
+                    ->where('nro_cargo', $registro->nro_cargo)
                     ->update([
                         'fec_baja' => $registro->fec_baja,
                         'chkstopliq' => $registro->chkstopliq,
@@ -308,8 +323,9 @@ class BloqueosProcessService
             $this->crearTablaBackupSiNoExiste();
 
             // Identificar grupos de registros con el mismo nro_legaj y nro_cargo
-            $duplicados = BloqueosDataModel::query()->select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
-                ->where('esta_procesado', false) // Solo procesamos los que no están procesados
+            $duplicados = BloqueosDataModel::query()
+                ->select('nro_legaj', 'nro_cargo', DB::raw('COUNT(*) as total_count'))
+                ->where('esta_procesado', false)  // Solo procesamos los que no están procesados
                 ->groupBy('nro_legaj', 'nro_cargo')
                 ->havingRaw('COUNT(*) > 1')
                 ->get();
@@ -318,14 +334,19 @@ class BloqueosProcessService
 
             foreach ($duplicados as $grupo) {
                 // Obtener todos los registros duplicados para este par legajo-cargo
-                $registrosDuplicados = BloqueosDataModel::query()->where('nro_legaj', $grupo->nro_legaj)
+                $registrosDuplicados = BloqueosDataModel::query()
+                    ->where('nro_legaj', $grupo->nro_legaj)
                     ->where('nro_cargo', $grupo->nro_cargo)
-                    ->where('esta_procesado', false)->oldest() // Procesamos primero los más antiguos
+                    ->where('esta_procesado', false)
+                    ->oldest()  // Procesamos primero los más antiguos
                     ->get();
 
                 // Verificar si el cargo existe en Mapuche
-                if (Dh03::validarParLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo)) {
-                    $cargo = Dh03::validarLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo)->first();
+                if ($this->dh03Repository->existeParLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo)) {
+                    $cargo = $this->dh03Repository->findCargoPorLegajoCargo($grupo->nro_legaj, $grupo->nro_cargo);
+                    if (!$cargo instanceof \App\Models\Dh03) {
+                        continue;
+                    }
 
                     // Guardar datos originales antes de cualquier modificación
                     $datosOriginales = [
@@ -395,6 +416,7 @@ class BloqueosProcessService
         }
 
         $cargo->update(['chkstopliq' => true]);
+
         return true;
     }
 
@@ -405,6 +427,7 @@ class BloqueosProcessService
 
         if (!$fechaBajaDh03 || $fechaBajaImportada->lt($fechaBajaDh03)) {
             $cargo->update(['fec_baja' => $fechaBajaImportada]);
+
             return true;
         }
 

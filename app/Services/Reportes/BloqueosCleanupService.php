@@ -60,6 +60,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 Log::info('No hay registros para limpiar', [
                     'periodo_fiscal' => $periodoString,
                 ]);
+
                 return CleanupResultData::nothingToClean($periodoFiscal);
             }
 
@@ -84,6 +85,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                                 'razon' => 'No existe en el historial',
                             ];
                             $noEliminados++;
+
                             continue;
                         }
 
@@ -136,6 +138,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                     $estadisticasDespues,
                 );
             }
+
             return CleanupResultData::partial(
                 $eliminados,
                 $noEliminados,
@@ -171,6 +174,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 Log::info('No existe liquidación definitiva para el período fiscal', [
                     'periodo_fiscal' => $periodoString,
                 ]);
+
                 return false;
             }
             $nroLiqui = $liquidacion->nro_liqui;
@@ -181,6 +185,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 Log::info('No existen registros para el período fiscal', [
                     'periodo_fiscal' => $periodoString,
                 ]);
+
                 return true; // No hay nada que limpiar, es válido
             }
 
@@ -201,6 +206,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 Log::error('No existen registros en el historial para este período', [
                     'periodo_fiscal' => $periodoString,
                 ]);
+
                 return false;
             }
 
@@ -210,6 +216,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 'periodo_fiscal' => $periodoString,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -229,6 +236,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
                 $query->where('nro_liqui', $nroLiqui);
             }
         }
+
         // Registros que no están procesados o tienen errores críticos
         return $query->where(function ($q): void {
             $q->where('esta_procesado', false)
@@ -251,6 +259,7 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             return collect();
         }
         $nroLiqui = $liquidacion->nro_liqui;
+
         return BloqueosDataModel::query()->where('nro_liqui', $nroLiqui)
             ->where('esta_procesado', true)
             ->whereIn('estado', [
@@ -260,7 +269,8 @@ class BloqueosCleanupService implements BloqueosCleanupServiceInterface
             ->get()
             ->filter(
                 // Verificar que existe en el historial antes de marcarlo para eliminar
-                fn(\App\Models\Reportes\BloqueosDataModel $registro): bool => $this->existeEnHistorial($registro));
+                fn(\App\Models\Reportes\BloqueosDataModel $registro): bool => $this->existeEnHistorial($registro),
+            );
     }
 
     /**

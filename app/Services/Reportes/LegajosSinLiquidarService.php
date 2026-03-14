@@ -9,7 +9,6 @@ use App\Services\Mapuche\PeriodoFiscalService;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,8 +20,7 @@ class LegajosSinLiquidarService
         private readonly Dh22 $dh22,
         private readonly Dh21h $dh21h,
         private readonly PeriodoFiscalService $periodoFiscalService,
-    ) {
-    }
+    ) {}
 
     /**
      * Obtiene los legajos sin liquidar en los últimos meses.

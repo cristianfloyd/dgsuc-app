@@ -115,14 +115,13 @@ class BloqueosValidationService
         } catch (Exception $e) {
             // Capturamos cualquier excepción no manejada en el proceso global
             $estadisticas['error_general'] = $e->getMessage();
+
             return $estadisticas;
         }
     }
 
     /**
      * Genera un mensaje de resumen para mostrar al usuario.
-     *
-     *
      */
     public function generarMensajeResumen(array $estadisticas): string
     {
@@ -143,6 +142,7 @@ class BloqueosValidationService
     public function validarTodosLosRegistros(): array
     {
         $registros = BloqueosDataModel::all();
+
         return $this->validarMultiplesRegistros($registros);
     }
 }

@@ -11,14 +11,16 @@ use App\Services\EncodingService;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use stdClass;
 
 class EmbargoReportService
 {
     use MapucheConnectionTrait;
 
-    public function generateReport(?int $nro_liqui): Collection
+    public function generateReport(?int $nro_liqui): SupportCollection
     {
         $connection = DB::connection($this->getConnectionName());
         Log::info("Generando reporte de embargos para la liquidación: $nro_liqui");
@@ -75,9 +77,10 @@ class EmbargoReportService
                 ->orderBy('embargos.codn_conce')
                 ->get();
 
-            $embargos = $results->map(function ($item): \stdClass {
+            $embargos = $results->map(function ($item): stdClass {
                 $item->caratula = EncodingService::toUtf8($item->caratula);
                 $item->nom_demandado = EncodingService::toUtf8($item->nom_demandado);
+
                 return $item;
             });
 
@@ -107,7 +110,7 @@ class EmbargoReportService
                 ->keyBy(fn($item): string => "{$item->nro_legaj}-{$item->nro_cargo}");
 
             // Agregar los conceptos adicionales al resultado
-            $embargos = $embargos->map(function ($item) use ($conceptosAdicionales): \stdClass {
+            $embargos = $embargos->map(function ($item) use ($conceptosAdicionales): stdClass {
                 $key = $item->nro_legaj . '-' . $item->nro_cargo;
                 $conceptos = $conceptosAdicionales[$key] ?? null;
 
@@ -118,9 +121,7 @@ class EmbargoReportService
                 return $item;
             });
 
-
-            // convertir a eloquent collection
-            return new Collection($embargos);
+            return $embargos;
         } catch (Exception $e) {
             Log::error('Error generando reporte de embargos', [
                 'error' => $e->getMessage(),
@@ -132,17 +133,21 @@ class EmbargoReportService
 
     /**
      * Obtiene los embargos activos con sus relaciones.
+     *
+     * @return Collection<int, Embargo>
      */
     public function getActiveEmbargos(): Collection
     {
-        return Embargo::query()
+        /** @var Collection<int, Embargo> */
+        $collection = Embargo::query()
             ->with([
                 'datosPersonales',
                 'tipoEmbargo',
                 'datosPersonales.dh03',
             ])
-            // ->whereIn('nro_legaj', [149639,159300,164859])
             ->get();
+
+        return $collection;
     }
 
     /**
@@ -151,14 +156,10 @@ class EmbargoReportService
      * @param Collection $embargos Colección de embargos.
      * @param int $nro_liqui Número de liquidación.
      *
-     * @return Collection Colección de datos de embargos, donde cada elemento
-     *                    representa un embargo con su información asociada,
-     *                    incluyendo el número de legajo, nombre completo,
-     *                    código de concepto, importe descontado,
-     *                    número de embargo, número de cargo,
-     *                    carátula y código de unidad académica.
+     * @return SupportCollection<int, array<string, mixed>> Colección de datos de embargos (legajo, nombre,
+     *                                                      concepto, importe descontado, nro_embargo, nro_cargo, carátula, codc_uacad).
      */
-    public function getEmbargos(Collection $embargos, int $nro_liqui)
+    public function getEmbargos(Collection $embargos, int $nro_liqui): SupportCollection
     {
         return $embargos
             ->groupBy('nro_legaj')
