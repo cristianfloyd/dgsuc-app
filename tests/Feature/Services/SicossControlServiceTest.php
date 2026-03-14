@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
 {
-    //use RefreshDatabase;
+    // use RefreshDatabase;
 
     protected SicossControlService $service;
 
@@ -38,7 +38,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
      */
     public function test_puede_crear_tabla_temporal(): void
     {
-        $this->service->crearTablaDH21Aportes();
+        $this->service->crearTablaDh21Aportes();
 
         $this->assertTrue(
             $this->checkTableExists('dh21aporte'),
