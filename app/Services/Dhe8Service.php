@@ -2,24 +2,19 @@
 
 namespace App\Services;
 
-use App\Contracts\Dhe8Repository;
 use App\Models\Dhe8;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Validator;
 
 /**
  * Class Dhe8Service.
- *
- * @package App\Services
  */
 class Dhe8Service
 {
     /**
      * Dhe8Service constructor.
      */
-    public function __construct(protected \App\Contracts\Dhe8Repository $dhe8Repository)
-    {
-    }
+    public function __construct(protected \App\Repositories\Dhe8Repository $dhe8Repository) {}
 
     /**
      * Obtiene todos los registros.
@@ -41,8 +36,6 @@ class Dhe8Service
 
     /**
      * Crea un nuevo registro.
-     *
-     *
      */
     public function create(array $data): Dhe8
     {
@@ -54,8 +47,6 @@ class Dhe8Service
 
     /**
      * Actualiza un registro existente.
-     *
-     *
      */
     public function update(string $codigo, array $data): bool
     {
@@ -67,8 +58,6 @@ class Dhe8Service
 
     /**
      * Elimina un registro.
-     *
-     *
      */
     public function delete(string $codigo): bool
     {

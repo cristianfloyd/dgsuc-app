@@ -9,9 +9,7 @@ class Dh12Service
     /**
      * Create a new class instance.
      */
-    public function __construct(protected \App\Models\Dh12 $dh12)
-    {
-    }
+    public function __construct(protected \App\Models\Dh12 $dh12) {}
 
     public static function getConceptosParaSelect()
     {

@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Repositories\Dh11RepositoryInterface;
 use App\Repositories\Dh61Repository;
 use Exception;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use function count;
 
 class Dh11RestoreService
 {
@@ -17,8 +19,7 @@ class Dh11RestoreService
     public function __construct(
         protected Dh61Repository $dh61Repository,
         protected Dh11RepositoryInterface $dh11Repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Restaura las categorías para un período fiscal específico.
@@ -52,8 +53,7 @@ class Dh11RestoreService
             }
 
             $updatedRecords = $this->restoreHistoricalRecords($historicalRecords);
-            Log::debug('Registros actualizados: ' . array_count_values($updatedRecords));
-
+            Log::debug('Registros actualizados: ' . count($updatedRecords));
 
             DB::commit();
             Log::info("Restauración completada con éxito para el período {$year}-{$month}");
@@ -67,13 +67,13 @@ class Dh11RestoreService
     /**
      * Restaura los registros históricos de categorías en la tabla dh11.
      *
-     * @param Collection $historicalRecords Colección de registros históricos a restaurar.
+     * @param Collection<int, \App\Models\Dh61> $historicalRecords Colección de registros históricos a restaurar.
      *
      * @throws Exception Si ocurre un error durante la actualización de los registros.
      *
-     * @return array Arreglo de registros actualizados.
+     * @return array<int, \App\Models\Dh61> Arreglo de registros actualizados.
      */
-    private function restoreHistoricalRecords(\Illuminate\Database\Eloquent\Collection $historicalRecords): array
+    private function restoreHistoricalRecords(Collection $historicalRecords): array
     {
         DB::beginTransaction();
 
@@ -99,7 +99,7 @@ class Dh11RestoreService
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error actualizando los registros: ' . $e->getMessage());
-            throw $e; // Re-lanzar la excepción para que el llamador pueda manejarla
+            throw $e;  // Re-lanzar la excepción para que el llamador pueda manejarla
         }
     }
 }

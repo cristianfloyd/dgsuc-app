@@ -22,15 +22,19 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
 
     public const string EVENT_WORKFLOW_STEP_COMPLETED = 'workflow.step.completed';
 
-
-    //constantes
+    // constantes
     private const int  PER_PAGE = 10;
+
     private const string  IN_PROGRESS = 'in_progress';
 
     private const string  LOG_INIT_POPULATE_TEMP_TABLE = 'iniciar-poblado-tabla-temp: ';
+
     private const int  DEFAULT_PERIODO_FISCAL = 202312;
+
     private const string  EVENT_WORKFLOW_COMPLETED = 'workflow-completed';
+
     private const string  EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION = 'success-mapuche-mi-simplificacion';
+
     private const string  EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION = 'error-mapuche-mi-simplificacion';
 
     // propiedades protegidas
@@ -66,7 +70,6 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         private CuilCompareService $cuilCompareService,
         private TempTableService $tempTableService,
         private MapucheMiSimplificacionService $mapucheMiSimplificacion,
-        private MessageManager $messageManager,
     ) {
         $this->processLog = $this->workflowService->getLatestWorkflow();
 
@@ -106,6 +109,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     public function setPerPage(int $perPage): self
     {
         $this->perPage = $perPage;
+
         return $this;
     }
 
@@ -123,6 +127,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     public function setPeriodoFiscal(int $periodoFiscal): self
     {
         $this->periodoFiscal = $periodoFiscal;
+
         return $this;
     }
 
@@ -176,6 +181,7 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     {
         try {
             $this->nroLiqui = ($nroLiqui instanceof NroLiqui) ? $nroLiqui : new NroLiqui($nroLiqui);
+
             return $this;
         } catch (InvalidArgumentException $e) {
             Log::error('Error al establecer NroLiqui: ' . $e->getMessage());
@@ -215,7 +221,8 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
     private function compareCuils(): Collection
     {
         try {
-            $this->cuilsNotInAfip = $this->cuilCompareService->compareCuils($this->perPage);
+            $this->cuilsNotInAfip = $this->cuilCompareService->compareCuils((string) $this->periodoFiscal, $this->perPage);
+
             return $this->cuilsNotInAfip;
         } catch (QueryException $e) {
             Log::error('Error en la consulta de comparación de CUILs: ' . $e->getMessage());
@@ -240,13 +247,13 @@ class WorkflowExecutionService implements WorkflowExecutionInterface
         try {
             $result = $this->mapucheMiSimplificacion->execute($this->nroLiqui, $this->periodoFiscal);
             if ($result) {
-                $this->dispatchEvent(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, ['Función almacenada ejecutada exitosamente']);
+                $this->dispatchEvent(self::EVENT_SUCCESS_MAPUCHE_MI_SIMPLIFICACION, ['message' => 'Función almacenada ejecutada exitosamente']);
             } else {
-                $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error al ejecutar la función almacenada']);
+                $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['message' => 'Error al ejecutar la función almacenada']);
             }
         } catch (Exception $e) {
             Log::error('Error al ejecutar la función almacenada: ' . $e->getMessage());
-            $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['Error: ' . $e->getMessage()]);
+            $this->dispatchEvent(self::EVENT_ERROR_MAPUCHE_MI_SIMPLIFICACION, ['message' => 'Error: ' . $e->getMessage()]);
         }
     }
 

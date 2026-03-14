@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
+use function in_array;
+
 class ComprobanteNominaService
 {
     use MapucheConnectionTrait;
@@ -112,6 +114,7 @@ class ComprobanteNominaService
                         $this->processHeaderLine($line);
                         $stats['header'] = true;
                         $stats['procesados']++;
+
                         continue;
                     }
                     throw new Exception('El archivo no comienza con un encabezado válido');
@@ -154,7 +157,6 @@ class ComprobanteNominaService
         // Procesamos el importe eliminando caracteres no numéricos
         $importe = (float) preg_replace('/[^0-9.-]/', '', (string) $fields['importe']);
         $esRetencion = preg_match('/^\d{2}\./', $line);
-
 
         return ComprobanteNominaModel::query()->create([
             'anio_periodo' => $this->currentHeader['anio_periodo'],

@@ -1,12 +1,12 @@
 <?php
 
-namespace app\Services;
+namespace App\Services;
 
 use App\Contracts\DatabaseServiceInterface;
 use App\Models\AfipRelacionesActivas;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\LazyCollection;
@@ -50,12 +50,14 @@ class DatabaseService implements DatabaseServiceInterface
 
             // Registra un mensaje de éxito en el log
             Log::info('Se importaron los datos correctamente');
+
             return true;
         } catch (Exception $e) {
             // Revierte la transacción en caso de error
             DB::rollBack();
             // Registra un mensaje de error en el log
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -94,10 +96,12 @@ class DatabaseService implements DatabaseServiceInterface
             $pdo->commit(); // Confirma la transacción
 
             Log::info('Se importaron los datos correctamente');
+
             return true;
         } catch (Exception $e) {
             $pdo->rollBack(); // Revierte la transacción en caso de error
             Log::error('Error al insertar datos masivos: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -145,6 +149,7 @@ class DatabaseService implements DatabaseServiceInterface
             DB::connection($conexion)->commit();
 
             Log::info("Se insertaron $rowInserted filas en la tabla: $tableName");
+
             return [
                 'success' => true,
                 'message' => 'Inserción completada con éxito',
@@ -157,6 +162,7 @@ class DatabaseService implements DatabaseServiceInterface
         } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
             Log::error('Error al insertar datos en ' . $tableName . ': ' . $e->getMessage());
+
             return [
                 'success' => false,
                 'message' => "Error al insertar datos en $tableName",
@@ -186,9 +192,10 @@ class DatabaseService implements DatabaseServiceInterface
     protected static function getMapucheConnection(): PDO
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 }

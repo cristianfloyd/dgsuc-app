@@ -2,81 +2,69 @@
 
 namespace App\Services;
 
-use App\Contracts\RetUdaRepository;
 use App\DTOs\RetUdaDTO;
-use App\Models\Suc\RetUda;
+use App\Repositories\RetUdaRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 class RetUdaService
 {
-    /**
-     * Constructor del servicio RetUda.
-     */
-    public function __construct(protected \App\Contracts\RetUdaRepository $repository)
-    {
-    }
+    public function __construct(
+        protected RetUdaRepository $repository,
+    ) {}
 
     /**
      * Obtiene todos los registros de RetUda.
      *
-     * @return Collection
+     * @return Collection<int, \App\Models\Suc\RetUda>
      */
-    public function getAllRetUdas()
+    public function getAllRetUdas(): Collection
     {
         return $this->repository->getAll();
     }
 
     /**
      * Obtiene un registro de RetUda por su clave primaria compuesta.
-     *
-     *
-     * @return RetUda|null
      */
     public function getRetUda(int $nroLegaj, int $nroCargo, string $periodo): ?RetUdaDTO
     {
         $retUda = $this->repository->findByPrimaryKey($nroLegaj, $nroCargo, $periodo);
-        return $retUda ? RetUdaDTO::fromArray($retUda->toArray()) : null;
+
+        return $retUda instanceof \App\Models\Suc\RetUda ? RetUdaDTO::from($retUda->toArray()) : null;
     }
 
     /**
      * Crea un nuevo registro de RetUda.
-     *
-     * @param array $data
-     *
-     * @return RetUda
      */
     public function createRetUda(RetUdaDTO $dto): RetUdaDTO
     {
         $retUda = $this->repository->create($dto->toArray());
-        return RetUdaDTO::fromArray($retUda->toArray());
+
+        return RetUdaDTO::from($retUda->toArray());
     }
 
     /**
      * Actualiza un registro de RetUda.
-     *
-     * @param array $data
-     *
      */
     public function updateRetUda(int $nroLegaj, int $nroCargo, string $periodo, RetUdaDTO $dto): bool
     {
         $retUda = $this->repository->findByPrimaryKey($nroLegaj, $nroCargo, $periodo);
-        if (!$retUda) {
+        if (!$retUda instanceof \App\Models\Suc\RetUda) {
             return false;
         }
+
         return $this->repository->update($retUda, $dto->toArray());
     }
 
     /**
      * Elimina un registro de RetUda.
-     *
-     *
      */
     public function deleteRetUda(int $nroLegaj, int $nroCargo, string $periodo): bool
     {
         $retUda = $this->repository->findByPrimaryKey($nroLegaj, $nroCargo, $periodo);
-        if (!$retUda) {
+        if (!$retUda instanceof \App\Models\Suc\RetUda) {
             return false;
         }
+
         return $this->repository->delete($retUda);
     }
 }

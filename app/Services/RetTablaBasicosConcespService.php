@@ -2,18 +2,13 @@
 
 namespace App\Services;
 
-use App\Contracts\RetTablaBasicosConcespRepository;
+use App\Contracts\RetTablaBasicosConcespInterface;
 use App\Exceptions\RegistroNoEncontradoException;
 use DateTime;
 
 class RetTablaBasicosConcespService
 {
-    private $repository;
-
-    public function __construct(RetTablaBasicosConcespRepository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(private readonly RetTablaBasicosConcespInterface $repository) {}
 
     /**
      * Obtiene el monto correspondiente a un registro específico de la tabla de básicos y conceptos.
@@ -31,7 +26,7 @@ class RetTablaBasicosConcespService
     {
         $registro = $this->repository->buscarRegistro($fecha, $catId, $concLiqId, $anios);
 
-        if (!$registro) {
+        if (!$registro instanceof \App\Models\Suc\RetTablaBasicosConcesp) {
             throw new RegistroNoEncontradoException('No se encontró un registro para los criterios dados.');
         }
 

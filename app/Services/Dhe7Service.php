@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Contracts\Dhe7Repository;
+use App\Repositories\Dhe7Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Validator;
 
 class Dhe7Service
 {
-    public function __construct(protected \App\Contracts\Dhe7Repository $dhe7Repository)
-    {
-    }
+    public function __construct(protected Dhe7Repository $dhe7Repository) {}
 
     // Obtiene todos los registros
     public function getAll(): Collection
@@ -19,13 +17,13 @@ class Dhe7Service
     }
 
     // Busca un registro por su código
-    public function findByCodigo(string $codigo)
+    public function findByCodigo(string $codigo): ?\App\Models\Dhe7
     {
         return $this->dhe7Repository->findByCodigo($codigo);
     }
 
     // Crea un nuevo registro
-    public function create(array $data)
+    public function create(array $data): \App\Models\Dhe7
     {
         // Validación de datos
         $this->validate($data);
@@ -35,7 +33,7 @@ class Dhe7Service
 
     // Elimina un registro
 
-    public function update(string $codigo, array $data)
+    public function update(string $codigo, array $data): bool
     {
         // Validación de datos
         $this->validate($data);
@@ -45,7 +43,7 @@ class Dhe7Service
 
     // Método de validación
 
-    public function delete(string $codigo)
+    public function delete(string $codigo): bool
     {
         return $this->dhe7Repository->delete($codigo);
     }

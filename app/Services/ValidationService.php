@@ -24,9 +24,6 @@ class ValidationService
      */
     public function validateSelectedFile(UploadedFile $archivoSeleccionado): void
     {
-        if (!$archivoSeleccionado) {
-            throw new InvalidArgumentException('No se ha seleccionado ningún archivo para importar.');
-        }
 
         $filePath = storage_path("app/{$archivoSeleccionado->file_path}");
         if (!file_exists($filePath)) {

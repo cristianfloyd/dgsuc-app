@@ -5,10 +5,8 @@ namespace App\Services;
 use App\Models\AfipMapucheSicoss;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -23,18 +21,12 @@ class AfipMapucheSicossImportService
     use MapucheConnectionTrait;
 
     private const int BATCH_SIZE = 1000;
-    private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 
-    private $connection;
+    private const MEMORY_LIMIT = 1024 * 1024 * 1024; // 1024MB
 
     private float $startTime;
 
     private float $endTime;
-
-    public function __construct()
-    {
-        $this->connection = $this->getConnectionFromTrait();
-    }
 
     /**
      * Método principal para importar datos desde un archivo SICOSS.
@@ -80,6 +72,7 @@ class AfipMapucheSicossImportService
                         // Solo ajustar si la longitud está cerca de 500
                         if (abs(strlen($line) - 500) > 5) {
                             $stats['errors'][] = "Línea {$lineNumber} con longitud inválida: " . strlen($line);
+
                             continue;
                         }
 
@@ -93,6 +86,7 @@ class AfipMapucheSicossImportService
 
                     if (!$parsedData['success']) {
                         $stats['errors'][] = "Error en línea {$lineNumber}: " . ($parsedData['error'] ?? 'Error desconocido');
+
                         continue;
                     }
 
@@ -162,10 +156,9 @@ class AfipMapucheSicossImportService
             try {
                 if (!$this->isValidLine($line)) {
                     $stats['errors'][] = 'Línea inválida: ' . substr((string) $line, 0, 50) . '...';
+
                     continue;
                 }
-
-
 
                 $parsedData = $this->parseLine($line);
                 $parsedData['data']['periodo_fiscal'] = $periodoFiscal;
@@ -249,6 +242,7 @@ class AfipMapucheSicossImportService
                         // Valor no reconocido, se interpreta como 0 (false)
                         $parsedData[$field] = 0;
                     }
+
                     continue;
                 }
 
@@ -332,33 +326,6 @@ class AfipMapucheSicossImportService
                         ];
                     }
                 }
-
-                // Convertir línea a diferentes encodings para comparar
-                $encodingVariants = [
-                    'original' => $line,
-                    'utf8' => mb_convert_encoding($line, 'UTF-8', $detectedEncoding ?: 'ISO-8859-1'),
-                    'iso' => mb_convert_encoding($line, 'ISO-8859-1', $detectedEncoding ?: 'UTF-8'),
-                    'ascii' => mb_convert_encoding($line, 'ASCII', $detectedEncoding ?: 'UTF-8'),
-                    'win1252' => mb_convert_encoding($line, 'Windows-1252', $detectedEncoding ?: 'UTF-8'),
-                ];
-
-                // Mostrar resultados con dd
-                dd([
-                    'archivo' => $filePath,
-                    'tamaño_archivo' => filesize($filePath) . ' bytes',
-                    'líneas_muestra' => $sampleLines,
-                    'encodings_detectados' => $lineEncodings,
-                    'frecuencia_encodings' => $encodingFrequency,
-                    'caracteres_especiales' => $specialChars,
-                    'variantes_encoding' => $encodingVariants,
-                    'línea_1_longitud' => [
-                        'original' => strlen($line),
-                        'utf8' => mb_strlen($encodingVariants['utf8']),
-                        'iso' => mb_strlen($encodingVariants['iso']),
-                        'ascii' => mb_strlen($encodingVariants['ascii']),
-                        'win1252' => mb_strlen($encodingVariants['win1252']),
-                    ],
-                ]);
             }
 
             fclose($handle);
@@ -803,6 +770,7 @@ class AfipMapucheSicossImportService
         if ($seconds < 60) {
             return sprintf('%.2f segundos', $seconds);
         }
+
         return sprintf('%d minutos %d segundos', floor($seconds / 60), $seconds % 60);
     }
 

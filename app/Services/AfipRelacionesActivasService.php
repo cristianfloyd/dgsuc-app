@@ -12,8 +12,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
 {
     public function __construct(
         protected AfipRelacionesActivas $model,
-    ) {
-    }
+    ) {}
 
     /**
      * Inserta datos masivamente en la tabla.
@@ -30,6 +29,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
             }
 
             DB::connection($conexion)->commit();
+
             return true;
         } catch (Exception $e) {
             DB::connection($conexion)->rollBack();
@@ -37,6 +37,7 @@ class AfipRelacionesActivasService implements AfipRelacionesActivasServiceInterf
                 'mensaje' => $e->getMessage(),
                 'exception' => $e,
             ]);
+
             return false;
         }
     }

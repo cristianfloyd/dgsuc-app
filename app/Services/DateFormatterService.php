@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Log;
+use Throwable;
+
+use function in_array;
 
 /**
  * Servicio para manejar el formateo de fechas de manera segura
@@ -33,7 +35,7 @@ class DateFormatterService
         try {
             // Intentar convertir a Carbon usando el formato especificado o auto-detección
             return $format ? \Illuminate\Support\Facades\Date::createFromFormat($format, $dateString) : \Illuminate\Support\Facades\Date::parse($dateString);
-        } catch (InvalidFormatException $e) {
+        } catch (Throwable $e) {
             // Registrar el error para depuración
             Log::debug("Error al parsear fecha: {$dateString}", [
                 'error' => $e->getMessage(),

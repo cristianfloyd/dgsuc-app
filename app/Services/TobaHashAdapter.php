@@ -16,7 +16,6 @@ use function strlen;
  * Implementación moderna de la clase toba_hash para Laravel optimizada para PHP 8.3
  * Replica la funcionalidad de Toba para el manejo de passwords usando características modernas de PHP.
  *
- * @package App\Services
  *
  * @author Integración Laravel-Toba
  *
@@ -25,7 +24,9 @@ use function strlen;
 class TobaHashAdapter
 {
     private const int MIN_ROUNDS = 10;
+
     private const array BCRYPT_INDICATORS = ['$2y$', '$2a$', '$2x$'];
+
     private const string ITOA64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
     /**
@@ -39,8 +40,7 @@ class TobaHashAdapter
     public function __construct(
         private readonly string $metodo = 'bcrypt',
         private int $rounds = self::MIN_ROUNDS,
-    ) {
-    }
+    ) {}
 
     /**
      * Establece el número de rondas para el hash.
@@ -80,6 +80,7 @@ class TobaHashAdapter
     public function verify(string $input, string $existingHash): bool
     {
         $hash = crypt($input, $existingHash);
+
         return hash_equals($hash, $existingHash);
     }
 
@@ -130,6 +131,7 @@ class TobaHashAdapter
     {
         if ($this->isBcryptHash($hash)) {
             preg_match('/^\$2[axy]\$(\d{2})\$/', $hash, $matches);
+
             return [
                 'algoritmo' => 'bcrypt',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : null,
@@ -139,6 +141,7 @@ class TobaHashAdapter
 
         if (str_starts_with($hash, '$5$')) {
             preg_match('/^\$5\$(?:rounds=(\d+)\$)?/', $hash, $matches);
+
             return [
                 'algoritmo' => 'sha256',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
@@ -148,6 +151,7 @@ class TobaHashAdapter
 
         if (str_starts_with($hash, '$6$')) {
             preg_match('/^\$6\$(?:rounds=(\d+)\$)?/', $hash, $matches);
+
             return [
                 'algoritmo' => 'sha512',
                 'rounds' => isset($matches[1]) ? (int) $matches[1] : 5000,
@@ -174,6 +178,7 @@ class TobaHashAdapter
     public static function hashSeguro(string $password, int $rounds = 12): string
     {
         $hasher = new self('bcrypt', $rounds);
+
         return $hasher->hash($password);
     }
 
@@ -199,6 +204,7 @@ class TobaHashAdapter
         };
 
         $bytes = $this->getSecureRandomBytes(16);
+
         return $salt . $this->encodeBytes($bytes);
     }
 
@@ -212,18 +218,18 @@ class TobaHashAdapter
 
     /**
      * Genera bytes aleatorios de manera segura usando características modernas de PHP.
-     *
-     *
      */
     private function getSecureRandomBytes(int $count): string
     {
         try {
             // PHP 8.3 tiene random_bytes optimizado y siempre disponible
             $randomBytes = random_bytes($count);
+
             return $randomBytes;
         } catch (Exception $e) {
             // Fallback extremo (muy improbable en PHP 8.3)
             Log::warning('random_bytes() falló, usando fallback', ['error' => $e->getMessage()]);
+
             return $this->legacyRandomBytes($count);
         }
     }
@@ -282,7 +288,7 @@ class TobaHashAdapter
             $c2 = ord($input[$i + 1]);
             $c1 |= $c2 >> 4;
             $output .= self::ITOA64[$c1];
-            $c1 = ($c2 & 0x0f) << 2;
+            $c1 = ($c2 & 0x0F) << 2;
 
             if ($i + 2 >= $inputLength) {
                 $output .= self::ITOA64[$c1];
@@ -292,7 +298,7 @@ class TobaHashAdapter
             $c3 = ord($input[$i + 2]);
             $c1 |= $c3 >> 6;
             $output .= self::ITOA64[$c1];
-            $output .= self::ITOA64[$c3 & 0x3f];
+            $output .= self::ITOA64[$c3 & 0x3F];
         }
 
         return $output;

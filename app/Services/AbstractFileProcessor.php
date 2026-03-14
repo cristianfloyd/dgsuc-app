@@ -2,21 +2,29 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use RuntimeException;
 
 abstract class AbstractFileProcessor
 {
-    // Método para procesar todo el archivo
+    /**
+     * Método para procesar todo el archivo.
+     *
+     * @param array<int, int> $columnWidths
+     *
+     * @return Collection<int, Collection<int, int|string>>
+     */
     public function processFile(string $filePath, array $columnWidths): Collection
     {
         return collect($this->readFileLines($filePath))
-            ->map(fn(string $line): \Illuminate\Database\Eloquent\Collection => $this->processLine($line, $columnWidths));
+            ->map(fn(string $line): Collection => $this->processLine($line, $columnWidths));
     }
 
-    // Método para validar el archivo
+    /**
+     * Método para validar el archivo.
+     */
     protected function validateFile(string $filePath): void
     {
         if ($filePath === '' || $filePath === '0' || !Storage::exists($filePath)) {
@@ -24,7 +32,11 @@ abstract class AbstractFileProcessor
         }
     }
 
-    // Método para leer las líneas del archivo
+    /**
+     * Método para leer las líneas del archivo.
+     *
+     * @return array<int, string>
+     */
     protected function readFileLines(string $filePath): array
     {
         $this->validateFile($filePath);
@@ -45,6 +57,12 @@ abstract class AbstractFileProcessor
         return $extractedLines;
     }
 
-    // Método abstracto para procesar una línea
+    /**
+     * Método abstracto para procesar una línea.
+     *
+     * @param array<int, int> $columnWidths
+     *
+     * @return Collection<int, int|string>
+     */
     abstract protected function processLine(string $line, array $columnWidths): Collection;
 }

@@ -8,9 +8,7 @@ class TemporaryTableManager
 {
     private bool $tableCreated = false;
 
-    public function __construct(private readonly NominaRepository $nominaRepository)
-    {
-    }
+    public function __construct(private readonly NominaRepository $nominaRepository) {}
 
     public function createTemporaryTables(int $nroLiqui): void
     {

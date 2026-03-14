@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Dh19RepositoryInterface;
-use App\Models\Dh19;
+use App\Models\Mapuche\Dh19;
 use Illuminate\Database\Eloquent\Collection;
 
 class Dh19Service
@@ -11,9 +11,7 @@ class Dh19Service
     /**
      * Constructor del servicio Dh19.
      */
-    public function __construct(protected Dh19RepositoryInterface $repository)
-    {
-    }
+    public function __construct(protected Dh19RepositoryInterface $repository) {}
 
     /**
      * Obtiene todos los registros de Dh19.
@@ -25,8 +23,6 @@ class Dh19Service
 
     /**
      * Obtiene un registro de Dh19 por su clave primaria compuesta.
-     *
-     *
      */
     public function getDh19ByPrimaryKey(int $nroLegaj, int $codnConce, string $tipoDocum, int $nroDocum): ?Dh19
     {
@@ -35,8 +31,6 @@ class Dh19Service
 
     /**
      * Crea un nuevo registro de Dh19.
-     *
-     *
      */
     public function createDh19(array $data): Dh19
     {
@@ -46,8 +40,6 @@ class Dh19Service
 
     /**
      * Actualiza un registro de Dh19.
-     *
-     *
      */
     public function updateDh19(Dh19 $dh19, array $data): bool
     {
@@ -57,8 +49,6 @@ class Dh19Service
 
     /**
      * Elimina un registro de Dh19.
-     *
-     *
      */
     public function deleteDh19(Dh19 $dh19): bool
     {

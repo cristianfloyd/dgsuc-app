@@ -3,25 +3,24 @@
 namespace App\Services;
 
 use App\Contracts\DatabaseServiceInterface;
-use App\Contracts\EmployeeServiceInterface;
 use App\Contracts\FileProcessorInterface;
-use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\TableManagementServiceInterface;
-use App\Contracts\TransactionServiceInterface;
 use App\Contracts\WorkflowExecutionInterface;
 use App\Contracts\WorkflowServiceInterface;
-use App\Livewire\AfipRelacionesActivas;
-use App\Livewire\CompareCuils;
-use App\Livewire\SicossImporter;
 use App\Models\UploadedFile;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class FileProcessingService
 {
-    public function __construct(AfipRelacionesActivas $afipRelacionesActivas, SicossImporter $sicossImporter, CompareCuils $compareCuils, private readonly FileProcessorInterface $fileProcessor, private readonly WorkflowServiceInterface $workflowService, private readonly SicossImportService $sicossImporterService, private readonly WorkflowExecutionInterface $workflowExecutionService, private readonly DatabaseServiceInterface $databaseService, private readonly TableManagementServiceInterface $tableManagementService)
-    {
-    }
+    public function __construct(
+        private readonly FileProcessorInterface $fileProcessor,
+        private readonly WorkflowServiceInterface $workflowService,
+        private readonly SicossImportService $sicossImporterService,
+        private readonly WorkflowExecutionInterface $workflowExecutionService,
+        private readonly DatabaseServiceInterface $databaseService,
+        private readonly TableManagementServiceInterface $tableManagementService,
+    ) {}
 
     /**
      * @return array<'afip', mixed>[]|bool[]|non-falsy-string[]
@@ -32,7 +31,6 @@ class FileProcessingService
         $afipFile = UploadedFile::query()->where('origen', 'afip')->latest()->first();
         $mapucheFile = UploadedFile::query()->where('origen', 'mapuche')->latest()->first();
 
-
         // Verificar que ambos archivos tienen el mismo UUID
         if (!$afipFile || !$mapucheFile || $afipFile->process_id !== $mapucheFile->process_id) {
             return [
@@ -41,7 +39,6 @@ class FileProcessingService
                 'data' => [],
             ];
         }
-
 
         $result = [
             'success' => true,
@@ -61,6 +58,7 @@ class FileProcessingService
         if (!$afipResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo AFIP';
+
             return $result;
         }
 
@@ -72,15 +70,17 @@ class FileProcessingService
         if (!$mapucheResult['success']) {
             $result['success'] = false;
             $result['message'] = 'Error en el procesamiento del archivo Mapuche';
+
             return $result;
         }
 
         // 3.- Ejecutar workflow
         try {
-            $workflowResult = $this->workflowExecutionService
+            $workflowResult = $this
+                ->workflowExecutionService
                 ->setPerPage(10)
-                ->setPeriodoFiscal($afipFile->periodo_fiscal)
-                ->setNroLiqui($afipFile->nro_liqui)
+                ->setPeriodoFiscal((int) $afipFile->periodo_fiscal)
+                ->setNroLiqui((int) $afipFile->nro_liqui)
                 ->executeWorkflowSteps();
             $result['data']['workflow'] = $workflowResult;
         } catch (Exception $e) {
@@ -89,6 +89,7 @@ class FileProcessingService
             $result['data']['workflow'] = ['error' => $e->getMessage()];
         }
         Log::info('Resultado del procesamiento fileProcessingService:', $result);
+
         return $result;
     }
 
@@ -125,8 +126,6 @@ class FileProcessingService
         $mappedData = $this->fileProcessor->handleFileImport($uploadedFile, $system);
         Log::info('Datos mapeados:', [$mappedData->count()]);
 
-
-
         if ($mappedData->isEmpty()) {
             return [
                 'success' => false,
@@ -156,6 +155,7 @@ class FileProcessingService
         if ($inserted !== []) {
             // Actualizar el flujo de trabajo y notificar al usuario
             $this->workflowService->completeStep($processLog, $step);
+
             return [
                 'success' => true,
                 'message' => 'Importación completada con éxito',
@@ -167,6 +167,7 @@ class FileProcessingService
                 ],
             ];
         }
+
         return [
             'success' => false,
             'message' => 'Error al insertar los datos en la base de datos',
@@ -185,6 +186,7 @@ class FileProcessingService
 
             if ($result !== []) {
                 Log::info('Archivo Mapuche procesado e importado correctamente.');
+
                 return [
                     'success' => true,
                     'message' => 'Archivo Mapuche procesado e importado correctamente.',
@@ -196,6 +198,7 @@ class FileProcessingService
                 ];
             }
             Log::error('Error al procesar el archivo Mapuche.');
+
             return [
                 'success' => false,
                 'message' => 'Error al procesar el archivo Mapuche.',
@@ -207,6 +210,7 @@ class FileProcessingService
             ];
         } catch (Exception $e) {
             Log::error('Excepción al procesar el archivo Mapuche: ' . $e->getMessage());
+
             return [
                 'success' => false,
                 'message' => 'Excepción al procesar el archivo Mapuche: ' . $e->getMessage(),

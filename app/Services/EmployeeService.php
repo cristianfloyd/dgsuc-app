@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class EmployeeService implements EmployeeServiceInterface
 {
-    public function __construct(private readonly EmployeeRepositoryInterface $employeeRepository, private readonly DatabaseService $databaseService)
-    {
-    }
+    public function __construct(private readonly EmployeeRepositoryInterface $employeeRepository, private readonly DatabaseService $databaseService) {}
 
     /**
      * Busca un empleado por su número de documento y devuelve un DTO con su información.
@@ -31,9 +29,9 @@ class EmployeeService implements EmployeeServiceInterface
         return new EmployeeInfoDTO(
             $employee->desc_nombr,
             $employee->desc_appat . ' ' . $employee->desc_apmat,
-            $employee->nro_legaj,
+            (string) $employee->nro_legaj,
             $employee->nro_docum,
-            $this->employeeRepository->getFirstEmploymentDate($employee->nro_legaj),
+            $this->employeeRepository->getFirstEmploymentDate((string) $employee->nro_legaj),
         );
     }
 
@@ -65,9 +63,11 @@ class EmployeeService implements EmployeeServiceInterface
             $datosMapeados = $this->mapearDatos($processedLines);
             $resultado = $this->databaseService->insertarDatosMasivos2($datosMapeados);
             $this->handleResultado($resultado);
+
             return $resultado;
         } catch (Exception $e) {
             Log::error('Error al almacenar las líneas procesadas: ' . $e->getMessage());
+
             return false;
         }
     }

@@ -21,8 +21,9 @@ class RepGerencialFinalService
 
     protected string $table = 'rep_ger_final';
 
-    public function __construct(private readonly PeriodoFiscalService $periodoFiscalService)
-    {
+    public function __construct(
+        private readonly PeriodoFiscalService $periodoFiscalService,
+    ) {
         $this->connection = $this->getConnectionName();
     }
 
@@ -111,18 +112,15 @@ class RepGerencialFinalService
         // Chequear que $liquidaciones no esté vacío
         if ($liquidaciones === null || $liquidaciones === []) {
             Log::warning('No se encontraron liquidaciones para procesar.');
+
             return;
         }
 
         try {
             DB::connection($this->connection)->beginTransaction();
 
-
-
-
             // Limpiamos la tabla final al inicio de un nuevo reporte
             $this->truncateFinalTable();
-
 
             // Procesamos cada liquidacion individualmente
             foreach ($liquidaciones as $liquidacion) {
@@ -403,7 +401,6 @@ class RepGerencialFinalService
         $finalSql = $this->addFilters($queryBuilder->getSql(), $whereClause);
         $bindings = $this->getBindings($filters);
 
-
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
@@ -648,7 +645,7 @@ class RepGerencialFinalService
      * de la base de datos 'mapuche' y almacena los resultados en la tabla
      * 'rep_ger_importes_netos_d' del esquema definido en la propiedad '$this->schema'.
      *
-     * @param array $liquidaciones Array de números de liquidación a procesar
+     * @param int|null $liquidaciones Número de liquidación a procesar
      */
     protected function processNetAmountsTypeD(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
@@ -716,7 +713,7 @@ class RepGerencialFinalService
      * varios joins con tablas del esquema `mapuche` para obtener la información
      * necesaria.
      *
-     * @param array $liquidaciones Array de números de liquidación a procesar.
+     * @param int|null $liquidaciones Número de liquidación a procesar.
      */
     protected function processNetAmountsTypeA(?int $liquidaciones, ?string $whereClause, array $filters): void
     {
@@ -776,12 +773,18 @@ class RepGerencialFinalService
         DB::connection($this->connection)->statement($finalSql, $bindings);
     }
 
-    /** Consolida los importes netos de los diferentes conceptos de pago en una tabla de resumen.
+    /**
+     * Consolida los importes netos de los diferentes conceptos de pago en una tabla de resumen.
      *
-     * Esta función ejecuta una consulta SQL compleja que combina datos de varias tablas relacionadas para calcular los importes netos de diferentes * conceptos de pago (como remuneraciones, aportes, descuentos, etc.) y almacenarlos en una tabla de resumen llamada `rep_ger_importes_netos`.
-     * La consulta utiliza múltiples uniones izquierdas para traer los datos de las tablas de importes netos específicas para cada concepto de pago, y luego realiza los cálculos necesarios para obtener los valores finales de importes brutos, netos, aportes, etc.
+     * Esta función ejecuta una consulta SQL compleja que combina datos de varias tablas relacionadas
+     * para calcular los importes netos de diferentes * conceptos de pago (como remuneraciones, aportes,
+     * descuentos, etc.) y almacenarlos en una tabla de resumen llamada `rep_ger_importes_netos`.
+     * La consulta utiliza múltiples uniones izquierdas para traer los datos de las tablas de importes
+     * netos específicas para cada concepto de pago, y luego realiza los cálculos necesarios para
+     * obtener los valores finales de importes brutos, netos, aportes, etc.
      *
-     * Esta función es parte de la lógica de negocio del servicio `RepGerencialFinalService` y se utiliza para generar informes gerenciales.
+     * Esta función es parte de la lógica de negocio del servicio `RepGerencialFinalService` y
+     * se utiliza para generar informes gerenciales.
      */
     protected function consolidateNetAmounts(): void
     {

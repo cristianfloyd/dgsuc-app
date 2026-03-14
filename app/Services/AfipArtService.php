@@ -4,22 +4,17 @@ namespace App\Services;
 
 use App\Http\Requests\AfipArtRequest;
 use App\Models\AfipMapucheArt;
-use App\Repositories\AfipArtRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class AfipArtService.
- *
- * @package App\Services
  */
 class AfipArtService
 {
     /**
      * AfipArtService constructor.
      */
-    public function __construct(protected \App\Repositories\AfipArtRepository $afipArtRepository)
-    {
-    }
+    public function __construct(protected \App\Repositories\AfipArtRepository $afipArtRepository) {}
 
     /**
      * Obtiene todos los registros.
@@ -31,8 +26,6 @@ class AfipArtService
 
     /**
      * Busca un registro por su CUIL original.
-     *
-     *
      */
     public function findByCuil(string $cuil): ?AfipMapucheArt
     {
@@ -41,8 +34,6 @@ class AfipArtService
 
     /**
      * Crea un nuevo registro.
-     *
-     *
      */
     public function create(AfipArtRequest $request): AfipMapucheArt
     {
@@ -51,8 +42,6 @@ class AfipArtService
 
     /**
      * Actualiza un registro existente.
-     *
-     *
      */
     public function update(string $cuil, AfipArtRequest $request): bool
     {
@@ -61,8 +50,6 @@ class AfipArtService
 
     /**
      * Elimina un registro.
-     *
-     *
      */
     public function delete(string $cuil): bool
     {

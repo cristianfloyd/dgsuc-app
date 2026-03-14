@@ -2,65 +2,43 @@
 
 namespace App\Services;
 
+use App\Contracts\PermissionManagementServiceInterface;
+use App\Enums\UserType;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Spatie\Permission\Models\Permission;
 
-class PermissionManagementService
+class PermissionManagementService implements PermissionManagementServiceInterface
 {
-    /**
-     * Asigna roles y permisos iniciales a un usuario.
-     */
     public function assignInitialPermissions(User $user, string $userType): void
     {
-        DB::transaction(function () use ($user, $userType): void {
-            switch ($userType) {
-                case 'admin':
-                    $user->assignRole('admin');
-                    $user->givePermissionTo([
-                        'access_admin_panel',
-                        'view_reports',
-                        'manage_users',
-                    ]);
-                    break;
+        $type = UserType::tryFrom($userType);
+        if ($type === null) {
+            throw new InvalidArgumentException("Tipo de usuario inválido: {$userType}. Valores esperados: admin, report_viewer, workflow_manager.");
+        }
 
-                case 'report_viewer':
-                    $user->assignRole('report_viewer');
-                    $user->givePermissionTo([
-                        'view_reports',
-                    ]);
-                    break;
-
-                case 'workflow_manager':
-                    $user->assignRole('workflow_manager');
-                    $user->givePermissionTo([
-                        'manage_workflow',
-                        'view_reports',
-                    ]);
-                    break;
-            }
+        DB::transaction(function () use ($user, $type): void {
+            $user->assignRole($type->role());
+            $user->syncPermissions($type->permissions());
         });
     }
 
-    /**
-     * Sincroniza los permisos de un usuario.
-     */
     public function syncUserPermissions(User $user, array $permissions): void
     {
-        DB::transaction(function () use ($user, $permissions): void {
-            $user->syncPermissions($permissions);
-        });
+        DB::transaction(fn(): mixed => $user->syncPermissions($permissions));
     }
 
     /**
-     * Obtiene todos los permisos disponibles agrupados por panel.
+     * @return array<string, Collection<int, Permission>>
      */
     public function getAvailablePermissions(): array
     {
         return [
-            'admin' => Permission::where('name', 'like', 'access_%')->get(),
-            'reports' => Permission::where('name', 'like', 'view_%')->get(),
-            'workflow' => Permission::where('name', 'like', 'manage_%')->get(),
+            'admin' => Permission::query()->where('name', 'like', 'access_%')->get(),
+            'reports' => Permission::query()->where('name', 'like', 'view_%')->get(),
+            'workflow' => Permission::query()->where('name', 'like', 'manage_%')->get(),
         ];
     }
 }

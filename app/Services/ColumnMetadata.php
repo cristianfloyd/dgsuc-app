@@ -53,7 +53,7 @@ class ColumnMetadata
 
     public function __construct()
     {
-        $this->initializeWidths(); // Por defecto
+        $this->initializeWidths();  // Por defecto
     }
 
     public function setSystem(string $system): void
@@ -90,6 +90,7 @@ class ColumnMetadata
     public function getColumnWidth(int $index): int
     {
         $widths = $this->getWidths();
+
         return $widths[$index] ?? 0;
     }
 
@@ -132,26 +133,25 @@ class ColumnMetadata
      */
     private function initializeWidths(): void
     {
-
         $this->widthsAfip = [
             6,  // periodo fiscal (no se utiliza en el archivo TXT)
             2,  // codigo movimiento
             2,  // Tipo de registro
-            11, // CUIL del empleado
+            11,  // CUIL del empleado
             1,  // Marca de trabajador agropecuario
             3,  // Modalidad de contrato
-            10, // Fecha de inicio de la rel. Laboral
-            10, // Fecha de fin relacion laboral
+            10,  // Fecha de inicio de la rel. Laboral
+            10,  // Fecha de fin relacion laboral
             6,  // Código de obra social
             2,  // codigo situacion baja
-            10, // Fecha telegrama renuncia
-            15, // Retribución pactada
+            10,  // Fecha telegrama renuncia
+            15,  // Retribución pactada
             1,  // Modalidad de liquidación
             5,  // Sucursal-Domicilio de desempeño
             6,  // Actividad en el domicilio de desempeño
             4,  // Puesto desempeñado
             1,  // Rectificación
-            10, // Numero Formulario Agropecuario
+            10,  // Numero Formulario Agropecuario
             3,  // Tipo de Servicio
             6,  // Categoría Profesional
             7,  // Código de Convenio Colectivo de Trabajo
@@ -160,12 +160,72 @@ class ColumnMetadata
 
         $this->widthsMapuche = [
             // Anchos pra Mapuche
-            6, 11, 30, 1, 2, 2, 2, 3, 2, 5, 3, 6, 2, 12, 12, 9, 9, 9, 9, 9, 50, 12, 12, 12, 2, 1, 9, 1, 9, 1, 2, 2, 2, 2, 2, 2, 12, 12, 12, 12, 12, 9, 12, 1, 12, 1, 12, 12, 12, 12, 3, 12, 12, 9, 12, 9, 3, 1, 12, 12, 12,
+            6,
+            11,
+            30,
+            1,
+            2,
+            2,
+            2,
+            3,
+            2,
+            5,
+            3,
+            6,
+            2,
+            12,
+            12,
+            9,
+            9,
+            9,
+            9,
+            9,
+            50,
+            12,
+            12,
+            12,
+            2,
+            1,
+            9,
+            1,
+            9,
+            1,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            12,
+            12,
+            12,
+            12,
+            12,
+            9,
+            12,
+            1,
+            12,
+            1,
+            12,
+            12,
+            12,
+            12,
+            3,
+            12,
+            12,
+            9,
+            12,
+            9,
+            3,
+            1,
+            12,
+            12,
+            12,
         ];
 
         $this->widthsMiSimplificacion = [
             // Anchos pra Mi Simplificacion
-            2, // codigo movimiento
+            2,  // codigo movimiento
             2,
             11,
             1,

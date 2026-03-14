@@ -26,9 +26,7 @@ class RepOrdenPagoService
     /**
      * Crear una nueva instancia.
      */
-    public function __construct(protected RepOrdenPagoRepositoryInterface $repository)
-    {
-    }
+    public function __construct(protected RepOrdenPagoRepositoryInterface $repository) {}
 
     /**
      * Obtiene todos los registros de RepOrdenPago.
@@ -40,8 +38,6 @@ class RepOrdenPagoService
 
     /**
      * Obtiene RepOrdenPago por nro_liqui.
-     *
-     *
      */
     public function getRepOrdenPagoByNroLiqui(int $nroLiqui): ?RepOrdenPagoModel
     {
@@ -65,8 +61,6 @@ class RepOrdenPagoService
 
     /**
      * Actualiza un registro existente de RepOrdenPago.
-     *
-     *
      */
     public function updateRepOrdenPago(RepOrdenPagoModel $repOrdenPago, RepOrdenPagoDtoData $data): bool
     {
@@ -75,8 +69,6 @@ class RepOrdenPagoService
 
     /**
      * Elimina un registro de RepOrdenPago.
-     *
-     *
      */
     public function deleteRepOrdenPago(RepOrdenPagoModel $repOrdenPago): bool
     {
@@ -94,8 +86,6 @@ class RepOrdenPagoService
 
     /**
      * Genera un reporte para las liquidaciones proporcionadas.
-     *
-     *
      */
     public function generateReport(array $liquidaciones): void
     {
@@ -118,6 +108,7 @@ class RepOrdenPagoService
         try {
             $result = $this->repository->truncate();
             Log::info('Tabla suc.rep_orden_pago truncada exitosamente');
+
             return $result;
         } catch (Exception $e) {
             Log::error('Error al truncar tabla suc.rep_orden_pago: ' . $e->getMessage());

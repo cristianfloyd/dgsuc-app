@@ -12,9 +12,12 @@ use Illuminate\Support\Facades\Log;
 
 class SicossImportService
 {
-    public function __construct(private readonly FileProcessorInterface $fileProcessor, private readonly WorkflowServiceInterface $workflowService, private readonly TableManagementServiceInterface $tableManagementService, private readonly DatabaseServiceInterface $databaseService)
-    {
-    }
+    public function __construct(
+        private readonly FileProcessorInterface $fileProcessor,
+        private readonly WorkflowServiceInterface $workflowService,
+        private readonly TableManagementServiceInterface $tableManagementService,
+        private readonly DatabaseServiceInterface $databaseService,
+    ) {}
 
     /**
      * Importa un archivo y procesa sus datos.
@@ -64,6 +67,7 @@ class SicossImportService
             if ($inserted !== []) {
                 // Actualizar el flujo de trabajo y notificar al usuario
                 $this->workflowService->completeStep($processLog, $step);
+
                 return [
                     'success' => true,
                     'message' => 'Importación completada con éxito',
@@ -75,6 +79,7 @@ class SicossImportService
                     ],
                 ];
             }
+
             return [
                 'success' => false,
                 'message' => 'Error al insertar los datos en la base de datos',
@@ -82,6 +87,7 @@ class SicossImportService
             ];
         } catch (Exception $e) {
             Log::error('Error durante la importación: ' . $e->getMessage());
+
             return [
                 'success' => false,
                 'message' => 'Error durante la importación: ' . $e->getMessage(),

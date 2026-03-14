@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Contracts\ExportServiceInterface;
 use App\Models\AfipMapucheMiSimplificacion;
 use BackedEnum;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -92,13 +91,13 @@ class AfipMapucheExportService implements ExportServiceInterface
      * Este método genera una línea de texto formateada concatenando los valores de campos
      * transformados según un orden predefinido y con un ancho de columna establecido.
      *
-     * @param mixed $record Registro a formatear
-     * @param array $fieldOrder Orden de los campos a incluir en la línea
-     * @param array $columnWidths Anchos de columna para cada campo
+     * @param object $record Registro a formatear (modelo o objeto con propiedades)
+     * @param array<string> $fieldOrder Orden de los campos a incluir en la línea
+     * @param array<int, int> $columnWidths Anchos de columna para cada campo
      *
      * @return string Línea formateada de texto
      */
-    private function formatLine(\stdClass $record, array $fieldOrder, array $columnWidths): string
+    private function formatLine(object $record, array $fieldOrder, array $columnWidths): string
     {
         $line = '';
         foreach ($fieldOrder as $index => $field) {
@@ -116,13 +115,13 @@ class AfipMapucheExportService implements ExportServiceInterface
      * Este método transforma un valor de campo para cumplir con requisitos específicos de exportación,
      * incluyendo formateo de fechas, conversión de enums, tratamiento de campos numéricos y textuales.
      *
-     * @param mixed $record El registro que contiene el campo a formatear
+     * @param object $record El registro que contiene el campo a formatear
      * @param string $field El nombre del campo a formatear
      * @param int $width El ancho máximo permitido para el campo
      *
      * @return string El campo formateado según las reglas establecidas
      */
-    private function formatField(\stdClass $record, string $field, int $width): string
+    private function formatField(object $record, string $field, int $width): string
     {
         $value = $record->{$field} ?? '';
 
@@ -143,15 +142,15 @@ class AfipMapucheExportService implements ExportServiceInterface
         // Formateo de números: remover comas y decimales
         if ($field === 'retribucion_pactada') {
             // Convertir a float, multiplicar por 100 para preservar 2 decimales y convertir a entero
-            $value = (int) ((float) (str_replace(',', '', $value)) * 100);
-            return str_pad($value, $width, '0', STR_PAD_LEFT);
-        }
+            $value = (int) ((float) (str_replace(',', '', (string) $value)) * 100);
 
+            return str_pad((string) $value, $width, '0', STR_PAD_LEFT);
+        }
 
         // Formateo específico por campo
         if (in_array($field, ['inicio_rel_lab', 'fin_rel_lab', 'fecha_tel_renuncia'])) {
-            // Si el valor es nulo, 0, '0' o vacío, retornamos espacios
-            if (empty($value) || $value === '0000000000' || $value === 0) {
+            // Si el valor es nulo, vacío o placeholder de fecha, retornamos espacios
+            if (empty($value) || $value === '0000000000') {
                 return str_repeat(' ', $width);
             }
             try {
@@ -192,11 +191,13 @@ class AfipMapucheExportService implements ExportServiceInterface
         // Formateo para campos numéricos
         if ($field === 'cuil') {
             $value = preg_replace('/[^0-9]/', '', (string) $value); // Remover no-números
+
             return str_pad((string) $value, $width, '0', STR_PAD_LEFT);
         }
 
         // Formateo por defecto para campos de texto
         $value = substr((string) $value, 0, $width); // Asegurar que no exceda el ancho
+
         return str_pad($value, $width, ' ', STR_PAD_RIGHT);
     }
 
@@ -210,9 +211,11 @@ class AfipMapucheExportService implements ExportServiceInterface
         try {
             $date = \Illuminate\Support\Facades\Date::parse($date)->format('Y/m/d');
             Log::info("Fecha formateada: $date");
+
             return $date;
         } catch (Exception $e) {
             Log::error('Error al formatear la fecha: ' . $e->getMessage());
+
             return ' ';
         }
     }

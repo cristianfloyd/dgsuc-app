@@ -18,9 +18,10 @@ class Dh21Service
     /**
      * Crea una nueva instancia de la clase Dh21Service.
      */
-    public function __construct(protected Dh21 $dh21, protected Dh21Repository $dh21Repository)
-    {
-    }
+    public function __construct(
+        protected Dh21 $dh21,
+        protected Dh21Repository $dh21Repository,
+    ) {}
 
     /**
      * Obtiene la suma total del concepto 101 en la tabla.
@@ -55,7 +56,9 @@ class Dh21Service
     {
         try {
             // Construcción de la consulta base
-            return $this->dh21->query()
+            return $this
+                ->dh21
+                ->query()
                 ->select(
                     DB::raw('ROW_NUMBER() OVER (ORDER BY codn_conce) as id_liquidacion'),
                     'codn_conce',
@@ -93,7 +96,8 @@ class Dh21Service
     {
         return new DataCollection(
             ConceptoTotalData::class,
-            $this->conceptosTotales($nro_liqui, $codn_fuent)
+            $this
+                ->conceptosTotales($nro_liqui, $codn_fuent)
                 ->get()
                 ->map(fn($item): \App\Data\Responses\ConceptoTotalData => ConceptoTotalData::fromArray($item->toArray())),
         );
@@ -107,15 +111,13 @@ class Dh21Service
      *
      * @return array Arreglo con las horas y días laborados
      */
-    public function obtenerHorasYDias(int $legajo, int $cargo): array
+    public function getHoursAndDaysByLegajoAndCargo(int $legajo, int $cargo): array
     {
-        return $this->dh21Repository->getHorasYDias($legajo, $cargo);
+        return $this->dh21Repository->getHorasAndDias($legajo, $cargo);
     }
 
     /**
      * Obtiene las liquidaciones aplicando filtros opcionales.
-     *
-     *
      */
     public function obtenerLiquidaciones(array $conditions = []): Collection
     {

@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class AfipMapucheSicossTableService extends AbstractTableService
 {
-    public function __construct(private readonly AfipMapucheSicossTableDefinition $definition)
-    {
-    }
+    public function __construct(private readonly AfipMapucheSicossTableDefinition $definition) {}
 
     /**
      * Obtiene el nombre de la tabla.

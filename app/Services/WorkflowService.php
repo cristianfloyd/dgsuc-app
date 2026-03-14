@@ -17,9 +17,7 @@ use Illuminate\Support\Facades\Log;
  */
 class WorkflowService implements WorkflowServiceInterface
 {
-    public function __construct(protected \App\Services\ProcessLogService $processLogService)
-    {
-    }
+    public function __construct(protected \App\Services\ProcessLogService $processLogService) {}
 
     /**  Inicia un nuevo Proceso de flujo de trabajo y devuelve la instancia de ProcessLog creada.
      *
@@ -101,9 +99,11 @@ class WorkflowService implements WorkflowServiceInterface
         foreach ($steps as $step => $status) {
             if ($status !== 'completed') {
                 Log::info("Return en getCurrentStep: $step");
+
                 return $step;
             }
         }
+
         return null;
     }
 
@@ -187,6 +187,7 @@ class WorkflowService implements WorkflowServiceInterface
     {
         if (!$step) {
             Log::warning('Se intentó obtener URL para un paso nulo');
+
             return null;
         }
 
@@ -243,7 +244,7 @@ class WorkflowService implements WorkflowServiceInterface
     {
         $allCompleted = array_reduce(
             $processLog->steps,
-            fn(true $carry, $step): bool => $carry && $step === 'completed',
+            fn(bool $carry, $step): bool => $carry && $step === 'completed',
             true,
         );
 

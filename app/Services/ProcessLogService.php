@@ -44,11 +44,10 @@ class ProcessLogService
 
     /**
      * Actualiza el estado de un paso específico del proceso.
-     *
-     *
      */
     public function updateStep(ProcessLog $processLog, string $step, string $status): void
     {
+        /** @phpstan-ignore-next-line */
         if (!is_array($processLog->steps)) {
             throw new InvalidArgumentException('Los pasos del proceso deben ser un arreglo');
         }
@@ -75,7 +74,7 @@ class ProcessLogService
     * @param string $errorMessage
     * @return void
     */
-    public function FailProcess(ProcessLog $processLog, string $errorMessage): void
+    public function failProcess(ProcessLog $processLog, string $errorMessage): void
     {
         $processLog->update([
             'status' => 'failed',
@@ -94,6 +93,7 @@ class ProcessLogService
     public function getLatestProcess(): ?ProcessLog
     {
         Log::info('Buscando el último registro de ProcessLog en ProcessLogService');
+
         return ProcessLog::query()->latest()->first();
     }
 }

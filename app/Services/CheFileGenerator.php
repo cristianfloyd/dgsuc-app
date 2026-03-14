@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\CheData;
+use App\Data\CheData;
+use App\Data\CheGrupoAporteRetencionData;
+use App\Models\CheRecord;
 use App\Traits\MapucheConnectionTrait;
 use Exception;
 use Illuminate\Support\Collection;
@@ -61,24 +63,24 @@ class CheFileGenerator
     /**
      * Genera el contenido del archivo CHE.
      */
-    public function generateCheContent(array $liquidaciones, int $anio, int $mes, int $indice): array
+    public function generateCheContent(array $liquidaciones, int $anio, int $mes, int $indice): CheData
     {
-        $grupo_aportes_retenciones = [];
         $aportes = $this->getAportes();
+        $grupoAportesRetenciones = array_map(
+            fn(array $aporte): CheGrupoAporteRetencionData => CheGrupoAporteRetencionData::fromAporteArray(
+                $aporte,
+                $this->fillWithZeros(...),
+                $this->fillWithSpaces(...),
+                $this->fillWithLeftSpaces(...),
+            ),
+            $aportes,
+        );
 
-        foreach ($aportes as $aporte) {
-            $grupo_aportes_retenciones[] = [
-                'codigo' => $this->fillWithZeros($aporte['grupo'], 3),
-                'descripcion' => $this->fillWithSpaces($aporte['desc_grupo'], 50),
-                'importe' => $this->fillWithLeftSpaces(number_format($aporte['total'], 2, '.', ''), 16),
-            ];
-        }
-
-        return [
-            'neto_liquidado' => $this->fillWithLeftSpaces(number_format($this->netos, 2, '.', ''), 16),
-            'accion' => 'O',
-            'grupo_aportes_retenciones' => $grupo_aportes_retenciones,
-        ];
+        return new CheData(
+            netoLiquidado: $this->fillWithLeftSpaces(number_format($this->netos, 2, '.', ''), 16),
+            accion: CheData::ACCION_OBRERO,
+            grupoAportesRetenciones: $grupoAportesRetenciones,
+        );
     }
 
     /**
@@ -95,22 +97,12 @@ class CheFileGenerator
 
             // Obtiene y formatea los aportes/retenciones
             $aportes = $this->temporaryTableManager->getAportes();
-            $grupoAportesRetenciones = $this->formatAportes($aportes);
-
-            // Prepara el payload
-            $payload = [
-                'neto_liquidado' => $this->fillWithLeftSpaces(
-                    number_format($netos, 2, '.', ''),
-                    16,
-                ),
-                'accion' => 'O',
-                'grupo_aportes_retenciones' => $grupoAportesRetenciones,
-            ];
+            $cheData = $this->buildCheDataFromAportes($netos, $aportes);
 
             // Envía a Pilaga
             $response = $this->pilagaClient->post(
                 "v1/liquidacion-sueldo/{$liquidaciones[$indice]['nro_liqui']}/aportes-retenciones",
-                $payload,
+                $cheData->toArray(),
             );
 
             return [
@@ -120,6 +112,7 @@ class CheFileGenerator
             ];
         } catch (Exception $e) {
             Log::error('Error sending CHE to Pilaga: ' . $e->getMessage());
+
             return [
                 'mensaje' => '505',
                 'error' => 'error',
@@ -145,6 +138,7 @@ class CheFileGenerator
         if (strlen(trim((string) $valor)) > $longitud) {
             return substr((string) $valor, -$longitud);
         }
+
         return str_pad((string) $valor, $longitud, '0', STR_PAD_LEFT);
     }
 
@@ -153,6 +147,7 @@ class CheFileGenerator
         if (strlen(trim((string) $texto)) > $longitud) {
             return substr((string) $texto, -$longitud);
         }
+
         return str_pad((string) $texto, $longitud, ' ', STR_PAD_RIGHT);
     }
 
@@ -161,16 +156,19 @@ class CheFileGenerator
         if (strlen(trim((string) $texto)) > $longitud) {
             return substr((string) $texto, -$longitud);
         }
+
         return str_pad((string) $texto, $longitud, ' ', STR_PAD_LEFT);
     }
 
-    public function set_progreso($porcentaje): void
+    public function setProgreso($porcentaje): void
     {
+        // TODO: Implementar la lógica para setear el progreso
     }
 
     public function setNroLiqui(int $nroLiqui): self
     {
         $this->nroLiqui = $nroLiqui;
+
         return $this;
     }
 
@@ -180,6 +178,7 @@ class CheFileGenerator
     public function setDescLiqui(?string $descLiqui): static
     {
         $this->descLiqui = $descLiqui;
+
         return $this;
     }
 
@@ -194,10 +193,9 @@ class CheFileGenerator
 
             // Insertar los datos en la tabla de la base de datos
             foreach (array_keys($liquidaciones) as $indice) {
-                $content = $this->generateCheContent($liquidaciones, $anio, $mes, $indice);
-
-                // Aquí se asume que tienes un modelo para la tabla donde deseas insertar los datos
-                $this->insertIntoDatabase($content);
+                $cheData = $this->generateCheContent($liquidaciones, $anio, $mes, $indice);
+                $nroLiqui = (int) ($liquidaciones[$indice]['nro_liqui'] ?? 0);
+                $this->insertIntoDatabase($cheData, $nroLiqui);
             }
         } finally {
             // Limpiar las tablas temporales
@@ -206,18 +204,25 @@ class CheFileGenerator
     }
 
     /**
-     * Formatea los aportes para el archivo CHE.
+     * Construye CheData a partir de netos y aportes (para envío a Pilaga o uso interno).
      */
-    private function formatAportes(array $aportes): array
+    private function buildCheDataFromAportes(float $netos, array $aportes): CheData
     {
-        return collect($aportes)->map(fn($aporte): array => [
-            'codigo' => $this->fillWithZeros($aporte['grupo'], 3),
-            'descripcion' => $this->fillWithSpaces($aporte['desc_grupo'], 50),
-            'importe' => $this->fillWithLeftSpaces(
-                number_format($aporte['total'], 2, '.', ''),
-                16,
+        $grupoAportesRetenciones = array_map(
+            fn(array $aporte): CheGrupoAporteRetencionData => CheGrupoAporteRetencionData::fromAporteArray(
+                $aporte,
+                $this->fillWithZeros(...),
+                $this->fillWithSpaces(...),
+                $this->fillWithLeftSpaces(...),
             ),
-        ])->all();
+            $aportes,
+        );
+
+        return new CheData(
+            netoLiquidado: $this->fillWithLeftSpaces(number_format($netos, 2, '.', ''), 16),
+            accion: CheData::ACCION_OBRERO,
+            grupoAportesRetenciones: $grupoAportesRetenciones,
+        );
     }
 
     private function dropTemporaryTable(): void
@@ -228,16 +233,9 @@ class CheFileGenerator
     /**
      * Inserta los datos generados en la tabla de la base de datos.
      */
-    private function insertIntoDatabase(array $content): void
+    private function insertIntoDatabase(CheData $cheData, int $nroLiqui): void
     {
-        // Asumiendo que tienes un modelo llamado CheData
-        CheData::create([
-            'neto_liquidado' => $content['neto_liquidado'],
-            'accion' => $content['accion'],
-            // Aquí puedes agregar más campos según la estructura de tu tabla
-            // 'campo1' => $content['campo1'],
-            // 'campo2' => $content['campo2'],
-            // ...
-        ]);
+        CheRecord::on($this->connection->getName())
+            ->create($cheData->toDatabaseArray($nroLiqui));
     }
 }

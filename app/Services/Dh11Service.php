@@ -6,9 +6,7 @@ use App\Repositories\Dh11RepositoryInterface;
 
 class Dh11Service
 {
-    public function __construct(private readonly Dh11RepositoryInterface $dh11Repository)
-    {
-    }
+    public function __construct(private readonly Dh11RepositoryInterface $dh11Repository) {}
 
     /**
      * Obtiene una lista de todas las codc_categ.

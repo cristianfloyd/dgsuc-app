@@ -30,8 +30,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         private AfipMapucheMiSimplificacion $afipMapucheMiSimplificacion,
         private TablaTempCuils $tablaTempCuils,
         private CuilRepositoryInterface $cuilRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Ejecuta el proceso principal de MapucheMiSimplificacion.
@@ -54,11 +53,11 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             return false;
         }
 
-        if (!$this->verificarYCrearTabla()) {
+        if (!$this->asegurarExistenciaTabla()) {
             return false;
         }
 
-        $this->verificarYVaciarTabla();
+        $this->vaciarTablaSiTieneRegistros();
 
         return $this->ejecutarFuncionAlmacenada($nroLiqui->value(), $periodoFiscal);
     }
@@ -72,7 +71,7 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
      * 3. Ejecutar la función almacenada principal si hay CUILs.
      * 4. Confirmar o revertir la transacción.
      *
-     * @param int $periodoFiscal El período fiscal en formato YYYYMM.
+     * @param string $periodoFiscal El período fiscal en formato YYYYMM.
      * @param int $nroLiqui El número de liquidación.
      *
      * @throws Exception Si ocurre un error durante la ejecución de la función almacenada.
@@ -85,14 +84,15 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
         try {
             // Se trunca la tabla para asegurar que esté vacía antes de poblarla.
-            $this->verificarYVaciarTabla();
+            $this->vaciarTablaSiTieneRegistros();
 
             $cuils = $this->cuilRepository->getCuilsNotInAfip($periodoFiscal);
             $cuilsCount = $cuils->count();
 
             if ($cuilsCount === 0) {
                 DB::connection($this->getConnectionName())->rollBack();
-                return 0; // Indica que no había nada que procesar.
+
+                return 0;  // Indica que no había nada que procesar.
             }
 
             // Usamos el método estático del modelo, igual que en el Resource original,
@@ -136,12 +136,14 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
 
             if (empty($schemaExists)) {
                 Log::info("El schema {$model->getSchemaName()} no existe en la base de datos {$connection}.");
+
                 return false;
             }
 
             // Luego verificamos si la tabla existe
             if (!Schema::connection($connection)->hasTable($fullTableName)) {
                 Log::info("La tabla {$fullTableName} no existe en la base de datos {$connection}.");
+
                 return false;
             }
 
@@ -155,13 +157,16 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
                     ->table($fullTableName)
                     ->count();
                 Log::info("La tabla {$fullTableName} contiene {$count} registros.");
+
                 return true;
             }
 
             Log::info("La tabla {$fullTableName} está vacía.");
+
             return false;
         } catch (Exception $e) {
             Log::error("Error al verificar la tabla {$fullTableName}: " . $e->getMessage());
+
             return false;
         }
     }
@@ -198,7 +203,8 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
     /**
      * Valida los parámetros de entrada para el proceso de MapucheMiSimplificacion.
      *
-     * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos. Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
+     * Esta función verifica que los parámetros `$nroLiqui` (número de liquidación) y `$periodoFiscal` (período fiscal) no estén vacíos.
+     * Si alguno de los parámetros está vacío, se registra un mensaje de advertencia en el log y se devuelve `false`.
      *
      * @param NroLiqui $nroLiqui Número de liquidación
      * @param int $periodoFiscal Período fiscal
@@ -212,19 +218,23 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         }
         if ($nroLiqui->value() === 0 || $periodoFiscal === 0) {
             Log::warning('nroliqui o periodofiscal vacios');
+
             return false;
         }
+
         return true;
     }
 
     /**
      * Verifica si la tabla 'MapucheMiSim' existe y la crea si no existe.
      *
-     * Esta función verifica si la tabla 'MapucheMiSim' existe en la base de datos. Si la tabla no existe, intenta crearla utilizando el método `createTable()` del modelo `$afipMapucheMiSimplificacion`. Si la creación de la tabla falla, se registra un mensaje de error en el log y se devuelve `false`.
+     * Esta función verifica si la tabla 'MapucheMiSim' existe en la base de datos.
+     * Si la tabla no existe, intenta crearla utilizando el método `createTable()` del modelo `$afipMapucheMiSimplificacion`.
+     * Si la creación de la tabla falla, se registra un mensaje de error en el log y se devuelve `false`.
      *
      * @return bool Verdadero si la tabla existe o se creó correctamente, falso en caso contrario
      */
-    private function verificarYCrearTabla(): bool
+    private function asegurarExistenciaTabla(): bool
     {
         $table = $this->afipMapucheMiSimplificacion->getTable();
         $connection = $this->getConnectionName();
@@ -232,20 +242,23 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
         if (!Schema::connection($connection)->hasTable($table)) {
             if (!$this->afipMapucheMiSimplificacion->createTable()) {
                 Log::error('La tabla MapucheMiSim no se creó');
+
                 return false;
             }
             Log::info('La tabla se creó exitosamente');
         }
+
         return true;
     }
 
     /**
      * Verifica si la tabla no está vacía y la vacía en caso de que contenga registros.
      *
-     * Esta función se encarga de verificar si la tabla `MapucheMiSim` contiene registros y, en caso afirmativo, la vacía utilizando el método `truncate()`.
+     * Esta función se encarga de verificar si la tabla `MapucheMiSim` contiene registros y,
+     * en caso afirmativo, la vacía utilizando el método `truncate()`.
      * El objetivo de esta función es asegurar que la tabla esté vacía antes de ejecutar la función almacenada `mapucheMiSimplificacion`.
      */
-    private function verificarYVaciarTabla(): void
+    private function vaciarTablaSiTieneRegistros(): void
     {
         if ($this->afipMapucheMiSimplificacion->count() > 0) {
             Log::info('La tabla no está vacía. Intentando vaciar');
@@ -269,12 +282,15 @@ class MapucheMiSimplificacionService implements MapucheMiSimplificacionServiceIn
             $result = $this->tablaTempCuils->mapucheMiSimplificacion($nroLiqui, $periodoFiscal);
             if ($result) {
                 Log::info('Función almacenada ejecutada exitosamente');
+
                 return true;
             }
             Log::error('Error al ejecutar la función almacenada');
+
             return false;
         } catch (Exception $e) {
             Log::error('Error en mapucheMiSimplificacion: ' . $e->getMessage());
+
             return false;
         }
     }

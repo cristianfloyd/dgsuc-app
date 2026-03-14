@@ -3,14 +3,10 @@
 namespace app\Services;
 
 use App\Models\ProcessLog;
-use App\Services\ProcessLogService;
-use App\Services\WorkflowService;
 
 class ProcessInitializationService
 {
-    public function __construct(protected \App\Services\WorkflowService $workflowService, protected \App\Services\ProcessLogService $processLogService)
-    {
-    }
+    public function __construct(protected \App\Services\WorkflowService $workflowService, protected \App\Services\ProcessLogService $processLogService) {}
 
     /** Inicia un nuevo proceso de registro.
      *

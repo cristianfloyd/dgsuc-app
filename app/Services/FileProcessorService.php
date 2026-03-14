@@ -6,10 +6,11 @@ use App\Contracts\DataMapperInterface;
 use App\Contracts\FileProcessorInterface;
 use App\Models\UploadedFile;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Override;
 use RuntimeException;
 
 use function sprintf;
@@ -28,9 +29,11 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
     private string $absolutePath;
 
-    public function __construct(private readonly ColumnMetadata $columnMetadata, private readonly DataMapperInterface $dataMapper, private int $periodoFiscal = 0)
-    {
-    }
+    public function __construct(
+        private readonly ColumnMetadata $columnMetadata,
+        private readonly DataMapperInterface $dataMapper,
+        private int $periodoFiscal = 0,
+    ) {}
 
     public function setPeriodoFiscal(int $periodoFiscal): void
     {
@@ -46,7 +49,7 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      * @param UploadedFile $file El archivo subido a procesar.
      * @param string $system El sistema al que pertenece el archivo.
      *
-     * @return Collection Una colección con los datos procesados del archivo.
+     * @return Collection<int, array<string, mixed>> Una colección con los datos procesados del archivo.
      */
     public function handleFileImport(UploadedFile $file, string $system): Collection
     {
@@ -58,11 +61,11 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $this->validateInput($filePath, $this->periodoFiscal);
         } catch (Exception $e) {
             Log::error('Error al validar el archivo: ' . $e->getMessage());
-            return new Collection();
+
+            return collect();
         }
         $this->columnMetadata->setSystem($system);
 
-        // Validación de $filePatfh, que pueda abrirse y leerse
         if (!is_readable($this->absolutePath)) {
             Log::error('El archivo no se puede leer.');
             throw new RuntimeException('El archivo no se puede leer.');
@@ -78,11 +81,12 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $mappedData = $this->mapearDatos($processedLines, $system);
 
             Log::info('Datos mapeados handleFileImport:', [$mappedData->count()]);
-            return  $mappedData;
+
+            return $mappedData;
         } catch (Exception $e) {
-            // Manejar el error, posiblemente registrándolo
             Log::error('Error al procesar el archivo (handleFileImport): ' . $e->getMessage());
-            return new Collection();
+
+            return collect();
         }
     }
 
@@ -109,15 +113,15 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      * Este método lee cada línea del archivo, las procesa utilizando el método `processLine()` y devuelve un array con las líneas procesadas.
      *
      * @param string $filePath La ruta del archivo a procesar.
-     * @param array $columnWidths Un array de anchos de columna a utilizar al procesar cada línea.
-     * @param UploadedFile $uploadedFile El archivo subido a procesar.
+     * @param array<int, int> $columnWidths Un array de anchos de columna a utilizar al procesar cada línea.
+     * @param UploadedFile|null $uploadedFile El archivo subido a procesar.
      *
-     * @return Collection Una Coleccion con las líneas del archivo procesadas.
+     * @return Collection<int, Collection<int, int|string>> Una Colección con las líneas del archivo procesadas.
      */
-    #[\Override]
+    #[Override]
     public function processFile(string $filePath, array $columnWidths, ?UploadedFile $uploadedFile = null): Collection
     {
-        if ($uploadedFile instanceof \App\Models\UploadedFile) {
+        if ($uploadedFile instanceof UploadedFile) {
             $this->assignValues($uploadedFile);
         }
 
@@ -128,11 +132,6 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
 
         Log::info("Procesando archivo: $filePath");
         try {
-            // Use Storage facade to get the full path
-            $fullPath = Storage::path($filePath);
-
-
-            // Check if the file exists
             if (!Storage::exists($filePath)) {
                 throw new RuntimeException("El archivo no existe: $filePath");
             }
@@ -146,58 +145,56 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
             $lines = $this->convertToUtf8($fileContent);
             Log::info('Líneas del archivo: ' . $lines->count());
 
-            $mappedData = $this->processLines($lines->toArray(), $columnWidths);
+            $mappedData = $this->processLines($lines->all(), $columnWidths);
             Log::info('Datos mapeados:', [$mappedData->count()]);
+
             return $mappedData;
         } catch (Exception $e) {
             Log::error('Error al procesar el archivo en FileProcessorService processFile(): ' . $e->getMessage());
-            return new Collection();
-        }
 
-        // Convertir la Illuminate\Support\Collection a Illuminate\Database\Eloquent\Collection
-        // return new Collection($data->all());
+            return collect();
+        }
     }
 
     /**
      * Lee y extrae las líneas de un archivo dado.
      *
-     * Este método abre el archivo en modo de lectura, lee cada línea del archivo y la convierte a UTF-8 si es necesario. Las líneas extraídas se devuelven en un array.
+     * Este método abre el archivo en modo de lectura, lee cada línea del archivo y la convierte a UTF-8 si es necesario.
      *
      * @param string $filePath La ruta del archivo a leer.
      *
      * @throws RuntimeException Si el archivo no se puede leer o abrir.
      *
-     * @return array Las líneas extraídas del archivo.
+     * @return Collection<int, string> Las líneas extraídas del archivo.
      */
     public function extractLines(string $filePath): Collection
     {
-        $data = collect($this->readFileLines($filePath));
-        return new Collection($data->all());
+        return collect($this->readFileLines($filePath));
     }
 
     /**
      * Procesa una línea del archivo cargado utilizando los anchos de columna proporcionados y el período fiscal.
      *
      * @param string $line La línea del archivo a procesar.
-     * @param array $columnWidths Un array de anchos de columna a utilizar al procesar la línea.
+     * @param array<int, int> $columnWidths Un array de anchos de columna a utilizar al procesar la línea.
      *
-     * @return array $processedLines Un array de campos procesados de la línea.
+     * @return Collection<int, int|string> Colección de campos procesados de la línea.
      */
+    #[Override]
     protected function processLine(string $line, array $columnWidths): Collection
     {
         $posicion = 0;
-        // Creamos una colección a partir de los anchos de columna
-        $data = collect($columnWidths)
+
+        return collect($columnWidths)
             ->map(function (int $width, $key) use ($line, &$posicion): int|string {
                 if ($key === 0) {
-                    return $campo = $this->periodoFiscal;
+                    return $this->periodoFiscal;
                 }
                 $campo = $this->processField($key, $line, $width, $posicion);
                 $posicion += $width;
+
                 return $campo;
             });
-        // Convertir la Illuminate\Support\Collection a Illuminate\Database\Eloquent\Collection
-        return new Collection($data->all());
     }
 
     /**
@@ -226,24 +223,32 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
         throw new RuntimeException('Sistema no válido: ' . $system);
     }
 
+    /**
+     * @param Collection<int, Collection<int, int|string>> $processedLines
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function mapearDatosRelacionesActivas(Collection $processedLines): Collection
     {
-        $mappedData = $processedLines
-            ->map(fn($linea): array => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->toArray()));
-        return new Collection($mappedData);
+        /** @var Collection<int, array<string, mixed>> */
+        return $processedLines
+            ->map(fn(Collection $linea): array => $this->dataMapper->mapDataToModelAfipRelacionesActivas($linea->all()));
     }
 
+    /**
+     * @param Collection<int, Collection<int, int|string>> $processedLines
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function mapearDatosMapucheSicoss(Collection $processedLines): Collection
     {
-        $mappedData = $processedLines
-            ->map(fn($linea): array => $this->dataMapper->mapDataToModel($linea->toArray()));
-        return new Collection($mappedData);
+        /** @var Collection<int, array<string, mixed>> */
+        return $processedLines
+            ->map(fn(Collection $linea): array => $this->dataMapper->mapDataToModel($linea->all()));
     }
 
     /**
      * Detecta la codificación del contenido del archivo.
-     *
-     *
      */
     private function detectEncoding(string $content): string
     {
@@ -255,29 +260,31 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
      *
      * @param string $content El contenido del archivo a convertir.
      *
-     * @return Collection Una colección de líneas en formato UTF-8.
+     * @return Collection<int, string> Una colección de líneas en formato UTF-8.
      */
     private function convertToUtf8(string $content): Collection
     {
         $utf8Content = mb_convert_encoding($content, self::UTF8_ENCODING, 'auto');
 
-
-        $data = explode("\n", $utf8Content);
-        return new Collection($data);
+        return collect(explode("\n", $utf8Content));
     }
 
     /**
      * Procesa las líneas del archivo.
      *
+     * @param array<int, string> $lines
+     * @param array<int, int> $columnWidths
      *
+     * @return Collection<int, Collection<int, int|string>>
      */
     private function processLines(array $lines, array $columnWidths): Collection
     {
         $data = collect($lines)
             ->filter()
-            ->map(fn(string $line): \Illuminate\Database\Eloquent\Collection => $this->processLine($line, $columnWidths));
+            ->map(fn(string $line): Collection => $this->processLine($line, $columnWidths));
         Log::info('Datos procesados en ProcessLines : ' . $data->count());
-        return new Collection($data->all());
+
+        return $data;
     }
 
     /**
@@ -293,9 +300,10 @@ class FileProcessorService extends AbstractFileProcessor implements FileProcesso
     private function processField(int $key, string $line, int $width, int $posicion): string
     {
         if ($key === 0) {
-            return $this->periodoFiscal;
+            return (string) $this->periodoFiscal;
         }
         $campo = substr($line, $posicion, $width);
+
         return str_replace(' ', ' ', $campo);
     }
 

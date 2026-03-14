@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Contracts\TableManagementServiceInterface;
 use Illuminate\Support\ServiceProvider;
+use Override;
 
 class TableManagementServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
      */
-    #[\Override]
+    #[Override]
     public function register(): void
     {
         $this->app->bind(fn($app): \App\Contracts\TableManagementServiceInterface => new TableManagementService());
@@ -21,7 +21,5 @@ class TableManagementServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 }

@@ -9,7 +9,7 @@ class DataMapperService implements DataMapperInterface
     /**
      * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
      *
-     * @param array $datosProcessados Linea de datos procesados.
+     * @param array $datosProcesados Linea de datos procesados.
      *
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
@@ -95,7 +95,7 @@ class DataMapperService implements DataMapperInterface
     /**
      * Mapea los datos procesados al modelo AfipSicossDesdeMapuche.
      *
-     * @param array $datosProcessados Los datos procesados.
+     * @param array $datosProcesados Los datos procesados.
      *
      * @return array Los datos mapeados al modelo AfipSicossDesdeMapuche.
      */
@@ -167,7 +167,7 @@ class DataMapperService implements DataMapperInterface
     }
 
     /** Mapea los datos procesados al modelo AfipRelacionesActivas.
-     * @param array $datosProcessados Los datos procesados.
+     * @param array $datosProcesados Los datos procesados.
      *
      * @return array Los datos mapeados al modelo AfipRelacionesActivas.
      */
@@ -175,27 +175,27 @@ class DataMapperService implements DataMapperInterface
     {
         return [
 
-            'periodo_fiscal' => $datosProcesados[0], //periodo fiscal,6
-            'codigo_movimiento' => $datosProcesados[1], //codigo movimiento,2
-            'tipo_registro' => $datosProcesados[2], //Tipo de registro,2
-            'cuil' => $datosProcesados[3], //CUIL del empleado,11
-            'marca_trabajador_agropecuario' => $datosProcesados[4], //Marca de trabajador agropecuario,1
-            'modalidad_contrato' => $datosProcesados[5], //Modalidad de contrato,3
-            'fecha_inicio_relacion_laboral' => $datosProcesados[6], //Fecha de inicio de la rel. Laboral,10
-            'fecha_fin_relacion_laboral' => $datosProcesados[7], //Fecha de fin relacion laboral,10
-            'codigo_o_social' => $datosProcesados[8], //Código de obra social,6
-            'cod_situacion_baja' => $datosProcesados[9], //codigo situacion baja,2
-            'fecha_telegrama_renuncia' => $datosProcesados[10], //Fecha telegrama renuncia,10
-            'retribucion_pactada' => $datosProcesados[11], //Retribución pactada,15
-            'modalidad_liquidacion' => $datosProcesados[12], //Modalidad de liquidación,1
-            'suc_domicilio_desem' => $datosProcesados[13], //Sucursal-Domicilio de desempeño,5
-            'actividad_domicilio_desem' => $datosProcesados[14], //Actividad en el domicilio de desempeño,6
-            'puesto_desem' => $datosProcesados[15], //Puesto desempeñado,4
-            'rectificacion' => $datosProcesados[16], //Rectificación,1
-            'numero_formulario_agro' => $datosProcesados[17], //Numero Formulario Agropecuario,10
-            'tipo_servicio' => $datosProcesados[18], //Tipo de Servicio,3
-            'categoria_profesional' => $datosProcesados[19], //Categoría Profesional,6
-            'ccct' => $datosProcesados[20], //Código de Convenio Colectivo de Trabajo,7
+            'periodo_fiscal' => $datosProcesados[0], // periodo fiscal,6
+            'codigo_movimiento' => $datosProcesados[1], // codigo movimiento,2
+            'tipo_registro' => $datosProcesados[2], // Tipo de registro,2
+            'cuil' => $datosProcesados[3], // CUIL del empleado,11
+            'marca_trabajador_agropecuario' => $datosProcesados[4], // Marca de trabajador agropecuario,1
+            'modalidad_contrato' => $datosProcesados[5], // Modalidad de contrato,3
+            'fecha_inicio_relacion_laboral' => $datosProcesados[6], // Fecha de inicio de la rel. Laboral,10
+            'fecha_fin_relacion_laboral' => $datosProcesados[7], // Fecha de fin relacion laboral,10
+            'codigo_o_social' => $datosProcesados[8], // Código de obra social,6
+            'cod_situacion_baja' => $datosProcesados[9], // codigo situacion baja,2
+            'fecha_telegrama_renuncia' => $datosProcesados[10], // Fecha telegrama renuncia,10
+            'retribucion_pactada' => $datosProcesados[11], // Retribución pactada,15
+            'modalidad_liquidacion' => $datosProcesados[12], // Modalidad de liquidación,1
+            'suc_domicilio_desem' => $datosProcesados[13], // Sucursal-Domicilio de desempeño,5
+            'actividad_domicilio_desem' => $datosProcesados[14], // Actividad en el domicilio de desempeño,6
+            'puesto_desem' => $datosProcesados[15], // Puesto desempeñado,4
+            'rectificacion' => $datosProcesados[16], // Rectificación,1
+            'numero_formulario_agro' => $datosProcesados[17], // Numero Formulario Agropecuario,10
+            'tipo_servicio' => $datosProcesados[18], // Tipo de Servicio,3
+            'categoria_profesional' => $datosProcesados[19], // Categoría Profesional,6
+            'ccct' => $datosProcesados[20], // Código de Convenio Colectivo de Trabajo,7
             'no_hay_datos' => $datosProcesados[21], // campo vacio,5
         ];
     }

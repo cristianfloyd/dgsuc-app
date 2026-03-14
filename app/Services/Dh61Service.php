@@ -2,19 +2,14 @@
 
 namespace App\Services;
 
-use App\Contracts\Dh61RepositoryInterface;
 use App\Models\Dh11;
+use App\Repositories\Dh61RepositoryInterface;
 
 use function count;
 
 class Dh61Service
 {
-    private readonly Dh61RepositoryInterface $dh61Repository;
-
-    public function __construct(Dh61RepositoryInterface $dh61Repository)
-    {
-        $this->dh61Repository = $dh61Repository;
-    }
+    public function __construct(private readonly Dh61RepositoryInterface $dh61Repository) {}
 
     /**
      * Restaura una categoría a un estado anterior utilizando un registro histórico.
@@ -50,27 +45,23 @@ class Dh61Service
      */
     public function restoreCategoriesByPeriod(int $year, int $month): array
     {
-        // Obtener los registros históricos agrupados por período.
-        $groupedRecords = $this->dh61Repository->getRecordsGroupedByPeriod();
-
-        // Verificar si existe el período especificado.
-        if (!isset($groupedRecords[$year][$month])) {
+        $historicalRecords = $this->dh61Repository->getRecordsByFiscalPeriod($year, $month);
+        if ($historicalRecords->isEmpty()) {
             return [
                 'success' => false,
                 'message' => "No se encontraron registros para el período {$year}-{$month}",
             ];
         }
 
-        // Iterar sobre los registros del período y restaurar las categorías.
-        // Iterar sobre los registros del período e intentar restaurar las categorías.
         $restoredCount = 0;
         $failedCategories = [];
-        foreach ($groupedRecords[$year][$month] as $historicalRecord) {
+        foreach ($historicalRecords as $historicalRecord) {
             $category = Dh11::query()->find($historicalRecord->codc_categ);
 
             // Validar si la categoría existe.
             if (!$category) {
                 $failedCategories[] = $historicalRecord->codc_categ;
+
                 continue;
             }
 

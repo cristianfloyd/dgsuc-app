@@ -11,8 +11,7 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
 {
     public function __construct(
         private readonly AfipMapucheSicossCalculoTableDefinition $definition,
-    ) {
-    }
+    ) {}
 
     public function getTableDefinition(): array
     {
@@ -25,7 +24,7 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getIndexes(): array
     {
@@ -33,7 +32,7 @@ class AfipMapucheSicossCalculoTableService extends AbstractTableService
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getTablePopulationQuery(): string
     {

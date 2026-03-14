@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Override;
 
 class OrdenesDescuentoTableService extends AbstractTableService
 {
@@ -18,16 +19,14 @@ class OrdenesDescuentoTableService extends AbstractTableService
 
     private const string TABLE_NAME = OrdenesDescuentoTableDefinition::TABLE;
 
-    public function __construct(private OrdenesDescuentoTableDefinition $definition)
-    {
-    }
+    public function __construct(private OrdenesDescuentoTableDefinition $definition) {}
 
     public function getTableName(): string
     {
         return $this->definition->getTableName();
     }
 
-    #[\Override]
+    #[Override]
     public function createAndPopulate(): void
     {
         try {
@@ -48,20 +47,20 @@ class OrdenesDescuentoTableService extends AbstractTableService
         }
     }
 
-    #[\Override]
+    #[Override]
     public function populateTable(): void
     {
         DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
     }
 
-    #[\Override]
+    #[Override]
     public function exists(): bool
     {
         return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getTableDefinition(): array
     {
@@ -69,7 +68,7 @@ class OrdenesDescuentoTableService extends AbstractTableService
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getIndexes(): array
     {
@@ -77,7 +76,7 @@ class OrdenesDescuentoTableService extends AbstractTableService
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getTablePopulationQuery(): string
     {
@@ -157,7 +156,7 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         ";
     }
 
-    #[\Override]
+    #[Override]
     protected function createIndexes(): void
     {
         $connection = $this->getConnectionName();
@@ -177,7 +176,7 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         }
     }
 
-    #[\Override]
+    #[Override]
     protected function addColumn($table, $column, $definition): void
     {
         switch ($definition['type']) {

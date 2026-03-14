@@ -9,15 +9,13 @@ use App\Repositories\Dh61RepositoryInterface;
 
 class CategoryUpdateService implements CategoryUpdateServiceInterface
 {
-    public function __construct(private readonly Dh11RepositoryInterface $dh11Repository, private readonly Dh61RepositoryInterface $dh61Repository)
-    {
-    }
+    public function __construct(private readonly Dh11RepositoryInterface $dh11Repository, private readonly Dh61RepositoryInterface $dh61Repository) {}
 
     /**
      * Actualiza la categoría con un registro histórico.
      *
      * @param Dh11 $category La categoría a actualizar.
-     * @param int $percentage El porcentaje a actualizar en el campo impp_basic de Dh11.
+     * @param float $percentage El porcentaje a actualizar en el campo impp_basic de Dh11.
      *
      * @return bool Verdadero si la actualización fue exitosa, falso en caso contrario.
      */

@@ -7,9 +7,7 @@ use Illuminate\Support\Collection;
 
 class NominaProcessor
 {
-    public function __construct(private readonly TemporaryTableManager $temporaryTableManager)
-    {
-    }
+    public function __construct(private readonly TemporaryTableManager $temporaryTableManager) {}
 
     public function processAndStore(array $liquidaciones, int $anio, int $mes, int $nroLiqui): Collection
     {

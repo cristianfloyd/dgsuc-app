@@ -70,9 +70,11 @@ class TableManagementService implements TableManagementServiceInterface
             }
 
             Log::info($result['message'], $result['actions']);
+
             return $result;
         } catch (Exception $e) {
             Log::error("Error al verificar y preparar la tabla {$tableName}: " . $e->getMessage());
+
             return [
                 'success' => false,
                 'message' => "Error al verificar y preparar la tabla {$tableName}",
@@ -104,15 +106,16 @@ class TableManagementService implements TableManagementServiceInterface
     protected static function getMapucheConnection(): Connection
     {
         if (self::$connectionInstance === null) {
-            $model = new static();
+            $model = new self();
             self::$connectionInstance = $model->getConnectionFromTrait();
         }
+
         return self::$connectionInstance;
     }
 
     protected static function getMapucheConnectionName(): string
     {
-        return new static()->getConnectionFromTrait()->getName();
+        return new self()->getConnectionFromTrait()->getName();
     }
 
     /**
@@ -120,7 +123,7 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
      *
-     * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     * @param string|null $connectionName El nombre de la conexión de base de datos a utilizar.
      *
      * @return Builder La instancia de la conexión de base de datos.
      */
@@ -134,7 +137,7 @@ class TableManagementService implements TableManagementServiceInterface
      *
      * Si se proporciona una conexión, se utiliza esa conexión. De lo contrario, se utiliza la conexión predeterminada configurada en la aplicación.
      *
-     * @param string|null $connection El nombre de la conexión de base de datos a utilizar.
+     * @param string|null $connectionName El nombre de la conexión de base de datos a utilizar.
      *
      * @return Connection La instancia de la conexión de base de datos.
      */
@@ -230,7 +233,6 @@ class TableManagementService implements TableManagementServiceInterface
             // $table->foreign('cuil')->references('cuil')->on('mapuche.dh01');
         });
 
-
         Log::info("Tabla $tableName creada en la conexión {$schema->getConnection()->getName()} usando la migración existente.");
     }
 
@@ -275,6 +277,7 @@ class TableManagementService implements TableManagementServiceInterface
     private static function tableHasData(string $tableName, $db): bool
     {
         $count = $db->table($tableName)->count();
+
         return $count > 0;
     }
 

@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use stdClass;
 
 class SicossCodigoActividadService
 {
@@ -76,6 +77,7 @@ class SicossCodigoActividadService
             return true;
         } catch (Exception $e) {
             Log::error('Error al generar tabla de conceptos liquidados: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -108,6 +110,7 @@ class SicossCodigoActividadService
             return true;
         } catch (Exception $e) {
             Log::error('Error al filtrar conceptos por período retro: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -135,9 +138,8 @@ class SicossCodigoActividadService
             ->whereRaw("nro_legaj = ? AND tipos_grupos IS NOT NULL AND {$condicion}", [$nroLegajo])
             ->get();
 
-
         // Convertir explícitamente cada objeto stdClass a un array asociativo
-        return array_map(fn(\stdClass $item): array => [
+        return array_map(fn(stdClass $item): array => [
             'impp_conce' => $item->impp_conce,
             'nov1_conce' => $item->nov1_conce,
             'codn_conce' => $item->codn_conce,
@@ -242,6 +244,7 @@ class SicossCodigoActividadService
         if ($prioridadTipoActividad === 38 || $prioridadTipoActividad === 0) {
             return $codigoActividadDefault ?? 0;
         }
+
         return $prioridadTipoActividad;
     }
 

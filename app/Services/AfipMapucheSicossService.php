@@ -9,14 +9,10 @@ use App\Models\AfipMapucheSicoss;
 
 class AfipMapucheSicossService
 {
-    public function __construct(private readonly AfipMapucheSicossRepositoryInterface $repository)
-    {
-    }
+    public function __construct(private readonly AfipMapucheSicossRepositoryInterface $repository) {}
 
     /**
      * Crea o actualiza un registro de AfipMapucheSicoss.
-     *
-     *
      */
     public function createOrUpdate(AfipMapucheSicossDTO $dto): \App\Models\AfipMapucheSicoss
     {
@@ -31,6 +27,46 @@ class AfipMapucheSicossService
 
     /**
      * Obtiene un registro por período fiscal y CUIL.
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      *
      *
      * @throws AfipMapucheSicossNotFoundException

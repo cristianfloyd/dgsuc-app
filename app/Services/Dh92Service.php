@@ -2,30 +2,63 @@
 
 namespace App\Services;
 
-use App\Contracts\Dh92Repository;
+use App\Repositories\Dh92Repository;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class Dh92Service
 {
     /**
-     * @var Dh92Repository
-     */
-    protected $repository;
-
-    /**
      * Constructor del servicio.
      */
-    public function __construct(Dh92Repository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(protected Dh92Repository $repository) {}
 
     /**
      * Crea un nuevo registro con transacción.
      *
      *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
      * @throws Exception
+     *
      * @return mixed
      */
     public function createWithTransaction(array $data)
@@ -34,6 +67,7 @@ class Dh92Service
         try {
             $result = $this->repository->create($data);
             DB::commit();
+
             return $result;
         } catch (Exception $e) {
             DB::rollBack();
@@ -47,6 +81,7 @@ class Dh92Service
      * @param int $id
      *
      * @throws Exception
+     *
      * @return bool
      */
     public function updateWithTransaction($id, array $data)
@@ -55,6 +90,7 @@ class Dh92Service
         try {
             $result = $this->repository->update($id, $data);
             DB::commit();
+
             return $result;
         } catch (Exception $e) {
             DB::rollBack();

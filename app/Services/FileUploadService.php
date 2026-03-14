@@ -29,6 +29,7 @@ class FileUploadService
             // Check if the file exists
             if (!Storage::exists($filePath)) {
                 Log::warning("File not found: {$filePath}");
+
                 return false;
             }
 
@@ -44,6 +45,7 @@ class FileUploadService
             return $deleted;
         } catch (Exception $e) {
             Log::error("Error deleting file {$filePath}: " . $e->getMessage());
+
             return false;
         }
     }
@@ -56,10 +58,8 @@ class FileUploadService
      *
      * @return string|false La ruta del archivo subido si es exitoso, falso en caso contrario
      */
-    public function uploadFile(UploadedFile $file, string $path): false
+    public function uploadFile(UploadedFile $file, string $path): string|false
     {
-
-
         try {
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
@@ -70,12 +70,15 @@ class FileUploadService
 
             if ($filePath) {
                 Log::info("File successfully uploaded: {$filePath}");
+
                 return $filePath;
             }
             Log::error('Failed to upload file');
+
             return false;
         } catch (Exception $e) {
             Log::error('Error uploading file: ' . $e->getMessage());
+
             return false;
         }
     }

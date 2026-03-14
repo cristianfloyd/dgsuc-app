@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\Log;
 
 use function strlen;
 
-use const PHP_VERSION;
-
 class TobaAuthService
 {
     /**
      * Replica la lógica de autenticación de Toba.
      */
-    public function autenticar($id_usuario, $clave): bool
+    public function autenticar($id_usuario, string $clave): bool
     {
         try {
             // Obtener datos del usuario desde la BD de Toba
@@ -23,12 +21,14 @@ class TobaAuthService
 
             if (empty($datos_usuario)) {
                 Log::error("El usuario '$id_usuario' no existe en Toba");
+
                 return false;
             }
 
             // Verificar si el usuario está bloqueado
             if ($datos_usuario->bloqueado == 1) {
                 Log::error("El usuario '$id_usuario' está bloqueado");
+
                 return false;
             }
 
@@ -39,12 +39,14 @@ class TobaAuthService
             // Verificar con hash_equals (timing attack safe)
             if (!hash_equals($datos_usuario->clave, $clave_procesada)) {
                 Log::error("El usuario '$id_usuario' ingresó una clave incorrecta");
+
                 return false;
             }
 
             return true;
         } catch (Exception $e) {
             Log::error('Error en autenticación Toba: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -73,7 +75,7 @@ class TobaAuthService
     /**
      * Procesa la clave según el algoritmo de Toba.
      */
-    private function procesarClave(string $clave, $algoritmo, $clave_almacenada): string
+    private function procesarClave(string $clave, $algoritmo, ?string $clave_almacenada): string
     {
         if ($algoritmo === 'plano') {
             return $clave;
@@ -90,28 +92,27 @@ class TobaAuthService
     /**
      * Implementación exacta de la función encriptar_con_sal de Toba.
      */
-    private function encriptarConSal(string $clave, $metodo, $sal = null): string
+    private function encriptarConSal(string $clave, mixed $metodo, ?string $sal = null): string
     {
-        if (version_compare(PHP_VERSION, '5.3.2') >= 0 || $metodo == 'bcrypt') {
-            $hasher = new TobaHashAdapter($metodo);
-            if ($sal === null) {
-                // Hash nuevo
-                return $hasher->hash($clave);
-            }
-            // Verificación - $sal es la clave almacenada
-            $resultado = $hasher->getHashVerificador($clave, $sal);
-            if (strlen($resultado) > 13) {
-                return $resultado;
-            }
+        $hasher = new TobaHashAdapter($metodo);
+
+        if ($sal === null) {
+            return $hasher->hash($clave);
         }
 
-        // Fallback para métodos antiguos
-        $sal = $sal === null ? $this->getSalt() : substr($sal, 0, 10);
+        $resultado = $hasher->getHashVerificador($clave, $sal);
 
-        // Si el mecanismo es bcrypt no debería llegar hasta aquí
-        return ($metodo != 'bcrypt')
-            ? $sal . hash((string) $metodo, $sal . $clave)
-            : hash('sha256', $this->getSalt() . ($resultado ?? ''));
+        if (strlen($resultado) > 13) {
+            return $resultado;
+        }
+
+        if ($metodo === 'bcrypt') {
+            return hash('sha256', $this->getSalt() . $resultado);
+        }
+
+        $salPrefijo = substr($sal, 0, 10);
+
+        return $salPrefijo . hash((string) $metodo, $salPrefijo . $clave);
     }
 
     /**
