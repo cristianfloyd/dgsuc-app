@@ -8,12 +8,9 @@ class DuplicateCargoException extends Exception
 {
     protected $message = 'Se encontraron números de cargo duplicados';
 
-    private array $duplicates = [];
-
-    public function __construct(string $message, array $duplicates = [])
+    public function __construct(string $message, private readonly array $duplicates = [])
     {
         parent::__construct($message);
-        $this->duplicates = $duplicates;
     }
 
     /**

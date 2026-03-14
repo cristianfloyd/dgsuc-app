@@ -13,7 +13,7 @@ class ValidationException extends Exception
 
     public function __construct(
         string $message,
-        private readonly array $context = [],
+        private array $context = [],
         int $code = 0,
         ?Throwable $previous = null,
     ) {

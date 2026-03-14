@@ -6,22 +6,12 @@ use Exception;
 
 class TableStructureException extends Exception
 {
-    protected string $tableName;
-
-    protected array $missingColumns;
-
-    protected array $extraColumns;
-
     public function __construct(
-        string $tableName,
-        array $missingColumns = [],
-        array $extraColumns = [],
+        protected string $tableName,
+        protected array $missingColumns = [],
+        protected array $extraColumns = [],
         ?string $message = null,
     ) {
-        $this->tableName = $tableName;
-        $this->missingColumns = $missingColumns;
-        $this->extraColumns = $extraColumns;
-
         $message ??= $this->buildMessage();
         parent::__construct($message);
     }
@@ -45,11 +35,11 @@ class TableStructureException extends Exception
     {
         $parts = ["Estructura inválida en tabla {$this->tableName}"];
 
-        if (!empty($this->missingColumns)) {
+        if ($this->missingColumns !== []) {
             $parts[] = 'Columnas faltantes: ' . implode(', ', $this->missingColumns);
         }
 
-        if (!empty($this->extraColumns)) {
+        if ($this->extraColumns !== []) {
             $parts[] = 'Columnas extra: ' . implode(', ', $this->extraColumns);
         }
 

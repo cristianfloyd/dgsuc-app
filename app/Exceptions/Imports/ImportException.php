@@ -5,16 +5,11 @@ namespace App\Exceptions\Imports;
 use Exception;
 use Throwable;
 
+/** Base exception for import operations. */
 class ImportException extends Exception
 {
-    /**
-     * Constructor personalizado para mantener el contexto del error original.
-     */
-    public function __construct(
-        string $message = '',
-        int $code = 0,
-        ?Throwable $previous = null,
-    ) {
+    public function __construct(string $message = 'Import error', int $code = 0, ?Throwable $previous = null)
+    {
         parent::__construct($message, $code, $previous);
     }
 }

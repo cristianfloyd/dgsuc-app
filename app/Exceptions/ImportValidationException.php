@@ -10,10 +10,6 @@ class ImportValidationException extends Exception
 {
     protected Collection $failures;
 
-    protected array $rowData;
-
-    protected int $rowNumber;
-
     /**
      * Constructor de la excepción de validación.
      *
@@ -25,15 +21,12 @@ class ImportValidationException extends Exception
      */
     public function __construct(
         string $message,
-        array $rowData = [],
-        int $rowNumber = 0,
+        protected array $rowData = [],
+        protected int $rowNumber = 0,
         int $code = 0,
         ?Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);
-
-        $this->rowData = $rowData;
-        $this->rowNumber = $rowNumber;
         $this->failures = new Collection();
     }
 
