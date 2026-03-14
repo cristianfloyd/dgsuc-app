@@ -33,6 +33,7 @@ El script ejecuta en orden: **PHP CS Fixer** (aplica) → **PHP CodeSniffer** (r
 | `app/ValueObjects/` | Hecho | 6 archivos. |
 | `app/Exceptions/` | Hecho | 10 archivos. |
 | `app/Exports/` | Hecho | Incluye Sheets/, Sicoss/. |
+| `app/Filament/Afip/` | Hecho | Incluye Resources/, Pages/, Actions/, Handlers/. |
 | `app/Services/` | Pendiente | |
 | `app/Models/` | Pendiente | |
 | `app/Http/` | Pendiente | |
@@ -165,6 +166,18 @@ Así las próximas conversaciones pueden reutilizar el patrón sin redescubrirlo
 - **Clase no encontrada (modelo en otro namespace)**  
   - p. ej. `App\Models\Dh19` vs `App\Models\Mapuche\Dh19`.  
   - **Solución:** Corregir el `use` y los type hints al namespace correcto.
+
+- **Clase referenciada con case incorrecto** (`class.nameCase`)  
+  - p. ej. `use app\Models\...` o `use app\Services\...`.  
+  - **Solución:** Usar `App` con mayúscula en los `use`: `App\Models\...`, `App\Services\...`.
+
+- **Offset no existe en array** (`offsetAccess.notFound`) cuando el array viene de un servicio  
+  - El `@return array{...}` del método no declara todas las claves que usa el llamador.  
+  - **Solución:** Completar el array shape en el PHPDoc del servicio (p. ej. `resultados`, `periodo`).
+
+- **Match expression does not handle remaining value** (`match.unhandled`)  
+  - El `match` no tiene rama `default` y el tipo permite otros valores.  
+  - **Solución:** Añadir `default => ...` (p. ej. `default => 'gray'` en badges).
 
 - **`query()` en exports FromQuery debe retornar `Builder`**  
   - Laravel Excel: `query()` en clases que implementan `FromQuery` debe tiparse como `\Illuminate\Database\Eloquent\Builder`.  
