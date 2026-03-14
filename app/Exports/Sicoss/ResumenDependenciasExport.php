@@ -11,18 +11,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 
 class ResumenDependenciasExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithTitle
 {
-    protected Collection $data;
-
-    protected int $year;
-
-    protected int $month;
-
-    public function __construct(Collection $data, int $year, int $month)
-    {
-        $this->data = $data;
-        $this->year = $year;
-        $this->month = $month;
-    }
+    public function __construct(protected Collection $data, protected int $year, protected int $month) {}
 
     public function collection()
     {

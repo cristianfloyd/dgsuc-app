@@ -23,21 +23,7 @@ use const STR_PAD_LEFT;
 
 abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithCustomStartCell, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected Collection $data;
-
-    protected int $year;
-
-    protected int $month;
-
-    protected string $reportTitle;
-
-    public function __construct(Collection $data, int $year, int $month, string $reportTitle)
-    {
-        $this->data = $data;
-        $this->year = $year;
-        $this->month = $month;
-        $this->reportTitle = $reportTitle;
-    }
+    public function __construct(protected Collection $data, protected int $year, protected int $month, protected string $reportTitle) {}
 
     public function collection()
     {
@@ -76,7 +62,7 @@ abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithC
         $sheet->mergeCells('A2:' . $this->getLastColumn() . '2');
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-" . str_pad($this->month, 2, '0', STR_PAD_LEFT));
+        $sheet->setCellValue('A2', "Período Fiscal: {$this->year}-" . str_pad((string) $this->month, 2, '0', STR_PAD_LEFT));
 
         // Estilo para la fecha de generación
         $sheet->mergeCells('A3:' . $this->getLastColumn() . '3');
@@ -109,7 +95,7 @@ abstract class BaseSicossExport implements FromCollection, ShouldAutoSize, WithC
 
             // Estilo para filas alternas
             for ($i = $dataFirstRow; $i <= $dataLastRow; $i++) {
-                if ($i % 2 == 0) {
+                if ($i % 2 === 0) {
                     $sheet->getStyle('A' . $i . ':' . $this->getLastColumn() . $i)
                         ->getFill()
                         ->setFillType(Fill::FILL_SOLID)

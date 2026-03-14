@@ -3,6 +3,7 @@
 namespace App\Exports\Sicoss;
 
 use Illuminate\Support\Collection;
+use Override;
 
 class AportesDiferenciasExport extends BaseSicossExport
 {
@@ -11,6 +12,7 @@ class AportesDiferenciasExport extends BaseSicossExport
         parent::__construct($data, $year, $month, 'Reporte de Diferencias de Aportes');
     }
 
+    #[Override]
     public function title(): string
     {
         return 'Diferencias Aportes';
