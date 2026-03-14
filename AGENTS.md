@@ -10,18 +10,17 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
 - php - 8.4.18
-- filament/filament (FILAMENT) - v4
+- filament/filament (FILAMENT) - v5
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
 - laravel/sanctum (SANCTUM) - v4
 - laravel/socialite (SOCIALITE) - v5
-- livewire/livewire (LIVEWIRE) - v3
+- livewire/livewire (LIVEWIRE) - v4
 - larastan/larastan (LARASTAN) - v3
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
-- laravel/sail (SAIL) - v1
 - phpunit/phpunit (PHPUNIT) - v11
 - rector/rector (RECTOR) - v2
 - alpinejs (ALPINEJS) - v3
@@ -31,8 +30,22 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
-- `livewire-development` — Develops reactive Livewire 3 components. Activates when creating, updating, or modifying Livewire components; working with wire:model, wire:click, wire:loading, or any wire: directives; adding real-time updates, loading states, or reactivity; debugging component behavior; writing Livewire tests; or when the user mentions Livewire, component, counter, or reactive UI.
-- `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
+### Frontend & UI
+
+- `livewire-development` — Livewire 3/4 components, wire:model, wire:click, reactivity, loading states. Activate when creating/modifying Livewire components, debugging reactivity, or writing Livewire tests.
+- `tailwindcss-development` — Tailwind CSS v4, gradients, spacing, responsive design, dark mode. Activate when adding styles, restyling, or working with CSS/utility classes.
+
+### Code Quality & Architecture
+
+- `php-modernization` — PHP 8.x (constructor promotion, readonly, enums, DTOs, type safety). Activate when upgrading PHP, implementing type safety, or running PHPStan/Rector.
+- `refactoring-expert` — Code smells, systematic refactoring, structural optimization. Activate when encountering duplicated code, long methods, complex conditionals, or any code quality issues.
+- `clean-code` — Principles from Robert C. Martin. Activate when writing, reviewing, or refactoring code for readability and maintainability.
+
+### Cursor & Configuration
+
+- `create-rule` — Persistent rules for AI guidance. Activate when creating rules, adding conventions, or configuring `.cursor/rules/`.
+- `create-skill` — Authoring agent skills. Activate when creating or editing skills, or asking about SKILL.md format.
+- `find-skills` — Discovering installable skills. Activate when the user asks "how do I do X", "find a skill for X", or wants to extend capabilities.
 
 ## Conventions
 
@@ -48,6 +61,27 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
+
+### SOLID Principles
+
+- **SRP** — One reason to change per class; Services handle one cohesive use case.
+- **OCP** — Extend via new implementations; avoid modifying existing classes.
+- **LSP** — Implementations must be interchangeable; respect contracts.
+- **ISP** — Narrow interfaces (e.g. `FileProcessorInterface`, `DatabaseServiceInterface`).
+- **DIP** — Depend on interfaces; inject abstractions via constructor.
+
+### Clean Architecture
+
+- **Layers**: Domain (`Services`), Infrastructure (`Repositories`, `Models`), Interface (`Filament`, `Http`).
+- **Dependency rule**: Inner layers do not depend on outer layers.
+- **Contracts**: Place in `app/Contracts/`; Services receive interfaces via DI.
+
+### Design Patterns in Use
+
+- **Repository** — Data access abstraction (`app/Repositories/`).
+- **Service** — Business logic orchestration (`app/Services/`).
+- **Strategy** — Swappable algorithms via interfaces (e.g. `FileProcessorInterface`).
+- **Factory** — Centralized creation; **Dependency Injection** — via Laravel container.
 
 ## Frontend Bundling
 
