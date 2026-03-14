@@ -24,13 +24,15 @@ use Spatie\LaravelData\WithData;
  * @property string|null $tipo_conce
  * @property float|null $nov1_conce
  * @property float|null $nov2_conce
+ *
+ * @method paginate(int $perPage)
  */
 class Dh21h extends Model
 {
-    use MapucheConnectionTrait;
     use Dh21hQueries;
-    use WithData;
     use HasFactory;
+    use MapucheConnectionTrait;
+    use WithData;
 
     /**
      * Desactivar timestamps de Laravel.
@@ -93,8 +95,6 @@ class Dh21h extends Model
     {
         return $this->belongsTo(Dh22::class, 'nro_liqui', 'nro_liqui');
     }
-
-
 
     /**####################### SCOPES ################################### **/
 

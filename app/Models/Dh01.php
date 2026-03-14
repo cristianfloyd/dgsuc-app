@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 use const STR_PAD_LEFT;
@@ -44,8 +45,8 @@ use const STR_PAD_LEFT;
  */
 class Dh01 extends Model
 {
-    use MapucheConnectionTrait;
     use EncodingTrait;
+    use MapucheConnectionTrait;
 
     public $timestamps = false;
 
@@ -112,7 +113,10 @@ class Dh01 extends Model
         return $this->belongsTo(AfipRelacionesActivas::class, 'cuil', 'cuil');
     }
 
-    public function dh03()
+    /**
+     * @return HasMany<Dh03, $this>
+     */
+    public function dh03(): HasMany
     {
         return $this->hasMany(Dh03::class, 'nro_legaj', 'nro_legaj');
     }
@@ -274,6 +278,7 @@ class Dh01 extends Model
             $cuil1 = str_pad($this->nro_cuil1, 2, '0', STR_PAD_LEFT);
             $cuil = str_pad($this->nro_cuil, 8, '0', STR_PAD_LEFT);
             $cuil2 = str_pad($this->nro_cuil2, 1, '0', STR_PAD_LEFT);
+
             return $cuil1 . $cuil . $cuil2;
         });
     }

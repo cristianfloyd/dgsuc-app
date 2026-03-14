@@ -3,8 +3,6 @@
 namespace App\Models\Suc;
 
 use App\Traits\MapucheConnectionTrait;
-use DateTime;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -41,23 +39,6 @@ class RetTablaBasicosConcesp extends Model
         'monto',
         'anios',
     ];
-
-    /**
-     * Obtiene los registros que coinciden con los criterios de búsqueda.
-     *
-     * @param Builder $query
-     *
-     * @return Builder
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function buscarRegistros($query, DateTime $fecha, string $catId, string $concLiqId, int $anios)
-    {
-        return $query->where('fecha_desde', '<=', $fecha)
-            ->where('fecha_hasta', '>=', $fecha)
-            ->where('cat_id', $catId)
-            ->where('conc_liq_id', $concLiqId)
-            ->where('anios', $anios);
-    }
 
     /**
      * Los atributos que deben ser convertidos a tipos nativos.

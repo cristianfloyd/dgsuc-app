@@ -13,12 +13,14 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Override;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use HasApiTokens;
     use HasFactory;
     use HasProfilePhoto;
+    use HasRoles;
     use Notifiable;
     use TwoFactorAuthenticatable;
 
@@ -61,7 +63,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     ];
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function canAccessPanel(Panel $panel): bool
     {
@@ -69,7 +71,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getFilamentAvatarUrl(): ?string
     {

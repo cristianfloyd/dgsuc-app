@@ -96,6 +96,16 @@ class ConceptoListado extends Model
         return false;
     }
 
+    public static function getMapucheConnection()
+    {
+        if (self::$connectionInstance === null) {
+            $model = new self();
+            self::$connectionInstance = $model->getConnectionFromTrait();
+        }
+
+        return self::$connectionInstance;
+    }
+
     protected function nombreCompleto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => "{$this->apellido}, {$this->nombre}");
@@ -152,15 +162,5 @@ class ConceptoListado extends Model
             get: fn($value): ?string => EncodingService::toUtf8(strtoupper((string) $value)),
             set: fn($value) => strtoupper((string) $value),
         );
-    }
-
-    protected static function getMapucheConnection()
-    {
-        if (self::$connectionInstance === null) {
-            $model = new self();
-            self::$connectionInstance = $model->getConnectionFromTrait();
-        }
-
-        return self::$connectionInstance;
     }
 }
