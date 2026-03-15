@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use App\Traits\MapucheConnectionTrait;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class EmbargoTableService
 {
@@ -13,27 +14,58 @@ class EmbargoTableService
 
     /**
      * Verifica y crea la tabla si no existe.
-     *
-     * @return bool
      */
     public function ensureTableExists(): bool
     {
         try {
-            if (!$this->tableExists()) {
+            // Verificar que la conexión esté disponible antes de continuar
+            if (! $this->isConnectionAvailable()) {
+                Log::warning('La conexión de base de datos no está disponible para verificar/crear tabla de embargos');
+
+                return false;
+            }
+
+            if (! $this->tableExists()) {
                 $this->createTable();
                 Log::info('Tabla de embargos creada exitosamente');
             }
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Error al verificar/crear tabla de embargos: ' . $e->getMessage());
+            Log::error('Error al verificar/crear tabla de embargos: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si la conexión de base de datos está disponible.
+     */
+    private function isConnectionAvailable(): bool
+    {
+        try {
+            $connectionName = $this->getConnectionName();
+            $connection = DB::connection($connectionName);
+
+            // Intentar obtener el PDO para verificar la conexión
+            $connection->getPdo();
+
+            // Verificar que la base de datos existe ejecutando una consulta simple
+            $connection->select('SELECT 1');
+
+            return true;
+        } catch (\Exception $e) {
+            Log::warning('Conexión no disponible', [
+                'connection' => $this->getConnectionName(),
+                'error' => $e->getMessage(),
+            ]);
+
             return false;
         }
     }
 
     /**
      * Verifica si la tabla existe.
-     *
-     * @return bool
      */
     private function tableExists(): bool
     {
@@ -43,8 +75,6 @@ class EmbargoTableService
 
     /**
      * Crea la tabla con su estructura.
-     *
-     * @return void
      */
     private function createTable(): void
     {
