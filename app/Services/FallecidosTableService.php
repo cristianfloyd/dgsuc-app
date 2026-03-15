@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Tables\FallecidosTableDefinition;
-use App\Services\Abstract\AbstractTableService;
+use App\Services\Base\AbstractTableService;
 use Illuminate\Support\Facades\DB;
 
 class FallecidosTableService extends AbstractTableService
@@ -13,11 +13,6 @@ class FallecidosTableService extends AbstractTableService
     public function __construct(
         private readonly FallecidosTableDefinition $definition,
     ) {
-    }
-
-    public function getTableName(): string
-    {
-        return $this->definition->getTableName();
     }
 
     public function populateFromDate(string $fecha): void
@@ -29,23 +24,6 @@ class FallecidosTableService extends AbstractTableService
         );
 
         DB::connection($this->getConnectionName())->statement($query);
-    }
-
-    public function truncateTable(): void
-    {
-        DB::connection($this->getConnectionName())
-            ->table($this->getTableName())
-            ->truncate();
-    }
-
-    protected function getTableDefinition(): array
-    {
-        return $this->definition->getColumns();
-    }
-
-    protected function getIndexes(): array
-    {
-        return $this->definition->getIndexes();
     }
 
     protected function getTablePopulationQuery(): string
@@ -74,5 +52,27 @@ class FallecidosTableService extends AbstractTableService
             LEFT JOIN latest_dh03 d3 ON d3.nro_legaj = d1.nro_legaj AND d3.rn = 1
             ORDER BY 1
         ";
+    }
+
+    public function getTableName(): string
+    {
+        return $this->definition->getTableName();
+    }
+
+    public function truncateTable(): void
+    {
+        DB::connection($this->getConnectionName())
+            ->table($this->getTableName())
+            ->truncate();
+    }
+
+    protected function getTableDefinition(): array
+    {
+        return $this->definition->getColumns();
+    }
+
+    protected function getIndexes(): array
+    {
+        return $this->definition->getIndexes();
     }
 }
