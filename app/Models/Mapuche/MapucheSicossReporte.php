@@ -30,9 +30,21 @@ class MapucheSicossReporte extends Model
     }
 
     /**
+     * Obtiene los totales del reporte SICOSS para el período (método público para uso desde repositorios).
+     *
+     * @return array{total_aportes: int|float, total_contribuciones: int|float, total_remunerativo: int|float, total_no_remunerativo: int|float, total_c305: int|float, total_c306: int|float}
+     */
+    public static function obtenerTotalesParaPeriodo(string $anio, string $mes): array
+    {
+        $instance = resolve(static::class);
+
+        return $instance->getTotales(static::query(), $anio, $mes);
+    }
+
+    /**
      * Scope para obtener el reporte SICOSS.
      *
-     * @param  Builder  $query
+     * @param Builder $query
      */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function getReporte($query, string $anio, string $mes): Builder
@@ -83,7 +95,7 @@ class MapucheSicossReporte extends Model
     /**
      * Scope para obtener los totales del reporte SICOSS.
      *
-     * @param  Builder  $query
+     * @param Builder $query
      */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function getTotales($query, string $anio, string $mes): array
@@ -117,13 +129,13 @@ class MapucheSicossReporte extends Model
                     $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'C' AND nro_orimp != 0 THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_remunerativo"),
                     $dbConnection->raw("SUM(CASE WHEN tipo_conce = 'S' THEN impp_conce ELSE 0 END)::NUMERIC(15,2) as total_no_remunerativo"),
                 ])
-                ->join('mapuche.dh01', $tablaPeriodo.'.nro_legaj', '=', 'dh01.nro_legaj')
-                ->join('mapuche.dh22', $tablaPeriodo.'.nro_liqui', '=', 'dh22.nro_liqui')
-                ->whereIn($tablaPeriodo.'.nro_liqui', $subconsultaLiquidaciones)
+                ->join('mapuche.dh01', $tablaPeriodo . '.nro_legaj', '=', 'dh01.nro_legaj')
+                ->join('mapuche.dh22', $tablaPeriodo . '.nro_liqui', '=', 'dh22.nro_liqui')
+                ->whereIn($tablaPeriodo . '.nro_liqui', $subconsultaLiquidaciones)
                 ->first();
 
             // Verificar si hay resultados antes de acceder a las propiedades
-            if (! $result) {
+            if (!$result) {
                 return [
                     'total_aportes' => 0,
                     'total_contribuciones' => 0,
@@ -161,22 +173,11 @@ class MapucheSicossReporte extends Model
     }
 
     /**
-     * Obtiene los totales del reporte SICOSS para el período (método público para uso desde repositorios).
-     *
-     * @return array{total_aportes: int|float, total_contribuciones: int|float, total_remunerativo: int|float, total_no_remunerativo: int|float, total_c305: int|float, total_c306: int|float}
-     */
-    public static function obtenerTotalesParaPeriodo(string $anio, string $mes): array
-    {
-        $instance = resolve(static::class);
-
-        return $instance->getTotales(static::query(), $anio, $mes);
-    }
-
-    /**
      * Determina la tabla de período a utilizar basada en el año y mes proporcionados.
      *
-     * @param  string  $anio  Año del período fiscal
-     * @param  string  $mes  Mes del período fiscal
+     * @param string $anio Año del período fiscal
+     * @param string $mes Mes del período fiscal
+     *
      * @return string Nombre de la tabla a utilizar
      */
     private function determinarTablaPeriodo(string $anio, string $mes): string
@@ -203,8 +204,9 @@ class MapucheSicossReporte extends Model
     /**
      * Genera la subconsulta para filtrar por liquidaciones del período especificado.
      *
-     * @param  string  $anio  Año del período fiscal
-     * @param  string  $mes  Mes del período fiscal
+     * @param string $anio Año del período fiscal
+     * @param string $mes Mes del período fiscal
+     *
      * @return Closure Función que genera la subconsulta
      */
     private function generarSubconsultaLiquidaciones(string $anio, string $mes): Closure
