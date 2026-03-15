@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Abstract;
+namespace App\Services\Base;
 
 use App\Contracts\TableService\TableServiceInterface;
 use App\Exceptions\TableStructureException;
@@ -28,6 +28,16 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     public function validateStructure(): void
     {
+        // Validar que la tabla exista primero
+        if (!$this->exists()) {
+            throw new TableStructureException(
+                $this->getTableName(),
+                array_keys($this->getTableDefinition()),
+                [],
+                "La tabla {$this->getTableName()} no existe",
+            );
+        }
+
         $currentColumns = Schema::connection($this->getConnectionName())
             ->getColumnListing($this->getTableName());
 
@@ -51,12 +61,67 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Verifica la existencia de la tabla.
+     * Obtiene el nombre de la tabla.
      */
-    public function exists(): bool
+    abstract public function getTableName(): string;
+
+    /**
+     * Obtiene la definición de la tabla.
+     *
+     * @return array<string, array>
+     */
+    abstract protected function getTableDefinition(): array;
+
+    /**
+     * Valida la definición de una columna específica.
+     *
+     * @throws TableStructureException
+     */
+    protected function validateColumnDefinition(string $column, array $definition): void
     {
-        return Schema::connection($this->getConnectionName())
-            ->hasTable($this->getTableName());
+        try {
+            $columnType = Schema::connection($this->getConnectionName())
+                ->getColumnType($this->getTableName(), $column);
+        } catch (\Exception $e) {
+            throw new TableStructureException(
+                $this->getTableName(),
+                [$column],
+                [],
+                "No se pudo obtener el tipo de la columna {$column}: {$e->getMessage()}",
+            );
+        }
+
+        // Mapeo de tipos de columna Laravel a tipos de base de datos
+        $expectedType = $this->mapColumnType($definition['type']);
+
+        if ($columnType !== $expectedType) {
+            throw new TableStructureException(
+                $this->getTableName(),
+                [],
+                [],
+                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}",
+            );
+        }
+    }
+
+    /**
+     * Mapea tipos de columna de Laravel a tipos de base de datos.
+     */
+    protected function mapColumnType(string $laravelType): string
+    {
+        $typeMap = [
+            'string' => 'varchar',
+            'integer' => 'integer',
+            'decimal' => 'numeric',
+            'boolean' => 'boolean',
+            'date' => 'date',
+            'datetime' => 'timestamp',
+            'timestamp' => 'timestamp',
+            'json' => 'json',
+            'jsonb' => 'jsonb',
+        ];
+
+        return $typeMap[$laravelType] ?? $laravelType;
     }
 
     /**
@@ -98,63 +163,12 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Puebla la tabla con datos iniciales.
+     * Verifica la existencia de la tabla.
      */
-    public function populateTable(): void
+    public function exists(): bool
     {
-        $query = $this->getTablePopulationQuery();
-
-        if (!empty($query)) {
-            $this->getConnectionFromTrait()->statement($query);
-        }
-    }
-
-    /**
-     * Obtiene el nombre de la tabla.
-     */
-    abstract public function getTableName(): string;
-
-    /**
-     * Valida la definición de una columna específica.
-     *
-     * @throws TableStructureException
-     */
-    protected function validateColumnDefinition(string $column, array $definition): void
-    {
-        $columnType = Schema::connection($this->getConnectionName())
-            ->getColumnType($this->getTableName(), $column);
-
-        // Mapeo de tipos de columna Laravel a tipos de base de datos
-        $expectedType = $this->mapColumnType($definition['type']);
-
-        if ($columnType !== $expectedType) {
-            throw new TableStructureException(
-                $this->getTableName(),
-                [],
-                [],
-                "Tipo de columna incorrecto para {$column}: esperado {$expectedType}, actual {$columnType}",
-            );
-        }
-    }
-
-    /**
-     * Mapea tipos de columna de Laravel a tipos de base de datos.
-     */
-    protected function mapColumnType(string $laravelType): string
-    {
-        $typeMap = [
-            'string' => 'varchar',
-            'integer' => 'integer',
-            'decimal' => 'numeric',
-            'boolean' => 'boolean',
-            'date' => 'date',
-            'datetime' => 'timestamp',
-            'timestamp' => 'timestamp',
-            'json' => 'json',
-            'jsonb' => 'jsonb',
-        ];
-
-        return $typeMap[$laravelType] ?? $laravelType;
+        return Schema::connection($this->getConnectionName())
+            ->hasTable($this->getTableName());
     }
 
     /**
@@ -225,6 +239,17 @@ abstract class AbstractTableService implements TableServiceInterface
      */
     protected function createIndexes(): void
     {
+        if (!$this->exists()) {
+            Log::warning("No se pueden crear índices: la tabla {$this->getTableName()} no existe");
+            return;
+        }
+
+        $indexes = $this->getIndexes();
+
+        if (empty($indexes)) {
+            return;
+        }
+
         Schema::connection($this->getConnectionName())
             ->table($this->getTableName(), function ($table): void {
                 foreach ($this->getIndexes() as $name => $columns) {
@@ -234,21 +259,6 @@ abstract class AbstractTableService implements TableServiceInterface
     }
 
     /**
-     * Hook para ejecutar acciones después de poblar la tabla.
-     */
-    protected function afterPopulate(): void
-    {
-        // Implementación opcional en clases hijas
-    }
-
-    /**
-     * Obtiene la definición de la tabla.
-     *
-     * @return array<string, array>
-     */
-    abstract protected function getTableDefinition(): array;
-
-    /**
      * Obtiene los índices de la tabla.
      *
      * @return array<string, array>
@@ -256,7 +266,27 @@ abstract class AbstractTableService implements TableServiceInterface
     abstract protected function getIndexes(): array;
 
     /**
+     * Puebla la tabla con datos iniciales.
+     */
+    public function populateTable(): void
+    {
+        $query = $this->getTablePopulationQuery();
+
+        if (!empty($query)) {
+            $this->getConnectionFromTrait()->statement($query);
+        }
+    }
+
+    /**
      * Obtiene la consulta SQL para poblar la tabla.
      */
     abstract protected function getTablePopulationQuery(): string;
+
+    /**
+     * Hook para ejecutar acciones después de poblar la tabla.
+     */
+    protected function afterPopulate(): void
+    {
+        // Implementación opcional en clases hijas
+    }
 }
