@@ -20,7 +20,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_get_all_afip_art(): void
+    public function testCanGetAllAfipArt(): void
     {
         AfipArt::factory()->count(3)->create();
 
@@ -30,7 +30,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_find_afip_art_by_cuil(): void
+    public function testCanFindAfipArtByCuil(): void
     {
         $afipArt = AfipArt::factory()->create();
 
@@ -40,7 +40,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_create_afip_art(): void
+    public function testCanCreateAfipArt(): void
     {
         $data = [
             'cuil_formateado' => '20-12345678-9',
@@ -55,13 +55,13 @@ class AfipArtRepositoryTest extends TestCase
             'concepto' => 1,
         ];
 
-        $afipArt = $this->afipArtRepository->create($data);
+        $this->afipArtRepository->create($data);
 
         $this->assertDatabaseHas('suc.afip_art', $data);
     }
 
     /** @test */
-    public function it_can_update_afip_art(): void
+    public function testCanUpdateAfipArt(): void
     {
         $afipArt = AfipArt::factory()->create();
 
@@ -76,7 +76,7 @@ class AfipArtRepositoryTest extends TestCase
     }
 
     /** @test */
-    public function it_can_delete_afip_art(): void
+    public function testCanDeleteAfipArt(): void
     {
         $afipArt = AfipArt::factory()->create();
 

@@ -40,6 +40,7 @@ El script ejecuta en orden: **PHP CS Fixer** (aplica) → **PHP CodeSniffer** (r
 | `app/Data/` | Pendiente | |
 | `app/Contracts/` | Pendiente | |
 | Otras bajo `app/` | Pendiente | |
+| `tests/` | Hecho | CodeSniffer CamelCaps en métodos de test; PHPStan en ImportServiceTest y UploadtxtTest. |
 
 Actualizar esta tabla al completar o empezar una carpeta.
 
@@ -116,6 +117,9 @@ Así las próximas conversaciones pueden reutilizar el patrón sin redescubrirlo
   - Nombres como `transformarARecordset` o `calcularSACInvestigador` suelen fallar por mayúsculas en medio.  
   - **Solución:** Renombrar a camelCase estricto, p. ej. `transformarToRecordset`, `calcularSacInvestigador` (o `calcularMontosYactualizar`).  
   - Si es método de interfaz, renombrar en la interfaz y en todas las implementaciones y llamadas.
+- **Métodos de test con guiones bajos** (mismo rule en `tests/`)  
+  - CodeSniffer exige camelCase; Pint por defecto (Laravel preset) formatea métodos de test en snake_case.  
+  - **Solución:** En `pint.json` definir `"php_unit_method_casing": { "case": "camel_case" }` para alinear Pint con CodeSniffer. Métodos de test: `testNombreDescriptivoEnCamelCase` (p. ej. `testProcessesHeaderLineCorrectly`).
 
 - **Línea > 200 caracteres** (`Generic.Files.LineLength.MaxExceeded`)  
   - **Solución:** Extraer parte de la expresión a una variable o partir la llamada/condición en varias líneas (p. ej. parámetros del método en líneas distintas).

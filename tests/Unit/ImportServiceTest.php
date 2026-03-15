@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
+use App\ImportService;
 use App\Models\UploadedFile;
 use App\Services\TableManagementService;
 use Exception;
 use Illuminate\Http\UploadedFile as IlluminateUploadedFile;
 use Illuminate\Support\Facades\Log;
-use Livewire\Livewire;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
@@ -20,8 +20,10 @@ class ImportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tableManagementService = Mockery::mock(TableManagementService::class);
-        $this->importService = Livewire::ImportService($this->tableManagementService);
+        /** @var TableManagementService $tableManagementService */
+        $tableManagementService = Mockery::mock(TableManagementService::class);
+        $this->tableManagementService = $tableManagementService;
+        $this->importService = new ImportService($tableManagementService);
     }
 
     protected function tearDown(): void
@@ -32,31 +34,31 @@ class ImportServiceTest extends TestCase
 
     public function testImportFileSuccessfully(): void
     {
-        $uploadedFile = Mockery::mock(UploadedFile::class);
-        $uploadedFile->file_path = '/ruta/al/archivo.csv';
-        $uploadedFile->periodo_fiscal = '202301';
-        $uploadedFile->id = 1;
+        $mock = Mockery::mock(UploadedFile::class);
+        $mock->file_path = '/ruta/al/archivo.csv';
+        $mock->periodo_fiscal = '202301';
+        $mock->id = 1;
 
         $this->tableManagementService->shouldReceive('verifyAndPrepareTable')
             ->once()
             ->with('suc.afip_mapuche_sicoss', null);
 
-        $illuminateFile = Mockery::mock(IlluminateUploadedFile::class);
+        Mockery::mock(IlluminateUploadedFile::class);
 
         Log::shouldReceive('info')
             ->once()
             ->with('Archivo 1 importado a la tabla suc.afip_mapuche_sicoss.');
 
-        $result = $this->importService->importFile($uploadedFile);
+        $result = $this->importService->importFile($mock);
 
         $this->assertTrue($result);
     }
 
     public function testImportFileWithInvalidFile(): void
     {
-        $uploadedFile = Mockery::mock(UploadedFile::class);
-        $uploadedFile->file_path = '/ruta/al/archivo_invalido.txt';
-        $uploadedFile->periodo_fiscal = '202301';
+        $mock = Mockery::mock(UploadedFile::class);
+        $mock->file_path = '/ruta/al/archivo_invalido.txt';
+        $mock->periodo_fiscal = '202301';
 
         $this->tableManagementService->shouldReceive('verifyAndPrepareTable')
             ->once()
@@ -64,14 +66,14 @@ class ImportServiceTest extends TestCase
 
         $this->expectException(Exception::class);
 
-        $this->importService->importFile($uploadedFile);
+        $this->importService->importFile($mock);
     }
 
     public function testImportFileWithEmptyFile(): void
     {
-        $uploadedFile = Mockery::mock(UploadedFile::class);
-        $uploadedFile->file_path = '/ruta/al/archivo_vacio.csv';
-        $uploadedFile->periodo_fiscal = '202301';
+        $mock = Mockery::mock(UploadedFile::class);
+        $mock->file_path = '/ruta/al/archivo_vacio.csv';
+        $mock->periodo_fiscal = '202301';
 
         $this->tableManagementService->shouldReceive('verifyAndPrepareTable')
             ->once()
@@ -79,6 +81,6 @@ class ImportServiceTest extends TestCase
 
         $this->expectException(Exception::class);
 
-        $this->importService->importFile($uploadedFile);
+        $this->importService->importFile($mock);
     }
 }

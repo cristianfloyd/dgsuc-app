@@ -35,7 +35,7 @@ class ComprobanteNominaServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_header_line_correctly(): void
+    public function testProcessesHeaderLineCorrectly(): void
     {
         $line = '2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]';
         $result = $this->service->processLine($line);
@@ -46,7 +46,7 @@ class ComprobanteNominaServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_net_amount_line_correctly(): void
+    public function testProcessesNetAmountLineCorrectly(): void
     {
         $line = '00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000';
         $this->service->processHeaderLine('2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]');
@@ -62,7 +62,7 @@ class ComprobanteNominaServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_retention_line_correctly(): void
+    public function testProcessesRetentionLineCorrectly(): void
     {
         $line = '01.DOSUBA - Obra Social                              =   3944521528.39S0000001';
         $this->service->processHeaderLine('2412.0004.Liq:4.Definitiva de Diciembre de 2024[Pesos]');
@@ -80,7 +80,7 @@ class ComprobanteNominaServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_complete_file_successfully(): void
+    public function testProcessesCompleteFileSuccessfully(): void
     {
         $stats = $this->service->processFile($this->testFilePath);
 
@@ -96,7 +96,7 @@ class ComprobanteNominaServiceTest extends TestCase
             mkdir(dirname($this->testFilePath), 0o777, true);
         }
 
-        $content = <<<EOT
+        $content = <<<'EOT'
             2412.0004.Liq:4.Definitiva de Diciembre de 2024                             [Pesos                         ]
             00.HABERES NETOS LIQUIDADOS                          =  30238029491.72N0100000
             01.DOSUBA - Obra Social                              =   3944521528.39S0000001

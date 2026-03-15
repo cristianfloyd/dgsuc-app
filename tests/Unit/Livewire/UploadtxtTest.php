@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Livewire;
 
-use App\Contracts\FileUploadRepository;
 use App\Contracts\FileUploadRepositoryInterface;
 use App\Contracts\OrigenRepositoryInterface;
 use App\Livewire\Uploadtxt;
@@ -17,26 +16,35 @@ class UploadtxtTest extends TestCase
 {
     // use RefreshDatabase;
 
-    private $fileUploadRepository;
-
-    private $uploadtxt;
+    private \PHPUnit\Framework\MockObject\MockObject&FileUploadRepositoryInterface $fileUploadRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fileUploadRepository = $this->createMock(FileUploadRepository::class);
-        $this->uploadtxt = Livewire::Uploadtxt($this->fileUploadRepository);
+        $this->fileUploadRepository = $this->createMock(FileUploadRepositoryInterface::class);
+        $this->app->instance(FileUploadRepositoryInterface::class, $this->fileUploadRepository);
     }
 
     public function testDeleteFileSuccess(): void
     {
         $fileId = 1;
-        $file = (object) ['id' => $fileId];
+        $file = (object) ['id' => $fileId, 'file_path' => '/path/to/file'];
 
         $this->fileUploadRepository->expects($this->once())
             ->method('findOrFail')
             ->with($fileId)
             ->willReturn($file);
+
+        $this->fileUploadRepository->expects($this->once())
+            ->method('delete')
+            ->with($file);
+
+        $fileUploadService = $this->createMock(FileUploadService::class);
+        $fileUploadService->expects($this->once())
+            ->method('deleteFile')
+            ->with($file->file_path)
+            ->willReturn(true);
+        $this->app->instance(FileUploadService::class, $fileUploadService);
 
         DB::shouldReceive('transaction')
             ->once()
@@ -44,15 +52,9 @@ class UploadtxtTest extends TestCase
                 $callback();
             });
 
-        $this->uploadtxt->expects($this->once())
-            ->method('deleteFileAndRecord')
-            ->with($file);
-
-        $this->uploadtxt->expects($this->once())
-            ->method('handleSuccessfulDeletion');
-
         Livewire::test(Uploadtxt::class)
-            ->call('deleteFile', $fileId);
+            ->call('deleteFile', $fileId)
+            ->assertDispatched('success');
     }
 
     public function testDeleteFileFailure(): void
@@ -82,95 +84,98 @@ class UploadtxtTest extends TestCase
         $mockFileUploadRepository = $this->createMock(FileUploadRepositoryInterface::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
-        $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
-
-        $mockFile = $this->createMock(UploadedFile::class);
-        $mockFile->method('getClientOriginalName')->willReturn('test.txt');
-
-        $component->archivotxt = $mockFile;
-        $component->periodo_fiscal = '202301';
-        $component->selectedOrigen = 1;
+        $mockFileUploadRepository->method('all')->willReturn(collect());
+        $mockFileUploadRepository->expects($this->once())
+            ->method('create')
+            ->willReturn(new UploadedFile());
+        $mockFileUploadRepository->method('existsByOrigen')->willReturn(false);
 
         $mockFileUploadService->expects($this->once())
             ->method('uploadFile')
             ->willReturn('/path/to/uploaded/file.txt');
 
         $mockOrigenRepository->expects($this->once())
-            ->method('findById')
-            ->willReturn((object) ['name' => 'TestOrigen']);
+            ->method('findByName')
+            ->with('afip')
+            ->willReturn((object) ['name' => 'afip']);
 
-        $mockFileUploadRepository->expects($this->once())
-            ->method('create')
-            ->willReturn(new UploadedFile());
+        $this->app->instance(FileUploadRepositoryInterface::class, $mockFileUploadRepository);
+        $this->app->instance(FileUploadService::class, $mockFileUploadService);
+        $this->app->instance(OrigenRepositoryInterface::class, $mockOrigenRepository);
 
-        $component->expects($this->once())
-            ->method('validateAndPrepare');
+        $mockFile = $this->createMock(UploadedFile::class);
+        $mockFile->method('getClientOriginalName')->willReturn('test.txt');
 
-        $component->expects($this->once())
-            ->method('updateWorkflowAndRedirect');
-
-        $component->save();
+        Livewire::test(Uploadtxt::class)
+            ->set('archivotxtAfip', $mockFile)
+            ->set('periodo_fiscal', '202301')
+            ->set('selectedLiquidacion', 1)
+            ->set('processId', 'test-uuid')
+            ->call('save', 'afip');
     }
 
     public function testSaveFailureFileUpload(): void
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
-        $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
+        $mockFileUploadRepository = $this->createMock(FileUploadRepositoryInterface::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
-        $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
-
-        $mockFile = $this->createMock(UploadedFile::class);
-        $component->archivotxt = $mockFile;
+        $mockFileUploadRepository->method('all')->willReturn(collect());
+        $mockFileUploadRepository->method('existsByOrigen')->willReturn(false);
 
         $mockFileUploadService->expects($this->once())
             ->method('uploadFile')
             ->willReturn(false);
 
-        $component->expects($this->once())
-            ->method('validateAndPrepare');
+        $this->app->instance(FileUploadRepositoryInterface::class, $mockFileUploadRepository);
+        $this->app->instance(FileUploadService::class, $mockFileUploadService);
+        $this->app->instance(OrigenRepositoryInterface::class, $mockOrigenRepository);
 
-        $component->expects($this->once())
-            ->method('handleException')
-            ->with($this->isInstanceOf(Exception::class));
+        $mockFile = $this->createMock(UploadedFile::class);
 
-        $component->save();
+        Livewire::test(Uploadtxt::class)
+            ->set('archivotxtAfip', $mockFile)
+            ->set('periodo_fiscal', '202301')
+            ->set('selectedLiquidacion', 1)
+            ->set('processId', 'test-uuid')
+            ->call('save', 'afip')
+            ->assertDispatched('fileUploadError');
     }
 
     public function testSaveFailureDatabaseInsert(): void
     {
         $mockFileUploadService = $this->createMock(FileUploadService::class);
-        $mockFileUploadRepository = $this->createMock(FileUploadRepository::class);
+        $mockFileUploadRepository = $this->createMock(FileUploadRepositoryInterface::class);
         $mockOrigenRepository = $this->createMock(OrigenRepositoryInterface::class);
 
-        $component = Livewire::Uploadtxt($mockFileUploadRepository, $mockFileUploadService, $mockOrigenRepository);
-
-        $mockFile = $this->createMock(UploadedFile::class);
-        $mockFile->method('getClientOriginalName')->willReturn('test.txt');
-
-        $component->archivotxt = $mockFile;
-        $component->periodo_fiscal = '202301';
-        $component->selectedOrigen = 1;
+        $mockFileUploadRepository->method('all')->willReturn(collect());
+        $mockFileUploadRepository->expects($this->once())
+            ->method('create')
+            ->willReturn(false);
+        $mockFileUploadRepository->method('existsByOrigen')->willReturn(false);
 
         $mockFileUploadService->expects($this->once())
             ->method('uploadFile')
             ->willReturn('/path/to/uploaded/file.txt');
 
         $mockOrigenRepository->expects($this->once())
-            ->method('findById')
-            ->willReturn((object) ['name' => 'TestOrigen']);
+            ->method('findByName')
+            ->with('afip')
+            ->willReturn((object) ['name' => 'afip']);
 
-        $mockFileUploadRepository->expects($this->once())
-            ->method('create')
-            ->willReturn(false);
+        $this->app->instance(FileUploadRepositoryInterface::class, $mockFileUploadRepository);
+        $this->app->instance(FileUploadService::class, $mockFileUploadService);
+        $this->app->instance(OrigenRepositoryInterface::class, $mockOrigenRepository);
 
-        $component->expects($this->once())
-            ->method('validateAndPrepare');
+        $mockFile = $this->createMock(UploadedFile::class);
+        $mockFile->method('getClientOriginalName')->willReturn('test.txt');
 
-        $component->expects($this->once())
-            ->method('handleException')
-            ->with($this->isInstanceOf(Exception::class));
-
-        $component->save();
+        Livewire::test(Uploadtxt::class)
+            ->set('archivotxtAfip', $mockFile)
+            ->set('periodo_fiscal', '202301')
+            ->set('selectedLiquidacion', 1)
+            ->set('processId', 'test-uuid')
+            ->call('save', 'afip')
+            ->assertDispatched('fileUploadError');
     }
 }

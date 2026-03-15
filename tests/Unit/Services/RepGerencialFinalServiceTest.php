@@ -29,11 +29,12 @@ class RepGerencialFinalServiceTest extends TestCase
         if ($table === null) {
             return $this->getMapucheTable();
         }
+
         return $table;
     }
 
     /** @test */
-    public function it_creates_all_required_tables(): void
+    public function testCreatesAllRequiredTables(): void
     {
         $liquidaciones = [1, 2];
 
@@ -60,7 +61,7 @@ class RepGerencialFinalServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_processes_data_for_given_liquidaciones(): void
+    public function testProcessesDataForGivenLiquidaciones(): void
     {
         $liquidaciones = [1, 2];
 
@@ -75,7 +76,7 @@ class RepGerencialFinalServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_calculates_correct_net_amounts(): void
+    public function testCalculatesCorrectNetAmounts(): void
     {
         $liquidaciones = [1];
 

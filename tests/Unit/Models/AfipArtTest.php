@@ -11,7 +11,7 @@ class AfipArtTest extends TestCase
     // use RefreshDatabase;
 
     /** @test */
-    public function it_can_create_an_afip_art(): void
+    public function testCanCreateAnAfipArt(): void
     {
         $data = [
             'cuil_formateado' => '20-12345678-9',
@@ -26,7 +26,7 @@ class AfipArtTest extends TestCase
             'concepto' => 1,
         ];
 
-        $afipArt = AfipArt::create($data);
+        AfipArt::query()->create($data);
 
         $this->assertDatabaseHas('suc.afip_art', $data);
     }

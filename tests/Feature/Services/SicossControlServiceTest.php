@@ -18,7 +18,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = app(SicossControlService::class);
+        $this->service = resolve(SicossControlService::class);
         $this->service->setConnection('pgsql-test');
     }
 
@@ -36,7 +36,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * Test de creación de tabla temporal.
      */
-    public function test_puede_crear_tabla_temporal(): void
+    public function testPuedeCrearTablaTemporal(): void
     {
         $this->service->crearTablaDh21Aportes();
 
@@ -49,7 +49,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * Test de obtención de diferencias.
      */
-    public function test_puede_obtener_diferencias(): void
+    public function testPuedeObtenerDiferencias(): void
     {
         // Preparar datos de prueba
         $this->seedTestData();
@@ -63,7 +63,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * Test del proceso completo.
      */
-    public function test_puede_ejecutar_proceso_completo(): void
+    public function testPuedeEjecutarProcesoCompleto(): void
     {
         $resultados = $this->service->ejecutarControlesPostImportacion();
 
@@ -74,7 +74,7 @@ class SicossControlServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * Test de guardado de diferencias.
      */
-    public function test_puede_guardar_diferencias(): void
+    public function testPuedeGuardarDiferencias(): void
     {
         $this->seedTestData();
 
