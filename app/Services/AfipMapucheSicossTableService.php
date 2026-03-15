@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Services\Abstract\AbstractTableService;
+use App\Services\Base\AbstractTableService;
 use App\Tables\Definitions\AfipMapucheSicossTableDefinition;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,14 +14,6 @@ class AfipMapucheSicossTableService extends AbstractTableService
     public function __construct(AfipMapucheSicossTableDefinition $definition)
     {
         $this->definition = $definition;
-    }
-
-    /**
-     * Obtiene el nombre de la tabla.
-     */
-    public function getTableName(): string
-    {
-        return $this->definition->getTableName();
     }
 
     /**
@@ -59,6 +51,22 @@ class AfipMapucheSicossTableService extends AbstractTableService
     }
 
     /**
+     * Obtiene el nombre de la tabla.
+     */
+    public function getTableName(): string
+    {
+        return $this->definition->getTableName();
+    }
+
+    /**
+     * Query para poblar la tabla desde Mapuche.
+     */
+    protected function getTablePopulationQuery(): string
+    {
+        return ' ';
+    }
+
+    /**
      * Obtiene la definición de la tabla.
      */
     protected function getTableDefinition(): array
@@ -72,13 +80,5 @@ class AfipMapucheSicossTableService extends AbstractTableService
     protected function getIndexes(): array
     {
         return $this->definition->getIndexes();
-    }
-
-    /**
-     * Query para poblar la tabla desde Mapuche.
-     */
-    protected function getTablePopulationQuery(): string
-    {
-        return ' ';
     }
 }
