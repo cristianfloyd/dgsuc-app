@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Tables\AfipMapucheSicossCalculoTableDefinition;
-use App\Services\Abstract\AbstractTableService;
+use App\Services\Base\AbstractTableService;
 
 class AfipMapucheSicossCalculoTableService extends AbstractTableService
 {
