@@ -4,13 +4,12 @@
     
     <!-- Archivos y directorios a analizar -->
     <file>app/Models/</file>
-    <!-- <file>routes/</file>
+    <file>routes/</file>
     <file>tests/</file>
     <file>config/</file>
-    <file>database/migrations/</file>
+    <file>database/migrations/</file>    
     <file>database/seeders/</file>
     <file>database/factories/</file>
-     -->
     <!-- Excluir directorios que no necesitan análisis -->
     <exclude-pattern>vendor/</exclude-pattern>
     <exclude-pattern>node_modules/</exclude-pattern>
