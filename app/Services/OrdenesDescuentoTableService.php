@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Tables\OrdenesDescuentoTableDefinition;
-use App\Services\Abstract\AbstractTableService;
+use App\Services\Base\AbstractTableService;
 use App\Traits\Mapuche\TableServiceTrait;
 use App\Traits\MapucheConnectionTrait;
 use Illuminate\Support\Facades\DB;
@@ -49,30 +49,74 @@ class OrdenesDescuentoTableService extends AbstractTableService
         }
     }
 
+    private function createTableIfNotExists(): void
+    {
+        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_ordenes_descuento')) {
+            Schema::connection($this->getConnectionName())->create('suc.rep_ordenes_descuento', function ($table): void {
+                $this->addLaravelPrimaryKey($table);
+                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
+                    if ($column !== 'id') {
+                        $this->addColumn($table, $column, $definition);
+                    }
+                }
+            });
+
+            // Mover la creación de índices fuera del callback de create
+            $this->createIndexes();
+        }
+    }
+
+    protected function addColumn($table, $column, $definition): void
+    {
+        switch ($definition['type']) {
+            case 'id':
+                $table->id();
+                break;
+            case 'string':
+                $table->string($column, $definition['length'] ?? null);
+                break;
+            case 'integer':
+                $table->integer($column);
+                break;
+            case 'decimal':
+                $table->decimal($column, $definition['precision'], $definition['scale']);
+                break;
+            case 'date':
+                $table->date($column);
+                break;
+            case 'timestamp':
+                $table->timestamp($column)->useCurrent();
+                break;
+        }
+    }
+
+    protected function createIndexes(): void
+    {
+        $connection = $this->getConnectionName();
+
+        foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
+            $indexName = "suc_rep_ordenes_descuento_{$name}_index";
+
+            // Verificar si el índice ya existe
+            $indexExists = DB::connection($connection)
+                ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
+
+            if (!$indexExists) {
+                Schema::connection($connection)->table(self::TABLE_NAME, function ($table) use ($columns, $name): void {
+                    $table->index($columns, $name);
+                });
+            }
+        }
+    }
+
+    private function truncateTable(): void
+    {
+        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
+    }
+
     public function populateTable(): void
     {
         DB::connection($this->getConnectionName())->statement($this->getTablePopulationQuery());
-    }
-
-    public function exists(): bool
-    {
-        return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getTableDefinition(): array
-    {
-        return $this->definition->getColumns();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function getIndexes(): array
-    {
-        return $this->definition->getIndexes();
     }
 
     /**
@@ -156,73 +200,29 @@ ORDER BY dh21.codc_uacad, dh21.codn_conce;
         ";
     }
 
-    protected function createIndexes(): void
-    {
-        $connection = $this->getConnectionName();
-
-        foreach (OrdenesDescuentoTableDefinition::INDEXES as $name => $columns) {
-            $indexName = "suc_rep_ordenes_descuento_{$name}_index";
-
-            // Verificar si el índice ya existe
-            $indexExists = DB::connection($connection)
-                ->select("SELECT to_regclass('suc.{$indexName}') IS NOT NULL as exists")[0]->exists;
-
-            if (!$indexExists) {
-                Schema::connection($connection)->table(self::TABLE_NAME, function ($table) use ($columns, $name): void {
-                    $table->index($columns, $name);
-                });
-            }
-        }
-    }
-
-    protected function addColumn($table, $column, $definition): void
-    {
-        switch ($definition['type']) {
-            case 'id':
-                $table->id();
-                break;
-            case 'string':
-                $table->string($column, $definition['length'] ?? null);
-                break;
-            case 'integer':
-                $table->integer($column);
-                break;
-            case 'decimal':
-                $table->decimal($column, $definition['precision'], $definition['scale']);
-                break;
-            case 'date':
-                $table->date($column);
-                break;
-            case 'timestamp':
-                $table->timestamp($column)->useCurrent();
-                break;
-        }
-    }
-
     private function updateLastSync(): void
     {
         DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->update(['last_sync' => now()]);
     }
 
-    private function truncateTable(): void
+    public function exists(): bool
     {
-        DB::connection($this->getConnectionName())->table(self::TABLE_NAME)->truncate();
+        return Schema::connection($this->getConnectionName())->hasTable(self::TABLE_NAME);
     }
 
-    private function createTableIfNotExists(): void
+    /**
+     * @inheritDoc
+     */
+    protected function getTableDefinition(): array
     {
-        if (!Schema::connection($this->getConnectionName())->hasTable('suc.rep_ordenes_descuento')) {
-            Schema::connection($this->getConnectionName())->create('suc.rep_ordenes_descuento', function ($table): void {
-                $this->addLaravelPrimaryKey($table);
-                foreach (OrdenesDescuentoTableDefinition::COLUMNS as $column => $definition) {
-                    if ($column !== 'id') {
-                        $this->addColumn($table, $column, $definition);
-                    }
-                }
-            });
+        return $this->definition->getColumns();
+    }
 
-            // Mover la creación de índices fuera del callback de create
-            $this->createIndexes();
-        }
+    /**
+     * @inheritDoc
+     */
+    protected function getIndexes(): array
+    {
+        return $this->definition->getIndexes();
     }
 }
