@@ -33,3 +33,7 @@ claude.md
 /docs/sql
 /docs/sql/*
 CLAUDE.md
+.gemini/settings.json
+.gemini/skills/livewire-development/SKILL.md
+.gemini/skills/tailwindcss-development/SKILL.md
+GEMINI.md
